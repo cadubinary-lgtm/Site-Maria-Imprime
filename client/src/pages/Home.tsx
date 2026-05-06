@@ -1,15 +1,17 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Zap, Truck, Palette, Headphones, Star } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { useState } from "react";
 
 const SEGMENTS = [
-  { name: "Alimentação", icon: "🍔" },
-  { name: "Beleza & Saúde", icon: "💄" },
-  { name: "Varejo", icon: "🛍️" },
-  { name: "Serviços", icon: "🔧" },
+  { name: "Alimentação", icon: "🍔", key: "alimentacao" },
+  { name: "Beleza & Saúde", icon: "💄", key: "beleza" },
+  { name: "Varejo", icon: "🛍️", key: "varejo" },
+  { name: "Serviços", icon: "🔧", key: "servicos" },
 ];
 
 const STEPS = [
@@ -70,6 +72,62 @@ const TESTIMONIALS = [
     source: "Google",
   },
 ];
+
+function FeaturedProductsSection() {
+  const { data: products, isLoading } = trpc.products.getAll.useQuery();
+
+  if (isLoading) {
+    return (
+      <section className="bg-gray-50 py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Pega 6 produtos aleatórios
+  const featured = products?.slice(0, 6) || [];
+
+  return (
+    <section className="bg-gray-50 py-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold mb-4 text-center">Produtos em Destaque</h2>
+        <p className="text-center text-gray-600 mb-12">Qualidade e personalização para valorizar sua marca</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featured.map((product: any) => (
+            <Link key={product.id} href={`/catalogo?segment=${product.segment}`}>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
+                <CardContent className="pt-6">
+                  <div className="text-4xl mb-4">
+                    {product.segment === "varejo" && "📦"}
+                    {product.segment === "servicos" && "🔧"}
+                    {product.segment === "alimentacao" && "🍔"}
+                    {product.segment === "beleza" && "💄"}
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">{product.description}</p>
+                  <p className="text-lg font-bold text-orange-500">R$ {parseFloat(product.price).toFixed(2)}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link href="/catalogo">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
+              Ver Todos os Produtos →
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -153,10 +211,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-center">Escolha seu Segmento</h2>
           <p className="text-center text-gray-600 mb-12">Clique no segmento para ver os pacotes disponíveis</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SEGMENTS.map((segment) => (
-              <Link key={segment.name} href="/catalogo">
+              <Link key={segment.name} href={`/catalogo?segment=${segment.key}`}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
                   <CardContent className="pt-8 text-center">
                     <div className="text-5xl mb-4">{segment.icon}</div>
@@ -174,7 +232,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-center">Como Funciona</h2>
           <p className="text-center text-gray-600 mb-12">É simples, rápido e eficiente</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {STEPS.map((step) => (
               <div key={step.number} className="text-center">
@@ -190,37 +248,14 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="bg-gray-50 py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4 text-center">Produtos em Destaque</h2>
-          <p className="text-center text-gray-600 mb-12">Qualidade e personalização para valorizar sua marca</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: "Lona Brilho/Fosca 280g/m² G/F", desc: "Lona de alta qualidade 280g/m² com acabamento brilho ou fosco" },
-              { name: "Lona Brilho/Fosca 440g/m² G/F", desc: "Lona premium 440g/m² com maior durabilidade e resistência" },
-              { name: "Lona Brilho/Fosca 440g/m² P/F", desc: "Lona 440g/m² para pequenos formatos, ideal para banners" },
-            ].map((product, idx) => (
-              <Link key={idx} href="/catalogo">
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full">
-                  <CardContent className="pt-6">
-                    <div className="text-4xl mb-4">📦</div>
-                    <h3 className="font-bold text-gray-900 mb-2">{product.name}</h3>
-                    <p className="text-sm text-gray-600">{product.desc}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <FeaturedProductsSection />
 
       {/* Differentials */}
       <section className="bg-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-center">Nossos Diferenciais</h2>
           <p className="text-center text-gray-600 mb-12">Por que escolher a nossa gráfica?</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {DIFFERENTIALS.map((diff, idx) => {
               const Icon = diff.icon;
@@ -249,7 +284,7 @@ export default function Home() {
       <section className="bg-gray-50 py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">O que nossos clientes dizem</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((testimonial, idx) => (
               <Card key={idx}>
