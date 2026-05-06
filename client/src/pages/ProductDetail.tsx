@@ -6,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Upload } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -16,13 +19,41 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [artFile, setArtFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedVariations, setSelectedVariations] = useState<Record<number, number>>({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 },
     { enabled: !!productId }
   );
 
+  const { data: variations } = trpc.variations.getByProduct.useQuery(
+    { productId: productId || 0 },
+    { enabled: !!productId }
+  );
+
   const createOrderMutation = trpc.orders.createOrder.useMutation();
+
+  // Calcular preço final com variações
+  const calculateFinalPrice = () => {
+    if (!product) return 0;
+    
+    let total = parseFloat(product.price);
+    
+    if (variations) {
+      for (const variationType of variations) {
+        const selectedOptionId = selectedVariations[variationType.id];
+        if (selectedOptionId) {
+          const option = variationType.options.find(o => o.id === selectedOptionId);
+          if (option) {
+            total += parseFloat(option.priceModifier);
+          }
+        }
+      }
+    }
+    
+    return total * quantity;
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -35,11 +66,32 @@ export default function ProductDetail() {
     }
   };
 
+  const validateVariations = () => {
+    if (!variations) return true;
+    
+    for (const variationType of variations) {
+      if (variationType.isRequired && !selectedVariations[variationType.id]) {
+        toast.error(`Por favor, selecione um ${variationType.name}`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleCheckout = async () => {
     if (!product) return;
 
     if (!artFile) {
       toast.error("Por favor, envie o arquivo de arte");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      toast.error("Por favor, aceite os termos e condições");
+      return;
+    }
+
+    if (!validateVariations()) {
       return;
     }
 
@@ -80,180 +132,207 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="animate-spin w-8 h-8 text-orange-500" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-6 flex items-center gap-4">
-            <Link href="/catalogo">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Produto não encontrado</h1>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Produto não encontrado</p>
       </div>
     );
   }
 
-  const totalPrice = parseFloat(product.price.toString()) * quantity;
+  const finalPrice = calculateFinalPrice();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex items-center gap-4">
-          <Link href="/catalogo">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <Link href="/catalogo">
+          <Button variant="ghost" className="mb-6">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar ao Catálogo
+          </Button>
+        </Link>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Image */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Informações do Produto */}
           <div>
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-96 object-cover rounded-lg shadow-lg"
-              />
-            ) : (
-              <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg flex items-center justify-center">
-                <span className="text-gray-400 text-lg">Sem imagem disponível</span>
-              </div>
-            )}
-          </div>
-
-          {/* Product Details */}
-          <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Detalhes do Produto</CardTitle>
+                <CardTitle>{product.name}</CardTitle>
+                <CardDescription>{product.segment}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600">Segmento</p>
-                  <p className="text-lg font-semibold capitalize">{product.segment}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Descrição</p>
-                  <p className="text-gray-700">{product.description || "Sem descrição"}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Preço Unitário</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    R$ {parseFloat(product.price.toString()).toFixed(2)}
+                <p className="text-gray-600">{product.description}</p>
+                <div className="border-t pt-4">
+                  <p className="text-sm text-gray-600">Preço Base</p>
+                  <p className="text-2xl font-bold text-orange-500">
+                    R$ {parseFloat(product.price).toFixed(2)}
                   </p>
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            {/* Order Form */}
+          {/* Formulário de Compra */}
+          <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Faça seu Pedido</CardTitle>
-                <CardDescription>Escolha a quantidade e envie sua arte</CardDescription>
+                <CardTitle>Configurar Pedido</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <Label htmlFor="quantity">Quantidade</Label>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    >
-                      −
-                    </Button>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-20 text-center"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setQuantity(quantity + 1)}
-                    >
-                      +
-                    </Button>
+                {/* Variações */}
+                {variations && variations.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Variações do Produto</h3>
+                    {variations.map((variationType) => (
+                      <div key={variationType.id} className="space-y-2">
+                        <Label className="text-base font-medium">
+                          {variationType.name}
+                          {variationType.isRequired && <span className="text-red-500 ml-1">*</span>}
+                        </Label>
+                        <Select
+                          value={selectedVariations[variationType.id]?.toString() || ""}
+                          onValueChange={(value) => {
+                            setSelectedVariations({
+                              ...selectedVariations,
+                              [variationType.id]: parseInt(value),
+                            });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={`Selecione um ${variationType.name.toLowerCase()}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {variationType.options.map((option) => (
+                              <SelectItem key={option.id} value={option.id.toString()}>
+                                {option.name}
+                                {parseFloat(option.priceModifier) > 0 && (
+                                  <span className="text-gray-600 ml-2">
+                                    +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                                  </span>
+                                )}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {variationType.options.find(o => o.id === selectedVariations[variationType.id])?.description && (
+                          <p className="text-sm text-gray-600">
+                            {variationType.options.find(o => o.id === selectedVariations[variationType.id])?.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
+                )}
+
+                {/* Quantidade */}
+                <div className="space-y-2">
+                  <Label htmlFor="quantity">Quantidade</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full"
+                  />
                 </div>
 
-                <div>
-                  <Label htmlFor="artFile">Arquivo de Arte (PDF, PNG, JPG)</Label>
-                  <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Input
+                {/* Upload de Arquivo */}
+                <div className="space-y-2">
+                  <Label htmlFor="artFile">Arquivo de Arte</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-500 transition">
+                    <input
                       id="artFile"
                       type="file"
-                      accept=".pdf,.png,.jpg,.jpeg"
                       onChange={handleFileChange}
                       className="hidden"
+                      accept=".pdf,.ai,.psd,.png,.jpg,.jpeg"
                     />
                     <label htmlFor="artFile" className="cursor-pointer">
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-8 h-8 text-gray-400" />
-                        <p className="text-sm font-medium text-gray-700">
-                          {artFile ? artFile.name : "Clique para enviar ou arraste um arquivo"}
-                        </p>
-                        <p className="text-xs text-gray-500">Máximo 10MB</p>
-                      </div>
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600">
+                        {artFile ? artFile.name : "Clique para enviar ou arraste o arquivo"}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Máximo 10MB (PDF, AI, PSD, PNG, JPG)</p>
                     </label>
                   </div>
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Subtotal ({quantity}x)</span>
-                    <span className="font-semibold">R$ {totalPrice.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-blue-200">
-                    <span className="text-lg font-bold">Total</span>
-                    <span className="text-2xl font-bold text-blue-600">R$ {totalPrice.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handleCheckout}
-                  disabled={isProcessing || !artFile}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processando...
-                    </>
-                  ) : (
-                    "Confirmar Pedido"
+                  {artFile && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Arquivo selecionado
+                    </div>
                   )}
-                </Button>
+                </div>
 
-                <p className="text-xs text-gray-500 text-center">
-                  Ao confirmar, você concorda com nossos termos de serviço.
-                </p>
+                {/* Checagem de Arquivo - Informações */}
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <p className="font-semibold mb-2">Checagem Gratuita de Arquivo</p>
+                    <ul className="text-sm space-y-1 ml-2">
+                      <li>✓ Conferência de tamanho proporcional</li>
+                      <li>✓ Verificação de resolução (300 DPI)</li>
+                      <li>✓ Verificação de cores em CMYK</li>
+                      <li>✓ Verificação de margens de segurança</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+
+                {/* Termos e Condições */}
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-sm">Termos e Condições</h4>
+                  <div className="text-xs text-gray-600 space-y-2 max-h-40 overflow-y-auto">
+                    <p><strong>Variação de Cores:</strong> As cores podem variar até 15% devido a diferenças de materiais e processos de impressão.</p>
+                    <p><strong>Responsabilidade:</strong> Não nos responsabilizamos pelas informações contidas no layout enviado. Todo conteúdo é responsabilidade do cliente.</p>
+                    <p><strong>Checagem:</strong> Esta checagem não inclui criação ou ajustes avançados na arte. Problemas serão notificados para correção.</p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Checkbox
+                      id="terms"
+                      checked={acceptedTerms}
+                      onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                    />
+                    <Label htmlFor="terms" className="text-sm cursor-pointer">
+                      Aceito os termos e condições
+                    </Label>
+                  </div>
+                </div>
+
+                {/* Preço Final */}
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-gray-600">Preço Final</span>
+                    <span className="text-3xl font-bold text-orange-500">
+                      R$ {finalPrice.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Botão de Checkout */}
+                  <Button
+                    onClick={handleCheckout}
+                    disabled={isProcessing || !artFile || !acceptedTerms}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      "Prosseguir para Pagamento"
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

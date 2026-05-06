@@ -18,6 +18,15 @@ import {
   getSegmentBySlug,
   getCategoriesBySegment,
   getProductsByCategory,
+  getVariationTypesByProduct,
+  getVariationOptions,
+  createVariationType,
+  createVariationOption,
+  getOrderItemVariations,
+  addOrderItemVariation,
+  createFileCheck,
+  getFileCheckByOrderItem,
+  updateFileCheckStatus,
 } from "./db";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems } from "../drizzle/schema";
@@ -183,6 +192,88 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const result = await updateOrderStatus(input.orderId, input.newStatus);
         return result;
+      }),
+  }),
+
+  // Variations - Procedimentos públicos para obter variações
+  variations: router({
+    getByProduct: publicProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input }) => {
+        const types = await getVariationTypesByProduct(input.productId);
+        const typesWithOptions = await Promise.all(
+          types.map(async (type) => ({
+            ...type,
+            options: await getVariationOptions(type.id),
+          }))
+        );
+        return typesWithOptions;
+      }),
+  }),
+
+  // Admin - Gerenciar variações
+  adminVariations: router({
+    createType: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        type: z.enum(["material", "acabamento"]),
+        name: z.string(),
+        isRequired: z.boolean().default(true),
+      }))
+      .mutation(async ({ input }) => {
+        return await createVariationType({
+          productId: input.productId,
+          type: input.type,
+          name: input.name,
+          isRequired: input.isRequired,
+        });
+      }),
+    createOption: adminProcedure
+      .input(z.object({
+        variationTypeId: z.number(),
+        name: z.string(),
+        description: z.string().optional(),
+        priceModifier: z.string().default("0"),
+      }))
+      .mutation(async ({ input }) => {
+        return await createVariationOption({
+          variationTypeId: input.variationTypeId,
+          name: input.name,
+          description: input.description,
+          priceModifier: input.priceModifier as any,
+        });
+      }),
+  }),
+
+  // File Check - Procedimentos para checagem de arquivo
+  fileCheck: router({
+    create: protectedProcedure
+      .input(z.object({
+        orderItemId: z.number(),
+        fileName: z.string(),
+        fileSize: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createFileCheck({
+          orderItemId: input.orderItemId,
+          fileName: input.fileName,
+          fileSize: input.fileSize,
+          status: "pendente",
+        });
+      }),
+    getByOrderItem: publicProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .query(async ({ input }) => {
+        return await getFileCheckByOrderItem(input.orderItemId);
+      }),
+    updateStatus: adminProcedure
+      .input(z.object({
+        fileCheckId: z.number(),
+        status: z.enum(["pendente", "aprovado", "rejeitado"]),
+        issues: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await updateFileCheckStatus(input.fileCheckId, input.status, input.issues);
       }),
   }),
 });

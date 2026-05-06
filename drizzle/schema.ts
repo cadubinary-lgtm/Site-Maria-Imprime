@@ -130,3 +130,65 @@ export const orderStatusHistory = mysqlTable("orderStatusHistory", {
 
 export type OrderStatusHistory = typeof orderStatusHistory.$inferSelect;
 export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
+/**
+ * Product variations - tipos de variações (material, acabamento)
+ */
+export const variationTypes = mysqlTable("variationTypes", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  type: mysqlEnum("type", ["material", "acabamento"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Material", "Acabamento"
+  isRequired: boolean("isRequired").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type VariationType = typeof variationTypes.$inferSelect;
+export type InsertVariationType = typeof variationTypes.$inferInsert;
+
+/**
+ * Variation options - opções dentro de cada tipo de variação
+ */
+export const variationOptions = mysqlTable("variationOptions", {
+  id: int("id").autoincrement().primaryKey(),
+  variationTypeId: int("variationTypeId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Adesivo Brilho Premium"
+  description: longtext("description"),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).notNull().default("0"), // Adicional ao preço
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type VariationOption = typeof variationOptions.$inferSelect;
+export type InsertVariationOption = typeof variationOptions.$inferInsert;
+
+/**
+ * Order item variations - variações selecionadas para cada item do pedido
+ */
+export const orderItemVariations = mysqlTable("orderItemVariations", {
+  id: int("id").autoincrement().primaryKey(),
+  orderItemId: int("orderItemId").notNull(),
+  variationOptionId: int("variationOptionId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderItemVariation = typeof orderItemVariations.$inferSelect;
+export type InsertOrderItemVariation = typeof orderItemVariations.$inferInsert;
+
+/**
+ * File checks - registro de checagem de arquivos
+ */
+export const fileChecks = mysqlTable("fileChecks", {
+  id: int("id").autoincrement().primaryKey(),
+  orderItemId: int("orderItemId").notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileSize: int("fileSize"), // em bytes
+  resolution: varchar("resolution", { length: 50 }), // Ex: "300 DPI"
+  colorMode: varchar("colorMode", { length: 50 }), // Ex: "CMYK"
+  issues: longtext("issues"), // Problemas encontrados
+  status: mysqlEnum("status", ["pendente", "aprovado", "rejeitado"]).default("pendente").notNull(),
+  checkedAt: timestamp("checkedAt"),
+  checkedBy: int("checkedBy"), // ID do admin que fez a checagem
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FileCheck = typeof fileChecks.$inferSelect;
+export type InsertFileCheck = typeof fileChecks.$inferInsert;

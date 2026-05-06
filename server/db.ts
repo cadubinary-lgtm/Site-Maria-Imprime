@@ -1,6 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories } from "../drizzle/schema";
+import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
+import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -213,5 +214,100 @@ export async function getProductsByCategory(categoryId: number) {
     .from(products)
     .innerJoin(productCategories, eq(products.id, productCategories.productId))
     .where(and(eq(productCategories.categoryId, categoryId), eq(products.isActive, true)));
+  return result;
+}
+
+// Variation Types queries
+export async function getVariationTypesByProduct(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(variationTypes)
+    .where(eq(variationTypes.productId, productId));
+  return result;
+}
+
+export async function createVariationType(data: InsertVariationType) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(variationTypes).values(data);
+  return result;
+}
+
+// Variation Options queries
+export async function getVariationOptions(variationTypeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(variationOptions)
+    .where(eq(variationOptions.variationTypeId, variationTypeId));
+  return result;
+}
+
+export async function createVariationOption(data: InsertVariationOption) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(variationOptions).values(data);
+  return result;
+}
+
+// Order Item Variations queries
+export async function getOrderItemVariations(orderItemId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select()
+    .from(orderItemVariations)
+    .innerJoin(variationOptions, eq(orderItemVariations.variationOptionId, variationOptions.id))
+    .where(eq(orderItemVariations.orderItemId, orderItemId));
+  
+  return result.map(row => ({
+    variation: row.orderItemVariations,
+    option: row.variationOptions,
+  }));
+}
+
+export async function addOrderItemVariation(data: InsertOrderItemVariation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(orderItemVariations).values(data);
+  return result;
+}
+
+// File Checks queries
+export async function createFileCheck(data: InsertFileCheck) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(fileChecks).values(data);
+  return result;
+}
+
+export async function getFileCheckByOrderItem(orderItemId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(fileChecks)
+    .where(eq(fileChecks.orderItemId, orderItemId))
+    .limit(1);
+  
+  return result[0];
+}
+
+export async function updateFileCheckStatus(fileCheckId: number, status: string, issues?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(fileChecks)
+    .set({ 
+      status: status as any, 
+      issues: issues || null,
+      checkedAt: new Date(),
+    })
+    .where(eq(fileChecks.id, fileCheckId));
+  
   return result;
 }
