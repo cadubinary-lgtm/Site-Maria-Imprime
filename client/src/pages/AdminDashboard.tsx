@@ -87,6 +87,13 @@ export default function AdminDashboard() {
 
           {/* Produtos Tab */}
           <TabsContent value="produtos" className="mt-8">
+            <div className="mb-6">
+              <Link href="/admin/produtos">
+                <Button className="bg-orange-500 hover:bg-orange-600">
+                  Gerenciar Produtos Existentes
+                </Button>
+              </Link>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Form */}
               <Card className="lg:col-span-1">

@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ClientCatalog from "./pages/ClientCatalog";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminProducts from "./pages/AdminProducts";
 import ProductionDashboard from "./pages/ProductionDashboard";
 import OrderTracking from "./pages/OrderTracking";
 import ProductDetail from "./pages/ProductDetail";
@@ -36,6 +37,7 @@ function Router() {
       {user?.role === "admin" && (
         <>
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/produtos" component={AdminProducts} />
         </>
       )}
 

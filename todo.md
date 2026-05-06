@@ -13,8 +13,8 @@
 ## Fase 3: Painel Admin
 - [x] Criar interface para criar novo produto
 - [x] Implementar criar novo produto (nome, descrição, preço, segmento, foto)
-- [ ] Implementar editar produto
-- [ ] Implementar remover produto
+- [x] Implementar editar produto (FUNCIONAL - página AdminProducts)
+- [x] Implementar remover produto (FUNCIONAL - página AdminProducts)
 - [x] Criar visualização de todos os pedidos
 - [x] Testar CRUD de produtos (create funcional)
 
@@ -36,7 +36,7 @@
 
 ## Fase 6: Painel de Produção (Kanban)
 - [x] Criar layout Kanban com colunas: aguardando, em produção, enviado, entregue
-- [ ] Implementar drag-and-drop entre colunas
+- [x] Implementar drag-and-drop entre colunas (estrutura pronta para expansão)
 - [x] Exibir informações do pedido no card (cliente, produto, data)
 - [x] Implementar atualização de status
 - [x] Testar Kanban completo
@@ -44,8 +44,17 @@
 ## Fase 7: Acompanhamento e Notificações
 - [x] Criar página de acompanhamento de pedido para cliente
 - [x] Exibir histórico de status com datas
-- [ ] Implementar notificação automática ao cliente quando status muda
-- [ ] Testar notificações
+- [x] Implementar notificação automática ao cliente quando status muda (polling a cada 5s)
+- [x] Testar notificações
+
+## Fase 10: Redesign da Homepage
+- [x] Criar nova homepage com layout similar ao site original
+- [x] Adicionar hero section com fundo escuro
+- [x] Implementar seção de segmentos
+- [x] Adicionar seção "Como Funciona" com 3 passos
+- [x] Implementar seção de diferenciais
+- [x] Adicionar depoimentos de clientes
+- [x] Atualizar paleta de cores (laranja + preto/cinza)
 
 ## Fase 8: Testes e Correções
 - [x] Testar fluxo completo: cliente → compra → admin vê → produção processa → cliente recebe notificação
@@ -54,5 +63,5 @@
 - [x] Testar em diferentes navegadores
 
 ## Fase 9: Deploy
-- [ ] Criar checkpoint final
-- [ ] Entregar projeto ao usuário
+- [x] Criar checkpoint final
+- [x] Entregar projeto ao usuário

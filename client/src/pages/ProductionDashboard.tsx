@@ -27,7 +27,8 @@ export default function ProductionDashboard() {
         newStatus: newStatus as "aguardando" | "em_producao" | "enviado" | "entregue",
       });
       
-      toast.success("Status atualizado com sucesso!");
+      const statusLabel = STATUS_CONFIG[newStatus as keyof typeof STATUS_CONFIG]?.label || newStatus;
+      toast.success(`Pedido atualizado para: ${statusLabel}`);
       refetch();
     } catch (error) {
       toast.error("Erro ao atualizar status");

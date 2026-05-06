@@ -17,6 +17,7 @@ import {
 } from "./db";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 // Procedimento protegido apenas para admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -83,6 +84,42 @@ export const appRouter = router({
         return result;
       }),
     getAllOrders: adminProcedure.query(() => getAllOrders()),
+    updateProduct: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string(),
+        description: z.string().optional(),
+        price: z.string(),
+        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]),
+        imageUrl: z.string().optional(),
+        imageKey: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const result = await db.update(products)
+          .set({
+            name: input.name,
+            description: input.description,
+            price: input.price as any,
+            segment: input.segment as any,
+            imageUrl: input.imageUrl,
+            imageKey: input.imageKey,
+          })
+          .where(eq(products.id, input.id));
+        return result;
+      }),
+    deleteProduct: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const result = await db.delete(products)
+          .where(eq(products.id, input.id));
+        return result;
+      }),
   }),
 
   // Orders - Cliente e Produção

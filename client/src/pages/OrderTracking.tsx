@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Loader2, ArrowLeft, CheckCircle, Clock, Truck, Package } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const STATUS_CONFIG = {
   aguardando: { label: "Aguardando", color: "bg-yellow-100 text-yellow-800", icon: Clock },
@@ -13,7 +15,15 @@ const STATUS_CONFIG = {
 };
 
 export default function OrderTracking() {
-  const { data: orders, isLoading } = trpc.orders.getMyOrders.useQuery();
+  const { data: orders, isLoading, refetch } = trpc.orders.getMyOrders.useQuery();
+  
+  // Atualizar pedidos a cada 5 segundos para notificações em tempo real
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [refetch]);
 
   return (
     <div className="min-h-screen bg-gray-50">
