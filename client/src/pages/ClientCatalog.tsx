@@ -93,9 +93,9 @@ export default function ClientCatalog() {
                           <p className="text-gray-600 mb-4 line-clamp-3">
                             {product.description || "Sem descrição disponível"}
                           </p>
-                          <Link href={`/produto/${product.id}`}>
+                          <a href={`/produto/${product.id}`}>
                             <Button className="w-full">Ver Detalhes</Button>
-                          </Link>
+                          </a>
                         </CardContent>
                       </Card>
                     ))}

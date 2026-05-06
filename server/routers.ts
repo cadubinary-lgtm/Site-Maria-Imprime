@@ -16,7 +16,7 @@ import {
   getDb,
 } from "./db";
 import { nanoid } from "nanoid";
-import { products, orders } from "../drizzle/schema";
+import { products, orders, orderItems } from "../drizzle/schema";
 
 // Procedimento protegido apenas para admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {

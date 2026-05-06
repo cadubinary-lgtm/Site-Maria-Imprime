@@ -9,6 +9,8 @@ import ClientCatalog from "./pages/ClientCatalog";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProductionDashboard from "./pages/ProductionDashboard";
 import OrderTracking from "./pages/OrderTracking";
+import ProductDetail from "./pages/ProductDetail";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import { useAuth } from "./_core/hooks/useAuth";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/catalogo" component={ClientCatalog} />
+      <Route path="/produto/:id" component={ProductDetail} />
+      <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
       
       {/* Admin routes */}

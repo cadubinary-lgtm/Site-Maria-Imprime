@@ -27,19 +27,19 @@
 - [x] Testar visualização de produtos
 
 ## Fase 5: Fluxo de Compra
-- [ ] Criar página de detalhes do produto
-- [ ] Implementar seleção de quantidade
-- [ ] Implementar upload de arquivo de arte (validação de tipo/tamanho)
-- [ ] Integrar pagamento (simulado)
-- [ ] Criar confirmação de pedido
-- [ ] Testar fluxo completo de compra
+- [x] Criar página de detalhes do produto
+- [x] Implementar seleção de quantidade
+- [x] Implementar upload de arquivo de arte (validação de tipo/tamanho)
+- [x] Integrar pagamento (simulado)
+- [x] Criar confirmação de pedido
+- [x] Testar fluxo completo de compra
 
 ## Fase 6: Painel de Produção (Kanban)
 - [x] Criar layout Kanban com colunas: aguardando, em produção, enviado, entregue
 - [ ] Implementar drag-and-drop entre colunas
 - [x] Exibir informações do pedido no card (cliente, produto, data)
 - [x] Implementar atualização de status
-- [ ] Testar Kanban completo
+- [x] Testar Kanban completo
 
 ## Fase 7: Acompanhamento e Notificações
 - [x] Criar página de acompanhamento de pedido para cliente
@@ -48,10 +48,10 @@
 - [ ] Testar notificações
 
 ## Fase 8: Testes e Correções
-- [ ] Testar fluxo completo: cliente → compra → admin vê → produção processa → cliente recebe notificação
+- [x] Testar fluxo completo: cliente → compra → admin vê → produção processa → cliente recebe notificação
 - [x] Corrigir erros visuais e duplicações
-- [ ] Validar responsividade
-- [ ] Testar em diferentes navegadores
+- [x] Validar responsividade
+- [x] Testar em diferentes navegadores
 
 ## Fase 9: Deploy
 - [ ] Criar checkpoint final
