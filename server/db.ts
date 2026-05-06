@@ -92,93 +92,47 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // Products queries
-export async function getProductsBySegment(segment: string) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(products)
-    .where(and(eq(products.segment, segment as any), eq(products.isActive, true)));
-  return result;
-}
-
 export async function getAllProducts() {
   const db = await getDb();
   if (!db) return [];
-  
+
+  const result = await db.select().from(products).limit(1000);
+  return result;
+}
+
+export async function getProductsBySegment(segment: string) {
+  const db = await getDb();
+  if (!db) return [];
+
   const result = await db.select().from(products)
-    .where(eq(products.isActive, true));
+    .where(eq(products.segment, segment as any))
+    .limit(100);
   return result;
 }
 
 export async function getProductById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db.select().from(products)
     .where(eq(products.id, id))
     .limit(1);
   return result[0];
 }
 
-// Orders queries
-export async function createOrder(order: InsertOrder) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.insert(orders).values(order);
-  return result;
-}
-
-export async function getOrdersByClient(clientId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(orders)
-    .where(eq(orders.clientId, clientId));
-  return result;
-}
-
-export async function getOrderById(id: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  
-  const result = await db.select().from(orders)
-    .where(eq(orders.id, id))
-    .limit(1);
-  return result[0];
-}
-
-export async function getAllOrders() {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(orders);
-  return result;
-}
-
-export async function updateOrderStatus(orderId: number, newStatus: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.update(orders)
-    .set({ status: newStatus as any, updatedAt: new Date() })
-    .where(eq(orders.id, orderId));
-  return result;
-}
-
 // Segments queries
 export async function getAllSegments() {
   const db = await getDb();
   if (!db) return [];
-  
-  const result = await db.select().from(segments);
+
+  const result = await db.select().from(segments).limit(100);
   return result;
 }
 
 export async function getSegmentBySlug(slug: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db.select().from(segments)
     .where(eq(segments.slug, slug))
     .limit(1);
@@ -189,31 +143,71 @@ export async function getSegmentBySlug(slug: string) {
 export async function getCategoriesBySegment(segmentId: number) {
   const db = await getDb();
   if (!db) return [];
-  
+
   const result = await db.select().from(categories)
-    .where(eq(categories.segmentId, segmentId));
+    .where(eq(categories.segmentId, segmentId))
+    .limit(100);
   return result;
 }
 
 export async function getProductsByCategory(categoryId: number) {
   const db = await getDb();
   if (!db) return [];
-  
-  const result = await db.select({
-    id: products.id,
-    name: products.name,
-    description: products.description,
-    price: products.price,
-    segment: products.segment,
-    imageUrl: products.imageUrl,
-    imageKey: products.imageKey,
-    isActive: products.isActive,
-    createdAt: products.createdAt,
-    updatedAt: products.updatedAt,
-  })
+
+  const result = await db.select()
     .from(products)
     .innerJoin(productCategories, eq(products.id, productCategories.productId))
-    .where(and(eq(productCategories.categoryId, categoryId), eq(products.isActive, true)));
+    .where(eq(productCategories.categoryId, categoryId))
+    .limit(100);
+
+  return result.map(row => row.products);
+}
+
+// Orders queries
+export async function getOrdersByClient(clientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db.select().from(orders)
+    .where(eq(orders.clientId, clientId))
+    .limit(100);
+  return result;
+}
+
+export async function getOrderById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(orders)
+    .where(eq(orders.id, id))
+    .limit(1);
+  return result[0];
+}
+
+export async function getAllOrders() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db.select().from(orders).limit(1000);
+  return result;
+}
+
+export async function createOrder(order: InsertOrder) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(orders).values(order);
+  return result;
+}
+
+export async function updateOrderStatus(orderId: number, status: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.update(orders)
+    .set({ status: status as any, updatedAt: new Date() })
+    .where(eq(orders.id, orderId));
+
   return result;
 }
 
@@ -310,4 +304,45 @@ export async function updateFileCheckStatus(fileCheckId: number, status: string,
     .where(eq(fileChecks.id, fileCheckId));
   
   return result;
+}
+
+// Search queries
+export async function searchGlobal(query: string) {
+  const db = await getDb();
+  if (!db) return { products: [], categories: [], materials: [] };
+
+  try {
+    if (query.length === 0) {
+      return { products: [], categories: [], materials: [] };
+    }
+
+    // Buscar TODOS os produtos, categorias e variações (sem limite)
+    const allProducts = await db.select().from(products);
+    const allCategories = await db.select().from(categories);
+    const allMaterials = await db.select().from(variationOptions);
+
+    // Filtrar resultados em memória
+    const filteredProducts = allProducts.filter(p =>
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(query.toLowerCase()))
+    ).slice(0, 10);
+
+    const filteredCategories = allCategories.filter(c =>
+      c.name.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 10);
+
+    const filteredMaterials = allMaterials.filter(m =>
+      m.name.toLowerCase().includes(query.toLowerCase()) ||
+      (m.description && m.description.toLowerCase().includes(query.toLowerCase()))
+    ).slice(0, 10);
+
+    return {
+      products: filteredProducts,
+      categories: filteredCategories,
+      materials: filteredMaterials,
+    };
+  } catch (error) {
+    console.error("Search error:", error);
+    return { products: [], categories: [], materials: [] };
+  }
 }

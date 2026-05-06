@@ -27,6 +27,7 @@ import {
   createFileCheck,
   getFileCheckByOrderItem,
   updateFileCheckStatus,
+  searchGlobal,
 } from "./db";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems } from "../drizzle/schema";
@@ -274,6 +275,15 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await updateFileCheckStatus(input.fileCheckId, input.status, input.issues);
+      }),
+  }),
+
+  // Search - Busca global de produtos, categorias e materiais
+  search: router({
+    global: publicProcedure
+      .input(z.object({ query: z.string() }))
+      .query(async ({ input }) => {
+        return await searchGlobal(input.query);
       }),
   }),
 });

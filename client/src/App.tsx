@@ -12,7 +12,9 @@ import ProductionDashboard from "./pages/ProductionDashboard";
 import OrderTracking from "./pages/OrderTracking";
 import ProductDetail from "./pages/ProductDetail";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import SearchResults from "./pages/SearchResults";
 import { useAuth } from "./_core/hooks/useAuth";
+import Header from "./components/Header";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -32,6 +34,7 @@ function Router() {
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
+      <Route path="/busca" component={SearchResults} />
       
       {/* Admin routes */}
       {user?.role === "admin" && (
@@ -60,6 +63,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <Header />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

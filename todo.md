@@ -70,3 +70,12 @@
 - [x] Criar script para adicionar 10 produtos de serviços
 - [x] Executar script com dados dos 10 serviços
 - [x] Verificar se produtos foram criados no catálogo
+
+## Fase 12: Header com Barra de Pesquisa Global
+- [x] Criar procedimento tRPC de busca global
+- [x] Criar componente Header com logo, barra de pesquisa e menu
+- [x] Implementar autocomplete e sugestões em tempo real
+- [x] Criar página de resultados de busca
+- [x] Implementar responsividade (mobile/desktop)
+- [x] Testar fluxo completo de busca
+- [x] Salvar checkpoint final
