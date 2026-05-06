@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, orders, orderItems, orderStatusHistory } from "../drizzle/schema";
+import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -162,5 +162,56 @@ export async function updateOrderStatus(orderId: number, newStatus: string) {
   const result = await db.update(orders)
     .set({ status: newStatus as any, updatedAt: new Date() })
     .where(eq(orders.id, orderId));
+  return result;
+}
+
+// Segments queries
+export async function getAllSegments() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(segments);
+  return result;
+}
+
+export async function getSegmentBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(segments)
+    .where(eq(segments.slug, slug))
+    .limit(1);
+  return result[0];
+}
+
+// Categories queries
+export async function getCategoriesBySegment(segmentId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(categories)
+    .where(eq(categories.segmentId, segmentId));
+  return result;
+}
+
+export async function getProductsByCategory(categoryId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: products.id,
+    name: products.name,
+    description: products.description,
+    price: products.price,
+    segment: products.segment,
+    imageUrl: products.imageUrl,
+    imageKey: products.imageKey,
+    isActive: products.isActive,
+    createdAt: products.createdAt,
+    updatedAt: products.updatedAt,
+  })
+    .from(products)
+    .innerJoin(productCategories, eq(products.id, productCategories.productId))
+    .where(and(eq(productCategories.categoryId, categoryId), eq(products.isActive, true)));
   return result;
 }

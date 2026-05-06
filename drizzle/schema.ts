@@ -40,6 +40,47 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 
 /**
+ * Segments table - segmentos de negócio
+ */
+export const segments = mysqlTable("segments", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  icon: varchar("icon", { length: 10 }),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Segment = typeof segments.$inferSelect;
+export type InsertSegment = typeof segments.$inferInsert;
+
+/**
+ * Categories table - categorias dentro de segmentos
+ */
+export const categories = mysqlTable("categories", {
+  id: int("id").autoincrement().primaryKey(),
+  segmentId: int("segmentId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = typeof categories.$inferInsert;
+
+/**
+ * Product categories junction table - relaciona produtos com categorias
+ */
+export const productCategories = mysqlTable("productCategories", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  categoryId: int("categoryId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type InsertProductCategory = typeof productCategories.$inferInsert;
+
+/**
  * Orders table - pedidos dos clientes
  */
 export const orders = mysqlTable("orders", {

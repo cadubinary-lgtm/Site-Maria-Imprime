@@ -14,6 +14,10 @@ import {
   updateOrderStatus,
   createOrder,
   getDb,
+  getAllSegments,
+  getSegmentBySlug,
+  getCategoriesBySegment,
+  getProductsByCategory,
 } from "./db";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems } from "../drizzle/schema";
@@ -55,6 +59,24 @@ export const appRouter = router({
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getProductById(input.id)),
+  }),
+
+  // Segments - Público
+  segments: router({
+    getAll: publicProcedure.query(() => getAllSegments()),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(({ input }) => getSegmentBySlug(input.slug)),
+  }),
+
+  // Categories - Público
+  categories: router({
+    getBySegment: publicProcedure
+      .input(z.object({ segmentId: z.number() }))
+      .query(({ input }) => getCategoriesBySegment(input.segmentId)),
+    getProducts: publicProcedure
+      .input(z.object({ categoryId: z.number() }))
+      .query(({ input }) => getProductsByCategory(input.categoryId)),
   }),
 
   // Admin - Gerenciar produtos
