@@ -65,3 +65,8 @@
 ## Fase 9: Deploy
 - [x] Criar checkpoint final
 - [x] Entregar projeto ao usuário
+
+## Fase 11: Adicionar 10 Produtos em Serviços
+- [x] Criar script para adicionar 10 produtos de serviços
+- [x] Executar script com dados dos 10 serviços
+- [x] Verificar se produtos foram criados no catálogo
