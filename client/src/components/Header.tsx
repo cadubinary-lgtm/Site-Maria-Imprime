@@ -62,11 +62,12 @@ export default function Header() {
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">GP</span>
-              </div>
-              <span className="font-bold text-lg text-gray-900">Gráfica Ponto Digital</span>
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition">
+              <img 
+                src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
+                alt="Gráfica Ponto Digital" 
+                className="h-12 w-auto"
+              />
             </div>
           </Link>
 
@@ -199,10 +200,11 @@ export default function Header() {
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">GP</span>
-              </div>
-              <span className="font-bold text-sm text-gray-900">GP Digital</span>
+              <img 
+                src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
+                alt="Gráfica Ponto Digital" 
+                className="h-10 w-auto"
+              />
             </div>
           </Link>
 
