@@ -161,9 +161,9 @@ export default function Home() {
                 Atendemos diversos segmentos com produtos personalizados que viralizam sua marca e impulsionam suas vendas.
               </p>
               <div className="flex gap-4 flex-wrap">
-                <Link href="/catalogo">
+                <Link href="/todos-produtos">
                   <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
-                    VER SEGMENTOS →
+                    VER TODOS OS PRODUTOS →
                   </Button>
                 </Link>
                 <Button size="lg" variant="outline" className="border-green-500 text-green-500 hover:bg-green-500/10">
