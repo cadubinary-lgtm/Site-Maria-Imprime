@@ -5,7 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import ClientCatalog from "./pages/ClientCatalog";
+import CatalogImproved from "./pages/CatalogImproved";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import ProductionDashboard from "./pages/ProductionDashboard";
@@ -30,8 +30,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/catalogo" component={ClientCatalog} />
-      <Route path="/produto/:id" component={ProductDetail} />
+      <Route path={"/catalogo"} component={CatalogImproved} />     <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
