@@ -28,19 +28,10 @@ export const products = mysqlTable("products", {
   name: varchar("name", { length: 255 }).notNull(),
   description: longtext("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  segment: mysqlEnum("segment", ["alimentacao", "beleza", "saude", "varejo", "servicos"]).notNull(),
+  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
   imageUrl: text("imageUrl"), // URL da imagem armazenada em S3
   imageKey: varchar("imageKey", { length: 255 }), // Chave para referência no S3
   isActive: boolean("isActive").default(true).notNull(),
-  technicalInfo: longtext("technicalInfo"), // Ficha técnica em JSON
-  benefits: longtext("benefits"), // Benefícios do produto
-  applications: longtext("applications"), // Aplicações/usos
-  allowCustomMeasures: boolean("allowCustomMeasures").default(false).notNull(), // Se permite medidas personalizadas
-  pricePerSquareMeter: decimal("pricePerSquareMeter", { precision: 10, scale: 2 }), // Preço por m² para lonas/adesivos
-  minWidth: decimal("minWidth", { precision: 10, scale: 2 }), // Largura mínima em cm
-  maxWidth: decimal("maxWidth", { precision: 10, scale: 2 }), // Largura máxima em cm
-  minHeight: decimal("minHeight", { precision: 10, scale: 2 }), // Altura mínima em cm
-  maxHeight: decimal("maxHeight", { precision: 10, scale: 2 }), // Altura máxima em cm
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
