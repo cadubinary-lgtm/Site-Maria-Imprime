@@ -49,7 +49,7 @@ export default function ProductDetail() {
       setAreaM2(0);
       return;
     }
-    const area = (w * h) / 10000; // Converter cm² para m²
+    const area = w * h; // Multiplicar metros diretos
     setAreaM2(Math.round(area * 100) / 100);
   };
 
@@ -267,7 +267,7 @@ export default function ProductDetail() {
                     <h3 className="font-semibold text-lg text-blue-900">Calcular Metragem Quadrada</h3>
                     <div className="grid grid-cols-3 gap-2 items-end">
                       <div className="space-y-2">
-                        <Label htmlFor="width" className="text-sm">Largura (cm)</Label>
+                        <Label htmlFor="width" className="text-sm">Largura (m)</Label>
                         <Input
                           id="width"
                           type="number"
@@ -284,7 +284,7 @@ export default function ProductDetail() {
                       </div>
                       <div className="flex items-center justify-center text-2xl font-bold text-gray-400">×</div>
                       <div className="space-y-2">
-                        <Label htmlFor="height" className="text-sm">Altura (cm)</Label>
+                        <Label htmlFor="height" className="text-sm">Altura (m)</Label>
                         <Input
                           id="height"
                           type="number"
