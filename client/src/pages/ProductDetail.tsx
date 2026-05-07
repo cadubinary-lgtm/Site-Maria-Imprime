@@ -43,8 +43,9 @@ export default function ProductDetail() {
       setAreaM2(0);
       return;
     }
-    const w = parseFloat(width);
-    const h = parseFloat(height);
+    // Converter vírgula para ponto para aceitar ambos os formatos
+    const w = parseFloat(width.toString().replace(',', '.'));
+    const h = parseFloat(height.toString().replace(',', '.'));
     if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
       setAreaM2(0);
       return;
@@ -270,16 +271,17 @@ export default function ProductDetail() {
                         <Label htmlFor="width" className="text-sm">Largura (m)</Label>
                         <Input
                           id="width"
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="1,00"
                           value={width}
                           onChange={(e) => {
-                            setWidth(e.target.value);
+                            // Aceitar vírgula e ponto
+                            const value = e.target.value.replace(',', '.');
+                            setWidth(value);
                             setTimeout(calculateArea, 0);
                           }}
                           className="w-full"
-                          step="0.01"
-                          min="0"
                         />
                       </div>
                       <div className="flex items-center justify-center text-2xl font-bold text-gray-400">×</div>
@@ -287,16 +289,17 @@ export default function ProductDetail() {
                         <Label htmlFor="height" className="text-sm">Altura (m)</Label>
                         <Input
                           id="height"
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="1,00"
                           value={height}
                           onChange={(e) => {
-                            setHeight(e.target.value);
+                            // Aceitar vírgula e ponto
+                            const value = e.target.value.replace(',', '.');
+                            setHeight(value);
                             setTimeout(calculateArea, 0);
                           }}
                           className="w-full"
-                          step="0.01"
-                          min="0"
                         />
                       </div>
                     </div>
