@@ -6,11 +6,12 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import CatalogImproved from "./pages/CatalogImproved";
+import AllProducts from "./pages/AllProducts";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import ProductionDashboard from "./pages/ProductionDashboard";
 import OrderTracking from "./pages/OrderTracking";
-import ProductDetail from "./pages/ProductDetail";
+import ProductDetailProfessional from "./pages/ProductDetailProfessional";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import SearchResults from "./pages/SearchResults";
 import { useAuth } from "./_core/hooks/useAuth";
@@ -30,7 +31,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path={"/catalogo"} component={CatalogImproved} />     <Route path="/produto/:id" component={ProductDetail} />
+      <Route path={"/catalogo"} component={CatalogImproved} />
+      <Route path="/todos-produtos" component={AllProducts} />
+      <Route path="/produto/:id" component={ProductDetailProfessional} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />

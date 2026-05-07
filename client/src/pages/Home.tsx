@@ -118,7 +118,7 @@ function FeaturedProductsSection() {
         </div>
 
         <div className="text-center mt-12">
-          <Link href="/catalogo">
+          <Link href="/todos-produtos">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
               Ver Todos os Produtos →
             </Button>
