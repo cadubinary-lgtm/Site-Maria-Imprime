@@ -118,7 +118,7 @@ function FeaturedProductsSection() {
         </div>
 
         <div className="text-center mt-12">
-          <Link href="/catalogo">
+          <Link href="/todos-produtos">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
               Ver Todos os Produtos →
             </Button>
@@ -161,9 +161,9 @@ export default function Home() {
                 Atendemos diversos segmentos com produtos personalizados que viralizam sua marca e impulsionam suas vendas.
               </p>
               <div className="flex gap-4 flex-wrap">
-                <Link href="/todos-produtos">
+                <Link href="/catalogo">
                   <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
-                    VER TODOS OS PRODUTOS →
+                    VER SEGMENTOS →
                   </Button>
                 </Link>
                 <Button size="lg" variant="outline" className="border-green-500 text-green-500 hover:bg-green-500/10">
