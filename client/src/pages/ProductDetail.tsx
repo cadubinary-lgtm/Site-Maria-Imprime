@@ -21,6 +21,9 @@ export default function ProductDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedVariations, setSelectedVariations] = useState<Record<number, number>>({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [width, setWidth] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
+  const [areaM2, setAreaM2] = useState<number>(0);
 
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 },
@@ -33,6 +36,22 @@ export default function ProductDetail() {
   );
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
+
+  // Calcular área em m²
+  const calculateArea = () => {
+    if (!width || !height) {
+      setAreaM2(0);
+      return;
+    }
+    const w = parseFloat(width);
+    const h = parseFloat(height);
+    if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+      setAreaM2(0);
+      return;
+    }
+    const area = (w * h) / 10000; // Converter cm² para m²
+    setAreaM2(Math.round(area * 100) / 100);
+  };
 
   // Calcular preço final com variações
   const calculateFinalPrice = () => {
@@ -50,6 +69,11 @@ export default function ProductDetail() {
           }
         }
       }
+    }
+    
+    // Se o produto requer cálculo de área, multiplicar pelo m²
+    if (product.requiresAreaCalculation && areaM2 > 0) {
+      return total * areaM2 * quantity;
     }
     
     return total * quantity;
@@ -226,6 +250,52 @@ export default function ProductDetail() {
                         )}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Calculador de m² para lona e adesivo */}
+                {product.requiresAreaCalculation && (
+                  <div className="space-y-4 bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                    <h3 className="font-semibold text-lg text-blue-900">Calcular Metragem Quadrada</h3>
+                    <div className="grid grid-cols-3 gap-2 items-end">
+                      <div className="space-y-2">
+                        <Label htmlFor="width" className="text-sm">Largura (cm)</Label>
+                        <Input
+                          id="width"
+                          type="number"
+                          placeholder="1,00"
+                          value={width}
+                          onChange={(e) => {
+                            setWidth(e.target.value);
+                            setTimeout(calculateArea, 0);
+                          }}
+                          className="w-full"
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
+                      <div className="flex items-center justify-center text-2xl font-bold text-gray-400">×</div>
+                      <div className="space-y-2">
+                        <Label htmlFor="height" className="text-sm">Altura (cm)</Label>
+                        <Input
+                          id="height"
+                          type="number"
+                          placeholder="1,00"
+                          value={height}
+                          onChange={(e) => {
+                            setHeight(e.target.value);
+                            setTimeout(calculateArea, 0);
+                          }}
+                          className="w-full"
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-blue-200 text-center">
+                      <p className="text-sm text-gray-600">Total m²</p>
+                      <p className="text-2xl font-bold text-blue-600">{areaM2.toFixed(2)}</p>
+                    </div>
                   </div>
                 )}
 

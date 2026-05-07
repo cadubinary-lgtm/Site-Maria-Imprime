@@ -32,6 +32,7 @@ export const products = mysqlTable("products", {
   imageUrl: text("imageUrl"), // URL da imagem armazenada em S3
   imageKey: varchar("imageKey", { length: 255 }), // Chave para referência no S3
   isActive: boolean("isActive").default(true).notNull(),
+  requiresAreaCalculation: boolean("requiresAreaCalculation").default(false).notNull(), // Para lona, adesivo, etc
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
