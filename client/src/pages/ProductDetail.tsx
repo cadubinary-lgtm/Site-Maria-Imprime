@@ -187,7 +187,15 @@ export default function ProductDetail() {
             <Card>
               <CardHeader>
                 <CardTitle>{product.name}</CardTitle>
-                <CardDescription>{product.segment}</CardDescription>
+                <CardDescription>
+                  {{
+                    alimentacao: '🍔 Alimentação',
+                    beleza: '💄 Beleza & Saúde',
+                    saude: '💄 Beleza & Saúde',
+                    varejo: '🛍️ Varejo',
+                    servicos: '🔧 Serviços',
+                  }[product.segment] || product.segment}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-600">{product.description}</p>
