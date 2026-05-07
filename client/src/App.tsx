@@ -13,6 +13,7 @@ import OrderTracking from "./pages/OrderTracking";
 import ProductDetail from "./pages/ProductDetail";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import SearchResults from "./pages/SearchResults";
+import AllProducts from "./pages/AllProducts";
 import { useAuth } from "./_core/hooks/useAuth";
 import Header from "./components/Header";
 
@@ -30,7 +31,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path={"/catalogo"} component={CatalogImproved} />     <Route path="/produto/:id" component={ProductDetail} />
+      <Route path={"/catalogo"} component={CatalogImproved} />
+      <Route path="/todos-produtos" component={AllProducts} />
+      <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
