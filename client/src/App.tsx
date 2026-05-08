@@ -40,8 +40,8 @@ function Router() {
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
       
-      {/* Admin routes */}
-      {user?.role === "admin" && (
+      {/* Admin routes - Acessível para todos os usuários logados */}
+      {user && (
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
