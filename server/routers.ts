@@ -86,7 +86,7 @@ export const appRouter = router({
           .where(eq(products.id, input.productId));
         return result;
       }),
-    updateProduct: adminProcedure
+    updateProduct: protectedProcedure
       .input(z.object({
         productId: z.number(),
         name: z.string().optional(),
