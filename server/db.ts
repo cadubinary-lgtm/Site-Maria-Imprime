@@ -139,37 +139,6 @@ export async function getSegmentBySlug(slug: string) {
   return result[0];
 }
 
-export async function createSegment(name: string, icon: string, slug: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.insert(segments).values({
-    name,
-    icon,
-    slug,
-  });
-  return result;
-}
-
-export async function updateSegment(id: number, name: string, icon: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.update(segments)
-    .set({ name, icon })
-    .where(eq(segments.id, id));
-  return result;
-}
-
-export async function deleteSegment(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.delete(segments)
-    .where(eq(segments.id, id));
-  return result;
-}
-
 // Categories queries
 export async function getCategoriesBySegment(segmentId: number) {
   const db = await getDb();
