@@ -69,6 +69,20 @@ export const appRouter = router({
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getProductById(input.id)),
+    updatePrice: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        price: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const result = await db.update(products)
+          .set({ price: input.price as any })
+          .where(eq(products.id, input.productId));
+        return result;
+      }),
   }),
 
   // Segments - Público

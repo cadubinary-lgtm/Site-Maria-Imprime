@@ -89,6 +89,15 @@
 - [x] Testar responsividade e consistência visual
 - [x] Executar todos os testes (16 testes passando)
 
+## Fase 14: Painel Admin de Gerenciamento de Preços
+- [ ] Criar página AdminPanel com layout de dashboard
+- [ ] Implementar tabela de produtos com edição inline de preços
+- [ ] Adicionar filtros e busca avançada
+- [ ] Gerenciamento de catálogos/segmentos
+- [ ] Controle de acesso (admin only)
+- [ ] Autenticação e autorização
+- [ ] Testes e validações
+
 ## Status Final ✅
 - ✅ Plataforma 100% funcional
 - ✅ 16 testes passando

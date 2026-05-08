@@ -14,6 +14,7 @@ import ProductDetail from "./pages/ProductDetail";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import SearchResults from "./pages/SearchResults";
 import AllProducts from "./pages/AllProducts";
+import AdminPanel from "./pages/AdminPanel";
 import { useAuth } from "./_core/hooks/useAuth";
 import Header from "./components/Header";
 
@@ -43,6 +44,7 @@ function Router() {
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
+          <Route path="/admin/precos" component={AdminPanel} />
         </>
       )}
 
