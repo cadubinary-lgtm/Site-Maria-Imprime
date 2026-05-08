@@ -48,10 +48,16 @@ async function startServer() {
   app.post('/api/upload', upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ error: 'No file provided' });
+        return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
       }
 
       const { originalname, buffer, mimetype } = req.file;
+      
+      // Validar formato de imagem
+      const allowedMimeTypes = ['image/jpeg', 'image/png'];
+      if (!allowedMimeTypes.includes(mimetype)) {
+        return res.status(400).json({ error: 'Apenas formatos JPG e PNG sao aceitos' });
+      }
       
       // Generate unique filename
       const timestamp = Date.now();
@@ -63,7 +69,7 @@ async function startServer() {
       res.json({ url });
     } catch (error) {
       console.error('Upload error:', error);
-      res.status(500).json({ error: 'Upload failed' });
+      res.status(500).json({ error: 'Falha ao fazer upload da imagem' });
     }
   });
   // tRPC API

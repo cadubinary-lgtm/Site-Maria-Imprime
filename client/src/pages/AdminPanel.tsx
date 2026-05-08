@@ -154,6 +154,13 @@ export default function AdminPanel() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar formato de imagem
+      const allowedFormats = ['image/jpeg', 'image/png'];
+      if (!allowedFormats.includes(file.type)) {
+        showNotification('error', 'Apenas formatos JPG e PNG são aceitos');
+        return;
+      }
+      
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -164,14 +171,15 @@ export default function AdminPanel() {
         });
         
         if (!response.ok) {
-          throw new Error('Erro ao fazer upload da foto');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao fazer upload da foto');
         }
         
         const { url } = await response.json();
         setEditingImageUrl(url);
         showNotification('success', 'Foto enviada com sucesso! Clique em salvar para confirmar.');
       } catch (error) {
-        showNotification('error', 'Erro ao fazer upload da foto');
+        showNotification('error', error instanceof Error ? error.message : 'Erro ao fazer upload da foto');
       }
     }
   };
@@ -179,6 +187,13 @@ export default function AdminPanel() {
   const handleCreatePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar formato de imagem
+      const allowedFormats = ['image/jpeg', 'image/png'];
+      if (!allowedFormats.includes(file.type)) {
+        showNotification('error', 'Apenas formatos JPG e PNG são aceitos');
+        return;
+      }
+      
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -189,14 +204,15 @@ export default function AdminPanel() {
         });
         
         if (!response.ok) {
-          throw new Error('Erro ao fazer upload da foto');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao fazer upload da foto');
         }
         
         const { url } = await response.json();
         setNewProductForm({ ...newProductForm, imageUrl: url });
         showNotification('success', 'Foto enviada com sucesso!');
       } catch (error) {
-        showNotification('error', 'Erro ao fazer upload da foto');
+        showNotification('error', error instanceof Error ? error.message : 'Erro ao fazer upload da foto');
       }
     }
   };
@@ -312,7 +328,7 @@ export default function AdminPanel() {
                   <input
                     ref={createFileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                     onChange={handleCreatePhotoUpload}
                     className="hidden"
                   />
@@ -494,7 +510,7 @@ export default function AdminPanel() {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                         onChange={handlePhotoUpload}
                         className="hidden"
                       />

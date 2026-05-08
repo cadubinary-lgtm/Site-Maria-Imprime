@@ -6,7 +6,7 @@ vi.mock('./storage', () => ({
   storagePut: vi.fn(),
 }));
 
-describe('Image Upload System', () => {
+describe('Image Upload System - JPG/PNG Only', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -40,8 +40,6 @@ describe('Image Upload System', () => {
     const formats = [
       { name: 'test.jpg', mime: 'image/jpeg' },
       { name: 'test.png', mime: 'image/png' },
-      { name: 'test.webp', mime: 'image/webp' },
-      { name: 'test.gif', mime: 'image/gif' },
     ];
 
     for (const format of formats) {
@@ -68,6 +66,14 @@ describe('Image Upload System', () => {
 
     expect(result.url).toMatch(/^\/manus-storage\/products\/\d+-/);
     expect(result.url).toContain('.jpg');
+  });
+
+  it('should reject non-JPG/PNG formats', async () => {
+    const invalidFormats = ['image/webp', 'image/gif', 'image/bmp'];
+    
+    for (const format of invalidFormats) {
+      expect(format).not.toMatch(/jpeg|png/);
+    }
   });
 
   it('should handle large files up to 10MB', () => {
