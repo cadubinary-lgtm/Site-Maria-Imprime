@@ -83,6 +83,31 @@ export const appRouter = router({
           .where(eq(products.id, input.productId));
         return result;
       }),
+    updateProduct: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        price: z.string().optional(),
+        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]).optional(),
+        imageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const updateData: any = {};
+        if (input.name) updateData.name = input.name;
+        if (input.description) updateData.description = input.description;
+        if (input.price) updateData.price = input.price;
+        if (input.segment) updateData.segment = input.segment;
+        if (input.imageUrl) updateData.imageUrl = input.imageUrl;
+        
+        const result = await db.update(products)
+          .set(updateData)
+          .where(eq(products.id, input.productId));
+        return result;
+      }),
   }),
 
   // Segments - Público

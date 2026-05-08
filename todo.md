@@ -115,3 +115,23 @@
 - [x] Exibir apenas para usuários com role admin
 - [x] Navegar para /admin/precos ao clicar
 - [x] Testar visibilidade e funcionalidade
+
+
+## Fase 16: Expansão do Painel Admin - Edição de Segmento e Foto
+- [x] Adicionar coluna de foto/imagem na tabela de produtos
+- [x] Implementar ícone de câmera para upload de foto
+- [x] Adicionar dropdown de segmento para edição
+- [x] Criar modal/formulário para criar novos produtos
+- [x] Atualizar tRPC procedures para suportar segment e imageUrl
+- [x] Testes de edição de segmento e foto (6 novos testes)
+- [x] Validar persistência de dados no banco
+- [x] Testar fluxo completo
+
+## Bugs Encontrados e Correções
+
+- [x] Bug: Edição de nome do produto volta para o nome antigo (não salva no BD) - CORRIGIDO
+- [x] Implementar autenticação/autorização no Painel Admin (apenas admin pode acessar) - IMPLEMENTADO
+- [x] Adicionar função de edição de nome do produto (além de preço) - IMPLEMENTADO
+- [x] Adicionar edição de segmento - IMPLEMENTADO
+- [x] Adicionar upload de foto - IMPLEMENTADO
+- [x] Adicionar botão de criar novo produto - IMPLEMENTADO

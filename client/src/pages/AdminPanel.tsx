@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { trpc } from '../lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -29,25 +36,70 @@ const SEGMENT_LABELS: Record<string, string> = {
   servicos: '🔧 Serviços',
 };
 
+const SEGMENTS = [
+  { value: 'alimentacao', label: '🍔 Alimentação' },
+  { value: 'beleza', label: '💄 Beleza & Saúde' },
+  { value: 'varejo', label: '🛍️ Varejo' },
+  { value: 'servicos', label: '🔧 Serviços' },
+];
+
 export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSegment, setSelectedSegment] = useState<string>('');
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState<string>('');
+  const [editingDescription, setEditingDescription] = useState<string>('');
   const [editingPrice, setEditingPrice] = useState<string>('');
+  const [editingSegment, setEditingSegment] = useState<string>('');
+  const [editingImageUrl, setEditingImageUrl] = useState<string>('');
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    segment: 'servicos',
+    imageUrl: '',
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const createFileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch all products
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
 
   // Update product mutation
-  const updateProductMutation = trpc.products.updatePrice.useMutation({
+  const updateProductMutation = trpc.products.updateProduct.useMutation({
     onSuccess: () => {
-      showNotification('success', 'Preço atualizado com sucesso!');
+      showNotification('success', 'Produto atualizado com sucesso!');
       setEditingId(null);
+      setEditingName('');
+      setEditingDescription('');
+      setEditingPrice('');
+      setEditingSegment('');
+      setEditingImageUrl('');
       refetch();
     },
     onError: (error) => {
-      showNotification('error', error.message || 'Erro ao atualizar preço');
+      showNotification('error', error.message || 'Erro ao atualizar produto');
+    },
+  });
+
+  // Create product mutation
+  const createProductMutation = trpc.admin.createProduct.useMutation({
+    onSuccess: () => {
+      showNotification('success', 'Produto criado com sucesso!');
+      setIsCreatingProduct(false);
+      setNewProductForm({
+        name: '',
+        description: '',
+        price: '',
+        segment: 'servicos',
+        imageUrl: '',
+      });
+      refetch();
+    },
+    onError: (error) => {
+      showNotification('error', error.message || 'Erro ao criar produto');
     },
   });
 
@@ -65,7 +117,7 @@ export default function AdminPanel() {
     return matchesSearch && matchesSegment;
   });
 
-  const handleSavePrice = async (productId: number) => {
+  const handleSaveProduct = async (productId: number) => {
     if (!editingPrice || isNaN(parseFloat(editingPrice))) {
       showNotification('error', 'Preço inválido');
       return;
@@ -73,7 +125,67 @@ export default function AdminPanel() {
 
     await updateProductMutation.mutateAsync({
       productId,
+      name: editingName || undefined,
+      description: editingDescription || undefined,
       price: editingPrice,
+      segment: (editingSegment as any) || undefined,
+      imageUrl: editingImageUrl || undefined,
+    });
+  };
+
+  const handleEditClick = (product: any) => {
+    setEditingId(product.id);
+    setEditingName(product.name);
+    setEditingDescription(product.description || '');
+    setEditingPrice(product.price);
+    setEditingSegment(product.segment);
+    setEditingImageUrl(product.imageUrl || '');
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditingName('');
+    setEditingDescription('');
+    setEditingPrice('');
+    setEditingSegment('');
+    setEditingImageUrl('');
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // For now, just store the file name as a placeholder
+      // In a real implementation, you'd upload to S3 here
+      setEditingImageUrl(file.name);
+      showNotification('success', 'Foto selecionada! Clique em salvar para confirmar.');
+    }
+  };
+
+  const handleCreatePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNewProductForm({ ...newProductForm, imageUrl: file.name });
+      showNotification('success', 'Foto selecionada!');
+    }
+  };
+
+  const handleCreateProduct = async () => {
+    if (!newProductForm.name || !newProductForm.price) {
+      showNotification('error', 'Nome e preço são obrigatórios');
+      return;
+    }
+
+    if (isNaN(parseFloat(newProductForm.price))) {
+      showNotification('error', 'Preço inválido');
+      return;
+    }
+
+    await createProductMutation.mutateAsync({
+      name: newProductForm.name,
+      description: newProductForm.description || undefined,
+      price: newProductForm.price,
+      segment: newProductForm.segment as any,
+      imageUrl: newProductForm.imageUrl || undefined,
     });
   };
 
@@ -98,35 +210,133 @@ export default function AdminPanel() {
       )}
 
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Painel Admin</h1>
-          <p className="text-gray-600 mt-2">Gerenciamento de Preços e Catálogos</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Painel Admin</h1>
+            <p className="text-gray-600">Gerenciamento de Preços e Catálogos</p>
+          </div>
+          <Dialog open={isCreatingProduct} onOpenChange={setIsCreatingProduct}>
+            <DialogTrigger asChild>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Produto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Criar Novo Produto</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Nome *</label>
+                  <Input
+                    value={newProductForm.name}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })}
+                    placeholder="Nome do produto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Descrição</label>
+                  <Input
+                    value={newProductForm.description}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, description: e.target.value })}
+                    placeholder="Descrição do produto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Preço *</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={newProductForm.price}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, price: e.target.value })}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Segmento</label>
+                  <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SEGMENTS.map((seg) => (
+                        <SelectItem key={seg.value} value={seg.value}>
+                          {seg.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Foto</label>
+                  <button
+                    onClick={() => createFileInputRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 p-2 border border-gray-300 rounded hover:bg-gray-50"
+                  >
+                    <Camera className="w-4 h-4" />
+                    {newProductForm.imageUrl ? 'Mudar foto' : 'Selecionar foto'}
+                  </button>
+                  <input
+                    ref={createFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCreatePhotoUpload}
+                    className="hidden"
+                  />
+                  {newProductForm.imageUrl && (
+                    <p className="text-sm text-gray-600 mt-1">Selecionado: {newProductForm.imageUrl}</p>
+                  )}
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCreatingProduct(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreateProduct}
+                    disabled={createProductMutation.isPending}
+                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {createProductMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      'Criar'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Stats */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Total de Produtos</p>
-            <p className="text-3xl font-bold text-gray-900">{products?.length || 0}</p>
+            <p className="text-gray-600 text-sm mb-2">Total de Produtos</p>
+            <p className="text-3xl font-bold">{products?.length || 0}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Segmentos</p>
-            <p className="text-3xl font-bold text-orange-600">5</p>
+            <p className="text-gray-600 text-sm mb-2">Segmentos</p>
+            <p className="text-3xl font-bold">5</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <p className="text-gray-600 text-sm">Produtos Filtrados</p>
-            <p className="text-3xl font-bold text-gray-900">{filteredProducts.length}</p>
+            <p className="text-gray-600 text-sm mb-2">Produtos Filtrados</p>
+            <p className="text-3xl font-bold">{filteredProducts.length}</p>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Search and Filter */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar Produto
-              </label>
+              <label className="block text-sm font-medium mb-2">Buscar Produto</label>
               <Input
                 placeholder="Nome ou descrição..."
                 value={searchTerm}
@@ -134,9 +344,7 @@ export default function AdminPanel() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Segmento
-              </label>
+              <label className="block text-sm font-medium mb-2">Filtrar por Segmento</label>
               <Select value={selectedSegment || 'all'} onValueChange={(val) => setSelectedSegment(val === 'all' ? '' : val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os segmentos" />
@@ -166,59 +374,113 @@ export default function AdminPanel() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {isLoading ? (
             <div className="p-8 flex justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-600" />
+              <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
+                <TableRow>
                   <TableHead>Produto</TableHead>
                   <TableHead>Segmento</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Preço</TableHead>
+                  <TableHead>Foto</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {editingId === product.id ? (
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          className="w-full"
+                        />
+                      ) : (
+                        product.name
+                      )}
+                    </TableCell>
                     <TableCell>
-                      <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">
-                        {SEGMENT_LABELS[product.segment] || product.segment}
-                      </span>
+                      {editingId === product.id ? (
+                        <Select value={editingSegment} onValueChange={setEditingSegment}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SEGMENTS.map((seg) => (
+                              <SelectItem key={seg.value} value={seg.value}>
+                                {seg.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">
+                          {SEGMENT_LABELS[product.segment] || product.segment}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-gray-600 text-sm max-w-xs truncate">
-                      {product.description || '-'}
+                      {editingId === product.id ? (
+                        <Input
+                          value={editingDescription}
+                          onChange={(e) => setEditingDescription(e.target.value)}
+                          className="w-full"
+                        />
+                      ) : (
+                        product.description || '-'
+                      )}
                     </TableCell>
                     <TableCell>
                       {editingId === product.id ? (
                         <Input
-                          type="number"
                           value={editingPrice}
                           onChange={(e) => setEditingPrice(e.target.value)}
-                          className="w-24"
+                          className="w-full"
+                          type="number"
                           step="0.01"
                         />
                       ) : (
-                        <span>R$ {parseFloat(product.price).toFixed(2)}</span>
+                        `R$ ${parseFloat(product.price).toFixed(2)}`
                       )}
+                    </TableCell>
+                    <TableCell>
+                      {editingId === product.id ? (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center justify-center gap-1 p-1 border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <span className="text-gray-600 text-sm">
+                          {product.imageUrl ? '✓ Sim' : '-'}
+                        </span>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
                     </TableCell>
                     <TableCell>
                       {editingId === product.id ? (
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            variant="default"
-                            onClick={() => handleSavePrice(product.id)}
-                            disabled={updateProductMutation.isPending}
+                            onClick={() => handleSaveProduct(product.id)}
+                            className="bg-green-600 hover:bg-green-700"
                           >
                             <Save className="w-4 h-4" />
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => setEditingId(null)}
+                            variant="destructive"
+                            onClick={handleCancel}
                           >
                             <X className="w-4 h-4" />
                           </Button>
@@ -227,10 +489,7 @@ export default function AdminPanel() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => {
-                            setEditingId(product.id);
-                            setEditingPrice(product.price);
-                          }}
+                          onClick={() => handleEditClick(product)}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
