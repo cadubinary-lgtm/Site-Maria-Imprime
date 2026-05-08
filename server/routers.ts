@@ -28,9 +28,12 @@ import {
   getFileCheckByOrderItem,
   updateFileCheckStatus,
   searchGlobal,
+  createSegment,
+  updateSegment,
+  deleteSegment,
 } from "./db";
 import { nanoid } from "nanoid";
-import { products, orders, orderItems } from "../drizzle/schema";
+import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // Procedimento protegido apenas para admin
@@ -110,12 +113,35 @@ export const appRouter = router({
       }),
   }),
 
-  // Segments - Público
+  // Segments - Público e Admin
   segments: router({
     getAll: publicProcedure.query(() => getAllSegments()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(({ input }) => getSegmentBySlug(input.slug)),
+    create: adminProcedure
+      .input(z.object({
+        name: z.string(),
+        icon: z.string().optional(),
+        slug: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return createSegment(input.name, input.icon || '', input.slug);
+      }),
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string(),
+        icon: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return updateSegment(input.id, input.name, input.icon || '');
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteSegment(input.id);
+      }),
   }),
 
   // Categories - Público
