@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User } from "lucide-react";
+import { Search, Menu, X, LogOut, User, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Header() {
@@ -164,6 +164,18 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
+                {user.role === 'admin' && (
+                  <Link href="/admin/precos">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Painel Admin
+                    </Button>
+                  </Link>
+                )}
                 <div className="flex items-center gap-2 text-sm">
                   <User className="w-4 h-4" />
                   <span className="text-gray-700">{user.name || user.email}</span>
@@ -275,6 +287,18 @@ export default function Header() {
             {isAuthenticated && user ? (
               <div className="space-y-2">
                 <div className="text-sm text-gray-700">{user.name || user.email}</div>
+                {user.role === 'admin' && (
+                  <Link href="/admin/precos">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Painel Admin
+                    </Button>
+                  </Link>
+                )}
                 <Button
                   onClick={handleLogout}
                   variant="ghost"

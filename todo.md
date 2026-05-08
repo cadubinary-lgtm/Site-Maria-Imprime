@@ -108,3 +108,10 @@
 - ✅ Calculadora de m² para adesivos e lonas
 - ✅ Feedback de sucesso/erro em UI (notificações)
 - ✅ Pronto para produção
+
+
+## Fase 15: Botão Painel Admin no Header
+- [x] Adicionar botão "Painel Admin" no header
+- [x] Exibir apenas para usuários com role admin
+- [x] Navegar para /admin/precos ao clicar
+- [x] Testar visibilidade e funcionalidade
