@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+'use client';
+
+import { useState } from 'react';
 import { trpc } from '../lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-// import { useToast } from '@/hooks/use-toast';
-import { Loader2, Edit2, Save, X } from 'lucide-react';
+import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -29,14 +30,11 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 export default function AdminPanel() {
-  // const { toast } = useToast();
-  const toast = {
-    title: (obj: any) => console.log(obj),
-  } as any;
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSegment, setSelectedSegment] = useState<string>('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>('');
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Fetch all products
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
@@ -44,34 +42,32 @@ export default function AdminPanel() {
   // Update product mutation
   const updateProductMutation = trpc.products.updatePrice.useMutation({
     onSuccess: () => {
-      console.log('Preço atualizado com sucesso!');
+      showNotification('success', 'Preço atualizado com sucesso!');
       setEditingId(null);
       refetch();
     },
     onError: (error) => {
-      console.error('Erro ao atualizar preço:', error.message);
+      showNotification('error', error.message || 'Erro ao atualizar preço');
     },
   });
 
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   // Filter products
-  const filteredProducts = useMemo(() => {
-    if (!products) return [];
-
-    return products.filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesSegment =
-        !selectedSegment || product.segment === selectedSegment;
-
-      return matchesSearch && matchesSegment;
-    });
-  }, [products, searchTerm, selectedSegment]);
+  const filteredProducts = (products || []).filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSegment = !selectedSegment || product.segment === selectedSegment;
+    return matchesSearch && matchesSegment;
+  });
 
   const handleSavePrice = async (productId: number) => {
     if (!editingPrice || isNaN(parseFloat(editingPrice))) {
-      console.error('Preço inválido');
+      showNotification('error', 'Preço inválido');
       return;
     }
 
@@ -81,61 +77,52 @@ export default function AdminPanel() {
     });
   };
 
-  const handleEditPrice = (productId: number, currentPrice: string) => {
-    setEditingId(productId);
-    setEditingPrice(currentPrice);
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditingPrice('');
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Painel Admin</h1>
-          <p className="text-gray-600 mt-1">Gerenciamento de Preços e Catálogos</p>
+    <div className="min-h-screen bg-gray-50 p-8">
+      {/* Notification */}
+      {notification && (
+        <div
+          className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 ${
+            notification.type === 'success'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {notification.type === 'success' ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          {notification.message}
         </div>
-      </div>
+      )}
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-gray-600 text-sm font-medium">Total de Produtos</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">
-              {products?.length || 0}
-            </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Painel Admin</h1>
+          <p className="text-gray-600 mt-2">Gerenciamento de Preços e Catálogos</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <p className="text-gray-600 text-sm">Total de Produtos</p>
+            <p className="text-3xl font-bold text-gray-900">{products?.length || 0}</p>
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-gray-600 text-sm font-medium">Segmentos</div>
-            <div className="text-3xl font-bold text-orange-500 mt-2">5</div>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <p className="text-gray-600 text-sm">Segmentos</p>
+            <p className="text-3xl font-bold text-orange-600">5</p>
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-gray-600 text-sm font-medium">Produtos Filtrados</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">
-              {filteredProducts.length}
-            </div>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <p className="text-gray-600 text-sm">Produtos Filtrados</p>
+            <p className="text-3xl font-bold text-gray-900">{filteredProducts.length}</p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Buscar Produto
@@ -144,15 +131,13 @@ export default function AdminPanel() {
                 placeholder="Nome ou descrição..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Segmento
               </label>
-              <Select value={selectedSegment || "all"} onValueChange={(val) => setSelectedSegment(val === "all" ? "" : val)}>
+              <Select value={selectedSegment || 'all'} onValueChange={(val) => setSelectedSegment(val === 'all' ? '' : val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os segmentos" />
                 </SelectTrigger>
@@ -165,118 +150,97 @@ export default function AdminPanel() {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex items-end">
-              <Button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedSegment('');
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                Limpar Filtros
-              </Button>
-            </div>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchTerm('');
+              setSelectedSegment('');
+            }}
+          >
+            Limpar Filtros
+          </Button>
         </div>
 
         {/* Products Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
+          {isLoading ? (
+            <div className="p-8 flex justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-600" />
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="font-semibold">Produto</TableHead>
-                  <TableHead className="font-semibold">Segmento</TableHead>
-                  <TableHead className="font-semibold">Descrição</TableHead>
-                  <TableHead className="font-semibold text-right">Preço</TableHead>
-                  <TableHead className="font-semibold text-center">Ações</TableHead>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Segmento</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      Nenhum produto encontrado
+                {filteredProducts.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>
+                      <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">
+                        {SEGMENT_LABELS[product.segment] || product.segment}
+                      </span>
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <TableRow key={product.id} className="border-b hover:bg-gray-50">
-                      <TableCell className="font-medium text-gray-900">
-                        {product.name}
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
-                          {SEGMENT_LABELS[product.segment] || product.segment}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-gray-600 text-sm max-w-xs truncate">
-                        {product.description || '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {editingId === product.id ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="text-gray-600">R$</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={editingPrice}
-                              onChange={(e) => setEditingPrice(e.target.value)}
-                              className="w-24"
-                              autoFocus
-                            />
-                          </div>
-                        ) : (
-                          <span className="font-semibold text-gray-900">
-                            R$ {parseFloat(product.price).toFixed(2)}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {editingId === product.id ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSavePrice(product.id)}
-                              disabled={updateProductMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <Save className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleCancel}
-                              disabled={updateProductMutation.isPending}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
+                    <TableCell className="text-gray-600 text-sm max-w-xs truncate">
+                      {product.description || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {editingId === product.id ? (
+                        <Input
+                          type="number"
+                          value={editingPrice}
+                          onChange={(e) => setEditingPrice(e.target.value)}
+                          className="w-24"
+                          step="0.01"
+                        />
+                      ) : (
+                        <span>R$ {parseFloat(product.price).toFixed(2)}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingId === product.id ? (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => handleSavePrice(product.id)}
+                            disabled={updateProductMutation.isPending}
+                          >
+                            <Save className="w-4 h-4" />
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              handleEditPrice(product.id, product.price)
-                            }
+                            onClick={() => setEditingId(null)}
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <X className="w-4 h-4" />
                           </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingId(product.id);
+                            setEditingPrice(product.price);
+                          }}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-8 text-center text-gray-600 text-sm">
-          <p>Exibindo {filteredProducts.length} de {products?.length || 0} produtos</p>
+          )}
         </div>
       </div>
     </div>
