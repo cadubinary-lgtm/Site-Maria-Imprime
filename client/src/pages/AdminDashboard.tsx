@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Plus } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
@@ -80,9 +80,10 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+            <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
           </TabsList>
 
           {/* Produtos Tab */}
@@ -243,6 +244,27 @@ export default function AdminDashboard() {
                 ) : (
                   <p className="text-gray-600 text-center py-8">Nenhum pedido encontrado.</p>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Segmentos Tab */}
+          <TabsContent value="segmentos" className="mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Gerenciar Segmentos
+                </CardTitle>
+                <CardDescription>Crie, edite e delete segmentos de negócio</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/admin/segmentos">
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Ir para Gerenciador de Segmentos
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </TabsContent>

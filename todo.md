@@ -148,3 +148,6 @@
 - [x] Adicionar rota /admin/segmentos no App.tsx
 - [x] Validar persistência de dados no banco
 - [x] 32 testes passando (6 novos testes de segmentos)
+- [x] Adicionar aba "Segmentos" no AdminDashboard.tsx
+- [x] Adicionar botão "Ir para Gerenciador de Segmentos" na aba
+- [x] Testar navegação do Painel Admin para Gerenciador de Segmentos
