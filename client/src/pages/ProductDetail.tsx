@@ -199,6 +199,15 @@ export default function ProductDetail() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {product.imageUrl && (
+                  <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <p className="text-gray-600">{product.description}</p>
                 <div className="border-t pt-4">
                   <p className="text-sm text-gray-600">Preço Base</p>

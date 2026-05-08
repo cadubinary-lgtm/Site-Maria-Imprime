@@ -151,21 +151,53 @@ export default function AdminPanel() {
     setEditingImageUrl('');
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // For now, just store the file name as a placeholder
-      // In a real implementation, you'd upload to S3 here
-      setEditingImageUrl(file.name);
-      showNotification('success', 'Foto selecionada! Clique em salvar para confirmar.');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error('Erro ao fazer upload da foto');
+        }
+        
+        const { url } = await response.json();
+        setEditingImageUrl(url);
+        showNotification('success', 'Foto enviada com sucesso! Clique em salvar para confirmar.');
+      } catch (error) {
+        showNotification('error', 'Erro ao fazer upload da foto');
+      }
     }
   };
 
-  const handleCreatePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCreatePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setNewProductForm({ ...newProductForm, imageUrl: file.name });
-      showNotification('success', 'Foto selecionada!');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error('Erro ao fazer upload da foto');
+        }
+        
+        const { url } = await response.json();
+        setNewProductForm({ ...newProductForm, imageUrl: url });
+        showNotification('success', 'Foto enviada com sucesso!');
+      } catch (error) {
+        showNotification('error', 'Erro ao fazer upload da foto');
+      }
     }
   };
 
