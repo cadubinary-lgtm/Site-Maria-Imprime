@@ -1,9 +1,0 @@
-{
-  "query": "INSERT INTO products (name, description, price, segment, isConfigurable, requiresAreaCalculation, isActive, createdAt, updatedAt)\nVALUES \n  ('Adesivo', 'Adesivos personalizados com múltiplas opções de material, acabamento e impressão', '0.00', 'servicos', true, true, true, NOW(), NOW()),\n  ('Lona', 'Lonas personalizadas com várias opções de mídia, gramatura e acabamento', '0.00', 'servicos', true, true, true, NOW(), NOW());",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute INSERT INTO products (name, description, price, segment, isConfigurable, requiresAreaCalculation, isActive, createdAt, updatedAt)\nVALUES \n  ('Adesivo', 'Adesivos personalizados com múltiplas opções de material, acabamento e impressão', '0.00', 'servicos', true, true, true, NOW(), NOW()),\n  ('Lona', 'Lonas personalizadas com várias opções de mídia, gramatura e acabamento', '0.00', 'servicos', true, true, true, NOW(), NOW());",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 584
-}

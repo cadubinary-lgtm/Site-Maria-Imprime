@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `productVariationCombinations` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`productId` int NOT NULL,\n\t`variationOptionIds` longtext,\n\t`basePrice` decimal(10,2) NOT NULL,\n\t`totalPriceModifier` decimal(10,2) NOT NULL DEFAULT '0',\n\t`finalPrice` decimal(10,2) NOT NULL,\n\t`isActive` boolean NOT NULL DEFAULT true,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `productVariationCombinations_id` PRIMARY KEY(`id`)\n);\nALTER TABLE `products` ADD `isConfigurable` boolean DEFAULT false NOT NULL;\nALTER TABLE `variationOptions` ADD `displayOrder` int DEFAULT 0 NOT NULL;\nALTER TABLE `variationOptions` ADD `isActive` boolean DEFAULT true NOT NULL;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE `productVariationCombinations` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`productId` int NOT NULL,\n\t`variationOptionIds` longtext,\n\t`basePrice` decimal(10,2) NOT NULL,\n\t`totalPriceModifier` decimal(10,2) NOT NULL DEFAULT '0',\n\t`finalPrice` decimal(10,2) NOT NULL,\n\t`isActive` boolean NOT NULL DEFAULT true,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `productVariationCombinations_id` PRIMARY KEY(`id`)\n);\nALTER TABLE `products` ADD `isConfigurable` boolean DEFAULT false NOT NULL;\nALTER TABLE `variationOptions` ADD `displayOrder` int DEFAULT 0 NOT NULL;\nALTER TABLE `variationOptions` ADD `isActive` boolean DEFAULT true NOT NULL;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 1431
-}
