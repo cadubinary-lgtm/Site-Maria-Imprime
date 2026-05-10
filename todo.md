@@ -163,7 +163,7 @@
 - [x] Fase 3: Criar Componente FormCardDynamic - Componente React com 4 abas
 - [x] Fase 4: Integrar ao Painel Admin - Form Card dinâmico adicionado
 - [x] Fase 5: Testar Interface - Componente funcionando corretamente
-- [ ] Fase 6: Implementar Seletor no Frontend - Página de produto com seleção de variações
-- [ ] Fase 7: Integrar Validações - Arquivo, regras comerciais, área mínima
-- [ ] Fase 8: Escrever Testes - Testes completos do sistema
-- [ ] Fase 9: Testar Fluxo Completo - Fazer checkpoint final
+- [x] Fase 6: Implementar Seletor no Frontend - Componente VariationSelector criado
+- [x] Fase 7: Integrar Validações - Utilitário de validação com 40+ testes
+- [x] Fase 8: Escrever Testes - Testes automatizados (Vitest) criados e executados
+- [x] Fase 9: Testar Fluxo Completo - Checkpoint final
