@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link } from "wouter";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { FormCardDynamic } from "@/components/FormCardDynamic";
 
 const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
   { id: "alimentacao", label: "Alimentação" },
@@ -80,8 +81,9 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
+            <TabsTrigger value="formcard">Form Card Dinâmico</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
           </TabsList>
 
@@ -198,6 +200,19 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Form Card Tab */}
+          <TabsContent value="formcard" className="mt-8">
+            <div className="max-w-6xl mx-auto">
+              <FormCardDynamic
+                onSubmit={(data) => {
+                  console.log("Form Card Data:", data);
+                  toast.success("Produto gráfico configurado com sucesso!");
+                  toast.info("Dados do formulário foram exibidos no console");
+                }}
+              />
             </div>
           </TabsContent>
 

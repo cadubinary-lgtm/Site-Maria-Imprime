@@ -193,3 +193,203 @@ export const fileChecks = mysqlTable("fileChecks", {
 
 export type FileCheck = typeof fileChecks.$inferSelect;
 export type InsertFileCheck = typeof fileChecks.$inferInsert;
+
+/**
+ * Printing Types - Tipos de impressão disponíveis
+ * Ex: Digital, Offset, UV, Eco Solvente, etc
+ */
+export const printingTypes = mysqlTable("printingTypes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "Digital", "Offset"
+  description: longtext("description"),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PrintingType = typeof printingTypes.$inferSelect;
+export type InsertPrintingType = typeof printingTypes.$inferInsert;
+
+/**
+ * Materials - Materiais/Papéis disponíveis
+ * Ex: Couché 90g, Supremo 250g, Adesivo Vinil, Lona, etc
+ */
+export const materials = mysqlTable("materials", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "Couché 90g"
+  category: varchar("category", { length: 100 }), // Ex: "Papel", "Vinil", "Lona"
+  description: longtext("description"),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Material = typeof materials.$inferSelect;
+export type InsertMaterial = typeof materials.$inferInsert;
+
+/**
+ * Finishes - Acabamentos disponíveis
+ * Ex: Refile, Dobra, Laminação, Verniz, etc
+ */
+export const finishes = mysqlTable("finishes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "Refile"
+  description: longtext("description"),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Finish = typeof finishes.$inferSelect;
+export type InsertFinish = typeof finishes.$inferInsert;
+
+/**
+ * Formats - Formatos pré-definidos
+ * Ex: A6, A5, A4, A3, 10x15cm, Personalizado, etc
+ */
+export const formats = mysqlTable("formats", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "A4"
+  width: decimal("width", { precision: 10, scale: 2 }), // Em mm
+  height: decimal("height", { precision: 10, scale: 2 }), // Em mm
+  isCustomizable: boolean("isCustomizable").default(false).notNull(), // Se permite personalização
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Format = typeof formats.$inferSelect;
+export type InsertFormat = typeof formats.$inferInsert;
+
+/**
+ * Print Colors - Cores de impressão
+ * Ex: 4x0, 4x1, 4x4, 1x0, 1x1, Preto e Branco, Colorido Total
+ */
+export const printColors = mysqlTable("printColors", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "4x0"
+  description: longtext("description"),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PrintColor = typeof printColors.$inferSelect;
+export type InsertPrintColor = typeof printColors.$inferInsert;
+
+/**
+ * Product Printing Types - Relacionamento entre produtos e tipos de impressão
+ */
+export const productPrintingTypes = mysqlTable("productPrintingTypes", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  printingTypeId: int("printingTypeId").notNull(),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductPrintingType = typeof productPrintingTypes.$inferSelect;
+export type InsertProductPrintingType = typeof productPrintingTypes.$inferInsert;
+
+/**
+ * Product Materials - Relacionamento entre produtos e materiais
+ */
+export const productMaterials = mysqlTable("productMaterials", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  materialId: int("materialId").notNull(),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductMaterial = typeof productMaterials.$inferSelect;
+export type InsertProductMaterial = typeof productMaterials.$inferInsert;
+
+/**
+ * Product Finishes - Relacionamento entre produtos e acabamentos
+ */
+export const productFinishes = mysqlTable("productFinishes", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  finishId: int("finishId").notNull(),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductFinish = typeof productFinishes.$inferSelect;
+export type InsertProductFinish = typeof productFinishes.$inferInsert;
+
+/**
+ * Product Formats - Relacionamento entre produtos e formatos
+ */
+export const productFormats = mysqlTable("productFormats", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  formatId: int("formatId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductFormat = typeof productFormats.$inferSelect;
+export type InsertProductFormat = typeof productFormats.$inferInsert;
+
+/**
+ * Product Print Colors - Relacionamento entre produtos e cores de impressão
+ */
+export const productPrintColors = mysqlTable("productPrintColors", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  printColorId: int("printColorId").notNull(),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductPrintColor = typeof productPrintColors.$inferSelect;
+export type InsertProductPrintColor = typeof productPrintColors.$inferInsert;
+
+/**
+ * Product Pricing - Tabela de preços progressivos por quantidade
+ * Ex: 100 unidades = R$ 50, 500 unidades = R$ 40, 1000 unidades = R$ 35
+ */
+export const productPricing = mysqlTable("productPricing", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  quantityMin: int("quantityMin").notNull(), // Quantidade mínima
+  quantityMax: int("quantityMax"), // Quantidade máxima (null = sem limite)
+  pricePerUnit: decimal("pricePerUnit", { precision: 10, scale: 2 }).notNull(),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductPricing = typeof productPricing.$inferSelect;
+export type InsertProductPricing = typeof productPricing.$inferInsert;
+
+/**
+ * Product Calculator Config - Configuração da calculadora automática
+ * Armazena custos base, margens, prazos, etc
+ */
+export const productCalculatorConfig = mysqlTable("productCalculatorConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().unique(),
+  baseValuePerSqm: decimal("baseValuePerSqm", { precision: 10, scale: 2 }).notNull(), // Valor base por m²
+  materialCost: decimal("materialCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  printingCost: decimal("printingCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  finishingCost: decimal("finishingCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  profitMarginPercent: decimal("profitMarginPercent", { precision: 5, scale: 2 }).default("30").notNull(), // Margem de lucro em %
+  minimumAreaSqm: decimal("minimumAreaSqm", { precision: 10, scale: 2 }).default("1").notNull(), // Área mínima de cobrança
+  productionDays: int("productionDays").default(5).notNull(), // Prazo padrão
+  expressProductionDays: int("expressProductionDays").default(2).notNull(), // Prazo expresso
+  estimatedWeight: decimal("estimatedWeight", { precision: 10, scale: 2 }), // Peso estimado em kg
+  shippingType: mysqlEnum("shippingType", ["retirada", "entrega_propria", "transportadora", "correios"]).default("transportadora").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductCalculatorConfig = typeof productCalculatorConfig.$inferSelect;
+export type InsertProductCalculatorConfig = typeof productCalculatorConfig.$inferInsert;

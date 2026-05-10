@@ -154,3 +154,16 @@
 - [x] Atualizar componente Header.tsx (desktop e mobile)
 - [x] Testar se o botão abre a página /admin corretamente
 - [x] Verificar funcionamento em ambas as versões (desktop e mobile)
+
+
+## Fase 20: Form Card Dinâmico de Produtos Gráficos
+
+- [x] Fase 1: Análise e Planejamento - Entender estrutura de variáveis comerciais e produtivas
+- [x] Fase 2: Atualizar Schema do Banco de Dados - Criar tabelas para tipos de impressão, material, acabamento, formato, cores, quantidades
+- [x] Fase 3: Criar Componente FormCardDynamic - Componente React com 4 abas
+- [x] Fase 4: Integrar ao Painel Admin - Form Card dinâmico adicionado
+- [x] Fase 5: Testar Interface - Componente funcionando corretamente
+- [ ] Fase 6: Implementar Seletor no Frontend - Página de produto com seleção de variações
+- [ ] Fase 7: Integrar Validações - Arquivo, regras comerciais, área mínima
+- [ ] Fase 8: Escrever Testes - Testes completos do sistema
+- [ ] Fase 9: Testar Fluxo Completo - Fazer checkpoint final
