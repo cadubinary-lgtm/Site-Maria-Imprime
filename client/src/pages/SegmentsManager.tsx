@@ -114,7 +114,7 @@ export default function SegmentsManager() {
 
     await createSegmentMutation.mutateAsync({
       name: newSegmentForm.name,
-      icon: newSegmentForm.icon || undefined,
+      icon: newSegmentForm.icon || "📦",
       slug: newSegmentForm.slug,
     });
   };

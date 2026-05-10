@@ -119,25 +119,34 @@ export const appRouter = router({
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(({ input }) => getSegmentBySlug(input.slug)),
-    create: adminProcedure
+    create: protectedProcedure
       .input(z.object({
         name: z.string(),
-        icon: z.string().optional(),
+        icon: z.string(),
         slug: z.string(),
       }))
       .mutation(async ({ input }) => {
-        return createSegment(input.name, input.icon || '', input.slug);
+        return createSegment({
+          name: input.name,
+          icon: input.icon,
+          slug: input.slug,
+        });
       }),
-    update: adminProcedure
+    update: protectedProcedure
       .input(z.object({
         id: z.number(),
-        name: z.string(),
+        name: z.string().optional(),
         icon: z.string().optional(),
+        slug: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return updateSegment(input.id, input.name, input.icon || '');
+        return updateSegment(input.id, {
+          name: input.name,
+          icon: input.icon,
+          slug: input.slug,
+        });
       }),
-    delete: adminProcedure
+    delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return deleteSegment(input.id);
@@ -351,6 +360,8 @@ export const appRouter = router({
         return await searchGlobal(input.query);
       }),
   }),
+
+
 });
 
 export type AppRouter = typeof appRouter;

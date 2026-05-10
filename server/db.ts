@@ -139,24 +139,29 @@ export async function getSegmentBySlug(slug: string) {
   return result[0];
 }
 
-export async function createSegment(name: string, icon: string, slug: string) {
+export async function createSegment(data: { name: string; icon: string; slug: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const result = await db.insert(segments).values({
-    name,
-    icon,
-    slug,
+    name: data.name,
+    icon: data.icon,
+    slug: data.slug,
   });
   return result;
 }
 
-export async function updateSegment(id: number, name: string, icon: string) {
+export async function updateSegment(id: number, data: { name?: string; icon?: string; slug?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  const updateData: Record<string, any> = {};
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.icon !== undefined) updateData.icon = data.icon;
+  if (data.slug !== undefined) updateData.slug = data.slug;
+
   const result = await db.update(segments)
-    .set({ name, icon })
+    .set(updateData)
     .where(eq(segments.id, id));
   return result;
 }
