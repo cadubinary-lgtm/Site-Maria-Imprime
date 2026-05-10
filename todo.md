@@ -148,3 +148,9 @@
 - [x] Adicionar rota /admin/segmentos no App.tsx
 - [x] Validar persistência de dados no banco
 - [x] 32 testes passando (6 novos testes de segmentos)
+
+## Fase 18: Correção do Link do Painel Admin
+- [x] Alterar link do botão "Painel Admin" de /admin/precos para /admin
+- [x] Atualizar componente Header.tsx (desktop e mobile)
+- [x] Testar se o botão abre a página /admin corretamente
+- [x] Verificar funcionamento em ambas as versões (desktop e mobile)
