@@ -207,10 +207,33 @@ export default function AdminDashboard() {
           <TabsContent value="formcard" className="mt-8">
             <div className="max-w-6xl mx-auto">
               <FormCardDynamic
-                onSubmit={(data) => {
-                  console.log("Form Card Data:", data);
-                  toast.success("Produto gráfico configurado com sucesso!");
-                  toast.info("Dados do formulário foram exibidos no console");
+                onSubmit={async (data) => {
+                  try {
+                    // Transformar dados do FormCardDynamic para o formato esperado
+                    const productData = {
+                      name: data.name,
+                      description: data.description,
+                      price: data.basePrice.toString(),
+                      segment: "varejo" as const,
+                      imageUrl: "",
+                    };
+
+                    // Salvar usando tRPC
+                    await createProductMutation.mutateAsync(productData);
+                    
+                    toast.success(`Produto "${data.name}" criado com sucesso!`);
+                    
+                    // Log dos dados completos (variações, preços, calculadora)
+                    console.log("Dados completos do formulário:", {
+                      product: productData,
+                      variations: data.variations,
+                      pricingTiers: data.pricingTiers,
+                      calculatorConfig: data.calculatorConfig,
+                    });
+                  } catch (error: any) {
+                    console.error("Erro ao criar produto:", error);
+                    toast.error(error?.message || "Erro ao criar produto gráfico");
+                  }
                 }}
               />
             </div>

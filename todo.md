@@ -167,3 +167,21 @@
 - [x] Fase 7: Integrar Validações - Utilitário de validação com 40+ testes
 - [x] Fase 8: Escrever Testes - Testes automatizados (Vitest) criados e executados
 - [x] Fase 9: Testar Fluxo Completo - Checkpoint final
+
+
+## Fase 21: Conectar FormCardDynamic ao Backend com tRPC
+
+- [x] Fase 1: Criar Procedures tRPC para CRUD de Produtos Gráficos
+- [x] Fase 2: Criar Query Helpers no server/db.ts
+- [x] Fase 3: Conectar FormCardDynamic ao tRPC no AdminDashboard
+- [x] Fase 4: Testar Fluxo Completo de Salvamento - Produto "Lona Brilho 280g" salvo com sucesso
+- [x] Fase 5: Fazer Checkpoint Final
+
+## Status Final ✅
+
+- ✅ Form Card Dinâmico totalmente funcional e integrado ao backend
+- ✅ Produtos gráficos podem ser cadastrados com variações, preços progressivos e calculadora automática
+- ✅ Integração tRPC funcionando perfeitamente
+- ✅ Dados sendo salvos no banco de dados com sucesso
+- ✅ Interface profissional e intuitiva
+- ✅ Pronto para uso em produção
