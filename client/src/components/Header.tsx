@@ -164,7 +164,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <Link href="/admin">
+                <Link href="/admin/precos">
                   <Button
                     variant="default"
                     size="sm"
@@ -285,7 +285,7 @@ export default function Header() {
             {isAuthenticated && user ? (
               <div className="space-y-2">
                 <div className="text-sm text-gray-700">{user.name || user.email}</div>
-                <Link href="/admin">
+                <Link href="/admin/precos">
                   <Button
                     variant="default"
                     size="sm"

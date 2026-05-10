@@ -137,9 +137,13 @@ export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
 export const variationTypes = mysqlTable("variationTypes", {
   id: int("id").autoincrement().primaryKey(),
   productId: int("productId").notNull(),
-  type: mysqlEnum("type", ["material", "acabamento"]).notNull(),
-  name: varchar("name", { length: 255 }).notNull(), // Ex: "Material", "Acabamento"
+  type: varchar("type", { length: 255 }).notNull(), // Ex: "tipo_impressao", "tipo_midia", "gramatura", "acabamento"
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Tipo de Impressão", "Tipo de Mídia"
+  displayOrder: int("displayOrder").default(0).notNull(), // Ordem de exibição
   isRequired: boolean("isRequired").default(true).notNull(),
+  isConditional: boolean("isConditional").default(false).notNull(), // Se depende de outra variação
+  conditionalParentType: varchar("conditionalParentType", { length: 255 }), // Tipo de variação pai
+  conditionalParentValues: longtext("conditionalParentValues"), // JSON com valores que ativam esta variação
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -155,6 +159,8 @@ export const variationOptions = mysqlTable("variationOptions", {
   name: varchar("name", { length: 255 }).notNull(), // Ex: "Adesivo Brilho Premium"
   description: longtext("description"),
   priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).notNull().default("0"), // Adicional ao preço
+  displayOrder: int("displayOrder").default(0).notNull(), // Ordem de exibição
+  isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

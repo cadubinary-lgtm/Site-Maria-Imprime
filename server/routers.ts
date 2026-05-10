@@ -33,7 +33,7 @@ import {
   deleteSegment,
 } from "./db";
 import { nanoid } from "nanoid";
-import { products, orders, orderItems, segments } from "../drizzle/schema";
+import { products, orders, orderItems, segments, variationOptions } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // Procedimento protegido apenas para admin
@@ -282,9 +282,13 @@ export const appRouter = router({
     createType: adminProcedure
       .input(z.object({
         productId: z.number(),
-        type: z.enum(["material", "acabamento"]),
+        type: z.string(),
         name: z.string(),
         isRequired: z.boolean().default(true),
+        displayOrder: z.number().default(0),
+        isConditional: z.boolean().default(false),
+        conditionalParentType: z.string().optional(),
+        conditionalParentValues: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         return await createVariationType({
@@ -292,6 +296,10 @@ export const appRouter = router({
           type: input.type,
           name: input.name,
           isRequired: input.isRequired,
+          displayOrder: input.displayOrder,
+          isConditional: input.isConditional,
+          conditionalParentType: input.conditionalParentType,
+          conditionalParentValues: input.conditionalParentValues,
         });
       }),
     createOption: adminProcedure
@@ -300,6 +308,8 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         priceModifier: z.string().default("0"),
+        displayOrder: z.number().default(0),
+        isActive: z.boolean().default(true),
       }))
       .mutation(async ({ input }) => {
         return await createVariationOption({
@@ -307,7 +317,49 @@ export const appRouter = router({
           name: input.name,
           description: input.description,
           priceModifier: input.priceModifier as any,
+          displayOrder: input.displayOrder,
+          isActive: input.isActive,
         });
+      }),
+    updateOption: adminProcedure
+      .input(z.object({
+        optionId: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        priceModifier: z.string().optional(),
+        displayOrder: z.number().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const updateData: any = {};
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.description !== undefined) updateData.description = input.description;
+        if (input.priceModifier !== undefined) updateData.priceModifier = input.priceModifier;
+        if (input.displayOrder !== undefined) updateData.displayOrder = input.displayOrder;
+        if (input.isActive !== undefined) updateData.isActive = input.isActive;
+        
+        const result = await db.update(variationOptions)
+          .set(updateData)
+          .where(eq(variationOptions.id, input.optionId));
+        return result;
+      }),
+    deleteOption: adminProcedure
+      .input(z.object({ optionId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const result = await db.delete(variationOptions)
+          .where(eq(variationOptions.id, input.optionId));
+        return result;
+      }),
+    getTypes: adminProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input }) => {
+        return await getVariationTypesByProduct(input.productId);
       }),
   }),
 

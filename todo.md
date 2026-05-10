@@ -149,8 +149,18 @@
 - [x] Validar persistência de dados no banco
 - [x] 32 testes passando (6 novos testes de segmentos)
 
-## Fase 18: Correção do Link do Painel Admin
+
+## Fase 18: Correção do Link do Botão Painel Admin
 - [x] Alterar link do botão "Painel Admin" de /admin/precos para /admin
-- [x] Atualizar componente Header.tsx (desktop e mobile)
-- [x] Testar se o botão abre a página /admin corretamente
-- [x] Verificar funcionamento em ambas as versões (desktop e mobile)
+- [x] Aplicar mudança em ambas as versões (desktop e mobile)
+- [x] Testar navegação
+
+## Fase 19: Reorganização de Produtos Configuráveis
+- [x] Fase 1: Análise e Planejamento - Criado plano detalhado
+- [x] Fase 2: Criar Dois Produtos Base (Adesivo e Lona) - Produtos inseridos no banco
+- [x] Fase 3: Implementar Procedures tRPC para Variações - Procedures criados e compilando
+- [ ] Fase 4: Criar Interface Admin para Gerenciar Variações
+- [ ] Fase 5: Implementar Seletor de Variações no Frontend
+- [ ] Fase 6: Integrar Cálculo de Preços com Variações
+- [ ] Fase 7: Escrever Testes para Sistema de Variações
+- [ ] Fase 8: Testar Fluxo Completo e Fazer Checkpoint Final
