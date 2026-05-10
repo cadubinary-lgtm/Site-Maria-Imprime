@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Plus, Edit2, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
@@ -27,20 +27,8 @@ export default function AdminDashboard() {
     imageUrl: "",
   });
 
-  const [segmentForm, setSegmentForm] = useState({
-    name: "",
-    icon: "",
-    slug: "",
-  });
-
-  const [editingSegment, setEditingSegment] = useState<{ id: number; name: string; icon: string | null; slug: string } | null>(null);
-
   const { data: orders, isLoading: ordersLoading } = trpc.admin.getAllOrders.useQuery();
-  const { data: segments, isLoading: segmentsLoading, refetch: refetchSegments } = trpc.segments.getAll.useQuery();
   const createProductMutation = trpc.admin.createProduct.useMutation();
-  const createSegmentMutation = trpc.segments.create.useMutation();
-  const updateSegmentMutation = trpc.segments.update.useMutation();
-  const deleteSegmentMutation = trpc.segments.delete.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,63 +52,6 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       toast.error("Erro ao criar produto");
-      console.error(error);
-    }
-  };
-
-  const handleCreateSegment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!segmentForm.name || !segmentForm.slug) {
-      toast.error("Nome e Slug são obrigatórios");
-      return;
-    }
-
-    try {
-      await createSegmentMutation.mutateAsync({
-        name: segmentForm.name,
-        icon: segmentForm.icon || "📦",
-        slug: segmentForm.slug,
-      });
-      
-      toast.success("Segmento criado com sucesso!");
-      setSegmentForm({ name: "", icon: "", slug: "" });
-      refetchSegments();
-    } catch (error) {
-      toast.error("Erro ao criar segmento");
-      console.error(error);
-    }
-  };
-
-  const handleUpdateSegment = async () => {
-    if (!editingSegment) return;
-
-    try {
-      await updateSegmentMutation.mutateAsync({
-        id: editingSegment.id,
-        name: editingSegment.name,
-        icon: editingSegment.icon || "📦",
-        slug: editingSegment.slug,
-      });
-      
-      toast.success("Segmento atualizado com sucesso!");
-      setEditingSegment(null);
-      refetchSegments();
-    } catch (error) {
-      toast.error("Erro ao atualizar segmento");
-      console.error(error);
-    }
-  };
-
-  const handleDeleteSegment = async (id: number) => {
-    if (!confirm("Tem certeza que deseja deletar este segmento?")) return;
-
-    try {
-      await deleteSegmentMutation.mutateAsync({ id });
-      toast.success("Segmento deletado com sucesso!");
-      refetchSegments();
-    } catch (error) {
-      toast.error("Erro ao deletar segmento");
       console.error(error);
     }
   };
@@ -149,30 +80,19 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
-            <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
           </TabsList>
 
           {/* Produtos Tab */}
           <TabsContent value="produtos" className="mt-8">
-            <div className="mb-6 flex gap-3 flex-wrap">
+            <div className="mb-6">
               <Link href="/admin/produtos">
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   Gerenciar Produtos Existentes
                 </Button>
               </Link>
-              <Button 
-                onClick={() => {
-                  const segmentTab = document.querySelector('[id="radix-_r_0_-trigger-segmentos"]');
-                  if (segmentTab) (segmentTab as HTMLElement).click();
-                }}
-                className="bg-blue-500 hover:bg-blue-600"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Segmento
-              </Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Form */}
@@ -275,133 +195,6 @@ export default function AdminDashboard() {
                     <p className="text-gray-600">
                       Funcionalidade de listagem de produtos será implementada em breve.
                     </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Segmentos Tab */}
-          <TabsContent value="segmentos" className="mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Form */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    {editingSegment ? "Editar Segmento" : "Novo Segmento"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={editingSegment ? (e) => { e.preventDefault(); handleUpdateSegment(); } : handleCreateSegment} className="space-y-4">
-                    <div>
-                      <Label htmlFor="seg-name">Nome do Segmento</Label>
-                      <Input
-                        id="seg-name"
-                        value={editingSegment ? editingSegment.name : segmentForm.name}
-                        onChange={(e) => editingSegment ? setEditingSegment({ ...editingSegment, name: e.target.value }) : setSegmentForm({ ...segmentForm, name: e.target.value })}
-                        placeholder="Ex: Impressão 3D"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="seg-icon">Ícone/Emoji</Label>
-                      <Input
-                        id="seg-icon"
-                        value={editingSegment ? (editingSegment.icon || "") : segmentForm.icon}
-                        onChange={(e) => editingSegment ? setEditingSegment({ ...editingSegment, icon: e.target.value }) : setSegmentForm({ ...segmentForm, icon: e.target.value })}
-                        placeholder="Ex: 🖨️"
-                        maxLength={2}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="seg-slug">Slug</Label>
-                      <Input
-                        id="seg-slug"
-                        value={editingSegment ? editingSegment.slug : segmentForm.slug}
-                        onChange={(e) => editingSegment ? setEditingSegment({ ...editingSegment, slug: e.target.value }) : setSegmentForm({ ...segmentForm, slug: e.target.value })}
-                        placeholder="Ex: impressao-3d"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        type="submit"
-                        className="flex-1"
-                        disabled={editingSegment ? updateSegmentMutation.isPending : createSegmentMutation.isPending}
-                      >
-                        {editingSegment ? "Atualizar" : "Criar Segmento"}
-                      </Button>
-                      {editingSegment && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setEditingSegment(null)}
-                        >
-                          Cancelar
-                        </Button>
-                      )}
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-
-              {/* Segments List */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Segmentos Cadastrados</CardTitle>
-                    <CardDescription>Gerencie todos os segmentos de negócio</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {segmentsLoading ? (
-                      <div className="flex justify-center items-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                      </div>
-                    ) : segments && segments.length > 0 ? (
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-2 px-4">Nome</th>
-                              <th className="text-left py-2 px-4">Ícone</th>
-                              <th className="text-left py-2 px-4">Slug</th>
-                              <th className="text-left py-2 px-4">Ações</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {segments.map((segment) => (
-                              <tr key={segment.id} className="border-b hover:bg-gray-50">
-                                <td className="py-2 px-4 font-semibold">{segment.name}</td>
-                                <td className="py-2 px-4 text-2xl">{segment.icon}</td>
-                                <td className="py-2 px-4 text-gray-600">{segment.slug}</td>
-                                <td className="py-2 px-4 flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setEditingSegment(segment)}
-                                  >
-                                    <Edit2 className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => handleDeleteSegment(segment.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600 text-center py-8">Nenhum segmento encontrado.</p>
-                    )}
                   </CardContent>
                 </Card>
               </div>
