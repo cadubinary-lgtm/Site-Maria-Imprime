@@ -185,3 +185,26 @@
 - ✅ Dados sendo salvos no banco de dados com sucesso
 - ✅ Interface profissional e intuitiva
 - ✅ Pronto para uso em produção
+
+## Fase 22: Vincular Form Card ao Produto no Frontend
+
+- [x] Fase 1: Criar procedure tRPC `admin.createConfigurableProduct` para salvar produtos com isConfigurable=true
+- [x] Fase 2: Criar função `createConfigurableProduct` em server/db.ts que persiste todas as variações
+- [x] Fase 3: Criar função `getConfigurableProductById` em server/db.ts que carrega todas as variações
+- [x] Fase 4: Atualizar `products.getById` para retornar dados configuráveis automaticamente
+- [x] Fase 5: Modificar AdminDashboard.tsx para usar novo procedure `createConfigurableProduct`
+- [x] Fase 6: Atualizar ProductDetail.tsx para renderizar variações de produtos configuráveis
+- [x] Fase 7: Implementar cálculo de preço dinâmico baseado em variações selecionadas
+- [x] Fase 8: Criar testes vitest para validar integração (configurable-products.test.ts)
+- [x] Fase 9: Validar fluxo completo: criar produto configurável → abrir no site → selecionar variações → preço atualiza
+
+## Status Final ✅
+
+- ✅ Produtos configuráveis totalmente implementados
+- ✅ Form Card Dinâmico agora salva produtos com `isConfigurable=true`
+- ✅ Variações (tipos de impressão, materiais, acabamentos, cores) vinculadas ao produto
+- ✅ ProductDetail carrega e renderiza variações automaticamente
+- ✅ Cálculo de preço dinâmico funciona com modificadores de variações
+- ✅ Compatibilidade com produtos legados mantida
+- ✅ Testes vitest criados para validar integração
+- ✅ Pronto para uso em produção
