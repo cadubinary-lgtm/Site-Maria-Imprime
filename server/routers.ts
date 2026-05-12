@@ -35,9 +35,13 @@ import {
 import { nanoid } from "nanoid";
 import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { crmRouter } from "./routers-crm";
+import { financialRouter } from "./routers-financial";
+import { web2printRouter } from "./routers-web2print";
+import { automationRouter } from "./routers-automation";
 
 // Procedimento protegido apenas para admin
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "admin") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar" });
   }
@@ -45,7 +49,7 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 
 // Procedimento protegido apenas para produção
-const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
+export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "production") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Apenas produção pode acessar" });
   }
@@ -351,6 +355,14 @@ export const appRouter = router({
         return await searchGlobal(input.query);
       }),
   }),
+  // CRM - Gestão de Clientes
+  crm: crmRouter,
+  // Financial - Controle Financeiro
+  financial: financialRouter,
+  // Web2Print - Validação de Arquivos
+  web2print: web2printRouter,
+  // Automation - Automação Inteligente
+  automation: automationRouter,
 });
 
 export type AppRouter = typeof appRouter;

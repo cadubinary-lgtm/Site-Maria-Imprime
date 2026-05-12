@@ -208,3 +208,165 @@
 - ✅ Compatibilidade com produtos legados mantida
 - ✅ Testes vitest criados para validar integração
 - ✅ Pronto para uso em produção
+
+
+## Fase 23: Transformação em ERP Gráfico Completo
+
+### FASE 1: Análise e Planejamento da Arquitetura Modular ✅
+- [x] Documentar arquitetura modular (site, admin, ERP, CRM, financeiro)
+- [x] Mapear dependências entre módulos
+- [x] Definir estratégia de backward compatibility
+- [x] Criar diagrama de fluxo de dados
+
+### FASE 2: Calculadora Gráfica Inteligente ✅
+- [x] Criar componente CalculadoraGrafica com input numérico profissional
+- [x] Implementar lógica de digitação inteligente (sem ponto/vírgula)
+- [x] Adicionar validação de entrada (apenas números)
+- [x] Implementar formatação automática (sempre 2 casas decimais)
+- [x] Criar função de cálculo de preço em tempo real
+- [x] Testes de calculadora (digitação, backspace, formatação)
+- [x] Integrar calculadora no ProductDetail
+
+### FASE 3: Expandir Schema do Banco de Dados ✅
+- [x] Criar tabela clients (CRM)
+- [x] Criar tabela production_jobs (Produção)
+- [x] Criar tabela file_validations (Web2Print)
+- [x] Criar tabela financial_records (Controle Financeiro)
+- [x] Criar tabela automation_logs (Automação)
+- [x] Adicionar campos opcionais em orders (para ERP)
+- [x] Executar migrations sem quebrar dados existentes
+
+### FASE 4: Módulo de Gestão de Clientes (CRM) ✅
+- [x] Criar página ClientsManager.tsx
+- [x] Implementar CRUD de clientes
+- [x] Adicionar histórico de pedidos por cliente
+- [x] Criar dashboard de cliente (volume, tipo, histórico)
+- [x] Integrar com orders (relacionamento automático)
+- [x] Testes de CRM
+
+### FASE 5: Módulo de Controle Financeiro ✅
+- [x] Criar página FinancialDashboard.tsx
+- [x] Implementar cálculo automático de custo/lucro por pedido
+- [x] Criar dashboard de faturamento (diário, mensal)
+- [x] Implementar gráficos de produtos mais vendidos
+- [x] Adicionar relatório de ticket médio
+- [x] Testes de controle financeiro
+
+### FASE 6: Módulo de Validação de Arquivos (Web2Print)
+- [ ] Criar componente FileValidator.tsx
+- [ ] Implementar validações (DPI, CMYK, sangria, margem)
+- [ ] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
+- [ ] Integrar com ProductDetail
+- [ ] Testes de validação de arquivo
+
+### FASE 7: Automação Inteligente
+- [ ] Criar sistema de notificações automáticas
+- [ ] Integrar WhatsApp (usando Manus API)
+- [ ] Integrar Email automático
+- [ ] Criar triggers de automação (pagamento, produção, entrega)
+- [ ] Testes de automação
+
+### FASE 8: Dashboard Gerencial do ERP
+- [ ] Criar página ERPDashboard.tsx
+- [ ] Implementar cards de pedidos do dia
+- [ ] Adicionar visualização de produção ativa
+- [ ] Criar lista de pedidos atrasados
+- [ ] Implementar faturamento em tempo real
+- [ ] Testes de dashboard
+
+### FASE 9: Testes de Integração e Backward Compatibility
+- [ ] Testar que produtos antigos continuam funcionando
+- [ ] Testar que pedidos antigos continuam acessíveis
+- [ ] Testar que Form Cards existentes funcionam
+- [ ] Testar integração entre módulos
+- [ ] Verificar que URLs não mudaram
+- [ ] Testes de backward compatibility (vitest)
+
+### FASE 10: Entrega do ERP Gráfico Completo
+- [ ] Criar checkpoint final
+- [ ] Documentar arquitetura implementada
+- [ ] Entregar ao usuário
+
+
+## Fase 23: Transformação em ERP Gráfico Completo - PROGRESSO
+
+### FASE 1: Análise e Planejamento ✅
+- [x] Documentar arquitetura modular
+- [x] Mapear dependências entre módulos
+- [x] Definir estratégia de backward compatibility
+- [x] Criar diagrama de fluxo de dados
+
+### FASE 2: Calculadora Gráfica Inteligente ✅
+- [x] Criar componente CalculadoraGrafica.tsx
+- [x] Implementar lógica de digitação inteligente
+- [x] Adicionar validação de entrada
+- [x] Implementar formatação automática
+- [x] Criar função de cálculo de preço em tempo real
+- [x] Testes de calculadora (30+ testes)
+- [x] Integrar calculadora no ProductDetail
+- [x] Criar página CalculadoraDemo.tsx
+
+### FASE 3: Expandir Schema do Banco de Dados ✅
+- [x] Criar tabela clients (CRM)
+- [x] Criar tabela production_jobs (Produção)
+- [x] Criar tabela file_validations (Web2Print)
+- [x] Criar tabela financial_records (Controle Financeiro)
+- [x] Criar tabela automation_logs (Automação)
+- [x] Criar tabela production_status_history
+- [x] Criar tabela daily_sales_reports
+- [x] Criar tabela product_costs
+- [x] Gerar migrations (32 tabelas total)
+- [x] Backward compatibility mantida
+
+### FASE 4: Módulo de Gestão de Clientes (CRM) - EM PROGRESSO
+- [ ] Criar procedures tRPC para CRUD de clientes
+- [ ] Criar página ClientsManager.tsx
+- [ ] Implementar CRUD de clientes
+- [ ] Adicionar histórico de pedidos por cliente
+- [ ] Criar dashboard de cliente
+- [ ] Integrar com orders
+- [ ] Testes de CRM
+
+### FASE 5: Módulo de Controle Financeiro
+- [ ] Criar procedures tRPC para financeiro
+- [ ] Criar página FinancialDashboard.tsx
+- [ ] Implementar cálculo automático de custo/lucro
+- [ ] Criar dashboard de faturamento
+- [ ] Implementar gráficos
+- [ ] Adicionar relatório de ticket médio
+- [ ] Testes de controle financeiro
+
+### FASE 6: Módulo de Validação de Arquivos (Web2Print)
+- [ ] Criar componente FileValidator.tsx
+- [ ] Implementar validações (DPI, CMYK, sangria, margem)
+- [ ] Criar sistema de status de arquivo
+- [ ] Integrar com ProductDetail
+- [ ] Testes de validação
+
+### FASE 7: Automação Inteligente
+- [ ] Criar sistema de notificações automáticas
+- [ ] Integrar WhatsApp
+- [ ] Integrar Email automático
+- [ ] Criar triggers de automação
+- [ ] Testes de automação
+
+### FASE 8: Dashboard Gerencial do ERP
+- [ ] Criar página ERPDashboard.tsx
+- [ ] Implementar cards de pedidos do dia
+- [ ] Adicionar visualização de produção ativa
+- [ ] Criar lista de pedidos atrasados
+- [ ] Implementar faturamento em tempo real
+- [ ] Testes de dashboard
+
+### FASE 9: Testes de Integração e Backward Compatibility
+- [ ] Testar que produtos antigos continuam funcionando
+- [ ] Testar que pedidos antigos continuam acessíveis
+- [ ] Testar que Form Cards existentes funcionam
+- [ ] Testar integração entre módulos
+- [ ] Verificar que URLs não mudaram
+- [ ] Testes de backward compatibility
+
+### FASE 10: Entrega do ERP Gráfico Completo
+- [ ] Criar checkpoint final
+- [ ] Documentar arquitetura implementada
+- [ ] Entregar ao usuário

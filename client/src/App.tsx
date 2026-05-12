@@ -16,6 +16,12 @@ import SearchResults from "./pages/SearchResults";
 import AllProducts from "./pages/AllProducts";
 import AdminPanel from "./pages/AdminPanel";
 import SegmentsManager from "./pages/SegmentsManager";
+import CalculadoraDemo from "./pages/CalculadoraDemo";
+import ClientsManager from "./pages/ClientsManager";
+import FinancialDashboard from "./pages/FinancialDashboard";
+import FileValidationManager from "./pages/FileValidationManager";
+import AutomationDashboard from "./pages/AutomationDashboard";
+import ERPDashboard from "./pages/ERPDashboard";
 import { useAuth } from "./_core/hooks/useAuth";
 import Header from "./components/Header";
 
@@ -39,6 +45,7 @@ function Router() {
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
+      <Route path="/calculadora-demo" component={CalculadoraDemo} />
       
       {/* Admin routes - Acessível para todos os usuários logados */}
       {user && (
@@ -47,6 +54,11 @@ function Router() {
           <Route path="/admin/produtos" component={AdminProducts} />
           <Route path="/admin/precos" component={AdminPanel} />
           <Route path="/admin/segmentos" component={SegmentsManager} />
+          <Route path="/admin/clientes" component={ClientsManager} />
+          <Route path="/admin/financeiro" component={FinancialDashboard} />
+          <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
+          <Route path="/admin/automacao" component={AutomationDashboard} />
+          <Route path="/admin/erp" component={ERPDashboard} />
         </>
       )}
 

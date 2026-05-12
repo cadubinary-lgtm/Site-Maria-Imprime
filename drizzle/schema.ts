@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean, date } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -393,3 +393,195 @@ export const productCalculatorConfig = mysqlTable("productCalculatorConfig", {
 
 export type ProductCalculatorConfig = typeof productCalculatorConfig.$inferSelect;
 export type InsertProductCalculatorConfig = typeof productCalculatorConfig.$inferInsert;
+
+
+/**
+ * MÓDULO ERP - Tabelas para gestão completa de produção, clientes e financeiro
+ */
+
+/**
+ * Clients (CRM) - Gestão de clientes com histórico
+ */
+export const clients = mysqlTable("clients", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"), // Relacionamento com usuário (opcional)
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  phone: varchar("phone", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  clientType: mysqlEnum("clientType", ["balcao", "revendedor", "agencia", "corporativo"]).default("balcao").notNull(),
+  totalVolume: decimal("totalVolume", { precision: 15, scale: 2 }).default("0").notNull(), // Volume total comprado
+  totalOrders: int("totalOrders").default(0).notNull(), // Quantidade de pedidos
+  averageTicket: decimal("averageTicket", { precision: 10, scale: 2 }).default("0").notNull(), // Ticket médio
+  notes: longtext("notes"),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = typeof clients.$inferInsert;
+
+/**
+ * Production Jobs - Ficha técnica de produção
+ */
+export const productionJobs = mysqlTable("productionJobs", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  orderItemId: int("orderItemId").notNull(),
+  jobNumber: varchar("jobNumber", { length: 50 }).notNull().unique(), // Ex: PROD-2024-001
+  status: mysqlEnum("status", [
+    "recebido",
+    "pagamento_aprovado",
+    "pre_impressao",
+    "producao",
+    "acabamento",
+    "controle_qualidade",
+    "finalizado",
+    "pronto_retirada",
+    "enviado"
+  ]).default("recebido").notNull(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  dimensions: varchar("dimensions", { length: 100 }), // Ex: "210x297mm"
+  material: varchar("material", { length: 255 }),
+  printingType: varchar("printingType", { length: 255 }),
+  finish: varchar("finish", { length: 255 }),
+  quantity: int("quantity").notNull(),
+  assignedTo: int("assignedTo"), // ID do usuário (production) responsável
+  deadline: timestamp("deadline"),
+  notes: longtext("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductionJob = typeof productionJobs.$inferSelect;
+export type InsertProductionJob = typeof productionJobs.$inferInsert;
+
+/**
+ * Financial Records - Registro de transações financeiras
+ */
+export const financialRecords = mysqlTable("financialRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  type: mysqlEnum("type", ["venda", "custo", "lucro", "devolucao"]).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: varchar("description", { length: 255 }),
+  paymentMethod: mysqlEnum("paymentMethod", [
+    "dinheiro",
+    "cartao_credito",
+    "cartao_debito",
+    "boleto",
+    "pix",
+    "transferencia",
+    "cheque"
+  ]),
+  status: mysqlEnum("status", ["pendente", "processando", "concluido", "falhou"]).default("pendente").notNull(),
+  recordedBy: int("recordedBy"), // ID do admin que registrou
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FinancialRecord = typeof financialRecords.$inferSelect;
+export type InsertFinancialRecord = typeof financialRecords.$inferInsert;
+
+/**
+ * File Validations - Validação de arquivos Web2Print
+ */
+export const fileValidations = mysqlTable("fileValidations", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileSize: int("fileSize"), // em bytes
+  dpi: int("dpi"), // Resolução em DPI
+  colorMode: varchar("colorMode", { length: 50 }), // CMYK, RGB, etc
+  hasBleed: boolean("hasBleed"), // Tem sangria
+  hasSafeMargin: boolean("hasSafeMargin"), // Tem margem de segurança
+  issues: longtext("issues"), // Problemas encontrados
+  status: mysqlEnum("status", [
+    "enviado",
+    "em_analise",
+    "aprovado",
+    "correcao_solicitada",
+    "rejeitado"
+  ]).default("enviado").notNull(),
+  validatedBy: int("validatedBy"), // ID do admin que validou
+  validatedAt: timestamp("validatedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FileValidation = typeof fileValidations.$inferSelect;
+export type InsertFileValidation = typeof fileValidations.$inferInsert;
+
+/**
+ * Automation Logs - Log de automações (WhatsApp, Email, etc)
+ */
+export const automationLogs = mysqlTable("automationLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  type: mysqlEnum("type", ["whatsapp", "email", "sms", "notificacao"]).notNull(),
+  recipient: varchar("recipient", { length: 255 }).notNull(), // Telefone, email, etc
+  message: longtext("message"),
+  status: mysqlEnum("status", ["pendente", "enviado", "falhou"]).default("pendente").notNull(),
+  errorMessage: longtext("errorMessage"),
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AutomationLog = typeof automationLogs.$inferSelect;
+export type InsertAutomationLog = typeof automationLogs.$inferInsert;
+
+/**
+ * Production Status History - Histórico detalhado de mudanças de status na produção
+ */
+export const productionStatusHistory = mysqlTable("productionStatusHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  productionJobId: int("productionJobId").notNull(),
+  previousStatus: varchar("previousStatus", { length: 100 }),
+  newStatus: varchar("newStatus", { length: 100 }).notNull(),
+  changedBy: int("changedBy"), // ID do usuário que fez a mudança
+  notes: longtext("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductionStatusHistory = typeof productionStatusHistory.$inferSelect;
+export type InsertProductionStatusHistory = typeof productionStatusHistory.$inferInsert;
+
+/**
+ * Daily Sales Report - Relatório diário de vendas
+ */
+export const dailySalesReports = mysqlTable("dailySalesReports", {
+  id: int("id").autoincrement().primaryKey(),
+  reportDate: date("reportDate").notNull(),
+  totalSales: decimal("totalSales", { precision: 15, scale: 2 }).default("0").notNull(),
+  totalCosts: decimal("totalCosts", { precision: 15, scale: 2 }).default("0").notNull(),
+  totalProfit: decimal("totalProfit", { precision: 15, scale: 2 }).default("0").notNull(),
+  ordersCount: int("ordersCount").default(0).notNull(),
+  averageTicket: decimal("averageTicket", { precision: 10, scale: 2 }).default("0").notNull(),
+  topProduct: varchar("topProduct", { length: 255 }),
+  topProductQuantity: int("topProductQuantity").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DailySalesReport = typeof dailySalesReports.$inferSelect;
+export type InsertDailySalesReport = typeof dailySalesReports.$inferInsert;
+
+/**
+ * Product Costs - Custos de produção por produto
+ */
+export const productCosts = mysqlTable("productCosts", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  materialCost: decimal("materialCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  laborCost: decimal("laborCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  equipmentCost: decimal("equipmentCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  overheadCost: decimal("overheadCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  totalCost: decimal("totalCost", { precision: 10, scale: 2 }).default("0").notNull(),
+  profitMarginPercent: decimal("profitMarginPercent", { precision: 5, scale: 2 }).default("30").notNull(),
+  lastUpdatedBy: int("lastUpdatedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductCost = typeof productCosts.$inferSelect;
+export type InsertProductCost = typeof productCosts.$inferInsert;
