@@ -743,3 +743,18 @@ export const orderItemAttributes = mysqlTable("orderItemAttributes", {
 
 export type OrderItemAttribute = typeof orderItemAttributes.$inferSelect;
 export type InsertOrderItemAttribute = typeof orderItemAttributes.$inferInsert;
+
+
+/**
+ * Product Segments - Tabela relacional para múltiplos segmentos por produto
+ * Permite que um produto pertença a vários segmentos (many-to-many)
+ */
+export const productSegments = mysqlTable("productSegments", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  segmentId: int("segmentId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductSegment = typeof productSegments.$inferSelect;
+export type InsertProductSegment = typeof productSegments.$inferInsert;

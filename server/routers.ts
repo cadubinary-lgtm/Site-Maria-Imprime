@@ -40,6 +40,7 @@ import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
 import { attributesRouter } from "./routers-attributes";
+import { productSegmentsRouter } from "./routers-product-segments";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -366,6 +367,8 @@ export const appRouter = router({
   automation: automationRouter,
   // Attributes - Atributos Dinâmicos
   attributes: attributesRouter,
+  // Product Segments - Múltiplos Segmentos por Produto
+  productSegments: productSegmentsRouter,
 });
 
 export type AppRouter = typeof appRouter;

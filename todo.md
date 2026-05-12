@@ -449,3 +449,15 @@
 - [ ] Checkpoint final
 - [ ] Documentação de uso
 - [ ] Guia de configuração para admin
+
+
+## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many)
+
+- [ ] Criar tabela relacional `productSegments` (product_id, segment_id)
+- [ ] Criar procedures tRPC para gerenciar relacionamentos
+- [ ] Modificar schema para suportar múltiplos segmentos
+- [ ] Criar componente MultiSegmentSelector com tags/checkboxes
+- [ ] Integrar ao formulário de edição de produtos
+- [ ] Adicionar busca e criação de segmentos
+- [ ] Testes de relacionamento many-to-many
+- [ ] Entrega final com interface moderna
