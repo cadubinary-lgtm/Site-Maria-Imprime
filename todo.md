@@ -370,3 +370,82 @@
 - [ ] Criar checkpoint final
 - [ ] Documentar arquitetura implementada
 - [ ] Entregar ao usuário
+
+
+## Fase 24: Sistema de Atributos Dinâmicos e Reutilizáveis
+
+### FASE 1: Análise e Planejamento
+- [ ] Documentar arquitetura de atributos dinâmicos
+- [ ] Definir tipos de componentes (botão, select, card, radio, checkbox, numérico)
+- [ ] Planejar engine de regras dinâmicas
+- [ ] Criar diagrama de fluxo de dados
+
+### FASE 2: Expandir Schema
+- [ ] Criar tabela attributes (id, name, type, description, icon)
+- [ ] Criar tabela attributeValues (id, attributeId, value, price_modifier, order)
+- [ ] Criar tabela attributeRules (id, name, condition, action)
+- [ ] Criar tabela productAttributes (id, productId, attributeId, required, order)
+- [ ] Criar tabela attributeRuleConditions (id, ruleId, attributeId, value)
+- [ ] Criar tabela attributeRuleActions (id, ruleId, targetAttributeId, action)
+
+### FASE 3: Procedures tRPC
+- [ ] Criar procedure admin.createAttribute
+- [ ] Criar procedure admin.updateAttribute
+- [ ] Criar procedure admin.deleteAttribute
+- [ ] Criar procedure admin.listAttributes
+- [ ] Criar procedure admin.createAttributeValue
+- [ ] Criar procedure admin.updateAttributeValue
+- [ ] Criar procedure admin.deleteAttributeValue
+- [ ] Criar procedure products.getAttributesByProductId
+- [ ] Criar procedure products.evaluateRules (engine de regras)
+
+### FASE 4: Engine de Regras
+- [ ] Implementar evaluateRules function
+- [ ] Suportar condições: equals, contains, greaterThan, lessThan
+- [ ] Suportar ações: show, hide, enable, disable, setPrice
+- [ ] Testes de regras dinâmicas
+
+### FASE 5: Componentes Dinâmicos
+- [ ] Criar DynamicAttributeRenderer.tsx
+- [ ] Implementar renderização de botões
+- [ ] Implementar renderização de selects
+- [ ] Implementar renderização de cards
+- [ ] Implementar renderização de radio buttons
+- [ ] Implementar renderização de checkboxes
+- [ ] Implementar renderização de campos numéricos
+
+### FASE 6: Integração ao ProductDetail
+- [ ] Carregar atributos do produto
+- [ ] Renderizar atributos dinamicamente
+- [ ] Aplicar regras dinâmicas ao selecionar
+- [ ] Calcular preço final com modificadores
+- [ ] Validar seleções obrigatórias
+
+### FASE 7: Interface Admin - Gerenciar Atributos
+- [ ] Criar página AttributesManager.tsx
+- [ ] CRUD de atributos globais
+- [ ] CRUD de valores de atributos
+- [ ] Definir preço modificador por valor
+- [ ] Ordenar atributos e valores
+- [ ] Testes da interface
+
+### FASE 8: Interface Admin - Vincular Atributos
+- [ ] Criar página ProductAttributesManager.tsx
+- [ ] Selecionar atributos para produto
+- [ ] Ativar/desativar valores específicos
+- [ ] Definir atributos obrigatórios
+- [ ] Ordenar atributos no frontend
+- [ ] Testes da interface
+
+### FASE 9: Testes e Validação
+- [ ] Testes de CRUD de atributos
+- [ ] Testes de engine de regras
+- [ ] Testes de renderização dinâmica
+- [ ] Testes de cálculo de preço
+- [ ] Testes de validação
+- [ ] Testes de backward compatibility
+
+### FASE 10: Entrega
+- [ ] Checkpoint final
+- [ ] Documentação de uso
+- [ ] Guia de configuração para admin

@@ -39,6 +39,7 @@ import { crmRouter } from "./routers-crm";
 import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
+import { attributesRouter } from "./routers-attributes";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -363,6 +364,8 @@ export const appRouter = router({
   web2print: web2printRouter,
   // Automation - Automação Inteligente
   automation: automationRouter,
+  // Attributes - Atributos Dinâmicos
+  attributes: attributesRouter,
 });
 
 export type AppRouter = typeof appRouter;

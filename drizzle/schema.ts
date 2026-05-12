@@ -585,3 +585,161 @@ export const productCosts = mysqlTable("productCosts", {
 
 export type ProductCost = typeof productCosts.$inferSelect;
 export type InsertProductCost = typeof productCosts.$inferInsert;
+
+
+/**
+ * ========================================
+ * SISTEMA DE ATRIBUTOS DINÂMICOS
+ * ========================================
+ * Tabelas para sistema de atributos reutilizáveis
+ * que permite renderização automática de interfaces
+ */
+
+/**
+ * Attributes - Atributos globais reutilizáveis
+ * Ex: Material, Acabamento, Revestimento, Prazo, Medidas, Quantidade
+ */
+export const attributes = mysqlTable("attributes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(), // Ex: "Material", "Acabamento"
+  slug: varchar("slug", { length: 255 }).notNull().unique(), // Ex: "material", "acabamento"
+  description: longtext("description"),
+  type: mysqlEnum("type", [
+    "button", // Botões de seleção
+    "select", // Dropdown
+    "card", // Cards com imagem
+    "radio", // Radio buttons
+    "checkbox", // Checkboxes
+    "numeric", // Campo numérico
+    "text", // Campo de texto
+    "measures", // Medidas personalizadas
+  ]).notNull(),
+  icon: varchar("icon", { length: 100 }), // Ícone para exibição
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Attribute = typeof attributes.$inferSelect;
+export type InsertAttribute = typeof attributes.$inferInsert;
+
+/**
+ * Attribute values - Valores possíveis para cada atributo
+ * Ex: Para Material: "Couchê 90g", "Couchê 115g", "Vinil brilho", etc
+ */
+export const attributeValues = mysqlTable("attributeValues", {
+  id: int("id").autoincrement().primaryKey(),
+  attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
+  value: varchar("value", { length: 255 }).notNull(), // Ex: "Couchê 90g"
+  description: longtext("description"),
+  priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(), // Impacto no preço
+  timeModifier: int("timeModifier").default(0).notNull(), // Impacto no prazo em horas
+  weightModifier: decimal("weightModifier", { precision: 10, scale: 4 }).default("0").notNull(), // Impacto no peso em kg
+  icon: varchar("icon", { length: 100 }), // Ícone para exibição
+  image: text("image"), // URL de imagem para cards
+  displayOrder: int("displayOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AttributeValue = typeof attributeValues.$inferSelect;
+export type InsertAttributeValue = typeof attributeValues.$inferInsert;
+
+/**
+ * Product attributes - Vinculação entre produtos e atributos
+ * Define quais atributos um produto utiliza
+ */
+export const productAttributes = mysqlTable("productAttributes", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "cascade" }),
+  attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
+  isRequired: boolean("isRequired").default(true).notNull(), // Se é obrigatório selecionar
+  allowMultiple: boolean("allowMultiple").default(false).notNull(), // Se permite múltiplas seleções
+  displayOrder: int("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductAttribute = typeof productAttributes.$inferSelect;
+export type InsertProductAttribute = typeof productAttributes.$inferInsert;
+
+/**
+ * Product attribute values - Quais valores de atributo estão disponíveis para um produto
+ * Ex: Produto "Cartão de Visita" pode usar "Couchê 250g" e "Couchê 300g" mas não "Lona 280g"
+ */
+export const productAttributeValues = mysqlTable("productAttributeValues", {
+  id: int("id").autoincrement().primaryKey(),
+  productAttributeId: int("productAttributeId").notNull().references(() => productAttributes.id, { onDelete: "cascade" }),
+  attributeValueId: int("attributeValueId").notNull().references(() => attributeValues.id, { onDelete: "cascade" }),
+  isEnabled: boolean("isEnabled").default(true).notNull(), // Ativar/desativar valor específico
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductAttributeValue = typeof productAttributeValues.$inferSelect;
+export type InsertProductAttributeValue = typeof productAttributeValues.$inferInsert;
+
+/**
+ * Attribute rules - Regras dinâmicas entre atributos
+ * Ex: "Se material = Lona, então mostrar acabamento = Ilhós"
+ */
+export const attributeRules = mysqlTable("attributeRules", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Lona requer ilhós"
+  description: longtext("description"),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AttributeRule = typeof attributeRules.$inferSelect;
+export type InsertAttributeRule = typeof attributeRules.$inferInsert;
+
+/**
+ * Attribute rule conditions - Condições de uma regra
+ * Ex: "Material = Lona"
+ */
+export const attributeRuleConditions = mysqlTable("attributeRuleConditions", {
+  id: int("id").autoincrement().primaryKey(),
+  ruleId: int("ruleId").notNull().references(() => attributeRules.id, { onDelete: "cascade" }),
+  attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
+  operator: mysqlEnum("operator", ["equals", "contains", "greaterThan", "lessThan", "in"]).notNull(),
+  value: varchar("value", { length: 255 }).notNull(), // Valor a comparar
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AttributeRuleCondition = typeof attributeRuleConditions.$inferSelect;
+export type InsertAttributeRuleCondition = typeof attributeRuleConditions.$inferInsert;
+
+/**
+ * Attribute rule actions - Ações de uma regra
+ * Ex: "Mostrar Acabamento = Ilhós"
+ */
+export const attributeRuleActions = mysqlTable("attributeRuleActions", {
+  id: int("id").autoincrement().primaryKey(),
+  ruleId: int("ruleId").notNull().references(() => attributeRules.id, { onDelete: "cascade" }),
+  targetAttributeId: int("targetAttributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
+  action: mysqlEnum("action", ["show", "hide", "enable", "disable", "setPrice", "addPrice"]).notNull(),
+  value: varchar("value", { length: 255 }), // Valor para a ação (ex: preço adicional)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AttributeRuleAction = typeof attributeRuleActions.$inferSelect;
+export type InsertAttributeRuleAction = typeof attributeRuleActions.$inferInsert;
+
+/**
+ * Order item attributes - Atributos selecionados para cada item do pedido
+ * Substitui orderItemVariations com sistema mais genérico
+ */
+export const orderItemAttributes = mysqlTable("orderItemAttributes", {
+  id: int("id").autoincrement().primaryKey(),
+  orderItemId: int("orderItemId").notNull().references(() => orderItems.id, { onDelete: "cascade" }),
+  attributeValueId: int("attributeValueId").notNull().references(() => attributeValues.id, { onDelete: "cascade" }),
+  customValue: varchar("customValue", { length: 255 }), // Para campos numéricos ou texto livre
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderItemAttribute = typeof orderItemAttributes.$inferSelect;
+export type InsertOrderItemAttribute = typeof orderItemAttributes.$inferInsert;
