@@ -461,3 +461,17 @@
 - [ ] Adicionar busca e criação de segmentos
 - [ ] Testes de relacionamento many-to-many
 - [ ] Entrega final com interface moderna
+
+
+## Fase 27: Sistema de Precificação Dinâmica dos Atributos
+
+- [ ] Adicionar campos de preço aos attributeValues (priceType, priceValue, impactOnDeadline, impactOnWeight)
+- [ ] Criar tipos de cálculo (fixo, percentual, multiplicador, m², quantidade)
+- [ ] Implementar engine de cálculo dinâmico em server/attributes-pricing.ts
+- [ ] Criar procedures tRPC para cálculo de preço com atributos
+- [ ] Criar interface admin para editar preços de atributos
+- [ ] Integrar cálculo ao UniversalProductRenderer
+- [ ] Atualizar preço em tempo real ao selecionar atributos
+- [ ] Salvar preço calculado no carrinho/pedido
+- [ ] Testes de cálculo dinâmico
+- [ ] Validação de precificação completa

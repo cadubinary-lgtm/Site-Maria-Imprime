@@ -41,6 +41,7 @@ import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
 import { attributesRouter } from "./routers-attributes";
 import { productSegmentsRouter } from "./routers-product-segments";
+import { pricingRouter } from "./routers-pricing";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -369,6 +370,8 @@ export const appRouter = router({
   attributes: attributesRouter,
   // Product Segments - Múltiplos Segmentos por Produto
   productSegments: productSegmentsRouter,
+  // Pricing - Precificação Dinâmica
+  pricing: pricingRouter,
 });
 
 export type AppRouter = typeof appRouter;
