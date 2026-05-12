@@ -17,6 +17,9 @@ import AllProducts from "./pages/AllProducts";
 import AdminPanel from "./pages/AdminPanel";
 import SegmentsManager from "./pages/SegmentsManager";
 import CalculadoraDemo from "./pages/CalculadoraDemo";
+import AdminAttributesManager from "./pages/AdminAttributesManager";
+import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
+import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import FileValidationManager from "./pages/FileValidationManager";
@@ -57,8 +60,11 @@ function Router() {
           <Route path="/admin/clientes" component={ClientsManager} />
           <Route path="/admin/financeiro" component={FinancialDashboard} />
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
-          <Route path="/admin/automacao" component={AutomationDashboard} />
-          <Route path="/admin/erp" component={ERPDashboard} />
+        <Route path="/admin/automacao" component={AutomationDashboard} />
+        <Route path="/admin/erp" component={ERPDashboard} />
+        <Route path="/admin/atributos" component={AdminAttributesManager} />
+        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
+        <Route path="/admin/regras" component={AdminRulesBuilder} />
         </>
       )}
 
