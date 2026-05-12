@@ -7,6 +7,8 @@
  * 
  * Não há código manual por produto.
  * Tudo é dinâmico e reutilizável.
+ * 
+ * COM PRECIFICAÇÃO DINÂMICA INTEGRADA
  */
 
 import React, { useState, useMemo } from "react";
@@ -14,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, ShoppingCart } from "lucide-react";
 import DynamicAttributeRenderer from "./DynamicAttributeRenderer";
 import { trpc } from "@/lib/trpc";
 
@@ -27,7 +29,8 @@ export default function UniversalProductRenderer({
   productId,
   onAddToCart,
 }: UniversalProductRendererProps) {
-  const [selectedAttributes, setSelectedAttributes] = useState<Map<number, any>>(new Map());
+  const [selectedAttributeIds, setSelectedAttributeIds] = useState<number[]>([]);
+  const [selectedAttributesMap, setSelectedAttributesMap] = useState<Map<number, any>>(new Map());
   const [quantity, setQuantity] = useState(1);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,13 +49,24 @@ export default function UniversalProductRenderer({
 
   // Carregar valores de atributos
   const { data: attributeValues } = trpc.attributes.listAttributeValues.useQuery({
-    attributeId: 0, // Carregar todos
+    attributeId: 0,
   });
 
   // Carregar regras do produto
   const { data: productRules } = trpc.attributes.getProductRules.useQuery(
     productId as any,
     { enabled: !!product }
+  );
+
+  // Calcular preço com precificação dinâmica
+  const { data: pricingData } = trpc.pricing.calculatePrice.useQuery(
+    {
+      productId,
+      basePrice: product?.price ? parseFloat(product.price.toString()) : 0,
+      selectedAttributeIds,
+      quantity,
+    },
+    { enabled: !!product && selectedAttributeIds.length > 0 }
   );
 
   // Processar atributos para renderização
@@ -67,46 +81,69 @@ export default function UniversalProductRenderer({
       .filter((attr: any) => attr.values.length > 0);
   }, [productAttributes, attributeValues]);
 
-  // Calcular preço total
+  // Calcular preço total (fallback se pricing não retornar)
   const totalPrice = useMemo(() => {
-    let price = typeof product?.price === 'string' ? parseFloat(product.price) : (product?.price || 0);
+    if (pricingData?.success && pricingData.pricing) {
+      return pricingData.pricing.finalPrice;
+    }
 
-    selectedAttributes.forEach((attr) => {
+    let price = product?.price ? parseFloat(product.price.toString()) : 0;
+    selectedAttributesMap.forEach((attr) => {
       if (attr.priceModifier) {
-        price += attr.priceModifier;
+        price += parseFloat(attr.priceModifier.toString());
       }
     });
 
     return price * quantity;
-  }, [product?.price, selectedAttributes, quantity]);
+  }, [pricingData, product?.price, selectedAttributesMap, quantity]);
 
   // Calcular prazo
   const totalDeadline = useMemo(() => {
-    let deadline = 3; // Prazo padrão
+    if (pricingData?.success && pricingData.pricing) {
+      return pricingData.pricing.deadlineModifier || 3;
+    }
 
-    selectedAttributes.forEach((attr) => {
+    let deadline = 3;
+    selectedAttributesMap.forEach((attr) => {
       if (attr.timeModifier) {
         deadline += attr.timeModifier;
       }
     });
 
     return Math.max(1, deadline);
-  }, [selectedAttributes]);
+  }, [pricingData, selectedAttributesMap]);
 
   // Validar seleções obrigatórias
   const isValid = useMemo(() => {
     return attributesToRender.every((attr: any) => {
       if (attr.isRequired) {
-        return selectedAttributes.has(attr.attributeId);
+        return selectedAttributeIds.includes(attr.attributeId);
       }
       return true;
     });
-  }, [attributesToRender, selectedAttributes]);
+  }, [attributesToRender, selectedAttributeIds]);
 
   const handleAttributeSelect = (attributeId: number, value: any) => {
-    const newSelected = new Map(selectedAttributes);
+    // Adicionar attributeId à lista
+    if (!selectedAttributeIds.includes(value.id)) {
+      setSelectedAttributeIds([...selectedAttributeIds, value.id]);
+    }
+
+    // Atualizar mapa de atributos selecionados
+    const newSelected = new Map(selectedAttributesMap);
     newSelected.set(attributeId, value);
-    setSelectedAttributes(newSelected);
+    setSelectedAttributesMap(newSelected);
+  };
+
+  const handleRemoveAttribute = (attributeId: number) => {
+    const newSelected = new Map(selectedAttributesMap);
+    const removedAttr = newSelected.get(attributeId);
+    newSelected.delete(attributeId);
+    setSelectedAttributesMap(newSelected);
+
+    if (removedAttr) {
+      setSelectedAttributeIds(selectedAttributeIds.filter(id => id !== removedAttr.id));
+    }
   };
 
   const handleAddToCart = async () => {
@@ -124,9 +161,11 @@ export default function UniversalProductRenderer({
         quantity,
         basePrice: product?.price,
         finalPrice: totalPrice,
-        attributes: Object.fromEntries(selectedAttributes),
+        attributes: Object.fromEntries(selectedAttributesMap),
+        attributeIds: selectedAttributeIds,
         deadline: totalDeadline,
         uploadedFiles,
+        pricing: pricingData?.pricing,
       };
 
       onAddToCart?.(cartItem);
@@ -160,140 +199,168 @@ export default function UniversalProductRenderer({
       {/* Informações do Produto */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{product.name}</CardTitle>
+          <CardTitle>{product.name}</CardTitle>
           <CardDescription>{product.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-600">Preço Base</p>
-              <p className="text-2xl font-bold text-orange-600">
-                R$ {(typeof product.price === 'string' ? parseFloat(product.price) : product.price)?.toFixed(2)}
-              </p>
+          <div className="space-y-4">
+            {/* Preço Base */}
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Preço Base:</span>
+              <span className="text-2xl font-bold text-orange-600">
+                R$ {product.price ? parseFloat(product.price.toString()).toFixed(2) : "0.00"}
+              </span>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Prazo Padrão</p>
-              <p className="text-2xl font-bold">3 dias</p>
+
+            {/* Atributos Selecionados */}
+            {selectedAttributesMap.size > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-semibold">Atributos Selecionados:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(selectedAttributesMap.entries()).map(([attrId, value]) => (
+                    <Badge key={attrId} variant="secondary" className="flex items-center gap-2">
+                      {value.value}
+                      {value.priceModifier > 0 && (
+                        <span className="text-xs">+R$ {parseFloat(value.priceModifier.toString()).toFixed(2)}</span>
+                      )}
+                      <button
+                        onClick={() => handleRemoveAttribute(attrId)}
+                        className="ml-1 hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Resumo de Preços */}
+            {pricingData?.success && pricingData.pricing && (
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span>R$ {pricingData.pricing.priceWithModifiers.toFixed(2)}</span>
+                </div>
+                {pricingData.pricing.volumeDiscount.discountPercentage > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Desconto por Volume ({pricingData.pricing.volumeDiscount.discountPercentage}%):</span>
+                    <span>-R$ {pricingData.pricing.volumeDiscount.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span>Impostos:</span>
+                  <span>R$ {pricingData.pricing.taxes.taxAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <span>Total:</span>
+                  <span className="text-orange-600">R$ {totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Prazo de Entrega */}
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-sm text-blue-900">
+                📅 Prazo de Entrega: <strong>{totalDeadline} dias úteis</strong>
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Atributos Dinâmicos */}
-      {attributesToRender.length > 0 ? (
+      {attributesToRender.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Configurações do Produto</CardTitle>
-            <CardDescription>
-              Selecione as opções desejadas. {attributesToRender.filter((a: any) => a.isRequired).length} campo(s) obrigatório(s)
-            </CardDescription>
+            <CardTitle>Opções do Produto</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {attributesToRender.map((attribute: any) => (
-              <div key={attribute.attributeId}>
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="font-semibold text-lg capitalize">{attribute.attribute?.name || 'Atributo'}</h3>
-                  {attribute.isRequired && (
-                    <Badge variant="destructive" className="text-xs">
-                      Obrigatório
-                    </Badge>
-                  )}
-                </div>
-
+          <CardContent className="space-y-4">
+            {attributesToRender.map((attr: any) => (
+              <div key={attr.attributeId} className="space-y-2">
+                <label className="font-semibold">
+                  {attr.name}
+                  {attr.isRequired && <span className="text-red-600 ml-1">*</span>}
+                </label>
                 <DynamicAttributeRenderer
-                  attribute={{
-                    ...attribute.attribute,
-                    values: attribute.values,
-                  } as any}
-                  onSelect={(value) => handleAttributeSelect(attribute.attributeId, value)}
+                  attribute={attr}
+                  selectedValues={selectedAttributeIds}
+                  onSelect={(attributeId: number, valueIds: number[]) => {
+                    const selectedValue = attr.values.find((v: any) => valueIds.includes(v.id));
+                    if (selectedValue) {
+                      handleAttributeSelect(attr.attributeId, selectedValue);
+                    }
+                  }}
                 />
               </div>
             ))}
           </CardContent>
         </Card>
-      ) : (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Este produto não possui atributos configuráveis. Vincule atributos no painel admin.
-          </AlertDescription>
-        </Alert>
       )}
 
       {/* Quantidade */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Quantidade</CardTitle>
+          <CardTitle>Quantidade</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="px-3 py-2 border rounded hover:bg-gray-100"
+            >
+              −
+            </button>
             <input
               type="number"
-              min="1"
-              max="10000"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="border rounded-lg px-4 py-2 w-24 font-semibold"
+              className="w-20 px-3 py-2 border rounded text-center"
+              min="1"
             />
-            <span className="text-sm text-gray-600">unidades</span>
+            <button
+              onClick={() => setQuantity(quantity + 1)}
+              className="px-3 py-2 border rounded hover:bg-gray-100"
+            >
+              +
+            </button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Resumo de Preço */}
-      <Card className="border-2 border-orange-500">
-        <CardHeader>
-          <CardTitle className="text-lg">Resumo do Orçamento</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between">
-            <span>Preço Unitário</span>
-            <span>R$ {(totalPrice / quantity).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Quantidade</span>
-            <span>{quantity.toLocaleString("pt-BR")} un</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Prazo de Entrega</span>
-            <span>{totalDeadline} dias úteis</span>
-          </div>
-          <div className="border-t pt-3 flex justify-between font-bold text-lg">
-            <span>Total</span>
-            <span className="text-orange-600">R$ {totalPrice.toFixed(2)}</span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Botão Adicionar ao Carrinho */}
+      <Button
+        onClick={handleAddToCart}
+        disabled={!isValid || isProcessing}
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-6 text-lg font-semibold"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            Processando...
+          </>
+        ) : (
+          <>
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            Adicionar ao Carrinho - R$ {totalPrice.toFixed(2)}
+          </>
+        )}
+      </Button>
 
       {/* Validação */}
       {!isValid && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Por favor, preencha todos os campos obrigatórios antes de adicionar ao carrinho
-          </AlertDescription>
+          <AlertDescription>Por favor, preencha todos os campos obrigatórios</AlertDescription>
         </Alert>
       )}
 
-      {/* Botão Adicionar ao Carrinho */}
-      <Button
-        size="lg"
-        className="w-full bg-orange-600 hover:bg-orange-700"
-        onClick={handleAddToCart}
-        disabled={isProcessing || !isValid}
-      >
-        {isProcessing ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Processando...
-          </>
-        ) : (
-          <>
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Adicionar ao Carrinho
-          </>
-        )}
-      </Button>
+      {isValid && (
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>Produto pronto para adicionar ao carrinho</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
