@@ -24,37 +24,6 @@ interface AttributeWithValues {
   }>;
 }
 
-const MAIN_ATTRIBUTES = {
-  'impressao': {
-    label: 'TIPO DE IMPRESSÃO',
-    keywords: ['impressão', 'frente', 'verso', 'preto', 'colorida', '4/0', '4/4']
-  },
-  'material': {
-    label: 'TIPO DE MATERIAL',
-    keywords: ['material', 'couchê', 'offset', 'kraft', 'sulfite', 'vinil', 'pvc', 'acm']
-  },
-  'papel': {
-    label: 'TIPO DE PAPEL',
-    keywords: ['papel', '90g', '115g', '150g', '170g', '210g', '250g', '300g']
-  },
-  'acabamento': {
-    label: 'TIPO DE ACABAMENTO',
-    keywords: ['acabamento', 'laminação', 'verniz', 'soft touch', 'corte', 'dobra', 'vinco']
-  },
-  'cor': {
-    label: 'TIPO DE COR',
-    keywords: ['cor', 'colorida', 'preto', 'branco', 'cmyk', 'pantone']
-  },
-  'formato': {
-    label: 'TIPO DE FORMATO',
-    keywords: ['formato', 'a4', 'a5', 'a6', 'personalizado', 'quadrado']
-  },
-  'quantidade': {
-    label: 'QUANTIDADE',
-    keywords: ['quantidade', '100', '250', '500', '1000', '3000']
-  },
-};
-
 export default function Atributos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -73,43 +42,26 @@ export default function Atributos() {
     },
   });
 
-  // Funcao para determinar a categoria de um atributo
-  const getAttributeCategory = (attr: AttributeWithValues): string | null => {
-    const lowerName = attr.name.toLowerCase();
-    const lowerSlug = attr.slug.toLowerCase();
-    
-    for (const [categoryId, categoryData] of Object.entries(MAIN_ATTRIBUTES)) {
-      const keywords = categoryData.keywords;
-      const matches = keywords.some(keyword => 
-        lowerName.includes(keyword) || lowerSlug.includes(keyword)
-      );
-      if (matches) {
-        return categoryId;
-      }
-    }
-    return null;
+  // Filtrar atributos por busca
+  const filteredAttributes = (attributes || []).filter((attr: AttributeWithValues) =>
+    attr.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    attr.slug.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Mapa de categorias por tipo
+  const getCategoryLabel = (type: string): string => {
+    const categoryMap: Record<string, string> = {
+      'text': 'MATERIAIS — PAPÉIS',
+      'select': 'MATERIAIS — PAPÉIS',
+      'button': 'IMPRESSÃO',
+      'card': 'ACABAMENTO',
+      'radio': 'COR',
+      'checkbox': 'ACABAMENTO',
+      'numeric': 'QUANTIDADE',
+      'measures': 'FORMATO',
+    };
+    return categoryMap[type] || 'OUTROS';
   };
-
-  // Filtrar atributos por categoria principal e busca
-  const filteredAttributes = (attributes || []).filter((attr: AttributeWithValues) => {
-    const category = getAttributeCategory(attr);
-    const hasMainCategory = category !== null;
-    const matchesSearch = attr.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      attr.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    return hasMainCategory && matchesSearch;
-  });
-
-  // Agrupar atributos por categoria
-  const groupedAttributes = filteredAttributes.reduce((acc: Record<string, AttributeWithValues[]>, attr: AttributeWithValues) => {
-    const category = getAttributeCategory(attr);
-    if (category) {
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(attr);
-    }
-    return acc;
-  }, {} as Record<string, AttributeWithValues[]>);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -142,97 +94,82 @@ export default function Atributos() {
           />
         </div>
 
-        {/* Lista de Atributos por Categoria */}
-        <div className="space-y-8">
+        {/* Lista de Atributos */}
+        <div className="space-y-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
             </div>
-          ) : Object.keys(groupedAttributes).length === 0 ? (
+          ) : filteredAttributes.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-              <p className="text-gray-500">Nenhum atributo encontrado nas 7 categorias principais</p>
+              <p className="text-gray-500">Nenhum atributo encontrado</p>
             </div>
           ) : (
-            Object.entries(MAIN_ATTRIBUTES).map(([categoryId, categoryData]) => {
-              const categoryAttrs = groupedAttributes[categoryId] || [];
-              if (categoryAttrs.length === 0) return null;
-
-              return (
-                <div key={categoryId} className="space-y-4">
-                  {/* Cabeçalho da Categoria */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">{categoryData.label}</h2>
-                    <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                      {categoryAttrs.length} atributo{categoryAttrs.length !== 1 ? 's' : ''}
-                    </span>
+            filteredAttributes.map((attr: AttributeWithValues) => (
+              <div key={attr.id} className="bg-white rounded-lg border border-gray-200 p-6">
+                {/* Cabeçalho do Atributo */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{attr.name}</h3>
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {attr.slug}
+                      </span>
+                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        {attr.type}
+                      </span>
+                    </div>
                   </div>
-
-                  {/* Lista de Atributos da Categoria */}
-                  <div className="space-y-3">
-                    {categoryAttrs.map((attr: AttributeWithValues) => (
-                      <div key={attr.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:border-gray-300 transition-colors">
-                        {/* Cabeçalho do Atributo */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-lg font-semibold text-gray-900">{attr.name}</h3>
-                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {attr.slug}
-                              </span>
-                              <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                                {attr.type}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingId(attr.id)}
-                              className="text-blue-600 hover:bg-blue-50"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteMutation.mutate(attr.id)}
-                              className="text-red-600 hover:bg-red-50"
-                              disabled={deleteMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Descrição */}
-                        {attr.description && (
-                          <p className="text-sm text-gray-600 mb-4">{attr.description}</p>
-                        )}
-
-                        {/* Valores do Atributo */}
-                        {attr.values && attr.values.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 font-semibold mb-2">VALORES:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {attr.values.map((value) => (
-                                <span
-                                  key={value.id}
-                                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                                >
-                                  {value.value}
-                                  {value.priceModifier && ` (+R$ ${value.priceModifier})`}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingId(attr.id)}
+                      className="text-blue-600 hover:bg-blue-50"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteMutation.mutate(attr.id)}
+                      className="text-red-600 hover:bg-red-50"
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-              );
-            })
+
+                {/* Categoria */}
+                <div className="text-sm text-gray-500 font-semibold mb-3 uppercase">
+                  {getCategoryLabel(attr.type)}
+                </div>
+
+                {/* Descrição */}
+                {attr.description && (
+                  <p className="text-sm text-gray-600 mb-4">{attr.description}</p>
+                )}
+
+                {/* Valores do Atributo */}
+                {attr.values && attr.values.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 font-semibold mb-2">VALORES:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {attr.values.map((value) => (
+                        <span
+                          key={value.id}
+                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                        >
+                          {value.value}
+                          {value.priceModifier && ` (+R$ ${value.priceModifier})`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       </div>
