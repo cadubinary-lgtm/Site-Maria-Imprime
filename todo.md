@@ -1017,3 +1017,63 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - ✅ Exportação de orçamento em PDF profissional
 - ✅ 23 testes de integração criados e validados
 - ✅ Documentação completa (GLOBAL_ATTRIBUTES_SYSTEM.md)
+
+
+## FASE 28: Criar Produtos Reais do Catálogo ⏳
+
+### FASE 1: Marcar produtos de teste como desenvolvimento
+- [ ] Marcar 5 produtos de teste como "desenvolvimento" (ocultar do catálogo público)
+- [ ] Manter disponíveis internamente para validações futuras
+
+### FASE 2: Criar 13 produtos reais
+- [ ] Cartão de visita
+- [ ] Folheto
+- [ ] Flyer
+- [ ] Banner
+- [ ] Faixa
+- [ ] Adesivo
+- [ ] Placa ACM
+- [ ] Lona
+- [ ] Pasta
+- [ ] Envelope
+- [ ] Receituário
+- [ ] Bloco
+- [ ] Papel timbrado
+
+### FASE 3: Vincular atributos globais
+- [ ] Vincular Material a todos os produtos
+- [ ] Vincular Acabamento a todos os produtos
+- [ ] Vincular atributos específicos por categoria
+
+### FASE 4: Criar regras de compatibilidade
+- [ ] Regras para Cartão de visita
+- [ ] Regras para Folheto
+- [ ] Regras para Flyer
+- [ ] Regras para Banner
+- [ ] Regras para Faixa
+- [ ] Regras para Adesivo
+- [ ] Regras para Placa ACM
+- [ ] Regras para Lona
+- [ ] Regras para Pasta
+- [ ] Regras para Envelope
+- [ ] Regras para Receituário
+- [ ] Regras para Bloco
+- [ ] Regras para Papel timbrado
+
+### FASE 5: Validar experiência completa
+- [ ] Testar seleção de atributos em cada produto
+- [ ] Validar cálculo de preço em tempo real
+- [ ] Testar exportação de orçamento PDF
+- [ ] Validar regras dinâmicas em produção
+
+### FASE 6: Testar fluxo de compra
+- [ ] Testar adição ao carrinho
+- [ ] Testar múltiplos produtos
+- [ ] Testar resumo lateral
+- [ ] Validar experiência completa do cliente
+
+### FASE 7: Documentar e entregar
+- [ ] Documentar sistema de atributos globais
+- [ ] Documentar regras de compatibilidade
+- [ ] Criar guia de uso para admin
+- [ ] Entregar para produção
