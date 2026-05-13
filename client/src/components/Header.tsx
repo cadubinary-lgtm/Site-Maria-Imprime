@@ -51,6 +51,14 @@ export default function Header() {
     setMobileMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    navigate("/");
+    // Rolar para o topo da página
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 0);
+  };
+
   const totalResults = (searchResults?.products.length || 0) +
     (searchResults?.categories.length || 0) +
     (searchResults?.materials.length || 0);
@@ -61,15 +69,16 @@ export default function Header() {
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo */}
-          <Link href="/">
-            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition">
-              <img 
-                src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
-                alt="Gráfica Ponto Digital" 
-                className="h-12 w-auto"
-              />
-            </div>
-          </Link>
+          <div 
+            onClick={handleLogoClick}
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
+          >
+            <img 
+              src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
+              alt="Gráfica Ponto Digital" 
+              className="h-12 w-auto"
+            />
+          </div>
 
           {/* Search Bar */}
           <div className="flex-1 max-w-md relative" ref={searchRef}>

@@ -702,3 +702,19 @@
 ✅ Novo segmento criado em admin aparece automaticamente na sidebar
 ✅ Sem lista hardcoded no frontend
 ✅ Pronto para produção
+
+
+## Validação de Estabilidade - Fase Atual (Antes de CRM)
+- [x] Validar que segmentos aparecem corretamente na sidebar do catálogo
+- [x] Validar que pedidos estão sendo listados corretamente no site
+- [x] Testar fluxo completo de compra (sem regressões)
+- [x] Executar todos os testes automatizados vitest
+- [x] Verificar logs do servidor para erros
+- [x] Confirmar que nenhuma regressão foi introduzida
+- [x] Gerar relatório de validação final
+
+
+## Bug Encontrado: Logo não Rola para Topo
+- [x] Corrigir clique na logo para rolar página para o topo quando na Home
+- [x] Testar comportamento em desktop e mobile
+- [x] Validar que não há regressão
