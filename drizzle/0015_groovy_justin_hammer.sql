@@ -1,1 +1,0 @@
-ALTER TABLE `attributes` ADD `basePrice` decimal(10,2) DEFAULT '0' NOT NULL;

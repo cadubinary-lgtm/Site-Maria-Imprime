@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE IF NOT EXISTS `productSegments` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `productId` int NOT NULL,\n  `segmentId` int NOT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  UNIQUE KEY `unique_product_segment` (`productId`, `segmentId`),\n  FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE,\n  FOREIGN KEY (`segmentId`) REFERENCES `segments`(`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE IF NOT EXISTS `productSegments` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `productId` int NOT NULL,\n  `segmentId` int NOT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  UNIQUE KEY `unique_product_segment` (`productId`, `segmentId`),\n  FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE,\n  FOREIGN KEY (`segmentId`) REFERENCES `segments`(`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 1436
-}

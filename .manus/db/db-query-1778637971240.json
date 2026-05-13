@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `pricingRules` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`category` varchar(255) NOT NULL,\n\t`description` text,\n\t`basePrice` decimal(10,2) NOT NULL,\n\t`calculationType` enum('fixed','percentage','multiplier','per_sqm','per_quantity') NOT NULL DEFAULT 'fixed',\n\t`isActive` boolean NOT NULL DEFAULT true,\n\t`priority` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `pricingRules_id` PRIMARY KEY(`id`)\n);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE `pricingRules` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`category` varchar(255) NOT NULL,\n\t`description` text,\n\t`basePrice` decimal(10,2) NOT NULL,\n\t`calculationType` enum('fixed','percentage','multiplier','per_sqm','per_quantity') NOT NULL DEFAULT 'fixed',\n\t`isActive` boolean NOT NULL DEFAULT true,\n\t`priority` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `pricingRules_id` PRIMARY KEY(`id`)\n);",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 350
-}

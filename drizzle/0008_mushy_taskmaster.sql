@@ -1,1 +1,0 @@
-ALTER TABLE `products` ADD `requiresAreaCalculation` boolean DEFAULT false NOT NULL;

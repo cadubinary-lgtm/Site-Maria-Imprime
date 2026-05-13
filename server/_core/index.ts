@@ -3,13 +3,11 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import multer from "multer";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { storagePut } from "../storage";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,40 +36,6 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
-  
-  // Upload endpoint
-  const upload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  });
-  
-  app.post('/api/upload', upload.single('file'), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
-      }
-
-      const { originalname, buffer, mimetype } = req.file;
-      
-      // Validar formato de imagem
-      const allowedMimeTypes = ['image/jpeg', 'image/png'];
-      if (!allowedMimeTypes.includes(mimetype)) {
-        return res.status(400).json({ error: 'Apenas formatos JPG e PNG sao aceitos' });
-      }
-      
-      // Generate unique filename
-      const timestamp = Date.now();
-      const filename = `products/${timestamp}-${originalname}`;
-
-      // Upload to S3
-      const { url } = await storagePut(filename, buffer, mimetype);
-
-      res.json({ url });
-    } catch (error) {
-      console.error('Upload error:', error);
-      res.status(500).json({ error: 'Falha ao fazer upload da imagem' });
-    }
-  });
   // tRPC API
   app.use(
     "/api/trpc",

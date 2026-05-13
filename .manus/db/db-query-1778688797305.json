@@ -1,9 +1,0 @@
-{
-  "query": "-- Criar produtos de teste\nINSERT INTO `products` (`name`, `description`, `price`, `segment`, `imageUrl`, `isActive`, `requiresAreaCalculation`, `createdAt`, `updatedAt`)\nVALUES \n('Lona 280g Brilho', 'Lona de alta qualidade para banners e lonas', 100.00, 'varejo', 'https://via.placeholder.com/300x300?text=Lona', TRUE, TRUE, NOW(), NOW()),\n('Folheto A4 Couchê 300g', 'Folheto profissional em papel couchê', 50.00, 'varejo', 'https://via.placeholder.com/300x300?text=Folheto', TRUE, FALSE, NOW(), NOW()),\n('Adesivo Vinil 10x10cm', 'Adesivo de vinil para personalizações', 25.00, 'varejo', 'https://via.placeholder.com/300x300?text=Adesivo', TRUE, TRUE, NOW(), NOW()),\n('Placa PVC 20x30cm', 'Placa de PVC para sinalização', 75.00, 'varejo', 'https://via.placeholder.com/300x300?text=Placa', TRUE, FALSE, NOW(), NOW());",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute -- Criar produtos de teste\nINSERT INTO `products` (`name`, `description`, `price`, `segment`, `imageUrl`, `isActive`, `requiresAreaCalculation`, `createdAt`, `updatedAt`)\nVALUES \n('Lona 280g Brilho', 'Lona de alta qualidade para banners e lonas', 100.00, 'varejo', 'https://via.placeholder.com/300x300?text=Lona', TRUE, TRUE, NOW(), NOW()),\n('Folheto A4 Couchê 300g', 'Folheto profissional em papel couchê', 50.00, 'varejo', 'https://via.placeholder.com/300x300?text=Folheto', TRUE, FALSE, NOW(), NOW()),\n('Adesivo Vinil 10x10cm', 'Adesivo de vinil para personalizações', 25.00, 'varejo', 'https://via.placeholder.com/300x300?text=Adesivo', TRUE, TRUE, NOW(), NOW()),\n('Placa PVC 20x30cm', 'Placa de PVC para sinalização', 75.00, 'varejo', 'https://via.placeholder.com/300x300?text=Placa', TRUE, FALSE, NOW(), NOW());",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 600
-}

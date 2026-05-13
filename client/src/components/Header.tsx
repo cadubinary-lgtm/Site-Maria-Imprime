@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Search, Menu, X, LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Header() {
@@ -51,14 +51,6 @@ export default function Header() {
     setMobileMenuOpen(false);
   };
 
-  const handleLogoClick = () => {
-    navigate("/");
-    // Rolar para o topo da página
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 0);
-  };
-
   const totalResults = (searchResults?.products.length || 0) +
     (searchResults?.categories.length || 0) +
     (searchResults?.materials.length || 0);
@@ -69,16 +61,15 @@ export default function Header() {
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo */}
-          <div 
-            onClick={handleLogoClick}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
-          >
-            <img 
-              src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
-              alt="Gráfica Ponto Digital" 
-              className="h-12 w-auto"
-            />
-          </div>
+          <Link href="/">
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition">
+              <img 
+                src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
+                alt="Gráfica Ponto Digital" 
+                className="h-12 w-auto"
+              />
+            </div>
+          </Link>
 
           {/* Search Bar */}
           <div className="flex-1 max-w-md relative" ref={searchRef}>
@@ -173,16 +164,6 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <Link href="/admin">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Painel Admin
-                  </Button>
-                </Link>
                 <div className="flex items-center gap-2 text-sm">
                   <User className="w-4 h-4" />
                   <span className="text-gray-700">{user.name || user.email}</span>
@@ -294,16 +275,6 @@ export default function Header() {
             {isAuthenticated && user ? (
               <div className="space-y-2">
                 <div className="text-sm text-gray-700">{user.name || user.email}</div>
-                <Link href="/admin">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Painel Admin
-                  </Button>
-                </Link>
                 <Button
                   onClick={handleLogout}
                   variant="ghost"

@@ -1,8 +1,0 @@
-{
-  "query": "-- Criar atributos para Papelaria\nINSERT INTO `attributes` (`name`, `slug`, `description`, `type`, `basePrice`, `displayOrder`, `isActive`, `createdAt`, `updatedAt`)\nVALUES \n('Encadernação', 'encadernacao', 'Tipo de encadernação (Espiral, Brochura, Capa Dura)', 'select', 0, 7, TRUE, NOW(), NOW()),\n('Wire-o', 'wire-o', 'Encadernação com Wire-o (metálico)', 'select', 0, 8, TRUE, NOW(), NOW());\n\n-- Obter IDs dos novos atributos\nSELECT id, name, slug FROM attributes WHERE slug IN ('encadernacao', 'wire-o') ORDER BY id DESC LIMIT 2;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute -- Criar atributos para Papelaria\nINSERT INTO `attributes` (`name`, `slug`, `description`, `type`, `basePrice`, `displayOrder`, `isActive`, `createdAt`, `updatedAt`)\nVALUES \n('Encadernação', 'encadernacao', 'Tipo de encadernação (Espiral, Brochura, Capa Dura)', 'select', 0, 7, TRUE, NOW(), NOW()),\n('Wire-o', 'wire-o', 'Encadernação com Wire-o (metálico)', 'select', 0, 8, TRUE, NOW(), NOW());\n\n-- Obter IDs dos novos atributos\nSELECT id, name, slug FROM attributes WHERE slug IN ('encadernacao', 'wire-o') ORDER BY id DESC LIMIT 2;",
-  "returncode": 1,
-  "logs": [
-    "ERROR 1062 (23000) at line 2: Duplicate entry '?' for key 'attributes.attributes_name_unique'"
-  ]
-}

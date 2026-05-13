@@ -1,9 +1,0 @@
-{
-  "query": "ALTER TABLE `products` MODIFY COLUMN `segment` enum('alimentacao','beleza','varejo','servicos') NOT NULL;\nALTER TABLE `products` DROP COLUMN `technicalInfo`;\nALTER TABLE `products` DROP COLUMN `benefits`;\nALTER TABLE `products` DROP COLUMN `applications`;\nALTER TABLE `products` DROP COLUMN `allowCustomMeasures`;\nALTER TABLE `products` DROP COLUMN `pricePerSquareMeter`;\nALTER TABLE `products` DROP COLUMN `minWidth`;\nALTER TABLE `products` DROP COLUMN `maxWidth`;\nALTER TABLE `products` DROP COLUMN `minHeight`;\nALTER TABLE `products` DROP COLUMN `maxHeight`;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute ALTER TABLE `products` MODIFY COLUMN `segment` enum('alimentacao','beleza','varejo','servicos') NOT NULL;\nALTER TABLE `products` DROP COLUMN `technicalInfo`;\nALTER TABLE `products` DROP COLUMN `benefits`;\nALTER TABLE `products` DROP COLUMN `applications`;\nALTER TABLE `products` DROP COLUMN `allowCustomMeasures`;\nALTER TABLE `products` DROP COLUMN `pricePerSquareMeter`;\nALTER TABLE `products` DROP COLUMN `minWidth`;\nALTER TABLE `products` DROP COLUMN `maxWidth`;\nALTER TABLE `products` DROP COLUMN `minHeight`;\nALTER TABLE `products` DROP COLUMN `maxHeight`;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 2598
-}

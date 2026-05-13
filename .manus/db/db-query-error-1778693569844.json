@@ -1,8 +1,0 @@
-{
-  "query": "SELECT id, name, description, price, segment_id FROM products WHERE id IN (840001, 840002, 840003, 840004, 870001) ORDER BY id;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute SELECT id, name, description, price, segment_id FROM products WHERE id IN (840001, 840002, 840003, 840004, 870001) ORDER BY id;",
-  "returncode": 1,
-  "logs": [
-    "ERROR 1054 (42S22) at line 1: Unknown column 'segment_id' in 'field list'"
-  ]
-}
