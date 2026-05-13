@@ -616,3 +616,17 @@
 - ✅ TypeScript: No errors
 - ✅ Build: OK
 - ✅ Página /admin/precos-atributos: Deve funcionar corretamente agora
+
+
+## NOVA FUNCIONALIDADE: Campo de Preço em Atributos (Simples)
+
+- [x] Adicionar coluna `basePrice` na tabela `attributes`
+- [x] Criar migration SQL
+- [x] Atualizar schema Drizzle
+- [x] Atualizar formulário AdminAttributesManager.tsx
+- [x] Adicionar campo de preço no form
+- [x] Salvar preço no banco
+- [x] Editar preço
+- [x] Carregar preço
+- [ ] Usar preço no cálculo automático (próxima fase)
+- [x] Testar fluxo completo

@@ -27,6 +27,7 @@ export async function createAttribute(data: {
   type: "button" | "select" | "card" | "radio" | "checkbox" | "numeric" | "text" | "measures";
   icon?: string;
   displayOrder?: number;
+  basePrice?: number;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -38,8 +39,9 @@ export async function createAttribute(data: {
     type: data.type,
     icon: data.icon,
     displayOrder: data.displayOrder || 0,
+    basePrice: String(data.basePrice || 0),
     isActive: true,
-  });
+  } as any);
 
   return result;
 }
@@ -72,11 +74,17 @@ export async function getAttributeById(id: number) {
 /**
  * Atualizar atributo
  */
-export async function updateAttribute(id: number, data: Partial<typeof attributes.$inferInsert>) {
+export async function updateAttribute(id: number, data: Partial<Omit<typeof attributes.$inferInsert, 'basePrice'> & { basePrice?: number | string }>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return await db.update(attributes).set(data).where(eq(attributes.id, id));
+  // Converter basePrice para string se for número
+  const processedData = {
+    ...data,
+    basePrice: data.basePrice !== undefined ? String(data.basePrice) : undefined,
+  };
+
+  return await db.update(attributes).set(processedData as any).where(eq(attributes.id, id));
 }
 
 /**

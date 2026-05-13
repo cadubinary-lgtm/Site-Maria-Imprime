@@ -615,6 +615,7 @@ export const attributes = mysqlTable("attributes", {
     "measures", // Medidas personalizadas
   ]).notNull(),
   icon: varchar("icon", { length: 100 }), // Ícone para exibição
+  basePrice: decimal("basePrice", { precision: 10, scale: 2 }).default("0").notNull(), // Preço base do atributo
   displayOrder: int("displayOrder").default(0).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -19,6 +19,7 @@ export default function AdminAttributesManager() {
     slug: "",
     type: "select" as AttributeType,
     description: "",
+    basePrice: 0,
   });
 
   // Carregar atributos
@@ -60,7 +61,7 @@ export default function AdminAttributesManager() {
   });
 
   const resetForm = () => {
-    setFormData({ name: "", slug: "", type: "select", description: "" });
+    setFormData({ name: "", slug: "", type: "select", description: "", basePrice: 0 });
     setEditingAttribute(null);
   };
 
@@ -72,6 +73,7 @@ export default function AdminAttributesManager() {
         slug: attribute.slug,
         type: attribute.type,
         description: attribute.description || "",
+        basePrice: Number(attribute.basePrice) || 0,
       });
     } else {
       resetForm();
@@ -170,6 +172,18 @@ export default function AdminAttributesManager() {
                   placeholder="Descrição opcional"
                 />
               </div>
+              <div>
+                <Label htmlFor="basePrice">Preço (R$)</Label>
+                <Input
+                  id="basePrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.basePrice}
+                  onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || 0 })}
+                  placeholder="0.00"
+                />
+              </div>
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
@@ -201,8 +215,15 @@ export default function AdminAttributesManager() {
               <Card key={attr.id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{attr.name}</CardTitle>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <CardTitle>{attr.name}</CardTitle>
+                        {attr.basePrice > 0 && (
+                          <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
+                            +R$ {Number(attr.basePrice).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
                       <CardDescription className="mt-1">
                         <span className="inline-block bg-gray-100 px-2 py-1 rounded text-xs mr-2">
                           {attr.slug}

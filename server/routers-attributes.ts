@@ -28,6 +28,7 @@ export const attributesRouter = router({
         type: z.enum(["button", "select", "card", "radio", "checkbox", "numeric", "text", "measures"]),
         icon: z.string().optional(),
         displayOrder: z.number().optional(),
+        basePrice: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -62,6 +63,7 @@ export const attributesRouter = router({
         icon: z.string().optional(),
         displayOrder: z.number().optional(),
         isActive: z.boolean().optional(),
+        basePrice: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
