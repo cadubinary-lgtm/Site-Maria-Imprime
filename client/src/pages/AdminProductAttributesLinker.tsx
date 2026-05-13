@@ -155,26 +155,36 @@ export default function AdminProductAttributesLinker() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               {selectedProductId ? (
                 <>
                   {[
-                    { id: 'print-type', label: 'TIPO DE IMPRESSÃO', description: 'Escolha o tipo de impressão' },
-                    { id: 'material-type', label: 'TIPO DE MATERIAL', description: 'Escolha o material' },
-                    { id: 'paper-type', label: 'TIPO DE PAPEL', description: 'Escolha o tipo de papel' },
-                    { id: 'finish-type', label: 'TIPO DE ACABAMENTO', description: 'Escolha o acabamento' },
-                    { id: 'color-type', label: 'TIPO DE COR', description: 'Escolha o tipo de cor' },
-                    { id: 'format-type', label: 'TIPO DE FORMATO', description: 'Escolha o formato' },
-                    { id: 'quantity', label: 'QUANTIDADE', description: 'Defina a quantidade' },
+                    { id: 'impressao', label: 'TIPO DE IMPRESSÃO', description: 'Selecione o tipo de impressão desejado', icon: '🖨️' },
+                    { id: 'material', label: 'TIPO DE MATERIAL', description: 'Escolha o material para seu produto', icon: '📦' },
+                    { id: 'papel', label: 'TIPO DE PAPEL', description: 'Selecione a gramatura e tipo de papel', icon: '📄' },
+                    { id: 'acabamento', label: 'TIPO DE ACABAMENTO', description: 'Escolha o acabamento para seu produto', icon: '✨' },
+                    { id: 'cor', label: 'TIPO DE COR', description: 'Selecione a configuração de cores', icon: '🎨' },
+                    { id: 'formato', label: 'TIPO DE FORMATO', description: 'Escolha o formato do seu produto', icon: '📐' },
+                    { id: 'quantidade', label: 'QUANTIDADE', description: 'Defina a quantidade desejada', icon: '🔢' },
                   ].map((attr) => (
-                    <div key={attr.id} className="border rounded-lg p-3 hover:bg-gray-50">
-                      <p className="font-semibold text-sm">{attr.label}</p>
-                      <p className="text-xs text-gray-600 mt-1">{attr.description}</p>
+                    <div key={attr.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`attr-${attr.id}`}
+                        checked={selectedAttributes.has(attr.id as any)}
+                        onCheckedChange={() => handleAttributeToggle(attr.id as any)}
+                        disabled={!selectedProductId}
+                      />
+                      <Label htmlFor={`attr-${attr.id}`} className="cursor-pointer flex-1">
+                        <div>
+                          <p className="font-medium text-sm">{attr.icon} {attr.label}</p>
+                          <p className="text-xs text-gray-500">{attr.description}</p>
+                        </div>
+                      </Label>
                     </div>
                   ))}
                 </>
               ) : (
-                <p className="text-gray-500 text-sm">Selecione um produto para ver os atributos</p>
+                <p className="text-gray-500 text-sm text-center py-4">Selecione um produto para ver os atributos</p>
               )}
             </div>
           </CardContent>
