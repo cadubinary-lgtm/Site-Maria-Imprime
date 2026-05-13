@@ -12,6 +12,7 @@ import { toast } from "sonner";
 export default function AdminProductAttributesLinker() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Set<number>>(new Set());
+  const [selectedAttributeCategory, setSelectedAttributeCategory] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [attributeSearch, setAttributeSearch] = useState("");
@@ -52,19 +53,45 @@ export default function AdminProductAttributesLinker() {
   // Filtrar atributos por busca
   const filteredAttributes = useMemo(() => {
     if (!attributes) return [];
-    if (!attributeSearch.trim()) return attributes;
+    let filtered = attributes;
     
-    const query = attributeSearch.toLowerCase();
-    return attributes.filter((a: any) => 
-      a.name.toLowerCase().includes(query) || a.slug.toLowerCase().includes(query)
-    );
-  }, [attributes, attributeSearch]);
+    if (attributeSearch.trim()) {
+      const query = attributeSearch.toLowerCase();
+      filtered = filtered.filter((a: any) => 
+        a.name.toLowerCase().includes(query) || a.slug.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filtrar por categoria de atributo selecionada
+    if (selectedAttributeCategory) {
+      const categoryMap: Record<string, string[]> = {
+        'impressao': ['frente', 'verso', 'preto', 'colorida', 'impressão', '4/0', '4/4', 'p/f', 'g/f'],
+        'material': ['couchê', 'offset', 'kraft', 'sulfite', 'vinil', 'pvc', 'acm', 'mdf', 'lona', 'ps', 'acrílico', 'reciclato', 'duplex', 'triplex'],
+        'papel': ['90g', '115g', '150g', '170g', '210g', '250g', '300g', '350g', 'offset', 'supremo', 'kraft', 'reciclato', 'sulfite', 'duplex', 'triplex'],
+        'acabamento': ['laminação', 'verniz', 'soft touch', 'plastificação', 'corte', 'dobra', 'vinco', 'furo', 'ilhós', 'solda', 'bastão', 'hot stamping', 'relevo', 'cantos', 'faca', 'espiral', 'wire-o', 'cola', 'encadernação', 'serrilha', 'revestimento', 'proteção'],
+        'cor': ['colorida', 'preto', 'branco', 'cmyk', 'pantone', 'frente', 'verso'],
+        'formato': ['a4', 'a5', 'a6', 'personalizado', 'quadrado', 'retangular', '10x', '15x', '20x', '21x', '30cm'],
+        'quantidade': ['100', '250', '500', '1000', '3000', 'quantidade']
+      };
+      
+      const keywords = categoryMap[selectedAttributeCategory] || [];
+      filtered = filtered.filter((attr: any) =>
+        keywords.some(keyword => attr.name.toLowerCase().includes(keyword) || attr.slug.toLowerCase().includes(keyword))
+      );
+    }
+    
+    return filtered;
+  }, [attributes, attributeSearch, selectedAttributeCategory]);
 
   const handleProductSelect = (productId: number) => {
     setSelectedProductId(productId);
     setSelectedAttributes(new Set());
   };
 
+  const handleAttributeCategoryToggle = (categoryId: string) => {
+    setSelectedAttributeCategory(selectedAttributeCategory === categoryId ? null : categoryId);
+  };
+  
   const handleAttributeToggle = (attributeId: number) => {
     const newSet = new Set(selectedAttributes);
     if (newSet.has(attributeId)) {
@@ -170,8 +197,8 @@ export default function AdminProductAttributesLinker() {
                     <div key={attr.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`attr-${attr.id}`}
-                        checked={selectedAttributes.has(attr.id as any)}
-                        onCheckedChange={() => handleAttributeToggle(attr.id as any)}
+                        checked={selectedAttributeCategory === attr.id}
+                        onCheckedChange={() => handleAttributeCategoryToggle(attr.id)}
                         disabled={!selectedProductId}
                       />
                       <Label htmlFor={`attr-${attr.id}`} className="cursor-pointer flex-1">
@@ -195,7 +222,7 @@ export default function AdminProductAttributesLinker() {
           <CardHeader>
             <CardTitle>Variáveis Disponíveis</CardTitle>
             <CardDescription>
-              {selectedProductId ? "Selecione as variáveis para este produto" : "Selecione um produto primeiro"}
+              {selectedProductId && selectedAttributeCategory ? `Variáveis para ${selectedAttributeCategory.toUpperCase()}` : selectedProductId ? "Selecione um atributo para ver as variáveis" : "Selecione um produto primeiro"}
             </CardDescription>
           </CardHeader>
           <CardContent>
