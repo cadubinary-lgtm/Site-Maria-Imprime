@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
@@ -98,103 +99,80 @@ export default function ProductDetail() {
 
     // Adicionar modificadores de regras
     if (attributeState) {
-      Object.values(attributeState).forEach((state) => {
-        total += state.priceModifier || 0;
+      Object.values(attributeState).forEach((state: any) => {
+        if (state.priceModifier) {
+          total += state.priceModifier;
+        }
       });
     }
 
-    return Math.max(0, total);
+    return total * quantity;
+  };
+
+  const handleAttributeSelect = (attributeId: number, valueIds: number[]) => {
+    setSelectedAttributes((prev) => ({
+      ...prev,
+      [attributeId]: { valueIds, customValue: undefined },
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validExtensions = [".pdf", ".ai", ".cdr", ".psd", ".eps", ".jpg", ".png"];
+      const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+
+      if (!validExtensions.includes(fileExtension)) {
+        toast.error("Tipo de arquivo não suportado");
+        return;
+      }
+
       if (file.size > 50 * 1024 * 1024) {
         toast.error("Arquivo muito grande (máximo 50MB)");
         return;
       }
+
       setArtFile(file);
       toast.success("Arquivo selecionado com sucesso");
     }
   };
 
-  const validateAttributes = () => {
-    if (!visibleAttributes) return true;
+  const handleCreateOrder = async () => {
+    if (!product) return;
 
-    for (const attr of visibleAttributes) {
-      if (attr.isRequired && !selectedAttributes[attr.attributeId]) {
-        toast.error(`Por favor, selecione ${attr.attribute?.name || "um atributo obrigatório"}`);
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  const handleAttributeSelect = (attributeId: number, valueIds: number[], customValue?: string) => {
-    setSelectedAttributes((prev) => ({
-      ...prev,
-      [attributeId]: { valueIds, customValue },
-    }));
-  };
-
-  const handleExportBudget = async () => {
-    if (!product) {
-      toast.error("Produto não encontrado");
-      return;
-    }
-
-    setIsExporting(true);
-
-    try {
-      await exportBudgetPDFWithValidation({
-        productName: product.name,
-        productDescription: product.description || undefined,
-        basePrice: parseFloat(product.price),
-        selectedAttributes: selectedAttributesForSummary,
-        quantity,
-        finalPrice: calculateFinalPrice() * quantity,
-        deadline: "5 dias úteis",
-        notes,
-        customerName: "Cliente",
-        companyName: "Gráfica Ponto Digital",
-      });
-
-      toast.success("Orçamento exportado com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao exportar orçamento");
-      console.error(error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleAddToCart = async () => {
-    if (!product || !productId) {
-      toast.error("Produto não encontrado");
-      return;
-    }
-
-    if (!validateAttributes()) {
+    if (!artFile) {
+      toast.error("Por favor, faça upload do arquivo de arte");
       return;
     }
 
     if (!acceptedTerms) {
-      toast.error("Você deve aceitar os termos");
+      toast.error("Por favor, aceite os termos e condições");
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      const order = await createOrderMutation.mutateAsync({
-        productId,
-        quantity,
+      const formData = new FormData();
+      formData.append("file", artFile);
+      formData.append("productId", product.id.toString());
+      formData.append("quantity", quantity.toString());
+      formData.append("selectedAttributes", JSON.stringify(selectedAttributes));
+      formData.append("notes", notes);
+
+      const response = await fetch("/api/orders/create", {
+        method: "POST",
+        body: formData,
       });
 
-      toast.success("Produto adicionado ao carrinho!");
+      if (!response.ok) {
+        throw new Error("Erro ao criar pedido");
+      }
+
+      const order = await response.json();
+      toast.success("Pedido criado com sucesso!");
     } catch (error) {
-      toast.error("Erro ao adicionar ao carrinho");
+      toast.error("Erro ao criar pedido");
       console.error(error);
     } finally {
       setIsProcessing(false);
@@ -242,90 +220,125 @@ export default function ProductDetail() {
     );
   }
 
-  // Converter atributos para formato do ConfiguradorVisual
-  const configuradorSteps: any[] = visibleAttributes?.map((attr, index) => ({
-    id: `attr-${attr.attributeId}`,
-    title: attr.attribute?.name || "Atributo",
-    description: "",
-    type: attr.allowMultiple ? "checkbox" : "radio",
-    visible: true,
-    required: attr.isRequired,
-    attributes: attr.values.map((v) => ({
-      id: `value-${v.id}`,
-      label: v.value,
-      description: v.value || "",
-      priceModifier: parseFloat(v.priceModifier.toString()),
-    })),
-  })) || [];
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Link href="/catalogo">
-        <Button variant="ghost" className="mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
-      </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-4 py-4">
+        <Link href="/catalogo">
+          <Button variant="ghost" className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar ao Catálogo
+          </Button>
+        </Link>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Coluna Esquerda - Imagem */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-4">
-            <CardContent className="pt-6">
+      {/* Conteúdo Principal */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Coluna Esquerda - Imagem do Produto */}
+          <div className="flex flex-col">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
               {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} className="w-full h-80 object-cover rounded" />
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.name} 
+                  className="w-full h-auto object-cover rounded-lg"
+                />
               ) : (
-                <div className="w-full h-80 bg-gray-200 rounded flex items-center justify-center">
+                <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
                   <span className="text-gray-500">Sem imagem</span>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Coluna Central - Configurador Visual */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Detalhes do Produto */}
-          <div>
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <p className="text-gray-600 mt-2">{product.description}</p>
+            </div>
           </div>
 
-          {/* Configurador Visual Profissional */}
-          {visibleAttributes && visibleAttributes.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações do Produto</CardTitle>
-                <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConfiguradorVisual
-                  steps={configuradorSteps}
-                  basePrice={parseFloat(product.price)}
-                  selectedValues={{}}
-                  onSelectionChange={(stepId, value) => {
-                    const attrId = parseInt(stepId.replace("attr-", ""));
-                    if (Array.isArray(value)) {
-                      const valueIds = value.map(v => parseInt(v.replace("value-", "")));
-                      handleAttributeSelect(attrId, valueIds);
-                    } else {
-                      const valueId = parseInt(value.replace("value-", ""));
-                      handleAttributeSelect(attrId, [valueId]);
-                    }
-                  }}
-                  onPriceUpdate={setConfiguradorPrice}
-                />
-              </CardContent>
-            </Card>
-          )}
+          {/* Coluna Direita - Detalhes e Configuração */}
+          <div className="space-y-6">
+            {/* Informações do Produto */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <p className="text-gray-600 text-lg mb-4">{product.description}</p>
+              
+              {/* Preço */}
+              <div className="mb-6">
+                <p className="text-sm text-gray-600 mb-1">Preço a partir de:</p>
+                <p className="text-3xl font-bold text-red-600">
+                  R$ {calculateFinalPrice().toFixed(2)}
+                </p>
+              </div>
+            </div>
 
-          {/* Upload de Arquivo */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Arquivo de Arte</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
+            {/* Seletores de Atributos */}
+            {visibleAttributes && visibleAttributes.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 className="text-xl font-bold text-gray-900">Configurações</h2>
+                
+                {visibleAttributes.map((attr) => {
+                  const selectedValue = selectedAttributes[attr.attributeId]?.valueIds[0];
+                  
+                  return (
+                    <div key={attr.attributeId} className="space-y-2">
+                      <Label className="text-base font-semibold text-gray-900">
+                        {attr.attribute?.name}
+                      </Label>
+                      
+                      <Select
+                        value={selectedValue?.toString() || ""}
+                        onValueChange={(value) => handleAttributeSelect(attr.attributeId, [parseInt(value)])}
+                      >
+                        <SelectTrigger className="w-full h-10 border-gray-300">
+                          <SelectValue placeholder="Selecione uma opção" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {attr.values.map((value) => {
+                            const priceModifier = parseFloat(value.priceModifier.toString());
+                            return (
+                            <SelectItem key={value.id} value={value.id.toString()}>
+                              {value.value}
+                              {priceModifier > 0 && ` (+R$ ${priceModifier.toFixed(2)})`}
+                              {priceModifier < 0 && ` (-R$ ${Math.abs(priceModifier).toFixed(2)})`}
+                            </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Quantidade */}
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">Quantidade</h2>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                >
+                  -
+                </Button>
+                <Input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 text-center"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+
+            {/* Upload de Arquivo */}
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">Arquivo de Arte</h2>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors">
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -333,49 +346,55 @@ export default function ProductDetail() {
                   id="art-upload"
                   accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
                 />
-                <label htmlFor="art-upload" className="cursor-pointer">
+                <label htmlFor="art-upload" className="cursor-pointer block">
                   <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-medium">Clique para fazer upload</p>
+                  <p className="text-sm font-medium text-gray-900">Clique para fazer upload</p>
                   <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
                 </label>
               </div>
               {artFile && (
                 <Alert>
-                  <CheckCircle2 className="h-4 w-4" />
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
                 </Alert>
               )}
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Termos */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              checked={acceptedTerms}
-              onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
-            />
-            <Label htmlFor="terms" className="text-sm cursor-pointer">
-              Aceito os termos e condições
-            </Label>
+            {/* Notas */}
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">Observações (Opcional)</h2>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Adicione observações sobre seu pedido..."
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                rows={3}
+              />
+            </div>
+
+            {/* Termos e Botão de Compra */}
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                />
+                <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
+                  Aceito os termos e condições de compra
+                </label>
+              </div>
+
+              <Button
+                onClick={handleCreateOrder}
+                disabled={isProcessing || !artFile || !acceptedTerms}
+                className="w-full bg-red-600 hover:bg-red-700 text-white h-12 text-lg font-semibold gap-2"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {isProcessing ? "Processando..." : "Solicitar Orçamento"}
+              </Button>
+            </div>
           </div>
-        </div>
-
-        {/* Coluna Direita - Resumo do Pedido */}
-        <div className="lg:col-span-1">
-          <OrderSummary
-            productName={product.name}
-            productImage={product.imageUrl || undefined}
-            selectedAttributes={selectedAttributesForSummary}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            basePrice={parseFloat(product.price)}
-            deadline="5 dias úteis"
-            notes={notes}
-            onNotesChange={setNotes}
-            onAddToCart={handleAddToCart}
-            isLoading={isProcessing}
-          />
         </div>
       </div>
     </div>
