@@ -6,13 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import DynamicAttributeRenderer, { DynamicAttribute } from "@/components/DynamicAttributeRenderer";
 import { processRules, generateInitialState, getVisibleAttributes } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
+import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -25,6 +26,8 @@ export default function ProductDetail() {
 
   // Estado de atributos selecionados
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
+  const [notes, setNotes] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -132,6 +135,37 @@ export default function ProductDetail() {
       ...prev,
       [attributeId]: { valueIds, customValue },
     }));
+  };
+
+  const handleExportBudget = async () => {
+    if (!product) {
+      toast.error("Produto não encontrado");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      await exportBudgetPDFWithValidation({
+        productName: product.name,
+        productDescription: product.description || undefined,
+        basePrice: parseFloat(product.price),
+        selectedAttributes: selectedAttributesForSummary,
+        quantity,
+        finalPrice: calculateFinalPrice() * quantity,
+        deadline: "5 dias úteis",
+        notes,
+        customerName: "Cliente",
+        companyName: "Gráfica Ponto Digital",
+      });
+
+      toast.success("Orçamento exportado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao exportar orçamento");
+      console.error(error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleAddToCart = async () => {
@@ -325,16 +359,32 @@ export default function ProductDetail() {
 
         {/* Coluna Direita - Resumo Lateral Fixo (1 coluna) */}
         <div className="lg:col-span-1">
-          <OrderSummary
-            productName={product.name}
-            productImage={product.imageUrl || undefined}
-            basePrice={parseFloat(product.price)}
-            selectedAttributes={selectedAttributesForSummary}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            onAddToCart={handleAddToCart}
-            isLoading={isProcessing}
-          />
+          <div className="space-y-4">
+            <OrderSummary
+              productName={product.name}
+              productImage={product.imageUrl || undefined}
+              basePrice={parseFloat(product.price)}
+              selectedAttributes={selectedAttributesForSummary}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              onAddToCart={handleAddToCart}
+              isLoading={isProcessing}
+              deadline="5 dias úteis"
+              notes={notes}
+              onNotesChange={setNotes}
+            />
+            
+            {/* Botão de Exportação de Orçamento */}
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleExportBudget}
+              disabled={isExporting}
+            >
+              <FileDown className="w-4 h-4" />
+              {isExporting ? "Exportando..." : "Exportar Orçamento"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

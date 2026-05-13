@@ -21,6 +21,7 @@ import AdminAttributesManager from "./pages/AdminAttributesManager";
 import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
 import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import { AdminPricingRules } from "./pages/AdminPricingRules";
+import AdminRulesManager from "./pages/AdminRulesManager";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -67,6 +68,7 @@ function Router() {
         <Route path="/admin/atributos" component={AdminAttributesManager} />
         <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
+        <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
 
         </>
       )}

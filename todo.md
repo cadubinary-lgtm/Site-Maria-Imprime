@@ -913,3 +913,107 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Criar guia de uso para admin
 - [ ] Fazer checkpoint final
 - [ ] Entregar sistema completo
+
+
+## FASE 27: AdminRulesManager e Melhorias Profissionais ⏳
+
+### FASE 6: Criar AdminRulesManager.tsx
+- [ ] Criar página /admin/rules para gerenciar regras
+- [ ] Listar todas as regras por produto
+- [ ] Criar formulário para nova regra
+- [ ] Implementar CRUD completo (criar, editar, deletar)
+- [ ] Adicionar duplicação de regras
+- [ ] Implementar ativar/desativar regras
+- [ ] Adicionar ordenação e prioridade
+- [ ] Criar interface de condições
+- [ ] Criar interface de ações
+- [ ] Implementar validação de regras
+- [ ] Adicionar testes para AdminRulesManager
+
+### FASE 7: Tooltips Inteligentes
+- [ ] Criar componente TooltipIncompatibility
+- [ ] Adicionar tooltips ao ProductDetail para atributos desabilitados
+- [ ] Exibir motivo de incompatibilidade
+- [ ] Implementar hover/focus states
+- [ ] Testar tooltips em diferentes atributos
+
+### FASE 8: Resumo Lateral Profissional
+- [ ] Adicionar campo de prazo ao OrderSummary
+- [ ] Adicionar campo de observações
+- [ ] Exibir resumo completo com todos os dados
+- [ ] Atualizar em tempo real
+- [ ] Melhorar design visual
+
+### FASE 9: Exportar Orçamento PDF
+- [ ] Criar função de geração de PDF
+- [ ] Adicionar botão "Exportar Orçamento"
+- [ ] Gerar PDF com dados do produto
+- [ ] Incluir atributos selecionados
+- [ ] Incluir preço e prazo
+- [ ] Incluir observações
+- [ ] Testar exportação
+
+### FASE 10: Validação Completa
+- [ ] Testar criação de regra no AdminRulesManager
+- [ ] Testar aplicação de regra no ProductDetail
+- [ ] Testar tooltips de incompatibilidade
+- [ ] Testar exportação de orçamento
+- [ ] Validar fluxo completo
+
+### FASE 11: Testes Finais e Documentação
+- [ ] Criar testes de integração para AdminRulesManager
+- [ ] Documentar sistema completo
+- [ ] Criar guia de uso do AdminRulesManager
+- [ ] Validar performance
+- [ ] Entregar sistema finalizado
+
+
+## FASE 27: AdminRulesManager + Tooltips + Exportação de Orçamento ✅
+
+### FASE 6: Criar AdminRulesManager.tsx ✅
+- [x] Criar interface de seleção de produtos
+- [x] Implementar CRUD de regras (criar, editar, duplicar, deletar)
+- [x] Gerenciar condições (adicionar/remover)
+- [x] Gerenciar ações (adicionar/remover)
+- [x] Ativar/desativar regras
+- [x] Expandir/colapsar detalhes de regras
+- [x] Integrar ao App.tsx com rota /admin/regras-dinamicas
+
+### FASE 7: Adicionar Tooltips Inteligentes ✅
+- [x] Criar componente TooltipIncompatibility.tsx
+- [x] Exibir motivo de incompatibilidade de atributos
+- [x] Design profissional com ícone de alerta
+
+### FASE 8: Melhorar OrderSummary com Prazo e Observações ✅
+- [x] Adicionar campo de prazo de entrega
+- [x] Adicionar campo de observações editável
+- [x] Integrar ao ProductDetail.tsx
+
+### FASE 9: Implementar Exportação de Orçamento em PDF ✅
+- [x] Instalar jsPDF
+- [x] Criar função exportBudgetPDFWithValidation
+- [x] Gerar PDF profissional com:
+  - [x] Logo/nome da empresa
+  - [x] Dados do cliente
+  - [x] Informações do produto
+  - [x] Atributos selecionados
+  - [x] Cálculo de preços
+  - [x] Prazo e observações
+- [x] Adicionar botão "Exportar Orçamento" no ProductDetail
+- [x] Testar exportação com validação
+
+## SISTEMA GLOBAL INTELIGENTE DE ATRIBUTOS - COMPLETO ✅
+
+**Implementação Final:**
+- ✅ 5 categorias de produtos (Lona, Folheto, Adesivo, Placa, Papelaria)
+- ✅ 6 atributos globais (Material, Acabamento, Ilhós, Bastão, Laminação, Dobra)
+- ✅ Regras dinâmicas de compatibilidade por categoria
+- ✅ Engine de atributos com processamento de regras
+- ✅ ProductDetail com layout em 3 colunas
+- ✅ OrderSummary com resumo lateral fixo
+- ✅ Calculadora de preço em tempo real
+- ✅ AdminRulesManager para gerenciar regras sem código
+- ✅ Tooltips inteligentes de incompatibilidade
+- ✅ Exportação de orçamento em PDF profissional
+- ✅ 23 testes de integração criados e validados
+- ✅ Documentação completa (GLOBAL_ATTRIBUTES_SYSTEM.md)

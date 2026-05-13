@@ -29,6 +29,9 @@ interface OrderSummaryProps {
   isLoading?: boolean;
   calculatorValue?: number;
   onCalculatorChange?: (value: number) => void;
+  deadline?: string;
+  notes?: string;
+  onNotesChange?: (notes: string) => void;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -42,6 +45,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   isLoading = false,
   calculatorValue,
   onCalculatorChange,
+  deadline,
+  notes,
+  onNotesChange,
 }) => {
   // Calcular preço total com modificadores
   const totalModifier = useMemo(() => {
@@ -143,6 +149,27 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                 ≈ {(calculatorValue / 10000).toFixed(2)} m²
               </p>
             )}
+          </div>
+        )}
+
+        {/* Prazo */}
+        {deadline && (
+          <div className="space-y-2 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Prazo de Entrega</p>
+            <p className="text-sm font-semibold text-green-600">{deadline}</p>
+          </div>
+        )}
+
+        {/* Observações */}
+        {onNotesChange && (
+          <div className="space-y-2 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Observações</p>
+            <textarea
+              value={notes || ""}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="Adicione observações sobre seu pedido..."
+              className="w-full h-20 p-2 text-xs border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
         )}
 
