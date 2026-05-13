@@ -633,6 +633,8 @@ export const attributeValues = mysqlTable("attributeValues", {
   attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
   value: varchar("value", { length: 255 }).notNull(), // Ex: "Couchê 90g"
   description: longtext("description"),
+  // ⚠️ DEPRECATED: Preços agora estão em productAttributes (vínculo)
+  // Mantido por compatibilidade, será removido em versão futura
   priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(), // Impacto no preço
   timeModifier: int("timeModifier").default(0).notNull(), // Impacto no prazo em horas
   weightModifier: decimal("weightModifier", { precision: 10, scale: 4 }).default("0").notNull(), // Impacto no peso em kg
@@ -648,37 +650,106 @@ export type AttributeValue = typeof attributeValues.$inferSelect;
 export type InsertAttributeValue = typeof attributeValues.$inferInsert;
 
 /**
+ * ⚠️ NOTA: Os preços em attributeValues são DEPRECATED
+ * Use productAttributes.priceModifier em vez disso (vínculo produto↔atributo)
+ */
+
+/**
  * Product attributes - Vinculação entre produtos e atributos
  * Define quais atributos um produto utiliza
+ * ✨ NOVO: Centraliza precificação no vínculo (não no atributo global!)
  */
-export const productAttributes = mysqlTable("productAttributes", {
-  id: int("id").autoincrement().primaryKey(),
-  productId: int("productId").notNull().references(() => products.id, { onDelete: "cascade" }),
-  attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
-  isRequired: boolean("isRequired").default(true).notNull(), // Se é obrigatório selecionar
-  allowMultiple: boolean("allowMultiple").default(false).notNull(), // Se permite múltiplas seleções
-  displayOrder: int("displayOrder").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const productAttributes = mysqlTable(
+  "productAttributes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    productId: int("productId").notNull().references(() => products.id, { onDelete: "cascade" }),
+    attributeId: int("attributeId").notNull().references(() => attributes.id, { onDelete: "cascade" }),
+    
+    // Configuração do vínculo
+    isRequired: boolean("isRequired").default(true).notNull(), // Se é obrigatório selecionar
+    allowMultiple: boolean("allowMultiple").default(false).notNull(), // Se permite múltiplas seleções
+    displayOrder: int("displayOrder").default(0).notNull(),
+    
+    // ✨ NOVO: Precificação no vínculo (por produto, não global!)
+    priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).default("0").notNull(), // +R$15 para este produto
+    calculationType: mysqlEnum("calculationType", [
+      "fixed",          // Valor fixo
+      "percentage",     // Percentual do preço base
+      "multiplier",     // Multiplicador (ex: 1.5x)
+      "per_sqm",        // Por metro quadrado
+      "per_quantity",   // Por quantidade
+    ]).default("fixed").notNull(),
+    
+    // ✨ NOVO: Impacto no prazo e peso
+    timeModifier: int("timeModifier").default(0).notNull(), // Impacto no prazo em horas
+    weightModifier: decimal("weightModifier", { precision: 10, scale: 4 }).default("0").notNull(), // Impacto no peso em kg
+    
+    // ✨ NOVO: Controle fino de ativação
+    isActive: boolean("isActive").default(true).notNull(), // Se este atributo está ativo para o produto
+    priority: int("priority").default(0).notNull(), // Ordem de exibição
+    
+    // ✨ NOVO: Regras específicas do vínculo (JSON para flexibilidade)
+    rules: text("rules"), // JSON com regras adicionais
+    
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    // Índices para performance - criados via SQL migration
+  })
+);
 
 export type ProductAttribute = typeof productAttributes.$inferSelect;
 export type InsertProductAttribute = typeof productAttributes.$inferInsert;
 
 /**
+ * Type para ProductAttribute com tipagem forte de calculationType
+ */
+export type ProductAttributeWithPricing = ProductAttribute & {
+  calculationType: "fixed" | "percentage" | "multiplier" | "per_sqm" | "per_quantity";
+  rules?: Record<string, any>;
+};
+
+/**
  * Product attribute values - Quais valores de atributo estão disponíveis para um produto
  * Ex: Produto "Cartão de Visita" pode usar "Couchê 250g" e "Couchê 300g" mas não "Lona 280g"
+ * ✨ NOVO: Permite override de preço por valor específico
  */
-export const productAttributeValues = mysqlTable("productAttributeValues", {
-  id: int("id").autoincrement().primaryKey(),
-  productAttributeId: int("productAttributeId").notNull().references(() => productAttributes.id, { onDelete: "cascade" }),
-  attributeValueId: int("attributeValueId").notNull().references(() => attributeValues.id, { onDelete: "cascade" }),
-  isEnabled: boolean("isEnabled").default(true).notNull(), // Ativar/desativar valor específico
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const productAttributeValues = mysqlTable(
+  "productAttributeValues",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    productAttributeId: int("productAttributeId").notNull().references(() => productAttributes.id, { onDelete: "cascade" }),
+    attributeValueId: int("attributeValueId").notNull().references(() => attributeValues.id, { onDelete: "cascade" }),
+    isEnabled: boolean("isEnabled").default(true).notNull(), // Ativar/desativar valor específico
+    
+    // ✨ NOVO: Preço pode variar por valor também (opcional)
+    priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }), // Override do preço para este valor
+    calculationType: mysqlEnum("calculationType", [
+      "fixed",
+      "percentage",
+      "multiplier",
+      "per_sqm",
+      "per_quantity",
+    ]), // Override do tipo de cálculo
+    
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    // Índices para performance - criados via SQL migration
+  })
+);
 
 export type ProductAttributeValue = typeof productAttributeValues.$inferSelect;
 export type InsertProductAttributeValue = typeof productAttributeValues.$inferInsert;
+
+/**
+ * Type para ProductAttributeValue com tipagem forte
+ */
+export type ProductAttributeValueWithPricing = ProductAttributeValue & {
+  calculationType?: "fixed" | "percentage" | "multiplier" | "per_sqm" | "per_quantity";
+};
 
 /**
  * Attribute rules - Regras dinâmicas entre atributos

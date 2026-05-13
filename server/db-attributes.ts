@@ -390,3 +390,110 @@ export async function getOrderItemAttributes(orderItemId: number) {
     .innerJoin(attributeValues, eq(orderItemAttributes.attributeValueId, attributeValues.id))
     .where(eq(orderItemAttributes.orderItemId, orderItemId));
 }
+
+/**
+ * ========================================
+ * PRECIFICAÇÃO CENTRALIZADA NO VÍNCULO
+ * ========================================
+ * NOVO: Funções para gerenciar precificação no vínculo produto↔atributo
+ */
+
+/**
+ * Atualizar preço e configurações de um atributo vinculado
+ * NOVO: Centraliza precificação no vínculo, não no atributo global
+ */
+export async function updateProductAttribute(data: {
+  productAttributeId: number;
+  priceModifier?: number;
+  calculationType?: "fixed" | "percentage" | "multiplier" | "per_sqm" | "per_quantity";
+  timeModifier?: number;
+  weightModifier?: number;
+  isActive?: boolean;
+  priority?: number;
+  rules?: string; // JSON string
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Validar que o vínculo existe
+  const existing = await db
+    .select()
+    .from(productAttributes)
+    .where(eq(productAttributes.id, data.productAttributeId));
+
+  if (!existing || existing.length === 0) {
+    throw new Error(`Product attribute with id ${data.productAttributeId} not found`);
+  }
+
+  // Preparar dados para atualização (apenas campos fornecidos)
+  const updateData: any = {};
+
+  if (data.priceModifier !== undefined) {
+    updateData.priceModifier = data.priceModifier;
+  }
+
+  if (data.calculationType !== undefined) {
+    updateData.calculationType = data.calculationType;
+  }
+
+  if (data.timeModifier !== undefined) {
+    updateData.timeModifier = data.timeModifier;
+  }
+
+  if (data.weightModifier !== undefined) {
+    updateData.weightModifier = data.weightModifier;
+  }
+
+  if (data.isActive !== undefined) {
+    updateData.isActive = data.isActive;
+  }
+
+  if (data.priority !== undefined) {
+    updateData.priority = data.priority;
+  }
+
+  if (data.rules !== undefined) {
+    updateData.rules = data.rules;
+  }
+
+  // Se nenhum campo foi fornecido, retornar erro
+  if (Object.keys(updateData).length === 0) {
+    throw new Error("No fields to update");
+  }
+
+  // Executar atualização
+  return await db
+    .update(productAttributes)
+    .set(updateData)
+    .where(eq(productAttributes.id, data.productAttributeId));
+}
+
+/**
+ * Desvinc ular atributo de produto
+ * NOVO: Remove o vínculo e todos os dados associados
+ */
+export async function unlinkAttributeFromProduct(productAttributeId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Validar que o vínculo existe
+  const existing = await db
+    .select()
+    .from(productAttributes)
+    .where(eq(productAttributes.id, productAttributeId));
+
+  if (!existing || existing.length === 0) {
+    throw new Error(`Product attribute with id ${productAttributeId} not found`);
+  }
+
+  // Deletar valores do atributo para este produto (via cascade)
+  await db
+    .delete(productAttributeValues)
+    .where(eq(productAttributeValues.productAttributeId, productAttributeId));
+
+  // Deletar o vínculo
+  return await db
+    .delete(productAttributes)
+    .where(eq(productAttributes.id, productAttributeId));
+}
+

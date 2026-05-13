@@ -99,6 +99,13 @@
       "when": 1778621023508,
       "tag": "0013_powerful_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1778632108165,
+      "tag": "0014_round_longshot",
+      "breakpoints": true
     }
   ]
 }

@@ -149,7 +149,7 @@ export const attributesRouter = router({
    */
 
   /**
-   * Vincular atributo a produto
+   * Vincular atributo a produto (com precificação no vínculo)
    */
   linkAttributeToProduct: adminProcedure
     .input(
@@ -159,6 +159,14 @@ export const attributesRouter = router({
         isRequired: z.boolean().optional(),
         allowMultiple: z.boolean().optional(),
         displayOrder: z.number().optional(),
+        // NOVO: Precificação no vínculo
+        priceModifier: z.number().optional(),
+        calculationType: z.enum(["fixed", "percentage", "multiplier", "per_sqm", "per_quantity"]).optional(),
+        timeModifier: z.number().optional(),
+        weightModifier: z.number().optional(),
+        isActive: z.boolean().optional(),
+        priority: z.number().optional(),
+        rules: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -166,11 +174,55 @@ export const attributesRouter = router({
     }),
 
   /**
-   * Obter atributos de um produto
+   * Atualizar precificacao de um vinculo produto-atributo
+   */
+  updateAttributePrice: adminProcedure
+    .input(
+      z.object({
+        productAttributeId: z.number(),
+        priceModifier: z.number().optional(),
+        calculationType: z.enum(["fixed", "percentage", "multiplier", "per_sqm", "per_quantity"]).optional(),
+        timeModifier: z.number().optional(),
+        weightModifier: z.number().optional(),
+        isActive: z.boolean().optional(),
+        priority: z.number().optional(),
+        rules: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await dbAttributes.updateProductAttribute(input);
+    }),
+
+  /**
+   * Desvinc ular atributo de um produto
+   */
+  unlinkAttributeFromProduct: adminProcedure
+    .input(z.number())
+    .mutation(async ({ input }) => {
+      return await dbAttributes.unlinkAttributeFromProduct(input);
+    }),
+
+  /**
+   * Obter atributos de um produto (com precificação)
    */
   getProductAttributes: publicProcedure.input(z.number()).query(async ({ input }) => {
     return await dbAttributes.getProductAttributes(input);
   }),
+
+  /**
+   * Obter atributo específico de um produto (com precificação)
+   */
+  getProductAttribute: publicProcedure
+    .input(
+      z.object({
+        productId: z.number(),
+        productAttributeId: z.number(),
+      })
+    )
+    .query(async ({ input }) => {
+      const attributes = await dbAttributes.getProductAttributes(input.productId);
+      return attributes.find((attr) => attr.id === input.productAttributeId) || null;
+    }),
 
   /**
    * Habilitar/desabilitar valor específico para produto
