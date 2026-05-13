@@ -53,7 +53,6 @@ function Router() {
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
-      <Route path="/atributos" component={Atributos} />
       
       {/* Admin routes - Acessível para todos os usuários logados */}
       {user && (
@@ -67,6 +66,7 @@ function Router() {
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
         <Route path="/admin/automacao" component={AutomationDashboard} />
         <Route path="/admin/erp" component={ERPDashboard} />
+        <Route path="/admin/atributos" component={Atributos} />
         <Route path="/admin/variaveis" component={AdminAttributesManager} />
         <Route path="/admin/vincular-variaveis" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
