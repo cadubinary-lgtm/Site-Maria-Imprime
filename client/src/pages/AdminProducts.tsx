@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,11 @@ export default function AdminProducts() {
       }));
     }
   }, [productSegments]);
+
+  // Memoizar handler para evitar loop infinito
+  const handleSegmentsChange = useCallback((segmentIds: number[]) => {
+    setEditForm((prev) => ({ ...prev, segmentIds }));
+  }, []);
 
   // Filtrar produtos por nome
   const filteredProducts = products?.filter((product: any) =>
@@ -274,9 +279,7 @@ export default function AdminProducts() {
                               <MultiSegmentSelector
                                 productId={editingId || 0}
                                 selectedSegmentIds={editForm.segmentIds}
-                                onSegmentsChange={(segmentIds) =>
-                                  setEditForm({ ...editForm, segmentIds })
-                                }
+                                onSegmentsChange={handleSegmentsChange}
                               />
                             </div>
 
