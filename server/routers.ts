@@ -42,6 +42,7 @@ import { automationRouter } from "./routers-automation";
 import { attributesRouter } from "./routers-attributes";
 import { productSegmentsRouter } from "./routers-product-segments";
 import { pricingRouter } from "./routers-pricing";
+import { pricingRulesRouter } from "./routers-pricing-rules";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -372,6 +373,8 @@ export const appRouter = router({
   productSegments: productSegmentsRouter,
   // Pricing - Precificação Dinâmica
   pricing: pricingRouter,
+  // Pricing Rules - Regras de Precificação Reutilizáveis
+  pricingRules: pricingRulesRouter,
 });
 
 export type AppRouter = typeof appRouter;

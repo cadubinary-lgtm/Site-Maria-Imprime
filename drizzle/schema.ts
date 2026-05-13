@@ -830,3 +830,32 @@ export const productSegments = mysqlTable("productSegments", {
 
 export type ProductSegment = typeof productSegments.$inferSelect;
 export type InsertProductSegment = typeof productSegments.$inferInsert;
+
+
+/**
+ * Pricing Rules - Itens de precificação reutilizáveis
+ * Substitui o sistema anterior de "regras condicionais"
+ * Agora são itens configuráveis com preço, categoria, status
+ * Exemplo: Couchê 300g (+R$10), Laminação Fosca (+R$15), etc.
+ */
+export const pricingRules = mysqlTable("pricingRules", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Couchê 300g"
+  category: varchar("category", { length: 255 }).notNull(), // Ex: "PAPÉIS", "REVESTIMENTOS", "ACABAMENTOS"
+  description: text("description"), // Descrição opcional
+  basePrice: decimal("basePrice", { precision: 10, scale: 2 }).notNull(), // Valor adicional
+  calculationType: mysqlEnum("calculationType", [
+    "fixed",          // Valor fixo
+    "percentage",     // Percentual do preço base
+    "multiplier",     // Multiplicador (ex: 1.5x)
+    "per_sqm",        // Por metro quadrado
+    "per_quantity",   // Por quantidade
+  ]).default("fixed").notNull(),
+  isActive: boolean("isActive").default(true).notNull(), // Ativo/Inativo
+  priority: int("priority").default(0).notNull(), // Ordem de exibição
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PricingRule = typeof pricingRules.$inferSelect;
+export type InsertPricingRule = typeof pricingRules.$inferInsert;

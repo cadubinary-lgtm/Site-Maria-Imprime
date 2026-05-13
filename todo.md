@@ -630,3 +630,22 @@
 - [x] Carregar preço
 - [ ] Usar preço no cálculo automático (próxima fase)
 - [x] Testar fluxo completo
+
+
+## NOVA ARQUITETURA: Sistema de Regras de Precificação Reutilizáveis (Nível Printi/FuturaIM)
+
+- [ ] Criar schema `pricingRules` no banco (tabela com categorias, preços, status)
+- [ ] Criar migrations SQL
+- [ ] Atualizar schema Drizzle
+- [ ] Implementar procedures tRPC (create, read, update, delete, list)
+- [ ] Criar página /admin/regras com interface profissional
+- [ ] Implementar acordeão/cards por categoria
+- [ ] Adicionar funcionalidade duplicar regra
+- [ ] Adicionar funcionalidade editar regra
+- [ ] Adicionar funcionalidade remover regra
+- [ ] Adicionar toggle ativo/inativo
+- [ ] Implementar modal "Criar nova regra"
+- [ ] Integrar regras com cálculo de preços
+- [ ] Testar fluxo completo
+- [ ] Validar persistência
+- [ ] Criar checkpoint estável

@@ -18,9 +18,9 @@ import AdminPanel from "./pages/AdminPanel";
 import SegmentsManager from "./pages/SegmentsManager";
 import CalculadoraDemo from "./pages/CalculadoraDemo";
 import AdminAttributesManager from "./pages/AdminAttributesManager";
-import AdminProductAttributesLinkerV2 from "./pages/AdminProductAttributesLinkerV2";
+import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
 import AdminRulesBuilder from "./pages/AdminRulesBuilder";
-import AdminAttributePricing from "./pages/AdminAttributePricing";
+
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import FileValidationManager from "./pages/FileValidationManager";
@@ -64,9 +64,9 @@ function Router() {
         <Route path="/admin/automacao" component={AutomationDashboard} />
         <Route path="/admin/erp" component={ERPDashboard} />
         <Route path="/admin/atributos" component={AdminAttributesManager} />
-        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinkerV2} />
+        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminRulesBuilder} />
-        <Route path="/admin/precos-atributos" component={AdminAttributePricing} />
+
         </>
       )}
 
