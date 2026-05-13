@@ -22,7 +22,6 @@ import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
 import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import { AdminPricingRules } from "./pages/AdminPricingRules";
 import AdminRulesManager from "./pages/AdminRulesManager";
-import Atributos from "./pages/Atributos";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -66,9 +65,8 @@ function Router() {
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
         <Route path="/admin/automacao" component={AutomationDashboard} />
         <Route path="/admin/erp" component={ERPDashboard} />
-        <Route path="/admin/atributos" component={Atributos} />
-        <Route path="/admin/variaveis" component={AdminAttributesManager} />
-        <Route path="/admin/vincular-variaveis" component={AdminProductAttributesLinker} />
+        <Route path="/admin/atributos" component={AdminAttributesManager} />
+        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
         <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
 
