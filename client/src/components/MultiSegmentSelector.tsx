@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,7 @@ export default function MultiSegmentSelector({
     setLocalSelected(selectedSegmentIds);
   }, [selectedSegmentIds]);
 
-  const handleToggleSegment = (segmentId: number) => {
+  const handleToggleSegment = useCallback((segmentId: number) => {
     setLocalSelected((prev) => {
       const newSelected = prev.includes(segmentId)
         ? prev.filter((id) => id !== segmentId)
@@ -33,11 +33,11 @@ export default function MultiSegmentSelector({
       onSegmentsChange(newSelected);
       return newSelected;
     });
-  };
+  }, [onSegmentsChange]);
 
-  const handleRemoveSegment = (segmentId: number) => {
+  const handleRemoveSegment = useCallback((segmentId: number) => {
     handleToggleSegment(segmentId);
-  };
+  }, [handleToggleSegment]);
 
   if (isLoading) {
     return <div className="text-gray-500">Carregando segmentos...</div>;
