@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,8 @@ export default function AdminProductAttributesLinker() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Set<number>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [attributeSearch, setAttributeSearch] = useState("");
 
   // Carregar produtos
   const { data: products, isLoading: productsLoading } = trpc.products.getAll.useQuery();
@@ -37,6 +39,26 @@ export default function AdminProductAttributesLinker() {
       toast.error(`Erro: ${error.message}`);
     },
   });
+
+  // Filtrar produtos por busca
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    if (!productSearch.trim()) return products;
+    
+    const query = productSearch.toLowerCase();
+    return products.filter((p: any) => p.name.toLowerCase().includes(query));
+  }, [products, productSearch]);
+
+  // Filtrar atributos por busca
+  const filteredAttributes = useMemo(() => {
+    if (!attributes) return [];
+    if (!attributeSearch.trim()) return attributes;
+    
+    const query = attributeSearch.toLowerCase();
+    return attributes.filter((a: any) => 
+      a.name.toLowerCase().includes(query) || a.slug.toLowerCase().includes(query)
+    );
+  }, [attributes, attributeSearch]);
 
   const handleProductSelect = (productId: number) => {
     setSelectedProductId(productId);
@@ -90,14 +112,23 @@ export default function AdminProductAttributesLinker() {
             <CardDescription>Selecione um produto para configurar seus atributos</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Buscar produto..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             {productsLoading ? (
               <div className="flex justify-center">
                 <Loader2 className="w-6 h-6 animate-spin" />
               </div>
             ) : (
               <div className="space-y-2">
-                {products && products.length > 0 ? (
-                  products.map((product: any) => (
+                {filteredProducts && filteredProducts.length > 0 ? (
+                  filteredProducts.map((product: any) => (
                     <Button
                       key={product.id}
                       variant={selectedProductId === product.id ? "default" : "outline"}
@@ -124,15 +155,24 @@ export default function AdminProductAttributesLinker() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Buscar atributo..."
+                value={attributeSearch}
+                onChange={(e) => setAttributeSearch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             {attributesLoading ? (
               <div className="flex justify-center">
                 <Loader2 className="w-6 h-6 animate-spin" />
               </div>
             ) : (
               <div className="space-y-3">
-                {attributes && attributes.length > 0 ? (
+                {filteredAttributes && filteredAttributes.length > 0 ? (
                   <>
-                    {attributes.map((attr: any) => (
+                    {filteredAttributes.map((attr: any) => (
                       <div key={attr.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={`attr-${attr.id}`}
