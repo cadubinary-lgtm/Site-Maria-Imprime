@@ -649,3 +649,22 @@
 - [ ] Testar fluxo completo
 - [ ] Validar persistência
 - [ ] Criar checkpoint estável
+
+## Fase 25: Segmentos Totalmente Dinâmicos no Catálogo ✅ COMPLETO
+- [x] Procedure tRPC `segments.getAll` para retornar lista de segmentos (já existia)
+- [x] Home.tsx - Componente SegmentsSection() carrega segmentos da API
+- [x] CatalogImproved.tsx - Sidebar de segmentos é dinâmica
+- [x] AdminDashboard.tsx - Select de segmentos carrega da API
+- [x] AdminPanel.tsx - Todos os Selects de segmentos são dinâmicos
+- [x] Implementar refetch automático via tRPC
+- [x] Remover todas as listas hardcoded de segmentos
+- [x] Escrever testes vitest (dynamic-segments.test.ts)
+- [x] Corrigir funções createSegment, updateSegment, deleteSegment
+- [x] Validar sincronização automática
+
+**Resultado Final:**
+✅ Segmentos totalmente dinâmicos - carregam exclusivamente da API `/admin/segmentos`
+✅ Sincronização automática - novo segmento criado no admin aparece automaticamente
+✅ Layout mantido - sem alterações visuais ou estruturais
+✅ Sem listas hardcoded - todo segmento vem do banco de dados
+✅ Pronto para produção
