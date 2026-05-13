@@ -1,36 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Edit2, Trash2, Plus } from "lucide-react";
+import { Loader2, ArrowLeft, Edit2, Trash2, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
-
-const SEGMENTS = [
-  { id: "alimentacao", label: "Alimentação" },
-  { id: "beleza", label: "Beleza & Saúde" },
-  { id: "varejo", label: "Varejo" },
-  { id: "servicos", label: "Serviços" },
-];
+import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 
 export default function AdminProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
     price: "",
-    segment: "alimentacao",
     imageUrl: "",
+    segmentIds: [] as number[],
   });
 
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
+  const { data: productSegments } = trpc.productSegments.getProductSegments.useQuery(
+    editingId || 0,
+    { enabled: !!editingId }
+  );
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
+  const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
   const deleteProductMutation = trpc.admin.deleteProduct.useMutation();
+
+  // Atualizar segmentos quando carrega produto
+  useEffect(() => {
+    if (productSegments) {
+      setEditForm((prev) => ({
+        ...prev,
+        segmentIds: productSegments.map((s) => s.id),
+      }));
+    }
+  }, [productSegments]);
+
+  // Memoizar handler para evitar loop infinito
+  const handleSegmentsChange = useCallback((segmentIds: number[]) => {
+    setEditForm((prev) => ({ ...prev, segmentIds }));
+  }, []);
+
+  // Filtrar produtos por nome
+  const filteredProducts = products?.filter((product: any) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
@@ -38,8 +57,8 @@ export default function AdminProducts() {
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
-      segment: product.segment,
       imageUrl: product.imageUrl || "",
+      segmentIds: [],
     });
   };
 
@@ -47,19 +66,27 @@ export default function AdminProducts() {
     if (!editingId) return;
 
     try {
+      // Atualizar dados básicos do produto (sem segmento único)
       await updateProductMutation.mutateAsync({
         id: editingId,
         name: editForm.name,
         description: editForm.description,
         price: editForm.price,
-        segment: editForm.segment as "alimentacao" | "beleza" | "varejo" | "servicos",
+        segment: "alimentacao", // Valor padrão, será ignorado
         imageUrl: editForm.imageUrl,
+      });
+
+      // Atualizar múltiplos segmentos
+      await updateSegmentsMutation.mutateAsync({
+        productId: editingId,
+        segmentIds: editForm.segmentIds,
       });
 
       toast.success("Produto atualizado com sucesso!");
       setEditingId(null);
       refetch();
     } catch (error) {
+      console.error("Error:", error);
       toast.error("Erro ao atualizar produto");
     }
   };
@@ -108,6 +135,32 @@ export default function AdminProducts() {
 
       {/* Products List */}
       <main className="max-w-7xl mx-auto px-4 py-12">
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <Input
+              placeholder="Buscar produto..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-sm text-gray-600 mt-2">
+              {filteredProducts.length} produto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
+            </p>
+          )}
+        </div>
+
         {!products || products.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center">
@@ -119,9 +172,22 @@ export default function AdminProducts() {
               </Link>
             </CardContent>
           </Card>
+        ) : filteredProducts.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <p className="text-gray-600">Nenhum produto encontrado com "{searchQuery}"</p>
+              <Button
+                variant="ghost"
+                onClick={() => setSearchQuery("")}
+                className="mt-4 text-orange-500 hover:text-orange-600"
+              >
+                Limpar busca
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid gap-6">
-            {products.map((product: any) => (
+            {filteredProducts.map((product: any) => (
               <Card key={product.id}>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
@@ -148,15 +214,12 @@ export default function AdminProducts() {
                         <span className="text-sm font-semibold text-gray-900">
                           R$ {parseFloat(product.price.toString()).toFixed(2)}
                         </span>
-                        <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded capitalize">
-                          {product.segment}
-                        </span>
                       </div>
                     </div>
 
                     {/* Actions */}
                     <div className="flex gap-2 justify-end">
-                      <Dialog>
+                      <Dialog open={editingId === product.id} onOpenChange={(open) => !open && setEditingId(null)}>
                         <DialogTrigger asChild>
                           <Button
                             variant="outline"
@@ -167,7 +230,7 @@ export default function AdminProducts() {
                             Editar
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>Editar Produto</DialogTitle>
                             <DialogDescription>
@@ -212,24 +275,12 @@ export default function AdminProducts() {
                             </div>
 
                             <div>
-                              <Label htmlFor="edit-segment">Segmento</Label>
-                              <Select
-                                value={editForm.segment}
-                                onValueChange={(value) =>
-                                  setEditForm({ ...editForm, segment: value })
-                                }
-                              >
-                                <SelectTrigger id="edit-segment">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {SEGMENTS.map((seg) => (
-                                    <SelectItem key={seg.id} value={seg.id}>
-                                      {seg.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Label>Segmentos</Label>
+                              <MultiSegmentSelector
+                                productId={editingId || 0}
+                                selectedSegmentIds={editForm.segmentIds}
+                                onSegmentsChange={handleSegmentsChange}
+                              />
                             </div>
 
                             <div>
@@ -246,9 +297,9 @@ export default function AdminProducts() {
                             <Button
                               onClick={handleSave}
                               className="w-full bg-orange-500 hover:bg-orange-600"
-                              disabled={updateProductMutation.isPending}
+                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
                             >
-                              {updateProductMutation.isPending ? (
+                              {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
                                 <>
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                   Salvando...

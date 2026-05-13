@@ -139,6 +139,55 @@ export async function getSegmentBySlug(slug: string) {
   return result[0];
 }
 
+export async function createSegment(name: string, icon: string, slug: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(segments).values({
+    name,
+    icon,
+    slug,
+  });
+  
+  // Retornar o segmento criado
+  const created = await db.select().from(segments)
+    .where(eq(segments.slug, slug))
+    .limit(1);
+  
+  return created[0] || { name, icon, slug };
+}
+
+export async function updateSegment(id: number, name: string, icon: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(segments)
+    .set({ name, icon })
+    .where(eq(segments.id, id));
+  
+  // Retornar o segmento atualizado
+  const updated = await db.select().from(segments)
+    .where(eq(segments.id, id))
+    .limit(1);
+  
+  return updated[0] || { id, name, icon };
+}
+
+export async function deleteSegment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Buscar segmento antes de deletar
+  const toDelete = await db.select().from(segments)
+    .where(eq(segments.id, id))
+    .limit(1);
+  
+  await db.delete(segments)
+    .where(eq(segments.id, id));
+  
+  return toDelete[0] || { id };
+}
+
 // Categories queries
 export async function getCategoriesBySegment(segmentId: number) {
   const db = await getDb();

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { processRules, generateInitialState } from "@/lib/attributes-engine";
+import { OrderSummary } from "@/components/OrderSummary";
+import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
+import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -19,318 +22,360 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [artFile, setArtFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedVariations, setSelectedVariations] = useState<Record<number, number>>({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
+  const [notes, setNotes] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const [configuradorPrice, setConfiguradorPrice] = useState(0);
 
+  // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 },
     { enabled: !!productId }
   );
 
-  const { data: variations } = trpc.variations.getByProduct.useQuery(
-    { productId: productId || 0 },
+  // Carregar atributos dinâmicos do produto
+  const { data: productAttributes } = trpc.attributes.getProductAttributes.useQuery(
+    productId || 0,
+    { enabled: !!productId }
+  );
+
+  // Carregar regras dinâmicas do produto
+  const { data: productRules } = trpc.attributes.getProductRules.useQuery(
+    productId || 0,
     { enabled: !!productId }
   );
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
 
-  // Calcular preço final com variações
+  // Processar regras dinâmicas
+  const attributeState = useMemo(() => {
+    if (!productAttributes || !productRules) return null;
+
+    const attributeIds = productAttributes.map((pa) => pa.attributeId);
+    const initialState = generateInitialState(attributeIds);
+
+    // Converter selectedAttributes para Map
+    const selectedMap = new Map<number, any>();
+    Object.entries(selectedAttributes).forEach(([attrId, selection]) => {
+      selectedMap.set(Number(attrId), selection.valueIds[0] || selection.customValue);
+    });
+
+    // Processar regras
+    return processRules(productRules as any, selectedMap, initialState);
+  }, [productAttributes, productRules, selectedAttributes]);
+
+  // Filtrar atributos visíveis
+  const visibleAttributes = useMemo(() => {
+    // Se não há regras, mostrar todos os atributos
+    if (!productAttributes) return [];
+    if (!attributeState) return productAttributes;
+
+    return productAttributes.filter((pa) => {
+      const state = attributeState[pa.attributeId];
+      return state?.visible !== false;
+    });
+  }, [productAttributes, attributeState]);
+
+  // Calcular preço final
   const calculateFinalPrice = () => {
     if (!product) return 0;
-    
+
     let total = parseFloat(product.price);
-    
-    if (variations) {
-      for (const variationType of variations) {
-        const selectedOptionId = selectedVariations[variationType.id];
-        if (selectedOptionId) {
-          const option = variationType.options.find(o => o.id === selectedOptionId);
-          if (option) {
-            total += parseFloat(option.priceModifier);
+
+    // Adicionar modificadores de atributos selecionados
+    Object.entries(selectedAttributes).forEach(([attrId, selection]) => {
+      const attr = productAttributes?.find((pa) => pa.attributeId === Number(attrId));
+      if (attr) {
+        selection.valueIds.forEach((valueId) => {
+          const value = attr.values.find((v) => v.id === valueId);
+          if (value) {
+            total += parseFloat(value.priceModifier.toString());
           }
-        }
+        });
       }
+    });
+
+    // Adicionar modificadores de regras
+    if (attributeState) {
+      Object.values(attributeState).forEach((state) => {
+        total += state.priceModifier || 0;
+      });
     }
-    
-    return total * quantity;
+
+    return Math.max(0, total);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Arquivo muito grande (máximo 10MB)");
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error("Arquivo muito grande (máximo 50MB)");
         return;
       }
       setArtFile(file);
+      toast.success("Arquivo selecionado com sucesso");
     }
   };
 
-  const validateVariations = () => {
-    if (!variations) return true;
-    
-    for (const variationType of variations) {
-      if (variationType.isRequired && !selectedVariations[variationType.id]) {
-        toast.error(`Por favor, selecione um ${variationType.name}`);
+  const validateAttributes = () => {
+    if (!visibleAttributes) return true;
+
+    for (const attr of visibleAttributes) {
+      if (attr.isRequired && !selectedAttributes[attr.attributeId]) {
+        toast.error(`Por favor, selecione ${attr.attribute?.name || "um atributo obrigatório"}`);
         return false;
       }
     }
+
     return true;
   };
 
-  const handleCheckout = async () => {
-    if (!product) return;
+  const handleAttributeSelect = (attributeId: number, valueIds: number[], customValue?: string) => {
+    setSelectedAttributes((prev) => ({
+      ...prev,
+      [attributeId]: { valueIds, customValue },
+    }));
+  };
 
-    if (!artFile) {
-      toast.error("Por favor, envie o arquivo de arte");
+  const handleExportBudget = async () => {
+    if (!product) {
+      toast.error("Produto não encontrado");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      await exportBudgetPDFWithValidation({
+        productName: product.name,
+        productDescription: product.description || undefined,
+        basePrice: parseFloat(product.price),
+        selectedAttributes: selectedAttributesForSummary,
+        quantity,
+        finalPrice: calculateFinalPrice() * quantity,
+        deadline: "5 dias úteis",
+        notes,
+        customerName: "Cliente",
+        companyName: "Gráfica Ponto Digital",
+      });
+
+      toast.success("Orçamento exportado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao exportar orçamento");
+      console.error(error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!product || !productId) {
+      toast.error("Produto não encontrado");
+      return;
+    }
+
+    if (!validateAttributes()) {
       return;
     }
 
     if (!acceptedTerms) {
-      toast.error("Por favor, aceite os termos e condições");
-      return;
-    }
-
-    if (!validateVariations()) {
+      toast.error("Você deve aceitar os termos");
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // Simular upload de arquivo
-      const artFileUrl = `https://example.com/arts/${Date.now()}-${artFile.name}`;
-      const artFileKey = `arts/${Date.now()}-${artFile.name}`;
-
-      await createOrderMutation.mutateAsync({
-        productId: product.id,
+      const order = await createOrderMutation.mutateAsync({
+        productId,
         quantity,
-        artFileUrl,
-        artFileKey,
       });
 
-      toast.success("Pedido criado com sucesso! Redirecionando...");
-      setTimeout(() => {
-        window.location.href = `/confirmacao/${product.name.replace(/\s+/g, '-')}-${Date.now()}`;
-      }, 1500);
+      toast.success("Produto adicionado ao carrinho!");
     } catch (error) {
-      toast.error("Erro ao criar pedido");
+      toast.error("Erro ao adicionar ao carrinho");
       console.error(error);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (!productId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">Produto não encontrado</p>
-      </div>
-    );
-  }
+  // Preparar atributos selecionados para OrderSummary
+  const selectedAttributesForSummary = useMemo(() => {
+    return Object.entries(selectedAttributes)
+      .map(([attrId, selection]) => {
+        const attr = productAttributes?.find((pa) => pa.attributeId === Number(attrId));
+        if (!attr) return null;
+        const value = attr.values.find((v) => v.id === selection.valueIds[0]);
+        return {
+          name: attr.attribute?.name || "Atributo",
+          value: value?.value || selection.customValue || "",
+          priceModifier: value?.priceModifier,
+        };
+      })
+      .filter(Boolean) as any[];
+  }, [selectedAttributes, productAttributes]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin w-8 h-8 text-orange-500" />
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">Produto não encontrado</p>
-      </div>
-    );
-  }
-
-  const finalPrice = calculateFinalPrice();
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Produto não encontrado</AlertDescription>
+        </Alert>
         <Link href="/catalogo">
-          <Button variant="ghost" className="mb-6">
+          <Button className="mt-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar ao Catálogo
           </Button>
         </Link>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Informações do Produto */}
+  // Converter atributos para formato do ConfiguradorVisual
+  const configuradorSteps: any[] = visibleAttributes?.map((attr, index) => ({
+    id: `attr-${attr.attributeId}`,
+    title: attr.attribute?.name || "Atributo",
+    description: "",
+    type: attr.allowMultiple ? "checkbox" : "radio",
+    visible: true,
+    required: attr.isRequired,
+    attributes: attr.values.map((v) => ({
+      id: `value-${v.id}`,
+      label: v.value,
+      description: v.value || "",
+      priceModifier: parseFloat(v.priceModifier.toString()),
+    })),
+  })) || [];
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Link href="/catalogo">
+        <Button variant="ghost" className="mb-6">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+      </Link>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Coluna Esquerda - Imagem */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-4">
+            <CardContent className="pt-6">
+              {product.imageUrl ? (
+                <img src={product.imageUrl} alt={product.name} className="w-full h-80 object-cover rounded" />
+              ) : (
+                <div className="w-full h-80 bg-gray-200 rounded flex items-center justify-center">
+                  <span className="text-gray-500">Sem imagem</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Coluna Central - Configurador Visual */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Detalhes do Produto */}
           <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>{product.name}</CardTitle>
-                <CardDescription>{product.segment}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-gray-600">{product.description}</p>
-                <div className="border-t pt-4">
-                  <p className="text-sm text-gray-600">Preço Base</p>
-                  <p className="text-2xl font-bold text-orange-500">
-                    R$ {parseFloat(product.price).toFixed(2)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <h1 className="text-3xl font-bold">{product.name}</h1>
+            <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
 
-          {/* Formulário de Compra */}
-          <div className="space-y-6">
+          {/* Configurador Visual Profissional */}
+          {visibleAttributes && visibleAttributes.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Configurar Pedido</CardTitle>
+                <CardTitle>Configurações do Produto</CardTitle>
+                <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Variações */}
-                {variations && variations.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Variações do Produto</h3>
-                    {variations.map((variationType) => (
-                      <div key={variationType.id} className="space-y-2">
-                        <Label className="text-base font-medium">
-                          {variationType.name}
-                          {variationType.isRequired && <span className="text-red-500 ml-1">*</span>}
-                        </Label>
-                        <Select
-                          value={selectedVariations[variationType.id]?.toString() || ""}
-                          onValueChange={(value) => {
-                            setSelectedVariations({
-                              ...selectedVariations,
-                              [variationType.id]: parseInt(value),
-                            });
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={`Selecione um ${variationType.name.toLowerCase()}`} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {variationType.options.map((option) => (
-                              <SelectItem key={option.id} value={option.id.toString()}>
-                                {option.name}
-                                {parseFloat(option.priceModifier) > 0 && (
-                                  <span className="text-gray-600 ml-2">
-                                    +R$ {parseFloat(option.priceModifier).toFixed(2)}
-                                  </span>
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {variationType.options.find(o => o.id === selectedVariations[variationType.id])?.description && (
-                          <p className="text-sm text-gray-600">
-                            {variationType.options.find(o => o.id === selectedVariations[variationType.id])?.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <CardContent>
+                <ConfiguradorVisual
+                  steps={configuradorSteps}
+                  basePrice={parseFloat(product.price)}
+                  selectedValues={{}}
+                  onSelectionChange={(stepId, value) => {
+                    const attrId = parseInt(stepId.replace("attr-", ""));
+                    if (Array.isArray(value)) {
+                      const valueIds = value.map(v => parseInt(v.replace("value-", "")));
+                      handleAttributeSelect(attrId, valueIds);
+                    } else {
+                      const valueId = parseInt(value.replace("value-", ""));
+                      handleAttributeSelect(attrId, [valueId]);
+                    }
+                  }}
+                  onPriceUpdate={setConfiguradorPrice}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-                {/* Quantidade */}
-                <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantidade</Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Upload de Arquivo */}
-                <div className="space-y-2">
-                  <Label htmlFor="artFile">Arquivo de Arte</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-500 transition">
-                    <input
-                      id="artFile"
-                      type="file"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      accept=".pdf,.ai,.psd,.png,.jpg,.jpeg"
-                    />
-                    <label htmlFor="artFile" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
-                        {artFile ? artFile.name : "Clique para enviar ou arraste o arquivo"}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">Máximo 10MB (PDF, AI, PSD, PNG, JPG)</p>
-                    </label>
-                  </div>
-                  {artFile && (
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Arquivo selecionado
-                    </div>
-                  )}
-                </div>
-
-                {/* Checagem de Arquivo - Informações */}
+          {/* Upload de Arquivo */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Arquivo de Arte</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="art-upload"
+                  accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
+                />
+                <label htmlFor="art-upload" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm font-medium">Clique para fazer upload</p>
+                  <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
+                </label>
+              </div>
+              {artFile && (
                 <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <p className="font-semibold mb-2">Checagem Gratuita de Arquivo</p>
-                    <ul className="text-sm space-y-1 ml-2">
-                      <li>✓ Conferência de tamanho proporcional</li>
-                      <li>✓ Verificação de resolução (300 DPI)</li>
-                      <li>✓ Verificação de cores em CMYK</li>
-                      <li>✓ Verificação de margens de segurança</li>
-                    </ul>
-                  </AlertDescription>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
                 </Alert>
+              )}
+            </CardContent>
+          </Card>
 
-                {/* Termos e Condições */}
-                <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-sm">Termos e Condições</h4>
-                  <div className="text-xs text-gray-600 space-y-2 max-h-40 overflow-y-auto">
-                    <p><strong>Variação de Cores:</strong> As cores podem variar até 15% devido a diferenças de materiais e processos de impressão.</p>
-                    <p><strong>Responsabilidade:</strong> Não nos responsabilizamos pelas informações contidas no layout enviado. Todo conteúdo é responsabilidade do cliente.</p>
-                    <p><strong>Checagem:</strong> Esta checagem não inclui criação ou ajustes avançados na arte. Problemas serão notificados para correção.</p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Checkbox
-                      id="terms"
-                      checked={acceptedTerms}
-                      onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
-                    />
-                    <Label htmlFor="terms" className="text-sm cursor-pointer">
-                      Aceito os termos e condições
-                    </Label>
-                  </div>
-                </div>
-
-                {/* Preço Final */}
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-gray-600">Preço Final</span>
-                    <span className="text-3xl font-bold text-orange-500">
-                      R$ {finalPrice.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Botão de Checkout */}
-                  <Button
-                    onClick={handleCheckout}
-                    disabled={isProcessing || !artFile || !acceptedTerms}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processando...
-                      </>
-                    ) : (
-                      "Prosseguir para Pagamento"
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Termos */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="terms"
+              checked={acceptedTerms}
+              onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+            />
+            <Label htmlFor="terms" className="text-sm cursor-pointer">
+              Aceito os termos e condições
+            </Label>
           </div>
+        </div>
+
+        {/* Coluna Direita - Resumo do Pedido */}
+        <div className="lg:col-span-1">
+          <OrderSummary
+            productName={product.name}
+            productImage={product.imageUrl || undefined}
+            selectedAttributes={selectedAttributesForSummary}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            basePrice={parseFloat(product.price)}
+            deadline="5 dias úteis"
+            notes={notes}
+            onNotesChange={setNotes}
+            onAddToCart={handleAddToCart}
+            isLoading={isProcessing}
+          />
         </div>
       </div>
     </div>

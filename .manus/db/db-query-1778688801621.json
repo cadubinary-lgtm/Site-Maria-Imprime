@@ -1,0 +1,26 @@
+{
+  "query": "SELECT id, name FROM products WHERE name IN ('Lona 280g Brilho', 'Folheto A4 Couchê 300g', 'Adesivo Vinil 10x10cm', 'Placa PVC 20x30cm') ORDER BY id DESC LIMIT 4;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute SELECT id, name FROM products WHERE name IN ('Lona 280g Brilho', 'Folheto A4 Couchê 300g', 'Adesivo Vinil 10x10cm', 'Placa PVC 20x30cm') ORDER BY id DESC LIMIT 4;",
+  "rows": [
+    {
+      "id": "840004",
+      "name": "Placa PVC 20x30cm"
+    },
+    {
+      "id": "840003",
+      "name": "Adesivo Vinil 10x10cm"
+    },
+    {
+      "id": "840002",
+      "name": "Folheto A4 Couchê 300g"
+    },
+    {
+      "id": "840001",
+      "name": "Lona 280g Brilho"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\n840004\tPlaca PVC 20x30cm\n840003\tAdesivo Vinil 10x10cm\n840002\tFolheto A4 Couchê 300g\n840001\tLona 280g Brilho\n",
+  "stderr": "",
+  "execution_time_ms": 592
+}

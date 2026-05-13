@@ -28,13 +28,24 @@ import {
   getFileCheckByOrderItem,
   updateFileCheckStatus,
   searchGlobal,
+  createSegment,
+  updateSegment,
+  deleteSegment,
 } from "./db";
 import { nanoid } from "nanoid";
-import { products, orders, orderItems } from "../drizzle/schema";
+import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { crmRouter } from "./routers-crm";
+import { financialRouter } from "./routers-financial";
+import { web2printRouter } from "./routers-web2print";
+import { automationRouter } from "./routers-automation";
+import { attributesRouter } from "./routers-attributes";
+import { productSegmentsRouter } from "./routers-product-segments";
+import { pricingRouter } from "./routers-pricing";
+import { pricingRulesRouter } from "./routers-pricing-rules";
 
 // Procedimento protegido apenas para admin
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "admin") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar" });
   }
@@ -42,7 +53,7 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 
 // Procedimento protegido apenas para produção
-const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
+export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "production") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Apenas produção pode acessar" });
   }
@@ -69,14 +80,76 @@ export const appRouter = router({
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getProductById(input.id)),
+    updatePrice: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        price: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const result = await db.update(products)
+          .set({ price: input.price as any })
+          .where(eq(products.id, input.productId));
+        return result;
+      }),
+    updateProduct: protectedProcedure
+      .input(z.object({
+        productId: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        price: z.string().optional(),
+        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]).optional(),
+        imageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const updateData: any = {};
+        if (input.name) updateData.name = input.name;
+        if (input.description) updateData.description = input.description;
+        if (input.price) updateData.price = input.price;
+        if (input.segment) updateData.segment = input.segment;
+        if (input.imageUrl) updateData.imageUrl = input.imageUrl;
+        
+        const result = await db.update(products)
+          .set(updateData)
+          .where(eq(products.id, input.productId));
+        return result;
+      }),
   }),
 
-  // Segments - Público
+  // Segments - Público e Admin
   segments: router({
     getAll: publicProcedure.query(() => getAllSegments()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(({ input }) => getSegmentBySlug(input.slug)),
+    create: adminProcedure
+      .input(z.object({
+        name: z.string(),
+        icon: z.string().optional(),
+        slug: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return createSegment(input.name, input.icon || '', input.slug);
+      }),
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string(),
+        icon: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return updateSegment(input.id, input.name, input.icon || '');
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteSegment(input.id);
+      }),
   }),
 
   // Categories - Público
@@ -286,6 +359,22 @@ export const appRouter = router({
         return await searchGlobal(input.query);
       }),
   }),
+  // CRM - Gestão de Clientes
+  crm: crmRouter,
+  // Financial - Controle Financeiro
+  financial: financialRouter,
+  // Web2Print - Validação de Arquivos
+  web2print: web2printRouter,
+  // Automation - Automação Inteligente
+  automation: automationRouter,
+  // Attributes - Atributos Dinâmicos
+  attributes: attributesRouter,
+  // Product Segments - Múltiplos Segmentos por Produto
+  productSegments: productSegmentsRouter,
+  // Pricing - Precificação Dinâmica
+  pricing: pricingRouter,
+  // Pricing Rules - Regras de Precificação Reutilizáveis
+  pricingRules: pricingRulesRouter,
 });
 
 export type AppRouter = typeof appRouter;

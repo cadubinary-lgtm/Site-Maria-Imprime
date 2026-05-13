@@ -12,15 +12,35 @@ import { Slider } from "@/components/ui/slider";
 const ITEMS_PER_PAGE = 12;
 
 export default function CatalogImproved() {
-  const [selectedSegment, setSelectedSegment] = useState("alimentacao");
+  // Carregar segmentos dinamicamente da API
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+
+  // Mapear segmentos para formato esperado
+  const segments = useMemo(() => {
+    if (!segmentsData || segmentsData.length === 0) return [];
+    return segmentsData.map((seg: any) => ({
+      id: seg.slug,
+      label: `${seg.icon || "📦"} ${seg.name}`,
+    }));
+  }, [segmentsData]);
+
+  // Definir primeiro segmento como padrão
+  const defaultSegment = useMemo(() => {
+    return segments.length > 0 ? segments[0].id : "alimentacao";
+  }, [segments]);
+
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchTerm, setSearchTerm] = useState("");
   const [cartCount, setCartCount] = useState(0);
 
+  // Usar segmento padrão se nenhum foi selecionado
+  const activeSegment = selectedSegment || defaultSegment;
+
   const { data: products, isLoading } = trpc.products.getBySegment.useQuery(
-    { segment: selectedSegment },
-    { enabled: !!selectedSegment }
+    { segment: activeSegment },
+    { enabled: !!activeSegment }
   );
 
   // Filtrar produtos por preço e termo de busca
@@ -45,13 +65,6 @@ export default function CatalogImproved() {
     toast.success(`${productName} adicionado ao carrinho!`);
   };
 
-  const segments = [
-    { id: "alimentacao", label: "🍕 Alimentação" },
-    { id: "beleza", label: "💄 Beleza & Saúde" },
-    { id: "varejo", label: "🛍️ Varejo" },
-    { id: "servicos", label: "🔧 Serviços" },
-  ];
-
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -73,19 +86,27 @@ export default function CatalogImproved() {
                 <div className="space-y-3">
                   <Label className="font-semibold text-gray-900">Segmento</Label>
                   <div className="space-y-2">
-                    {segments.map((seg) => (
-                      <Button
-                        key={seg.id}
-                        variant={selectedSegment === seg.id ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => {
-                          setSelectedSegment(seg.id);
-                          setCurrentPage(1);
-                        }}
-                      >
-                        {seg.label}
-                      </Button>
-                    ))}
+                    {segmentsLoading ? (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                      </div>
+                    ) : segments.length === 0 ? (
+                      <p className="text-sm text-gray-500">Nenhum segmento disponível</p>
+                    ) : (
+                      segments.map((seg) => (
+                        <Button
+                          key={seg.id}
+                          variant={activeSegment === seg.id ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setSelectedSegment(seg.id);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          {seg.label}
+                        </Button>
+                      ))
+                    )}
                   </div>
                 </div>
 

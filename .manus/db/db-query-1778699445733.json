@@ -1,0 +1,9 @@
+{
+  "query": "-- Vincular Material (ID 68) a todos os 13 produtos\nINSERT INTO productAttributes (productId, attributeId) VALUES\n(900001, 68), (900002, 68), (900003, 68), (900004, 68), (900005, 68), \n(900006, 68), (900007, 68), (900008, 68), (900009, 68), (900010, 68), \n(900011, 68), (900012, 68), (900013, 68);\n\n-- Vincular Acabamento (ID 69) a todos os 13 produtos\nINSERT INTO productAttributes (productId, attributeId) VALUES\n(900001, 69), (900002, 69), (900003, 69), (900004, 69), (900005, 69), \n(900006, 69), (900007, 69), (900008, 69), (900009, 69), (900010, 69), \n(900011, 69), (900012, 69), (900013, 69);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute -- Vincular Material (ID 68) a todos os 13 produtos\nINSERT INTO productAttributes (productId, attributeId) VALUES\n(900001, 68), (900002, 68), (900003, 68), (900004, 68), (900005, 68), \n(900006, 68), (900007, 68), (900008, 68), (900009, 68), (900010, 68), \n(900011, 68), (900012, 68), (900013, 68);\n\n-- Vincular Acabamento (ID 69) a todos os 13 produtos\nINSERT INTO productAttributes (productId, attributeId) VALUES\n(900001, 69), (900002, 69), (900003, 69), (900004, 69), (900005, 69), \n(900006, 69), (900007, 69), (900008, 69), (900009, 69), (900010, 69), \n(900011, 69), (900012, 69), (900013, 69);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 676
+}
