@@ -825,3 +825,29 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Verificar compatibilidade automática
 - [ ] Fazer checkpoint final
 - [ ] Documentar sistema para manutenção futura
+
+
+## FASE 25: Sistema Global Inteligente de Atributos ✅
+
+### FASE 1: VALIDAR E IMPLEMENTAR ENGINE DE REGRAS ✅
+- [x] Validar engine de regras existente (conditional-rules.test.ts)
+- [x] Criar atributos globais (Material, Acabamento, Ilhós, Bastão, Laminação, Dobra)
+- [x] Criar produtos de teste (Lona, Folheto, Adesivo, Placa)
+- [x] Vincular atributos aos produtos
+- [x] Implementar regras de compatibilidade para LONA
+- [x] Implementar regras de compatibilidade para FOLHETO
+- [x] Implementar regras de compatibilidade para ADESIVO
+- [x] Implementar regras de compatibilidade para PLACA
+- [x] Validar ProductDetail UI com regras dinâmicas (verificado em navegador)
+- [x] Criar testes de integração (18 casos de teste)
+- [x] Documentar sistema (GLOBAL_ATTRIBUTES_SYSTEM.md)
+
+### Status Final ✅
+- ✅ Sistema Global de Atributos 100% implementado
+- ✅ Regras dinâmicas por categoria funcionando
+- ✅ Atributos globais reutilizáveis em todos os produtos
+- ✅ Validação em tempo real no frontend
+- ✅ 18 testes de integração criados
+- ✅ Documentação completa
+- ✅ Sem refatoração da arquitetura existente
+- ✅ Pronto para próximas fases (UI melhorada, Admin Panel)

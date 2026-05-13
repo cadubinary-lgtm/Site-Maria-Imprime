@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO `attributes` (`name`, `slug`, `description`, `type`, `basePrice`, `displayOrder`, `isActive`, `createdAt`, `updatedAt`)\nVALUES \n('Laminação', 'laminacao', 'Tipo de laminação (Brilho, Fosco, Matte)', 'select', 0, 5, TRUE, NOW(), NOW()),\n('Dobra', 'dobra', 'Tipo de dobra (Simples, Dupla, Sanfona)', 'select', 0, 6, TRUE, NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute INSERT INTO `attributes` (`name`, `slug`, `description`, `type`, `basePrice`, `displayOrder`, `isActive`, `createdAt`, `updatedAt`)\nVALUES \n('Laminação', 'laminacao', 'Tipo de laminação (Brilho, Fosco, Matte)', 'select', 0, 5, TRUE, NOW(), NOW()),\n('Dobra', 'dobra', 'Tipo de dobra (Simples, Dupla, Sanfona)', 'select', 0, 6, TRUE, NOW(), NOW());",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 588
+}

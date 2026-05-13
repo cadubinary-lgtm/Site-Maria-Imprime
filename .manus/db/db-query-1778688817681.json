@@ -1,0 +1,20 @@
+{
+  "query": "-- Verificar IDs de Laminação e Dobra\nSELECT id, name, slug FROM attributes WHERE slug IN ('laminacao', 'dobra');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute -- Verificar IDs de Laminação e Dobra\nSELECT id, name, slug FROM attributes WHERE slug IN ('laminacao', 'dobra');",
+  "rows": [
+    {
+      "id": "30004",
+      "name": "Laminação",
+      "slug": "laminacao"
+    },
+    {
+      "id": "30005",
+      "name": "Dobra",
+      "slug": "dobra"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tslug\n30004\tLaminação\tlaminacao\n30005\tDobra\tdobra\n",
+  "stderr": "",
+  "execution_time_ms": 592
+}
