@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2, Search, X } from "lucide-react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
 type AttributeType = "button" | "select" | "card" | "radio" | "checkbox" | "numeric" | "text" | "measures";
@@ -14,6 +15,7 @@ type AttributeType = "button" | "select" | "card" | "radio" | "checkbox" | "nume
 export default function AdminAttributesManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -102,6 +104,18 @@ export default function AdminAttributesManager() {
       deleteMutation.mutate(id);
     }
   };
+
+  // Filtrar atributos por busca
+  const filteredAttributes = useMemo(() => {
+    if (!attributes) return [];
+    if (!searchQuery.trim()) return attributes;
+    
+    const query = searchQuery.toLowerCase();
+    return attributes.filter((attr: any) => 
+      attr.name.toLowerCase().includes(query) ||
+      attr.slug.toLowerCase().includes(query)
+    );
+  }, [attributes, searchQuery]);
 
   return (
     <div className="space-y-6">
@@ -204,14 +218,33 @@ export default function AdminAttributesManager() {
         </Dialog>
       </div>
 
+      {/* Campo de Busca */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Input
+          placeholder="Buscar atributo..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 pr-10"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       ) : (
         <div className="grid gap-4">
-          {attributes && attributes.length > 0 ? (
-            attributes.map((attr: any) => (
+          {filteredAttributes && filteredAttributes.length > 0 ? (
+            filteredAttributes.map((attr: any) => (
               <Card key={attr.id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
@@ -266,8 +299,17 @@ export default function AdminAttributesManager() {
           ) : (
             <Card>
               <CardContent className="pt-6 text-center">
-                <p className="text-gray-500">Nenhum atributo cadastrado</p>
-                <p className="text-sm text-gray-400 mt-2">Clique em "Novo Atributo" para começar</p>
+                <p className="text-gray-500">
+                  {attributes && attributes.length > 0
+                    ? "Nenhum atributo encontrado com esse termo"
+                    : "Nenhum atributo cadastrado"}
+                </p>
+                {attributes && attributes.length > 0 && (
+                  <p className="text-sm text-gray-400 mt-2">Tente uma busca diferente</p>
+                )}
+                {!attributes || attributes.length === 0 && (
+                  <p className="text-sm text-gray-400 mt-2">Clique em "Novo Atributo" para começar</p>
+                )}
               </CardContent>
             </Card>
           )}
