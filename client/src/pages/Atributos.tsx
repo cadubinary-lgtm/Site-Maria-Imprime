@@ -1,144 +1,236 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-
-interface AttributeCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-}
-
-const attributeCategories: AttributeCategory[] = [
-  {
-    id: 'impressao',
-    name: 'TIPO DE IMPRESSÃO',
-    description: 'Selecione o tipo de impressão desejado',
-    icon: '🖨️',
-    color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-  },
-  {
-    id: 'material',
-    name: 'TIPO DE MATERIAL',
-    description: 'Escolha o material para seu produto',
-    icon: '📦',
-    color: 'bg-green-50 border-green-200 hover:bg-green-100',
-  },
-  {
-    id: 'papel',
-    name: 'TIPO DE PAPEL',
-    description: 'Selecione a gramatura e tipo de papel',
-    icon: '📄',
-    color: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100',
-  },
-  {
-    id: 'acabamento',
-    name: 'TIPO DE ACABAMENTO',
-    description: 'Escolha o acabamento para seu produto',
-    icon: '✨',
-    color: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
-  },
-  {
-    id: 'cor',
-    name: 'TIPO DE COR',
-    description: 'Selecione a configuração de cores',
-    icon: '🎨',
-    color: 'bg-pink-50 border-pink-200 hover:bg-pink-100',
-  },
-  {
-    id: 'formato',
-    name: 'TIPO DE FORMATO',
-    description: 'Escolha o formato do seu produto',
-    icon: '📐',
-    color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
-  },
-  {
-    id: 'quantidade',
-    name: 'QUANTIDADE',
-    description: 'Defina a quantidade desejada',
-    icon: '🔢',
-    color: 'bg-orange-50 border-orange-200 hover:bg-orange-100',
-  },
-];
+import { useState, useMemo } from "react";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Atributos() {
-  const handleAddAttribute = (categoryId: string) => {
-    console.log(`Adicionar atributo à categoria: ${categoryId}`);
+  const [selectedAttributeCategoryId, setSelectedAttributeCategoryId] = useState<string | null>(null);
+  const [selectedAttributes, setSelectedAttributes] = useState<Set<number>>(new Set());
+  const [attributeSearch, setAttributeSearch] = useState("");
+
+  // Carregar atributos globais
+  const { data: attributes, isLoading: attributesLoading } = trpc.attributes.listAttributes.useQuery();
+
+  // Mutation para criar novo atributo (placeholder)
+  const createMutation = {
+    isPending: false,
+    mutate: () => {
+      toast.success("Atributo criado com sucesso!");
+      setSelectedAttributes(new Set());
+    },
+  };
+
+  // Categorias de atributos
+  const attributeCategories = [
+    { id: 'impressao', label: 'TIPO DE IMPRESSÃO', description: 'Selecione o tipo de impressão desejado', icon: '🖨️' },
+    { id: 'material', label: 'TIPO DE MATERIAL', description: 'Escolha o material para seu produto', icon: '📦' },
+    { id: 'papel', label: 'TIPO DE PAPEL', description: 'Selecione a gramatura e tipo de papel', icon: '📄' },
+    { id: 'acabamento', label: 'TIPO DE ACABAMENTO', description: 'Escolha o acabamento para seu produto', icon: '✨' },
+    { id: 'cor', label: 'TIPO DE COR', description: 'Selecione a configuração de cores', icon: '🎨' },
+    { id: 'formato', label: 'TIPO DE FORMATO', description: 'Escolha o formato do seu produto', icon: '📐' },
+    { id: 'quantidade', label: 'QUANTIDADE', description: 'Defina a quantidade desejada', icon: '🔢' },
+  ];
+
+  // Filtrar atributos por busca e categoria
+  const filteredAttributes = useMemo(() => {
+    if (!attributes) return [];
+    let filtered = attributes;
+    
+    if (attributeSearch.trim()) {
+      const query = attributeSearch.toLowerCase();
+      filtered = filtered.filter((a: any) => 
+        a.name.toLowerCase().includes(query) || a.slug.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filtrar por categoria selecionada
+    if (selectedAttributeCategoryId) {
+      const categoryMap: Record<string, string[]> = {
+        'impressao': ['frente', 'verso', 'preto', 'colorida', 'impressão', '4/0', '4/4', 'p/f', 'g/f'],
+        'material': ['couchê', 'offset', 'kraft', 'sulfite', 'vinil', 'pvc', 'acm', 'mdf', 'lona', 'ps', 'acrílico', 'reciclato', 'duplex', 'triplex'],
+        'papel': ['90g', '115g', '150g', '170g', '210g', '250g', '300g', '350g', 'offset', 'supremo', 'kraft', 'reciclato', 'sulfite', 'duplex', 'triplex'],
+        'acabamento': ['laminação', 'verniz', 'soft touch', 'plastificação', 'corte', 'dobra', 'vinco', 'furo', 'ilhós', 'solda', 'bastão', 'hot stamping', 'relevo', 'cantos', 'faca', 'espiral', 'wire-o', 'cola', 'encadernação', 'serrilha', 'revestimento', 'proteção'],
+        'cor': ['colorida', 'preto', 'branco', 'cmyk', 'pantone', 'frente', 'verso'],
+        'formato': ['a4', 'a5', 'a6', 'personalizado', 'quadrado', 'retangular', '10x', '15x', '20x', '21x', '30cm'],
+        'quantidade': ['100', '250', '500', '1000', '3000', 'quantidade']
+      };
+      
+      const keywords = categoryMap[selectedAttributeCategoryId] || [];
+      filtered = filtered.filter((attr: any) =>
+        keywords.some(keyword => attr.name.toLowerCase().includes(keyword) || attr.slug.toLowerCase().includes(keyword))
+      );
+    }
+    
+    return filtered;
+  }, [attributes, attributeSearch, selectedAttributeCategoryId]);
+
+  const handleAttributeToggle = (attributeId: number) => {
+    const newSet = new Set(selectedAttributes);
+    if (newSet.has(attributeId)) {
+      newSet.delete(attributeId);
+    } else {
+      newSet.add(attributeId);
+    }
+    setSelectedAttributes(newSet);
+  };
+
+  const handleCreateAttributes = () => {
+    if (!selectedAttributeCategoryId) {
+      toast.error("Selecione uma categoria");
+      return;
+    }
+
+    if (selectedAttributes.size === 0) {
+      toast.error("Selecione pelo menos um atributo");
+      return;
+    }
+
+    // Criar cada atributo selecionado
+    selectedAttributes.forEach((attributeId) => {
+      toast.info(`Atributo ${attributeId} será criado em ${selectedAttributeCategoryId}`);
+    });
+    setSelectedAttributes(new Set());
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Gerenciador de Atributos</h1>
-          <p className="text-lg text-slate-600">
-            Gerencie todos os atributos disponíveis para seus produtos
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Gerenciar Atributos</h1>
+        <p className="text-gray-600 mt-2">Selecione quais atributos cada categoria utilizará</p>
+      </div>
 
-        {/* Grid de Categorias */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {attributeCategories.map((category) => (
-            <Card
-              key={category.id}
-              className={`border-2 transition-all duration-300 cursor-pointer ${category.color}`}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl">{category.icon}</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Coluna Esquerda - Categorias */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Categorias</CardTitle>
+            <CardDescription>Selecione uma categoria para gerenciar seus atributos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {attributeCategories.map((category) => (
+                <div key={category.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`cat-${category.id}`}
+                    checked={selectedAttributeCategoryId === category.id}
+                    onCheckedChange={() => 
+                      setSelectedAttributeCategoryId(selectedAttributeCategoryId === category.id ? null : category.id)
+                    }
+                  />
+                  <Label htmlFor={`cat-${category.id}`} className="cursor-pointer flex-1">
                     <div>
-                      <CardTitle className="text-lg font-bold text-slate-900">
-                        {category.name}
-                      </CardTitle>
-                      <CardDescription className="text-sm text-slate-600 mt-1">
-                        {category.description}
-                      </CardDescription>
+                      <p className="font-medium text-sm">{category.icon} {category.label}</p>
+                      <p className="text-xs text-gray-500">{category.description}</p>
                     </div>
-                  </div>
+                  </Label>
                 </div>
-              </CardHeader>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  {/* Placeholder para atributos */}
-                  <div className="bg-white/50 rounded-lg p-3 border border-dashed border-slate-300">
-                    <p className="text-sm text-slate-500 text-center">
-                      Nenhum atributo adicionado
-                    </p>
-                  </div>
+        {/* Coluna Central - Atributos Disponíveis */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Atributos Disponíveis</CardTitle>
+            <CardDescription>
+              {selectedAttributeCategoryId 
+                ? `Atributos para ${selectedAttributeCategoryId.toUpperCase()}` 
+                : "Selecione uma categoria primeiro"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selectedAttributeCategoryId && (
+              <>
+                <div className="mb-4">
+                  <Input
+                    placeholder="Buscar atributo..."
+                    value={attributeSearch}
+                    onChange={(e) => setAttributeSearch(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {attributesLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  ) : filteredAttributes.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">Nenhum atributo encontrado</p>
+                  ) : (
+                    filteredAttributes.map((attr: any) => (
+                      <div key={attr.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`attr-${attr.id}`}
+                          checked={selectedAttributes.has(attr.id)}
+                          onCheckedChange={() => handleAttributeToggle(attr.id)}
+                        />
+                        <Label htmlFor={`attr-${attr.id}`} className="cursor-pointer flex-1">
+                          <div>
+                            <p className="font-medium text-sm">{attr.name}</p>
+                            <p className="text-xs text-gray-500">{attr.slug}</p>
+                          </div>
+                        </Label>
+                      </div>
+                    ))
+                  )}
+                </div>
 
-                  {/* Botão para adicionar */}
+                {selectedAttributes.size > 0 && (
                   <Button
-                    onClick={() => handleAddAttribute(category.id)}
-                    className="w-full gap-2"
-                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={handleCreateAttributes}
+                    disabled={false}
                   >
-                    <Plus className="w-4 h-4" />
-                    Adicionar Atributo
+                    {createMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Criar {selectedAttributes.size} Atributo(s)
+                      </>
+                    )}
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Seção de Resumo */}
-        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Resumo de Categorias</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {attributeCategories.map((category) => (
-              <div key={category.id} className="text-center p-4 bg-slate-50 rounded-lg">
-                <p className="text-2xl mb-2">{category.icon}</p>
-                <p className="text-sm font-semibold text-slate-900">{category.name}</p>
-                <p className="text-xs text-slate-500 mt-1">0 atributos</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Coluna Direita - Atributos Selecionados */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Atributos Selecionados</CardTitle>
+            <CardDescription>
+              {selectedAttributes.size > 0 
+                ? `${selectedAttributes.size} atributo(s) selecionado(s)` 
+                : "Nenhum atributo selecionado"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {selectedAttributes.size === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">Selecione atributos para gerenciar</p>
+              ) : (
+                filteredAttributes
+                  .filter((attr: any) => selectedAttributes.has(attr.id))
+                  .map((attr: any) => (
+                    <div key={attr.id} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="font-medium text-sm">{attr.name}</p>
+                      <p className="text-xs text-gray-500">{attr.slug}</p>
+                    </div>
+                  ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
