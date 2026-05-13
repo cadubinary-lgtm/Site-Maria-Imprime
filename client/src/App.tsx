@@ -22,6 +22,7 @@ import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
 import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import { AdminPricingRules } from "./pages/AdminPricingRules";
 import AdminRulesManager from "./pages/AdminRulesManager";
+import Atributos from "./pages/Atributos";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
+      <Route path="/atributos" component={Atributos} />
       
       {/* Admin routes - Acessível para todos os usuários logados */}
       {user && (

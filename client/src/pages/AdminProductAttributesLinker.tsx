@@ -104,7 +104,7 @@ export default function AdminProductAttributesLinker() {
         <p className="text-gray-600 mt-2">Selecione quais variáveis cada produto utilizará</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Coluna Esquerda - Produtos */}
         <Card>
           <CardHeader>
@@ -146,7 +146,41 @@ export default function AdminProductAttributesLinker() {
           </CardContent>
         </Card>
 
-        {/* Coluna Direita - Atributos */}
+        {/* Coluna Central - Atributos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Atributos</CardTitle>
+            <CardDescription>
+              {selectedProductId ? "Selecione os atributos para este produto" : "Selecione um produto primeiro"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {selectedProductId ? (
+                <>
+                  {[
+                    { id: 'print-type', label: 'TIPO DE IMPRESSÃO', description: 'Escolha o tipo de impressão' },
+                    { id: 'material-type', label: 'TIPO DE MATERIAL', description: 'Escolha o material' },
+                    { id: 'paper-type', label: 'TIPO DE PAPEL', description: 'Escolha o tipo de papel' },
+                    { id: 'finish-type', label: 'TIPO DE ACABAMENTO', description: 'Escolha o acabamento' },
+                    { id: 'color-type', label: 'TIPO DE COR', description: 'Escolha o tipo de cor' },
+                    { id: 'format-type', label: 'TIPO DE FORMATO', description: 'Escolha o formato' },
+                    { id: 'quantity', label: 'QUANTIDADE', description: 'Defina a quantidade' },
+                  ].map((attr) => (
+                    <div key={attr.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                      <p className="font-semibold text-sm">{attr.label}</p>
+                      <p className="text-xs text-gray-600 mt-1">{attr.description}</p>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">Selecione um produto para ver os atributos</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Coluna Direita - Variáveis */}
         <Card>
           <CardHeader>
             <CardTitle>Variáveis Disponíveis</CardTitle>
