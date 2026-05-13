@@ -80,32 +80,6 @@ export default function AllProducts() {
           Encontre a solução perfeita para seu negócio
         </p>
 
-        {/* Segmentos no Topo */}
-        {segmentsLoading ? (
-          <div className="flex justify-center py-4 mb-8">
-            <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
-          </div>
-        ) : segments.length > 0 ? (
-          <div className="mb-8 flex flex-wrap gap-2">
-            {segments.map((seg) => (
-              <Button
-                key={seg.value}
-                variant={selectedSegment === seg.value ? 'default' : 'outline'}
-                onClick={() =>
-                  setSelectedSegment(selectedSegment === seg.value ? null : seg.value)
-                }
-                className={
-                  selectedSegment === seg.value
-                    ? 'bg-orange-500 hover:bg-orange-600'
-                    : ''
-                }
-              >
-                {seg.label}
-              </Button>
-            ))}
-          </div>
-        ) : null}
-
         {/* Filters */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
