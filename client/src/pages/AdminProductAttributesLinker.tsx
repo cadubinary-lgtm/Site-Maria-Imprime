@@ -100,8 +100,8 @@ export default function AdminProductAttributesLinker() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Vincular Atributos a Produtos</h1>
-        <p className="text-gray-600 mt-2">Selecione quais atributos cada produto utilizará</p>
+        <h1 className="text-3xl font-bold">Vincular Variáveis a Produtos</h1>
+        <p className="text-gray-600 mt-2">Selecione quais variáveis cada produto utilizará</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,16 +149,16 @@ export default function AdminProductAttributesLinker() {
         {/* Coluna Direita - Atributos */}
         <Card>
           <CardHeader>
-            <CardTitle>Atributos Disponíveis</CardTitle>
+            <CardTitle>Variáveis Disponíveis</CardTitle>
             <CardDescription>
-              {selectedProductId ? "Selecione os atributos para este produto" : "Selecione um produto primeiro"}
+              {selectedProductId ? "Selecione as variáveis para este produto" : "Selecione um produto primeiro"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
               <input
                 type="text"
-                placeholder="Buscar atributo..."
+                placeholder="Buscar variável..."
                 value={attributeSearch}
                 onChange={(e) => setAttributeSearch(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -202,14 +202,14 @@ export default function AdminProductAttributesLinker() {
                         ) : (
                           <>
                             <Link2 className="w-4 h-4 mr-2" />
-                            Vincular {selectedAttributes.size} Atributo(s)
+                            Vincular {selectedAttributes.size} Variável(is)
                           </>
                         )}
                       </Button>
                     )}
                   </>
                 ) : (
-                  <p className="text-gray-500 text-sm">Nenhum atributo cadastrado</p>
+                  <p className="text-gray-500 text-sm">Nenhuma variável cadastrada</p>
                 )}
               </div>
             )}
@@ -217,12 +217,12 @@ export default function AdminProductAttributesLinker() {
         </Card>
       </div>
 
-      {/* Atributos Vinculados */}
+      {/* Variáveis Vinculadas */}
       {selectedProductId && productAttributes && productAttributes.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Atributos Vinculados</CardTitle>
-            <CardDescription>Atributos já configurados para este produto</CardDescription>
+            <CardTitle>Variáveis Vinculadas</CardTitle>
+            <CardDescription>Variáveis já configuradas para este produto</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

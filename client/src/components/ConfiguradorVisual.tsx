@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -61,9 +62,13 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
       });
     });
 
-    onPriceUpdate?.(price);
     return price;
-  }, [selectedValues, steps, basePrice, onPriceUpdate]);
+  }, [selectedValues, steps, basePrice]);
+
+  // Notificar atualização de preço em useEffect (não durante render)
+  useEffect(() => {
+    onPriceUpdate?.(totalPrice);
+  }, [totalPrice, onPriceUpdate]);
 
   const handleStepSelect = (stepId: string, value: string | string[]) => {
     onSelectionChange(stepId, value);

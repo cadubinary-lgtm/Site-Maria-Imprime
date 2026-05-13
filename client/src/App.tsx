@@ -65,8 +65,8 @@ function Router() {
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
         <Route path="/admin/automacao" component={AutomationDashboard} />
         <Route path="/admin/erp" component={ERPDashboard} />
-        <Route path="/admin/atributos" component={AdminAttributesManager} />
-        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
+        <Route path="/admin/variaveis" component={AdminAttributesManager} />
+        <Route path="/admin/vincular-variaveis" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
         <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
 
