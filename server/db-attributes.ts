@@ -193,7 +193,14 @@ export async function linkAttributeToProduct(data: {
     isRequired: data.isRequired ?? true,
     allowMultiple: data.allowMultiple ?? false,
     displayOrder: data.displayOrder || 0,
-  });
+    priceModifier: "0",
+    calculationType: "fixed",
+    timeModifier: 0,
+    weightModifier: "0",
+    isActive: true,
+    priority: 0,
+    rules: null,
+  } as any);
 }
 
 /**
