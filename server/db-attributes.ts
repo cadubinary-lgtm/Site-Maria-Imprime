@@ -55,7 +55,7 @@ export async function listAttributes(includeInactive = false) {
   if (!includeInactive) {
     query = query.where(eq(attributes.isActive, true));
   }
-  return query.orderBy(attributes.displayOrder);
+  return await query.orderBy(attributes.displayOrder);
 }
 
 /**
@@ -137,7 +137,7 @@ export async function listAttributeValues(attributeId: number, includeInactive =
   if (!includeInactive) {
     query = query.where(eq(attributeValues.isActive, true));
   }
-  return query.orderBy(attributeValues.displayOrder);
+  return await query.orderBy(attributeValues.displayOrder);
 }
 
 /**

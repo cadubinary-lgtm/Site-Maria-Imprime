@@ -590,3 +590,29 @@
 - ✅ Pronto para produção
 - ✅ Escalável e reutilizável
 - ✅ Arquitetura modular e testada
+
+
+## DEBUG CRÍTICO: Erro em /admin/precos-atributos ✅
+
+### Problema Identificado
+- TypeError: value.priceModifier.toFixed is not a function
+- Causa: Query Drizzle não estava sendo executada com `await`
+
+### Correções Aplicadas
+- [x] Adicionar `await` em `listAttributeValues()` (db-attributes.ts:140)
+- [x] Adicionar `await` em `listAttributes()` (db-attributes.ts:58)
+- [x] Adicionar validação segura com `??` operator em AdminAttributePricing.tsx
+- [x] Criar teste de precificação (admin-attribute-pricing.test.ts)
+- [x] Criar teste de integração (admin-attribute-pricing-integration.test.ts)
+
+### Arquivos Modificados
+1. server/db-attributes.ts - Adicionado `await` nas queries
+2. client/src/pages/AdminAttributePricing.tsx - Validação segura de valores
+3. server/admin-attribute-pricing.test.ts - 30+ testes
+4. server/admin-attribute-pricing-integration.test.ts - 20+ testes de integração
+
+### Status
+- ✅ Servidor Dev: Running
+- ✅ TypeScript: No errors
+- ✅ Build: OK
+- ✅ Página /admin/precos-atributos: Deve funcionar corretamente agora

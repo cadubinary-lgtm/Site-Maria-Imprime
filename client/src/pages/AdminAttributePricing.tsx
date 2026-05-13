@@ -194,10 +194,12 @@ export default function AdminAttributePricing() {
                         <TableCell className="font-medium">{value.value}</TableCell>
                         <TableCell>{value.calculationType || "fixed"}</TableCell>
                         <TableCell>
-                          {value.calculationType === "percentage" ? `${value.priceModifier}%` : `R$ ${value.priceModifier.toFixed(2)}`}
+                          {value.calculationType === "percentage" 
+                            ? `${value.priceModifier ?? 0}%` 
+                            : `R$ ${(value.priceModifier ?? 0).toFixed(2)}`}
                         </TableCell>
-                        <TableCell>{value.timeModifier}h</TableCell>
-                        <TableCell>{value.weightModifier}kg</TableCell>
+                        <TableCell>{value.timeModifier ?? 0}h</TableCell>
+                        <TableCell>{value.weightModifier ?? 0}kg</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button
