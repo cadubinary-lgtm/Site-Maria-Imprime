@@ -186,36 +186,34 @@ export default function AllProducts() {
         {filteredAndSortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedProducts.map((product) => (
-              <Link key={product.id} href={`/produto/${product.id}`}>
-                <a className="block group">
-                  <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    {product.imageUrl && (
-                      <div className="w-full h-48 bg-gray-800 overflow-hidden">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-orange-500">
-                          R$ {product.price}
-                        </span>
-                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                          Ver
-                        </Button>
-                      </div>
+              <Link key={product.id} href={`/produto/${product.id}`} className="block group">
+                <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                  {product.imageUrl && (
+                    <div className="w-full h-48 bg-gray-800 overflow-hidden">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                      {product.description}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold text-orange-500">
+                        R$ {product.price}
+                      </span>
+                      <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                        Ver
+                      </Button>
                     </div>
                   </div>
-                </a>
+                </div>
               </Link>
             ))}
           </div>
