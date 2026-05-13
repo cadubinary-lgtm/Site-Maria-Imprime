@@ -6,14 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2, FileDown } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import DynamicAttributeRenderer, { DynamicAttribute } from "@/components/DynamicAttributeRenderer";
-import { processRules, generateInitialState, getVisibleAttributes } from "@/lib/attributes-engine";
+import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
+import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -23,11 +23,10 @@ export default function ProductDetail() {
   const [artFile, setArtFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-
-  // Estado de atributos selecionados
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
   const [notes, setNotes] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [configuradorPrice, setConfiguradorPrice] = useState(0);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -68,7 +67,9 @@ export default function ProductDetail() {
 
   // Filtrar atributos visíveis
   const visibleAttributes = useMemo(() => {
-    if (!productAttributes || !attributeState) return [];
+    // Se não há regras, mostrar todos os atributos
+    if (!productAttributes) return [];
+    if (!attributeState) return productAttributes;
 
     return productAttributes.filter((pa) => {
       const state = attributeState[pa.attributeId];
@@ -76,7 +77,7 @@ export default function ProductDetail() {
     });
   }, [productAttributes, attributeState]);
 
-  // Calcular preço final com modificadores de atributos
+  // Calcular preço final
   const calculateFinalPrice = () => {
     if (!product) return 0;
 
@@ -192,7 +193,6 @@ export default function ProductDetail() {
       });
 
       toast.success("Produto adicionado ao carrinho!");
-      // Redirecionar para carrinho ou checkout
     } catch (error) {
       toast.error("Erro ao adicionar ao carrinho");
       console.error(error);
@@ -232,19 +232,35 @@ export default function ProductDetail() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>Produto não encontrado</AlertDescription>
         </Alert>
-        <Link href="/produtos">
+        <Link href="/catalogo">
           <Button className="mt-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar aos Produtos
+            Voltar ao Catálogo
           </Button>
         </Link>
       </div>
     );
   }
 
+  // Converter atributos para formato do ConfiguradorVisual
+  const configuradorSteps: any[] = visibleAttributes?.map((attr, index) => ({
+    id: `attr-${attr.attributeId}`,
+    title: attr.attribute?.name || "Atributo",
+    description: "",
+    type: attr.allowMultiple ? "checkbox" : "radio",
+    visible: true,
+    required: attr.isRequired,
+    attributes: attr.values.map((v) => ({
+      id: `value-${v.id}`,
+      label: v.value,
+      description: v.value || "",
+      priceModifier: parseFloat(v.priceModifier.toString()),
+    })),
+  })) || [];
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/produtos">
+      <Link href="/catalogo">
         <Button variant="ghost" className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar
@@ -252,7 +268,7 @@ export default function ProductDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Coluna Esquerda - Imagem (1 coluna) */}
+        {/* Coluna Esquerda - Imagem */}
         <div className="lg:col-span-1">
           <Card className="sticky top-4">
             <CardContent className="pt-6">
@@ -267,7 +283,7 @@ export default function ProductDetail() {
           </Card>
         </div>
 
-        {/* Coluna Central - Configurações (1 coluna) */}
+        {/* Coluna Central - Configurador Visual */}
         <div className="lg:col-span-1 space-y-6">
           {/* Detalhes do Produto */}
           <div>
@@ -275,42 +291,30 @@ export default function ProductDetail() {
             <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
 
-          {/* Renderização Dinâmica de Atributos */}
+          {/* Configurador Visual Profissional */}
           {visibleAttributes && visibleAttributes.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Configurações</CardTitle>
+                <CardTitle>Configurações do Produto</CardTitle>
                 <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {visibleAttributes.map((attr) => {
-                  const attrObj: DynamicAttribute = {
-                    id: attr.attributeId,
-                    name: attr.attribute?.name || "Atributo",
-                    slug: attr.attribute?.slug || "",
-                    type: (attr.attribute?.type as any) || "select",
-                    isRequired: attr.isRequired,
-                    allowMultiple: attr.allowMultiple,
-                    values: attr.values.map((v) => ({
-                      ...v,
-                      priceModifier: typeof v.priceModifier === "string" ? parseFloat(v.priceModifier) : v.priceModifier,
-                      weightModifier: typeof v.weightModifier === "string" ? parseFloat(v.weightModifier) : v.weightModifier,
-                      icon: v.icon || undefined,
-                      image: v.image || undefined,
-                    })) as any,
-                    visible: attributeState?.[attr.attributeId]?.visible !== false,
-                    enabled: attributeState?.[attr.attributeId]?.enabled !== false,
-                  };
-                  return (
-                    <DynamicAttributeRenderer
-                      key={attr.attributeId}
-                      attribute={attrObj}
-                      onSelect={handleAttributeSelect}
-                      selectedValues={selectedAttributes[attr.attributeId]?.valueIds}
-                      customValue={selectedAttributes[attr.attributeId]?.customValue}
-                    />
-                  );
-                })}
+              <CardContent>
+                <ConfiguradorVisual
+                  steps={configuradorSteps}
+                  basePrice={parseFloat(product.price)}
+                  selectedValues={{}}
+                  onSelectionChange={(stepId, value) => {
+                    const attrId = parseInt(stepId.replace("attr-", ""));
+                    if (Array.isArray(value)) {
+                      const valueIds = value.map(v => parseInt(v.replace("value-", "")));
+                      handleAttributeSelect(attrId, valueIds);
+                    } else {
+                      const valueId = parseInt(value.replace("value-", ""));
+                      handleAttributeSelect(attrId, [valueId]);
+                    }
+                  }}
+                  onPriceUpdate={setConfiguradorPrice}
+                />
               </CardContent>
             </Card>
           )}
@@ -351,40 +355,27 @@ export default function ProductDetail() {
               checked={acceptedTerms}
               onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
             />
-            <Label htmlFor="terms" className="cursor-pointer text-sm">
+            <Label htmlFor="terms" className="text-sm cursor-pointer">
               Aceito os termos e condições
             </Label>
           </div>
         </div>
 
-        {/* Coluna Direita - Resumo Lateral Fixo (1 coluna) */}
+        {/* Coluna Direita - Resumo do Pedido */}
         <div className="lg:col-span-1">
-          <div className="space-y-4">
-            <OrderSummary
-              productName={product.name}
-              productImage={product.imageUrl || undefined}
-              basePrice={parseFloat(product.price)}
-              selectedAttributes={selectedAttributesForSummary}
-              quantity={quantity}
-              onQuantityChange={setQuantity}
-              onAddToCart={handleAddToCart}
-              isLoading={isProcessing}
-              deadline="5 dias úteis"
-              notes={notes}
-              onNotesChange={setNotes}
-            />
-            
-            {/* Botão de Exportação de Orçamento */}
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={handleExportBudget}
-              disabled={isExporting}
-            >
-              <FileDown className="w-4 h-4" />
-              {isExporting ? "Exportando..." : "Exportar Orçamento"}
-            </Button>
-          </div>
+          <OrderSummary
+            productName={product.name}
+            productImage={product.imageUrl || undefined}
+            selectedAttributes={selectedAttributesForSummary}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            basePrice={parseFloat(product.price)}
+            deadline="5 dias úteis"
+            notes={notes}
+            onNotesChange={setNotes}
+            onAddToCart={handleAddToCart}
+            isLoading={isProcessing}
+          />
         </div>
       </div>
     </div>

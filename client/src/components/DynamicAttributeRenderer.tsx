@@ -63,25 +63,30 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
 
   switch (attribute.type) {
     /**
-     * BUTTON - Botões de seleção
+     * BUTTON - Botões de seleção com animações
      */
     case "button":
       return (
-        <div className="space-y-2">
-          <Label className={isDisabled ? "opacity-50" : ""}>{attribute.name}</Label>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className={`text-base font-semibold ${isDisabled ? "opacity-50" : ""}`}>
+              {attribute.name}
+              {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {attribute.values.map((value) => (
               <Button
                 key={value.id}
                 variant={internalSelected.includes(value.id) ? "default" : "outline"}
                 onClick={() => handleSelect([value.id])}
                 disabled={isDisabled}
-                className="text-sm"
+                className="text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-2.5 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 {value.icon && <span className="mr-1">{value.icon}</span>}
                 {value.value}
                 {value.priceModifier !== 0 && (
-                  <span className="ml-1 text-xs">
+                  <span className="ml-1 text-xs sm:text-sm font-medium">
                     +R$ {Math.abs(value.priceModifier).toFixed(2)}
                   </span>
                 )}
@@ -126,29 +131,38 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
       );
 
     /**
-     * CARD - Cards com imagem
+     * CARD - Cards com imagem e animações
      */
     case "card":
       return (
-        <div className="space-y-2">
-          <Label className={isDisabled ? "opacity-50" : ""}>{attribute.name}</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="space-y-3">
+          <Label className={`text-base font-semibold ${isDisabled ? "opacity-50" : ""}`}>
+            {attribute.name}
+            {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+          </Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             {attribute.values.map((value) => (
               <Card
                 key={value.id}
-                className={`p-3 cursor-pointer transition-all ${
+                className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 transform hover:scale-105 active:scale-95 ${
                   internalSelected.includes(value.id)
-                    ? "ring-2 ring-blue-500 bg-blue-50"
-                    : "hover:ring-1 hover:ring-gray-300"
-                } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                    ? "ring-2 ring-blue-500 bg-blue-50 shadow-md"
+                    : "hover:ring-1 hover:ring-gray-300 shadow-sm"
+                } ${
+                  isDisabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 onClick={() => !isDisabled && handleSelect([value.id])}
               >
                 {value.image && (
-                  <img src={value.image} alt={value.value} className="w-full h-24 object-cover rounded mb-2" />
+                  <img
+                    src={value.image}
+                    alt={value.value}
+                    className="w-full h-20 sm:h-24 object-cover rounded mb-2"
+                  />
                 )}
-                <p className="text-sm font-medium">{value.value}</p>
+                <p className="text-xs sm:text-sm font-medium">{value.value}</p>
                 {value.priceModifier !== 0 && (
-                  <p className="text-xs text-gray-500">+R$ {Math.abs(value.priceModifier).toFixed(2)}</p>
+                  <p className="text-xs text-blue-600 font-medium">+R$ {Math.abs(value.priceModifier).toFixed(2)}</p>
                 )}
               </Card>
             ))}
@@ -157,44 +171,78 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
       );
 
     /**
-     * RADIO - Radio buttons
+     * RADIO - Radio buttons com cards modernos
      */
     case "radio":
       return (
-        <div className="space-y-2">
-          <Label className={isDisabled ? "opacity-50" : ""}>{attribute.name}</Label>
+        <div className="space-y-3">
+          <Label className={`text-base font-semibold ${isDisabled ? "opacity-50" : ""}`}>
+            {attribute.name}
+            {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+          </Label>
           <RadioGroup
             value={internalSelected[0]?.toString() || ""}
             onValueChange={(val) => handleSelect([Number(val)])}
             disabled={isDisabled}
           >
-            {attribute.values.map((value) => (
-              <div key={value.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={value.id.toString()} id={`radio-${value.id}`} disabled={isDisabled} />
-                <Label htmlFor={`radio-${value.id}`} className="cursor-pointer flex-1">
-                  {value.value}
-                  {value.priceModifier !== 0 && (
-                    <span className="ml-2 text-xs text-gray-500">
-                      +R$ {Math.abs(value.priceModifier).toFixed(2)}
-                    </span>
-                  )}
-                </Label>
-              </div>
-            ))}
+            <div className="space-y-2">
+              {attribute.values.map((value) => (
+                <div
+                  key={value.id}
+                  className={`flex items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                    internalSelected.includes(value.id)
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300 bg-white"
+                  } ${
+                    isDisabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  <RadioGroupItem
+                    value={value.id.toString()}
+                    id={`radio-${value.id}`}
+                    disabled={isDisabled}
+                    className="mr-3"
+                  />
+                  <Label
+                    htmlFor={`radio-${value.id}`}
+                    className="cursor-pointer flex-1 flex items-center justify-between"
+                  >
+                    <span className="text-sm sm:text-base">{value.value}</span>
+                    {value.priceModifier !== 0 && (
+                      <span className="ml-2 text-xs sm:text-sm font-medium text-blue-600">
+                        +R$ {Math.abs(value.priceModifier).toFixed(2)}
+                      </span>
+                    )}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </RadioGroup>
         </div>
       );
 
     /**
-     * CHECKBOX - Checkboxes (múltipla seleção)
+     * CHECKBOX - Checkboxes com cards modernos (múltipla seleção)
      */
     case "checkbox":
       return (
-        <div className="space-y-2">
-          <Label className={isDisabled ? "opacity-50" : ""}>{attribute.name}</Label>
+        <div className="space-y-3">
+          <Label className={`text-base font-semibold ${isDisabled ? "opacity-50" : ""}`}>
+            {attribute.name}
+            {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+          </Label>
           <div className="space-y-2">
             {attribute.values.map((value) => (
-              <div key={value.id} className="flex items-center space-x-2">
+              <div
+                key={value.id}
+                className={`flex items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                  internalSelected.includes(value.id)
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300 bg-white"
+                } ${
+                  isDisabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
                 <Checkbox
                   id={`check-${value.id}`}
                   checked={internalSelected.includes(value.id)}
@@ -205,11 +253,15 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                     handleSelect(newSelected);
                   }}
                   disabled={isDisabled}
+                  className="mr-3"
                 />
-                <Label htmlFor={`check-${value.id}`} className="cursor-pointer flex-1">
-                  {value.value}
+                <Label
+                  htmlFor={`check-${value.id}`}
+                  className="cursor-pointer flex-1 flex items-center justify-between"
+                >
+                  <span className="text-sm sm:text-base">{value.value}</span>
                   {value.priceModifier !== 0 && (
-                    <span className="ml-2 text-xs text-gray-500">
+                    <span className="ml-2 text-xs sm:text-sm font-medium text-blue-600">
                       +R$ {Math.abs(value.priceModifier).toFixed(2)}
                     </span>
                   )}
