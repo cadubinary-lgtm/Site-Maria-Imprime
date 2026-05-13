@@ -78,13 +78,23 @@ export async function updateAttribute(id: number, data: Partial<Omit<typeof attr
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  // Converter basePrice para string se for número
-  const processedData = {
-    ...data,
-    basePrice: data.basePrice !== undefined ? String(data.basePrice) : undefined,
-  };
+  // Construir objeto de update com apenas campos definidos
+  const updateData: any = {};
+  
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.type !== undefined) updateData.type = data.type;
+  if (data.icon !== undefined) updateData.icon = data.icon;
+  if (data.displayOrder !== undefined) updateData.displayOrder = data.displayOrder;
+  if (data.basePrice !== undefined) updateData.basePrice = String(data.basePrice);
+  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  
+  if (Object.keys(updateData).length === 0) {
+    throw new Error("No fields to update");
+  }
 
-  return await db.update(attributes).set(processedData as any).where(eq(attributes.id, id));
+  return await db.update(attributes).set(updateData).where(eq(attributes.id, id));
 }
 
 /**

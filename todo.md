@@ -726,3 +726,102 @@
 - [x] Reutilizar mesma fonte de dados da sidebar
 - [x] Testar sincronização de segmentos
 - [x] Validar que não há regressão
+
+
+## Bugs Encontrados: Página "Ver Todos os Produtos" (Duplicação de Segmentos)
+- [x] Remover renderização duplicada de segmentos no topo da página
+- [x] Manter apenas uma única renderização de segmentos na página
+- [x] Validar que layout foi preservado
+- [x] Testar sincronização de segmentos
+
+## Bugs Encontrados: Admin Produtos (setState Error)
+- [x] Corrigir erro "Cannot update a component while rendering a different component"
+- [x] Adicionar useCallback para memoizar handleSegmentsChange
+- [x] Remover função inline que causava re-render
+- [x] Testar modal de edição com MultiSegmentSelector
+- [x] Validar que não há loop infinito de setState
+
+
+## Fase 27: Sistema Global Inteligente de Atributos com Regras Condicionais
+
+### Objetivo:
+Transformar atributos em um sistema global onde todos os produtos herdam atributos dinâmicos configuráveis automaticamente com regras condicionais por categoria/material.
+
+### FASE 1: Análise e Planejamento da Arquitetura
+- [ ] Analisar estrutura atual de atributos (productAttributes, productVariations)
+- [ ] Mapear categorias de produtos (Lona, Folheto, Adesivo, Placa, etc.)
+- [ ] Definir atributos globais: tipo impressão, material, papel, acabamento, revestimento, cor, formato, quantidade
+- [ ] Criar matriz de compatibilidade (categoria → atributos permitidos)
+- [ ] Documentar regras de visibilidade condicional
+- [ ] Criar diagrama de arquitetura modular
+
+### FASE 2: Expandir Schema do Banco de Dados com Regras Condicionais
+- [ ] Criar tabela `attributeRules` (id, categoryId, attributeId, isRequired, displayOrder, compatibilityRules)
+- [ ] Criar tabela `categoryAttributeMappings` (categoryId, attributeId, isVisible, order)
+- [ ] Criar tabela `attributeCompatibility` (attributeId, compatibleWithAttributeId, rule)
+- [ ] Adicionar coluna `categoryId` em `products` se não existir
+- [ ] Executar migrations SQL via webdev_execute_sql
+- [ ] Validar schema no banco de dados
+
+### FASE 3: Criar Procedures tRPC para Sistema de Regras
+- [ ] Criar `rules.getByCategory` - retorna regras de atributos para uma categoria
+- [ ] Criar `rules.getCompatible` - retorna atributos compatíveis com seleção atual
+- [ ] Criar `rules.create` - criar nova regra de compatibilidade
+- [ ] Criar `rules.update` - atualizar regra existente
+- [ ] Criar `rules.delete` - deletar regra
+- [ ] Criar `categories.getAll` - retorna todas as categorias com suas regras
+- [ ] Escrever testes para procedures
+
+### FASE 4: Implementar Lógica de Compatibilidade Automática
+- [ ] Criar função `getCompatibleAttributes(categoryId, selectedAttributes)` em server/db.ts
+- [ ] Implementar lógica de filtragem automática baseada em regras
+- [ ] Criar função `validateAttributeSelection(categoryId, selection)` para validar seleções
+- [ ] Implementar cache de regras para performance
+- [ ] Testar lógica com diferentes combinações
+
+### FASE 5: Criar Painel de Gerenciamento de Regras Inteligentes
+- [ ] Criar página AdminRulesManager.tsx
+- [ ] Implementar interface para criar/editar regras
+- [ ] Adicionar seletor de categoria
+- [ ] Implementar matriz de compatibilidade visual
+- [ ] Adicionar toggle para ativar/desativar regras
+- [ ] Criar preview de atributos que serão exibidos
+- [ ] Testar interface completa
+
+### FASE 6: Refatorar ProductDetail para Sistema Global de Atributos
+- [ ] Atualizar ProductDetail.tsx para carregar regras da API
+- [ ] Implementar renderização dinâmica de atributos baseada em categoria
+- [ ] Remover atributos hardcoded
+- [ ] Integrar lógica de compatibilidade automática
+- [ ] Testar com diferentes categorias de produtos
+
+### FASE 7: Melhorar Interface com Cartões Clicáveis e Preview Visual
+- [ ] Criar componente AttributeCard com design moderno
+- [ ] Implementar cartões clicáveis para seleção de atributos
+- [ ] Adicionar ícones e cores por tipo de atributo
+- [ ] Criar preview visual de seleções
+- [ ] Implementar etapas organizadas (Step 1: Material, Step 2: Acabamento, etc.)
+- [ ] Adicionar animações suaves
+- [ ] Testar responsividade
+
+### FASE 8: Integrar Calculadora Automática com Regras
+- [ ] Atualizar CalculadoraGrafica para considerar regras
+- [ ] Implementar cálculo automático conforme material, acabamento, quantidade, formato, revestimento
+- [ ] Adicionar modificadores de preço por atributo
+- [ ] Implementar preview de preço em tempo real
+- [ ] Testar cálculos com diferentes combinações
+
+### FASE 9: Escrever Testes Vitest para Sistema de Regras
+- [ ] Criar intelligent-attributes.test.ts com testes de regras
+- [ ] Testar getCompatibleAttributes com diferentes categorias
+- [ ] Testar validateAttributeSelection
+- [ ] Testar procedures tRPC
+- [ ] Testar integração completa
+- [ ] Executar testes e validar cobertura
+
+### FASE 10: Entregar Sistema Global de Atributos
+- [ ] Validar funcionalidade completa em todos os produtos
+- [ ] Testar regras condicionais por categoria
+- [ ] Verificar compatibilidade automática
+- [ ] Fazer checkpoint final
+- [ ] Documentar sistema para manutenção futura
