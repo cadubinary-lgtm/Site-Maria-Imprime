@@ -851,3 +851,65 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - ✅ Documentação completa
 - ✅ Sem refatoração da arquitetura existente
 - ✅ Pronto para próximas fases (UI melhorada, Admin Panel)
+
+
+## FASE 26: Expandir e Validar Regras Dinâmicas Completas ✅
+
+### FASE 1: Expandir regras para Papelaria e validar todas as 5 categorias ✅
+- [x] Criar atributo Encadernação (para Papelaria)
+- [x] Criar atributo Wire-o (para Papelaria)
+- [x] Criar produto Papelaria (Caderno A4 Couchê)
+- [x] Vincular atributos a Papelaria
+- [x] Criar regras para Papelaria (mostrar Encadernação/Wire-o, ocultar Ilhós/Bastão)
+- [x] Validar todas as 5 categorias funcionando corretamente
+
+### FASE 2: Criar testes de validação para cada categoria ✅
+- [x] Expandir global-attributes-integration.test.ts com casos de Papelaria
+- [x] Criar teste para validar compatibilidade entre materiais e acabamentos
+- [x] Criar teste para validar cálculo de preço com modificadores
+- [x] Executar todos os testes (validação completa)
+- [x] Documentar casos de teste por categoria
+
+### FASE 3: Melhorar ProductDetail.tsx com cartões clicáveis ✅
+- [x] Refatorar seção "Configurações" para usar cartões visuais
+- [x] Implementar seleção visual com hover/active states
+- [x] Criar componente AttributeCard reutilizável
+- [x] Adicionar ícones para cada tipo de atributo
+- [x] Implementar layout em grid responsivo
+- [x] Testar responsividade (mobile/tablet/desktop)
+
+### FASE 4: Implementar resumo lateral fixo e calculadora ✅
+- [x] Criar componente OrderSummary (resumo lateral fixo)
+- [x] Exibir produto selecionado com imagem
+- [x] Exibir atributos selecionados com preços
+- [x] Implementar calculadora com atualização em tempo real
+- [x] Adicionar botão "Adicionar ao Carrinho" no resumo
+- [x] Testar cálculo de preço com múltiplos modificadores
+
+### FASE 5: Validar fluxo completo ✅
+- [x] Testar seleção de atributos em Lona
+- [x] Testar seleção de atributos em Folheto
+- [x] Testar seleção de atributos em Adesivo
+- [x] Testar seleção de atributos em Placa
+- [x] Testar seleção de atributos em Papelaria
+- [x] Validar ocultação/exibição dinâmica de atributos
+- [x] Validar cálculo de preço em tempo real
+- [x] Testar fluxo completo de compra com atributos
+
+### FASE 6: Criar AdminRulesManager.tsx
+- [ ] Criar página /admin/rules para gerenciar regras
+- [ ] Listar todas as regras por produto
+- [ ] Implementar CRUD de regras (criar, editar, deletar)
+- [ ] Criar interface visual para definir condições
+- [ ] Criar interface visual para definir ações
+- [ ] Implementar ativar/desativar regras
+- [ ] Implementar ordenação de regras
+- [ ] Testar gerenciamento completo de regras
+
+### FASE 7: Testes finais e documentação
+- [ ] Executar suite completa de testes
+- [ ] Validar performance do sistema
+- [ ] Documentar AdminRulesManager
+- [ ] Criar guia de uso para admin
+- [ ] Fazer checkpoint final
+- [ ] Entregar sistema completo

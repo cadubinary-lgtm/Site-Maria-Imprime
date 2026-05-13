@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import DynamicAttributeRenderer, { DynamicAttribute } from "@/components/DynamicAttributeRenderer";
 import { processRules, generateInitialState, getVisibleAttributes } from "@/lib/attributes-engine";
+import { OrderSummary } from "@/components/OrderSummary";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -98,7 +99,7 @@ export default function ProductDetail() {
       });
     }
 
-    return Math.max(0, total * quantity);
+    return Math.max(0, total);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,6 +167,22 @@ export default function ProductDetail() {
     }
   };
 
+  // Preparar atributos selecionados para OrderSummary
+  const selectedAttributesForSummary = useMemo(() => {
+    return Object.entries(selectedAttributes)
+      .map(([attrId, selection]) => {
+        const attr = productAttributes?.find((pa) => pa.attributeId === Number(attrId));
+        if (!attr) return null;
+        const value = attr.values.find((v) => v.id === selection.valueIds[0]);
+        return {
+          name: attr.attribute?.name || "Atributo",
+          value: value?.value || selection.customValue || "",
+          priceModifier: value?.priceModifier,
+        };
+      })
+      .filter(Boolean) as any[];
+  }, [selectedAttributes, productAttributes]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -200,15 +217,15 @@ export default function ProductDetail() {
         </Button>
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Coluna Esquerda - Imagem */}
-        <div>
-          <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Coluna Esquerda - Imagem (1 coluna) */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-4">
             <CardContent className="pt-6">
               {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} className="w-full h-96 object-cover rounded" />
+                <img src={product.imageUrl} alt={product.name} className="w-full h-80 object-cover rounded" />
               ) : (
-                <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
+                <div className="w-full h-80 bg-gray-200 rounded flex items-center justify-center">
                   <span className="text-gray-500">Sem imagem</span>
                 </div>
               )}
@@ -216,24 +233,13 @@ export default function ProductDetail() {
           </Card>
         </div>
 
-        {/* Coluna Direita - Detalhes e Configuração */}
-        <div className="space-y-6">
+        {/* Coluna Central - Configurações (1 coluna) */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Detalhes do Produto */}
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
             <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Preço</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-blue-600">
-                R$ {calculateFinalPrice().toFixed(2)}
-              </div>
-              <p className="text-sm text-gray-500 mt-2">Preço base: R$ {product.price}</p>
-            </CardContent>
-          </Card>
 
           {/* Renderização Dinâmica de Atributos */}
           {visibleAttributes && visibleAttributes.length > 0 && (
@@ -304,36 +310,6 @@ export default function ProductDetail() {
             </CardContent>
           </Card>
 
-          {/* Quantidade */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quantidade</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                >
-                  -
-                </Button>
-                <Input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => setQuantity(quantity + 1)}
-                >
-                  +
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Termos */}
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -341,27 +317,24 @@ export default function ProductDetail() {
               checked={acceptedTerms}
               onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
             />
-            <Label htmlFor="terms" className="cursor-pointer">
+            <Label htmlFor="terms" className="cursor-pointer text-sm">
               Aceito os termos e condições
             </Label>
           </div>
+        </div>
 
-          {/* Botão de Compra */}
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleAddToCart}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processando...
-              </>
-            ) : (
-              "Adicionar ao Carrinho"
-            )}
-          </Button>
+        {/* Coluna Direita - Resumo Lateral Fixo (1 coluna) */}
+        <div className="lg:col-span-1">
+          <OrderSummary
+            productName={product.name}
+            productImage={product.imageUrl || undefined}
+            basePrice={parseFloat(product.price)}
+            selectedAttributes={selectedAttributesForSummary}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            onAddToCart={handleAddToCart}
+            isLoading={isProcessing}
+          />
         </div>
       </div>
     </div>

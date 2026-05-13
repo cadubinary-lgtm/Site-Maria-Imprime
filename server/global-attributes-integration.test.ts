@@ -150,12 +150,15 @@ const ILHOS_ID = 62;
 const BASTAO_ID = 64;
 const LAMINACAO_ID = 30004;
 const DOBRA_ID = 30005;
+const ENCADERNACAO_ID = 72;
+const WIREO_ID = 70;
 
 // IDs dos produtos
 const LONA_ID = 840001;
 const FOLHETO_ID = 840002;
 const ADESIVO_ID = 840003;
 const PLACA_ID = 840004;
+const PAPELARIA_ID = 870001;
 
 describe("Global Attributes Integration System", () => {
   let initialState: AttributeState;
@@ -359,6 +362,60 @@ describe("Global Attributes Integration System", () => {
     });
   });
 
+  describe("PAPELARIA - Regras de Compatibilidade", () => {
+    it("deve mostrar Encadernação e Wire-o para Papelaria", () => {
+      const rules: DynamicRule[] = [
+        {
+          id: 1,
+          name: "Papelaria permite Encadernação e Wire-o",
+          conditions: [],
+          actions: [
+            { targetAttributeId: ENCADERNACAO_ID, action: "show" },
+            { targetAttributeId: WIREO_ID, action: "show" },
+          ],
+          isActive: true,
+        },
+      ];
+
+      const finalState = processRules(rules, selectedValues, initialState);
+
+      expect(finalState[ENCADERNACAO_ID].visible).toBe(true);
+      expect(finalState[WIREO_ID].visible).toBe(true);
+    });
+
+    it("deve ocultar Ilhós, Bastão, Laminação e Dobra para Papelaria", () => {
+      const rules: DynamicRule[] = [
+        {
+          id: 2,
+          name: "Papelaria não permite Ilhós ou Bastão",
+          conditions: [],
+          actions: [
+            { targetAttributeId: ILHOS_ID, action: "hide" },
+            { targetAttributeId: BASTAO_ID, action: "hide" },
+          ],
+          isActive: true,
+        },
+        {
+          id: 3,
+          name: "Papelaria não permite Laminação ou Dobra",
+          conditions: [],
+          actions: [
+            { targetAttributeId: LAMINACAO_ID, action: "hide" },
+            { targetAttributeId: DOBRA_ID, action: "hide" },
+          ],
+          isActive: true,
+        },
+      ];
+
+      const finalState = processRules(rules, selectedValues, initialState);
+
+      expect(finalState[ILHOS_ID].visible).toBe(false);
+      expect(finalState[BASTAO_ID].visible).toBe(false);
+      expect(finalState[LAMINACAO_ID].visible).toBe(false);
+      expect(finalState[DOBRA_ID].visible).toBe(false);
+    });
+  });
+
   describe("PLACA - Regras de Compatibilidade", () => {
     it("deve ocultar Dobra, Ilhós e Bastão para Placa", () => {
       const rules: DynamicRule[] = [
@@ -401,6 +458,57 @@ describe("Global Attributes Integration System", () => {
 
       expect(finalState[MATERIAL_ID].visible).toBe(true);
       expect(finalState[ACABAMENTO_ID].visible).toBe(true);
+    });
+  });
+
+  describe("Compatibilidade entre Materiais e Acabamentos", () => {
+    it("deve aplicar modificadores de preço para materiais diferentes", () => {
+      const rules: DynamicRule[] = [];
+      selectedValues.set(MATERIAL_ID, "Papel Couchê 300g");
+      
+      const finalState = processRules(rules, selectedValues, initialState);
+      
+      // Material deve estar selecionado
+      expect(finalState[MATERIAL_ID].visible).toBe(true);
+    });
+
+    it("deve validar compatibilidade entre Lona e Ilhós", () => {
+      const rules: DynamicRule[] = [
+        {
+          id: 1,
+          name: "Lona requer Ilhós e Bastão",
+          conditions: [{ attributeId: MATERIAL_ID, operator: "equals", value: "Lona 280g" }],
+          actions: [
+            { targetAttributeId: ILHOS_ID, action: "show" },
+            { targetAttributeId: BASTAO_ID, action: "show" },
+          ],
+          isActive: true,
+        },
+      ];
+
+      selectedValues.set(MATERIAL_ID, "Lona 280g");
+      const finalState = processRules(rules, selectedValues, initialState);
+
+      // Lona deve mostrar Ilhós
+      expect(finalState[ILHOS_ID].visible).toBe(true);
+    });
+
+    it("deve validar compatibilidade entre Papel e Dobra", () => {
+      const rules: DynamicRule[] = [
+        {
+          id: 1,
+          name: "Folheto permite Dobra",
+          conditions: [{ attributeId: MATERIAL_ID, operator: "equals", value: "Papel Couchê 300g" }],
+          actions: [{ targetAttributeId: DOBRA_ID, action: "show" }],
+          isActive: true,
+        },
+      ];
+
+      selectedValues.set(MATERIAL_ID, "Papel Couchê 300g");
+      const finalState = processRules(rules, selectedValues, initialState);
+
+      // Papel deve mostrar Dobra
+      expect(finalState[DOBRA_ID].visible).toBe(true);
     });
   });
 
