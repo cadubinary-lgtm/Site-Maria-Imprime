@@ -718,3 +718,11 @@
 - [x] Corrigir clique na logo para rolar página para o topo quando na Home
 - [x] Testar comportamento em desktop e mobile
 - [x] Validar que não há regressão
+
+
+## Bugs Encontrados: Página "Ver Todos os Produtos"
+- [x] Corrigir scroll: página deve iniciar no topo ao abrir
+- [x] Adicionar segmentos no topo da página (sincronizados com /admin/segmentos)
+- [x] Reutilizar mesma fonte de dados da sidebar
+- [x] Testar sincronização de segmentos
+- [x] Validar que não há regressão

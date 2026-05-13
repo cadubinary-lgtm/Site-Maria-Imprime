@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,23 @@ export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
+
+  // Rolar para o topo ao montar a página
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Carregar segmentos dinamicamente da API
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+
+  // Mapear segmentos para formato esperado
+  const segments = useMemo(() => {
+    if (!segmentsData || segmentsData.length === 0) return [];
+    return segmentsData.map((seg: any) => ({
+      value: seg.slug,
+      label: `${seg.icon || '📦'} ${seg.name}`,
+    }));
+  }, [segmentsData]);
 
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
 
@@ -42,12 +59,7 @@ export default function AllProducts() {
     return filtered;
   }, [products, searchTerm, selectedSegment, sortBy]);
 
-  const segments = [
-    { value: 'alimentacao', label: '🍔 Alimentação' },
-    { value: 'beleza', label: '💄 Beleza & Saúde' },
-    { value: 'varejo', label: '🛍️ Varejo' },
-    { value: 'servicos', label: '🔧 Serviços' },
-  ];
+
 
   if (isLoading) {
     return (
@@ -67,6 +79,32 @@ export default function AllProducts() {
         <p className="text-gray-400 mb-8">
           Encontre a solução perfeita para seu negócio
         </p>
+
+        {/* Segmentos no Topo */}
+        {segmentsLoading ? (
+          <div className="flex justify-center py-4 mb-8">
+            <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+          </div>
+        ) : segments.length > 0 ? (
+          <div className="mb-8 flex flex-wrap gap-2">
+            {segments.map((seg) => (
+              <Button
+                key={seg.value}
+                variant={selectedSegment === seg.value ? 'default' : 'outline'}
+                onClick={() =>
+                  setSelectedSegment(selectedSegment === seg.value ? null : seg.value)
+                }
+                className={
+                  selectedSegment === seg.value
+                    ? 'bg-orange-500 hover:bg-orange-600'
+                    : ''
+                }
+              >
+                {seg.label}
+              </Button>
+            ))}
+          </div>
+        ) : null}
 
         {/* Filters */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
