@@ -11,6 +11,7 @@ import { Link } from "wouter";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { FormCardDynamic } from "@/components/FormCardDynamic";
+import { ProductVariationManager } from "@/components/ProductVariationManager";
 
 const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
   { id: "alimentacao", label: "Alimentação" },
@@ -81,8 +82,9 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
+            <TabsTrigger value="variações">Gerenciar Variações</TabsTrigger>
             <TabsTrigger value="formcard">Form Card Dinâmico</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
           </TabsList>
@@ -201,6 +203,11 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Variações Tab */}
+          <TabsContent value="variações" className="mt-8">
+            <ProductVariationManager />
           </TabsContent>
 
           {/* Form Card Tab */}

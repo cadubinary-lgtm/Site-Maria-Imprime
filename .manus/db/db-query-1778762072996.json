@@ -1,0 +1,9 @@
+{
+  "query": "SELECT vt.id, vt.type, vt.name, vt.isRequired, vo.id as optionId, vo.name as optionName, vo.priceModifier \nFROM variationTypes vt \nLEFT JOIN variationOptions vo ON vt.id = vo.variationTypeId \nWHERE vt.productId = 990001 \nORDER BY vt.id, vo.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute SELECT vt.id, vt.type, vt.name, vt.isRequired, vo.id as optionId, vo.name as optionName, vo.priceModifier \nFROM variationTypes vt \nLEFT JOIN variationOptions vo ON vt.id = vo.variationTypeId \nWHERE vt.productId = 990001 \nORDER BY vt.id, vo.id;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 715
+}

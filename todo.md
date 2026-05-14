@@ -1175,3 +1175,42 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - ✅ Botão "Adicionar ao Carrinho" com validação de campos
 - ✅ Interface profissional similar a Padrão Color
 - ✅ Pronto para produção
+
+
+## Fase 26: Form Card Dinâmico Escalável por Produto
+
+### FASE 1: Analisar Estrutura Atual ⏳
+- [ ] Revisar componente FormCardDynamic.tsx
+- [ ] Analisar como variações são salvas no banco de dados
+- [ ] Entender fluxo de preços e modificadores
+- [ ] Mapear limitações atuais
+
+### FASE 2: Criar Sistema de Gerenciamento de Variações por Produto ⏳
+- [ ] Criar nova tabela `productVariationConfigs` para armazenar configurações por produto
+- [ ] Adicionar campos: productId, variationType, options, priceModifiers, isActive
+- [ ] Criar procedures tRPC para CRUD de variações por produto
+- [ ] Implementar função `getVariationsByProduct` em server/db.ts
+
+### FASE 3: Implementar CRUD de Variações no Painel Admin ⏳
+- [ ] Criar componente `ProductVariationManager.tsx` com interface de gerenciamento
+- [ ] Implementar adição dinâmica de variações
+- [ ] Implementar remoção de variações
+- [ ] Implementar edição de preços e modificadores
+- [ ] Adicionar toggle para ativar/desativar variações
+
+### FASE 4: Integrar Calculadora Dinâmica com Variações ⏳
+- [ ] Atualizar ProductConfigurator para carregar variações dinamicamente
+- [ ] Implementar cálculo de preço baseado em variações do banco de dados
+- [ ] Refletir mudanças em tempo real no frontend
+
+### FASE 5: Testar Fluxo Completo com Produto Adesivo ⏳
+- [ ] Selecionar produto "Adesivo" no painel admin
+- [ ] Adicionar variações (tipos, acabamentos, medidas)
+- [ ] Definir preços e modificadores
+- [ ] Testar no frontend se as variações aparecem corretamente
+- [ ] Validar cálculo de preço com modificadores
+
+### FASE 6: Entregar Solução Escalável ⏳
+- [ ] Documentar como adicionar novos produtos com variações
+- [ ] Criar checkpoint final
+- [ ] Entregar ao usuário
