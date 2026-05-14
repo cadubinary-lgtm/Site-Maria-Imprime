@@ -33,6 +33,10 @@ export default function ProductDetail() {
   const [configuradorPrice, setConfiguradorPrice] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+  const [deadlineType, setDeadlineType] = useState<'economico' | 'expresso'>('economico');
+  const [fileTreatment, setFileTreatment] = useState<'padrao' | 'profissional'>('padrao');
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -506,6 +510,14 @@ export default function ProductDetail() {
             onNotesChange={setNotes}
             onAddToCart={handleAddToCart}
             isLoading={isProcessing}
+            width={width}
+            onWidthChange={setWidth}
+            height={height}
+            onHeightChange={setHeight}
+            deadline_type={deadlineType}
+            onDeadlineTypeChange={setDeadlineType}
+            file_treatment={fileTreatment}
+            onFileTreatmentChange={setFileTreatment}
           />
         </div>
       </div>

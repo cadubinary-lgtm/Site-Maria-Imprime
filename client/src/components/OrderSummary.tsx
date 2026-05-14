@@ -32,6 +32,14 @@ interface OrderSummaryProps {
   deadline?: string;
   notes?: string;
   onNotesChange?: (notes: string) => void;
+  width?: number;
+  onWidthChange?: (width: number) => void;
+  height?: number;
+  onHeightChange?: (height: number) => void;
+  deadline_type?: 'economico' | 'expresso';
+  onDeadlineTypeChange?: (type: 'economico' | 'expresso') => void;
+  file_treatment?: 'padrao' | 'profissional';
+  onFileTreatmentChange?: (type: 'padrao' | 'profissional') => void;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -48,13 +56,25 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   deadline,
   notes,
   onNotesChange,
+  width = 0,
+  onWidthChange,
+  height = 0,
+  onHeightChange,
+  deadline_type = 'economico',
+  onDeadlineTypeChange,
+  file_treatment = 'padrao',
+  onFileTreatmentChange,
 }) => {
+  // Calcular modificadores de prazo e tratamento
+  const fileTreatmentModifier = file_treatment === 'profissional' ? 21 : 0;
+  const deadlineModifier = deadline_type === 'expresso' ? 15 : 0;
+
   // Calcular preço total com modificadores
   const totalModifier = useMemo(() => {
     return selectedAttributes.reduce((sum, attr) => {
       return sum + (attr.priceModifier || 0);
-    }, 0);
-  }, [selectedAttributes]);
+    }, 0) + fileTreatmentModifier + deadlineModifier;
+  }, [selectedAttributes, fileTreatmentModifier, deadlineModifier]);
 
   const unitPrice = basePrice + totalModifier;
   const totalPrice = unitPrice * quantity;
@@ -106,6 +126,102 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                 <span className="font-medium">{attr.value}</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Dimensões */}
+        {onWidthChange && onHeightChange && (
+          <div className="space-y-3 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Dimensões</p>
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-muted-foreground">Largura (m)</label>
+                <Input
+                  type="number"
+                  value={width}
+                  onChange={(e) => onWidthChange(Number(e.target.value))}
+                  placeholder="0.00"
+                  step="0.01"
+                  className="text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Altura (m)</label>
+                <Input
+                  type="number"
+                  value={height}
+                  onChange={(e) => onHeightChange(Number(e.target.value))}
+                  placeholder="0.00"
+                  step="0.01"
+                  className="text-sm"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Prazo de Produção */}
+        {onDeadlineTypeChange && (
+          <div className="space-y-2 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Prazo de Produção</p>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="deadline"
+                  value="economico"
+                  checked={deadline_type === 'economico'}
+                  onChange={() => onDeadlineTypeChange('economico')}
+                  className="w-4 h-4"
+                />
+                <span className="text-xs">Econômico (4 dias úteis)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="deadline"
+                  value="expresso"
+                  checked={deadline_type === 'expresso'}
+                  onChange={() => onDeadlineTypeChange('expresso')}
+                  className="w-4 h-4"
+                />
+                <span className="text-xs">Expresso (3 dias úteis) +R$ 15,00</span>
+              </label>
+            </div>
+          </div>
+        )}
+
+        {/* Tratamento de Arquivo */}
+        {onFileTreatmentChange && (
+          <div className="space-y-2 pb-3 border-b">
+            <div className="flex items-center gap-1">
+              <p className="text-xs font-medium text-muted-foreground">Tratamento de Arquivo</p>
+              <span className="text-xs bg-gray-800 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-help" title="Profissional: Ajuste de cores, dimensões e preparação completa">?</span>
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="treatment"
+                  value="padrao"
+                  checked={file_treatment === 'padrao'}
+                  onChange={() => onFileTreatmentChange('padrao')}
+                  className="w-4 h-4"
+                />
+                <span className="text-xs">Padrão (R$ 0,00 - Grátis)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="treatment"
+                  value="profissional"
+                  checked={file_treatment === 'profissional'}
+                  onChange={() => onFileTreatmentChange('profissional')}
+                  className="w-4 h-4"
+                />
+                <span className="text-xs">Profissional (R$ 21,00)</span>
+              </label>
+            </div>
           </div>
         )}
 
