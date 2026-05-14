@@ -34,7 +34,7 @@ export default function Catalog() {
   // Obter categorias únicas
   const categories = useMemo(() => {
     if (!products) return [];
-    const cats = new Set(products.map((p) => p.category).filter(Boolean));
+    const cats = new Set(products.map((p) => p.category).filter((c): c is string => c !== null && c !== undefined));
     return Array.from(cats);
   }, [products]);
 
