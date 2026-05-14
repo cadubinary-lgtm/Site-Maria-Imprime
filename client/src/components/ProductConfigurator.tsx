@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +14,7 @@ interface AttributeValue {
   value: string;
   priceModifier: number;
   timeModifier: number;
+  compatibleWith?: number[]; // IDs dos atributos de impressão compatíveis
 }
 
 interface ProductAttribute {
@@ -73,8 +76,8 @@ export function ProductConfigurator({
           {
             id: 1,
             attributeId: 1,
-            attributeName: "Tipo de Impressão",
-            attributeSlug: "tipo-impressao",
+            attributeName: "Impressão",
+            attributeSlug: "impressao",
             attributeType: "select",
             values: [
               { id: 1, value: "Solvente", priceModifier: 0, timeModifier: 0 },
@@ -87,15 +90,86 @@ export function ProductConfigurator({
           {
             id: 2,
             attributeId: 2,
-            attributeName: "Material",
-            attributeSlug: "material",
+            attributeName: "Tipo de Material",
+            attributeSlug: "tipo-material",
             attributeType: "select",
             values: [
-              { id: 3, value: "Vinil Transparente", priceModifier: 0, timeModifier: 0 },
-              { id: 4, value: "Vinil Brilho", priceModifier: 30, timeModifier: 0 },
+              { id: 3, value: "Brilho", priceModifier: 30, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 4, value: "Fosco", priceModifier: 20, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 5, value: "Transparente", priceModifier: 35, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 6, value: "Perfurado", priceModifier: 25, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 7, value: "Blackout", priceModifier: 40, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 8, value: "Automotivo", priceModifier: 45, timeModifier: 0, compatibleWith: [1] }, // Solvente
+              { id: 9, value: "ACM", priceModifier: 60, timeModifier: 0, compatibleWith: [2] }, // UV
+              { id: 10, value: "MDF", priceModifier: 50, timeModifier: 0, compatibleWith: [2] }, // UV
+              { id: 11, value: "PS", priceModifier: 15, timeModifier: 0, compatibleWith: [2] }, // UV
             ],
             isRequired: true,
             displayOrder: 2,
+            priceModifier: 0,
+          },
+          {
+            id: 3,
+            attributeId: 3,
+            attributeName: "Acabamento",
+            attributeSlug: "acabamento",
+            attributeType: "select",
+            values: [
+              { id: 12, value: "Bastão Vertical", priceModifier: 10, timeModifier: 0 },
+              { id: 13, value: "Bastão Horizontal", priceModifier: 10, timeModifier: 0 },
+              { id: 14, value: "Corte Reto", priceModifier: 5, timeModifier: 0 },
+              { id: 15, value: "Corte Especial", priceModifier: 25, timeModifier: 0 },
+              { id: 16, value: "Canteamento", priceModifier: 15, timeModifier: 0 },
+              { id: 17, value: "Meio Corte", priceModifier: 8, timeModifier: 0 },
+              { id: 18, value: "Ilhós", priceModifier: 12, timeModifier: 0 },
+              { id: 19, value: "Ilhós + Proteção UV", priceModifier: 18, timeModifier: 0 },
+              { id: 20, value: "Ilhós + Proteção UV + Reforço", priceModifier: 25, timeModifier: 0 },
+              { id: 21, value: "Sem Acabamento + Verniz", priceModifier: 8, timeModifier: 0 },
+              { id: 22, value: "Sem Acabamento", priceModifier: 0, timeModifier: 0 },
+              { id: 23, value: "Laminação Brilho", priceModifier: 20, timeModifier: 0 },
+            ],
+            isRequired: false,
+            displayOrder: 3,
+            priceModifier: 0,
+          },
+          {
+            id: 4,
+            attributeId: 4,
+            attributeName: "Tipo de Finalização",
+            attributeSlug: "tipo-finalizacao",
+            attributeType: "select",
+            values: [
+              { id: 24, value: "Verniz Total Brilho", priceModifier: 15, timeModifier: 0 },
+              { id: 25, value: "Verniz UV Local", priceModifier: 20, timeModifier: 0 },
+              { id: 26, value: "Sem Verniz UV", priceModifier: 0, timeModifier: 0 },
+              { id: 27, value: "Plastificação", priceModifier: 18, timeModifier: 0 },
+              { id: 28, value: "Corte Especial", priceModifier: 25, timeModifier: 0 },
+              { id: 29, value: "Corte Eletrônico", priceModifier: 30, timeModifier: 0 },
+              { id: 30, value: "Vinco", priceModifier: 10, timeModifier: 0 },
+              { id: 31, value: "Dobra Central", priceModifier: 12, timeModifier: 0 },
+              { id: 32, value: "Dobra Sanfona", priceModifier: 14, timeModifier: 0 },
+              { id: 33, value: "Dobra Janela", priceModifier: 16, timeModifier: 0 },
+              { id: 34, value: "Dobra Carteira", priceModifier: 16, timeModifier: 0 },
+              { id: 35, value: "Serrilha", priceModifier: 8, timeModifier: 0 },
+              { id: 36, value: "Furo", priceModifier: 5, timeModifier: 0 },
+              { id: 37, value: "Ilhós", priceModifier: 12, timeModifier: 0 },
+              { id: 38, value: "Laminação Brilho", priceModifier: 20, timeModifier: 0 },
+              { id: 39, value: "Sem Revestimento", priceModifier: 0, timeModifier: 0 },
+              { id: 40, value: "Laminação Fosca", priceModifier: 22, timeModifier: 0 },
+              { id: 41, value: "Laminação Holográfica", priceModifier: 35, timeModifier: 0 },
+              { id: 42, value: "Refile", priceModifier: 6, timeModifier: 0 },
+              { id: 43, value: "Hot Stamping", priceModifier: 40, timeModifier: 0 },
+              { id: 44, value: "2 Cantos Arredondados", priceModifier: 8, timeModifier: 0 },
+              { id: 45, value: "4 Cantos Arredondados", priceModifier: 12, timeModifier: 0 },
+              { id: 46, value: "Faca Especial", priceModifier: 28, timeModifier: 0 },
+              { id: 47, value: "Espiral", priceModifier: 15, timeModifier: 0 },
+              { id: 48, value: "Cola", priceModifier: 10, timeModifier: 0 },
+              { id: 49, value: "Blocagem", priceModifier: 20, timeModifier: 0 },
+              { id: 50, value: "Wire-O", priceModifier: 18, timeModifier: 0 },
+              { id: 51, value: "Encadernação", priceModifier: 25, timeModifier: 0 },
+            ],
+            isRequired: false,
+            displayOrder: 4,
             priceModifier: 0,
           },
         ];
@@ -148,28 +222,21 @@ export function ProductConfigurator({
       area = Math.max(area, calculatorConfig.minimumAreaSqm);
     }
 
-    // Calcular preço final
-    const pricePerUnit = (basePrice + totalAdditionals) * area;
-    totalPrice = pricePerUnit * quantity;
+    totalPrice = basePrice + totalAdditionals;
 
-    // Aplicar margem de lucro
-    const margin = totalPrice * (calculatorConfig.profitMarginPercent / 100);
-    totalPrice = totalPrice + margin;
-
-    return totalPrice;
-  }, [selectedValues, dimensions, quantity, basePrice, calculationType, calculatorConfig, attributes]);
-
-  // Atualizar preço no componente pai
-  useEffect(() => {
+    // Chamar callback com preço atualizado
     if (onPriceUpdate) {
-      onPriceUpdate(calculatedPrice, {
+      onPriceUpdate(totalPrice, {
+        basePrice,
+        additionals: totalAdditionals,
         selectedValues,
         dimensions,
         quantity,
-        calculationType,
       });
     }
-  }, [calculatedPrice, selectedValues, dimensions, quantity, calculationType, onPriceUpdate]);
+
+    return totalPrice;
+  }, [selectedValues, basePrice, calculatorConfig, calculationType, dimensions, quantity, attributes, onPriceUpdate]);
 
   const handleAttributeSelect = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => ({
@@ -178,221 +245,170 @@ export function ProductConfigurator({
     }));
   };
 
-  const handleDimensionChange = (field: "width" | "height", value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setDimensions((prev) => ({
-      ...prev,
-      [field]: numValue,
-    }));
+  const requiredFieldsFilled = attributes
+    .filter((attr) => attr.isRequired)
+    .every((attr) => selectedValues[attr.id] !== undefined);
+
+  const filledCount = Object.keys(selectedValues).length;
+  const requiredCount = attributes.filter((attr) => attr.isRequired).length;
+
+  // Funcao para filtrar opcoes baseado na selecao de Impressao
+  const getFilteredValues = (attribute: ProductAttribute) => {
+    const selectedPrintingId = selectedValues[1]; // ID do atributo Impressao
+    
+    // Se for o atributo Tipo de Material
+    if (attribute.id === 2 && selectedPrintingId) {
+      // Filtrar baseado na compatibilidade
+      return attribute.values.filter(
+        (v) => !v.compatibleWith || v.compatibleWith.includes(selectedPrintingId)
+      );
+    }
+    
+    return attribute.values;
   };
 
-  const isConfigurationComplete = attributes
-    .filter((a) => a.isRequired)
-    .every((a) => selectedValues[a.id] !== undefined);
-
   if (isLoading) {
-    return <div className="text-center py-8">Carregando configurações...</div>;
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Carregando configurações...</CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Cabeçalho */}
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Configurações do Produto</h2>
-        <p className="text-gray-600">Customize seu produto selecionando as opções abaixo</p>
-        <div className="mt-4 h-2 bg-gray-200 rounded-full">
-          <div
-            className="h-full bg-orange-500 rounded-full transition-all"
-            style={{
-              width: `${
-                (Object.keys(selectedValues).length /
-                  attributes.filter((a) => a.isRequired).length) *
-                100
-              }%`,
-            }}
-          />
-        </div>
-        <p className="text-sm text-gray-600 mt-2">
-          {Object.keys(selectedValues).length} de {attributes.filter((a) => a.isRequired).length} campos
-          preenchidos
-        </p>
-      </div>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Atributos */}
-      <div className="space-y-3">
-        {attributes.map((attribute, index) => (
-          <Card
-            key={attribute.id}
-            className={`cursor-pointer transition-all ${
-              expandedAttribute === attribute.id ? "ring-2 ring-orange-500" : ""
-            }`}
-            onClick={() =>
-              setExpandedAttribute(
-                expandedAttribute === attribute.id ? null : attribute.id
-              )
-            }
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-sm">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">
-                      {attribute.attributeName}
-                      {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedValues[attribute.id]
-                        ? attribute.values.find((v) => v.id === selectedValues[attribute.id])
-                            ?.value
-                        : "Não selecionado"}
-                    </CardDescription>
-                  </div>
-                </div>
-                <ChevronDown
-                  className={`h-5 w-5 transition-transform ${
-                    expandedAttribute === attribute.id ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-            </CardHeader>
-
-            {expandedAttribute === attribute.id && (
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  {attribute.attributeType === "select" && (
-                    <Select
-                      value={selectedValues[attribute.id]?.toString() || ""}
-                      onValueChange={(value) =>
-                        handleAttributeSelect(attribute.id, parseInt(value))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma opção" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {attribute.values.map((value) => (
-                          <SelectItem key={value.id} value={value.id.toString()}>
-                            {value.value}
-                            {value.priceModifier > 0 && (
-                              <span className="text-orange-500 ml-2">
-                                +R$ {value.priceModifier.toFixed(2)}
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
-
-      {/* Dimensões (se necessário) */}
-      {calculationType === "m2" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Dimensões</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="width">Largura (cm)</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  value={dimensions.width || ""}
-                  onChange={(e) => handleDimensionChange("width", e.target.value)}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <Label htmlFor="height">Altura (cm)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  value={dimensions.height || ""}
-                  onChange={(e) => handleDimensionChange("height", e.target.value)}
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            {dimensions.width > 0 && dimensions.height > 0 && (
-              <div className="text-sm text-gray-600">
-                Área: {((dimensions.width * dimensions.height) / 10000).toFixed(4)} m²
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quantidade */}
+    <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Quantidade</CardTitle>
+          <CardTitle>Configurações do Produto</CardTitle>
+          <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
+          <div className="mt-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-3">
+            <div className="text-sm font-medium text-orange-900">
+              {filledCount} de {requiredCount} campos preenchidos
+            </div>
+            <div className="mt-2 w-full bg-orange-200 rounded-full h-2">
+              <div
+                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(filledCount / requiredCount) * 100}%` }}
+              />
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <Input
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            min="1"
-          />
+
+        <CardContent className="space-y-4">
+          {attributes.map((attribute, index) => (
+            <Card key={attribute.id} className="border-2 border-orange-200">
+              <CardHeader
+                className="cursor-pointer hover:bg-orange-50 transition-colors"
+                onClick={() =>
+                  setExpandedAttribute(
+                    expandedAttribute === attribute.id ? null : attribute.id
+                  )
+                }
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500 text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {attribute.attributeName}
+                        {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+                      </CardTitle>
+                      <CardDescription>
+                        {selectedValues[attribute.id]
+                          ? attribute.values.find((v) => v.id === selectedValues[attribute.id])?.value
+                          : "Não selecionado"}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 transition-transform ${
+                      expandedAttribute === attribute.id ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </CardHeader>
+
+              {expandedAttribute === attribute.id && (
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {attribute.attributeType === "select" && (
+                      <Select
+                        value={selectedValues[attribute.id]?.toString() || ""}
+                        onValueChange={(value) =>
+                          handleAttributeSelect(attribute.id, parseInt(value))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma opção" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-96">
+                          {getFilteredValues(attribute).map((value) => (
+                            <SelectItem key={value.id} value={value.id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <span>{value.value}</span>
+                                {value.priceModifier > 0 && (
+                                  <span className="text-orange-500 ml-2 font-semibold">
+                                    +R$ {value.priceModifier.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))}
         </CardContent>
       </Card>
 
-      {/* Resumo de Preço */}
-      <Card className="bg-orange-50 border-orange-200">
+      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
         <CardHeader>
-          <CardTitle className="text-base">Preço Total Estimado</CardTitle>
+          <CardTitle className="text-orange-900">Preço Total Estimado</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Preço Base:</span>
-            <span className="font-semibold">R$ {basePrice.toFixed(2)}</span>
+            <span className="text-gray-700">Preço Base:</span>
+            <span className="text-lg font-semibold">R$ {basePrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Adicionais:</span>
-            <span className="font-semibold">
+            <span className="text-gray-700">Adicionais:</span>
+            <span className="text-lg font-semibold text-orange-600">
               R$ {(calculatedPrice - basePrice).toFixed(2)}
             </span>
           </div>
-          <div className="border-t pt-2 flex justify-between items-center">
-            <span className="text-lg font-bold">Total:</span>
+          <div className="border-t-2 border-orange-300 pt-3 flex justify-between items-center">
+            <span className="text-lg font-bold text-orange-900">Total:</span>
             <span className="text-2xl font-bold text-orange-600">
               R$ {calculatedPrice.toFixed(2)}
             </span>
           </div>
+          {!requiredFieldsFilled && (
+            <Alert className="mt-4 bg-orange-100 border-orange-300">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800">
+                Preencha todos os campos obrigatórios
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
-
-      {/* Botão Adicionar ao Carrinho */}
-      <Button
-        onClick={() =>
-          onAddToCart?.({
-            selectedValues,
-            dimensions,
-            quantity,
-            totalPrice: calculatedPrice,
-          })
-        }
-        disabled={!isConfigurationComplete}
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-bold"
-      >
-        {isConfigurationComplete ? "Adicionar ao Carrinho" : "Preencha todos os campos obrigatórios"}
-      </Button>
     </div>
   );
 }

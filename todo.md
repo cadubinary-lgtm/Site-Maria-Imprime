@@ -1177,6 +1177,31 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - ✅ Pronto para produção
 
 
+## Fase 29: Filtro Dinâmico de Opções por Tipo de Impressão ✅
+
+### FASE 1: Criar Mapeamento de Opções por Tipo de Impressão ✅
+- [x] Mapear Solvente → Brilho, Fosco, Transparente, Perfurado, Blackout, Automotivo
+- [x] Mapear UV → ACM, MDF, PS
+- [x] Criar estrutura de compatibilidade no ProductConfigurator.tsx
+
+### FASE 2: Implementar Lógica de Filtro Dinâmico ✅
+- [x] Adicionar estado para rastrear tipo de impressão selecionado
+- [x] Filtrar opções de Material baseado em Impressão
+- [x] Filtrar opções de Acabamento baseado em Impressão + Material
+- [x] Atualizar dropdowns em tempo real
+
+### FASE 3: Testar Filtro com Solvente e UV ✅
+- [x] Selecionar Solvente → verificar Material (6 opções corretas)
+- [x] Selecionar Material Brilho → verificar Acabamento (12 opções corretas)
+- [x] Selecionar UV → verificar Material (3 opções corretas: ACM, MDF, PS)
+- [x] Selecionar UV + ACM → verificar Acabamento (12 opções corretas)
+- [x] Validar que opções incompatíveis não aparecem
+
+### FASE 4: Entregar Solução ⏳
+- [ ] Atualizar todo.md com conclusão
+- [ ] Criar checkpoint final
+- [ ] Entregar ao usuário
+
 ## Fase 26: Form Card Dinâmico Escalável por Produto
 
 ### FASE 1: Analisar Estrutura Atual ⏳
