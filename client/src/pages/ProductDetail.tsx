@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ export default function ProductDetail() {
 
   const [quantity, setQuantity] = useState(1);
   const [artFile, setArtFile] = useState<File | null>(null);
+  const [artSource, setArtSource] = useState<'file' | 'link'>('file');
+  const [artLink, setArtLink] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
@@ -416,32 +419,63 @@ export default function ProductDetail() {
             />
           )}
 
-          {/* Upload de Arquivo */}
+          {/* Upload de Arquivo com Toggle Link/Arquivo */}
           <Card>
             <CardHeader>
               <CardTitle>Arquivo de Arte</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="art-upload"
-                  accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
-                />
-                <label htmlFor="art-upload" className="cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-medium">Clique para fazer upload</p>
-                  <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
-                </label>
-              </div>
-              {artFile && (
-                <Alert>
-                  <CheckCircle2 className="h-4 w-4" />
-                  <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
-                </Alert>
-              )}
+              <Tabs value={artSource} onValueChange={(value) => setArtSource(value as 'file' | 'link')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="file">Upload de Arquivo</TabsTrigger>
+                  <TabsTrigger value="link">Link da Imagem</TabsTrigger>
+                </TabsList>
+
+                {/* Aba: Upload de Arquivo */}
+                <TabsContent value="file" className="space-y-4">
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="art-upload"
+                      accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
+                    />
+                    <label htmlFor="art-upload" className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-medium">Clique para fazer upload</p>
+                      <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
+                    </label>
+                  </div>
+                  {artFile && (
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
+                    </Alert>
+                  )}
+                </TabsContent>
+
+                {/* Aba: Link da Imagem */}
+                <TabsContent value="link" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="art-link">Cole o link da sua imagem</Label>
+                    <Input
+                      id="art-link"
+                      type="url"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={artLink}
+                      onChange={(e) => setArtLink(e.target.value)}
+                      className="w-full"
+                    />
+                    {artLink && (
+                      <Alert>
+                        <CheckCircle2 className="h-4 w-4" />
+                        <AlertDescription>Link adicionado: {artLink}</AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 

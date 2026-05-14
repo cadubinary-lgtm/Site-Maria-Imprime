@@ -1214,3 +1214,12 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Documentar como adicionar novos produtos com variações
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
+
+
+## Fase 27: Melhorias de UX no ProductConfigurator
+
+- [x] Atualizar quantidade para input number com incremento/decremento
+- [x] Implementar toggle Link/Arquivo para arte
+- [x] Quando Link selecionado: mostrar input para colar URL
+- [x] Quando Arquivo selecionado: mostrar upload de arquivo
+- [x] Testar fluxo completo com ambas opções
