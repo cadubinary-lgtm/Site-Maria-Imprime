@@ -14,7 +14,7 @@ import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
-import { ProductConfigurationCards } from "@/components/ProductConfigurationCards";
+import { ProductConfigurator } from "@/components/ProductConfigurator";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -400,14 +400,19 @@ export default function ProductDetail() {
             <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
 
-          {/* Configurador Visual com Cards */}
-          {visibleAttributes && visibleAttributes.length > 0 && (
-            <ProductConfigurationCards
-              product={product}
-              productAttributes={productAttributes || []}
-              selectedAttributes={selectedAttributes}
-              onAttributeSelect={handleAttributeSelect}
+          {/* Configurador de Produto */}
+          {product && (
+            <ProductConfigurator
+              productId={product.id}
               basePrice={parseFloat(product.price)}
+              calculationType={product.calculationType as any}
+              onPriceUpdate={(price, config) => {
+                // Atualizar preço no resumo
+              }}
+              onAddToCart={(config) => {
+                // Adicionar ao carrinho
+                console.log('Adicionar ao carrinho:', config);
+              }}
             />
           )}
 
