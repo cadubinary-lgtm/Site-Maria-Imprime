@@ -14,6 +14,7 @@ import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 export default function AdminProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -30,6 +31,7 @@ export default function AdminProducts() {
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
   const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
   const deleteProductMutation = trpc.admin.deleteProduct.useMutation();
+  const deleteMultipleProductsMutation = trpc.admin.deleteMultipleProducts.useMutation();
 
   // Atualizar segmentos quando carrega produto
   useEffect(() => {
@@ -91,6 +93,42 @@ export default function AdminProducts() {
     }
   };
 
+  const handleToggleProduct = (id: number) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedProducts.size === filteredProducts.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(filteredProducts.map((p: any) => p.id)));
+    }
+  };
+
+  const handleDeleteMultiple = async () => {
+    if (selectedProducts.size === 0) {
+      toast.error("Selecione pelo menos um produto");
+      return;
+    }
+
+    if (!confirm(`Tem certeza que deseja remover ${selectedProducts.size} produto(s)? Esta ação não pode ser desfeita.`)) return;
+
+    try {
+      await deleteMultipleProductsMutation.mutateAsync({ ids: Array.from(selectedProducts) });
+      toast.success(`${selectedProducts.size} produto(s) removido(s) com sucesso!`);
+      setSelectedProducts(new Set());
+      refetch();
+    } catch (error) {
+      toast.error("Erro ao remover produtos");
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("Tem certeza que deseja remover este produto?")) return;
 
@@ -135,8 +173,8 @@ export default function AdminProducts() {
 
       {/* Products List */}
       <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Search Bar */}
-        <div className="mb-8">
+        {/* Search Bar and Bulk Actions */}
+        <div className="mb-8 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <Input
@@ -155,9 +193,38 @@ export default function AdminProducts() {
             )}
           </div>
           {searchQuery && (
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600">
               {filteredProducts.length} produto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
             </p>
+          )}
+
+          {/* Bulk Actions Bar */}
+          {filteredProducts.length > 0 && (
+            <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-4">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.size === filteredProducts.length && filteredProducts.length > 0}
+                  onChange={handleSelectAll}
+                  className="w-5 h-5 rounded border-gray-300 cursor-pointer"
+                />
+                <span className="text-sm text-gray-600">
+                  {selectedProducts.size > 0
+                    ? `${selectedProducts.size} produto(s) selecionado(s)`
+                    : "Selecionar produtos"}
+                </span>
+              </div>
+              {selectedProducts.size > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteMultiple}
+                  disabled={deleteMultipleProductsMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {deleteMultipleProductsMutation.isPending ? "Removendo..." : `Remover ${selectedProducts.size}`}
+                </Button>
+              )}
+            </div>
           )}
         </div>
 
@@ -188,9 +255,19 @@ export default function AdminProducts() {
         ) : (
           <div className="grid gap-6">
             {filteredProducts.map((product: any) => (
-              <Card key={product.id}>
+              <Card key={product.id} className={selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""}>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                    {/* Checkbox */}
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.has(product.id)}
+                        onChange={() => handleToggleProduct(product.id)}
+                        className="w-5 h-5 rounded border-gray-300 cursor-pointer"
+                      />
+                    </div>
+
                     {/* Product Image */}
                     <div>
                       {product.imageUrl ? (
@@ -218,7 +295,7 @@ export default function AdminProducts() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-2 justify-end md:col-span-1">
                       <Dialog open={editingId === product.id} onOpenChange={(open) => !open && setEditingId(null)}>
                         <DialogTrigger asChild>
                           <Button
@@ -317,9 +394,9 @@ export default function AdminProducts() {
                         size="sm"
                         onClick={() => handleDelete(product.id)}
                         disabled={deleteProductMutation.isPending}
+                        title="Remover este produto individualmente"
                       >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Remover
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

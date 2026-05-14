@@ -164,7 +164,25 @@ export const appRouter = router({
 
   // Admin - Gerenciar produtos
   admin: router({
-    createProduct: adminProcedure
+    deleteMultipleProducts: adminProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        if (input.ids.length === 0) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Nenhum produto selecionado" });
+        }
+        
+        // Deletar produtos em lotes para evitar problemas
+        const result = await Promise.all(
+          input.ids.map(id => 
+            db.delete(products).where(eq(products.id, id))
+          )
+        );
+        return { deletedCount: input.ids.length };
+      }),
+    updateProduct: adminProcedure
       .input(z.object({
         name: z.string(),
         description: z.string().optional(),
