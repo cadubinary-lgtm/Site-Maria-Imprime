@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, AlertCircle, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,12 +27,36 @@ export default function ProductDetail() {
   const [notes, setNotes] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [configuradorPrice, setConfiguradorPrice] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 },
     { enabled: !!productId }
   );
+
+  // Preparar galeria de imagens
+  useMemo(() => {
+    if (product) {
+      const images: string[] = [];
+      if (product.imageUrl) {
+        images.push(product.imageUrl);
+      }
+      if (product.galleryUrls) {
+        try {
+          const parsed = JSON.parse(product.galleryUrls);
+          if (Array.isArray(parsed)) {
+            images.push(...parsed);
+          }
+        } catch (e) {
+          // Ignorar erro de parsing
+        }
+      }
+      setGalleryImages(images);
+      setCurrentImageIndex(0);
+    }
+  }, [product]);
 
   // Carregar atributos dinâmicos do produto
   const { data: productAttributes } = trpc.attributes.getProductAttributes.useQuery(
@@ -268,17 +292,101 @@ export default function ProductDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Coluna Esquerda - Imagem */}
+        {/* Coluna Esquerda - Imagem e Galeria */}
         <div className="lg:col-span-1">
           <Card className="sticky top-4">
-            <CardContent className="pt-6">
-              {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} className="w-full h-80 object-cover rounded" />
-              ) : (
-                <div className="w-full h-80 bg-gray-200 rounded flex items-center justify-center">
-                  <span className="text-gray-500">Sem imagem</span>
+            <CardContent className="pt-6 space-y-4">
+              {/* Imagem Principal */}
+              <div className="relative bg-gray-100 rounded overflow-hidden">
+                {galleryImages.length > 0 ? (
+                  <>
+                    <img
+                      src={galleryImages[currentImageIndex]}
+                      alt={`${product.name} - ${currentImageIndex + 1}`}
+                      className="w-full h-96 object-cover"
+                    />
+                    {galleryImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
+                    <span className="text-gray-500">Sem imagem</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Galeria de Miniaturas */}
+              {galleryImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto">
+                  {galleryImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden ${
+                        idx === currentImageIndex ? "border-red-600" : "border-gray-300"
+                      }`}
+                    >
+                      <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
                 </div>
               )}
+
+              {/* Dados Base do Produto */}
+              <div className="border-t pt-4 space-y-3 text-sm">
+                <div>
+                  <span className="font-semibold text-gray-600">ID do Produto:</span>
+                  <p className="text-gray-900">{product.id}</p>
+                </div>
+                {product.category && (
+                  <div>
+                    <span className="font-semibold text-gray-600">Categoria:</span>
+                    <p className="text-gray-900">{product.category}</p>
+                  </div>
+                )}
+                {product.subcategory && (
+                  <div>
+                    <span className="font-semibold text-gray-600">Subcategoria:</span>
+                    <p className="text-gray-900">{product.subcategory}</p>
+                  </div>
+                )}
+                <div>
+                  <span className="font-semibold text-gray-600">Tipo de Cálculo:</span>
+                  <p className="text-gray-900">
+                    {product.calculationType === "m2"
+                      ? "m²"
+                      : product.calculationType === "metro_linear"
+                        ? "Metro Linear"
+                        : product.calculationType === "pacote"
+                          ? "Pacote"
+                          : "Unidade"}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-600">Unidade:</span>
+                  <p className="text-gray-900">{product.unit}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-600">Status:</span>
+                  <p className={product.isActive ? "text-green-600" : "text-red-600"}>
+                    {product.isActive ? "Ativo" : "Inativo"}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

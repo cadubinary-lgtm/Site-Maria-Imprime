@@ -22,6 +22,7 @@ import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
 import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import { AdminPricingRules } from "./pages/AdminPricingRules";
 import AdminRulesManager from "./pages/AdminRulesManager";
+import Catalog from "./pages/Catalog";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -45,7 +46,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path={"/catalogo"} component={CatalogImproved} />
+      <Route path={"/catalogo"} component={Catalog} />
+      <Route path="/catalogo-melhorado" component={CatalogImproved} />
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />

@@ -32,6 +32,7 @@ import {
   updateSegment,
   deleteSegment,
 } from "./db";
+import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -182,7 +183,7 @@ export const appRouter = router({
         );
         return { deletedCount: input.ids.length };
       }),
-    updateProduct: adminProcedure
+    createProduct: adminProcedure
       .input(z.object({
         name: z.string(),
         description: z.string().optional(),
@@ -195,6 +196,7 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error("Database not available");
         
+        // Inserir produto
         const result = await db.insert(products).values({
           name: input.name,
           description: input.description,
@@ -204,6 +206,14 @@ export const appRouter = router({
           imageKey: input.imageKey,
           isActive: true,
         });
+        
+        // Obter ID do produto inserido
+        const productId = (result as any).insertId || (result as any).lastInsertRowid || 0;
+        if (!productId) throw new Error("Failed to get product ID");
+        
+        // Vincular os 7 atributos principais automaticamente
+        // Os atributos devem ser vinculados manualmente via admin
+        
         return result;
       }),
     getAllOrders: adminProcedure.query(() => getAllOrders()),

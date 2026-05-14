@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `products` ADD `category` varchar(255);\nALTER TABLE `products` ADD `subcategory` varchar(255);\nALTER TABLE `products` ADD `galleryUrls` longtext;\nALTER TABLE `products` ADD `calculationType` enum('m2','metro_linear','pacote','unidade') DEFAULT 'pacote' NOT NULL;\nALTER TABLE `products` ADD `unit` varchar(50) DEFAULT 'pacote' NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute ALTER TABLE `products` ADD `category` varchar(255);\nALTER TABLE `products` ADD `subcategory` varchar(255);\nALTER TABLE `products` ADD `galleryUrls` longtext;\nALTER TABLE `products` ADD `calculationType` enum('m2','metro_linear','pacote','unidade') DEFAULT 'pacote' NOT NULL;\nALTER TABLE `products` ADD `unit` varchar(50) DEFAULT 'pacote' NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1702
+}

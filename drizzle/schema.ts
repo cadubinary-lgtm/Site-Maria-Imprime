@@ -29,8 +29,13 @@ export const products = mysqlTable("products", {
   description: longtext("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
+  category: varchar("category", { length: 255 }), // Categoria do produto
+  subcategory: varchar("subcategory", { length: 255 }), // Subcategoria do produto
   imageUrl: text("imageUrl"), // URL da imagem armazenada em S3
   imageKey: varchar("imageKey", { length: 255 }), // Chave para referência no S3
+  galleryUrls: longtext("galleryUrls"), // JSON array de URLs de galeria
+  calculationType: mysqlEnum("calculationType", ["m2", "metro_linear", "pacote", "unidade"]).default("pacote").notNull(), // Tipo de cálculo
+  unit: varchar("unit", { length: 50 }).default("pacote").notNull(), // Unidade (m², metro linear, pacote, unidade)
   isActive: boolean("isActive").default(true).notNull(),
   requiresAreaCalculation: boolean("requiresAreaCalculation").default(false).notNull(), // Para lona, adesivo, etc
   createdAt: timestamp("createdAt").defaultNow().notNull(),
