@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -61,9 +61,13 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
       });
     });
 
-    onPriceUpdate?.(price);
     return price;
-  }, [selectedValues, steps, basePrice, onPriceUpdate]);
+  }, [selectedValues, steps, basePrice]);
+
+  // Atualizar preço no componente pai usando useEffect
+  useEffect(() => {
+    onPriceUpdate?.(totalPrice);
+  }, [totalPrice, onPriceUpdate]);
 
   const handleStepSelect = (stepId: string, value: string | string[]) => {
     onSelectionChange(stepId, value);
