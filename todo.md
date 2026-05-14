@@ -1239,3 +1239,31 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Documentar como adicionar novos produtos com variações
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
+
+
+## Fase 30: Toggle Upload vs Link para Arquivo de Arte ✅
+
+### FASE 1: Adicionar Toggle Upload vs Link na Seção de Arquivo de Arte ✅
+- [x] Criar botões de toggle (Upload de Arquivo / Link/URL)
+- [x] Implementar estado `useLink` para controlar qual modo está ativo
+- [x] Estilizar botões com cores (laranja ativo, cinza inativo)
+
+### FASE 2: Implementar Campo de Link/URL com Validação ✅
+- [x] Adicionar campo de input type="url" para link
+- [x] Mostrar/ocultar campo baseado no estado `useLink`
+- [x] Adicionar label "Cole o link da sua arte aqui"
+- [x] Mostrar mensagem de sucesso quando link é preenchido
+- [x] Manter campo de upload quando toggle está em "Upload de Arquivo"
+
+### FASE 3: Testar Funcionalidade em Todos os Tipos de Impressão ✅
+- [x] Testar toggle com Solvente selecionado
+- [x] Testar preenchimento de link com Solvente
+- [x] Testar toggle com UV selecionado
+- [x] Testar preenchimento de link com UV
+- [x] Confirmar que toggle funciona em todos os tipos de impressão
+- [x] Validar que mensagem de sucesso aparece corretamente
+
+### FASE 4: Salvar Checkpoint e Entregar ✅
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário

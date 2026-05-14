@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,15 @@ import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 
+
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
   const productId = params?.id ? parseInt(params.id) : null;
 
   const [quantity, setQuantity] = useState(1);
   const [artFile, setArtFile] = useState<File | null>(null);
+  const [artLink, setArtLink] = useState("");
+  const [useLink, setUseLink] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
@@ -422,25 +425,77 @@ export default function ProductDetail() {
               <CardTitle>Arquivo de Arte</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="art-upload"
-                  accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
-                />
-                <label htmlFor="art-upload" className="cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-medium">Clique para fazer upload</p>
-                  <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
-                </label>
+              {/* Toggle entre Upload e Link */}
+              <div className="flex gap-4 mb-4">
+                <button
+                  onClick={() => setUseLink(false)}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                    !useLink
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Upload de Arquivo
+                </button>
+                <button
+                  onClick={() => setUseLink(true)}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                    useLink
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Link/URL
+                </button>
               </div>
-              {artFile && (
-                <Alert>
-                  <CheckCircle2 className="h-4 w-4" />
-                  <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
-                </Alert>
+
+              {/* Upload de Arquivo */}
+              {!useLink && (
+                <>
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="art-upload"
+                      accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
+                    />
+                    <label htmlFor="art-upload" className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-medium">Clique para fazer upload</p>
+                      <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
+                    </label>
+                  </div>
+                  {artFile && (
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              )}
+
+              {/* Campo de Link */}
+              {useLink && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="art-link">Cole o link da sua arte aqui</Label>
+                    <Input
+                      id="art-link"
+                      type="url"
+                      placeholder="https://exemplo.com/sua-arte.pdf"
+                      value={artLink}
+                      onChange={(e) => setArtLink(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  {artLink && (
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <AlertDescription>Link adicionado com sucesso</AlertDescription>
+                    </Alert>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
