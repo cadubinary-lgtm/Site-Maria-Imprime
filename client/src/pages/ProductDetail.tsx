@@ -13,9 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
-import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
+import { ProductVariationAccordion } from "@/components/ProductVariationAccordion";
+import { ProductVariationData } from "@/lib/product-variation-engine";
+import { ProductConfigurationCards, type ProductAttribute } from "@/components/ProductConfigurationCards";
+import { useState, useEffect } from "react";
 
 export default function ProductDetail() {
+  // Imports já feitos acima
   const [, params] = useRoute("/produto/:id");
   const productId = params?.id ? parseInt(params.id) : null;
 
@@ -37,7 +41,7 @@ export default function ProductDetail() {
   );
 
   // Preparar galeria de imagens
-  useMemo(() => {
+  useEffect(() => {
     if (product) {
       const images: string[] = [];
       if (product.imageUrl) {
@@ -266,21 +270,28 @@ export default function ProductDetail() {
     );
   }
 
-  // Converter atributos para formato do ConfiguradorVisual
-  const configuradorSteps: any[] = visibleAttributes?.map((attr, index) => ({
-    id: `attr-${attr.attributeId}`,
-    title: attr.attribute?.name || "Atributo",
-    description: "",
-    type: attr.allowMultiple ? "checkbox" : "radio",
-    visible: true,
-    required: attr.isRequired,
-    attributes: attr.values.map((v) => ({
-      id: `value-${v.id}`,
-      label: v.value,
-      description: v.value || "",
-      priceModifier: parseFloat(v.priceModifier.toString()),
-    })),
-  })) || [];
+  // Converter atributos para formato do ProductVariationAccordion
+  const variationData: ProductVariationData | null = useMemo(() => {
+    if (!product || !productAttributes) return null;
+    
+    return {
+      productId: product.id,
+      basePrice: Math.round(parseFloat(product.price) * 100),
+      marginPercentage: 1,
+      variables: productAttributes.map((attr) => ({
+        id: attr.attributeId,
+        name: attr.attribute?.name || "Atributo",
+        category: attr.attribute?.slug as any || "other",
+        required: attr.isRequired,
+        values: attr.values.map((v) => ({
+          id: v.id,
+          name: v.value,
+          priceModifier: parseFloat(v.priceModifier.toString()),
+          leadTimeModifier: 0,
+        })),
+      })),
+    };
+  }, [product, productAttributes]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -399,32 +410,21 @@ export default function ProductDetail() {
             <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
 
-          {/* Configurador Visual Profissional */}
-          {visibleAttributes && visibleAttributes.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações do Produto</CardTitle>
-                <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConfiguradorVisual
-                  steps={configuradorSteps}
-                  basePrice={parseFloat(product.price)}
-                  selectedValues={{}}
-                  onSelectionChange={(stepId, value) => {
-                    const attrId = parseInt(stepId.replace("attr-", ""));
-                    if (Array.isArray(value)) {
-                      const valueIds = value.map(v => parseInt(v.replace("value-", "")));
-                      handleAttributeSelect(attrId, valueIds);
-                    } else {
-                      const valueId = parseInt(value.replace("value-", ""));
-                      handleAttributeSelect(attrId, [valueId]);
-                    }
-                  }}
-                  onPriceUpdate={setConfiguradorPrice}
-                />
-              </CardContent>
-            </Card>
+          {/* Configurador Visual com Accordion */}
+          {variationData && (
+            <ProductVariationAccordion
+              variationData={variationData}
+              onPriceUpdate={setConfiguradorPrice}
+              onSelectionChange={(selections) => {
+                // Converter seleções para formato antigo
+                Object.entries(selections).forEach(([varId, valueId]) => {
+                  const variable = variationData.variables.find((v) => v.id === parseInt(varId));
+                  if (variable) {
+                    handleAttributeSelect(parseInt(varId), [valueId]);
+                  }
+                });
+              }}
+            />
           )}
 
           {/* Upload de Arquivo */}
