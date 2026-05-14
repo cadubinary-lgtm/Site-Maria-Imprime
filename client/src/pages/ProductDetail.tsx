@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
+import { ProductConfigurationCards } from "@/components/ProductConfigurationCards";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/produto/:id");
@@ -37,7 +38,7 @@ export default function ProductDetail() {
   );
 
   // Preparar galeria de imagens
-  useMemo(() => {
+  useEffect(() => {
     if (product) {
       const images: string[] = [];
       if (product.imageUrl) {
@@ -399,32 +400,15 @@ export default function ProductDetail() {
             <p className="text-gray-600 mt-2">{product.description}</p>
           </div>
 
-          {/* Configurador Visual Profissional */}
+          {/* Configurador Visual com Cards */}
           {visibleAttributes && visibleAttributes.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações do Produto</CardTitle>
-                <CardDescription>Customize seu produto selecionando as opções abaixo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConfiguradorVisual
-                  steps={configuradorSteps}
-                  basePrice={parseFloat(product.price)}
-                  selectedValues={{}}
-                  onSelectionChange={(stepId, value) => {
-                    const attrId = parseInt(stepId.replace("attr-", ""));
-                    if (Array.isArray(value)) {
-                      const valueIds = value.map(v => parseInt(v.replace("value-", "")));
-                      handleAttributeSelect(attrId, valueIds);
-                    } else {
-                      const valueId = parseInt(value.replace("value-", ""));
-                      handleAttributeSelect(attrId, [valueId]);
-                    }
-                  }}
-                  onPriceUpdate={setConfiguradorPrice}
-                />
-              </CardContent>
-            </Card>
+            <ProductConfigurationCards
+              product={product}
+              productAttributes={productAttributes || []}
+              selectedAttributes={selectedAttributes}
+              onAttributeSelect={handleAttributeSelect}
+              basePrice={parseFloat(product.price)}
+            />
           )}
 
           {/* Upload de Arquivo */}
