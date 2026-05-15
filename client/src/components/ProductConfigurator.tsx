@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,6 +72,9 @@ export function ProductConfigurator({
     { enabled: !!productId }
   );
 
+  // Memoizar variações para evitar re-renders infinitos
+  const memoizedVariationTypes = useMemo(() => variationTypes, [JSON.stringify(variationTypes)]);
+
   // Carregar atributos do produto
   useEffect(() => {
     const loadProductAttributes = async () => {
@@ -79,8 +82,8 @@ export function ProductConfigurator({
         setIsLoading(true);
         
         // Se temos variações reais, usá-las
-        if (variationTypes && variationTypes.length > 0) {
-          const attributes: ProductAttribute[] = variationTypes.map((vt: any, index: number) => ({
+        if (memoizedVariationTypes && memoizedVariationTypes.length > 0) {
+          const attributes: ProductAttribute[] = memoizedVariationTypes.map((vt: any, index: number) => ({
             id: vt.id,
             attributeId: vt.id,
             attributeName: vt.name,
@@ -225,7 +228,7 @@ export function ProductConfigurator({
     };
 
     loadProductAttributes();
-  }, [productId, variationTypes]);
+  }, [productId, memoizedVariationTypes]);
 
   // Calcular preço em tempo real
   const calculatedPrice = useMemo(() => {
