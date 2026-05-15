@@ -14,18 +14,19 @@ interface VariationType {
   name: string;
   type: string;
   isRequired: boolean;
+  options?: VariationOption[];
 }
 
 interface VariationOption {
   id: number;
   name: string;
-  priceModifier: number;
+  priceModifier: string | number;
 }
 
 export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
-  const [editingOption, setEditingOption] = useState<number | null>(null);
+  const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -42,12 +43,17 @@ export function ProductVariationManager() {
   // Mutations
   const createVariationTypeMutation = trpc.adminVariations.createType.useMutation();
   const createVariationOptionMutation = trpc.adminVariations.createOption.useMutation();
+  const deleteVariationTypeMutation = trpc.adminVariations.deleteType.useMutation();
+  const deleteVariationOptionMutation = trpc.adminVariations.deleteOption.useMutation();
+  const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
 
   // Form states
   const [newVariationTypeName, setNewVariationTypeName] = useState("");
   const [newVariationTypeRequired, setNewVariationTypeRequired] = useState(true);
   const [newOptionName, setNewOptionName] = useState("");
   const [newOptionPrice, setNewOptionPrice] = useState("");
+  const [editingOptionName, setEditingOptionName] = useState("");
+  const [editingOptionPrice, setEditingOptionPrice] = useState("");
 
   const handleAddVariationType = async () => {
     if (!selectedProductId || !newVariationTypeName) {
@@ -59,14 +65,13 @@ export function ProductVariationManager() {
       await createVariationTypeMutation.mutateAsync({
         productId: selectedProductId,
         name: newVariationTypeName,
-        type: "material" as const, // Default type
+        type: "material" as const,
         isRequired: newVariationTypeRequired,
       });
 
       toast.success("Tipo de variação adicionado!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
-      // Invalidate and refetch
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
@@ -93,7 +98,6 @@ export function ProductVariationManager() {
       toast.success("Opção adicionada!");
       setNewOptionName("");
       setNewOptionPrice("");
-      // Invalidate and refetch
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
@@ -108,9 +112,13 @@ export function ProductVariationManager() {
     if (!confirm("Tem certeza que deseja remover este tipo de variação?")) return;
 
     try {
-      // Delete mutation not yet implemented - just show message
-      toast.info("Funcionalidade de exclusão será implementada em breve");
+      await deleteVariationTypeMutation.mutateAsync({ id });
+      toast.success("Tipo de variação removido!");
       setEditingVariationType(null);
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao remover tipo de variação");
       console.error(error);
@@ -121,14 +129,41 @@ export function ProductVariationManager() {
     if (!confirm("Tem certeza que deseja remover esta opção?")) return;
 
     try {
-      // Delete mutation not yet implemented - just show message
-      toast.info("Funcionalidade de exclusão será implementada em breve");
+      await deleteVariationOptionMutation.mutateAsync({ id });
+      toast.success("Opção removida!");
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
     } catch (error) {
       toast.error("Erro ao remover opção");
+      console.error(error);
+    }
+  };
+
+  const handleUpdateOption = async () => {
+    if (!editingOptionId || !editingOptionName) {
+      toast.error("Preencha o nome da opção");
+      return;
+    }
+
+    try {
+      await updateVariationOptionMutation.mutateAsync({
+        id: editingOptionId,
+        name: editingOptionName,
+        priceModifier: (parseFloat(editingOptionPrice) || 0).toString(),
+      });
+
+      toast.success("Opção atualizada!");
+      setEditingOptionId(null);
+      setEditingOptionName("");
+      setEditingOptionPrice("");
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar opção");
       console.error(error);
     }
   };
@@ -303,6 +338,55 @@ export function ProductVariationManager() {
                   </div>
                 </div>
 
+                {/* Edit Option Modal */}
+                {editingOptionId && (
+                  <div className="border rounded-lg p-4 bg-blue-50 space-y-4">
+                    <h4 className="font-semibold">Editar Opção</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="editOptionName">Nome da Opção</Label>
+                        <Input
+                          id="editOptionName"
+                          value={editingOptionName}
+                          onChange={(e) => setEditingOptionName(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="editOptionPrice">Modificador de Preço (R$)</Label>
+                        <Input
+                          id="editOptionPrice"
+                          type="number"
+                          step="0.01"
+                          value={editingOptionPrice}
+                          onChange={(e) => setEditingOptionPrice(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex gap-2 items-end">
+                        <Button
+                          onClick={handleUpdateOption}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          disabled={updateVariationOptionMutation.isPending}
+                        >
+                          Salvar
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setEditingOptionId(null);
+                            setEditingOptionName("");
+                            setEditingOptionPrice("");
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Options List */}
                 <div className="space-y-2">
                   {!variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options || variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options.length === 0 ? (
@@ -320,14 +404,28 @@ export function ProductVariationManager() {
                               +R$ {parseFloat(option.priceModifier).toFixed(2)}
                             </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteOption(option.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingOptionId(option.id);
+                                setEditingOptionName(option.name);
+                                setEditingOptionPrice(option.priceModifier);
+                              }}
+                              className="text-blue-500 hover:text-blue-700"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteOption(option.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

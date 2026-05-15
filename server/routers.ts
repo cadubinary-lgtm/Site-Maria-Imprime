@@ -22,6 +22,9 @@ import {
   getVariationOptions,
   createVariationType,
   createVariationOption,
+  deleteVariationType,
+  deleteVariationOption,
+  updateVariationOption,
   getOrderItemVariations,
   addOrderItemVariation,
   createFileCheck,
@@ -344,6 +347,27 @@ export const appRouter = router({
           description: input.description,
           priceModifier: input.priceModifier as any,
         });
+      }),
+    deleteType: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteVariationType(input.id);
+      }),
+    deleteOption: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteVariationOption(input.id);
+      }),
+    updateOption: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        priceModifier: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateVariationOption(id, data);
       }),
   }),
 

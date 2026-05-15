@@ -1380,3 +1380,43 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar todo.md com conclusao
 - [x] Criar checkpoint final
 - [x] Entregar ao usuario
+
+## Fase 34: Implementar CRUD Completo de Variações e Opções ✅
+
+### FASE 1: Analisar Estrutura Atual ✅
+- [x] Revisar ProductVariationManager.tsx
+- [x] Verificar procedures tRPC de variações
+- [x] Analisar tabelas: variationTypes, variationOptions
+- [x] Mapear relacionamentos e dependências
+
+### FASE 2: Implementar Exclusão de Variações ✅
+- [x] Criar procedure tRPC deleteVariationType
+- [x] Implementar validação de dependências (produtos vinculados)
+- [x] Adicionar confirmação com quantidade de produtos afetados
+- [x] Deletar opções relacionadas
+- [x] Atualizar cache após exclusão
+
+### FASE 3: Implementar CRUD Completo de Opções ✅
+- [x] Criar procedure updateVariationOption (nome, preço, descrição, prazo)
+- [x] Criar procedure deleteVariationOption
+- [x] Criar procedure reorderVariationOptions
+- [x] Implementar edição inline de opções
+- [x] Adicionar botões de ação (editar, deletar, reordenar)
+
+### FASE 4: Adicionar Validação e Confirmação ✅
+- [x] Modal de confirmação antes de deletar
+- [x] Mostrar quantidade de produtos afetados
+- [x] Validar dependências antes de deletar
+- [x] Mostrar mensagens de sucesso/erro
+
+### FASE 5: Testar Fluxo Completo ✅
+- [x] Testar exclusão de variação
+- [x] Testar edição de opção
+- [x] Testar exclusão de opção
+- [x] Validar sincronização com ProductDetail
+- [x] Testar reordenação de opções
+
+### FASE 6: Salvar Checkpoint Final ✅
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário

@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
@@ -312,6 +312,66 @@ export async function getOrderItemVariations(orderItemId: number) {
   }));
 }
 
+export async function updateVariationOption(id: number, data: Partial<InsertVariationOption>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(variationOptions)
+    .set(data)
+    .where(eq(variationOptions.id, id));
+  return result;
+}
+
+export async function deleteVariationOption(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete order item variations first (cascade)
+  await db.delete(orderItemVariations)
+    .where(eq(orderItemVariations.variationOptionId, id));
+  
+  // Then delete the option
+  const result = await db.delete(variationOptions)
+    .where(eq(variationOptions.id, id));
+  return result;
+}
+
+export async function deleteVariationType(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get all options for this type
+  const options = await db.select().from(variationOptions)
+    .where(eq(variationOptions.variationTypeId, id));
+  
+  // Delete order item variations for all options
+  for (const option of options) {
+    await db.delete(orderItemVariations)
+      .where(eq(orderItemVariations.variationOptionId, option.id));
+  }
+  
+  // Delete all options
+  await db.delete(variationOptions)
+    .where(eq(variationOptions.variationTypeId, id));
+  
+  // Delete the type
+  const result = await db.delete(variationTypes)
+    .where(eq(variationTypes.id, id));
+  return result;
+}
+
+export async function getProductsUsingVariationType(variationTypeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({ productId: variationTypes.productId })
+    .from(variationTypes)
+    .where(eq(variationTypes.id, variationTypeId));
+  
+  return result;
+}
+
+// Order Item Variations queries
 export async function addOrderItemVariation(data: InsertOrderItemVariation) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
