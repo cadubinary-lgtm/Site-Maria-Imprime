@@ -1267,3 +1267,42 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar todo.md com conclusão
 - [x] Criar checkpoint final
 - [x] Entregar ao usuário
+
+
+## Fase 31: Consolidar Página /catalogo Removendo Duplicações ✅
+
+### FASE 1: Analisar estrutura atual ✅
+- [x] Revisar componente Catalog.tsx (página original)
+- [x] Revisar componente CatalogMelhorado.tsx (página nova)
+- [x] Identificar diferenças visuais e funcionais
+- [x] Mapear melhorias implementadas em CatalogMelhorado
+
+### FASE 2: Identificar melhorias úteis ✅
+- [x] Listar melhorias visuais de CatalogMelhorado
+- [x] Listar otimizações de performance
+- [x] Listar novos componentes reutilizáveis
+- [x] Documentar o que deve ser migrado
+
+### FASE 3: Integrar melhorias no /catalogo original ✅
+- [x] Aplicar melhorias visuais ao Catalog.tsx
+- [x] Manter estrutura de navegação lateral esquerda
+- [x] Integrar novos componentes úteis
+- [x] Preservar performance e otimizações
+
+### FASE 4: Remover /catalogo-melhorado e rotas duplicadas ✅
+- [x] Remover arquivo CatalogMelhorado.tsx
+- [x] Remover rota /catalogo-melhorado do App.tsx
+- [x] Remover componentes não utilizados
+- [x] Limpar imports desnecessários
+
+### FASE 5: Testar e validar consolidação ✅
+- [x] Testar navegação lateral esquerda
+- [x] Testar filtros de segmento
+- [x] Testar busca de produtos
+- [x] Testar responsividade (desktop/mobile)
+- [x] Validar que melhorias visuais foram mantidas
+
+### FASE 6: Salvar checkpoint final ✅
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário
