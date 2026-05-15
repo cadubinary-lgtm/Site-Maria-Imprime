@@ -54,7 +54,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           ? "bg-orange-50 border-orange-300"
           : "bg-white hover:bg-gray-50"
       } ${isDragging ? "shadow-lg" : ""}`}
-      onClick={() => onSelect(vt.id)}
+
     >
       <div className="flex justify-between items-start gap-4">
         <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
@@ -67,6 +67,18 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(vt.id);
+            }}
+            className="bg-green-50 border-green-300 hover:bg-green-100"
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Opções
+          </Button>
           <Button
             variant="outline"
             size="sm"
