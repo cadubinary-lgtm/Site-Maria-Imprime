@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `fileValidations` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `orderId` int NOT NULL,\n  `fileName` varchar(255) NOT NULL,\n  `fileSize` int,\n  `dpi` int,\n  `colorMode` varchar(50),\n  `hasBleed` boolean,\n  `hasSafeMargin` boolean,\n  `issues` longtext,\n  `status` enum('enviado', 'em_analise', 'aprovado', 'correcao_solicitada', 'rejeitado') NOT NULL DEFAULT 'enviado',\n  `validatedBy` int,\n  `validatedAt` timestamp NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE IF NOT EXISTS `fileValidations` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `orderId` int NOT NULL,\n  `fileName` varchar(255) NOT NULL,\n  `fileSize` int,\n  `dpi` int,\n  `colorMode` varchar(50),\n  `hasBleed` boolean,\n  `hasSafeMargin` boolean,\n  `issues` longtext,\n  `status` enum('enviado', 'em_analise', 'aprovado', 'correcao_solicitada', 'rejeitado') NOT NULL DEFAULT 'enviado',\n  `validatedBy` int,\n  `validatedAt` timestamp NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 662
+}

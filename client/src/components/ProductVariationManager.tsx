@@ -36,11 +36,8 @@ export function ProductVariationManager() {
     { enabled: !!selectedProductId }
   );
 
-  // Fetch variation options for a type
-  const { data: variationOptions = [], refetch: refetchOptions } = trpc.variations.getByProduct.useQuery(
-    { productId: selectedProductId || 0 },
-    { enabled: !!selectedProductId }
-  );
+  // Get utils for invalidation
+  const utils = trpc.useUtils();
 
   // Mutations
   const createVariationTypeMutation = trpc.adminVariations.createType.useMutation();
@@ -69,7 +66,11 @@ export function ProductVariationManager() {
       toast.success("Tipo de variação adicionado!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
-      refetchVariationTypes();
+      // Invalidate and refetch
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao adicionar tipo de variação");
       console.error(error);
@@ -92,7 +93,11 @@ export function ProductVariationManager() {
       toast.success("Opção adicionada!");
       setNewOptionName("");
       setNewOptionPrice("");
-      refetchOptions();
+      // Invalidate and refetch
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao adicionar opção");
       console.error(error);
@@ -118,7 +123,10 @@ export function ProductVariationManager() {
     try {
       // Delete mutation not yet implemented - just show message
       toast.info("Funcionalidade de exclusão será implementada em breve");
-      refetchOptions();
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao remover opção");
       console.error(error);
@@ -297,11 +305,11 @@ export function ProductVariationManager() {
 
                 {/* Options List */}
                 <div className="space-y-2">
-                  {variationOptions && typeof variationOptions === 'object' && Object.keys(variationOptions).length === 0 ? (
+                  {!variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options || variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options.length === 0 ? (
                     <p className="text-gray-500 text-sm">Nenhuma opção cadastrada</p>
                   ) : (
                     <div className="grid gap-2">
-                      {variationOptions && typeof variationOptions === 'object' && Object.values(variationOptions).map((option: any) => (
+                      {variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options?.map((option: any) => (
                         <div
                           key={option.id}
                           className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
