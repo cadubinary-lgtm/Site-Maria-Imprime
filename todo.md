@@ -1484,7 +1484,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Entregar ao usuário
 
 
-## Fase 37: Debugar e Finalizar CRUD Completo de Variações ⏳
+## Fase 37: Corrigir Vinculo Automatico de Variacoes ao Produto COMPLETO ⏳
 
 ### FASE 1: Debugar CRUD de Tipos de Variações ⏳
 - [ ] Validar criação de novo tipo (persistência no banco)

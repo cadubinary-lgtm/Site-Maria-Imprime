@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { trpc } from "@/lib/trpc";
 
 interface AttributeValue {
   id: number;
@@ -65,13 +66,42 @@ export function ProductConfigurator({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Carregar variações reais do backend
+  const { data: variationTypes = [] } = trpc.variations.getByProduct.useQuery(
+    { productId },
+    { enabled: !!productId }
+  );
+
   // Carregar atributos do produto
   useEffect(() => {
     const loadProductAttributes = async () => {
       try {
         setIsLoading(true);
-        // Aqui você faria uma chamada à API para carregar os atributos do produto
-        // Por enquanto, usando dados mock
+        
+        // Se temos variações reais, usá-las
+        if (variationTypes && variationTypes.length > 0) {
+          const attributes: ProductAttribute[] = variationTypes.map((vt: any, index: number) => ({
+            id: vt.id,
+            attributeId: vt.id,
+            attributeName: vt.name,
+            attributeSlug: vt.slug || vt.name.toLowerCase().replace(/\s+/g, '-'),
+            attributeType: vt.selectionType || 'select',
+            values: (vt.options || []).map((opt: any) => ({
+              id: opt.id,
+              value: opt.name,
+              priceModifier: parseFloat(opt.priceModifier || '0'),
+              timeModifier: 0,
+            })) || [],
+            isRequired: vt.isRequired ?? true,
+            displayOrder: vt.order || index + 1,
+            priceModifier: 0,
+          }));
+          setAttributes(attributes);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Fallback para dados mock se não houver variações
         const mockAttributes: ProductAttribute[] = [
           {
             id: 1,
@@ -195,7 +225,7 @@ export function ProductConfigurator({
     };
 
     loadProductAttributes();
-  }, [productId]);
+  }, [productId, variationTypes]);
 
   // Calcular preço em tempo real
   const calculatedPrice = useMemo(() => {
