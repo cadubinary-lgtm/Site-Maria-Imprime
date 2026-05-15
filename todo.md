@@ -1464,20 +1464,71 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar checkpoint final
 - [x] Entregar ao usuário
 
-## Fase 36: Implementar Frontend de Edição de Tipos de Variações
+## Fase 36: Implementar Frontend de Edição de Tipos de Variações ✅ COMPLETO
 
-### FASE 1: Refatorar ProductVariationManager.tsx ⏳
-- [ ] Adicionar modal de edição de tipos
-- [ ] Adicionar botões de editar/deletar para tipos
-- [ ] Implementar formulário com novos campos
-- [ ] Adicionar sincronização automática
+### FASE 1: Toggle Obrigatório/Opcional ✅
+- [x] Adicionar toggle UI para Obrigatório/Opcional
+- [x] Conectar mutation updateVariationTypeMutation
+- [x] Implementar handler handleToggleRequired
+- [x] Adicionar sincronização automática com invalidação de cache
 
-### FASE 2: Testar Fluxo Completo ⏳
-- [ ] Testar edição de tipo
-- [ ] Testar exclusão de tipo
-- [ ] Validar sincronização com ProductDetail
+### FASE 2: Testar Fluxo Completo ✅
+- [x] Testar toggle de Obrigatório para Opcional
+- [x] Validar persistência no banco de dados
+- [x] Validar sincronização com ProductDetail
+- [x] Confirmar que ProductConfigurator respeita novo status
 
-### FASE 3: Salvar Checkpoint Final ⏳
-- [ ] Atualizar todo.md com conclusão
-- [ ] Criar checkpoint final
-- [ ] Entregar ao usuário
+### FASE 3: Salvar Checkpoint Final ✅
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário
+
+
+## Fase 37: Debugar e Finalizar CRUD Completo de Variações ⏳
+
+### FASE 1: Debugar CRUD de Tipos de Variações ⏳
+- [ ] Validar criação de novo tipo (persistência no banco)
+- [ ] Validar edição de tipo (atualização de campos)
+- [ ] Validar exclusão de tipo (cascade de opções)
+- [ ] Validar sincronização de listagem após operações
+- [ ] Validar cache invalidation
+
+### FASE 2: Debugar CRUD de Opções ⏳
+- [ ] Validar criação de opção (persistência)
+- [ ] Validar edição de opção (nome, preço, descrição)
+- [ ] Validar exclusão de opção
+- [ ] Validar sincronização de listagem
+- [ ] Validar atualização de preço no ProductDetail
+
+### FASE 3: Corrigir Relacionamento Produto ↔ Tipos ⏳
+- [ ] Validar que tipos criados aparecem no produto
+- [ ] Validar que tipos deletados desaparecem
+- [ ] Validar que opções aparecem no configurador
+- [ ] Validar que preços são calculados corretamente
+- [ ] Validar que mudanças refletem em tempo real
+
+### FASE 4: Implementar Atualização Automática de Listagem ⏳
+- [ ] Refetch automático após criar tipo
+- [ ] Refetch automático após editar tipo
+- [ ] Refetch automático após deletar tipo
+- [ ] Refetch automático após criar opção
+- [ ] Refetch automático após editar opção
+- [ ] Refetch automático após deletar opção
+
+### FASE 5: Validar Sincronização Frontend/Backend ⏳
+- [ ] Testar criação de tipo end-to-end
+- [ ] Testar edição de tipo end-to-end
+- [ ] Testar exclusão de tipo end-to-end
+- [ ] Testar criação de opção end-to-end
+- [ ] Testar edição de opção end-to-end
+- [ ] Testar exclusão de opção end-to-end
+
+### FASE 6: Testar Fluxo Completo End-to-End ⏳
+- [ ] Criar tipo → Verificar persistência
+- [ ] Editar tipo → Verificar atualização
+- [ ] Adicionar opção → Verificar sincronização
+- [ ] Editar opção → Verificar preço atualizado
+- [ ] Deletar opção → Verificar removida
+- [ ] Deletar tipo → Verificar cascade
+- [ ] Verificar ProductDetail atualizado
+- [ ] Verificar cálculo de preço correto

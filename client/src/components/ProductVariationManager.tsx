@@ -46,6 +46,7 @@ export function ProductVariationManager() {
   const deleteVariationTypeMutation = trpc.adminVariations.deleteType.useMutation();
   const deleteVariationOptionMutation = trpc.adminVariations.deleteOption.useMutation();
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
+  const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
 
   // Form states
   const [newVariationTypeName, setNewVariationTypeName] = useState("");
@@ -168,6 +169,24 @@ export function ProductVariationManager() {
     }
   };
 
+  const handleToggleRequired = async (id: number, currentRequired: boolean) => {
+    try {
+      await updateVariationTypeMutation.mutateAsync({
+        id,
+        isRequired: !currentRequired,
+      });
+
+      toast.success(!currentRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar tipo de variação");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Product Selector */}
@@ -274,17 +293,30 @@ export function ProductVariationManager() {
                             {vt.isRequired ? "Obrigatório" : "Opcional"}
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteVariationType(vt.id);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleRequired(vt.id, vt.isRequired);
+                            }}
+                            className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
+                          >
+                            {vt.isRequired ? "Obrigatório" : "Opcional"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteVariationType(vt.id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
