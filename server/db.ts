@@ -266,7 +266,8 @@ export async function getVariationTypesByProduct(productId: number) {
   if (!db) return [];
   
   const result = await db.select().from(variationTypes)
-    .where(eq(variationTypes.productId, productId));
+    .where(eq(variationTypes.productId, productId))
+    .orderBy(variationTypes.order);
   return result;
 }
 
