@@ -1420,3 +1420,64 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar todo.md com conclusão
 - [x] Criar checkpoint final
 - [x] Entregar ao usuário
+
+
+## Fase 35: Implementar CRUD Completo de Tipos de Variações ⚠️ (Parcial)
+
+### FASE 1: Analisar Estrutura de Tipos de Variações ✅
+- [x] Verificar tabela variationTypes no schema
+- [x] Analisar campos atuais (id, productId, name, required)
+- [x] Verificar relacionamentos (variationOptions, productVariationTypes)
+- [x] Mapear funcionalidades faltantes
+
+### FASE 2: Implementar CRUD de Tipos ✅ (Backend)
+- [x] Criar procedure updateVariationType
+- [x] Criar procedure deleteVariationType com validação
+- [x] Adicionar campos estendidos ao schema (slug, description, selectionType, visualType)
+- [x] Criar migration para novos campos
+- [ ] Implementar UI de edição de tipos (PENDENTE - Fase 36)
+
+### FASE 3: Adicionar Campos Estendidos ✅
+- [x] Adicionar slug (auto-generated)
+- [x] Adicionar description
+- [x] Adicionar selectionType (radio, checkbox, select, cards, chips)
+- [x] Adicionar visualType
+- [x] Adicionar order (ordenação)
+- [x] Adicionar status (ativo/inativo)
+
+### FASE 4: Implementar Validação e Exclusão Segura ✅
+- [x] Validar dependências antes de deletar
+- [x] Mostrar produtos afetados
+- [x] Mostrar categorias afetadas
+- [x] Remover vínculos órfãos
+- [x] Implementar confirmação de exclusão
+
+### FASE 5: Testar Sincronização ⏳ (PENDENTE - Fase 36)
+- [ ] Testar edição de tipo
+- [ ] Testar exclusão de tipo
+- [ ] Validar sincronização com ProductDetail
+- [ ] Validar sincronização com catálogo
+- [ ] Testar regras dinâmicas
+
+### FASE 6: Salvar Checkpoint Final ⏳
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário
+
+## Fase 36: Implementar Frontend de Edição de Tipos de Variações
+
+### FASE 1: Refatorar ProductVariationManager.tsx ⏳
+- [ ] Adicionar modal de edição de tipos
+- [ ] Adicionar botões de editar/deletar para tipos
+- [ ] Implementar formulário com novos campos
+- [ ] Adicionar sincronização automática
+
+### FASE 2: Testar Fluxo Completo ⏳
+- [ ] Testar edição de tipo
+- [ ] Testar exclusão de tipo
+- [ ] Validar sincronização com ProductDetail
+
+### FASE 3: Salvar Checkpoint Final ⏳
+- [ ] Atualizar todo.md com conclusão
+- [ ] Criar checkpoint final
+- [ ] Entregar ao usuário

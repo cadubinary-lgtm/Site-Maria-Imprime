@@ -23,6 +23,7 @@ import {
   createVariationType,
   createVariationOption,
   deleteVariationType,
+  updateVariationType,
   deleteVariationOption,
   updateVariationOption,
   getOrderItemVariations,
@@ -347,6 +348,22 @@ export const appRouter = router({
           description: input.description,
           priceModifier: input.priceModifier as any,
         });
+      }),
+    updateType: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        slug: z.string().optional(),
+        description: z.string().optional(),
+        selectionType: z.enum(["radio", "checkbox", "select", "cards", "chips"]).optional(),
+        visualType: z.string().optional(),
+        order: z.number().optional(),
+        isRequired: z.boolean().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateVariationType(id, data as any);
       }),
     deleteType: adminProcedure
       .input(z.object({ id: z.number() }))

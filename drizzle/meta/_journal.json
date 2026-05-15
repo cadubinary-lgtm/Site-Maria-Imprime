@@ -127,6 +127,13 @@
       "when": 1778722167257,
       "tag": "0017_steep_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1778869436404,
+      "tag": "0018_aspiring_mysterio",
+      "breakpoints": true
     }
   ]
 }

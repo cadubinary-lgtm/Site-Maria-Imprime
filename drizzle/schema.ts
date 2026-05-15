@@ -143,9 +143,16 @@ export const variationTypes = mysqlTable("variationTypes", {
   id: int("id").autoincrement().primaryKey(),
   productId: int("productId").notNull(),
   type: mysqlEnum("type", ["material", "acabamento"]).notNull(),
-  name: varchar("name", { length: 255 }).notNull(), // Ex: "Material", "Acabamento"
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }),
+  description: longtext("description"),
+  selectionType: mysqlEnum("selectionType", ["radio", "checkbox", "select", "cards", "chips"]).default("select"),
+  visualType: varchar("visualType", { length: 50 }).default("default"),
+  order: int("order").default(0).notNull(),
   isRequired: boolean("isRequired").default(true).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type VariationType = typeof variationTypes.$inferSelect;

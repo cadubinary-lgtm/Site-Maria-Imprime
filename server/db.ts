@@ -360,6 +360,16 @@ export async function deleteVariationType(id: number) {
   return result;
 }
 
+export async function updateVariationType(id: number, data: Partial<InsertVariationType>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(variationTypes)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(variationTypes.id, id));
+  return result;
+}
+
 export async function getProductsUsingVariationType(variationTypeId: number) {
   const db = await getDb();
   if (!db) return [];
