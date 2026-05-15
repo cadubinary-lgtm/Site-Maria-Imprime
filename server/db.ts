@@ -465,3 +465,22 @@ export async function searchGlobal(query: string) {
     return { products: [], categories: [], materials: [] };
   }
 }
+
+
+// Reorder variation types
+export async function reorderVariationTypes(updates: Array<{ id: number; order: number }>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    for (const update of updates) {
+      await db.update(variationTypes)
+        .set({ order: update.order, updatedAt: new Date() })
+        .where(eq(variationTypes.id, update.id));
+    }
+    return true;
+  } catch (error) {
+    console.error("Error reordering variation types:", error);
+    throw error;
+  }
+}

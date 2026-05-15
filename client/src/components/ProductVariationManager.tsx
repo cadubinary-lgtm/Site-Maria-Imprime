@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useState } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Plus, Edit2, Trash2 } from "lucide-react";
+import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 
 interface VariationType {
@@ -14,6 +18,7 @@ interface VariationType {
   name: string;
   type: string;
   isRequired: boolean;
+  order: number;
   options?: VariationOption[];
 }
 
@@ -21,6 +26,73 @@ interface VariationOption {
   id: number;
   name: string;
   priceModifier: string | number;
+}
+
+// Draggable item component
+function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired }: any) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: vt.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`border rounded-lg p-4 cursor-pointer transition ${
+        isSelected
+          ? "bg-orange-50 border-orange-300"
+          : "bg-white hover:bg-gray-50"
+      } ${isDragging ? "shadow-lg" : ""}`}
+      onClick={() => onSelect(vt.id)}
+    >
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
+          <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
+          <div>
+            <h4 className="font-semibold">{vt.name}</h4>
+            <p className="text-sm text-gray-600">
+              {vt.isRequired ? "Obrigatório" : "Opcional"} • Ordem: {vt.order}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleRequired(vt.id, vt.isRequired);
+            }}
+            className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
+          >
+            {vt.isRequired ? "Obrigatório" : "Opcional"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(vt.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ProductVariationManager() {
@@ -47,6 +119,15 @@ export function ProductVariationManager() {
   const deleteVariationOptionMutation = trpc.adminVariations.deleteOption.useMutation();
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
+  const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
+
+  // Drag & drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Form states
   const [newVariationTypeName, setNewVariationTypeName] = useState("");
@@ -187,6 +268,40 @@ export function ProductVariationManager() {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = variationTypes.findIndex((vt: VariationType) => vt.id === active.id);
+      const newIndex = variationTypes.findIndex((vt: VariationType) => vt.id === over.id);
+
+      const newOrder = arrayMove(variationTypes, oldIndex, newIndex);
+      
+      try {
+        // Atualizar ordem no backend
+        const updates = newOrder.map((vt: VariationType, index: number) => ({
+          id: vt.id,
+          order: index + 1,
+        }));
+
+        await reorderVariationTypesMutation.mutateAsync({ updates });
+        toast.success("Ordem atualizada!");
+        
+        if (selectedProductId) {
+          await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+          refetchVariationTypes();
+        }
+      } catch (error) {
+        toast.error("Erro ao reordenar variações");
+        console.error(error);
+      }
+    }
+  };
+
+  const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => 
+    (a.order || 0) - (b.order || 0)
+  );
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Product Selector */}
@@ -223,7 +338,7 @@ export function ProductVariationManager() {
           <CardHeader>
             <CardTitle>Gerenciar Variações</CardTitle>
             <CardDescription>
-              Adicione, edite ou remova tipos de variações e suas opções
+              Adicione, edite, remova ou reordene tipos de variações e suas opções
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -269,58 +384,35 @@ export function ProductVariationManager() {
               </div>
             </div>
 
-            {/* Variation Types List */}
+            {/* Variation Types List with Drag & Drop */}
             <div className="space-y-3">
-              <h3 className="font-semibold">Tipos de Variações Cadastrados</h3>
+              <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
               {variationTypes.length === 0 ? (
                 <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
               ) : (
-                <div className="grid gap-3">
-                  {variationTypes.map((vt: VariationType) => (
-                    <div
-                      key={vt.id}
-                      className={`border rounded-lg p-4 cursor-pointer transition ${
-                        editingVariationType === vt.id
-                          ? "bg-orange-50 border-orange-300"
-                          : "bg-white hover:bg-gray-50"
-                      }`}
-                      onClick={() => setEditingVariationType(vt.id)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold">{vt.name}</h4>
-                          <p className="text-sm text-gray-600">
-                            {vt.isRequired ? "Obrigatório" : "Opcional"}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleRequired(vt.id, vt.isRequired);
-                            }}
-                            className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
-                          >
-                            {vt.isRequired ? "Obrigatório" : "Opcional"}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteVariationType(vt.id);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={sortedVariationTypes.map((vt: VariationType) => vt.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="grid gap-3">
+                      {sortedVariationTypes.map((vt: VariationType) => (
+                        <DraggableVariationItem
+                          key={vt.id}
+                          vt={vt}
+                          isSelected={editingVariationType === vt.id}
+                          onSelect={setEditingVariationType}
+                          onDelete={handleDeleteVariationType}
+                          onToggleRequired={handleToggleRequired}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
 

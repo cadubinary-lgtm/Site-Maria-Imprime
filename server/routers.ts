@@ -26,6 +26,7 @@ import {
   updateVariationType,
   deleteVariationOption,
   updateVariationOption,
+  reorderVariationTypes,
   getOrderItemVariations,
   addOrderItemVariation,
   createFileCheck,
@@ -385,6 +386,16 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
         return await updateVariationOption(id, data);
+      }),
+    reorderTypes: adminProcedure
+      .input(z.object({
+        updates: z.array(z.object({
+          id: z.number(),
+          order: z.number(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        return await reorderVariationTypes(input.updates);
       }),
   }),
 

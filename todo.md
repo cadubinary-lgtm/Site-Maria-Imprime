@@ -1532,3 +1532,39 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Deletar tipo → Verificar cascade
 - [ ] Verificar ProductDetail atualizado
 - [ ] Verificar cálculo de preço correto
+
+
+## Fase 38: Implementar Ordenação Editável de Variações com Drag & Drop ⏳
+
+### FASE 1: Analisar Schema e Backend ⏳
+- [ ] Verificar campo displayOrder em variationTypes
+- [ ] Confirmar que schema suporta ordenação
+- [ ] Analisar queries getVariationTypesByProduct
+
+### FASE 2: Criar Mutation tRPC ⏳
+- [ ] Criar procedure reorderVariationTypes
+- [ ] Implementar lógica de atualização de ordem
+- [ ] Validar persistência no banco
+
+### FASE 3: Implementar Drag & Drop ⏳
+- [ ] Instalar react-beautiful-dnd
+- [ ] Implementar DragDropContext no ProductVariationManager
+- [ ] Adicionar Droppable para lista de variações
+- [ ] Adicionar Draggable para cada item de variação
+- [ ] Implementar handler onDragEnd
+
+### FASE 4: Sincronizar com ProductDetail ⏳
+- [ ] Validar que ordem é respeitada no ProductDetail
+- [ ] Validar que ProductConfigurator renderiza na ordem correta
+- [ ] Testar sincronização automática
+
+### FASE 5: Testar Fluxo Completo ⏳
+- [ ] Testar drag & drop de variações
+- [ ] Validar persistência após refresh
+- [ ] Testar sincronização com ProductDetail
+- [ ] Testar sincronização com ProductConfigurator
+
+### FASE 6: Salvar Checkpoint Final ⏳
+- [ ] Atualizar todo.md com conclusão
+- [ ] Criar checkpoint final
+- [ ] Entregar ao usuário
