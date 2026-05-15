@@ -133,6 +133,11 @@ export async function getProductsBySegment(segmentId: number) {
         description: products.description,
         price: products.price,
         imageUrl: products.imageUrl,
+        category: products.category,
+        subcategory: products.subcategory,
+        calculationType: products.calculationType,
+        unit: products.unit,
+        isActive: products.isActive,
       })
       .from(productSegments)
       .innerJoin(products, eq(productSegments.productId, products.id))

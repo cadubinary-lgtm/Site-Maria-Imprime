@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,20 +20,30 @@ export default function MultiSegmentSelector({
 }: MultiSegmentSelectorProps) {
   const { data: allSegments, isLoading } = trpc.productSegments.getAllSegments.useQuery();
   const [localSelected, setLocalSelected] = useState<number[]>(selectedSegmentIds);
+  const prevSelectedRef = useRef<number[]>(selectedSegmentIds);
 
+  // Sincronizar quando selectedSegmentIds muda externamente
   useEffect(() => {
     setLocalSelected(selectedSegmentIds);
+    prevSelectedRef.current = selectedSegmentIds;
   }, [selectedSegmentIds]);
+
+  // Notificar pai quando localSelected muda (separado do setState)
+  useEffect(() => {
+    if (prevSelectedRef.current !== localSelected) {
+      onSegmentsChange(localSelected);
+      prevSelectedRef.current = localSelected;
+    }
+  }, [localSelected, onSegmentsChange]);
 
   const handleToggleSegment = useCallback((segmentId: number) => {
     setLocalSelected((prev) => {
       const newSelected = prev.includes(segmentId)
         ? prev.filter((id) => id !== segmentId)
         : [...prev, segmentId];
-      onSegmentsChange(newSelected);
       return newSelected;
     });
-  }, [onSegmentsChange]);
+  }, []);
 
   const handleRemoveSegment = useCallback((segmentId: number) => {
     handleToggleSegment(segmentId);

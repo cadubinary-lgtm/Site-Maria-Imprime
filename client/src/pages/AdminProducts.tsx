@@ -55,13 +55,15 @@ export default function AdminProducts() {
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
-    setEditForm({
+    // Não inicializar segmentIds aqui - deixar o useEffect carregar
+    setEditForm((prev) => ({
+      ...prev,
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
       imageUrl: product.imageUrl || "",
-      segmentIds: [],
-    });
+      // segmentIds será preenchido pelo useEffect quando productSegments carregar
+    }));
   };
 
   const handleSave = async () => {

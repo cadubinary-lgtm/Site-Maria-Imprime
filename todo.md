@@ -1306,3 +1306,39 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar todo.md com conclusão
 - [x] Criar checkpoint final
 - [x] Entregar ao usuário
+
+
+## Fase 32: Corrigir Vínculo de Segmento/Categoria na Edição de Produtos ✅
+
+### FASE 1: Analisar Estrutura de Segmento/Categoria ✅
+- [x] Verificar schema.ts para entender tabelas (products, segments, productSegments)
+- [x] Identificar dois sistemas conflitantes (antigo com enum, novo com many-to-many)
+- [x] Mapear relacionamento productSegments
+
+### FASE 2: Verificar Carregamento de Segmento no Formulário de Edição ✅
+- [x] Analisar AdminProducts.tsx para fluxo de edição
+- [x] Identificar timing issue com useEffect
+- [x] Corrigir inicialização vazia de segmentIds
+
+### FASE 3: Validar Persistência no Backend ✅
+- [x] Verificar mutation updateSegments
+- [x] Confirmar que updateProductSegments substitui todos os segmentos
+- [x] Validar integridade do relacionamento
+
+### FASE 4: Testar Fluxo Completo de Edição e Carregamento ✅
+- [x] Editar produto e carregar segmentos
+- [x] Validar que segmentos aparecem selecionados
+- [x] Confirmar persistência após salvar
+- [x] Testar reabertura do formulário
+
+### FASE 5: Validar Compatibilidade com Catálogo e Regras Dinâmicas ✅
+- [x] Atualizar Catalog.tsx para usar novo sistema (segmentId numérico)
+- [x] Migrar de trpc.products.getBySegment para trpc.productSegments.getProductsBySegment
+- [x] Expandir campos retornados por getProductsBySegment
+- [x] Testar filtro de segmentos no catálogo
+- [x] Validar que produtos aparecem com seus segmentos
+
+### FASE 6: Salvar Checkpoint Final ✅
+- [x] Atualizar todo.md com conclusão
+- [x] Criar checkpoint final
+- [x] Entregar ao usuário

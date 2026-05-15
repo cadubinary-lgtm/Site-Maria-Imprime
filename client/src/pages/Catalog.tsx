@@ -12,23 +12,23 @@ const ITEMS_PER_PAGE = 12;
 
 export default function Catalog() {
   // Carregar segmentos dinamicamente
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.productSegments.getAllSegments.useQuery();
 
-  // Mapear segmentos para formato esperado
+  // Mapear segmentos para formato esperado (usando ID numérico)
   const segments = useMemo(() => {
     if (!segmentsData || segmentsData.length === 0) return [];
     return segmentsData.map((seg: any) => ({
-      id: seg.slug,
+      id: seg.id, // Usar ID numérico em vez de slug
       label: `${seg.icon || "📦"} ${seg.name}`,
     }));
   }, [segmentsData]);
 
   // Definir primeiro segmento como padrão
   const defaultSegment = useMemo(() => {
-    return segments.length > 0 ? segments[0].id : "alimentacao";
+    return segments.length > 0 ? segments[0].id : 1;
   }, [segments]);
 
-  const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,9 +37,9 @@ export default function Catalog() {
   // Usar segmento padrão se nenhum foi selecionado
   const activeSegment = selectedSegment || defaultSegment;
 
-  // Carregar produtos do segmento ativo
-  const { data: products, isLoading } = trpc.products.getBySegment.useQuery(
-    { segment: activeSegment },
+  // Carregar produtos do segmento ativo (usando novo sistema)
+  const { data: products, isLoading } = trpc.productSegments.getProductsBySegment.useQuery(
+    activeSegment as number,
     { enabled: !!activeSegment }
   );
 
