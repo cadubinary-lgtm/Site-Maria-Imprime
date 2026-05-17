@@ -728,7 +728,44 @@ export function ProductVariationManager() {
                         {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
                       </p>
                     </div>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingNameId(vt.id);
+                          setEditingNameValue(vt.name);
+                        }}
+                        className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        Editar Nome
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingVariationType(vt.id)}
+                        className="bg-green-50 border-green-300 hover:bg-green-100"
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        Opções
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleRequired(vt.id, vt.isRequired)}
+                        className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
+                      >
+                        {vt.isRequired ? "Obrigatório" : "Opcional"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteVariationType(vt.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                       {selectedProductId && (
                         <Button
                           onClick={() => handleLinkGlobalVariation(vt.id)}
@@ -740,9 +777,6 @@ export function ProductVariationManager() {
                           Adicionar
                         </Button>
                       )}
-                      <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        ID: {vt.id}
-                      </div>
                     </div>
                   </div>
                 </div>
