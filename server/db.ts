@@ -282,6 +282,54 @@ export async function getGlobalVariationTypes() {
   return result;
 }
 
+export async function linkGlobalVariationToProduct(globalVariationId: number, productId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get the global variation
+  const globalVariation = await db.select().from(variationTypes)
+    .where(eq(variationTypes.id, globalVariationId))
+    .limit(1);
+  
+  if (globalVariation.length === 0) {
+    throw new Error("Global variation not found");
+  }
+  
+  const gv = globalVariation[0];
+  
+  // Create a new variation for this product based on the global one
+  const result = await db.insert(variationTypes).values({
+    productId,
+    type: gv.type,
+    name: gv.name,
+    slug: gv.slug,
+    description: gv.description,
+    selectionType: gv.selectionType,
+    visualType: gv.visualType,
+    order: gv.order,
+    isRequired: gv.isRequired,
+    isActive: gv.isActive,
+  });
+  
+  // Get the new variation ID
+  const newVariationId = (result as any).insertId;
+  
+  // Copy all options from the global variation
+  const options = await db.select().from(variationOptions)
+    .where(eq(variationOptions.variationTypeId, globalVariationId));
+  
+  for (const option of options) {
+    await db.insert(variationOptions).values({
+      variationTypeId: newVariationId as number,
+      name: option.name,
+      description: option.description,
+      priceModifier: option.priceModifier,
+    });
+  }
+  
+  return result;
+}
+
 export async function createVariationType(data: InsertVariationType) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

@@ -20,6 +20,7 @@ import {
   getProductsByCategory,
   getVariationTypesByProduct,
   getGlobalVariationTypes,
+  linkGlobalVariationToProduct,
   getVariationOptions,
   createVariationType,
   createVariationOption,
@@ -408,6 +409,14 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await reorderVariationTypes(input.updates);
+      }),
+    linkGlobal: adminProcedure
+      .input(z.object({
+        globalVariationId: z.number(),
+        productId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return await linkGlobalVariationToProduct(input.globalVariationId, input.productId);
       }),
   }),
 

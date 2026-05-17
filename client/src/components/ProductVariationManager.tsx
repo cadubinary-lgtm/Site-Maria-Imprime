@@ -136,6 +136,7 @@ export function ProductVariationManager() {
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
+  const linkGlobalMutation = trpc.adminVariations.linkGlobal.useMutation();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -285,6 +286,29 @@ export function ProductVariationManager() {
       }
     } catch (error) {
       toast.error("Erro ao atualizar tipo de variação");
+      console.error(error);
+    }
+  };
+
+  const handleLinkGlobalVariation = async (globalVariationId: number) => {
+    if (!selectedProductId) {
+      toast.error("Selecione um produto primeiro");
+      return;
+    }
+
+    try {
+      await linkGlobalMutation.mutateAsync({
+        globalVariationId,
+        productId: selectedProductId,
+      });
+
+      toast.success("Variação vinculada ao produto!");
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
+    } catch (error) {
+      toast.error("Erro ao vincular variação");
       console.error(error);
     }
   };
@@ -621,8 +645,21 @@ export function ProductVariationManager() {
                         {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
                       </p>
                     </div>
-                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                      ID: {vt.id}
+                    <div className="flex gap-2 items-center">
+                      {selectedProductId && (
+                        <Button
+                          onClick={() => handleLinkGlobalVariation(vt.id)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          size="sm"
+                          disabled={linkGlobalMutation.isPending}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Adicionar
+                        </Button>
+                      )}
+                      <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        ID: {vt.id}
+                      </div>
                     </div>
                   </div>
                 </div>
