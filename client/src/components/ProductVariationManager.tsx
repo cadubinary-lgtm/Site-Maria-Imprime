@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
+import { X, Plus, Edit2, Trash2, GripVertical, Move } from "lucide-react";
 import { toast } from "sonner";
 
 interface VariationType {
@@ -26,6 +25,30 @@ interface VariationOption {
   id: number;
   name: string;
   priceModifier: string | number;
+}
+
+// Draggable global type component
+function DraggableGlobalType({ globalType, isLinked }: any) {
+  return (
+    <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'copy';
+        e.dataTransfer.setData('application/json', JSON.stringify({ globalType, type: 'global-type' }));
+      }}
+      className={`border rounded-lg p-3 flex justify-between items-center cursor-move transition ${
+        isLinked ? 'bg-green-50 border-green-300 opacity-50' : 'bg-white hover:bg-blue-50 hover:border-blue-300'
+      }`}
+    >
+      <div className="flex-1">
+        <h4 className="font-medium text-sm">{globalType.name}</h4>
+        <p className="text-xs text-gray-600">{globalType.description}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Move className="w-4 h-4 text-gray-400" />
+      </div>
+    </div>
+  );
 }
 
 // Draggable item component
@@ -125,6 +148,7 @@ export function ProductVariationManager() {
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
   const [editingVariationNameId, setEditingVariationNameId] = useState<number | null>(null);
   const [editingVariationName, setEditingVariationName] = useState("");
+  const [dragOverDropZone, setDragOverDropZone] = useState(false);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -288,20 +312,20 @@ export function ProductVariationManager() {
         isRequired: !currentRequired,
       });
 
-      toast.success(!currentRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
+      toast.success("Status atualizado!");
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
     } catch (error) {
-      toast.error("Erro ao atualizar tipo de variação");
+      toast.error("Erro ao atualizar status");
       console.error(error);
     }
   };
 
-  const handleEditVariationName = (id: number, currentName: string) => {
+  const handleEditVariationName = (id: number, name: string) => {
     setEditingVariationNameId(id);
-    setEditingVariationName(currentName);
+    setEditingVariationName(name);
   };
 
   const handleSaveVariationName = async () => {
@@ -344,10 +368,9 @@ export function ProductVariationManager() {
       const newOrder = arrayMove(variationTypes, oldIndex, newIndex);
       
       try {
-        // Atualizar ordem no backend
         const updates = newOrder.map((vt: VariationType, index: number) => ({
           id: vt.id,
-          order: index + 1,
+          order: index,
         }));
 
         await reorderVariationTypesMutation.mutateAsync({ updates });
@@ -361,6 +384,32 @@ export function ProductVariationManager() {
         toast.error("Erro ao reordenar variações");
         console.error(error);
       }
+    }
+  };
+
+  const handleDropGlobalType = async (globalType: any) => {
+    if (!selectedProductId) return;
+    
+    try {
+      const isAlreadyLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
+      if (isAlreadyLinked) {
+        toast.info(`${globalType.name} já está vinculado ao produto`);
+        return;
+      }
+
+      await linkVariationTypeMutation.mutateAsync({
+        productId: selectedProductId,
+        variationTypeId: globalType.id,
+        isRequired: true,
+        order: variationTypes.length,
+      });
+      
+      toast.success(`${globalType.name} adicionado com sucesso!`);
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
+    } catch (error) {
+      toast.error(`Erro ao adicionar ${globalType.name}`);
+      console.error(error);
     }
   };
 
@@ -411,8 +460,8 @@ export function ProductVariationManager() {
             </CardHeader>
             <CardContent className="space-y-6">
             {/* Add New Variation Type */}
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
+            <div className="border rounded-lg p-4 bg-orange-50">
+              <h3 className="font-semibold mb-4 text-orange-900">Adicionar Novo Tipo de Variação</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="variationType">Nome da Variação</Label>
@@ -452,11 +501,46 @@ export function ProductVariationManager() {
               </div>
             </div>
 
+            {/* Drop Zone */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                setDragOverDropZone(true);
+              }}
+              onDragLeave={() => setDragOverDropZone(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOverDropZone(false);
+                try {
+                  const data = e.dataTransfer.getData('application/json');
+                  if (data) {
+                    const { globalType, type } = JSON.parse(data);
+                    if (type === 'global-type') {
+                      handleDropGlobalType(globalType);
+                    }
+                  }
+                } catch (error) {
+                  console.error('Erro ao processar drop:', error);
+                }
+              }}
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition ${
+                dragOverDropZone
+                  ? 'border-orange-400 bg-orange-50'
+                  : 'border-gray-300 bg-gray-50 hover:border-orange-300'
+              }`}
+            >
+              <p className="text-sm text-gray-600">📥 Solte aqui para adicionar tipo do sistema</p>
+            </div>
+
             {/* Variation Types List with Drag & Drop */}
             <div className="space-y-3">
-              <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
+              <h3 className="font-semibold text-sm text-gray-700">Variações Vinculadas (Arraste para reordenar)</h3>
               {variationTypes.length === 0 ? (
-                <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
+                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
+                  <p className="text-gray-400 text-xs mt-1">Crie um novo tipo acima ou arraste um da coluna ao lado →</p>
+                </div>
               ) : (
                 <DndContext
                   sensors={sensors}
@@ -500,11 +584,10 @@ export function ProductVariationManager() {
                       placeholder="Digite o novo nome da variação"
                     />
                   </div>
-                  <div className="flex items-end gap-2">
+                  <div className="flex gap-2 items-end">
                     <Button
                       onClick={handleSaveVariationName}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
-                      disabled={updateVariationTypeMutation.isPending}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700"
                     >
                       Salvar
                     </Button>
@@ -520,78 +603,54 @@ export function ProductVariationManager() {
               </div>
             )}
 
-            {/* Options for Selected Variation Type */}
-            {editingVariationType && !editingVariationNameId && (
-              <div className="border-t pt-6 space-y-4">
-                <h3 className="font-semibold">
-                  Opções para "{variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.name}"
-                </h3>
+            {/* Edit Options */}
+            {editingVariationType && (
+              <div className="border-t pt-6 space-y-4 bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold">Editar Opções da Variação</h3>
 
                 {/* Add New Option */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <h4 className="font-semibold mb-4">Adicionar Nova Opção</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="optionName">Nome da Opção</Label>
-                      <Input
-                        id="optionName"
-                        placeholder="Ex: Vinil Brilho, Acabamento Fosco"
-                        value={newOptionName}
-                        onChange={(e) => setNewOptionName(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="optionPrice">Modificador de Preço (R$)</Label>
-                      <Input
-                        id="optionPrice"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={newOptionPrice}
-                        onChange={(e) => setNewOptionPrice(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        onClick={handleAddOption}
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={createVariationOptionMutation.isPending}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar
-                      </Button>
-                    </div>
+                <div className="border rounded-lg p-3 bg-white">
+                  <h4 className="font-medium text-sm mb-3">Adicionar Nova Opção</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      placeholder="Nome da opção"
+                      value={newOptionName}
+                      onChange={(e) => setNewOptionName(e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Preço modificador"
+                      value={newOptionPrice}
+                      onChange={(e) => setNewOptionPrice(e.target.value)}
+                    />
+                    <Button
+                      onClick={handleAddOption}
+                      className="bg-green-600 hover:bg-green-700"
+                      disabled={createVariationOptionMutation.isPending}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
                   </div>
                 </div>
 
-                {/* Edit Option Modal */}
+                {/* Edit Option */}
                 {editingOptionId && (
-                  <div className="border rounded-lg p-4 bg-blue-50 space-y-4">
-                    <h4 className="font-semibold">Editar Opção</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="editOptionName">Nome da Opção</Label>
-                        <Input
-                          id="editOptionName"
-                          value={editingOptionName}
-                          onChange={(e) => setEditingOptionName(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="editOptionPrice">Modificador de Preço (R$)</Label>
-                        <Input
-                          id="editOptionPrice"
-                          type="number"
-                          step="0.01"
-                          value={editingOptionPrice}
-                          onChange={(e) => setEditingOptionPrice(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div className="flex gap-2 items-end">
+                  <div className="border rounded-lg p-3 bg-blue-50">
+                    <h4 className="font-medium text-sm mb-3">Editar Opção</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <Input
+                        placeholder="Nome da opção"
+                        value={editingOptionName}
+                        onChange={(e) => setEditingOptionName(e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Preço modificador"
+                        value={editingOptionPrice}
+                        onChange={(e) => setEditingOptionPrice(e.target.value)}
+                      />
+                      <div className="flex gap-2">
                         <Button
                           onClick={handleUpdateOption}
                           className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -669,63 +728,24 @@ export function ProductVariationManager() {
             <CardHeader>
               <CardTitle>Tipos Disponíveis no Sistema</CardTitle>
               <CardDescription>
-                Selecione para adicionar ao produto
+                Arraste para adicionar ao produto
               </CardDescription>
             </CardHeader>
             <CardContent>
 
             <div className="space-y-3">
+              <p className="text-xs text-gray-500 mb-2">💡 Arraste para adicionar ao produto</p>
               {globalVariationTypes.length === 0 ? (
                 <p className="text-gray-500 text-sm">Nenhum tipo global disponível</p>
               ) : (
                 globalVariationTypes.map((globalType: any) => {
                   const isLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
                   return (
-                    <div
+                    <DraggableGlobalType
                       key={globalType.id}
-                      className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
-                    >
-                      <div className="flex-1">
-                        <h4 className="font-medium">{globalType.name}</h4>
-                        <p className="text-sm text-gray-600">{globalType.description}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={isLinked}
-                          onChange={async (e) => {
-                            if (!selectedProductId) return;
-                            
-                            try {
-                              if (e.target.checked) {
-                                // Vincular tipo
-                                await linkVariationTypeMutation.mutateAsync({
-                                  productId: selectedProductId,
-                                  variationTypeId: globalType.id,
-                                  isRequired: true,
-                                  order: 0,
-                                });
-                                toast.success(`${globalType.name} vinculado com sucesso`);
-                              } else {
-                                // Desvincular tipo
-                                await unlinkVariationTypeMutation.mutateAsync({
-                                  productId: selectedProductId,
-                                  variationTypeId: globalType.id,
-                                });
-                                toast.success(`${globalType.name} desvinculado com sucesso`);
-                              }
-                              // Invalidar cache
-                              await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-                              refetchVariationTypes();
-                            } catch (error) {
-                              toast.error(`Erro ao ${e.target.checked ? 'vincular' : 'desvincular'} ${globalType.name}`);
-                              console.error(error);
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                      </div>
-                    </div>
+                      globalType={globalType}
+                      isLinked={isLinked}
+                    />
                   );
                 })
               )}
