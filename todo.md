@@ -1628,12 +1628,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Salvar checkpoint final
 
 
-## BUGS IDENTIFICADOS - GERENCIAR VARIAÇÕES ✅
+## BUGS IDENTIFICADOS - GERENCIAR VARIAÇÕES
 
-- [x] BUG: Novo tipo de variação não aparece na coluna 1 após adicionar - RESOLVIDO
-- [x] BUG: Drag-drop da coluna 2 para coluna 1 não vincula ao produto - RESOLVIDO
-- [x] BUG: Variações da coluna 1 não têm campo obrigatório/opcional para editar - RESOLVIDO
-- [x] FEATURE: Adicionar campo obrigatório/opcional ao expandir variação na coluna 1 - IMPLEMENTADO
-- [x] FEATURE: Sincronizar coluna 1 com banco de dados ao adicionar novo tipo - IMPLEMENTADO
-- [x] FEATURE: Implementar drop handler para vincular tipos arrastados - IMPLEMENTADO
-- [x] FEATURE: Refatorar coluna 2 com TODOS os controles (Editar, Opções, Obrigatório, Deletar) - IMPLEMENTADO
+- [ ] BUG: Novo tipo de variação não aparece na coluna 1 após adicionar
+- [ ] BUG: Drag-drop da coluna 2 para coluna 1 não vincula ao produto
+- [ ] BUG: Variações da coluna 1 não têm campo obrigatório/opcional para editar
+- [ ] FEATURE: Adicionar campo obrigatório/opcional ao expandir variação na coluna 1
+- [ ] FEATURE: Sincronizar coluna 1 com banco de dados ao adicionar novo tipo
+- [ ] FEATURE: Implementar drop handler para vincular tipos arrastados
