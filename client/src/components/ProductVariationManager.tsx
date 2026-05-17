@@ -29,7 +29,7 @@ interface VariationOption {
 }
 
 // Draggable item component
-function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired }: any) {
+function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEditName }: any) {
   const {
     attributes,
     listeners,
@@ -67,6 +67,18 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditName(vt.id, vt.name);
+            }}
+            className="bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Editar
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -111,6 +123,8 @@ export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
+  const [editingVariationNameId, setEditingVariationNameId] = useState<number | null>(null);
+  const [editingVariationName, setEditingVariationName] = useState("");
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -120,6 +134,9 @@ export function ProductVariationManager() {
     { productId: selectedProductId || 0 },
     { enabled: !!selectedProductId }
   );
+
+  // Fetch global variation types
+  const { data: globalVariationTypes = [] } = trpc.adminVariations.getGlobal.useQuery();
 
   // Get utils for invalidation
   const utils = trpc.useUtils();
@@ -132,6 +149,8 @@ export function ProductVariationManager() {
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
+  const linkVariationTypeMutation = trpc.adminVariations.linkType.useMutation();
+  const unlinkVariationTypeMutation = trpc.adminVariations.unlinkType.useMutation();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -280,6 +299,41 @@ export function ProductVariationManager() {
     }
   };
 
+  const handleEditVariationName = (id: number, currentName: string) => {
+    setEditingVariationNameId(id);
+    setEditingVariationName(currentName);
+  };
+
+  const handleSaveVariationName = async () => {
+    if (!editingVariationNameId || !editingVariationName) {
+      toast.error("Preencha o nome da variação");
+      return;
+    }
+
+    try {
+      await updateVariationTypeMutation.mutateAsync({
+        id: editingVariationNameId,
+        name: editingVariationName,
+      });
+
+      toast.success("Nome da variação atualizado!");
+      setEditingVariationNameId(null);
+      setEditingVariationName("");
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar nome da variação");
+      console.error(error);
+    }
+  };
+
+  const handleCancelEditVariationName = () => {
+    setEditingVariationNameId(null);
+    setEditingVariationName("");
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -420,6 +474,7 @@ export function ProductVariationManager() {
                           onSelect={setEditingVariationType}
                           onDelete={handleDeleteVariationType}
                           onToggleRequired={handleToggleRequired}
+                          onEditName={handleEditVariationName}
                         />
                       ))}
                     </div>
@@ -428,8 +483,43 @@ export function ProductVariationManager() {
               )}
             </div>
 
+            {/* Edit Variation Name */}
+            {editingVariationNameId && (
+              <div className="border-t pt-6 space-y-4 bg-yellow-50 p-4 rounded-lg">
+                <h3 className="font-semibold">Editar Nome da Variação</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="editVariationName">Novo Nome</Label>
+                    <Input
+                      id="editVariationName"
+                      value={editingVariationName}
+                      onChange={(e) => setEditingVariationName(e.target.value)}
+                      className="mt-1"
+                      placeholder="Digite o novo nome da variação"
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Button
+                      onClick={handleSaveVariationName}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      disabled={updateVariationTypeMutation.isPending}
+                    >
+                      Salvar
+                    </Button>
+                    <Button
+                      onClick={handleCancelEditVariationName}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Options for Selected Variation Type */}
-            {editingVariationType && (
+            {editingVariationType && !editingVariationNameId && (
               <div className="border-t pt-6 space-y-4">
                 <h3 className="font-semibold">
                   Opções para "{variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.name}"
@@ -569,6 +659,76 @@ export function ProductVariationManager() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Seção de Tipos Globais */}
+      {selectedProductId && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Tipos Globais Disponíveis</CardTitle>
+            <CardDescription>
+              Selecione os tipos que este produto utiliza
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {globalVariationTypes.length === 0 ? (
+                <p className="text-gray-500 text-sm">Nenhum tipo global disponível</p>
+              ) : (
+                globalVariationTypes.map((globalType: any) => {
+                  const isLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
+                  return (
+                    <div
+                      key={globalType.id}
+                      className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
+                    >
+                      <div className="flex-1">
+                        <h4 className="font-medium">{globalType.name}</h4>
+                        <p className="text-sm text-gray-600">{globalType.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={isLinked}
+                          onChange={async (e) => {
+                            if (!selectedProductId) return;
+                            
+                            try {
+                              if (e.target.checked) {
+                                // Vincular tipo
+                                await linkVariationTypeMutation.mutateAsync({
+                                  productId: selectedProductId,
+                                  variationTypeId: globalType.id,
+                                  isRequired: true,
+                                  order: 0,
+                                });
+                                toast.success(`${globalType.name} vinculado com sucesso`);
+                              } else {
+                                // Desvincular tipo
+                                await unlinkVariationTypeMutation.mutateAsync({
+                                  productId: selectedProductId,
+                                  variationTypeId: globalType.id,
+                                });
+                                toast.success(`${globalType.name} desvinculado com sucesso`);
+                              }
+                              // Invalidar cache
+                              await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+                              refetchVariationTypes();
+                            } catch (error) {
+                              toast.error(`Erro ao ${e.target.checked ? 'vincular' : 'desvincular'} ${globalType.name}`);
+                              console.error(error);
+                            }
+                          }}
+                          className="w-4 h-4"
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </CardContent>
         </Card>
       )}

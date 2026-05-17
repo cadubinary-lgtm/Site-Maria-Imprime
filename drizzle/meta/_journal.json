@@ -134,6 +134,13 @@
       "when": 1778869436404,
       "tag": "0018_aspiring_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1779029436131,
+      "tag": "0019_amusing_synch",
+      "breakpoints": true
     }
   ]
 }

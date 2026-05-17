@@ -1568,3 +1568,61 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todo.md com conclusão
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
+
+
+## Fase 39: Refatorar Arquitetura de Variações (Tipos Globais vs Vínculo de Produto)
+
+### PROBLEMA IDENTIFICADO
+- Variações estão sendo criadas POR PRODUTO (duplicação)
+- Correto: Tipos globais + vínculo com configuração (obrigatório/opcional)
+- Exemplo: Tipo "Acabamento" deve existir UMA VEZ, múltiplos produtos vinculam
+
+### ABORDAGEM: Migração Gradual e Segura
+- Manter compatibilidade com dados existentes
+- Criar nova tabela productVariationTypes em paralelo
+- Migrar dados gradualmente
+- Atualizar queries para novo modelo
+- Manter interface atual funcionando
+
+### FASE 1: Criar Tabela productVariationTypes ⏳
+- [ ] Criar tabela productVariationTypes (id, productId, variationTypeId, isRequired, order, isActive)
+- [ ] Adicionar foreign keys
+- [ ] Criar índices
+- [ ] Executar migração SQL
+
+### FASE 2: Migrar Dados Existentes ⏳
+- [ ] Copiar dados de variationTypes para productVariationTypes
+- [ ] Manter productId em variationTypes (compatibilidade)
+- [ ] Validar integridade dos dados
+- [ ] Testar fluxo existente
+
+### FASE 3: Criar Tipos Globais Reutilizáveis ⏳
+- [ ] Criar interface para gerenciar tipos globais
+- [ ] Permitir criar tipos SEM vincular a produto
+- [ ] Permitir vincular tipos existentes a novo produto
+- [ ] Evitar duplicação de tipos
+
+### FASE 4: Refatorar Backend (Gradualmente) ⏳
+- [ ] Criar queries para novo modelo
+- [ ] Manter queries antigas (compatibilidade)
+- [ ] Atualizar getVariationTypesByProduct para usar productVariationTypes
+- [ ] Criar getGlobalVariationTypes
+
+### FASE 5: Refatorar Frontend (Gradualmente) ⏳
+- [ ] Modificar ProductVariationManager para vincular tipos globais
+- [ ] Criar seção "Tipos Disponíveis" (checkbox para vincular)
+- [ ] Manter configuração de obrigatório/opcional
+- [ ] Manter drag & drop de ordem
+
+### FASE 6: Testar Fluxo Completo ⏳
+- [ ] Criar tipo global
+- [ ] Vincular a múltiplos produtos
+- [ ] Verificar sem duplicação
+- [ ] Validar ProductDetail
+- [ ] Testar compatibilidade com dados antigos
+
+### FASE 7: Remover Compatibilidade (Futuro) ⏳
+- [ ] Remover productId de variationTypes (após migração completa)
+- [ ] Atualizar todas as queries
+- [ ] Testar fluxo completo
+- [ ] Salvar checkpoint final
