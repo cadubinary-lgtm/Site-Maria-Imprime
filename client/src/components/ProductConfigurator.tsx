@@ -73,7 +73,10 @@ export function ProductConfigurator({
   );
 
   // Memoizar variações para evitar re-renders infinitos
-  const memoizedVariationTypes = useMemo(() => variationTypes, [JSON.stringify(variationTypes)]);
+  // Filtrar apenas variações obrigatórias (isRequired = true)
+  const memoizedVariationTypes = useMemo(() => {
+    return variationTypes.filter((vt: any) => vt.isRequired !== false);
+  }, [JSON.stringify(variationTypes)]);
 
   // Carregar atributos do produto
   useEffect(() => {
@@ -81,9 +84,11 @@ export function ProductConfigurator({
       try {
         setIsLoading(true);
         
-        // Se temos variações reais, usá-las
+        // Se temos variações reais, usá-las (apenas obrigatórias)
         if (memoizedVariationTypes && memoizedVariationTypes.length > 0) {
-          const attributes: ProductAttribute[] = memoizedVariationTypes.map((vt: any, index: number) => ({
+          const attributes: ProductAttribute[] = memoizedVariationTypes
+            .filter((vt: any) => vt.isRequired !== false)
+            .map((vt: any, index: number) => ({
             id: vt.id,
             attributeId: vt.id,
             attributeName: vt.name,
