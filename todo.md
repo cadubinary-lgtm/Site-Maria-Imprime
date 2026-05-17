@@ -451,30 +451,30 @@
 - [ ] Guia de configuração para admin
 
 
-## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many)
+## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many) ✅
 
-- [ ] Criar tabela relacional `productSegments` (product_id, segment_id)
-- [ ] Criar procedures tRPC para gerenciar relacionamentos
-- [ ] Modificar schema para suportar múltiplos segmentos
-- [ ] Criar componente MultiSegmentSelector com tags/checkboxes
-- [ ] Integrar ao formulário de edição de produtos
-- [ ] Adicionar busca e criação de segmentos
-- [ ] Testes de relacionamento many-to-many
-- [ ] Entrega final com interface moderna
+- [x] Criar tabela relacional `productSegments` (product_id, segment_id)
+- [x] Criar procedures tRPC para gerenciar relacionamentos
+- [x] Modificar schema para suportar múltiplos segmentos
+- [x] Criar componente MultiSegmentSelector com tags/checkboxes
+- [x] Integrar ao formulário de edição de produtos
+- [x] Adicionar busca e criação de segmentos
+- [x] Testes de relacionamento many-to-many
+- [x] Entrega final com interface moderna
 
 
-## Fase 27: Sistema de Precificação Dinâmica dos Atributos
+## Fase 27: Sistema de Precificação Dinâmica dos Atributos ✅
 
-- [ ] Adicionar campos de preço aos attributeValues (priceType, priceValue, impactOnDeadline, impactOnWeight)
-- [ ] Criar tipos de cálculo (fixo, percentual, multiplicador, m², quantidade)
-- [ ] Implementar engine de cálculo dinâmico em server/attributes-pricing.ts
-- [ ] Criar procedures tRPC para cálculo de preço com atributos
-- [ ] Criar interface admin para editar preços de atributos
-- [ ] Integrar cálculo ao UniversalProductRenderer
-- [ ] Atualizar preço em tempo real ao selecionar atributos
-- [ ] Salvar preço calculado no carrinho/pedido
-- [ ] Testes de cálculo dinâmico
-- [ ] Validação de precificação completa
+- [x] Adicionar campos de preço aos attributeValues (priceType, priceValue, impactOnDeadline, impactOnWeight)
+- [x] Criar tipos de cálculo (fixo, percentual, multiplicador, m², quantidade)
+- [x] Implementar engine de cálculo dinâmico em server/attributes-pricing.ts
+- [x] Criar procedures tRPC para cálculo de preço com atributos
+- [x] Criar interface admin para editar preços de atributos
+- [x] Integrar cálculo ao UniversalProductRenderer
+- [x] Atualizar preço em tempo real ao selecionar atributos
+- [x] Salvar preço calculado no carrinho/pedido
+- [x] Testes de cálculo dinâmico
+- [x] Validação de precificação completa
 
 
 ## FASE FINAL: Estabilidade, Consistência e Validação Completa
