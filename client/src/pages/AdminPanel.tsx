@@ -36,7 +36,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   servicos: '🔧 Serviços',
 };
 
-const SEGMENTS = [
+// Segmentos padrão como fallback
+const DEFAULT_SEGMENTS = [
   { value: 'alimentacao', label: '🍔 Alimentação' },
   { value: 'beleza', label: '💄 Beleza & Saúde' },
   { value: 'varejo', label: '🛍️ Varejo' },
@@ -66,6 +67,15 @@ export default function AdminPanel() {
 
   // Fetch all products
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
+
+  // Fetch all segments dynamically
+  const { data: segmentsData } = trpc.segments.getAll.useQuery();
+  
+  // Converter segmentos da API para formato esperado
+  const SEGMENTS = segmentsData?.map((seg: any) => ({
+    value: seg.slug,
+    label: `${seg.icon || '📦'} ${seg.name}`,
+  })) || DEFAULT_SEGMENTS;
 
   // Update product mutation
   const updateProductMutation = trpc.products.updateProduct.useMutation({
