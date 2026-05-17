@@ -27,8 +27,8 @@ interface VariationOption {
   priceModifier: string | number;
 }
 
-// Draggable global type component
-function DraggableGlobalType({ globalType, isLinked }: any) {
+// Draggable global type component com controles completos
+function DraggableGlobalType({ globalType, isLinked, onEdit, onToggleRequired, onDelete, onSelectOptions }: any) {
   return (
     <div
       draggable
@@ -36,16 +36,72 @@ function DraggableGlobalType({ globalType, isLinked }: any) {
         e.dataTransfer.effectAllowed = 'copy';
         e.dataTransfer.setData('application/json', JSON.stringify({ globalType, type: 'global-type' }));
       }}
-      className={`border rounded-lg p-3 flex justify-between items-center cursor-move transition ${
+      className={`border rounded-lg p-4 cursor-move transition ${
         isLinked ? 'bg-green-50 border-green-300 opacity-50' : 'bg-white hover:bg-blue-50 hover:border-blue-300'
       }`}
     >
-      <div className="flex-1">
-        <h4 className="font-medium text-sm">{globalType.name}</h4>
-        <p className="text-xs text-gray-600">{globalType.description}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Move className="w-4 h-4 text-gray-400" />
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex items-start gap-3 flex-1">
+          <Move className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
+          <div>
+            <h4 className="font-semibold">{globalType.name}</h4>
+            <p className="text-sm text-gray-600">
+              {globalType.isRequired ? "Obrigatório" : "Opcional"} • Ordem: {globalType.order || 0}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit?.(globalType.id, globalType.name);
+            }}
+            className="bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+            disabled={isLinked}
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Editar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectOptions?.(globalType.id);
+            }}
+            className="bg-green-50 border-green-300 hover:bg-green-100"
+            disabled={isLinked}
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Opções
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleRequired?.(globalType.id, globalType.isRequired);
+            }}
+            className={globalType.isRequired ? "bg-blue-50 border-blue-300 hover:bg-blue-100" : "bg-red-50 border-red-300 hover:bg-red-100"}
+            disabled={isLinked}
+          >
+            {globalType.isRequired ? "Obrigatório" : "Opcional"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(globalType.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+            disabled={isLinked}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -762,6 +818,19 @@ export function ProductVariationManager() {
                       key={globalType.id}
                       globalType={globalType}
                       isLinked={isLinked}
+                      onEdit={(id: number, name: string) => {
+                        setEditingVariationNameId(id);
+                        setEditingVariationName(name);
+                      }}
+                      onSelectOptions={(id: number) => {
+                        setEditingVariationType(id);
+                      }}
+                      onToggleRequired={(id: number, isRequired: boolean) => {
+                        handleToggleRequired(id, isRequired);
+                      }}
+                      onDelete={(id: number) => {
+                        handleDeleteVariationType(id);
+                      }}
                     />
                   );
                 })
