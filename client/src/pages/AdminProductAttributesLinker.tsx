@@ -8,14 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Link2 } from "lucide-react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
 
 export default function AdminProductAttributesLinker() {
-  const [location] = useLocation();
-  const queryParams = new URLSearchParams(location.split('?')[1] || '');
-  const productIdFromUrl = queryParams.get('productId') ? parseInt(queryParams.get('productId')!) : null;
-  
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(productIdFromUrl);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Set<number>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
