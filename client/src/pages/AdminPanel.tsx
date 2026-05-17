@@ -42,6 +42,7 @@ const DEFAULT_SEGMENTS = [
   { value: 'beleza', label: '💄 Beleza & Saúde' },
   { value: 'varejo', label: '🛍️ Varejo' },
   { value: 'servicos', label: '🔧 Serviços' },
+  { value: 'revendedores', label: '🏭 REVENDEDORES' },
 ];
 
 export default function AdminPanel() {
