@@ -131,6 +131,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
 export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
+  const [editingGlobalVariationType, setEditingGlobalVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState("");
@@ -207,14 +208,15 @@ export function ProductVariationManager() {
   };
 
   const handleAddOption = async () => {
-    if (!editingVariationType || !newOptionName) {
+    const variationId = editingVariationType || editingGlobalVariationType;
+    if (!variationId || !newOptionName) {
       toast.error("Preencha o nome da opção");
       return;
     }
 
     try {
       await createVariationOptionMutation.mutateAsync({
-        variationTypeId: editingVariationType,
+        variationTypeId: variationId,
         name: newOptionName,
         priceModifier: (parseFloat(newOptionPrice) || 0).toString(),
       });
@@ -226,6 +228,8 @@ export function ProductVariationManager() {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
+      await utils.variations.getGlobal.invalidate();
+      refetchGlobalVariationTypes();
     } catch (error) {
       toast.error("Erro ao adicionar opção");
       console.error(error);
@@ -696,6 +700,87 @@ export function ProductVariationManager() {
                 </div>
               </div>
             )}
+
+            {/* Options for Global Variation Type */}
+            {editingGlobalVariationType && (
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="font-semibold">
+                  Opções para "{globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.name}"
+                </h3>
+
+                {/* Add New Option */}
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <h4 className="font-semibold mb-4">Adicionar Nova Opção</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="globalOptionName">Nome da Opção</Label>
+                      <Input
+                        id="globalOptionName"
+                        placeholder="Ex: Vinil Brilho, Acabamento Fosco"
+                        value={newOptionName}
+                        onChange={(e) => setNewOptionName(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="globalOptionPrice">Modificador de Preço (R$)</Label>
+                      <Input
+                        id="globalOptionPrice"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={newOptionPrice}
+                        onChange={(e) => setNewOptionPrice(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        onClick={handleAddOption}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        disabled={createVariationOptionMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Options List */}
+                <div className="space-y-2">
+                  {!globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options || globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options.length === 0 ? (
+                    <p className="text-gray-500 text-sm">Nenhuma opção cadastrada</p>
+                  ) : (
+                    <div className="grid gap-2">
+                      {globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options?.map((option: any) => (
+                        <div
+                          key={option.id}
+                          className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
+                        >
+                          <div>
+                            <h5 className="font-medium">{option.name}</h5>
+                            <p className="text-sm text-gray-600">
+                              +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteOption(option.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -741,7 +826,7 @@ export function ProductVariationManager() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingVariationType(vt.id)}
+                        onClick={() => setEditingGlobalVariationType(vt.id)}
                         className="bg-green-50 border-green-300 hover:bg-green-100"
                       >
                         <Edit2 className="w-4 h-4 mr-1" />
