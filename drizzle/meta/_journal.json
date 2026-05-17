@@ -155,6 +155,13 @@
       "when": 1779041428597,
       "tag": "0021_adorable_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1779047940344,
+      "tag": "0022_glorious_lorna_dane",
+      "breakpoints": true
     }
   ]
 }
