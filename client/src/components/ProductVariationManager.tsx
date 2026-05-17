@@ -135,6 +135,7 @@ export function ProductVariationManager() {
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState("");
+  const [productSearchQuery, setProductSearchQuery] = useState("");
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -429,24 +430,37 @@ export function ProductVariationManager() {
           <CardDescription>Escolha o produto para gerenciar suas variações</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select
-            value={selectedProductId?.toString() || ""}
-            onValueChange={(value) => {
-              setSelectedProductId(parseInt(value));
-              setEditingVariationType(null);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um produto..." />
-            </SelectTrigger>
-            <SelectContent>
-              {products.map((product: any) => (
-                <SelectItem key={product.id} value={product.id.toString()}>
-                  {product.name} (ID: {product.id})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-3">
+            <Input
+              placeholder="Pesquisar produtos..."
+              value={productSearchQuery}
+              onChange={(e) => setProductSearchQuery(e.target.value)}
+              className="mb-2"
+            />
+            <Select
+              value={selectedProductId?.toString() || ""}
+              onValueChange={(value) => {
+                setSelectedProductId(parseInt(value));
+                setEditingVariationType(null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um produto..." />
+              </SelectTrigger>
+              <SelectContent>
+                {products
+                  .filter((product: any) =>
+                    product.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+                    product.id.toString().includes(productSearchQuery)
+                  )
+                  .map((product: any) => (
+                    <SelectItem key={product.id} value={product.id.toString()}>
+                      {product.name} (ID: {product.id})
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
