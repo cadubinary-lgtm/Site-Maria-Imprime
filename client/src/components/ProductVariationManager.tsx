@@ -29,7 +29,7 @@ interface VariationOption {
 }
 
 // Draggable item component
-function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired }: any) {
+function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEdit }: any) {
   const {
     attributes,
     listeners,
@@ -67,6 +67,18 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(vt.id, vt.name);
+            }}
+            className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Editar Nome
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -112,6 +124,8 @@ export function ProductVariationManager() {
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
   const [saveAsGlobal, setSaveAsGlobal] = useState(false);
+  const [editingNameId, setEditingNameId] = useState<number | null>(null);
+  const [editingNameValue, setEditingNameValue] = useState("");
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -268,6 +282,33 @@ export function ProductVariationManager() {
       }
     } catch (error) {
       toast.error("Erro ao atualizar opção");
+      console.error(error);
+    }
+  };
+
+  const handleEditName = async () => {
+    if (!editingNameId || !editingNameValue) {
+      toast.error("Preencha o novo nome");
+      return;
+    }
+
+    try {
+      await updateVariationTypeMutation.mutateAsync({
+        id: editingNameId,
+        name: editingNameValue,
+      });
+
+      toast.success("Nome atualizado!");
+      setEditingNameId(null);
+      setEditingNameValue("");
+      if (selectedProductId) {
+        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
+      }
+      await utils.variations.getGlobal.invalidate();
+      refetchGlobalVariationTypes();
+    } catch (error) {
+      toast.error("Erro ao atualizar nome");
       console.error(error);
     }
   };
@@ -467,6 +508,10 @@ export function ProductVariationManager() {
                           onSelect={setEditingVariationType}
                           onDelete={handleDeleteVariationType}
                           onToggleRequired={handleToggleRequired}
+                          onEdit={(id: number, name: string) => {
+                            setEditingNameId(id);
+                            setEditingNameValue(name);
+                          }}
                         />
                       ))}
                     </div>
@@ -474,6 +519,44 @@ export function ProductVariationManager() {
                 </DndContext>
               )}
             </div>
+
+            {/* Edit Variation Name Modal */}
+            {editingNameId && (
+              <div className="border rounded-lg p-4 bg-yellow-50 space-y-4">
+                <h4 className="font-semibold">Editar Nome da Variação</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="editName">Novo Nome</Label>
+                    <Input
+                      id="editName"
+                      value={editingNameValue}
+                      onChange={(e) => setEditingNameValue(e.target.value)}
+                      className="mt-1"
+                      placeholder="Digite o novo nome"
+                    />
+                  </div>
+                  <div className="flex gap-2 items-end">
+                    <Button
+                      onClick={handleEditName}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                      disabled={updateVariationTypeMutation.isPending}
+                    >
+                      Salvar
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setEditingNameId(null);
+                        setEditingNameValue("");
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Options for Selected Variation Type */}
             {editingVariationType && (
