@@ -252,12 +252,12 @@
 - [x] Adicionar relatório de ticket médio
 - [x] Testes de controle financeiro
 
-### FASE 6: Módulo de Validação de Arquivos (Web2Print)
-- [ ] Criar componente FileValidator.tsx
-- [ ] Implementar validações (DPI, CMYK, sangria, margem)
-- [ ] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
-- [ ] Integrar com ProductDetail
-- [ ] Testes de validação de arquivo
+### FASE 8: Módulo de Validação de Arquivos (Web2Print) ✅
+- [x] Criar componente FileValidator.tsx
+- [x] Implementar validações (DPI, CMYK, sangria, margem)
+- [x] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
+- [x] Integrar com ProductDetail
+- [x] Testes de validação de arquivo
 
 ### FASE 7: Automação Inteligente
 - [ ] Criar sistema de notificações automáticas
@@ -514,15 +514,15 @@
 - [x] Total: 36 testes do admin
 - [x] Arquivo: server/admin-functionality.test.ts
 
-### FASE 6: Melhorias Visuais e UX
-- [ ] Revisar organização visual dos componentes
-- [ ] Melhorar espaçamento e padding
-- [ ] Otimizar responsividade mobile
-- [ ] Melhorar visual dos cards de atributos
-- [ ] Melhorar visual das opções de seleção
-- [ ] Adicionar loading states
-- [ ] Melhorar experiência do admin
-- [ ] Testar em diferentes dispositivos
+### FASE 6: Melhorias Visuais e UX ✅
+- [x] Revisar organização visual dos componentes
+- [x] Melhorar espaçamento e padding
+- [x] Otimizar responsividade mobile
+- [x] Melhorar visual dos cards de atributos
+- [x] Melhorar visual das opções de seleção
+- [x] Adicionar loading states
+- [x] Melhorar experiência do admin
+- [x] Testar em diferentes dispositivos
 
 ### FASE 7: Documentação Final ✅
 - [x] Criar documentação completa de arquitetura
