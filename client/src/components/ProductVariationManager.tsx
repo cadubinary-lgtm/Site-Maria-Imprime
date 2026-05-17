@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 interface VariationType {
   id: number;
@@ -90,7 +91,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             className="bg-green-50 border-green-300 hover:bg-green-100"
           >
             <Edit2 className="w-4 h-4 mr-1" />
-            Opções
+            Opções (Variações)
           </Button>
           <div className="flex items-center gap-2">
             <Label className="text-sm font-medium">Obrigatório:</Label>
@@ -129,6 +130,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
 }
 
 export function ProductVariationManager() {
+  const [, navigate] = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
@@ -429,11 +431,19 @@ export function ProductVariationManager() {
       {/* Variation Management */}
       {selectedProductId && (
         <Card>
-          <CardHeader>
-            <CardTitle>Gerenciar Variações</CardTitle>
-            <CardDescription>
-              Adicione, edite, remova ou reordene tipos de variações e suas opções
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Gerenciar Variações</CardTitle>
+              <CardDescription>
+                Adicione, edite, remova ou reordene tipos de variações e suas opções
+              </CardDescription>
+            </div>
+            <Button
+              onClick={() => navigate(`/admin/vincular-atributos?productId=${selectedProductId}`)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white whitespace-nowrap"
+            >
+              + ADICIONAR ATRIBUTOS
+            </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Add New Variation Type */}
