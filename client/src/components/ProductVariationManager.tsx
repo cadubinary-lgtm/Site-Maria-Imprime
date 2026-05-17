@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 
 interface VariationType {
@@ -91,17 +92,25 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             <Edit2 className="w-4 h-4 mr-1" />
             Opções
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleRequired(vt.id, vt.isRequired);
-            }}
-            className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
-          >
-            {vt.isRequired ? "Obrigatório" : "Opcional"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">Obrigatório:</Label>
+            <RadioGroup
+              value={vt.isRequired ? "sim" : "nao"}
+              onValueChange={(value) => {
+                onToggleRequired(vt.id, value === "sim");
+              }}
+              className="flex gap-3"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
+                <Label htmlFor={`required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="nao" id={`required-nao-${vt.id}`} />
+                <Label htmlFor={`required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
+              </div>
+            </RadioGroup>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -736,14 +745,25 @@ export function ProductVariationManager() {
                         <Edit2 className="w-4 h-4 mr-1" />
                         Opções
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleRequired(vt.id, vt.isRequired)}
-                        className={vt.isRequired ? "bg-blue-50 border-blue-300" : "bg-gray-50"}
-                      >
-                        {vt.isRequired ? "Obrigatório" : "Opcional"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-medium">Obrigatório:</Label>
+                        <RadioGroup
+                          value={vt.isRequired ? "sim" : "nao"}
+                          onValueChange={(value) => {
+                            handleToggleRequired(vt.id, value === "sim");
+                          }}
+                          className="flex gap-3"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} />
+                            <Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} />
+                            <Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
