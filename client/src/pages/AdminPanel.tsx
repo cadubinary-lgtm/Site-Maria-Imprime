@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { trpc } from '../lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,21 +69,33 @@ export default function AdminPanel() {
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
 
   // Fetch all segments dynamically
-  const { data: segmentsData } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData, isLoading: segmentsLoading, error: segmentsError } = trpc.segments.getAll.useQuery();
+  
+  // Debug: log dados de segmentos
+  useEffect(() => {
+    console.log('Segments Query Status:', {
+      isLoading: segmentsLoading,
+      hasData: !!segmentsData,
+      dataLength: segmentsData?.length || 0,
+      error: segmentsError?.message,
+      data: segmentsData,
+    });
+  }, [segmentsData, segmentsLoading, segmentsError]);
   
   // Converter segmentos da API para formato esperado com useMemo
   const SEGMENTS = useMemo(() => {
+    console.log('SEGMENTS useMemo called with:', { segmentsData, length: segmentsData?.length });
     if (segmentsData && segmentsData.length > 0) {
-      return segmentsData.map((seg: any) => ({
+      const mapped = segmentsData.map((seg: any) => ({
         value: seg.slug,
         label: `${seg.icon || '📦'} ${seg.name}`,
       }));
+      console.log('Mapped SEGMENTS:', mapped);
+      return mapped;
     }
+    console.log('Using DEFAULT_SEGMENTS');
     return DEFAULT_SEGMENTS;
   }, [segmentsData]);
-  
-  // Debug: log SEGMENTS para verificar se está carregando
-  console.log('SEGMENTS loaded:', SEGMENTS);
 
   // Update product mutation
   const updateProductMutation = trpc.products.updateProduct.useMutation({
