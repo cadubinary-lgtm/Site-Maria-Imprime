@@ -1626,3 +1626,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todas as queries
 - [ ] Testar fluxo completo
 - [ ] Salvar checkpoint final
+
+
+## BUGS IDENTIFICADOS - GERENCIAR VARIAÇÕES
+
+- [ ] BUG: Novo tipo de variação não aparece na coluna 1 após adicionar
+- [ ] BUG: Drag-drop da coluna 2 para coluna 1 não vincula ao produto
+- [ ] BUG: Variações da coluna 1 não têm campo obrigatório/opcional para editar
+- [ ] FEATURE: Adicionar campo obrigatório/opcional ao expandir variação na coluna 1
+- [ ] FEATURE: Sincronizar coluna 1 com banco de dados ao adicionar novo tipo
+- [ ] FEATURE: Implementar drop handler para vincular tipos arrastados

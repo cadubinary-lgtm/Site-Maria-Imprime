@@ -72,12 +72,19 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-lg p-4 cursor-pointer transition ${
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/json', JSON.stringify({
+          type: 'product-variation',
+          variation: vt,
+        }));
+      }}
+      className={`border rounded-lg p-4 cursor-move transition ${
         isSelected
           ? "bg-orange-50 border-orange-300"
           : "bg-white hover:bg-gray-50"
       } ${isDragging ? "shadow-lg" : ""}`}
-
     >
       <div className="flex justify-between items-start gap-4">
         <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
@@ -199,6 +206,8 @@ export function ProductVariationManager() {
     }
 
     try {
+      console.log('Criando novo tipo de variação:', { selectedProductId, newVariationTypeName, newVariationTypeRequired });
+      
       await createVariationTypeMutation.mutateAsync({
         productId: selectedProductId,
         name: newVariationTypeName,
@@ -206,15 +215,19 @@ export function ProductVariationManager() {
         isRequired: newVariationTypeRequired,
       });
 
-      toast.success("Tipo de variação adicionado!");
+      toast.success("Tipo de variação adicionado com sucesso!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
+      
       if (selectedProductId) {
+        console.log('Invalidando cache para produto:', selectedProductId);
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
+        console.log('Refetchando variações...');
+        await refetchVariationTypes();
+        console.log('Variações refetchadas!');
       }
     } catch (error) {
-      toast.error("Erro ao adicionar tipo de variação");
+      toast.error(`Erro ao adicionar tipo de variação: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
       console.error(error);
     }
   };
@@ -388,14 +401,25 @@ export function ProductVariationManager() {
   };
 
   const handleDropGlobalType = async (globalType: any) => {
-    if (!selectedProductId) return;
+    if (!selectedProductId) {
+      toast.error('Selecione um produto primeiro');
+      return;
+    }
     
     try {
+      console.log('Iniciando drag-drop de tipo global:', globalType);
       const isAlreadyLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
       if (isAlreadyLinked) {
         toast.info(`${globalType.name} já está vinculado ao produto`);
         return;
       }
+
+      console.log('Chamando linkVariationTypeMutation com:', {
+        productId: selectedProductId,
+        variationTypeId: globalType.id,
+        isRequired: true,
+        order: variationTypes.length,
+      });
 
       await linkVariationTypeMutation.mutateAsync({
         productId: selectedProductId,
@@ -405,11 +429,13 @@ export function ProductVariationManager() {
       });
       
       toast.success(`${globalType.name} adicionado com sucesso!`);
+      console.log('Invalidando cache e refetchando...');
       await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-      refetchVariationTypes();
+      await refetchVariationTypes();
+      console.log('Refetch completo!');
     } catch (error) {
-      toast.error(`Erro ao adicionar ${globalType.name}`);
-      console.error(error);
+      toast.error(`Erro ao adicionar ${globalType.name}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro completo:', error);
     }
   };
 
@@ -501,37 +527,7 @@ export function ProductVariationManager() {
               </div>
             </div>
 
-            {/* Drop Zone */}
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'copy';
-                setDragOverDropZone(true);
-              }}
-              onDragLeave={() => setDragOverDropZone(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOverDropZone(false);
-                try {
-                  const data = e.dataTransfer.getData('application/json');
-                  if (data) {
-                    const { globalType, type } = JSON.parse(data);
-                    if (type === 'global-type') {
-                      handleDropGlobalType(globalType);
-                    }
-                  }
-                } catch (error) {
-                  console.error('Erro ao processar drop:', error);
-                }
-              }}
-              className={`border-2 border-dashed rounded-lg p-4 text-center transition ${
-                dragOverDropZone
-                  ? 'border-orange-400 bg-orange-50'
-                  : 'border-gray-300 bg-gray-50 hover:border-orange-300'
-              }`}
-            >
-              <p className="text-sm text-gray-600">📥 Solte aqui para adicionar tipo do sistema</p>
-            </div>
+            {/* Drop Zone Removed - Drag-drop now integrated into variation list */}
 
             {/* Variation Types List with Drag & Drop */}
             <div className="space-y-3">
@@ -733,8 +729,29 @@ export function ProductVariationManager() {
             </CardHeader>
             <CardContent>
 
-            <div className="space-y-3">
-              <p className="text-xs text-gray-500 mb-2">💡 Arraste para adicionar ao produto</p>
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                try {
+                  const data = e.dataTransfer.getData('application/json');
+                  if (data) {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === 'product-variation') {
+                      console.log('Desvincular variacao:', parsed.variation);
+                      handleDeleteVariationType(parsed.variation.id);
+                    }
+                  }
+                } catch (error) {
+                  console.error('Erro ao processar drop:', error);
+                }
+              }}
+              className="space-y-3"
+            >
+              <p className="text-xs text-gray-500 mb-2">💡 Arraste variacoes aqui para desvincular</p>
               {globalVariationTypes.length === 0 ? (
                 <p className="text-gray-500 text-sm">Nenhum tipo global disponível</p>
               ) : (
