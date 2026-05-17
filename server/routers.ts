@@ -203,25 +203,24 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error("Database not available");
         
-        // Inserir produto
-        const result = await db.insert(products).values({
-          name: input.name,
-          description: input.description,
-          price: input.price as any,
-          segment: input.segment as any,
-          imageUrl: input.imageUrl,
-          imageKey: input.imageKey,
-          isActive: true,
-        });
-        
-        // Obter ID do produto inserido
-        const productId = (result as any).insertId || (result as any).lastInsertRowid || 0;
-        if (!productId) throw new Error("Failed to get product ID");
-        
-        // Vincular os 7 atributos principais automaticamente
-        // Os atributos devem ser vinculados manualmente via admin
-        
-        return result;
+        try {
+          // Inserir produto
+          const result = await db.insert(products).values({
+            name: input.name,
+            description: input.description,
+            price: input.price as any,
+            segment: input.segment as any,
+            imageUrl: input.imageUrl,
+            imageKey: input.imageKey,
+            isActive: true,
+          });
+          
+          // Retornar o resultado da inserção
+          return { success: true, message: 'Produto criado com sucesso' };
+        } catch (error) {
+          console.error('Error creating product:', error);
+          throw new Error(`Erro ao criar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+        }
       }),
     getAllOrders: adminProcedure.query(() => getAllOrders()),
     updateProduct: adminProcedure
