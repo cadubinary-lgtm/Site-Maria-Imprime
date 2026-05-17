@@ -871,19 +871,3 @@ export const pricingRules = mysqlTable("pricingRules", {
 
 export type PricingRule = typeof pricingRules.$inferSelect;
 export type InsertPricingRule = typeof pricingRules.$inferInsert;
-
-/**
- * Product Variation Types - Relacionamento entre produtos e tipos de variação globais
- * Permite que um produto use tipos de variação globais com configurações específicas
- */
-export const productVariationTypes = mysqlTable("productVariationTypes", {
-  id: int("id").autoincrement().primaryKey(),
-  productId: int("productId").notNull(),
-  variationTypeId: int("variationTypeId").notNull(),
-  isRequired: boolean("isRequired").default(true).notNull(), // Obrigatório/Opcional para este produto
-  order: int("order").default(0).notNull(), // Ordem de exibição para este produto
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type ProductVariationType = typeof productVariationTypes.$inferSelect;
-export type InsertProductVariationType = typeof productVariationTypes.$inferInsert;

@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Edit2, Trash2, GripVertical, Move } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 
 interface VariationType {
@@ -27,32 +28,8 @@ interface VariationOption {
   priceModifier: string | number;
 }
 
-// Draggable global type component
-function DraggableGlobalType({ globalType, isLinked }: any) {
-  return (
-    <div
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.effectAllowed = 'copy';
-        e.dataTransfer.setData('application/json', JSON.stringify({ globalType, type: 'global-type' }));
-      }}
-      className={`border rounded-lg p-3 flex justify-between items-center cursor-move transition ${
-        isLinked ? 'bg-green-50 border-green-300 opacity-50' : 'bg-white hover:bg-blue-50 hover:border-blue-300'
-      }`}
-    >
-      <div className="flex-1">
-        <h4 className="font-medium text-sm">{globalType.name}</h4>
-        <p className="text-xs text-gray-600">{globalType.description}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Move className="w-4 h-4 text-gray-400" />
-      </div>
-    </div>
-  );
-}
-
 // Draggable item component
-function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEditName }: any) {
+function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired }: any) {
   const {
     attributes,
     listeners,
@@ -72,19 +49,12 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
     <div
       ref={setNodeRef}
       style={style}
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('application/json', JSON.stringify({
-          type: 'product-variation',
-          variation: vt,
-        }));
-      }}
-      className={`border rounded-lg p-4 cursor-move transition ${
+      className={`border rounded-lg p-4 cursor-pointer transition ${
         isSelected
           ? "bg-orange-50 border-orange-300"
           : "bg-white hover:bg-gray-50"
       } ${isDragging ? "shadow-lg" : ""}`}
+
     >
       <div className="flex justify-between items-start gap-4">
         <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
@@ -97,18 +67,6 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditName(vt.id, vt.name);
-            }}
-            className="bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
-          >
-            <Edit2 className="w-4 h-4 mr-1" />
-            Editar
-          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -153,9 +111,6 @@ export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
-  const [editingVariationNameId, setEditingVariationNameId] = useState<number | null>(null);
-  const [editingVariationName, setEditingVariationName] = useState("");
-  const [dragOverDropZone, setDragOverDropZone] = useState(false);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -165,9 +120,6 @@ export function ProductVariationManager() {
     { productId: selectedProductId || 0 },
     { enabled: !!selectedProductId }
   );
-
-  // Fetch global variation types
-  const { data: globalVariationTypes = [] } = trpc.adminVariations.getGlobal.useQuery();
 
   // Get utils for invalidation
   const utils = trpc.useUtils();
@@ -180,8 +132,6 @@ export function ProductVariationManager() {
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
-  const linkVariationTypeMutation = trpc.adminVariations.linkType.useMutation();
-  const unlinkVariationTypeMutation = trpc.adminVariations.unlinkType.useMutation();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -206,8 +156,6 @@ export function ProductVariationManager() {
     }
 
     try {
-      console.log('Criando novo tipo de variação:', { selectedProductId, newVariationTypeName, newVariationTypeRequired });
-      
       await createVariationTypeMutation.mutateAsync({
         productId: selectedProductId,
         name: newVariationTypeName,
@@ -215,19 +163,15 @@ export function ProductVariationManager() {
         isRequired: newVariationTypeRequired,
       });
 
-      toast.success("Tipo de variação adicionado com sucesso!");
+      toast.success("Tipo de variação adicionado!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
-      
       if (selectedProductId) {
-        console.log('Invalidando cache para produto:', selectedProductId);
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        console.log('Refetchando variações...');
-        await refetchVariationTypes();
-        console.log('Variações refetchadas!');
+        refetchVariationTypes();
       }
     } catch (error) {
-      toast.error(`Erro ao adicionar tipo de variação: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      toast.error("Erro ao adicionar tipo de variação");
       console.error(error);
     }
   };
@@ -325,50 +269,15 @@ export function ProductVariationManager() {
         isRequired: !currentRequired,
       });
 
-      toast.success("Status atualizado!");
+      toast.success(!currentRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
     } catch (error) {
-      toast.error("Erro ao atualizar status");
+      toast.error("Erro ao atualizar tipo de variação");
       console.error(error);
     }
-  };
-
-  const handleEditVariationName = (id: number, name: string) => {
-    setEditingVariationNameId(id);
-    setEditingVariationName(name);
-  };
-
-  const handleSaveVariationName = async () => {
-    if (!editingVariationNameId || !editingVariationName) {
-      toast.error("Preencha o nome da variação");
-      return;
-    }
-
-    try {
-      await updateVariationTypeMutation.mutateAsync({
-        id: editingVariationNameId,
-        name: editingVariationName,
-      });
-
-      toast.success("Nome da variação atualizado!");
-      setEditingVariationNameId(null);
-      setEditingVariationName("");
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-    } catch (error) {
-      toast.error("Erro ao atualizar nome da variação");
-      console.error(error);
-    }
-  };
-
-  const handleCancelEditVariationName = () => {
-    setEditingVariationNameId(null);
-    setEditingVariationName("");
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -381,9 +290,10 @@ export function ProductVariationManager() {
       const newOrder = arrayMove(variationTypes, oldIndex, newIndex);
       
       try {
+        // Atualizar ordem no backend
         const updates = newOrder.map((vt: VariationType, index: number) => ({
           id: vt.id,
-          order: index,
+          order: index + 1,
         }));
 
         await reorderVariationTypesMutation.mutateAsync({ updates });
@@ -397,45 +307,6 @@ export function ProductVariationManager() {
         toast.error("Erro ao reordenar variações");
         console.error(error);
       }
-    }
-  };
-
-  const handleDropGlobalType = async (globalType: any) => {
-    if (!selectedProductId) {
-      toast.error('Selecione um produto primeiro');
-      return;
-    }
-    
-    try {
-      console.log('Iniciando drag-drop de tipo global:', globalType);
-      const isAlreadyLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
-      if (isAlreadyLinked) {
-        toast.info(`${globalType.name} já está vinculado ao produto`);
-        return;
-      }
-
-      console.log('Chamando linkVariationTypeMutation com:', {
-        productId: selectedProductId,
-        variationTypeId: globalType.id,
-        isRequired: true,
-        order: variationTypes.length,
-      });
-
-      await linkVariationTypeMutation.mutateAsync({
-        productId: selectedProductId,
-        variationTypeId: globalType.id,
-        isRequired: true,
-        order: variationTypes.length,
-      });
-      
-      toast.success(`${globalType.name} adicionado com sucesso!`);
-      console.log('Invalidando cache e refetchando...');
-      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-      await refetchVariationTypes();
-      console.log('Refetch completo!');
-    } catch (error) {
-      toast.error(`Erro ao adicionar ${globalType.name}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-      console.error('Erro completo:', error);
     }
   };
 
@@ -473,21 +344,19 @@ export function ProductVariationManager() {
         </CardContent>
       </Card>
 
-      {/* Main Layout: 2 Areas */}
+      {/* Variation Management */}
       {selectedProductId && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ÁREA 1: Gerenciar Variações (2 colunas) */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Tipos de Variações Cadastrados do Produto</CardTitle>
-              <CardDescription>
-                Adicione, edite, remova ou reordene tipos de variações e suas opções
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Variações</CardTitle>
+            <CardDescription>
+              Adicione, edite, remova ou reordene tipos de variações e suas opções
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
             {/* Add New Variation Type */}
-            <div className="border rounded-lg p-4 bg-orange-50">
-              <h3 className="font-semibold mb-4 text-orange-900">Adicionar Novo Tipo de Variação</h3>
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="variationType">Nome da Variação</Label>
@@ -527,16 +396,11 @@ export function ProductVariationManager() {
               </div>
             </div>
 
-            {/* Drop Zone Removed - Drag-drop now integrated into variation list */}
-
             {/* Variation Types List with Drag & Drop */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-sm text-gray-700">Variações Vinculadas (Arraste para reordenar)</h3>
+              <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
               {variationTypes.length === 0 ? (
-                <div className="text-center py-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
-                  <p className="text-gray-400 text-xs mt-1">Crie um novo tipo acima ou arraste um da coluna ao lado →</p>
-                </div>
+                <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
               ) : (
                 <DndContext
                   sensors={sensors}
@@ -556,7 +420,6 @@ export function ProductVariationManager() {
                           onSelect={setEditingVariationType}
                           onDelete={handleDeleteVariationType}
                           onToggleRequired={handleToggleRequired}
-                          onEditName={handleEditVariationName}
                         />
                       ))}
                     </div>
@@ -565,88 +428,78 @@ export function ProductVariationManager() {
               )}
             </div>
 
-            {/* Edit Variation Name */}
-            {editingVariationNameId && (
-              <div className="border-t pt-6 space-y-4 bg-yellow-50 p-4 rounded-lg">
-                <h3 className="font-semibold">Editar Nome da Variação</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="editVariationName">Novo Nome</Label>
-                    <Input
-                      id="editVariationName"
-                      value={editingVariationName}
-                      onChange={(e) => setEditingVariationName(e.target.value)}
-                      className="mt-1"
-                      placeholder="Digite o novo nome da variação"
-                    />
-                  </div>
-                  <div className="flex gap-2 items-end">
-                    <Button
-                      onClick={handleSaveVariationName}
-                      className="flex-1 bg-yellow-600 hover:bg-yellow-700"
-                    >
-                      Salvar
-                    </Button>
-                    <Button
-                      onClick={handleCancelEditVariationName}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Edit Options */}
+            {/* Options for Selected Variation Type */}
             {editingVariationType && (
-              <div className="border-t pt-6 space-y-4 bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold">Editar Opções da Variação</h3>
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="font-semibold">
+                  Opções para "{variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.name}"
+                </h3>
 
                 {/* Add New Option */}
-                <div className="border rounded-lg p-3 bg-white">
-                  <h4 className="font-medium text-sm mb-3">Adicionar Nova Opção</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Input
-                      placeholder="Nome da opção"
-                      value={newOptionName}
-                      onChange={(e) => setNewOptionName(e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Preço modificador"
-                      value={newOptionPrice}
-                      onChange={(e) => setNewOptionPrice(e.target.value)}
-                    />
-                    <Button
-                      onClick={handleAddOption}
-                      className="bg-green-600 hover:bg-green-700"
-                      disabled={createVariationOptionMutation.isPending}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar
-                    </Button>
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <h4 className="font-semibold mb-4">Adicionar Nova Opção</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="optionName">Nome da Opção</Label>
+                      <Input
+                        id="optionName"
+                        placeholder="Ex: Vinil Brilho, Acabamento Fosco"
+                        value={newOptionName}
+                        onChange={(e) => setNewOptionName(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="optionPrice">Modificador de Preço (R$)</Label>
+                      <Input
+                        id="optionPrice"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={newOptionPrice}
+                        onChange={(e) => setNewOptionPrice(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        onClick={handleAddOption}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        disabled={createVariationOptionMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Edit Option */}
+                {/* Edit Option Modal */}
                 {editingOptionId && (
-                  <div className="border rounded-lg p-3 bg-blue-50">
-                    <h4 className="font-medium text-sm mb-3">Editar Opção</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <Input
-                        placeholder="Nome da opção"
-                        value={editingOptionName}
-                        onChange={(e) => setEditingOptionName(e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Preço modificador"
-                        value={editingOptionPrice}
-                        onChange={(e) => setEditingOptionPrice(e.target.value)}
-                      />
-                      <div className="flex gap-2">
+                  <div className="border rounded-lg p-4 bg-blue-50 space-y-4">
+                    <h4 className="font-semibold">Editar Opção</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="editOptionName">Nome da Opção</Label>
+                        <Input
+                          id="editOptionName"
+                          value={editingOptionName}
+                          onChange={(e) => setEditingOptionName(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="editOptionPrice">Modificador de Preço (R$)</Label>
+                        <Input
+                          id="editOptionPrice"
+                          type="number"
+                          step="0.01"
+                          value={editingOptionPrice}
+                          onChange={(e) => setEditingOptionPrice(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex gap-2 items-end">
                         <Button
                           onClick={handleUpdateOption}
                           className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -717,59 +570,7 @@ export function ProductVariationManager() {
               </div>
             )}
           </CardContent>
-          </Card>
-
-          {/* ÁREA 2: Tipos Globais Disponíveis (1 coluna) */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Tipos Disponíveis no Sistema</CardTitle>
-              <CardDescription>
-                Arraste para adicionar ao produto
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                try {
-                  const data = e.dataTransfer.getData('application/json');
-                  if (data) {
-                    const parsed = JSON.parse(data);
-                    if (parsed.type === 'product-variation') {
-                      console.log('Desvincular variacao:', parsed.variation);
-                      handleDeleteVariationType(parsed.variation.id);
-                    }
-                  }
-                } catch (error) {
-                  console.error('Erro ao processar drop:', error);
-                }
-              }}
-              className="space-y-3"
-            >
-              <p className="text-xs text-gray-500 mb-2">💡 Arraste variacoes aqui para desvincular</p>
-              {globalVariationTypes.length === 0 ? (
-                <p className="text-gray-500 text-sm">Nenhum tipo global disponível</p>
-              ) : (
-                globalVariationTypes.map((globalType: any) => {
-                  const isLinked = variationTypes.some((vt: VariationType) => vt.id === globalType.id);
-                  return (
-                    <DraggableGlobalType
-                      key={globalType.id}
-                      globalType={globalType}
-                      isLinked={isLinked}
-                    />
-                  );
-                })
-              )}
-            </div>
-            </CardContent>
-          </Card>
-        </div>
+        </Card>
       )}
     </div>
   );

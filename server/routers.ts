@@ -27,7 +27,6 @@ import {
   deleteVariationOption,
   updateVariationOption,
   reorderVariationTypes,
-  getGlobalVariationTypes,
   getOrderItemVariations,
   addOrderItemVariation,
   createFileCheck,
@@ -37,11 +36,8 @@ import {
   createSegment,
   updateSegment,
   deleteSegment,
-  linkVariationType,
-  unlinkVariationType,
-  getLinkedVariationTypes,
 } from "./db";
-import { inArray, and } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -324,10 +320,6 @@ export const appRouter = router({
 
   // Admin - Gerenciar variações
   adminVariations: router({
-    getGlobal: adminProcedure
-      .query(async () => {
-        return await getGlobalVariationTypes();
-      }),
     createType: adminProcedure
       .input(z.object({
         productId: z.number(),
@@ -404,24 +396,6 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await reorderVariationTypes(input.updates);
-      }),
-    linkType: adminProcedure
-      .input(z.object({
-        productId: z.number(),
-        variationTypeId: z.number(),
-        isRequired: z.boolean().default(true),
-        order: z.number().default(0),
-      }))
-      .mutation(async ({ input }) => {
-        return await linkVariationType(input.productId, input.variationTypeId, input.isRequired, input.order);
-      }),
-    unlinkType: adminProcedure
-      .input(z.object({
-        productId: z.number(),
-        variationTypeId: z.number(),
-      }))
-      .mutation(async ({ input }) => {
-        return await unlinkVariationType(input.productId, input.variationTypeId);
       }),
   }),
 

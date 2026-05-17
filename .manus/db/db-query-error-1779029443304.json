@@ -1,8 +1,0 @@
-{
-  "query": "CREATE TABLE `productVariationTypes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`productId` int NOT NULL,\n\t`variationTypeId` int NOT NULL,\n\t`isRequired` boolean NOT NULL DEFAULT true,\n\t`order` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `productVariationTypes_id` PRIMARY KEY(`id`)\n);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE `productVariationTypes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`productId` int NOT NULL,\n\t`variationTypeId` int NOT NULL,\n\t`isRequired` boolean NOT NULL DEFAULT true,\n\t`order` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `productVariationTypes_id` PRIMARY KEY(`id`)\n);",
-  "returncode": 1,
-  "logs": [
-    "ERROR 1050 (42S01) at line 1: Table 'UWGRo8uVP2ec6WHZ5QpBak.productVariationTypes' already exists"
-  ]
-}

@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE IF NOT EXISTS productVariationTypes (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  productId INT NOT NULL,\n  variationTypeId INT NOT NULL,\n  isRequired BOOLEAN DEFAULT true NOT NULL,\n  `order` INT DEFAULT 0 NOT NULL,\n  isActive BOOLEAN DEFAULT true NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,\n  FOREIGN KEY (variationTypeId) REFERENCES variationTypes(id) ON DELETE CASCADE,\n  UNIQUE KEY unique_product_variation (productId, variationTypeId),\n  INDEX idx_productId (productId),\n  INDEX idx_variationTypeId (variationTypeId),\n  INDEX idx_order (`order`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute CREATE TABLE IF NOT EXISTS productVariationTypes (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  productId INT NOT NULL,\n  variationTypeId INT NOT NULL,\n  isRequired BOOLEAN DEFAULT true NOT NULL,\n  `order` INT DEFAULT 0 NOT NULL,\n  isActive BOOLEAN DEFAULT true NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,\n  FOREIGN KEY (variationTypeId) REFERENCES variationTypes(id) ON DELETE CASCADE,\n  UNIQUE KEY unique_product_variation (productId, variationTypeId),\n  INDEX idx_productId (productId),\n  INDEX idx_variationTypeId (variationTypeId),\n  INDEX idx_order (`order`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 672
-}

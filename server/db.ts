@@ -1,7 +1,7 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks, productVariationTypes } from "../drizzle/schema";
-import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck, InsertProductVariationType } from "../drizzle/schema";
+import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
+import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -484,116 +484,4 @@ export async function reorderVariationTypes(updates: Array<{ id: number; order: 
     console.error("Error reordering variation types:", error);
     throw error;
   }
-}
-
-/**
- * Lê tipos de variação com suporte híbrido:
- * 1. Tenta ler de productVariationTypes (nova estrutura)
- * 2. Fallback para variationTypes.productId (estrutura antiga)
- * Permite coexistência de ambas as estruturas durante migração
- */
-export async function getVariationTypesByProductHybrid(productId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  // Por enquanto, usar a função original
-  // Será atualizada para usar productVariationTypes quando disponível
-  return getVariationTypesByProduct(productId);
-}
-
-
-
-/**
- * Obter lista de tipos de variação globais (productId=0)
- * Estes tipos podem ser reutilizados por qualquer produto
- */
-export async function getGlobalVariationTypes() {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(variationTypes)
-    .where(eq(variationTypes.productId, 0))
-    .orderBy(variationTypes.order);
-  return result;
-}
-
-
-/**
- * Vincular um tipo de variação global a um produto
- * Cria uma entrada em productVariationTypes com configurações específicas
- */
-export async function linkVariationType(productId: number, variationTypeId: number, isRequired: boolean = true, order: number = 0) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  // Verificar se já está vinculado
-  const existing = await db.select().from(productVariationTypes)
-    .where(and(
-      eq(productVariationTypes.productId, productId),
-      eq(productVariationTypes.variationTypeId, variationTypeId)
-    ));
-  
-  if (existing.length > 0) {
-    // Já vinculado, atualizar configurações
-    return await db.update(productVariationTypes)
-      .set({ isRequired, order })
-      .where(and(
-        eq(productVariationTypes.productId, productId),
-        eq(productVariationTypes.variationTypeId, variationTypeId)
-      ));
-  }
-  
-  // Novo vínculo
-  return await db.insert(productVariationTypes).values({
-    productId,
-    variationTypeId,
-    isRequired,
-    order,
-  });
-}
-
-/**
- * Desvincular um tipo de variação global de um produto
- * Remove a entrada em productVariationTypes
- */
-export async function unlinkVariationType(productId: number, variationTypeId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return await db.delete(productVariationTypes)
-    .where(and(
-      eq(productVariationTypes.productId, productId),
-      eq(productVariationTypes.variationTypeId, variationTypeId)
-    ));
-}
-
-/**
- * Obter tipos de variação vinculados a um produto (via productVariationTypes)
- * Retorna tipos globais com configurações específicas do produto
- */
-export async function getLinkedVariationTypes(productId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select({
-    id: variationTypes.id,
-    productId: variationTypes.productId,
-    type: variationTypes.type,
-    name: variationTypes.name,
-    slug: variationTypes.slug,
-    description: variationTypes.description,
-    selectionType: variationTypes.selectionType,
-    visualType: variationTypes.visualType,
-    order: productVariationTypes.order, // Usar order do vínculo produto-tipo
-    isRequired: productVariationTypes.isRequired, // Usar isRequired do vínculo
-    isActive: variationTypes.isActive,
-    createdAt: variationTypes.createdAt,
-    updatedAt: variationTypes.updatedAt,
-  })
-    .from(productVariationTypes)
-    .innerJoin(variationTypes, eq(productVariationTypes.variationTypeId, variationTypes.id))
-    .where(eq(productVariationTypes.productId, productId))
-    .orderBy(productVariationTypes.order);
-  
-  return result;
 }

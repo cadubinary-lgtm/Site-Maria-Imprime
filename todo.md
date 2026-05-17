@@ -252,12 +252,12 @@
 - [x] Adicionar relatório de ticket médio
 - [x] Testes de controle financeiro
 
-### FASE 8: Módulo de Validação de Arquivos (Web2Print) ✅
-- [x] Criar componente FileValidator.tsx
-- [x] Implementar validações (DPI, CMYK, sangria, margem)
-- [x] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
-- [x] Integrar com ProductDetail
-- [x] Testes de validação de arquivo
+### FASE 6: Módulo de Validação de Arquivos (Web2Print)
+- [ ] Criar componente FileValidator.tsx
+- [ ] Implementar validações (DPI, CMYK, sangria, margem)
+- [ ] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
+- [ ] Integrar com ProductDetail
+- [ ] Testes de validação de arquivo
 
 ### FASE 7: Automação Inteligente
 - [ ] Criar sistema de notificações automáticas
@@ -451,30 +451,30 @@
 - [ ] Guia de configuração para admin
 
 
-## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many) ✅
+## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many)
 
-- [x] Criar tabela relacional `productSegments` (product_id, segment_id)
-- [x] Criar procedures tRPC para gerenciar relacionamentos
-- [x] Modificar schema para suportar múltiplos segmentos
-- [x] Criar componente MultiSegmentSelector com tags/checkboxes
-- [x] Integrar ao formulário de edição de produtos
-- [x] Adicionar busca e criação de segmentos
-- [x] Testes de relacionamento many-to-many
-- [x] Entrega final com interface moderna
+- [ ] Criar tabela relacional `productSegments` (product_id, segment_id)
+- [ ] Criar procedures tRPC para gerenciar relacionamentos
+- [ ] Modificar schema para suportar múltiplos segmentos
+- [ ] Criar componente MultiSegmentSelector com tags/checkboxes
+- [ ] Integrar ao formulário de edição de produtos
+- [ ] Adicionar busca e criação de segmentos
+- [ ] Testes de relacionamento many-to-many
+- [ ] Entrega final com interface moderna
 
 
-## Fase 27: Sistema de Precificação Dinâmica dos Atributos ✅
+## Fase 27: Sistema de Precificação Dinâmica dos Atributos
 
-- [x] Adicionar campos de preço aos attributeValues (priceType, priceValue, impactOnDeadline, impactOnWeight)
-- [x] Criar tipos de cálculo (fixo, percentual, multiplicador, m², quantidade)
-- [x] Implementar engine de cálculo dinâmico em server/attributes-pricing.ts
-- [x] Criar procedures tRPC para cálculo de preço com atributos
-- [x] Criar interface admin para editar preços de atributos
-- [x] Integrar cálculo ao UniversalProductRenderer
-- [x] Atualizar preço em tempo real ao selecionar atributos
-- [x] Salvar preço calculado no carrinho/pedido
-- [x] Testes de cálculo dinâmico
-- [x] Validação de precificação completa
+- [ ] Adicionar campos de preço aos attributeValues (priceType, priceValue, impactOnDeadline, impactOnWeight)
+- [ ] Criar tipos de cálculo (fixo, percentual, multiplicador, m², quantidade)
+- [ ] Implementar engine de cálculo dinâmico em server/attributes-pricing.ts
+- [ ] Criar procedures tRPC para cálculo de preço com atributos
+- [ ] Criar interface admin para editar preços de atributos
+- [ ] Integrar cálculo ao UniversalProductRenderer
+- [ ] Atualizar preço em tempo real ao selecionar atributos
+- [ ] Salvar preço calculado no carrinho/pedido
+- [ ] Testes de cálculo dinâmico
+- [ ] Validação de precificação completa
 
 
 ## FASE FINAL: Estabilidade, Consistência e Validação Completa
@@ -514,15 +514,15 @@
 - [x] Total: 36 testes do admin
 - [x] Arquivo: server/admin-functionality.test.ts
 
-### FASE 6: Melhorias Visuais e UX ✅
-- [x] Revisar organização visual dos componentes
-- [x] Melhorar espaçamento e padding
-- [x] Otimizar responsividade mobile
-- [x] Melhorar visual dos cards de atributos
-- [x] Melhorar visual das opções de seleção
-- [x] Adicionar loading states
-- [x] Melhorar experiência do admin
-- [x] Testar em diferentes dispositivos
+### FASE 6: Melhorias Visuais e UX
+- [ ] Revisar organização visual dos componentes
+- [ ] Melhorar espaçamento e padding
+- [ ] Otimizar responsividade mobile
+- [ ] Melhorar visual dos cards de atributos
+- [ ] Melhorar visual das opções de seleção
+- [ ] Adicionar loading states
+- [ ] Melhorar experiência do admin
+- [ ] Testar em diferentes dispositivos
 
 ### FASE 7: Documentação Final ✅
 - [x] Criar documentação completa de arquitetura
@@ -1568,71 +1568,3 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todo.md com conclusão
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
-
-
-## Fase 39: Refatorar Arquitetura de Variações (Tipos Globais vs Vínculo de Produto)
-
-### PROBLEMA IDENTIFICADO
-- Variações estão sendo criadas POR PRODUTO (duplicação)
-- Correto: Tipos globais + vínculo com configuração (obrigatório/opcional)
-- Exemplo: Tipo "Acabamento" deve existir UMA VEZ, múltiplos produtos vinculam
-
-### ABORDAGEM: Migração Gradual e Segura
-- Manter compatibilidade com dados existentes
-- Criar nova tabela productVariationTypes em paralelo
-- Migrar dados gradualmente
-- Atualizar queries para novo modelo
-- Manter interface atual funcionando
-
-### FASE 1: Criar Tabela productVariationTypes ⏳
-- [ ] Criar tabela productVariationTypes (id, productId, variationTypeId, isRequired, order, isActive)
-- [ ] Adicionar foreign keys
-- [ ] Criar índices
-- [ ] Executar migração SQL
-
-### FASE 2: Migrar Dados Existentes ⏳
-- [ ] Copiar dados de variationTypes para productVariationTypes
-- [ ] Manter productId em variationTypes (compatibilidade)
-- [ ] Validar integridade dos dados
-- [ ] Testar fluxo existente
-
-### FASE 3: Criar Tipos Globais Reutilizáveis ⏳
-- [ ] Criar interface para gerenciar tipos globais
-- [ ] Permitir criar tipos SEM vincular a produto
-- [ ] Permitir vincular tipos existentes a novo produto
-- [ ] Evitar duplicação de tipos
-
-### FASE 4: Refatorar Backend (Gradualmente) ⏳
-- [ ] Criar queries para novo modelo
-- [ ] Manter queries antigas (compatibilidade)
-- [ ] Atualizar getVariationTypesByProduct para usar productVariationTypes
-- [ ] Criar getGlobalVariationTypes
-
-### FASE 5: Refatorar Frontend (Gradualmente) ⏳
-- [ ] Modificar ProductVariationManager para vincular tipos globais
-- [ ] Criar seção "Tipos Disponíveis" (checkbox para vincular)
-- [ ] Manter configuração de obrigatório/opcional
-- [ ] Manter drag & drop de ordem
-
-### FASE 6: Testar Fluxo Completo ⏳
-- [ ] Criar tipo global
-- [ ] Vincular a múltiplos produtos
-- [ ] Verificar sem duplicação
-- [ ] Validar ProductDetail
-- [ ] Testar compatibilidade com dados antigos
-
-### FASE 7: Remover Compatibilidade (Futuro) ⏳
-- [ ] Remover productId de variationTypes (após migração completa)
-- [ ] Atualizar todas as queries
-- [ ] Testar fluxo completo
-- [ ] Salvar checkpoint final
-
-
-## BUGS IDENTIFICADOS - GERENCIAR VARIAÇÕES
-
-- [ ] BUG: Novo tipo de variação não aparece na coluna 1 após adicionar
-- [ ] BUG: Drag-drop da coluna 2 para coluna 1 não vincula ao produto
-- [ ] BUG: Variações da coluna 1 não têm campo obrigatório/opcional para editar
-- [ ] FEATURE: Adicionar campo obrigatório/opcional ao expandir variação na coluna 1
-- [ ] FEATURE: Sincronizar coluna 1 com banco de dados ao adicionar novo tipo
-- [ ] FEATURE: Implementar drop handler para vincular tipos arrastados
