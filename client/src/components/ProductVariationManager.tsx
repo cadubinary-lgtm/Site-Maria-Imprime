@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 interface VariationType {
   id: number;
@@ -85,7 +86,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onSelect(vt.id);
+              window.location.href = `/admin/vincular-atributos?variationId=${vt.id}`;
             }}
             className="bg-green-50 border-green-300 hover:bg-green-100"
           >
@@ -846,7 +847,7 @@ export function ProductVariationManager() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingGlobalVariationType(vt.id)}
+                        onClick={() => window.location.href = `/admin/vincular-atributos?variationId=${vt.id}`}
                         className="bg-green-50 border-green-300 hover:bg-green-100"
                       >
                         <Edit2 className="w-4 h-4 mr-1" />
