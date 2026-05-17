@@ -319,18 +319,20 @@ export function ProductVariationManager() {
     }
   };
 
-  const handleToggleRequired = async (id: number, currentRequired: boolean) => {
+  const handleToggleRequired = async (id: number, newRequired: boolean) => {
     try {
       await updateVariationTypeMutation.mutateAsync({
         id,
-        isRequired: !currentRequired,
+        isRequired: newRequired,
       });
 
-      toast.success(!currentRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
+      toast.success(newRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
       }
+      // Invalidar variações globais também
+      await utils.variations.getGlobal.invalidate();
+      refetchVariationTypes();
     } catch (error) {
       toast.error("Erro ao atualizar tipo de variação");
       console.error(error);
