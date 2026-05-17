@@ -210,7 +210,7 @@
 - ✅ Pronto para uso em produção
 
 
-## Fase 25: Sistema de Atributos Dinâmicos ✅
+## Fase 23: Transformação em ERP Gráfico Completo
 
 ### FASE 1: Análise e Planejamento da Arquitetura Modular ✅
 - [x] Documentar arquitetura modular (site, admin, ERP, CRM, financeiro)
@@ -244,7 +244,7 @@
 - [x] Integrar com orders (relacionamento automático)
 - [x] Testes de CRM
 
-### FASE 5: Módulo de Controle Financeiro ✅ceiro ✅
+### FASE 5: Módulo de Controle Financeiro ✅
 - [x] Criar página FinancialDashboard.tsx
 - [x] Implementar cálculo automático de custo/lucro por pedido
 - [x] Criar dashboard de faturamento (diário, mensal)
@@ -399,56 +399,56 @@
 - [ ] Criar procedure products.getAttributesByProductId
 - [ ] Criar procedure products.evaluateRules (engine de regras)
 
-### FASE 4: Engine de Regras ✅
-- [x] Implementar evaluateRules function
-- [x] Suportar condições: equals, contains, greaterThan, lessThan
-- [x] Suportar ações: show, hide, enable, disable, setPrice
-- [x] Testes de regras dinâmicas
+### FASE 4: Engine de Regras
+- [ ] Implementar evaluateRules function
+- [ ] Suportar condições: equals, contains, greaterThan, lessThan
+- [ ] Suportar ações: show, hide, enable, disable, setPrice
+- [ ] Testes de regras dinâmicas
 
-### FASE 5: Componentes Dinâmicos ✅
-- [x] Criar DynamicAttributeRenderer.tsx
-- [x] Implementar renderização de botões
-- [x] Implementar renderização de selects
-- [x] Implementar renderização de cards
-- [x] Implementar renderização de radio buttons
-- [x] Implementar renderização de checkboxes
-- [x] Implementar renderização de campos numéricos
+### FASE 5: Componentes Dinâmicos
+- [ ] Criar DynamicAttributeRenderer.tsx
+- [ ] Implementar renderização de botões
+- [ ] Implementar renderização de selects
+- [ ] Implementar renderização de cards
+- [ ] Implementar renderização de radio buttons
+- [ ] Implementar renderização de checkboxes
+- [ ] Implementar renderização de campos numéricos
 
-### FASE 6: Integração ao ProductDetail ✅
-- [x] Carregar atributos do produto
-- [x] Renderizar atributos dinamicamente
-- [x] Aplicar regras dinâmicas ao selecionar
-- [x] Calcular preço final com modificadores
-- [x] Validar seleções obrigatórias
+### FASE 6: Integração ao ProductDetail
+- [ ] Carregar atributos do produto
+- [ ] Renderizar atributos dinamicamente
+- [ ] Aplicar regras dinâmicas ao selecionar
+- [ ] Calcular preço final com modificadores
+- [ ] Validar seleções obrigatórias
 
-### FASE 7: Interface Admin - Gerenciar Atributos ✅
-- [x] Criar página AdminAttributesManager.tsx
-- [x] CRUD de atributos globais
-- [x] CRUD de valores de atributos
-- [x] Definir preço modificador por valor
-- [x] Ordenar atributos e valores
-- [x] Testes da interface
+### FASE 7: Interface Admin - Gerenciar Atributos
+- [ ] Criar página AttributesManager.tsx
+- [ ] CRUD de atributos globais
+- [ ] CRUD de valores de atributos
+- [ ] Definir preço modificador por valor
+- [ ] Ordenar atributos e valores
+- [ ] Testes da interface
 
-### FASE 8: Interface Admin - Vincular Atributos ✅
-- [x] Criar página AdminProductAttributesLinker.tsx
-- [x] Selecionar atributos para produto
-- [x] Ativar/desativar valores específicos
-- [x] Definir atributos obrigatórios
-- [x] Ordenar atributos no frontend
-- [x] Testes da interface
+### FASE 8: Interface Admin - Vincular Atributos
+- [ ] Criar página ProductAttributesManager.tsx
+- [ ] Selecionar atributos para produto
+- [ ] Ativar/desativar valores específicos
+- [ ] Definir atributos obrigatórios
+- [ ] Ordenar atributos no frontend
+- [ ] Testes da interface
 
-### FASE 9: Testes e Validação ✅
-- [x] Testes de CRUD de atributos
-- [x] Testes de engine de regras
-- [x] Testes de renderização dinâmica
-- [x] Testes de cálculo de preço
-- [x] Testes de validação
-- [x] Testes de backward compatibility
+### FASE 9: Testes e Validação
+- [ ] Testes de CRUD de atributos
+- [ ] Testes de engine de regras
+- [ ] Testes de renderização dinâmica
+- [ ] Testes de cálculo de preço
+- [ ] Testes de validação
+- [ ] Testes de backward compatibility
 
-### FASE 10: Entrega ✅
-- [x] Checkpoint final
-- [x] Documentação de uso
-- [x] Guia de configuração para admin
+### FASE 10: Entrega
+- [ ] Checkpoint final
+- [ ] Documentação de uso
+- [ ] Guia de configuração para admin
 
 
 ## Fase 26: Múltiplos Segmentos por Produto (Many-to-Many)

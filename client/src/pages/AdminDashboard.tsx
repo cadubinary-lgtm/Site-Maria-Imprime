@@ -82,12 +82,10 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
             <TabsTrigger value="variações">Gerenciar Variações</TabsTrigger>
             <TabsTrigger value="formcard">Form Card Dinâmico</TabsTrigger>
-            <TabsTrigger value="atributos">Atributos</TabsTrigger>
-            <TabsTrigger value="vincular-atributos">Vincular Atributos</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
           </TabsList>
 
@@ -246,40 +244,6 @@ export default function AdminDashboard() {
                 }}
               />
             </div>
-          </TabsContent>
-
-          {/* Atributos Tab */}
-          <TabsContent value="atributos" className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gerenciar Atributos Globais</CardTitle>
-                <CardDescription>Crie e edite atributos reutilizáveis (Papel, Vinil, Acabamento, etc)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/admin/atributos">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Abrir Gerenciador de Atributos
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Vincular Atributos Tab */}
-          <TabsContent value="vincular-atributos" className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Vincular Atributos a Produtos</CardTitle>
-                <CardDescription>Selecione quais atributos cada produto utiliza</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/admin/vincular-atributos">
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    Abrir Vinculador de Atributos
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Pedidos Tab */}
