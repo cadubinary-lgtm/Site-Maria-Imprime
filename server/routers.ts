@@ -334,14 +334,14 @@ export const appRouter = router({
   adminVariations: router({
     createType: adminProcedure
       .input(z.object({
-        productId: z.number(),
+        productId: z.number().nullable(),
         type: z.enum(["material", "acabamento"]),
         name: z.string(),
         isRequired: z.boolean().default(true),
       }))
       .mutation(async ({ input }) => {
         return await createVariationType({
-          productId: input.productId,
+          productId: input.productId as any,
           type: input.type,
           name: input.name,
           isRequired: input.isRequired,
