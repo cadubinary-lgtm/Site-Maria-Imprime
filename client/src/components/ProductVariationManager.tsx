@@ -311,12 +311,22 @@ export function ProductVariationManager() {
       toast.success("Nome atualizado!");
       setEditingNameId(null);
       setEditingNameValue("");
-      if (selectedProductId) {
+      
+      // Verificar se a variação editada é do produto ou global
+      const editedVariation = variationTypes.find((vt: VariationType) => vt.id === editingNameId);
+      const isGlobalVariation = globalVariationTypes.find((vt: VariationType) => vt.id === editingNameId);
+      
+      if (editedVariation && selectedProductId) {
+        // Variação do produto
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
+      
+      if (isGlobalVariation) {
+        // Variação global
+        await utils.variations.getGlobal.invalidate();
+        refetchGlobalVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao atualizar nome");
       console.error(error);
@@ -331,13 +341,22 @@ export function ProductVariationManager() {
       });
 
       toast.success(newRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
-      if (selectedProductId) {
+      
+      // Verificar se a variação editada é do produto ou global
+      const editedVariation = variationTypes.find((vt: VariationType) => vt.id === id);
+      const isGlobalVariation = globalVariationTypes.find((vt: VariationType) => vt.id === id);
+      
+      if (editedVariation && selectedProductId) {
+        // Variação do produto
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
-      // Invalidar variações globais também
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
+      
+      if (isGlobalVariation) {
+        // Variação global
+        await utils.variations.getGlobal.invalidate();
+        refetchGlobalVariationTypes();
+      }
     } catch (error) {
       toast.error("Erro ao atualizar tipo de variação");
       console.error(error);
