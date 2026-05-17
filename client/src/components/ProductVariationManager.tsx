@@ -398,16 +398,18 @@ export function ProductVariationManager() {
         </CardContent>
       </Card>
 
-      {/* Variation Management */}
+      {/* Main Layout: 2 Areas */}
       {selectedProductId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Gerenciar Variações</CardTitle>
-            <CardDescription>
-              Adicione, edite, remova ou reordene tipos de variações e suas opções
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* ÁREA 1: Gerenciar Variações (2 colunas) */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Tipos de Variações Cadastrados do Produto</CardTitle>
+              <CardDescription>
+                Adicione, edite, remova ou reordene tipos de variações e suas opções
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
             {/* Add New Variation Type */}
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
@@ -660,19 +662,18 @@ export function ProductVariationManager() {
               </div>
             )}
           </CardContent>
-        </Card>
-      )}
+          </Card>
 
-      {/* Seção de Tipos Globais */}
-      {selectedProductId && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Tipos Globais Disponíveis</CardTitle>
-            <CardDescription>
-              Selecione os tipos que este produto utiliza
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          {/* ÁREA 2: Tipos Globais Disponíveis (1 coluna) */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Tipos Disponíveis no Sistema</CardTitle>
+              <CardDescription>
+                Selecione para adicionar ao produto
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+
             <div className="space-y-3">
               {globalVariationTypes.length === 0 ? (
                 <p className="text-gray-500 text-sm">Nenhum tipo global disponível</p>
@@ -729,8 +730,9 @@ export function ProductVariationManager() {
                 })
               )}
             </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
