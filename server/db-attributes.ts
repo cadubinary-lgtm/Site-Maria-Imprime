@@ -193,6 +193,13 @@ export async function linkAttributeToProduct(data: {
   isRequired?: boolean;
   allowMultiple?: boolean;
   displayOrder?: number;
+  priceModifier?: number;
+  calculationType?: "fixed" | "percentage" | "multiplier" | "per_sqm" | "per_quantity";
+  timeModifier?: number;
+  weightModifier?: number;
+  isActive?: boolean;
+  priority?: number;
+  rules?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -202,14 +209,14 @@ export async function linkAttributeToProduct(data: {
     attributeId: data.attributeId,
     isRequired: data.isRequired ?? true,
     allowMultiple: data.allowMultiple ?? false,
-    displayOrder: data.displayOrder || 0,
-    priceModifier: "0",
-    calculationType: "fixed",
-    timeModifier: 0,
-    weightModifier: "0",
-    isActive: true,
-    priority: 0,
-    rules: null,
+    displayOrder: data.displayOrder ?? 0,
+    priceModifier: data.priceModifier ?? 0,
+    calculationType: data.calculationType ?? "fixed",
+    timeModifier: data.timeModifier ?? 0,
+    weightModifier: data.weightModifier ?? 0,
+    isActive: data.isActive ?? true,
+    priority: data.priority ?? 0,
+    rules: data.rules ?? null,
   } as any);
 }
 
