@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { trpc } from '../lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,11 +71,19 @@ export default function AdminPanel() {
   // Fetch all segments dynamically
   const { data: segmentsData } = trpc.segments.getAll.useQuery();
   
-  // Converter segmentos da API para formato esperado
-  const SEGMENTS = segmentsData?.map((seg: any) => ({
-    value: seg.slug,
-    label: `${seg.icon || '📦'} ${seg.name}`,
-  })) || DEFAULT_SEGMENTS;
+  // Converter segmentos da API para formato esperado com useMemo
+  const SEGMENTS = useMemo(() => {
+    if (segmentsData && segmentsData.length > 0) {
+      return segmentsData.map((seg: any) => ({
+        value: seg.slug,
+        label: `${seg.icon || '📦'} ${seg.name}`,
+      }));
+    }
+    return DEFAULT_SEGMENTS;
+  }, [segmentsData]);
+  
+  // Debug: log SEGMENTS para verificar se está carregando
+  console.log('SEGMENTS loaded:', SEGMENTS);
 
   // Update product mutation
   const updateProductMutation = trpc.products.updateProduct.useMutation({
