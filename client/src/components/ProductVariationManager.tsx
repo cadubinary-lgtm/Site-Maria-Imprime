@@ -333,10 +333,11 @@ export function ProductVariationManager() {
       toast.success(newRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+        refetchVariationTypes();
       }
       // Invalidar variações globais também
       await utils.variations.getGlobal.invalidate();
-      refetchVariationTypes();
+      refetchGlobalVariationTypes();
     } catch (error) {
       toast.error("Erro ao atualizar tipo de variação");
       console.error(error);
