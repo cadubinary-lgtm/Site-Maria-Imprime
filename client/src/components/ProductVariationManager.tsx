@@ -90,7 +90,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             className="bg-green-50 border-green-300 hover:bg-green-100"
           >
             <Edit2 className="w-4 h-4 mr-1" />
-            Opções
+            ADICIONAR ATRIBUTOS
           </Button>
           <div className="flex items-center gap-2">
             <Label className="text-sm font-medium">Obrigatório:</Label>
