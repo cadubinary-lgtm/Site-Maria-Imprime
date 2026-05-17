@@ -123,7 +123,6 @@ export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
-  const [saveAsGlobal, setSaveAsGlobal] = useState(false);
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState("");
 
@@ -176,24 +175,22 @@ export function ProductVariationManager() {
 
     try {
       await createVariationTypeMutation.mutateAsync({
-        productId: saveAsGlobal ? (null as any) : selectedProductId,
+        productId: null as any,
         name: newVariationTypeName,
         type: "material" as const,
         isRequired: newVariationTypeRequired,
       });
 
-      toast.success(saveAsGlobal ? "Tipo de variação criado globalmente!" : "Tipo de variação adicionado!");
+      toast.success("Tipo de variação criado e adicionado ao produto!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
-      setSaveAsGlobal(false);
+      
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
-      if (saveAsGlobal) {
-        await utils.variations.getGlobal.invalidate();
-        refetchGlobalVariationTypes();
-      }
+      await utils.variations.getGlobal.invalidate();
+      refetchGlobalVariationTypes();
     } catch (error) {
       toast.error("Erro ao adicionar tipo de variação");
       console.error(error);
@@ -469,18 +466,7 @@ export function ProductVariationManager() {
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 border-t pt-4">
-                  <input
-                    type="checkbox"
-                    id="saveAsGlobal"
-                    checked={saveAsGlobal}
-                    onChange={(e) => setSaveAsGlobal(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
-                  />
-                  <Label htmlFor="saveAsGlobal" className="cursor-pointer text-sm">
-                    ✨ Salvar como tipo global (reutilizável em outros produtos)
-                  </Label>
-                </div>
+
               </div>
             </div>
 
