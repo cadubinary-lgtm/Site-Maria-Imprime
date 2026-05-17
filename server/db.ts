@@ -4,6 +4,7 @@ import { InsertUser, users, products, orders, orderItems, orderStatusHistory, se
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { isNull } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -267,6 +268,16 @@ export async function getVariationTypesByProduct(productId: number) {
   
   const result = await db.select().from(variationTypes)
     .where(eq(variationTypes.productId, productId))
+    .orderBy(variationTypes.order);
+  return result;
+}
+
+export async function getGlobalVariationTypes() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(variationTypes)
+    .where(isNull(variationTypes.productId))
     .orderBy(variationTypes.order);
   return result;
 }

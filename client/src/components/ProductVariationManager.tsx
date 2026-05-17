@@ -111,6 +111,7 @@ export function ProductVariationManager() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingVariationType, setEditingVariationType] = useState<number | null>(null);
   const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
+  const [saveAsGlobal, setSaveAsGlobal] = useState(false);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -120,6 +121,9 @@ export function ProductVariationManager() {
     { productId: selectedProductId || 0 },
     { enabled: !!selectedProductId }
   );
+
+  // Fetch global variation types (productId = null)
+  const { data: globalVariationTypes = [], refetch: refetchGlobalVariationTypes } = trpc.variations.getGlobal.useQuery();
 
   // Get utils for invalidation
   const utils = trpc.useUtils();
@@ -157,18 +161,23 @@ export function ProductVariationManager() {
 
     try {
       await createVariationTypeMutation.mutateAsync({
-        productId: selectedProductId,
+        productId: saveAsGlobal ? (null as any) : selectedProductId,
         name: newVariationTypeName,
         type: "material" as const,
         isRequired: newVariationTypeRequired,
       });
 
-      toast.success("Tipo de variação adicionado!");
+      toast.success(saveAsGlobal ? "Tipo de variação criado globalmente!" : "Tipo de variação adicionado!");
       setNewVariationTypeName("");
       setNewVariationTypeRequired(true);
+      setSaveAsGlobal(false);
       if (selectedProductId) {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
+      }
+      if (saveAsGlobal) {
+        await utils.variations.getGlobal.invalidate();
+        refetchGlobalVariationTypes();
       }
     } catch (error) {
       toast.error("Erro ao adicionar tipo de variação");
@@ -357,41 +366,55 @@ export function ProductVariationManager() {
             {/* Add New Variation Type */}
             <div className="border rounded-lg p-4 bg-gray-50">
               <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="variationType">Nome da Variação</Label>
-                  <Input
-                    id="variationType"
-                    placeholder="Ex: Material, Acabamento, Tamanho"
-                    value={newVariationTypeName}
-                    onChange={(e) => setNewVariationTypeName(e.target.value)}
-                    className="mt-1"
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="variationType">Nome da Variação</Label>
+                    <Input
+                      id="variationType"
+                      placeholder="Ex: Material, Acabamento, Tamanho"
+                      value={newVariationTypeName}
+                      onChange={(e) => setNewVariationTypeName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="required">Obrigatório?</Label>
+                    <Select
+                      value={newVariationTypeRequired ? "true" : "false"}
+                      onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
+                    >
+                      <SelectTrigger id="required" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Sim</SelectItem>
+                        <SelectItem value="false">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-end">
+                    <Button
+                      onClick={handleAddVariationType}
+                      className="w-full bg-orange-500 hover:bg-orange-600"
+                      disabled={createVariationTypeMutation.isPending}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 border-t pt-4">
+                  <input
+                    type="checkbox"
+                    id="saveAsGlobal"
+                    checked={saveAsGlobal}
+                    onChange={(e) => setSaveAsGlobal(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
                   />
-                </div>
-                <div>
-                  <Label htmlFor="required">Obrigatório?</Label>
-                  <Select
-                    value={newVariationTypeRequired ? "true" : "false"}
-                    onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
-                  >
-                    <SelectTrigger id="required" className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="true">Sim</SelectItem>
-                      <SelectItem value="false">Não</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleAddVariationType}
-                    className="w-full bg-orange-500 hover:bg-orange-600"
-                    disabled={createVariationTypeMutation.isPending}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar
-                  </Button>
+                  <Label htmlFor="saveAsGlobal" className="cursor-pointer text-sm">
+                    ✨ Salvar como tipo global (reutilizável em outros produtos)
+                  </Label>
                 </div>
               </div>
             </div>
@@ -572,6 +595,42 @@ export function ProductVariationManager() {
           </CardContent>
         </Card>
       )}
+
+      {/* Global Variation Types - Fixed Area */}
+      <Card className="border-2 border-purple-200 bg-purple-50">
+        <CardHeader>
+          <CardTitle className="text-purple-900">📚 Tipos de Variações Cadastrados no Sistema</CardTitle>
+          <CardDescription>
+            Variações globais disponíveis para reutilizar em qualquer produto
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {globalVariationTypes.length === 0 ? (
+            <p className="text-gray-500 text-sm">Nenhuma variação global cadastrada. Crie uma nova marcando "Salvar como tipo global".</p>
+          ) : (
+            <div className="grid gap-3">
+              {globalVariationTypes.map((vt: VariationType) => (
+                <div
+                  key={vt.id}
+                  className="border rounded-lg p-4 bg-white hover:bg-purple-50 transition"
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-purple-900">{vt.name}</h4>
+                      <p className="text-sm text-gray-600">
+                        {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
+                      </p>
+                    </div>
+                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      ID: {vt.id}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

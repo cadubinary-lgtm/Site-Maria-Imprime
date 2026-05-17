@@ -1,0 +1,1 @@
+ALTER TABLE `variationTypes` MODIFY COLUMN `productId` int;

@@ -141,7 +141,7 @@ export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
  */
 export const variationTypes = mysqlTable("variationTypes", {
   id: int("id").autoincrement().primaryKey(),
-  productId: int("productId").notNull(),
+  productId: int("productId"),
   type: mysqlEnum("type", ["material", "acabamento"]).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }),

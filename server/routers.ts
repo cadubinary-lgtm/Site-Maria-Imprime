@@ -19,6 +19,7 @@ import {
   getCategoriesBySegment,
   getProductsByCategory,
   getVariationTypesByProduct,
+  getGlobalVariationTypes,
   getVariationOptions,
   createVariationType,
   createVariationOption,
@@ -308,6 +309,17 @@ export const appRouter = router({
       .input(z.object({ productId: z.number() }))
       .query(async ({ input }) => {
         const types = await getVariationTypesByProduct(input.productId);
+        const typesWithOptions = await Promise.all(
+          types.map(async (type) => ({
+            ...type,
+            options: await getVariationOptions(type.id),
+          }))
+        );
+        return typesWithOptions;
+      }),
+    getGlobal: publicProcedure
+      .query(async () => {
+        const types = await getGlobalVariationTypes();
         const typesWithOptions = await Promise.all(
           types.map(async (type) => ({
             ...type,
