@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +10,7 @@ import { Loader2, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminProductAttributesLinker() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const variationIdParam = searchParams.get('variationId');
-  const variationId = variationIdParam ? parseInt(variationIdParam) : null;
-  
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedVariationId, setSelectedVariationId] = useState<number | null>(variationId);
   const [selectedAttributes, setSelectedAttributes] = useState<Set<number>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
@@ -70,12 +65,6 @@ export default function AdminProductAttributesLinker() {
     setSelectedAttributes(new Set());
   };
 
-  useEffect(() => {
-    if (variationId) {
-      setSelectedVariationId(variationId);
-    }
-  }, [variationId]);
-
   const handleAttributeToggle = (attributeId: number) => {
     const newSet = new Set(selectedAttributes);
     if (newSet.has(attributeId)) {
@@ -87,24 +76,6 @@ export default function AdminProductAttributesLinker() {
   };
 
   const handleLinkAttributes = () => {
-    if (selectedVariationId) {
-      // Vincular atributos à variação
-      if (selectedAttributes.size === 0) {
-        toast.error("Selecione pelo menos um atributo");
-        return;
-      }
-      // Vincular cada atributo selecionado à variação
-      selectedAttributes.forEach((attributeId) => {
-        linkMutation.mutate({
-          productId: selectedVariationId,
-          attributeId,
-          isRequired: true,
-          allowMultiple: false,
-        });
-      });
-      return;
-    }
-    
     if (!selectedProductId) {
       toast.error("Selecione um produto");
       return;
@@ -129,8 +100,8 @@ export default function AdminProductAttributesLinker() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{selectedVariationId ? "Vincular Atributos à Variação" : "Vincular Atributos a Produtos"}</h1>
-        <p className="text-gray-600 mt-2">{selectedVariationId ? `Variação ID: ${selectedVariationId}` : "Selecione quais atributos cada produto utilizará"}</p>
+        <h1 className="text-3xl font-bold">Vincular Atributos a Produtos</h1>
+        <p className="text-gray-600 mt-2">Selecione quais atributos cada produto utilizará</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
