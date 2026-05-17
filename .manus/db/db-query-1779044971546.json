@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `variationTypes` MODIFY COLUMN `productId` int NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute ALTER TABLE `variationTypes` MODIFY COLUMN `productId` int NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 633
+}
