@@ -75,6 +75,12 @@ export function ProductConfigurator({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Converter vírgula para ponto
+  const parseDecimal = (value: string): number => {
+    const normalized = value.replace(',', '.');
+    return parseFloat(normalized) || 0;
+  };
+
   // Carregar variações reais do backend
   const { data: variationTypes = [] } = trpc.variations.getByProduct.useQuery(
     { productId },
@@ -160,7 +166,7 @@ export function ProductConfigurator({
     }
 
     return totalPrice;
-  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions]);
+  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal]);
 
   const handleSelectChange = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => ({
@@ -169,19 +175,16 @@ export function ProductConfigurator({
     }));
   };
 
-  // Converter vírgula para ponto
-  const parseDecimal = (value: string): number => {
-    const normalized = value.replace(',', '.');
-    return parseFloat(normalized) || 0;
-  };
-
   const handleAddToCart = () => {
     const config = {
       productId,
       selectedVariations: selectedValues,
       quantity,
       totalPrice: calculatedPrice,
-      dimensions,
+      dimensions: {
+        width: parseDecimal(dimensions.width as string),
+        height: parseDecimal(dimensions.height as string),
+      },
     };
     onAddToCart?.(config);
   };
