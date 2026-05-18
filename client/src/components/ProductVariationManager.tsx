@@ -210,6 +210,7 @@ export function ProductVariationManager() {
 
   const handleAddOption = async () => {
     const variationId = editingVariationType || editingGlobalVariationType;
+    console.log("[DEBUG] handleAddOption - editingVariationType:", editingVariationType, "editingGlobalVariationType:", editingGlobalVariationType, "variationId:", variationId);
     if (!variationId || !newOptionName) {
       toast.error("Preencha o nome da opção");
       return;
