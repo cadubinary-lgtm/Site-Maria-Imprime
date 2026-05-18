@@ -33,10 +33,18 @@ export default function ProductDetail() {
   const [configuradorPrice, setConfiguradorPrice] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [configuradorAttributes, setConfiguradorAttributes] = useState<any[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 },
+    { enabled: !!productId }
+  );
+
+  // Carregar tipos de variações
+  const { data: variationTypes = [] } = trpc.variations.getByProduct.useQuery(
+    { productId: productId || 0 },
     { enabled: !!productId }
   );
 
@@ -415,7 +423,24 @@ export default function ProductDetail() {
               minHeight={(product as any).minHeight ? parseFloat((product as any).minHeight) : undefined}
               maxHeight={(product as any).maxHeight ? parseFloat((product as any).maxHeight) : undefined}
               onPriceUpdate={(price, config) => {
-                // Atualizar preço no resumo
+                // Atualizar preço e atributos no resumo
+                setTotalPrice(price);
+                // Construir array de atributos selecionados para o OrderSummary
+                const attrs: any[] = [];
+                Object.entries(config.selectedVariations || {}).forEach(([attrId, valueId]) => {
+                  const attr = (variationTypes || []).find((vt: any) => vt.id === parseInt(attrId));
+                  if (attr) {
+                    const option = (attr.options || []).find((opt: any) => opt.id === valueId);
+                    if (option) {
+                      attrs.push({
+                        name: attr.name,
+                        value: option.name,
+                        priceModifier: parseFloat(option.priceModifier || '0'),
+                      });
+                    }
+                  }
+                });
+                setConfiguradorAttributes(attrs);
               }}
               onAddToCart={(config) => {
                 // Adicionar ao carrinho
@@ -523,10 +548,10 @@ export default function ProductDetail() {
           <OrderSummary
             productName={product.name}
             productImage={product.imageUrl || undefined}
-            selectedAttributes={selectedAttributesForSummary}
+            basePrice={totalPrice || parseFloat(product.price)}
+            selectedAttributes={configuradorAttributes}
             quantity={quantity}
             onQuantityChange={setQuantity}
-            basePrice={parseFloat(product.price)}
             deadline="5 dias úteis"
             notes={notes}
             onNotesChange={setNotes}

@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,7 +44,7 @@ interface ProductCalculatorConfig {
 interface ProductConfiguratorProps {
   productId: number;
   basePrice: number;
-  calculationType: "m2" | "metro_linear" | "pacote" | "unidade";
+  calculationType?: string;
   pricePerM2?: number;
   minWidth?: number;
   maxWidth?: number;
@@ -159,7 +159,7 @@ export function ProductConfigurator({
       const width = parseDecimal(dimensions.width as string);
       const height = parseDecimal(dimensions.height as string);
       const area = width * height;
-      totalPrice = area * pricePerM2;
+      totalPrice = (area * pricePerM2) + totalAdditionals;
     } else {
       totalPrice += totalAdditionals;
       totalPrice = totalPrice * quantity;
@@ -167,6 +167,19 @@ export function ProductConfigurator({
 
     return totalPrice;
   }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal]);
+
+  // Efeito para chamar onPriceUpdate quando o preço muda
+  useEffect(() => {
+    if (onPriceUpdate) {
+      const config = {
+        productId,
+        selectedVariations: selectedValues,
+        quantity,
+        totalPrice: calculatedPrice,
+      };
+      onPriceUpdate(calculatedPrice, config);
+    }
+  }, [calculatedPrice, onPriceUpdate, productId, selectedValues, quantity]);
 
   const handleSelectChange = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => ({
@@ -176,11 +189,24 @@ export function ProductConfigurator({
   };
 
   const handleAddToCart = () => {
+    // Calcular additionals para enviar ao carrinho
+    let totalAdditionals = 0;
+    Object.entries(selectedValues).forEach(([attrId, valueId]) => {
+      const attribute = attributes.find((a) => a.id === parseInt(attrId));
+      if (attribute) {
+        const value = attribute.values.find((v) => v.id === valueId);
+        if (value) {
+          totalAdditionals += value.priceModifier;
+        }
+      }
+    });
+
     const config = {
       productId,
       selectedVariations: selectedValues,
       quantity,
       totalPrice: calculatedPrice,
+      totalAdditionals,
       dimensions: {
         width: parseDecimal(dimensions.width as string),
         height: parseDecimal(dimensions.height as string),
