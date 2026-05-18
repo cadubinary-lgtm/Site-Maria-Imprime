@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import { Loader2, ArrowLeft, Edit2, Trash2, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
@@ -352,6 +353,93 @@ export default function AdminProducts() {
                                 }
                               />
                             </div>
+
+                            <div>
+                              <Label htmlFor="edit-calculationType">Tipo de Cobrança</Label>
+                              <Select
+                                value={(editForm as any).calculationType || "unidade"}
+                                onValueChange={(value) =>
+                                  setEditForm({ ...editForm, calculationType: value } as any)
+                                }
+                              >
+                                <SelectTrigger id="edit-calculationType">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unidade">Unidade</SelectItem>
+                                  <SelectItem value="m2">m²</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {(editForm as any).calculationType === "m2" && (
+                              <>
+                                <div>
+                                  <Label htmlFor="edit-pricePerM2">Preço por m² (R$)</Label>
+                                  <Input
+                                    id="edit-pricePerM2"
+                                    type="number"
+                                    step="0.01"
+                                    value={(editForm as any).pricePerM2 || ""}
+                                    onChange={(e) =>
+                                      setEditForm({ ...editForm, pricePerM2: e.target.value } as any)
+                                    }
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
+                                    <Input
+                                      id="edit-minWidth"
+                                      type="number"
+                                      step="0.01"
+                                      value={(editForm as any).minWidth || ""}
+                                      onChange={(e) =>
+                                        setEditForm({ ...editForm, minWidth: e.target.value } as any)
+                                      }
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit-maxWidth">Largura Máx (m)</Label>
+                                    <Input
+                                      id="edit-maxWidth"
+                                      type="number"
+                                      step="0.01"
+                                      value={(editForm as any).maxWidth || ""}
+                                      onChange={(e) =>
+                                        setEditForm({ ...editForm, maxWidth: e.target.value } as any)
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
+                                    <Input
+                                      id="edit-minHeight"
+                                      type="number"
+                                      step="0.01"
+                                      value={(editForm as any).minHeight || ""}
+                                      onChange={(e) =>
+                                        setEditForm({ ...editForm, minHeight: e.target.value } as any)
+                                      }
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit-maxHeight">Altura Máx (m)</Label>
+                                    <Input
+                                      id="edit-maxHeight"
+                                      type="number"
+                                      step="0.01"
+                                      value={(editForm as any).maxHeight || ""}
+                                      onChange={(e) =>
+                                        setEditForm({ ...editForm, maxHeight: e.target.value } as any)
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
 
                             <div>
                               <Label>Segmentos</Label>
