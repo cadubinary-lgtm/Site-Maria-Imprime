@@ -598,9 +598,54 @@ export function ProductVariationManager() {
             Variações globais disponíveis para reutilizar em qualquer produto. Clique para expandir e visualizar opções.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Add New Global Variation Type */}
+          <div className="border rounded-lg p-4 bg-white">
+            <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variacao Global</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="globalVariationType">Nome da Variacao</Label>
+                  <Input
+                    id="globalVariationType"
+                    placeholder="Ex: Material, Acabamento, Tamanho"
+                    value={newVariationTypeName}
+                    onChange={(e) => setNewVariationTypeName(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="globalRequired">Obrigatorio?</Label>
+                  <Select
+                    value={newVariationTypeRequired ? "true" : "false"}
+                    onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
+                  >
+                    <SelectTrigger id="globalRequired" className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Sim</SelectItem>
+                      <SelectItem value="false">Nao</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <Button
+                    onClick={handleAddVariationType}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    disabled={createVariationTypeMutation.isPending}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Tipo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Global Variation Types List */}
           {globalVariationTypes.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhuma variação global cadastrada. Crie uma nova marcando "Salvar como tipo global".</p>
+            <p className="text-gray-500 text-sm">Nenhuma variacao global cadastrada. Use o formulario acima para criar uma.</p>
           ) : (
             <div className="grid gap-3">
               {globalVariationTypes.map((vt: VariationType) => {
