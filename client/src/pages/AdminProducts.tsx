@@ -11,6 +11,7 @@ import { Link } from "wouter";
 import { Loader2, ArrowLeft, Edit2, Trash2, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
+import { DeliveryOptionsManager } from "@/components/DeliveryOptionsManager";
 
 export default function AdminProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -499,6 +500,13 @@ export default function AdminProducts() {
                                   </div>
                                 </div>
                               </>
+                            )}
+
+                            {(editForm as any).calculationType === "m2" && editingId && (
+                              <DeliveryOptionsManager
+                                productId={editingId}
+                                calculationType="m2"
+                              />
                             )}
 
                             <div>

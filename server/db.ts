@@ -561,3 +561,98 @@ export async function reorderVariationTypes(updates: Array<{ id: number; order: 
     throw error;
   }
 }
+
+// Delivery Options queries - usando raw SQL para evitar problemas de tipo
+export async function getDeliveryOptionsByProduct(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  try {
+    const result = await (db as any).execute(
+      `SELECT * FROM productDeliveryOptions WHERE productId = ? ORDER BY \`order\` ASC`,
+      [productId]
+    ) as any;
+    return result[0] || [];
+  } catch (error) {
+    console.error("Error fetching delivery options:", error);
+    return [];
+  }
+}
+
+export async function createDeliveryOption(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    const result = await (db as any).execute(
+      `INSERT INTO productDeliveryOptions (productId, name, daysToDeliver, pricePerM2, isActive, \`order\`) VALUES (?, ?, ?, ?, ?, ?)`,
+      [data.productId, data.name, data.daysToDeliver, data.pricePerM2, data.isActive ?? true, data.order ?? 0]
+    ) as any;
+    return result;
+  } catch (error) {
+    console.error("Error creating delivery option:", error);
+    throw error;
+  }
+}
+
+export async function updateDeliveryOption(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    if (data.name !== undefined) { updates.push("name = ?"); values.push(data.name); }
+    if (data.daysToDeliver !== undefined) { updates.push("daysToDeliver = ?"); values.push(data.daysToDeliver); }
+    if (data.pricePerM2 !== undefined) { updates.push("pricePerM2 = ?"); values.push(data.pricePerM2); }
+    if (data.isActive !== undefined) { updates.push("isActive = ?"); values.push(data.isActive); }
+    if (data.order !== undefined) { updates.push("`order` = ?"); values.push(data.order); }
+    
+    updates.push("updatedAt = NOW()");
+    values.push(id);
+    
+    if (updates.length > 1) {
+      await (db as any).execute(
+        `UPDATE productDeliveryOptions SET ${updates.join(", ")} WHERE id = ?`,
+        values
+      );
+    }
+  } catch (error) {
+    console.error("Error updating delivery option:", error);
+    throw error;
+  }
+}
+
+export async function deleteDeliveryOption(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    await (db as any).execute(
+      `DELETE FROM productDeliveryOptions WHERE id = ?`,
+      [id]
+    );
+  } catch (error) {
+    console.error("Error deleting delivery option:", error);
+    throw error;
+  }
+}
+
+export async function reorderDeliveryOptions(updates: Array<{ id: number; order: number }>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    for (const update of updates) {
+      await (db as any).execute(
+        `UPDATE productDeliveryOptions SET \`order\` = ?, updatedAt = NOW() WHERE id = ?`,
+        [update.order, update.id]
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error reordering delivery options:", error);
+    throw error;
+  }
+}

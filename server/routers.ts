@@ -38,6 +38,11 @@ import {
   createSegment,
   updateSegment,
   deleteSegment,
+  getDeliveryOptionsByProduct,
+  createDeliveryOption,
+  updateDeliveryOption,
+  deleteDeliveryOption,
+  reorderDeliveryOptions,
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -503,6 +508,51 @@ export const appRouter = router({
   pricing: pricingRouter,
   // Pricing Rules - Regras de Precificação Reutilizáveis
   pricingRules: pricingRulesRouter,
+  // Delivery Options - Prazos de Entrega
+  deliveryOptions: router({
+    getByProduct: publicProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input }) => {
+        return await getDeliveryOptionsByProduct(input.productId);
+      }),
+    create: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        name: z.string(),
+        daysToDeliver: z.number(),
+        pricePerM2: z.number().default(0),
+        isActive: z.boolean().default(true),
+        order: z.number().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        return await createDeliveryOption(input);
+      }),
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        daysToDeliver: z.number().optional(),
+        pricePerM2: z.number().optional(),
+        isActive: z.boolean().optional(),
+        order: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateDeliveryOption(id, data);
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteDeliveryOption(input.id);
+      }),
+    reorder: adminProcedure
+      .input(z.object({
+        updates: z.array(z.object({ id: z.number(), order: z.number() }))
+      }))
+      .mutation(async ({ input }) => {
+        return await reorderDeliveryOptions(input.updates);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
