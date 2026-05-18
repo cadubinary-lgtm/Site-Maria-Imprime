@@ -68,7 +68,7 @@ export function ProductConfigurator({
 }: ProductConfiguratorProps) {
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
   const [selectedValues, setSelectedValues] = useState<Record<number, number>>({});
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState({ width: "", height: "" });
   const [quantity, setQuantity] = useState(1);
   const [calculatorConfig, setCalculatorConfig] = useState<ProductCalculatorConfig | null>(null);
   const [expandedAttribute, setExpandedAttribute] = useState<number | null>(null);
@@ -150,7 +150,9 @@ export function ProductConfigurator({
 
     // Se for m², calcular por área
     if (calculationType === "m2" && pricePerM2) {
-      const area = dimensions.width * dimensions.height;
+      const width = parseDecimal(dimensions.width as string);
+      const height = parseDecimal(dimensions.height as string);
+      const area = width * height;
       totalPrice = area * pricePerM2;
     } else {
       totalPrice += totalAdditionals;
@@ -165,6 +167,12 @@ export function ProductConfigurator({
       ...prev,
       [attributeId]: valueId,
     }));
+  };
+
+  // Converter vírgula para ponto
+  const parseDecimal = (value: string): number => {
+    const normalized = value.replace(',', '.');
+    return parseFloat(normalized) || 0;
   };
 
   const handleAddToCart = () => {
@@ -289,13 +297,11 @@ export function ProductConfigurator({
                 <Label htmlFor="width">Largura (m)</Label>
                 <Input
                   id="width"
-                  type="number"
-                  step="0.01"
-                  min={minWidth || 0}
-                  max={maxWidth || 999}
+                  type="text"
+                  inputMode="decimal"
                   value={dimensions.width}
-                  onChange={(e) => setDimensions({ ...dimensions, width: parseFloat(e.target.value) || 0 })}
-                  placeholder="1.50"
+                  onChange={(e) => setDimensions({ ...dimensions, width: e.target.value })}
+                  placeholder="1.50 ou 1,50"
                 />
                 {minWidth && maxWidth && (
                   <p className="text-xs text-gray-600 mt-1">
@@ -307,13 +313,11 @@ export function ProductConfigurator({
                 <Label htmlFor="height">Altura (m)</Label>
                 <Input
                   id="height"
-                  type="number"
-                  step="0.01"
-                  min={minHeight || 0}
-                  max={maxHeight || 999}
+                  type="text"
+                  inputMode="decimal"
                   value={dimensions.height}
-                  onChange={(e) => setDimensions({ ...dimensions, height: parseFloat(e.target.value) || 0 })}
-                  placeholder="2.00"
+                  onChange={(e) => setDimensions({ ...dimensions, height: e.target.value })}
+                  placeholder="2.00 ou 2,00"
                 />
                 {minHeight && maxHeight && (
                   <p className="text-xs text-gray-600 mt-1">
@@ -326,7 +330,7 @@ export function ProductConfigurator({
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <p className="text-gray-600">Área total:</p>
-                  <p className="font-semibold text-lg">{(dimensions.width * dimensions.height).toFixed(2)} m²</p>
+                  <p className="font-semibold text-lg">{(parseDecimal(dimensions.width as string) * parseDecimal(dimensions.height as string)).toFixed(2)} m²</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Valor por m²:</p>
