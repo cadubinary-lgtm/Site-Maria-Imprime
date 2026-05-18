@@ -41,6 +41,53 @@ export default function AdminDashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validações obrigatórias
+    if (!formData.name.trim()) {
+      toast.error("Nome do produto é obrigatório");
+      return;
+    }
+    
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast.error("Preço é obrigatório e deve ser maior que 0");
+      return;
+    }
+    
+    if (!formData.calculationType) {
+      toast.error("Tipo de cobrança é obrigatório");
+      return;
+    }
+    
+    if (formData.calculationType === "m2") {
+      if (!formData.pricePerM2 || parseFloat(formData.pricePerM2) <= 0) {
+        toast.error("Preço por m² é obrigatório e deve ser maior que 0");
+        return;
+      }
+      if (!formData.minWidth || parseFloat(formData.minWidth) <= 0) {
+        toast.error("Largura mínima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!formData.maxWidth || parseFloat(formData.maxWidth) <= 0) {
+        toast.error("Largura máxima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!formData.minHeight || parseFloat(formData.minHeight) <= 0) {
+        toast.error("Altura mínima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!formData.maxHeight || parseFloat(formData.maxHeight) <= 0) {
+        toast.error("Altura máxima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (parseFloat(formData.minWidth) >= parseFloat(formData.maxWidth)) {
+        toast.error("Largura máxima deve ser maior que a mínima");
+        return;
+      }
+      if (parseFloat(formData.minHeight) >= parseFloat(formData.maxHeight)) {
+        toast.error("Altura máxima deve ser maior que a mínima");
+        return;
+      }
+    }
+    
     try {
       await createProductMutation.mutateAsync({
         name: formData.name,

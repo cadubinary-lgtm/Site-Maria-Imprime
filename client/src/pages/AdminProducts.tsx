@@ -70,6 +70,48 @@ export default function AdminProducts() {
   const handleSave = async () => {
     if (!editingId) return;
 
+    // Validações obrigatórias
+    if (!editForm.name.trim()) {
+      toast.error("Nome do produto é obrigatório");
+      return;
+    }
+    
+    if (!editForm.price || parseFloat(editForm.price as any) <= 0) {
+      toast.error("Preço é obrigatório e deve ser maior que 0");
+      return;
+    }
+    
+    if ((editForm as any).calculationType === "m2") {
+      if (!(editForm as any).pricePerM2 || parseFloat((editForm as any).pricePerM2) <= 0) {
+        toast.error("Preço por m² é obrigatório e deve ser maior que 0");
+        return;
+      }
+      if (!(editForm as any).minWidth || parseFloat((editForm as any).minWidth) <= 0) {
+        toast.error("Largura mínima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!(editForm as any).maxWidth || parseFloat((editForm as any).maxWidth) <= 0) {
+        toast.error("Largura máxima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!(editForm as any).minHeight || parseFloat((editForm as any).minHeight) <= 0) {
+        toast.error("Altura mínima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (!(editForm as any).maxHeight || parseFloat((editForm as any).maxHeight) <= 0) {
+        toast.error("Altura máxima é obrigatória e deve ser maior que 0");
+        return;
+      }
+      if (parseFloat((editForm as any).minWidth) >= parseFloat((editForm as any).maxWidth)) {
+        toast.error("Largura máxima deve ser maior que a mínima");
+        return;
+      }
+      if (parseFloat((editForm as any).minHeight) >= parseFloat((editForm as any).maxHeight)) {
+        toast.error("Altura máxima deve ser maior que a mínima");
+        return;
+      }
+    }
+
     try {
       // Atualizar dados básicos do produto (sem segmento único)
       await updateProductMutation.mutateAsync({
@@ -79,6 +121,12 @@ export default function AdminProducts() {
         price: editForm.price,
         segment: "alimentacao", // Valor padrão, será ignorado
         imageUrl: editForm.imageUrl,
+        calculationType: (editForm as any).calculationType,
+        pricePerM2: (editForm as any).calculationType === "m2" ? (editForm as any).pricePerM2 : undefined,
+        minWidth: (editForm as any).calculationType === "m2" ? (editForm as any).minWidth : undefined,
+        maxWidth: (editForm as any).calculationType === "m2" ? (editForm as any).maxWidth : undefined,
+        minHeight: (editForm as any).calculationType === "m2" ? (editForm as any).minHeight : undefined,
+        maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
       });
 
       // Atualizar múltiplos segmentos
