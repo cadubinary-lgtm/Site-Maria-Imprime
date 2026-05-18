@@ -168,24 +168,16 @@ export function ProductConfigurator({
     return totalPrice;
   }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal]);
 
-  // Efeito para chamar onPriceUpdate quando o preço muda
-  useEffect(() => {
-    if (onPriceUpdate) {
-      const config = {
-        productId,
-        selectedVariations: selectedValues,
-        quantity,
-        totalPrice: calculatedPrice,
-      };
-      onPriceUpdate(calculatedPrice, config);
-    }
-  }, [calculatedPrice, onPriceUpdate, productId, selectedValues, quantity]);
-
   const handleSelectChange = (attributeId: number, valueId: number) => {
-    setSelectedValues((prev) => ({
-      ...prev,
-      [attributeId]: valueId,
-    }));
+    setSelectedValues((prev) => {
+      const updated = {
+        ...prev,
+        [attributeId]: valueId,
+      };
+      // Chamar onPriceUpdate imediatamente após atualizar estado
+      // Será chamado no próximo render com o novo calculatedPrice
+      return updated;
+    });
   };
 
   const handleAddToCart = () => {
@@ -214,6 +206,19 @@ export function ProductConfigurator({
     };
     onAddToCart?.(config);
   };
+
+  // Chamar onPriceUpdate quando calculatedPrice muda (sem dependência circular)
+  useEffect(() => {
+    if (onPriceUpdate && calculatedPrice > 0) {
+      const config = {
+        productId,
+        selectedVariations: selectedValues,
+        quantity,
+        totalPrice: calculatedPrice,
+      };
+      onPriceUpdate(calculatedPrice, config);
+    }
+  }, [calculatedPrice]);
 
   if (isLoading) {
     return (
