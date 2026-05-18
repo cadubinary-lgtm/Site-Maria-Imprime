@@ -32,6 +32,8 @@ interface OrderSummaryProps {
   deadline?: string;
   notes?: string;
   onNotesChange?: (notes: string) => void;
+  deliveryOption?: any;
+  deliveryTax?: number;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -48,6 +50,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   deadline,
   notes,
   onNotesChange,
+  deliveryOption,
+  deliveryTax = 0,
 }) => {
   // Calcular preço total com modificadores
   const totalModifier = useMemo(() => {
@@ -153,10 +157,25 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         )}
 
         {/* Prazo */}
-        {deadline && (
+        {(deadline || deliveryOption) && (
           <div className="space-y-2 pb-3 border-b">
             <p className="text-xs font-medium text-muted-foreground">Prazo de Entrega</p>
-            <p className="text-sm font-semibold text-green-600">{deadline}</p>
+            <p className="text-sm font-semibold text-green-600">
+              {deliveryOption ? deliveryOption.name : deadline}
+            </p>
+            {deliveryOption && deliveryOption.daysToDeliver && (
+              <p className="text-xs text-muted-foreground">
+                {deliveryOption.daysToDeliver} dias úteis
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Taxa de Prazo Expresso */}
+        {deliveryTax > 0 && (
+          <div className="space-y-2 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Taxa Expressa</p>
+            <p className="text-sm font-semibold text-orange-600">+R$ {deliveryTax.toFixed(2)}</p>
           </div>
         )}
 

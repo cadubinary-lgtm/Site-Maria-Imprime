@@ -74,6 +74,8 @@ export function ProductConfigurator({
   const [expandedAttribute, setExpandedAttribute] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<number | null>(null);
+  const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
 
   // Converter vírgula para ponto
   const parseDecimal = (value: string): number => {
@@ -86,6 +88,24 @@ export function ProductConfigurator({
     { productId },
     { enabled: !!productId }
   );
+
+  // Carregar prazos de entrega (apenas se for m²)
+  const { data: deliveryOptionsData = [] } = trpc.deliveryOptions.getByProduct.useQuery(
+    { productId },
+    { enabled: !!productId && calculationType === "m2" }
+  );
+
+  // Atualizar delivery options quando carregar
+  useEffect(() => {
+    if (deliveryOptionsData && deliveryOptionsData.length > 0) {
+      setDeliveryOptions(deliveryOptionsData as any[]);
+      // Selecionar primeira opção ativa por padrão
+      const firstActive = deliveryOptionsData.find((opt: any) => opt.isActive);
+      if (firstActive) {
+        setSelectedDeliveryOption(firstActive.id);
+      }
+    }
+  }, [deliveryOptionsData]);
 
   // Memoizar variações para evitar re-renders infinitos
   // Filtrar apenas variações obrigatórias (isRequired = true)
@@ -159,14 +179,24 @@ export function ProductConfigurator({
       const width = parseDecimal(dimensions.width as string);
       const height = parseDecimal(dimensions.height as string);
       const area = width * height;
-      totalPrice = (area * pricePerM2) + totalAdditionals;
+      
+      // Calcular taxa de prazo (se selecionado)
+      let deliveryAdditional = 0;
+      if (selectedDeliveryOption && deliveryOptions.length > 0) {
+        const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedDeliveryOption);
+        if (selectedOption) {
+          deliveryAdditional = area * selectedOption.pricePerM2;
+        }
+      }
+      
+      totalPrice = (area * pricePerM2) + totalAdditionals + deliveryAdditional;
     } else {
       totalPrice += totalAdditionals;
       totalPrice = totalPrice * quantity;
     }
 
     return totalPrice;
-  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal]);
+  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal, selectedDeliveryOption, deliveryOptions]);
 
   const handleSelectChange = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => {
@@ -210,11 +240,26 @@ export function ProductConfigurator({
   // Chamar onPriceUpdate quando calculatedPrice muda (sem dependência circular)
   useEffect(() => {
     if (onPriceUpdate && calculatedPrice > 0) {
+      // Calcular taxa de prazo
+      let deliveryTax = 0;
+      if (selectedDeliveryOption && deliveryOptions.length > 0) {
+        const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedDeliveryOption);
+        if (selectedOption && calculationType === "m2") {
+          const width = parseDecimal(dimensions.width as string);
+          const height = parseDecimal(dimensions.height as string);
+          const area = width * height;
+          deliveryTax = area * selectedOption.pricePerM2;
+        }
+      }
+      
       const config = {
         productId,
         selectedVariations: selectedValues,
         quantity,
         totalPrice: calculatedPrice,
+        selectedDeliveryOption,
+        deliveryOptions,
+        deliveryTax,
       };
       onPriceUpdate(calculatedPrice, config);
     }
@@ -371,6 +416,37 @@ export function ProductConfigurator({
                   <p className="font-semibold text-lg">R$ {pricePerM2?.toFixed(2)}</p>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Prazos de Entrega (apenas para m²) */}
+        {calculationType === "m2" && deliveryOptions.length > 0 && (
+          <div className="space-y-4 bg-green-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-lg">Prazo de Produção</h3>
+            <div className="space-y-3">
+              {deliveryOptions.map((option: any) => (
+                <label
+                  key={option.id}
+                  className="flex items-center p-3 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition"
+                >
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value={option.id}
+                    checked={selectedDeliveryOption === option.id}
+                    onChange={() => setSelectedDeliveryOption(option.id)}
+                    className="w-4 h-4 text-green-600"
+                  />
+                  <div className="ml-3 flex-1">
+                    <p className="font-semibold">{option.name}</p>
+                    <p className="text-sm text-gray-600">{option.daysToDeliver} dias úteis</p>
+                  </div>
+                  {option.pricePerM2 > 0 && (
+                    <span className="font-semibold text-green-600">+R$ {option.pricePerM2.toFixed(2)}/m²</span>
+                  )}
+                </label>
+              ))}
             </div>
           </div>
         )}

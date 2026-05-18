@@ -35,6 +35,8 @@ export default function ProductDetail() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [configuradorAttributes, setConfiguradorAttributes] = useState<any[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
+  const [deliveryTax, setDeliveryTax] = useState(0);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -441,6 +443,14 @@ export default function ProductDetail() {
                   }
                 });
                 setConfiguradorAttributes(attrs);
+                // Rastrear prazo selecionado e taxa
+                if (config.selectedDeliveryOption && config.deliveryOptions) {
+                  const selected = config.deliveryOptions.find((opt: any) => opt.id === config.selectedDeliveryOption);
+                  if (selected) {
+                    setSelectedDeliveryOption(selected);
+                    setDeliveryTax(config.deliveryTax || 0);
+                  }
+                }
               }}
               onAddToCart={(config) => {
                 // Adicionar ao carrinho
@@ -552,11 +562,13 @@ export default function ProductDetail() {
             selectedAttributes={configuradorAttributes}
             quantity={quantity}
             onQuantityChange={setQuantity}
-            deadline="5 dias úteis"
+            deadline={!selectedDeliveryOption ? "5 dias úteis" : undefined}
             notes={notes}
             onNotesChange={setNotes}
             onAddToCart={handleAddToCart}
             isLoading={isProcessing}
+            deliveryOption={selectedDeliveryOption}
+            deliveryTax={deliveryTax}
           />
         </div>
       </div>
