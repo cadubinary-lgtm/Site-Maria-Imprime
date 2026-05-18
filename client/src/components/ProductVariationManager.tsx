@@ -64,8 +64,10 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
         }`}
       >
         <div className="flex justify-between items-start gap-4">
-          <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
-            <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
+          <div className="flex items-start gap-3 flex-1">
+            <div {...attributes} {...listeners}>
+              <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
+            </div>
             <div className="flex items-center gap-2">
               <div className={`transform transition-transform text-gray-600 ${isExpanded ? 'rotate-90' : ''}`}>
                 ▶
