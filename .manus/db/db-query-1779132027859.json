@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, name, calculationType, pricePerM2, minWidth, maxWidth, minHeight, maxHeight FROM products WHERE name = 'teste';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute SELECT id, name, calculationType, pricePerM2, minWidth, maxWidth, minHeight, maxHeight FROM products WHERE name = 'teste';",
+  "rows": [
+    {
+      "id": "1200001",
+      "name": "teste",
+      "calculationType": "pacote",
+      "pricePerM2": "NULL",
+      "minWidth": "NULL",
+      "maxWidth": "NULL",
+      "minHeight": "NULL",
+      "maxHeight": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcalculationType\tpricePerM2\tminWidth\tmaxWidth\tminHeight\tmaxHeight\n1200001\tteste\tpacote\tNULL\tNULL\tNULL\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 2300
+}

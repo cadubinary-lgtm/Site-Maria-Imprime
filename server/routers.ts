@@ -244,20 +244,36 @@ export const appRouter = router({
         segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
+        calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
+        pricePerM2: z.string().optional(),
+        minWidth: z.string().optional(),
+        maxWidth: z.string().optional(),
+        minHeight: z.string().optional(),
+        maxHeight: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
         
+        const updateData: any = {
+          name: input.name,
+          description: input.description,
+          price: input.price as any,
+          segment: input.segment as any,
+          imageUrl: input.imageUrl,
+          imageKey: input.imageKey,
+        };
+
+        // Adicionar campos de m² se fornecidos
+        if (input.calculationType) updateData.calculationType = input.calculationType;
+        if (input.pricePerM2) updateData.pricePerM2 = parseFloat(input.pricePerM2);
+        if (input.minWidth) updateData.minWidth = parseFloat(input.minWidth);
+        if (input.maxWidth) updateData.maxWidth = parseFloat(input.maxWidth);
+        if (input.minHeight) updateData.minHeight = parseFloat(input.minHeight);
+        if (input.maxHeight) updateData.maxHeight = parseFloat(input.maxHeight);
+        
         const result = await db.update(products)
-          .set({
-            name: input.name,
-            description: input.description,
-            price: input.price as any,
-            segment: input.segment as any,
-            imageUrl: input.imageUrl,
-            imageKey: input.imageKey,
-          })
+          .set(updateData)
           .where(eq(products.id, input.id));
         return result;
       }),

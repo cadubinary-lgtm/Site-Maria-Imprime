@@ -22,6 +22,12 @@ export default function AdminProducts() {
     price: "",
     imageUrl: "",
     segmentIds: [] as number[],
+    calculationType: "unidade",
+    pricePerM2: "",
+    minWidth: "",
+    maxWidth: "",
+    minHeight: "",
+    maxHeight: "",
   });
 
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
@@ -63,6 +69,12 @@ export default function AdminProducts() {
       description: product.description || "",
       price: product.price.toString(),
       imageUrl: product.imageUrl || "",
+      calculationType: product.calculationType || "unidade",
+      pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
+      minWidth: product.minWidth ? product.minWidth.toString() : "",
+      maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
+      minHeight: product.minHeight ? product.minHeight.toString() : "",
+      maxHeight: product.maxHeight ? product.maxHeight.toString() : "",
       // segmentIds será preenchido pelo useEffect quando productSegments carregar
     }));
   };
