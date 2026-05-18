@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -30,7 +29,7 @@ interface VariationOption {
 }
 
 // Draggable item component
-function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEdit }: any) {
+function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEdit, isExpanded, onToggleExpand }: any) {
   const {
     attributes,
     listeners,
@@ -50,80 +49,94 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-lg p-4 cursor-pointer transition ${
-        isSelected
-          ? "bg-orange-50 border-orange-300"
-          : "bg-white hover:bg-gray-50"
-      } ${isDragging ? "shadow-lg" : ""}`}
-
+      className={`border rounded-lg overflow-hidden transition ${
+        isDragging ? "shadow-lg" : ""
+      }`}
     >
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
-          <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
-          <div>
-            <h4 className="font-semibold">{vt.name}</h4>
-            <p className="text-sm text-gray-600">
-              {vt.isRequired ? "Obrigatório" : "Opcional"} • Ordem: {vt.order}
-            </p>
+      {/* Header - Clicável para expandir/recolher */}
+      <div
+        onClick={() => onToggleExpand(vt.id)}
+        className={`p-4 cursor-pointer transition ${
+          isExpanded
+            ? "bg-orange-50 border-b border-orange-300"
+            : "bg-white hover:bg-gray-50"
+        }`}
+      >
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex items-start gap-3 flex-1" {...attributes} {...listeners}>
+            <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
+            <div className="flex items-center gap-2">
+              <div className={`transform transition-transform text-gray-600 ${isExpanded ? 'rotate-90' : ''}`}>
+                ▶
+              </div>
+              <div>
+                <h4 className="font-semibold">{vt.name}</h4>
+                <p className="text-sm text-gray-600">
+                  {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(vt.id, vt.name);
-            }}
-            className="bg-blue-50 border-blue-300 hover:bg-blue-100"
-          >
-            <Edit2 className="w-4 h-4 mr-1" />
-            Editar Nome
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(vt.id);
-            }}
-            className="bg-green-50 border-green-300 hover:bg-green-100"
-          >
-            <Edit2 className="w-4 h-4 mr-1" />
-            ADICIONAR ATRIBUTOS
-          </Button>
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium">Obrigatório:</Label>
-            <RadioGroup
-              value={vt.isRequired ? "sim" : "nao"}
-              onValueChange={(value) => {
-                onToggleRequired(vt.id, value === "sim");
+          <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Obrigatório:</Label>
+              <RadioGroup
+                value={vt.isRequired ? "sim" : "nao"}
+                onValueChange={(value) => {
+                  onToggleRequired(vt.id, value === "sim");
+                }}
+                className="flex gap-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
+                  <Label htmlFor={`required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="nao" id={`required-nao-${vt.id}`} />
+                  <Label htmlFor={`required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(vt.id);
               }}
-              className="flex gap-3"
+              className="text-red-500 hover:text-red-700"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
-                <Label htmlFor={`required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="nao" id={`required-nao-${vt.id}`} />
-                <Label htmlFor={`required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
-              </div>
-            </RadioGroup>
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(vt.id);
-            }}
-            className="text-red-500 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
         </div>
       </div>
+
+      {/* Expanded Content - Opções */}
+      {isExpanded && (
+        <div className="border-t bg-gray-50 p-4 space-y-3">
+          <h5 className="font-semibold text-sm">Opções ({vt.options?.length || 0})</h5>
+          {!vt.options || vt.options.length === 0 ? (
+            <p className="text-gray-500 text-sm">Nenhuma opção vinculada. Adicione no sistema global.</p>
+          ) : (
+            <div className="space-y-2">
+              {vt.options.map((option: any) => (
+                <div
+                  key={option.id}
+                  className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-100 transition"
+                >
+                  <div>
+                    <h6 className="font-medium text-sm">{option.name}</h6>
+                    <p className="text-xs text-gray-600">
+                      +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -136,6 +149,8 @@ export function ProductVariationManager() {
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState("");
   const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [expandedGlobalVariationId, setExpandedGlobalVariationId] = useState<number | null>(null);
+  const [expandedProductVariationId, setExpandedProductVariationId] = useState<number | null>(null);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -177,37 +192,6 @@ export function ProductVariationManager() {
   const [newOptionPrice, setNewOptionPrice] = useState("");
   const [editingOptionName, setEditingOptionName] = useState("");
   const [editingOptionPrice, setEditingOptionPrice] = useState("");
-  const [expandedGlobalVariationId, setExpandedGlobalVariationId] = useState<number | null>(null);
-
-  const handleAddVariationType = async () => {
-    if (!selectedProductId || !newVariationTypeName) {
-      toast.error("Selecione um produto e preencha o nome da variação");
-      return;
-    }
-
-    try {
-      await createVariationTypeMutation.mutateAsync({
-        productId: null as any,
-        name: newVariationTypeName,
-        type: "material" as const,
-        isRequired: newVariationTypeRequired,
-      });
-
-      toast.success("Tipo de variação criado e adicionado ao produto!");
-      setNewVariationTypeName("");
-      setNewVariationTypeRequired(true);
-      
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
-    } catch (error) {
-      toast.error("Erro ao adicionar tipo de variação");
-      console.error(error);
-    }
-  };
 
   const handleAddOption = async () => {
     const variationId = editingVariationType || editingGlobalVariationType;
@@ -266,6 +250,8 @@ export function ProductVariationManager() {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
+      await utils.variations.getGlobal.invalidate();
+      refetchGlobalVariationTypes();
     } catch (error) {
       toast.error("Erro ao remover opção");
       console.error(error);
@@ -293,6 +279,8 @@ export function ProductVariationManager() {
         await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
         refetchVariationTypes();
       }
+      await utils.variations.getGlobal.invalidate();
+      refetchGlobalVariationTypes();
     } catch (error) {
       toast.error("Erro ao atualizar opção");
       console.error(error);
@@ -361,14 +349,65 @@ export function ProductVariationManager() {
         refetchGlobalVariationTypes();
       }
     } catch (error) {
-      toast.error("Erro ao atualizar tipo de variação");
+      toast.error("Erro ao atualizar obrigatoriedade");
       console.error(error);
+    }
+  };
+
+  const handleAddVariationType = async () => {
+    if (!selectedProductId || !newVariationTypeName) {
+      toast.error("Selecione um produto e preencha o nome da variação");
+      return;
+    }
+
+    try {
+      await createVariationTypeMutation.mutateAsync({
+        productId: selectedProductId,
+        name: newVariationTypeName,
+        isRequired: newVariationTypeRequired,
+      });
+
+      toast.success("Tipo de variação adicionado!");
+      setNewVariationTypeName("");
+      setNewVariationTypeRequired(true);
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
+    } catch (error) {
+      toast.error("Erro ao adicionar tipo de variação");
+      console.error(error);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sortedVariationTypes.findIndex((vt: VariationType) => vt.id === active.id);
+      const newIndex = sortedVariationTypes.findIndex((vt: VariationType) => vt.id === over.id);
+
+      const newOrder = arrayMove(sortedVariationTypes, oldIndex, newIndex);
+      const orderMap = newOrder.map((vt: VariationType, index: number) => ({
+        id: vt.id,
+        order: index,
+      }));
+
+      try {
+        await reorderVariationTypesMutation.mutateAsync({ orders: orderMap });
+        toast.success("Ordem atualizada!");
+        if (selectedProductId) {
+          await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+          refetchVariationTypes();
+        }
+      } catch (error) {
+        toast.error("Erro ao reordenar");
+        console.error(error);
+      }
     }
   };
 
   const handleLinkGlobalVariation = async (globalVariationId: number) => {
     if (!selectedProductId) {
-      toast.error("Selecione um produto primeiro");
+      toast.error("Selecione um produto");
       return;
     }
 
@@ -379,447 +418,171 @@ export function ProductVariationManager() {
       });
 
       toast.success("Variação vinculada ao produto!");
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
     } catch (error) {
       toast.error("Erro ao vincular variação");
       console.error(error);
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = variationTypes.findIndex((vt: VariationType) => vt.id === active.id);
-      const newIndex = variationTypes.findIndex((vt: VariationType) => vt.id === over.id);
-
-      const newOrder = arrayMove(variationTypes, oldIndex, newIndex);
-      
-      try {
-        // Atualizar ordem no backend
-        const updates = newOrder.map((vt: VariationType, index: number) => ({
-          id: vt.id,
-          order: index + 1,
-        }));
-
-        await reorderVariationTypesMutation.mutateAsync({ updates });
-        toast.success("Ordem atualizada!");
-        
-        if (selectedProductId) {
-          await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-          refetchVariationTypes();
-        }
-      } catch (error) {
-        toast.error("Erro ao reordenar variações");
-        console.error(error);
-      }
-    }
-  };
-
-  const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => 
-    (a.order || 0) - (b.order || 0)
-  );
+  const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => a.order - b.order);
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Product Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Selecione um Produto</CardTitle>
-          <CardDescription>Escolha o produto para gerenciar suas variações</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <Input
-              placeholder="Pesquisar produtos..."
-              value={productSearchQuery}
-              onChange={(e) => setProductSearchQuery(e.target.value)}
-              className="mb-2"
-            />
-            <Select
-              value={selectedProductId?.toString() || ""}
-              onValueChange={(value) => {
-                setSelectedProductId(parseInt(value));
-                setEditingVariationType(null);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um produto..." />
-              </SelectTrigger>
-              <SelectContent>
+    <div className="space-y-6">
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList>
+          <TabsTrigger value="products">Selecionar Produto</TabsTrigger>
+          <TabsTrigger value="manage">Gerenciar Variações</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="products" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Selecionar Produto</CardTitle>
+              <CardDescription>
+                Escolha um produto para gerenciar suas variações
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="productSearch">Buscar Produto</Label>
+                <Input
+                  id="productSearch"
+                  placeholder="Digite o nome do produto..."
+                  value={productSearchQuery}
+                  onChange={(e) => setProductSearchQuery(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="grid gap-2">
                 {products
-                  .filter((product: any) =>
-                    product.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
-                    product.id.toString().includes(productSearchQuery)
+                  .filter((p: any) =>
+                    p.name.toLowerCase().includes(productSearchQuery.toLowerCase())
                   )
                   .map((product: any) => (
-                    <SelectItem key={product.id} value={product.id.toString()}>
-                      {product.name} (ID: {product.id})
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Variation Management */}
-      {selectedProductId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Gerenciar Variações</CardTitle>
-            <CardDescription>
-              Adicione, edite, remova ou reordene tipos de variações e suas opções
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Add New Variation Type */}
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="variationType">Nome da Variação</Label>
-                    <Input
-                      id="variationType"
-                      placeholder="Ex: Material, Acabamento, Tamanho"
-                      value={newVariationTypeName}
-                      onChange={(e) => setNewVariationTypeName(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="required">Obrigatório?</Label>
-                    <Select
-                      value={newVariationTypeRequired ? "true" : "false"}
-                      onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
-                    >
-                      <SelectTrigger id="required" className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Sim</SelectItem>
-                        <SelectItem value="false">Não</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-end">
                     <Button
-                      onClick={handleAddVariationType}
-                      className="w-full bg-orange-500 hover:bg-orange-600"
-                      disabled={createVariationTypeMutation.isPending}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar
-                    </Button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Variation Types List with Drag & Drop */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
-              {variationTypes.length === 0 ? (
-                <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={sortedVariationTypes.map((vt: VariationType) => vt.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="grid gap-3">
-                      {sortedVariationTypes.map((vt: VariationType) => (
-                        <DraggableVariationItem
-                          key={vt.id}
-                          vt={vt}
-                          isSelected={editingVariationType === vt.id}
-                          onSelect={setEditingVariationType}
-                          onDelete={handleDeleteVariationType}
-                          onToggleRequired={handleToggleRequired}
-                          onEdit={(id: number, name: string) => {
-                            setEditingNameId(id);
-                            setEditingNameValue(name);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </div>
-
-            {/* Edit Variation Name Modal */}
-            {editingNameId && (
-              <div className="border rounded-lg p-4 bg-yellow-50 space-y-4">
-                <h4 className="font-semibold">Editar Nome da Variação</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="editName">Novo Nome</Label>
-                    <Input
-                      id="editName"
-                      value={editingNameValue}
-                      onChange={(e) => setEditingNameValue(e.target.value)}
-                      className="mt-1"
-                      placeholder="Digite o novo nome"
-                    />
-                  </div>
-                  <div className="flex gap-2 items-end">
-                    <Button
-                      onClick={handleEditName}
-                      className="flex-1 bg-yellow-600 hover:bg-yellow-700"
-                      disabled={updateVariationTypeMutation.isPending}
-                    >
-                      Salvar
-                    </Button>
-                    <Button
+                      key={product.id}
                       onClick={() => {
-                        setEditingNameId(null);
-                        setEditingNameValue("");
+                        setSelectedProductId(product.id);
+                        setEditingVariationType(null);
                       }}
-                      variant="outline"
-                      className="flex-1"
+                      variant={selectedProductId === product.id ? "default" : "outline"}
+                      className="justify-start"
                     >
-                      Cancelar
+                      {product.name}
                     </Button>
-                  </div>
-                </div>
+                  ))}
               </div>
-            )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            {/* Options for Selected Variation Type */}
-            {editingVariationType && (
-              <div className="border-t pt-6 space-y-4">
-                <h3 className="font-semibold">
-                  Opções para "{variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.name}"
-                </h3>
-
-                {/* Add New Option */}
+        <TabsContent value="manage">
+          {!selectedProductId ? (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-gray-500">Selecione um produto na aba anterior para gerenciar variações</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Gerenciar Variações</CardTitle>
+                <CardDescription>
+                  Adicione, edite, remova ou reordene tipos de variações e suas opções
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add New Variation Type */}
                 <div className="border rounded-lg p-4 bg-gray-50">
-                  <h4 className="font-semibold mb-4">Adicionar Nova Opção</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="optionName">Nome da Opção</Label>
-                      <Input
-                        id="optionName"
-                        placeholder="Ex: Vinil Brilho, Acabamento Fosco"
-                        value={newOptionName}
-                        onChange={(e) => setNewOptionName(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="optionPrice">Modificador de Preço (R$)</Label>
-                      <Input
-                        id="optionPrice"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={newOptionPrice}
-                        onChange={(e) => setNewOptionPrice(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        onClick={handleAddOption}
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={createVariationOptionMutation.isPending}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Edit Option Modal */}
-                {editingOptionId && (
-                  <div className="border rounded-lg p-4 bg-blue-50 space-y-4">
-                    <h4 className="font-semibold">Editar Opção</h4>
+                  <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
+                  <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="editOptionName">Nome da Opção</Label>
+                        <Label htmlFor="variationType">Nome da Variação</Label>
                         <Input
-                          id="editOptionName"
-                          value={editingOptionName}
-                          onChange={(e) => setEditingOptionName(e.target.value)}
+                          id="variationType"
+                          placeholder="Ex: Material, Acabamento, Tamanho"
+                          value={newVariationTypeName}
+                          onChange={(e) => setNewVariationTypeName(e.target.value)}
                           className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="editOptionPrice">Modificador de Preço (R$)</Label>
-                        <Input
-                          id="editOptionPrice"
-                          type="number"
-                          step="0.01"
-                          value={editingOptionPrice}
-                          onChange={(e) => setEditingOptionPrice(e.target.value)}
-                          className="mt-1"
-                        />
+                        <Label htmlFor="required">Obrigatório?</Label>
+                        <Select
+                          value={newVariationTypeRequired ? "true" : "false"}
+                          onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
+                        >
+                          <SelectTrigger id="required" className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">Sim</SelectItem>
+                            <SelectItem value="false">Não</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="flex gap-2 items-end">
+                      <div className="flex items-end">
                         <Button
-                          onClick={handleUpdateOption}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700"
-                          disabled={updateVariationOptionMutation.isPending}
+                          onClick={handleAddVariationType}
+                          className="w-full bg-orange-500 hover:bg-orange-600"
+                          disabled={createVariationTypeMutation.isPending}
                         >
-                          Salvar
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setEditingOptionId(null);
-                            setEditingOptionName("");
-                            setEditingOptionPrice("");
-                          }}
-                          variant="outline"
-                          className="flex-1"
-                        >
-                          Cancelar
+                          <Plus className="w-4 h-4 mr-2" />
+                          Adicionar
                         </Button>
                       </div>
                     </div>
+
                   </div>
-                )}
-
-                {/* Options List */}
-                <div className="space-y-2">
-                  {!variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options || variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Nenhuma opção cadastrada</p>
-                  ) : (
-                    <div className="grid gap-2">
-                      {variationTypes.find((vt: VariationType) => vt.id === editingVariationType)?.options?.map((option: any) => (
-                        <div
-                          key={option.id}
-                          className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
-                        >
-                          <div>
-                            <h5 className="font-medium">{option.name}</h5>
-                            <p className="text-sm text-gray-600">
-                              +R$ {parseFloat(option.priceModifier).toFixed(2)}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingOptionId(option.id);
-                                setEditingOptionName(option.name);
-                                setEditingOptionPrice(option.priceModifier);
-                              }}
-                              className="text-blue-500 hover:text-blue-700"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteOption(option.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </div>
-            )}
 
-            {/* Options for Global Variation Type */}
-            {editingGlobalVariationType && (
-              <div className="border-t pt-6 space-y-4">
-                <h3 className="font-semibold">
-                  Opções para "{globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.name}"
-                </h3>
-
-                {/* Add New Option */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <h4 className="font-semibold mb-4">Adicionar Nova Opção</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="globalOptionName">Nome da Opção</Label>
-                      <Input
-                        id="globalOptionName"
-                        placeholder="Ex: Vinil Brilho, Acabamento Fosco"
-                        value={newOptionName}
-                        onChange={(e) => setNewOptionName(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="globalOptionPrice">Modificador de Preço (R$)</Label>
-                      <Input
-                        id="globalOptionPrice"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={newOptionPrice}
-                        onChange={(e) => setNewOptionPrice(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        onClick={handleAddOption}
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={createVariationOptionMutation.isPending}
+                {/* Variation Types List with Drag & Drop */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
+                  {variationTypes.length === 0 ? (
+                    <p className="text-gray-500 text-sm">Nenhum tipo de variação cadastrado</p>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={sortedVariationTypes.map((vt: VariationType) => vt.id)}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Options List */}
-                <div className="space-y-2">
-                  {!globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options || globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Nenhuma opção cadastrada</p>
-                  ) : (
-                    <div className="grid gap-2">
-                      {globalVariationTypes.find((vt: VariationType) => vt.id === editingGlobalVariationType)?.options?.map((option: any) => (
-                        <div
-                          key={option.id}
-                          className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50"
-                        >
-                          <div>
-                            <h5 className="font-medium">{option.name}</h5>
-                            <p className="text-sm text-gray-600">
-                              +R$ {parseFloat(option.priceModifier).toFixed(2)}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteOption(option.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                        <div className="grid gap-3">
+                          {sortedVariationTypes.map((vt: VariationType) => (
+                            <DraggableVariationItem
+                              key={vt.id}
+                              vt={vt}
+                              isSelected={editingVariationType === vt.id}
+                              onSelect={setEditingVariationType}
+                              onDelete={handleDeleteVariationType}
+                              onToggleRequired={handleToggleRequired}
+                              onEdit={(id: number, name: string) => {
+                                setEditingNameId(id);
+                                setEditingNameValue(name);
+                              }}
+                              isExpanded={expandedProductVariationId === vt.id}
+                              onToggleExpand={setExpandedProductVariationId}
+                            />
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </SortableContext>
+                    </DndContext>
                   )}
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Global Variation Types - Accordion Area */}
       <Card className="border-2 border-purple-200 bg-purple-50">
