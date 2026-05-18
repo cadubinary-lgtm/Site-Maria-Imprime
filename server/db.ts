@@ -514,7 +514,8 @@ export async function searchGlobal(query: string) {
     // Buscar TODOS os produtos, categorias e variações (sem limite)
     const allProducts = await db.select().from(products);
     const allCategories = await db.select().from(categories);
-    const allMaterials = await db.select().from(variationOptions);
+    // Usar apenas variationOptions do sistema global (sem filtro de productId)
+    const allVariationOptions = await db.select().from(variationOptions);
 
     // Filtrar resultados em memória
     const filteredProducts = allProducts.filter(p =>
@@ -526,7 +527,7 @@ export async function searchGlobal(query: string) {
       c.name.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 10);
 
-    const filteredMaterials = allMaterials.filter(m =>
+    const filteredMaterials = allVariationOptions.filter(m =>
       m.name.toLowerCase().includes(query.toLowerCase()) ||
       (m.description && m.description.toLowerCase().includes(query.toLowerCase()))
     ).slice(0, 10);
