@@ -197,8 +197,6 @@ export default function AdminDashboard() {
                         <SelectContent>
                           <SelectItem value="unidade">Unidade</SelectItem>
                           <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
-                          <SelectItem value="metro_linear">Metro Linear</SelectItem>
-                          <SelectItem value="pacote">Pacote</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

@@ -45,6 +45,11 @@ interface ProductConfiguratorProps {
   productId: number;
   basePrice: number;
   calculationType: "m2" | "metro_linear" | "pacote" | "unidade";
+  pricePerM2?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
   onPriceUpdate?: (price: number, config: any) => void;
   onAddToCart?: (config: any) => void;
 }
@@ -53,6 +58,11 @@ export function ProductConfigurator({
   productId,
   basePrice,
   calculationType,
+  pricePerM2,
+  minWidth,
+  maxWidth,
+  minHeight,
+  maxHeight,
   onPriceUpdate,
   onAddToCart,
 }: ProductConfiguratorProps) {
@@ -124,8 +134,6 @@ export function ProductConfigurator({
 
   // Calcular preço em tempo real
   const calculatedPrice = useMemo(() => {
-    if (!calculatorConfig) return basePrice;
-
     let totalPrice = basePrice;
     let totalAdditionals = 0;
 
@@ -140,9 +148,17 @@ export function ProductConfigurator({
       }
     });
 
-    totalPrice += totalAdditionals;
-    return totalPrice * quantity;
-  }, [selectedValues, attributes, basePrice, quantity, calculatorConfig]);
+    // Se for m², calcular por área
+    if (calculationType === "m2" && pricePerM2) {
+      const area = dimensions.width * dimensions.height;
+      totalPrice = area * pricePerM2;
+    } else {
+      totalPrice += totalAdditionals;
+      totalPrice = totalPrice * quantity;
+    }
+
+    return totalPrice;
+  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions]);
 
   const handleSelectChange = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => ({
@@ -264,17 +280,76 @@ export function ProductConfigurator({
           </div>
         ))}
 
-        {/* Quantidade */}
-        <div className="space-y-2">
-          <Label htmlFor="quantity">Quantidade</Label>
-          <Input
-            id="quantity"
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-          />
-        </div>
+        {/* Calculadora de m² */}
+        {calculationType === "m2" && (
+          <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-lg">Calculadora de Área</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="width">Largura (m)</Label>
+                <Input
+                  id="width"
+                  type="number"
+                  step="0.01"
+                  min={minWidth || 0}
+                  max={maxWidth || 999}
+                  value={dimensions.width}
+                  onChange={(e) => setDimensions({ ...dimensions, width: parseFloat(e.target.value) || 0 })}
+                  placeholder="1.50"
+                />
+                {minWidth && maxWidth && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Min: {minWidth}m | Max: {maxWidth}m
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="height">Altura (m)</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  step="0.01"
+                  min={minHeight || 0}
+                  max={maxHeight || 999}
+                  value={dimensions.height}
+                  onChange={(e) => setDimensions({ ...dimensions, height: parseFloat(e.target.value) || 0 })}
+                  placeholder="2.00"
+                />
+                {minHeight && maxHeight && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Min: {minHeight}m | Max: {maxHeight}m
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="bg-white p-3 rounded border border-blue-200">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-gray-600">Área total:</p>
+                  <p className="font-semibold text-lg">{(dimensions.width * dimensions.height).toFixed(2)} m²</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Valor por m²:</p>
+                  <p className="font-semibold text-lg">R$ {pricePerM2?.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quantidade (apenas para unidade) */}
+        {calculationType !== "m2" && (
+          <div className="space-y-2">
+            <Label htmlFor="quantity">Quantidade</Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            />
+          </div>
+        )}
 
         {/* Preço Total */}
         <div className="bg-orange-50 p-4 rounded-lg">

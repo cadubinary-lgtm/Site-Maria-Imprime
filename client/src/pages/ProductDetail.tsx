@@ -409,6 +409,11 @@ export default function ProductDetail() {
               productId={product.id}
               basePrice={parseFloat(product.price)}
               calculationType={product.calculationType as any}
+              pricePerM2={(product as any).pricePerM2 ? parseFloat((product as any).pricePerM2) : undefined}
+              minWidth={(product as any).minWidth ? parseFloat((product as any).minWidth) : undefined}
+              maxWidth={(product as any).maxWidth ? parseFloat((product as any).maxWidth) : undefined}
+              minHeight={(product as any).minHeight ? parseFloat((product as any).minHeight) : undefined}
+              maxHeight={(product as any).maxHeight ? parseFloat((product as any).maxHeight) : undefined}
               onPriceUpdate={(price, config) => {
                 // Atualizar preço no resumo
               }}
