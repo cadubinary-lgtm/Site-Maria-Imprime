@@ -965,7 +965,7 @@ export function ProductVariationManager() {
                               <Input
                                 id={`global-option-name-${vt.id}`}
                                 placeholder="Ex: Vinil Brilho"
-                                value={editingGlobalVariationType === vt.id ? newOptionName : ""}
+                                value={newOptionName}
                                 onChange={(e) => setNewOptionName(e.target.value)}
                                 className="mt-1 text-sm"
                               />
@@ -977,7 +977,7 @@ export function ProductVariationManager() {
                                 type="number"
                                 step="0.01"
                                 placeholder="0.00"
-                                value={editingGlobalVariationType === vt.id ? newOptionPrice : ""}
+                                value={newOptionPrice}
                                 onChange={(e) => setNewOptionPrice(e.target.value)}
                                 className="mt-1 text-sm"
                               />
