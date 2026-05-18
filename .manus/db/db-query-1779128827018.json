@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE products ADD COLUMN pricePerM2 DECIMAL(10, 2) NULL AFTER unit;\nALTER TABLE products ADD COLUMN minWidth DECIMAL(10, 2) NULL AFTER pricePerM2;\nALTER TABLE products ADD COLUMN maxWidth DECIMAL(10, 2) NULL AFTER minWidth;\nALTER TABLE products ADD COLUMN minHeight DECIMAL(10, 2) NULL AFTER maxWidth;\nALTER TABLE products ADD COLUMN maxHeight DECIMAL(10, 2) NULL AFTER minHeight;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute ALTER TABLE products ADD COLUMN pricePerM2 DECIMAL(10, 2) NULL AFTER unit;\nALTER TABLE products ADD COLUMN minWidth DECIMAL(10, 2) NULL AFTER pricePerM2;\nALTER TABLE products ADD COLUMN maxWidth DECIMAL(10, 2) NULL AFTER minWidth;\nALTER TABLE products ADD COLUMN minHeight DECIMAL(10, 2) NULL AFTER maxWidth;\nALTER TABLE products ADD COLUMN maxHeight DECIMAL(10, 2) NULL AFTER minHeight;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1682
+}

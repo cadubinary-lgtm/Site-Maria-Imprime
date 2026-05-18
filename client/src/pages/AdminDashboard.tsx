@@ -27,6 +27,12 @@ export default function AdminDashboard() {
     price: "",
     segment: "alimentacao",
     imageUrl: "",
+    calculationType: "unidade",
+    pricePerM2: "",
+    minWidth: "",
+    maxWidth: "",
+    minHeight: "",
+    maxHeight: "",
   });
 
   const { data: orders, isLoading: ordersLoading } = trpc.admin.getAllOrders.useQuery();
@@ -42,6 +48,12 @@ export default function AdminDashboard() {
         price: formData.price,
         segment: formData.segment as "alimentacao" | "beleza" | "varejo" | "servicos",
         imageUrl: formData.imageUrl,
+        calculationType: formData.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
+        pricePerM2: formData.calculationType === "m2" ? formData.pricePerM2 : undefined,
+        minWidth: formData.calculationType === "m2" ? formData.minWidth : undefined,
+        maxWidth: formData.calculationType === "m2" ? formData.maxWidth : undefined,
+        minHeight: formData.calculationType === "m2" ? formData.minHeight : undefined,
+        maxHeight: formData.calculationType === "m2" ? formData.maxHeight : undefined,
       });
       
       toast.success("Produto criado com sucesso!");
@@ -51,6 +63,12 @@ export default function AdminDashboard() {
         price: "",
         segment: "alimentacao",
         imageUrl: "",
+        calculationType: "unidade",
+        pricePerM2: "",
+        minWidth: "",
+        maxWidth: "",
+        minHeight: "",
+        maxHeight: "",
       });
     } catch (error) {
       toast.error("Erro ao criar produto");
@@ -168,6 +186,89 @@ export default function AdminDashboard() {
                         placeholder="https://..."
                       />
                     </div>
+
+                    {/* Tipo de Cobrança */}
+                    <div>
+                      <Label htmlFor="calculationType">Tipo de Cobrança</Label>
+                      <Select value={formData.calculationType} onValueChange={(value) => setFormData({ ...formData, calculationType: value })}>
+                        <SelectTrigger id="calculationType">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unidade">Unidade</SelectItem>
+                          <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
+                          <SelectItem value="metro_linear">Metro Linear</SelectItem>
+                          <SelectItem value="pacote">Pacote</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Campos condicionais para m² */}
+                    {formData.calculationType === "m2" && (
+                      <>
+                        <div>
+                          <Label htmlFor="pricePerM2">Preço por m² (R$)</Label>
+                          <Input
+                            id="pricePerM2"
+                            type="number"
+                            step="0.01"
+                            value={formData.pricePerM2}
+                            onChange={(e) => setFormData({ ...formData, pricePerM2: e.target.value })}
+                            placeholder="45.00"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label htmlFor="minWidth">Largura Mínima (m)</Label>
+                            <Input
+                              id="minWidth"
+                              type="number"
+                              step="0.01"
+                              value={formData.minWidth}
+                              onChange={(e) => setFormData({ ...formData, minWidth: e.target.value })}
+                              placeholder="0.10"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="maxWidth">Largura Máxima (m)</Label>
+                            <Input
+                              id="maxWidth"
+                              type="number"
+                              step="0.01"
+                              value={formData.maxWidth}
+                              onChange={(e) => setFormData({ ...formData, maxWidth: e.target.value })}
+                              placeholder="5.00"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label htmlFor="minHeight">Altura Mínima (m)</Label>
+                            <Input
+                              id="minHeight"
+                              type="number"
+                              step="0.01"
+                              value={formData.minHeight}
+                              onChange={(e) => setFormData({ ...formData, minHeight: e.target.value })}
+                              placeholder="0.10"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="maxHeight">Altura Máxima (m)</Label>
+                            <Input
+                              id="maxHeight"
+                              type="number"
+                              step="0.01"
+                              value={formData.maxHeight}
+                              onChange={(e) => setFormData({ ...formData, maxHeight: e.target.value })}
+                              placeholder="5.00"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     <Button
                       type="submit"

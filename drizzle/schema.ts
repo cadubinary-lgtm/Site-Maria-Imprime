@@ -36,6 +36,11 @@ export const products = mysqlTable("products", {
   galleryUrls: longtext("galleryUrls"), // JSON array de URLs de galeria
   calculationType: mysqlEnum("calculationType", ["m2", "metro_linear", "pacote", "unidade"]).default("pacote").notNull(), // Tipo de cálculo
   unit: varchar("unit", { length: 50 }).default("pacote").notNull(), // Unidade (m², metro linear, pacote, unidade)
+  pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }), // Preço por metro quadrado
+  minWidth: decimal("minWidth", { precision: 10, scale: 2 }), // Largura mínima em metros
+  maxWidth: decimal("maxWidth", { precision: 10, scale: 2 }), // Largura máxima em metros
+  minHeight: decimal("minHeight", { precision: 10, scale: 2 }), // Altura mínima em metros
+  maxHeight: decimal("maxHeight", { precision: 10, scale: 2 }), // Altura máxima em metros
   isActive: boolean("isActive").default(true).notNull(),
   requiresAreaCalculation: boolean("requiresAreaCalculation").default(false).notNull(), // Para lona, adesivo, etc
   createdAt: timestamp("createdAt").defaultNow().notNull(),

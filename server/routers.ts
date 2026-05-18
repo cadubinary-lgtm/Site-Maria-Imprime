@@ -198,6 +198,12 @@ export const appRouter = router({
         segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
+        calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
+        pricePerM2: z.string().optional(),
+        minWidth: z.string().optional(),
+        maxWidth: z.string().optional(),
+        minHeight: z.string().optional(),
+        maxHeight: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -212,8 +218,14 @@ export const appRouter = router({
             segment: input.segment as any,
             imageUrl: input.imageUrl,
             imageKey: input.imageKey,
+            calculationType: (input.calculationType || "unidade") as any,
+            pricePerM2: input.pricePerM2 ? input.pricePerM2 as any : null,
+            minWidth: input.minWidth ? input.minWidth as any : null,
+            maxWidth: input.maxWidth ? input.maxWidth as any : null,
+            minHeight: input.minHeight ? input.minHeight as any : null,
+            maxHeight: input.maxHeight ? input.maxHeight as any : null,
             isActive: true,
-          });
+          } as any);
           
           // Retornar o resultado da inserção
           return { success: true, message: 'Produto criado com sucesso' };
