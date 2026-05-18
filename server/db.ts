@@ -298,7 +298,7 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
   const gv = globalVariation[0];
   
   // Create a new variation for this product based on the global one
-  const result = await db.insert(variationTypes).values({
+  const insertResult = await db.insert(variationTypes).values({
     productId,
     type: gv.type,
     name: gv.name,
@@ -311,8 +311,24 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
     isActive: gv.isActive,
   });
   
-  // Get the new variation ID
-  const newVariationId = (result as any).insertId;
+  // Get the new variation ID from the insert result
+  // With Drizzle + MySQL, we need to query the newly inserted row
+  let newVariationId: number;
+  
+  // Try to get insertId from the result
+  if ((insertResult as any).insertId) {
+    newVariationId = (insertResult as any).insertId;
+  } else {
+    // Fallback: query the newly inserted row by product and get the latest
+    const newVariation = await db.select().from(variationTypes)
+      .where(eq(variationTypes.productId, productId))
+      .orderBy(variationTypes.id)
+      .limit(1);
+    if (newVariation.length === 0) {
+      throw new Error("Failed to retrieve newly inserted variation");
+    }
+    newVariationId = newVariation[0].id;
+  }
   
   // Copy all options from the global variation
   const options = await db.select().from(variationOptions)
@@ -320,14 +336,14 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
   
   for (const option of options) {
     await db.insert(variationOptions).values({
-      variationTypeId: newVariationId as number,
+      variationTypeId: newVariationId,
       name: option.name,
       description: option.description,
       priceModifier: option.priceModifier,
     });
   }
   
-  return result;
+  return { success: true, variationId: newVariationId };
 }
 
 export async function createVariationType(data: InsertVariationType) {

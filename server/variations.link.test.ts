@@ -24,6 +24,9 @@ describe("Link Global Variation to Product", () => {
 
     const result = await linkGlobalVariationToProduct(globalVariationId, testProductId);
     expect(result).toBeDefined();
+    expect(result.success).toBe(true);
+    expect(result.variationId).toBeDefined();
+    expect(typeof result.variationId).toBe('number');
   });
 
   it("should create product-specific variation with copied options", async () => {
@@ -33,17 +36,22 @@ describe("Link Global Variation to Product", () => {
     }
 
     // Link the variation
-    await linkGlobalVariationToProduct(globalVariationId, testProductId);
+    const linkResult = await linkGlobalVariationToProduct(globalVariationId, testProductId);
+    expect(linkResult.variationId).toBeDefined();
 
     // Get product variations
     const productVariations = await getVariationTypesByProduct(testProductId);
     expect(productVariations.length).toBeGreaterThan(0);
 
-    // Check that at least one variation has options
-    const variationWithOptions = productVariations.find(v => v.id);
-    if (variationWithOptions) {
-      const options = await getVariationOptions(variationWithOptions.id);
+    // Check that the linked variation has options
+    const linkedVariation = productVariations.find(v => v.id === linkResult.variationId);
+    expect(linkedVariation).toBeDefined();
+    
+    if (linkedVariation) {
+      const options = await getVariationOptions(linkedVariation.id);
       expect(Array.isArray(options)).toBe(true);
+      // Should have at least one option copied from the global variation
+      expect(options.length).toBeGreaterThan(0);
     }
   });
 
