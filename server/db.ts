@@ -1,10 +1,9 @@
-import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull } from 'drizzle-orm';
+import { isNull, desc, eq } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -322,7 +321,7 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
     // Fallback: query the newly inserted row by product and get the latest
     const newVariation = await db.select().from(variationTypes)
       .where(eq(variationTypes.productId, productId))
-      .orderBy(variationTypes.id)
+      .orderBy(desc(variationTypes.id))
       .limit(1);
     if (newVariation.length === 0) {
       throw new Error("Failed to retrieve newly inserted variation");
