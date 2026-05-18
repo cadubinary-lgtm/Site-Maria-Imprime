@@ -177,6 +177,7 @@ export function ProductVariationManager() {
   const [newOptionPrice, setNewOptionPrice] = useState("");
   const [editingOptionName, setEditingOptionName] = useState("");
   const [editingOptionPrice, setEditingOptionPrice] = useState("");
+  const [expandedGlobalVariationId, setExpandedGlobalVariationId] = useState<number | null>(null);
 
   const handleAddVariationType = async () => {
     if (!selectedProductId || !newVariationTypeName) {
@@ -820,12 +821,12 @@ export function ProductVariationManager() {
         </Card>
       )}
 
-      {/* Global Variation Types - Fixed Area */}
+      {/* Global Variation Types - Accordion Area */}
       <Card className="border-2 border-purple-200 bg-purple-50">
         <CardHeader>
           <CardTitle className="text-purple-900">📚 Tipos de Variações Cadastrados no Sistema</CardTitle>
           <CardDescription>
-            Variações globais disponíveis para reutilizar em qualquer produto
+            Variações globais disponíveis para reutilizar em qualquer produto. Clique para expandir e visualizar opções.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -833,82 +834,174 @@ export function ProductVariationManager() {
             <p className="text-gray-500 text-sm">Nenhuma variação global cadastrada. Crie uma nova marcando "Salvar como tipo global".</p>
           ) : (
             <div className="grid gap-3">
-              {globalVariationTypes.map((vt: VariationType) => (
-                <div
-                  key={vt.id}
-                  className="border rounded-lg p-4 bg-white hover:bg-purple-50 transition"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-purple-900">{vt.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingNameId(vt.id);
-                          setEditingNameValue(vt.name);
-                        }}
-                        className="bg-blue-50 border-blue-300 hover:bg-blue-100"
-                      >
-                        <Edit2 className="w-4 h-4 mr-1" />
-                        Editar Nome
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingGlobalVariationType(vt.id)}
-                        className="bg-green-50 border-green-300 hover:bg-green-100"
-                      >
-                        <Edit2 className="w-4 h-4 mr-1" />
-                        ADICIONAR ATRIBUTOS
-                      </Button>
-                      <div className="flex items-center gap-2">
-                        <Label className="text-sm font-medium">Obrigatório:</Label>
-                        <RadioGroup
-                          value={vt.isRequired ? "sim" : "nao"}
-                          onValueChange={(value) => {
-                            handleToggleRequired(vt.id, value === "sim");
-                          }}
-                          className="flex gap-3"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} />
-                            <Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
+              {globalVariationTypes.map((vt: VariationType) => {
+                const isExpanded = expandedGlobalVariationId === vt.id;
+                return (
+                  <div key={vt.id} className="border rounded-lg bg-white overflow-hidden">
+                    {/* Header - Clicável para expandir/recolher */}
+                    <div
+                      onClick={() => setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
+                      className="p-4 hover:bg-purple-50 transition cursor-pointer flex justify-between items-start gap-4"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className={`transform transition-transform text-purple-900 ${isExpanded ? 'rotate-90' : ''}`}>
+                            ▶
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} />
-                            <Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
-                          </div>
-                        </RadioGroup>
+                          <h4 className="font-semibold text-purple-900">{vt.name}</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-6">
+                          {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
+                        </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteVariationType(vt.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      {selectedProductId && (
+                      <div className="flex gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                         <Button
-                          onClick={() => handleLinkGlobalVariation(vt.id)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          variant="outline"
                           size="sm"
-                          disabled={linkGlobalMutation.isPending}
+                          onClick={() => {
+                            setEditingNameId(vt.id);
+                            setEditingNameValue(vt.name);
+                          }}
+                          className="bg-blue-50 border-blue-300 hover:bg-blue-100"
                         >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Adicionar
+                          <Edit2 className="w-4 h-4 mr-1" />
+                          Editar Nome
                         </Button>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium">Obrigatório:</Label>
+                          <RadioGroup
+                            value={vt.isRequired ? "sim" : "nao"}
+                            onValueChange={(value) => {
+                              handleToggleRequired(vt.id, value === "sim");
+                            }}
+                            className="flex gap-3"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} />
+                              <Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} />
+                              <Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteVariationType(vt.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        {selectedProductId && (
+                          <Button
+                            onClick={() => handleLinkGlobalVariation(vt.id)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                            size="sm"
+                            disabled={linkGlobalMutation.isPending}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Adicionar
+                          </Button>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Expanded Content - Opções */}
+                    {isExpanded && (
+                      <div className="border-t bg-gray-50 p-4 space-y-4">
+                        <div>
+                          <h5 className="font-semibold text-sm mb-3">Opções ({vt.options?.length || 0})</h5>
+                          {!vt.options || vt.options.length === 0 ? (
+                            <p className="text-gray-500 text-sm">Nenhuma opção cadastrada</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {vt.options.map((option: any) => (
+                                <div
+                                  key={option.id}
+                                  className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-100 transition"
+                                >
+                                  <div>
+                                    <h6 className="font-medium text-sm">{option.name}</h6>
+                                    <p className="text-xs text-gray-600">
+                                      +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingOptionId(option.id);
+                                        setEditingOptionName(option.name);
+                                        setEditingOptionPrice(option.priceModifier);
+                                      }}
+                                      className="text-blue-500 hover:text-blue-700"
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteOption(option.id)}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Adicionar Nova Opção */}
+                        <div className="border-t pt-4">
+                          <h5 className="font-semibold text-sm mb-3">Adicionar Nova Opção</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <Label htmlFor={`global-option-name-${vt.id}`} className="text-xs">Nome</Label>
+                              <Input
+                                id={`global-option-name-${vt.id}`}
+                                placeholder="Ex: Vinil Brilho"
+                                value={editingGlobalVariationType === vt.id ? newOptionName : ""}
+                                onChange={(e) => setNewOptionName(e.target.value)}
+                                className="mt-1 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`global-option-price-${vt.id}`} className="text-xs">Preço (R$)</Label>
+                              <Input
+                                id={`global-option-price-${vt.id}`}
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={editingGlobalVariationType === vt.id ? newOptionPrice : ""}
+                                onChange={(e) => setNewOptionPrice(e.target.value)}
+                                className="mt-1 text-sm"
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <Button
+                                onClick={() => {
+                                  setEditingGlobalVariationType(vt.id);
+                                  handleAddOption();
+                                }}
+                                className="w-full bg-green-600 hover:bg-green-700 text-sm"
+                                disabled={createVariationOptionMutation.isPending}
+                              >
+                                <Plus className="w-4 h-4 mr-1" />
+                                Adicionar
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
