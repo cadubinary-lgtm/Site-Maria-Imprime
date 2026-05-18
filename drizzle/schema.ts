@@ -876,3 +876,22 @@ export const pricingRules = mysqlTable("pricingRules", {
 
 export type PricingRule = typeof pricingRules.$inferSelect;
 export type InsertPricingRule = typeof pricingRules.$inferInsert;
+
+/**
+ * Product Delivery Options - Opções de prazo de entrega para produtos m²
+ * Ex: Normal (5 dias), Expresso 24h, Mesmo Dia
+ */
+export const productDeliveryOptions = mysqlTable("productDeliveryOptions", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Normal", "24 Horas", "Mesmo Dia"
+  daysToDeliver: int("daysToDeliver").notNull(), // Número de dias úteis
+  pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }).default("0").notNull(), // Valor adicional por m²
+  isActive: boolean("isActive").default(true).notNull(),
+  order: int("order").default(0).notNull(), // Ordenação
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProductDeliveryOption = typeof productDeliveryOptions.$inferSelect;
+export type InsertProductDeliveryOption = typeof productDeliveryOptions.$inferInsert;

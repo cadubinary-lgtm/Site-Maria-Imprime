@@ -21,7 +21,7 @@ import {
   getVariationTypesByProduct,
   getGlobalVariationTypes,
   linkGlobalVariationToProduct,
-  getVariationOptions,
+  getVariationOptionsByType,
   createVariationType,
   createVariationOption,
   deleteVariationType,
@@ -340,7 +340,7 @@ export const appRouter = router({
         const typesWithOptions = await Promise.all(
           types.map(async (type) => ({
             ...type,
-            options: await getVariationOptions(type.id),
+            options: await getVariationOptionsByType(type.id),
           }))
         );
         return typesWithOptions;
@@ -351,7 +351,7 @@ export const appRouter = router({
         const typesWithOptions = await Promise.all(
           types.map(async (type) => ({
             ...type,
-            options: await getVariationOptions(type.id),
+            options: await getVariationOptionsByType(type.id),
           }))
         );
         return typesWithOptions;

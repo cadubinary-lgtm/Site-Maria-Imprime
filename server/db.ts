@@ -353,13 +353,14 @@ export async function createVariationType(data: InsertVariationType) {
   return result;
 }
 
-// Variation Options queries
-export async function getVariationOptions(variationTypeId: number) {
+// Delivery Options queries will be added after schema is properly loaded
+
+export async function getVariationOptionsByType(typeId: number) {
   const db = await getDb();
   if (!db) return [];
   
   const result = await db.select().from(variationOptions)
-    .where(eq(variationOptions.variationTypeId, variationTypeId));
+    .where(eq(variationOptions.variationTypeId, typeId));
   return result;
 }
 
