@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link } from "wouter";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
-
+import { FormCardDynamic } from "@/components/FormCardDynamic";
 import { ProductVariationManager } from "@/components/ProductVariationManager";
 
 const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
@@ -82,9 +82,10 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
             <TabsTrigger value="variações">Gerenciar Variações</TabsTrigger>
+            <TabsTrigger value="formcard">Form Card Dinâmico</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
           </TabsList>
 
@@ -207,6 +208,42 @@ export default function AdminDashboard() {
           {/* Variações Tab */}
           <TabsContent value="variações" className="mt-8">
             <ProductVariationManager />
+          </TabsContent>
+
+          {/* Form Card Tab */}
+          <TabsContent value="formcard" className="mt-8">
+            <div className="max-w-6xl mx-auto">
+              <FormCardDynamic
+                onSubmit={async (data) => {
+                  try {
+                    // Transformar dados do FormCardDynamic para o formato esperado
+                    const productData = {
+                      name: data.name,
+                      description: data.description,
+                      price: data.basePrice.toString(),
+                      segment: "varejo" as const,
+                      imageUrl: "",
+                    };
+
+                    // Salvar usando tRPC
+                    await createProductMutation.mutateAsync(productData);
+                    
+                    toast.success(`Produto "${data.name}" criado com sucesso!`);
+                    
+                    // Log dos dados completos (variações, preços, calculadora)
+                    console.log("Dados completos do formulário:", {
+                      product: productData,
+                      variations: data.variations,
+                      pricingTiers: data.pricingTiers,
+                      calculatorConfig: data.calculatorConfig,
+                    });
+                  } catch (error: any) {
+                    console.error("Erro ao criar produto:", error);
+                    toast.error(error?.message || "Erro ao criar produto gráfico");
+                  }
+                }}
+              />
+            </div>
           </TabsContent>
 
           {/* Pedidos Tab */}

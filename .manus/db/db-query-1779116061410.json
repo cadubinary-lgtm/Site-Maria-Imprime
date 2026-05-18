@@ -1,9 +1,0 @@
-{
-  "query": "\n-- 1. Remover variações antigas (aquelas vinculadas a produtos específicos)\nDELETE FROM variationTypes WHERE productId IS NOT NULL;\n\n-- 2. Remover opções órfãs (que não têm variationType associada)\nDELETE FROM variationOptions WHERE variationTypeId NOT IN (SELECT id FROM variationTypes);\n\n-- 3. Remover tabelas antigas de materiais, acabamentos e tipos de impressão\nDELETE FROM materials;\nDELETE FROM finishes;\nDELETE FROM printingTypes;\n",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute \n-- 1. Remover variações antigas (aquelas vinculadas a produtos específicos)\nDELETE FROM variationTypes WHERE productId IS NOT NULL;\n\n-- 2. Remover opções órfãs (que não têm variationType associada)\nDELETE FROM variationOptions WHERE variationTypeId NOT IN (SELECT id FROM variationTypes);\n\n-- 3. Remover tabelas antigas de materiais, acabamentos e tipos de impressão\nDELETE FROM materials;\nDELETE FROM finishes;\nDELETE FROM printingTypes;\n",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 841
-}

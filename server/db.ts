@@ -1,9 +1,10 @@
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq } from 'drizzle-orm';
+import { isNull } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -321,7 +322,7 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
     // Fallback: query the newly inserted row by product and get the latest
     const newVariation = await db.select().from(variationTypes)
       .where(eq(variationTypes.productId, productId))
-      .orderBy(desc(variationTypes.id))
+      .orderBy(variationTypes.id)
       .limit(1);
     if (newVariation.length === 0) {
       throw new Error("Failed to retrieve newly inserted variation");
@@ -513,8 +514,7 @@ export async function searchGlobal(query: string) {
     // Buscar TODOS os produtos, categorias e variações (sem limite)
     const allProducts = await db.select().from(products);
     const allCategories = await db.select().from(categories);
-    // Usar apenas variationOptions do sistema global (sem filtro de productId)
-    const allVariationOptions = await db.select().from(variationOptions);
+    const allMaterials = await db.select().from(variationOptions);
 
     // Filtrar resultados em memória
     const filteredProducts = allProducts.filter(p =>
@@ -526,7 +526,7 @@ export async function searchGlobal(query: string) {
       c.name.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 10);
 
-    const filteredMaterials = allVariationOptions.filter(m =>
+    const filteredMaterials = allMaterials.filter(m =>
       m.name.toLowerCase().includes(query.toLowerCase()) ||
       (m.description && m.description.toLowerCase().includes(query.toLowerCase()))
     ).slice(0, 10);
