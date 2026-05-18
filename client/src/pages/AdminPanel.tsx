@@ -69,6 +69,11 @@ export default function AdminPanel() {
     minHeight: '',
     maxHeight: '',
   });
+  const [deliveryOptions, setDeliveryOptions] = useState([
+    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
+    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
+    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -139,6 +144,11 @@ export default function AdminPanel() {
         minHeight: '',
         maxHeight: '',
       });
+      setDeliveryOptions([
+        { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
+        { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
+        { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
+      ]);
       refetch();
     },
     onError: (error) => {
@@ -271,7 +281,7 @@ export default function AdminPanel() {
       return;
     }
 
-    await createProductMutation.mutateAsync({
+    const product = await createProductMutation.mutateAsync({
       name: newProductForm.name,
       description: newProductForm.description || undefined,
       price: newProductForm.price,
@@ -284,6 +294,9 @@ export default function AdminPanel() {
       minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
       maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
     });
+
+    console.log('Produto criado:', product);
+    console.log('Prazos:', deliveryOptions.filter(o => o.isActive));
   };
 
   return (
@@ -419,6 +432,63 @@ export default function AdminPanel() {
                       </div>
                     </div>
                   </>
+                )}
+                {(newProductForm as any).calculationType === 'm2' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <label className="block text-sm font-bold text-blue-900">Prazos de Producao</label>
+                    {deliveryOptions.map((option, idx) => (
+                      <div key={idx} className="space-y-2 p-2 bg-white rounded border">
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={option.isActive}
+                              onChange={(e) => {
+                                const updated = [...deliveryOptions];
+                                updated[idx].isActive = e.target.checked;
+                                setDeliveryOptions(updated);
+                              }}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-sm font-medium">{option.name}</span>
+                          </label>
+                        </div>
+                        {option.isActive && (
+                          <div className="grid grid-cols-2 gap-2 ml-6">
+                            {option.name !== 'Normal' && (
+                              <div>
+                                <label className="text-xs text-gray-600">Valor Adicional (R$/m2)</label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={option.pricePerM2}
+                                  onChange={(e) => {
+                                    const updated = [...deliveryOptions];
+                                    updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
+                                    setDeliveryOptions(updated);
+                                  }}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <label className="text-xs text-gray-600">Dias Uteis</label>
+                              <Input
+                                type="number"
+                                value={option.daysToDeliver}
+                                onChange={(e) => {
+                                  const updated = [...deliveryOptions];
+                                  updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
+                                  setDeliveryOptions(updated);
+                                }}
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
