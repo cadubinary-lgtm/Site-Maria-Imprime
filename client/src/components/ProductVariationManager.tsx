@@ -152,6 +152,7 @@ export function ProductVariationManager() {
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [expandedGlobalVariationId, setExpandedGlobalVariationId] = useState<number | null>(null);
   const [expandedProductVariationId, setExpandedProductVariationId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'products' | 'manage'>('products');
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -427,11 +428,18 @@ export function ProductVariationManager() {
     }
   };
 
+  // Automaticamente mudar para aba de gerenciamento quando produto é selecionado
+  const handleSelectProduct = (productId: number) => {
+    setSelectedProductId(productId);
+    setEditingVariationType(null);
+    setActiveTab('manage');
+  };
+
   const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => a.order - b.order);
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="products" className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'products' | 'manage')} className="w-full">
         <TabsList>
           <TabsTrigger value="products">Selecionar Produto</TabsTrigger>
           <TabsTrigger value="manage">Gerenciar Variações</TabsTrigger>
@@ -465,10 +473,7 @@ export function ProductVariationManager() {
                   .map((product: any) => (
                     <Button
                       key={product.id}
-                      onClick={() => {
-                        setSelectedProductId(product.id);
-                        setEditingVariationType(null);
-                      }}
+                      onClick={() => handleSelectProduct(product.id)}
                       variant={selectedProductId === product.id ? "default" : "outline"}
                       className="justify-start"
                     >
