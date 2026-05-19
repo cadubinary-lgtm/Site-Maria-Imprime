@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
 export type FileStatus = 'pending' | 'analyzing' | 'approved' | 'needs-correction' | 'error';
 
-interface FileValidationResult {
+export interface FileValidationResult {
   status: FileStatus;
   message: string;
   issues: string[];

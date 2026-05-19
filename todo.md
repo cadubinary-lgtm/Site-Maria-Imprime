@@ -253,11 +253,11 @@
 - [x] Testes de controle financeiro
 
 ### FASE 6: Módulo de Validação de Arquivos (Web2Print)
-- [ ] Criar componente FileValidator.tsx
-- [ ] Implementar validações (DPI, CMYK, sangria, margem)
-- [ ] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
-- [ ] Integrar com ProductDetail
-- [ ] Testes de validação de arquivo
+- [x] Criar componente FileValidator.tsx
+- [x] Implementar validações (DPI, CMYK, sangria, margem)
+- [x] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
+- [x] Integrar com ProductDetail
+- [x] Testes de validação de arquivo
 
 ### FASE 7: Automação Inteligente
 - [ ] Criar sistema de notificações automáticas
