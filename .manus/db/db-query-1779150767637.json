@@ -1,0 +1,80 @@
+{
+  "query": "SELECT * FROM segments LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute SELECT * FROM segments LIMIT 10;",
+  "rows": [
+    {
+      "id": "2",
+      "name": "ALIMENTAÇÃO",
+      "icon": "⭐",
+      "slug": "beleza",
+      "createdAt": "2026-05-06 03:58:55"
+    },
+    {
+      "id": "3",
+      "name": "E-COMMERCE",
+      "icon": "🛍️",
+      "slug": "ecommerce",
+      "createdAt": "2026-05-06 03:58:57"
+    },
+    {
+      "id": "4",
+      "name": " SAÚDE & FARMÁCIA",
+      "icon": "💊",
+      "slug": "saude",
+      "createdAt": "2026-05-06 03:58:57"
+    },
+    {
+      "id": "5",
+      "name": "AUTOMOTIVO",
+      "icon": "🚗",
+      "slug": "automotivo",
+      "createdAt": "2026-05-06 03:58:58"
+    },
+    {
+      "id": "6",
+      "name": " JURÍDICO",
+      "icon": "⚖️",
+      "slug": "juridico",
+      "createdAt": "2026-05-06 03:58:59"
+    },
+    {
+      "id": "7",
+      "name": "IMOBILIÁRIA",
+      "icon": "🏠",
+      "slug": "imobiliaria",
+      "createdAt": "2026-05-06 03:58:59"
+    },
+    {
+      "id": "8",
+      "name": "REFRIGERAÇÃO",
+      "icon": "❄️",
+      "slug": "refrigeracao",
+      "createdAt": "2026-05-06 03:58:59"
+    },
+    {
+      "id": "9",
+      "name": "EVENTOS",
+      "icon": "🎉",
+      "slug": "eventos",
+      "createdAt": "2026-05-06 03:59:00"
+    },
+    {
+      "id": "10",
+      "name": "PET SHOP",
+      "icon": "🐾",
+      "slug": "petshop",
+      "createdAt": "2026-05-06 03:59:00"
+    },
+    {
+      "id": "11",
+      "name": "EDUCAÇÃO",
+      "icon": "🏫",
+      "slug": "educacao",
+      "createdAt": "2026-05-06 03:59:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\ticon\tslug\tcreatedAt\n2\tALIMENTAÇÃO\t⭐\tbeleza\t2026-05-06 03:58:55\n3\tE-COMMERCE\t🛍️\tecommerce\t2026-05-06 03:58:57\n4\t SAÚDE & FARMÁCIA\t💊\tsaude\t2026-05-06 03:58:57\n5\tAUTOMOTIVO\t🚗\tautomotivo\t2026-05-06 03:58:58\n6\t JURÍDICO\t⚖️\tjuridico\t2026-05-06 03:58:59\n7\tIMOBILIÁRIA\t🏠\timobiliaria\t2026-05-06 03:58:59\n8\tREFRIGERAÇÃO\t❄️\trefrigeracao\t2026-05-06 03:58:59\n9\tEVENTOS\t🎉\teventos\t2026-05-06 03:59:00\n10\tPET SHOP\t🐾\tpetshop\t2026-05-06 03:59:00\n11\tEDUCAÇÃO\t🏫\teducacao\t2026-05-06 03:59:00\n",
+  "stderr": "",
+  "execution_time_ms": 656
+}

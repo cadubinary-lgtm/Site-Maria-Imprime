@@ -69,7 +69,7 @@ export type InsertSegment = typeof segments.$inferInsert;
  */
 export const categories = mysqlTable("categories", {
   id: int("id").autoincrement().primaryKey(),
-  segmentId: int("segmentId").notNull(),
+  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -841,7 +841,7 @@ export type InsertOrderItemAttribute = typeof orderItemAttributes.$inferInsert;
 export const productSegments = mysqlTable("productSegments", {
   id: int("id").autoincrement().primaryKey(),
   productId: int("productId").notNull(),
-  segmentId: int("segmentId").notNull(),
+  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

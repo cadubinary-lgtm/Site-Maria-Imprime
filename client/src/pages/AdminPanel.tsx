@@ -38,12 +38,11 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 // Segmentos padrão como fallback
-const DEFAULT_SEGMENTS = [
+const DEFAULT_SEGMENTS_CONST = [
   { value: 'alimentacao', label: '🍔 Alimentação' },
   { value: 'beleza', label: '💄 Beleza & Saúde' },
   { value: 'varejo', label: '🛍️ Varejo' },
   { value: 'servicos', label: '🔧 Serviços' },
-  { value: 'revendedores', label: '🏭 REVENDEDORES' },
 ];
 
 export default function AdminPanel() {
@@ -58,19 +57,6 @@ export default function AdminPanel() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newProductForm, setNewProductForm] = useState({
-    name: '',
-    description: '',
-    price: '',
-    segment: 'servicos',
-    imageUrl: '',
-    calculationType: 'unidade',
-    pricePerM2: '',
-    minWidth: '',
-    maxWidth: '',
-    minHeight: '',
-    maxHeight: '',
-  });
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionForCreation[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
@@ -79,33 +65,44 @@ export default function AdminPanel() {
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
 
   // Fetch all segments dynamically
-  const { data: segmentsData, isLoading: segmentsLoading, error: segmentsError } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData } = trpc.segments.getAll.useQuery();
   
-  // Debug: log dados de segmentos
-  useEffect(() => {
-    console.log('Segments Query Status:', {
-      isLoading: segmentsLoading,
-      hasData: !!segmentsData,
-      dataLength: segmentsData?.length || 0,
-      error: segmentsError?.message,
-      data: segmentsData,
-    });
-  }, [segmentsData, segmentsLoading, segmentsError]);
-  
+  // Usar fallback de segmentos padrão
+
   // Converter segmentos da API para formato esperado com useMemo
   const SEGMENTS = useMemo(() => {
-    console.log('SEGMENTS useMemo called with:', { segmentsData, length: segmentsData?.length });
     if (segmentsData && segmentsData.length > 0) {
-      const mapped = segmentsData.map((seg: any) => ({
+      return segmentsData.map((seg: any) => ({
         value: seg.slug,
         label: `${seg.icon || '📦'} ${seg.name}`,
       }));
-      console.log('Mapped SEGMENTS:', mapped);
-      return mapped;
     }
-    console.log('Using DEFAULT_SEGMENTS');
-    return DEFAULT_SEGMENTS;
+    // Usar fallback se a query não retornar dados
+    return DEFAULT_SEGMENTS_CONST;
   }, [segmentsData]);
+
+
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    segment: DEFAULT_SEGMENTS_CONST[0]?.value || 'alimentacao',
+    imageUrl: '',
+    calculationType: 'unidade',
+    pricePerM2: '',
+    minWidth: '',
+    maxWidth: '',
+    minHeight: '',
+    maxHeight: '',
+  });
+
+  // Definir o primeiro segmento como padrão quando os dados carregarem
+  useEffect(() => {
+    if (SEGMENTS.length > 0 && newProductForm.segment !== SEGMENTS[0].value) {
+      setNewProductForm(prev => ({ ...prev, segment: SEGMENTS[0].value }));
+    }
+  }, [SEGMENTS]);
+
 
   // Update product mutation
   const updateProductMutation = trpc.products.updateProduct.useMutation({

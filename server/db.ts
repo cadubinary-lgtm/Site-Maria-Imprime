@@ -364,6 +364,9 @@ export async function getVariationOptionsByType(typeId: number) {
   return result;
 }
 
+// Alias para compatibilidade
+export const getVariationOptions = getVariationOptionsByType;
+
 export async function createVariationOption(data: InsertVariationOption) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
