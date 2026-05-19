@@ -27,7 +27,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
-import { ProductDeliveryManager } from '@/components/ProductDeliveryManager';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -63,7 +62,18 @@ export default function AdminPanel() {
     price: '',
     segment: 'servicos',
     imageUrl: '',
+    calculationType: 'unidade',
+    pricePerM2: '',
+    minWidth: '',
+    maxWidth: '',
+    minHeight: '',
+    maxHeight: '',
   });
+  const [deliveryOptions, setDeliveryOptions] = useState([
+    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
+    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
+    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,7 +137,18 @@ export default function AdminPanel() {
         price: '',
         segment: 'servicos',
         imageUrl: '',
+        calculationType: 'unidade',
+        pricePerM2: '',
+        minWidth: '',
+        maxWidth: '',
+        minHeight: '',
+        maxHeight: '',
       });
+      setDeliveryOptions([
+        { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
+        { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
+        { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
+      ]);
       refetch();
     },
     onError: (error) => {
@@ -260,13 +281,22 @@ export default function AdminPanel() {
       return;
     }
 
-    await createProductMutation.mutateAsync({
+    const product = await createProductMutation.mutateAsync({
       name: newProductForm.name,
       description: newProductForm.description || undefined,
       price: newProductForm.price,
       segment: newProductForm.segment as any,
       imageUrl: newProductForm.imageUrl || undefined,
+      calculationType: (newProductForm as any).calculationType || 'unidade',
+      pricePerM2: (newProductForm as any).pricePerM2 || undefined,
+      minWidth: (newProductForm as any).minWidth ? (newProductForm as any).minWidth : undefined,
+      maxWidth: (newProductForm as any).maxWidth ? (newProductForm as any).maxWidth : undefined,
+      minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
+      maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
     });
+
+    console.log('Produto criado:', product);
+    console.log('Prazos:', deliveryOptions.filter(o => o.isActive));
   };
 
   return (
@@ -333,6 +363,133 @@ export default function AdminPanel() {
                     placeholder="0.00"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tipo de Cobrança</label>
+                  <Select value={(newProductForm as any).calculationType || 'unidade'} onValueChange={(val) => setNewProductForm({ ...newProductForm, calculationType: val } as any)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unidade">Unidade</SelectItem>
+                      <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {(newProductForm as any).calculationType === 'm2' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Preço por m²</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(newProductForm as any).pricePerM2}
+                        onChange={(e) => setNewProductForm({ ...newProductForm, pricePerM2: e.target.value } as any)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Largura Mín (m)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={(newProductForm as any).minWidth}
+                          onChange={(e) => setNewProductForm({ ...newProductForm, minWidth: e.target.value } as any)}
+                          placeholder="1.0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Largura Máx (m)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={(newProductForm as any).maxWidth}
+                          onChange={(e) => setNewProductForm({ ...newProductForm, maxWidth: e.target.value } as any)}
+                          placeholder="10.0"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Altura Mín (m)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={(newProductForm as any).minHeight}
+                          onChange={(e) => setNewProductForm({ ...newProductForm, minHeight: e.target.value } as any)}
+                          placeholder="1.0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Altura Máx (m)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={(newProductForm as any).maxHeight}
+                          onChange={(e) => setNewProductForm({ ...newProductForm, maxHeight: e.target.value } as any)}
+                          placeholder="10.0"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+                {(newProductForm as any).calculationType === 'm2' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <label className="block text-sm font-bold text-blue-900">Prazos de Producao</label>
+                    {deliveryOptions.map((option, idx) => (
+                      <div key={idx} className="space-y-2 p-2 bg-white rounded border">
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={option.isActive}
+                              onChange={(e) => {
+                                const updated = [...deliveryOptions];
+                                updated[idx].isActive = e.target.checked;
+                                setDeliveryOptions(updated);
+                              }}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-sm font-medium">{option.name}</span>
+                          </label>
+                        </div>
+                        {option.isActive && (
+                          <div className="grid grid-cols-2 gap-2 ml-6">
+                            {option.name !== 'Normal' && (
+                              <div>
+                                <label className="text-xs text-gray-600">Valor Adicional (R$/m2)</label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={option.pricePerM2}
+                                  onChange={(e) => {
+                                    const updated = [...deliveryOptions];
+                                    updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
+                                    setDeliveryOptions(updated);
+                                  }}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <label className="text-xs text-gray-600">Dias Uteis</label>
+                              <Input
+                                type="number"
+                                value={option.daysToDeliver}
+                                onChange={(e) => {
+                                  const updated = [...deliveryOptions];
+                                  updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
+                                  setDeliveryOptions(updated);
+                                }}
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
