@@ -197,6 +197,20 @@
       "when": 1779138478505,
       "tag": "0027_lean_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "5",
+      "when": 1779143833479,
+      "tag": "0028_nappy_spot",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1779230153957,
+      "tag": "0029_needy_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

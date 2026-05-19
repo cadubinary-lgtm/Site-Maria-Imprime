@@ -120,6 +120,16 @@ export async function getProductById(id: number) {
   return result[0];
 }
 
+export async function getProductByName(name: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.execute(
+    sql`SELECT * FROM products WHERE name = ${name} LIMIT 1`
+  ) as any;
+  return result[0]?.[0];
+}
+
 // Segments queries
 export async function getAllSegments() {
   const db = await getDb();
@@ -583,6 +593,33 @@ export async function getDeliveryOptionsByProduct(productId: number) {
   } catch (error) {
     console.error("Error fetching delivery options:", error);
     return [];
+  }
+}
+
+export async function copyDeliveryOptionsFromProduct(sourceProductId: number, targetProductId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    // Buscar prazos do produto de origem
+    const sourceOptions = await getDeliveryOptionsByProduct(sourceProductId);
+    
+    // Copiar cada prazo para o novo produto
+    for (const option of sourceOptions) {
+      await createDeliveryOption({
+        productId: targetProductId,
+        name: option.name,
+        daysToDeliver: option.daysToDeliver,
+        pricePerM2: option.pricePerM2,
+        isActive: option.isActive,
+        order: option.order,
+      });
+    }
+    
+    return { success: true, copied: sourceOptions.length };
+  } catch (error) {
+    console.error("Error copying delivery options:", error);
+    throw error;
   }
 }
 

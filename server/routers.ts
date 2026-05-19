@@ -8,6 +8,7 @@ import {
   getAllProducts,
   getProductsBySegment,
   getProductById,
+  getProductByName,
   getOrdersByClient,
   getOrderById,
   getAllOrders,
@@ -43,6 +44,7 @@ import {
   updateDeliveryOption,
   deleteDeliveryOption,
   reorderDeliveryOptions,
+  copyDeliveryOptionsFromProduct,
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -232,7 +234,16 @@ export const appRouter = router({
             isActive: true,
           } as any);
           
-          // Retornar o resultado da inserção
+          const newProductId = (result as any).insertId;
+          const testProduct = await getProductByName('Teste');
+          if (testProduct && testProduct.id) {
+            try {
+              await copyDeliveryOptionsFromProduct(testProduct.id, newProductId);
+            } catch (e) {
+              console.warn('Erro ao copiar prazos:', e);
+            }
+          }
+          
           return { success: true, message: 'Produto criado com sucesso' };
         } catch (error) {
           console.error('Error creating product:', error);
