@@ -20,13 +20,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
+import { DeliveryOptionsCreator, DeliveryOptionForCreation } from '@/components/DeliveryOptionsCreator';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -56,6 +57,7 @@ export default function AdminPanel() {
   const [editingImageUrl, setEditingImageUrl] = useState<string>('');
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newProductForm, setNewProductForm] = useState({
     name: '',
     description: '',
@@ -69,11 +71,7 @@ export default function AdminPanel() {
     minHeight: '',
     maxHeight: '',
   });
-  const [deliveryOptions, setDeliveryOptions] = useState([
-    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true },
-    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, isActive: false },
-    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, isActive: false },
-  ]);
+  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionForCreation[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -288,6 +286,13 @@ export default function AdminPanel() {
       maxWidth: (newProductForm as any).maxWidth ? (newProductForm as any).maxWidth : undefined,
       minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
       maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
+      deliveryOptions: deliveryOptions.map(opt => ({
+        name: opt.name,
+        daysToDeliver: opt.daysToDeliver,
+        pricePerM2: opt.pricePerM2,
+        isActive: opt.isActive,
+        order: opt.order,
+      })),
     });
   };
 
@@ -317,17 +322,17 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-bold mb-2">Painel Admin</h1>
             <p className="text-gray-600">Gerenciamento de Preços e Catálogos</p>
           </div>
-          <Dialog open={isCreatingProduct} onOpenChange={setIsCreatingProduct}>
-            <DialogTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Produto
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Criar Novo Produto</DialogTitle>
-              </DialogHeader>
+          <Button 
+            onClick={() => setIsDialogOpen(!isDialogOpen)}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Produto
+          </Button>
+        </div>
+
+        {isDialogOpen && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Nome *</label>
@@ -423,55 +428,13 @@ export default function AdminPanel() {
                         />
                       </div>
                     </div>
+                    <DeliveryOptionsCreator
+                      options={deliveryOptions}
+                      onOptionsChange={setDeliveryOptions}
+                      calculationType={(newProductForm as any).calculationType}
+                    />
                   </>
                 )}
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-blue-900 bg-blue-50 p-2 rounded">Prazos de Produção</label>
-                  <div className="space-y-2">
-                    {deliveryOptions.map((option, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded border">
-                        <input
-                          type="checkbox"
-                          checked={option.isActive}
-                          onChange={(e) => {
-                            const updated = [...deliveryOptions];
-                            updated[idx].isActive = e.target.checked;
-                            setDeliveryOptions(updated);
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="font-medium text-sm flex-1">{option.name}</span>
-                        {option.isActive && (
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              value={option.daysToDeliver}
-                              onChange={(e) => {
-                                const updated = [...deliveryOptions];
-                                updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
-                                setDeliveryOptions(updated);
-                              }}
-                              className="w-16 h-8 text-xs"
-                              placeholder="dias"
-                            />
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={option.pricePerM2}
-                              onChange={(e) => {
-                                const updated = [...deliveryOptions];
-                                updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
-                                setDeliveryOptions(updated);
-                              }}
-                              className="w-20 h-8 text-xs"
-                              placeholder="R$/m²"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
@@ -531,9 +494,8 @@ export default function AdminPanel() {
                   </Button>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
+          )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-8">

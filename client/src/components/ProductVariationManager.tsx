@@ -367,6 +367,7 @@ export function ProductVariationManager() {
     try {
       await createVariationTypeMutation.mutateAsync({
         productId: selectedProductId,
+        type: 'material',
         name: newVariationTypeName,
         isRequired: newVariationTypeRequired,
       });
@@ -392,11 +393,11 @@ export function ProductVariationManager() {
       const newOrder = arrayMove(sortedVariationTypes, oldIndex, newIndex);
       const orderMap = newOrder.map((vt: VariationType, index: number) => ({
         id: vt.id,
-        order: index,
+        order: index + 1,
       }));
 
       try {
-        await reorderVariationTypesMutation.mutateAsync({ orders: orderMap });
+        await reorderVariationTypesMutation.mutateAsync({ updates: orderMap });
         toast.success("Ordem atualizada!");
         if (selectedProductId) {
           await utils.variations.getByProduct.invalidate({ productId: selectedProductId });

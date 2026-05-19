@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager } from "@/components/DeliveryOptionsManager";
 
+
 export default function AdminProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -502,11 +503,13 @@ export default function AdminProducts() {
                               </>
                             )}
 
-                            {(editForm as any).calculationType === "m2" && editingId && (
-                              <DeliveryOptionsManager
-                                productId={editingId}
-                                calculationType="m2"
-                              />
+                            {editingId && (
+                              <>
+                                <DeliveryOptionsManager
+                                  productId={editingId}
+                                  calculationType={(editForm as any).calculationType || "unidade"}
+                                />
+                              </>
                             )}
 
                             <div>

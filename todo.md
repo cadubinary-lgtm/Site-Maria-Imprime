@@ -1618,3 +1618,72 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todo.md com conclusão
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
+
+
+## FASE 29: Refatorar Prazos para Sistema Global ⏳
+
+### FASE 1: Analisar e Planejar Migração
+- [ ] Analisar estrutura atual (productDeliveryOptions com productId)
+- [ ] Documentar mudanças necessárias
+- [ ] Planejar estratégia de migração de dados
+- [ ] Definir tabelas necessárias
+
+### FASE 2: Criar Tabela Global de Prazos
+- [ ] Criar tabela `deliveryOptions` (id, name, daysToDeliver, pricePerM2, isActive, order)
+- [ ] Criar tabela `productDeliveryOptionMappings` (productId, deliveryOptionId)
+- [ ] Executar migration SQL via webdev_execute_sql
+- [ ] Validar dados no banco
+
+### FASE 3: Atualizar Schema Drizzle
+- [ ] Adicionar tabela `deliveryOptions` ao schema
+- [ ] Adicionar tabela `productDeliveryOptionMappings` ao schema
+- [ ] Remover coluna productId de `productDeliveryOptions` (ou manter como legado)
+- [ ] Gerar migration SQL
+
+### FASE 4: Criar Procedures tRPC Globais
+- [ ] Criar `deliveryOptions.getAll` (lista todos os prazos globais)
+- [ ] Criar `deliveryOptions.create` (criar novo prazo global)
+- [ ] Criar `deliveryOptions.update` (editar prazo global)
+- [ ] Criar `deliveryOptions.delete` (deletar prazo global)
+- [ ] Criar `deliveryOptions.reorder` (reordenar prazos)
+- [ ] Criar `products.getDeliveryOptions` (prazos de um produto específico)
+- [ ] Criar `products.setDeliveryOptions` (vincular prazos a um produto)
+
+### FASE 5: Criar Admin Panel para Prazos Globais
+- [ ] Criar página `/admin/prazos` para gerenciar prazos globais
+- [ ] Implementar CRUD de prazos (criar, editar, deletar, reordenar)
+- [ ] Adicionar seção em "Criar Novo Produto" para selecionar prazos
+- [ ] Implementar checkboxes para vincular prazos ao produto
+- [ ] Testar interface completa
+
+### FASE 6: Refatorar Formulário de Novo Produto
+- [ ] Remover seção de "Prazos de Produção" do formulário de edição
+- [ ] Adicionar dropdown/checkboxes para selecionar prazos globais
+- [ ] Implementar busca/filtro de prazos
+- [ ] Validar seleção de prazos obrigatória
+- [ ] Testar fluxo de criação
+
+### FASE 7: Atualizar ProductConfigurator
+- [ ] Modificar para carregar prazos via `products.getDeliveryOptions`
+- [ ] Validar que prazos globais aparecem corretamente
+- [ ] Testar cálculo de taxa expressa
+- [ ] Validar seleção de prazos
+
+### FASE 8: Migrar Dados Existentes
+- [ ] Criar script para migrar dados de productDeliveryOptions para deliveryOptions
+- [ ] Atualizar productDeliveryOptionMappings com dados migrados
+- [ ] Validar integridade de dados
+- [ ] Testar que produtos existentes continuam funcionando
+
+### FASE 9: Testes e Validação
+- [ ] Testar criação de novo prazo global
+- [ ] Testar vinculação de prazos a novo produto
+- [ ] Testar que produtos reutilizam prazos globais
+- [ ] Testar que alteração de prazo global afeta todos os produtos
+- [ ] Validar fluxo completo de compra
+- [ ] Testar que produtos antigos continuam funcionando
+
+### FASE 10: Entregar Solução
+- [ ] Criar checkpoint final
+- [ ] Documentar sistema de prazos globais
+- [ ] Atualizar guia de uso do admin

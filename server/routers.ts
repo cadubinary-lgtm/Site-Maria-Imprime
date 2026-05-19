@@ -43,6 +43,7 @@ import {
   updateDeliveryOption,
   deleteDeliveryOption,
   reorderDeliveryOptions,
+
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -209,6 +210,13 @@ export const appRouter = router({
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
+        deliveryOptions: z.array(z.object({
+          name: z.string(),
+          daysToDeliver: z.number(),
+          pricePerM2: z.number(),
+          isActive: z.boolean(),
+          order: z.number(),
+        })).optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -231,6 +239,25 @@ export const appRouter = router({
             maxHeight: input.maxHeight ? input.maxHeight as any : null,
             isActive: true,
           } as any);
+          
+          // Obter o produto inserido para pegar o ID
+          const allProducts = await getAllProducts();
+          const newProduct = allProducts[allProducts.length - 1];
+          const productId = newProduct?.id || 0;
+          
+          // Inserir prazos se fornecidos
+          if (input.deliveryOptions && input.deliveryOptions.length > 0) {
+            for (const option of input.deliveryOptions) {
+              await createDeliveryOption({
+                productId,
+                name: option.name,
+                daysToDeliver: option.daysToDeliver,
+                pricePerM2: option.pricePerM2,
+                isActive: option.isActive,
+                order: option.order,
+              });
+            }
+          }
           
           // Retornar o resultado da inserção
           return { success: true, message: 'Produto criado com sucesso' };
@@ -553,6 +580,7 @@ export const appRouter = router({
         return await reorderDeliveryOptions(input.updates);
       }),
   }),
+
 });
 
 export type AppRouter = typeof appRouter;
