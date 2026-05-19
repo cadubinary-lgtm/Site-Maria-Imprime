@@ -27,6 +27,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
+import { ProductDeliveryManager } from '@/components/ProductDeliveryManager';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
