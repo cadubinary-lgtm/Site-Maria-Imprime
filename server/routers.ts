@@ -43,7 +43,6 @@ import {
   updateDeliveryOption,
   deleteDeliveryOption,
   reorderDeliveryOptions,
-
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -54,6 +53,7 @@ import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
 import { attributesRouter } from "./routers-attributes";
+import { productSegmentsRouter } from "./routers-product-segments";
 import { pricingRouter } from "./routers-pricing";
 import { pricingRulesRouter } from "./routers-pricing-rules";
 
@@ -168,8 +168,8 @@ export const appRouter = router({
   // Categories - Público
   categories: router({
     getBySegment: publicProcedure
-      .input(z.object({ segment: z.string() }))
-      .query(({ input }) => getCategoriesBySegment(input.segment)),
+      .input(z.object({ segmentId: z.number() }))
+      .query(({ input }) => getCategoriesBySegment(input.segmentId)),
     getProducts: publicProcedure
       .input(z.object({ categoryId: z.number() }))
       .query(({ input }) => getProductsByCategory(input.categoryId)),
@@ -209,13 +209,6 @@ export const appRouter = router({
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
-        deliveryOptions: z.array(z.object({
-          name: z.string(),
-          daysToDeliver: z.number(),
-          pricePerM2: z.number(),
-          isActive: z.boolean(),
-          order: z.number(),
-        })).optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -238,25 +231,6 @@ export const appRouter = router({
             maxHeight: input.maxHeight ? input.maxHeight as any : null,
             isActive: true,
           } as any);
-          
-          // Obter o produto inserido para pegar o ID
-          const allProducts = await getAllProducts();
-          const newProduct = allProducts[allProducts.length - 1];
-          const productId = newProduct?.id || 0;
-          
-          // Inserir prazos se fornecidos
-          if (input.deliveryOptions && input.deliveryOptions.length > 0) {
-            for (const option of input.deliveryOptions) {
-              await createDeliveryOption({
-                productId,
-                name: option.name,
-                daysToDeliver: option.daysToDeliver,
-                pricePerM2: option.pricePerM2,
-                isActive: option.isActive,
-                order: option.order,
-              });
-            }
-          }
           
           // Retornar o resultado da inserção
           return { success: true, message: 'Produto criado com sucesso' };
@@ -528,6 +502,8 @@ export const appRouter = router({
   automation: automationRouter,
   // Attributes - Atributos Dinâmicos
   attributes: attributesRouter,
+  // Product Segments - Múltiplos Segmentos por Produto
+  productSegments: productSegmentsRouter,
   // Pricing - Precificação Dinâmica
   pricing: pricingRouter,
   // Pricing Rules - Regras de Precificação Reutilizáveis
@@ -577,7 +553,6 @@ export const appRouter = router({
         return await reorderDeliveryOptions(input.updates);
       }),
   }),
-
 });
 
 export type AppRouter = typeof appRouter;

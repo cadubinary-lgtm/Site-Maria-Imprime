@@ -17,9 +17,11 @@ import AllProducts from "./pages/AllProducts";
 import AdminPanel from "./pages/AdminPanel";
 import SegmentsManager from "./pages/SegmentsManager";
 import CalculadoraDemo from "./pages/CalculadoraDemo";
-import AdminNewProduct from "./pages/AdminNewProduct";
-
-
+import AdminAttributesManager from "./pages/AdminAttributesManager";
+import AdminProductAttributesLinker from "./pages/AdminProductAttributesLinker";
+import AdminRulesBuilder from "./pages/AdminRulesBuilder";
+import { AdminPricingRules } from "./pages/AdminPricingRules";
+import AdminRulesManager from "./pages/AdminRulesManager";
 import Catalog from "./pages/Catalog";
 
 import ClientsManager from "./pages/ClientsManager";
@@ -58,14 +60,17 @@ function Router() {
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
-          <Route path="/admin/produtos/novos" component={AdminNewProduct} />
+          <Route path="/admin/precos" component={AdminPanel} />
           <Route path="/admin/segmentos" component={SegmentsManager} />
           <Route path="/admin/clientes" component={ClientsManager} />
           <Route path="/admin/financeiro" component={FinancialDashboard} />
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
-          <Route path="/admin/automacao" component={AutomationDashboard} />
-          <Route path="/admin/erp" component={ERPDashboard} />
-
+        <Route path="/admin/automacao" component={AutomationDashboard} />
+        <Route path="/admin/erp" component={ERPDashboard} />
+        <Route path="/admin/atributos" component={AdminAttributesManager} />
+        <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
+        <Route path="/admin/regras" component={AdminPricingRules} />
+        <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
 
         </>
       )}

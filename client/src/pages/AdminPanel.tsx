@@ -20,14 +20,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
-import { DeliveryOptionsCreator, DeliveryOptionForCreation } from '@/components/DeliveryOptionsCreator';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -38,11 +37,12 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 // Segmentos padrão como fallback
-const DEFAULT_SEGMENTS_CONST = [
+const DEFAULT_SEGMENTS = [
   { value: 'alimentacao', label: '🍔 Alimentação' },
   { value: 'beleza', label: '💄 Beleza & Saúde' },
   { value: 'varejo', label: '🛍️ Varejo' },
   { value: 'servicos', label: '🔧 Serviços' },
+  { value: 'revendedores', label: '🏭 REVENDEDORES' },
 ];
 
 export default function AdminPanel() {
@@ -56,37 +56,11 @@ export default function AdminPanel() {
   const [editingImageUrl, setEditingImageUrl] = useState<string>('');
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionForCreation[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const createFileInputRef = useRef<HTMLInputElement>(null);
-
-  // Fetch all products
-  const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
-
-  // Fetch all segments dynamically
-  const { data: segmentsData } = trpc.segments.getAll.useQuery();
-  
-  // Usar fallback de segmentos padrão
-
-  // Converter segmentos da API para formato esperado com useMemo
-  const SEGMENTS = useMemo(() => {
-    if (segmentsData && segmentsData.length > 0) {
-      return segmentsData.map((seg: any) => ({
-        value: seg.slug,
-        label: `${seg.icon || '📦'} ${seg.name}`,
-      }));
-    }
-    // Usar fallback se a query não retornar dados
-    return DEFAULT_SEGMENTS_CONST;
-  }, [segmentsData]);
-
-
   const [newProductForm, setNewProductForm] = useState({
     name: '',
     description: '',
     price: '',
-    segment: DEFAULT_SEGMENTS_CONST[0]?.value || 'alimentacao',
+    segment: 'servicos',
     imageUrl: '',
     calculationType: 'unidade',
     pricePerM2: '',
@@ -95,14 +69,40 @@ export default function AdminPanel() {
     minHeight: '',
     maxHeight: '',
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const createFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Definir o primeiro segmento como padrão quando os dados carregarem
+  // Fetch all products
+  const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
+
+  // Fetch all segments dynamically
+  const { data: segmentsData, isLoading: segmentsLoading, error: segmentsError } = trpc.segments.getAll.useQuery();
+  
+  // Debug: log dados de segmentos
   useEffect(() => {
-    if (SEGMENTS.length > 0 && newProductForm.segment !== SEGMENTS[0].value) {
-      setNewProductForm(prev => ({ ...prev, segment: SEGMENTS[0].value }));
+    console.log('Segments Query Status:', {
+      isLoading: segmentsLoading,
+      hasData: !!segmentsData,
+      dataLength: segmentsData?.length || 0,
+      error: segmentsError?.message,
+      data: segmentsData,
+    });
+  }, [segmentsData, segmentsLoading, segmentsError]);
+  
+  // Converter segmentos da API para formato esperado com useMemo
+  const SEGMENTS = useMemo(() => {
+    console.log('SEGMENTS useMemo called with:', { segmentsData, length: segmentsData?.length });
+    if (segmentsData && segmentsData.length > 0) {
+      const mapped = segmentsData.map((seg: any) => ({
+        value: seg.slug,
+        label: `${seg.icon || '📦'} ${seg.name}`,
+      }));
+      console.log('Mapped SEGMENTS:', mapped);
+      return mapped;
     }
-  }, [SEGMENTS]);
-
+    console.log('Using DEFAULT_SEGMENTS');
+    return DEFAULT_SEGMENTS;
+  }, [segmentsData]);
 
   // Update product mutation
   const updateProductMutation = trpc.products.updateProduct.useMutation({
@@ -283,13 +283,6 @@ export default function AdminPanel() {
       maxWidth: (newProductForm as any).maxWidth ? (newProductForm as any).maxWidth : undefined,
       minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
       maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
-      deliveryOptions: deliveryOptions.map(opt => ({
-        name: opt.name,
-        daysToDeliver: opt.daysToDeliver,
-        pricePerM2: opt.pricePerM2,
-        isActive: opt.isActive,
-        order: opt.order,
-      })),
     });
   };
 
@@ -319,17 +312,17 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-bold mb-2">Painel Admin</h1>
             <p className="text-gray-600">Gerenciamento de Preços e Catálogos</p>
           </div>
-          <Button 
-            onClick={() => setIsDialogOpen(!isDialogOpen)}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Produto
-          </Button>
-        </div>
-
-        {isDialogOpen && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+          <Dialog open={isCreatingProduct} onOpenChange={setIsCreatingProduct}>
+            <DialogTrigger asChild>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Produto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Criar Novo Produto</DialogTitle>
+              </DialogHeader>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Nome *</label>
@@ -425,11 +418,6 @@ export default function AdminPanel() {
                         />
                       </div>
                     </div>
-                    <DeliveryOptionsCreator
-                      options={deliveryOptions}
-                      onOptionsChange={setDeliveryOptions}
-                      calculationType={(newProductForm as any).calculationType}
-                    />
                   </>
                 )}
                 <div>
@@ -491,8 +479,9 @@ export default function AdminPanel() {
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-8">

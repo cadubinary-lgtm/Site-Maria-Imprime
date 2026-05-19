@@ -18,7 +18,7 @@ export default function MultiSegmentSelector({
   selectedSegmentIds,
   onSegmentsChange,
 }: MultiSegmentSelectorProps) {
-  const { data: allSegments, isLoading } = trpc.segments.getAll.useQuery();
+  const { data: allSegments, isLoading } = trpc.productSegments.getAllSegments.useQuery();
   const [localSelected, setLocalSelected] = useState<number[]>(selectedSegmentIds);
   const prevSelectedRef = useRef<number[]>(selectedSegmentIds);
 
@@ -53,8 +53,8 @@ export default function MultiSegmentSelector({
     return <div className="text-gray-500">Carregando segmentos...</div>;
   }
 
-  const selectedSegments = allSegments?.filter((s: any) => localSelected.includes(s.id)) || [];
-  const unselectedSegments = allSegments?.filter((s: any) => !localSelected.includes(s.id)) || [];
+  const selectedSegments = allSegments?.filter((s) => localSelected.includes(s.id)) || [];
+  const unselectedSegments = allSegments?.filter((s) => !localSelected.includes(s.id)) || [];
 
   return (
     <div className="space-y-4">
@@ -66,7 +66,7 @@ export default function MultiSegmentSelector({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {selectedSegments.map((segment: any) => (
+              {selectedSegments.map((segment) => (
                 <Badge
                   key={segment.id}
                   className="bg-blue-600 text-white cursor-pointer hover:bg-blue-700 flex items-center gap-1"
@@ -89,7 +89,7 @@ export default function MultiSegmentSelector({
         <CardContent>
           <div className="space-y-3">
             {unselectedSegments.length > 0 ? (
-              unselectedSegments.map((segment: any) => (
+              unselectedSegments.map((segment) => (
                 <div key={segment.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`segment-${segment.id}`}

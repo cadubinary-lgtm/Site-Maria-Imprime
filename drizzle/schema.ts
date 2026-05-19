@@ -69,7 +69,7 @@ export type InsertSegment = typeof segments.$inferInsert;
  */
 export const categories = mysqlTable("categories", {
   id: int("id").autoincrement().primaryKey(),
-  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
+  segmentId: int("segmentId").notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -841,7 +841,7 @@ export type InsertOrderItemAttribute = typeof orderItemAttributes.$inferInsert;
 export const productSegments = mysqlTable("productSegments", {
   id: int("id").autoincrement().primaryKey(),
   productId: int("productId").notNull(),
-  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
+  segmentId: int("segmentId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -880,39 +880,6 @@ export type InsertPricingRule = typeof pricingRules.$inferInsert;
 /**
  * Product Delivery Options - Opções de prazo de entrega para produtos m²
  * Ex: Normal (5 dias), Expresso 24h, Mesmo Dia
- */
-/**
- * Delivery Options table - prazos de produção GLOBAIS (reutilizáveis em todos os produtos)
- */
-export const deliveryOptions = mysqlTable("deliveryOptions", {
-  id: int("id").autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(), // Ex: "Normal", "24 Horas", "Mesmo Dia"
-  daysToDeliver: int("daysToDeliver").notNull(), // Número de dias úteis
-  pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }).default("0").notNull(), // Valor adicional por m²
-  isActive: boolean("isActive").default(true).notNull(),
-  order: int("order").default(0).notNull(), // Ordenação
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type DeliveryOption = typeof deliveryOptions.$inferSelect;
-export type InsertDeliveryOption = typeof deliveryOptions.$inferInsert;
-
-/**
- * Product Delivery Option Mappings - relaciona produtos com prazos globais (N:N)
- */
-export const productDeliveryOptionMappings = mysqlTable("productDeliveryOptionMappings", {
-  id: int("id").autoincrement().primaryKey(),
-  productId: int("productId").notNull(),
-  deliveryOptionId: int("deliveryOptionId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type ProductDeliveryOptionMapping = typeof productDeliveryOptionMappings.$inferSelect;
-export type InsertProductDeliveryOptionMapping = typeof productDeliveryOptionMappings.$inferInsert;
-
-/**
- * LEGADO: Tabela antiga de prazos por produto (mantida para compatibilidade)
  */
 export const productDeliveryOptions = mysqlTable("productDeliveryOptions", {
   id: int("id").autoincrement().primaryKey(),

@@ -15,7 +15,6 @@ import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
-import FileValidator, { type FileStatus, type FileValidationResult } from "@/components/FileValidator";
 
 
 export default function ProductDetail() {
@@ -38,8 +37,6 @@ export default function ProductDetail() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
   const [deliveryTax, setDeliveryTax] = useState(0);
-  const [fileValidationResult, setFileValidationResult] = useState<FileValidationResult | null>(null);
-  const [fileStatus, setFileStatus] = useState<FileStatus>('pending');
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(

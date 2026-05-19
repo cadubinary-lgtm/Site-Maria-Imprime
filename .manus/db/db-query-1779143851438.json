@@ -1,9 +1,0 @@
-{
-  "query": "-- Inserir prazos globais únicos (sem duplicação)\nINSERT IGNORE INTO deliveryOptions (name, daysToDeliver, pricePerM2, isActive, `order`)\nSELECT DISTINCT name, daysToDeliver, pricePerM2, isActive, `order`\nFROM productDeliveryOptions\nORDER BY `order`, name;\n\n-- Vincular produtos aos prazos globais\nINSERT INTO productDeliveryOptionMappings (productId, deliveryOptionId)\nSELECT DISTINCT pdo.productId, do.id\nFROM productDeliveryOptions pdo\nJOIN deliveryOptions do ON pdo.name = do.name \n  AND pdo.daysToDeliver = do.daysToDeliver \n  AND pdo.pricePerM2 = do.pricePerM2;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user hL4x6qyw4tzDhtT.root --database UWGRo8uVP2ec6WHZ5QpBak --execute -- Inserir prazos globais únicos (sem duplicação)\nINSERT IGNORE INTO deliveryOptions (name, daysToDeliver, pricePerM2, isActive, `order`)\nSELECT DISTINCT name, daysToDeliver, pricePerM2, isActive, `order`\nFROM productDeliveryOptions\nORDER BY `order`, name;\n\n-- Vincular produtos aos prazos globais\nINSERT INTO productDeliveryOptionMappings (productId, deliveryOptionId)\nSELECT DISTINCT pdo.productId, do.id\nFROM productDeliveryOptions pdo\nJOIN deliveryOptions do ON pdo.name = do.name \n  AND pdo.daysToDeliver = do.daysToDeliver \n  AND pdo.pricePerM2 = do.pricePerM2;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 639
-}

@@ -253,18 +253,18 @@
 - [x] Testes de controle financeiro
 
 ### FASE 6: Módulo de Validação de Arquivos (Web2Print)
-- [x] Criar componente FileValidator.tsx
-- [x] Implementar validações (DPI, CMYK, sangria, margem)
-- [x] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
-- [x] Integrar com ProductDetail
-- [x] Testes de validação de arquivo
+- [ ] Criar componente FileValidator.tsx
+- [ ] Implementar validações (DPI, CMYK, sangria, margem)
+- [ ] Criar sistema de status de arquivo (enviado, análise, aprovado, correção)
+- [ ] Integrar com ProductDetail
+- [ ] Testes de validação de arquivo
 
 ### FASE 7: Automação Inteligente
-- [x] Criar sistema de notificações automáticas
-- [x] Integrar WhatsApp (usando Manus API)
-- [x] Integrar Email automático
-- [x] Criar triggers de automação (pagamento, produção, entrega)
-- [x] Testes de automação
+- [ ] Criar sistema de notificações automáticas
+- [ ] Integrar WhatsApp (usando Manus API)
+- [ ] Integrar Email automático
+- [ ] Criar triggers de automação (pagamento, produção, entrega)
+- [ ] Testes de automação
 
 ### FASE 8: Dashboard Gerencial do ERP
 - [ ] Criar página ERPDashboard.tsx
@@ -1079,56 +1079,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Entregar para produção
 
 
-## FASE 28: Sistema de Prazos de Produção ✅
-
-### FASE 1: Criar Tabela de Prazos de Produção ✅
-- [x] Criar tabela `productDeliveryOptions` no banco de dados
-- [x] Campos: id, productId, name, daysToDeliver, pricePerM2, isActive, order
-- [x] Executar migration SQL
-- [x] Atualizar schema Drizzle
-
-### FASE 2: Criar Procedures tRPC para Prazos ✅
-- [x] Criar procedure `deliveryOptions.getByProduct` (public)
-- [x] Criar procedure `deliveryOptions.create` (admin)
-- [x] Criar procedure `deliveryOptions.update` (admin)
-- [x] Criar procedure `deliveryOptions.delete` (admin)
-- [x] Criar procedure `deliveryOptions.reorder` (admin)
-
-### FASE 3: Criar Interface Admin para Gerenciar Prazos ✅
-- [x] Adicionar seção "Prazos de Produção" ao formulário de edição de produto
-- [x] Implementar CRUD de prazos (criar, editar, deletar, reordenar)
-- [x] Adicionar validação de dados
-- [x] Testar interface completa
-
-### FASE 4: Integrar Prazos ao ProductConfigurator ✅
-- [x] Carregar prazos do backend via tRPC
-- [x] Renderizar radio buttons para seleção de prazo
-- [x] Calcular taxa expressa em tempo real
-- [x] Atualizar preço total com taxa
-- [x] Exibir prazo selecionado no resumo
-
-### FASE 5: Corrigir Tipos de Dados ✅
-- [x] Converter `daysToDeliver` de string para número
-- [x] Converter `pricePerM2` de string para número
-- [x] Validar tipos no frontend
-- [x] Testar cálculos com diferentes prazos
-
-### FASE 6: Testes e Validação ✅
-- [x] Testar criação de prazos no admin
-- [x] Testar seleção de prazos no frontend
-- [x] Testar cálculo de taxa expressa
-- [x] Validar persistência de dados
-- [x] Testar fluxo completo: Prazo Normal (R$ 300) → 24h (R$ 360) → Mesmo Dia (R$ 420)
-
-### Status Final ✅
-- ✅ Sistema de prazos 100% funcional
-- ✅ Admin pode criar/editar/deletar prazos
-- ✅ Cliente pode selecionar prazo com cálculo automático
-- ✅ Taxa expressa aplicada corretamente
-- ✅ Tipos de dados validados
-- ✅ Pronto para produção
-
-
 ## FASE 29: Polimento + UX + Performance + Conversão ✅
 
 ### FASE 1: Melhorar DynamicAttributeRenderer ✅
@@ -1618,72 +1568,3 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todo.md com conclusão
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
-
-
-## FASE 29: Refatorar Prazos para Sistema Global ⏳
-
-### FASE 1: Analisar e Planejar Migração
-- [ ] Analisar estrutura atual (productDeliveryOptions com productId)
-- [ ] Documentar mudanças necessárias
-- [ ] Planejar estratégia de migração de dados
-- [ ] Definir tabelas necessárias
-
-### FASE 2: Criar Tabela Global de Prazos
-- [ ] Criar tabela `deliveryOptions` (id, name, daysToDeliver, pricePerM2, isActive, order)
-- [ ] Criar tabela `productDeliveryOptionMappings` (productId, deliveryOptionId)
-- [ ] Executar migration SQL via webdev_execute_sql
-- [ ] Validar dados no banco
-
-### FASE 3: Atualizar Schema Drizzle
-- [ ] Adicionar tabela `deliveryOptions` ao schema
-- [ ] Adicionar tabela `productDeliveryOptionMappings` ao schema
-- [ ] Remover coluna productId de `productDeliveryOptions` (ou manter como legado)
-- [ ] Gerar migration SQL
-
-### FASE 4: Criar Procedures tRPC Globais
-- [ ] Criar `deliveryOptions.getAll` (lista todos os prazos globais)
-- [ ] Criar `deliveryOptions.create` (criar novo prazo global)
-- [ ] Criar `deliveryOptions.update` (editar prazo global)
-- [ ] Criar `deliveryOptions.delete` (deletar prazo global)
-- [ ] Criar `deliveryOptions.reorder` (reordenar prazos)
-- [ ] Criar `products.getDeliveryOptions` (prazos de um produto específico)
-- [ ] Criar `products.setDeliveryOptions` (vincular prazos a um produto)
-
-### FASE 5: Criar Admin Panel para Prazos Globais
-- [ ] Criar página `/admin/prazos` para gerenciar prazos globais
-- [ ] Implementar CRUD de prazos (criar, editar, deletar, reordenar)
-- [ ] Adicionar seção em "Criar Novo Produto" para selecionar prazos
-- [ ] Implementar checkboxes para vincular prazos ao produto
-- [ ] Testar interface completa
-
-### FASE 6: Refatorar Formulário de Novo Produto
-- [ ] Remover seção de "Prazos de Produção" do formulário de edição
-- [ ] Adicionar dropdown/checkboxes para selecionar prazos globais
-- [ ] Implementar busca/filtro de prazos
-- [ ] Validar seleção de prazos obrigatória
-- [ ] Testar fluxo de criação
-
-### FASE 7: Atualizar ProductConfigurator
-- [ ] Modificar para carregar prazos via `products.getDeliveryOptions`
-- [ ] Validar que prazos globais aparecem corretamente
-- [ ] Testar cálculo de taxa expressa
-- [ ] Validar seleção de prazos
-
-### FASE 8: Migrar Dados Existentes
-- [ ] Criar script para migrar dados de productDeliveryOptions para deliveryOptions
-- [ ] Atualizar productDeliveryOptionMappings com dados migrados
-- [ ] Validar integridade de dados
-- [ ] Testar que produtos existentes continuam funcionando
-
-### FASE 9: Testes e Validação
-- [ ] Testar criação de novo prazo global
-- [ ] Testar vinculação de prazos a novo produto
-- [ ] Testar que produtos reutilizam prazos globais
-- [ ] Testar que alteração de prazo global afeta todos os produtos
-- [ ] Validar fluxo completo de compra
-- [ ] Testar que produtos antigos continuam funcionando
-
-### FASE 10: Entregar Solução
-- [ ] Criar checkpoint final
-- [ ] Documentar sistema de prazos globais
-- [ ] Atualizar guia de uso do admin

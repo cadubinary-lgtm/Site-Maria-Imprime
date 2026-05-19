@@ -3,7 +3,7 @@ import { InsertUser, users, products, orders, orderItems, orderStatusHistory, se
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq, sql } from 'drizzle-orm';
+import { isNull, desc, eq } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -189,12 +189,12 @@ export async function deleteSegment(id: number) {
 }
 
 // Categories queries
-export async function getCategoriesBySegment(segment: string) {
+export async function getCategoriesBySegment(segmentId: number) {
   const db = await getDb();
   if (!db) return [];
 
   const result = await db.select().from(categories)
-    .where(eq(categories.segment, segment as any))
+    .where(eq(categories.segmentId, segmentId))
     .limit(100);
   return result;
 }
@@ -363,9 +363,6 @@ export async function getVariationOptionsByType(typeId: number) {
     .where(eq(variationOptions.variationTypeId, typeId));
   return result;
 }
-
-// Alias para compatibilidade
-export const getVariationOptions = getVariationOptionsByType;
 
 export async function createVariationOption(data: InsertVariationOption) {
   const db = await getDb();
@@ -571,18 +568,11 @@ export async function getDeliveryOptionsByProduct(productId: number) {
   if (!db) return [];
   
   try {
-    const result = await db.execute(
-      sql`SELECT * FROM productDeliveryOptions WHERE productId = ${productId} ORDER BY \`order\` ASC`
+    const result = await (db as any).execute(
+      `SELECT * FROM productDeliveryOptions WHERE productId = ? ORDER BY \`order\` ASC`,
+      [productId]
     ) as any;
-    const options = result[0] || [];
-    // Converter tipos de dados para garantir que sejam números
-    return options.map((opt: any) => ({
-      ...opt,
-      daysToDeliver: parseInt(opt.daysToDeliver) || 0,
-      pricePerM2: parseFloat(opt.pricePerM2) || 0,
-      isActive: opt.isActive === 1 || opt.isActive === true,
-      order: parseInt(opt.order) || 0,
-    }));
+    return result[0] || [];
   } catch (error) {
     console.error("Error fetching delivery options:", error);
     return [];
@@ -594,8 +584,9 @@ export async function createDeliveryOption(data: any) {
   if (!db) throw new Error("Database not available");
   
   try {
-    const result = await db.execute(
-      sql`INSERT INTO productDeliveryOptions (productId, name, daysToDeliver, pricePerM2, isActive, \`order\`) VALUES (${data.productId}, ${data.name}, ${data.daysToDeliver}, ${data.pricePerM2}, ${data.isActive ?? true}, ${data.order ?? 0})`
+    const result = await (db as any).execute(
+      `INSERT INTO productDeliveryOptions (productId, name, daysToDeliver, pricePerM2, isActive, \`order\`) VALUES (?, ?, ?, ?, ?, ?)`,
+      [data.productId, data.name, data.daysToDeliver, data.pricePerM2, data.isActive ?? true, data.order ?? 0]
     ) as any;
     return result;
   } catch (error) {
@@ -609,30 +600,22 @@ export async function updateDeliveryOption(id: number, data: any) {
   if (!db) throw new Error("Database not available");
   
   try {
-    // Build update query dynamically based on provided fields
-    if (data.name !== undefined) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET name = ${data.name}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.daysToDeliver !== undefined) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET daysToDeliver = ${data.daysToDeliver}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.pricePerM2 !== undefined) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET pricePerM2 = ${data.pricePerM2}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.isActive !== undefined) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET isActive = ${data.isActive}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.order !== undefined) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET \`order\` = ${data.order}, updatedAt = NOW() WHERE id = ${id}`
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    if (data.name !== undefined) { updates.push("name = ?"); values.push(data.name); }
+    if (data.daysToDeliver !== undefined) { updates.push("daysToDeliver = ?"); values.push(data.daysToDeliver); }
+    if (data.pricePerM2 !== undefined) { updates.push("pricePerM2 = ?"); values.push(data.pricePerM2); }
+    if (data.isActive !== undefined) { updates.push("isActive = ?"); values.push(data.isActive); }
+    if (data.order !== undefined) { updates.push("`order` = ?"); values.push(data.order); }
+    
+    updates.push("updatedAt = NOW()");
+    values.push(id);
+    
+    if (updates.length > 1) {
+      await (db as any).execute(
+        `UPDATE productDeliveryOptions SET ${updates.join(", ")} WHERE id = ?`,
+        values
       );
     }
   } catch (error) {
@@ -646,8 +629,9 @@ export async function deleteDeliveryOption(id: number) {
   if (!db) throw new Error("Database not available");
   
   try {
-    await db.execute(
-      sql`DELETE FROM productDeliveryOptions WHERE id = ${id}`
+    await (db as any).execute(
+      `DELETE FROM productDeliveryOptions WHERE id = ?`,
+      [id]
     );
   } catch (error) {
     console.error("Error deleting delivery option:", error);
@@ -661,174 +645,14 @@ export async function reorderDeliveryOptions(updates: Array<{ id: number; order:
   
   try {
     for (const update of updates) {
-      await db.execute(
-        sql`UPDATE productDeliveryOptions SET \`order\` = ${update.order}, updatedAt = NOW() WHERE id = ${update.id}`
+      await (db as any).execute(
+        `UPDATE productDeliveryOptions SET \`order\` = ?, updatedAt = NOW() WHERE id = ?`,
+        [update.order, update.id]
       );
     }
     return true;
   } catch (error) {
     console.error("Error reordering delivery options:", error);
-    throw error;
-  }
-}
-
-
-// ==================== PRAZOS GLOBAIS ====================
-
-export async function getAllDeliveryOptions() {
-  const db = await getDb();
-  if (!db) return [];
-  
-  try {
-    const result = await db.execute(
-      sql`SELECT * FROM deliveryOptions WHERE isActive = true ORDER BY \`order\` ASC`
-    ) as any;
-    const options = result[0] || [];
-    return options.map((opt: any) => ({
-      ...opt,
-      daysToDeliver: parseInt(opt.daysToDeliver) || 0,
-      pricePerM2: parseFloat(opt.pricePerM2) || 0,
-      isActive: opt.isActive === 1 || opt.isActive === true,
-      order: parseInt(opt.order) || 0,
-    }));
-  } catch (error) {
-    console.error("Error fetching all delivery options:", error);
-    return [];
-  }
-}
-
-export async function getDeliveryOptionsByProductGlobal(productId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  try {
-    const result = await db.execute(
-      sql`SELECT do.* FROM deliveryOptions do
-           INNER JOIN productDeliveryOptionMappings pdom ON do.id = pdom.deliveryOptionId
-           WHERE pdom.productId = ${productId} AND do.isActive = true
-           ORDER BY do.\`order\` ASC`
-    ) as any;
-    const options = result[0] || [];
-    return options.map((opt: any) => ({
-      ...opt,
-      daysToDeliver: parseInt(opt.daysToDeliver) || 0,
-      pricePerM2: parseFloat(opt.pricePerM2) || 0,
-      isActive: opt.isActive === 1 || opt.isActive === true,
-      order: parseInt(opt.order) || 0,
-    }));
-  } catch (error) {
-    console.error("Error fetching delivery options for product:", error);
-    return [];
-  }
-}
-
-export async function createGlobalDeliveryOption(data: any) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  try {
-    const result = await db.execute(
-      sql`INSERT INTO deliveryOptions (name, daysToDeliver, pricePerM2, isActive, \`order\`) VALUES (${data.name}, ${data.daysToDeliver}, ${data.pricePerM2}, ${data.isActive ?? true}, ${data.order ?? 0})`
-    ) as any;
-    return result;
-  } catch (error) {
-    console.error("Error creating global delivery option:", error);
-    throw error;
-  }
-}
-
-export async function updateGlobalDeliveryOption(id: number, data: any) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  try {
-    if (data.name !== undefined) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET name = ${data.name}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.daysToDeliver !== undefined) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET daysToDeliver = ${data.daysToDeliver}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.pricePerM2 !== undefined) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET pricePerM2 = ${data.pricePerM2}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.isActive !== undefined) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET isActive = ${data.isActive}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-    if (data.order !== undefined) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET \`order\` = ${data.order}, updatedAt = NOW() WHERE id = ${id}`
-      );
-    }
-  } catch (error) {
-    console.error("Error updating global delivery option:", error);
-    throw error;
-  }
-}
-
-export async function deleteGlobalDeliveryOption(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  try {
-    // Remover mapeamentos de produtos
-    await db.execute(
-      sql`DELETE FROM productDeliveryOptionMappings WHERE deliveryOptionId = ${id}`
-    );
-    // Remover prazo global
-    await db.execute(
-      sql`DELETE FROM deliveryOptions WHERE id = ${id}`
-    );
-  } catch (error) {
-    console.error("Error deleting global delivery option:", error);
-    throw error;
-  }
-}
-
-export async function reorderGlobalDeliveryOptions(updates: Array<{ id: number; order: number }>) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  try {
-    for (const update of updates) {
-      await db.execute(
-        sql`UPDATE deliveryOptions SET \`order\` = ${update.order}, updatedAt = NOW() WHERE id = ${update.id}`
-      );
-    }
-    return true;
-  } catch (error) {
-    console.error("Error reordering global delivery options:", error);
-    throw error;
-  }
-}
-
-export async function setProductDeliveryOptions(productId: number, deliveryOptionIds: number[]) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  try {
-    // Remover mapeamentos antigos
-    await db.execute(
-      sql`DELETE FROM productDeliveryOptionMappings WHERE productId = ${productId}`
-    );
-    
-    // Adicionar novos mapeamentos
-    for (const deliveryOptionId of deliveryOptionIds) {
-      await db.execute(
-        sql`INSERT INTO productDeliveryOptionMappings (productId, deliveryOptionId) VALUES (${productId}, ${deliveryOptionId})`
-      );
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error setting product delivery options:", error);
     throw error;
   }
 }

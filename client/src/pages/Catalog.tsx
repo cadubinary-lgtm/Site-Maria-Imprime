@@ -11,15 +11,8 @@ import { Slider } from "@/components/ui/slider";
 const ITEMS_PER_PAGE = 12;
 
 export default function Catalog() {
-  // Estados
-  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [cartCount, setCartCount] = useState(0);
-
   // Carregar segmentos dinamicamente
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.productSegments.getAllSegments.useQuery();
 
   // Mapear segmentos para formato esperado (usando ID numérico)
   const segments = useMemo(() => {
@@ -30,22 +23,31 @@ export default function Catalog() {
     }));
   }, [segmentsData]);
 
-  // Carregar todos os produtos
-  const { data: products, isLoading } = trpc.products.getAll.useQuery();
-
   // Definir primeiro segmento como padrão
   const defaultSegment = useMemo(() => {
     return segments.length > 0 ? segments[0].id : 1;
   }, [segments]);
 
+  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
   // Usar segmento padrão se nenhum foi selecionado
   const activeSegment = selectedSegment || defaultSegment;
+
+  // Carregar produtos do segmento ativo (usando novo sistema)
+  const { data: products, isLoading } = trpc.productSegments.getProductsBySegment.useQuery(
+    activeSegment as number,
+    { enabled: !!activeSegment }
+  );
 
   // Filtrar produtos por preço e termo de busca
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     
-    return products.filter((p: any) => {
+    return products.filter((p) => {
       const price = parseFloat(p.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,7 +98,7 @@ export default function Catalog() {
                     {segments.length === 0 ? (
                       <p className="text-sm text-gray-500">Nenhum segmento disponível</p>
                     ) : (
-                      segments.map((seg: any) => (
+                      segments.map((seg) => (
                         <Button
                           key={seg.id}
                           variant={activeSegment === seg.id ? "default" : "outline"}
@@ -188,7 +190,7 @@ export default function Catalog() {
               <>
                 {/* Grid de Produtos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {paginatedProducts.map((product: any) => (
+                  {paginatedProducts.map((product) => (
                     <Card key={product.id} className="hover:shadow-lg transition border-gray-200 overflow-hidden">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem */}
