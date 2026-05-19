@@ -70,9 +70,9 @@ export default function AdminPanel() {
     maxHeight: '',
   });
   const [deliveryOptions, setDeliveryOptions] = useState([
-    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
-    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
-    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
+    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true },
+    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, isActive: false },
+    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, isActive: false },
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
@@ -144,11 +144,6 @@ export default function AdminPanel() {
         minHeight: '',
         maxHeight: '',
       });
-      setDeliveryOptions([
-        { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 1 },
-        { name: '24 Horas', daysToDeliver: 1, pricePerM2: 50, isActive: false, order: 2 },
-        { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 120, isActive: false, order: 3 },
-      ]);
       refetch();
     },
     onError: (error) => {
@@ -281,7 +276,7 @@ export default function AdminPanel() {
       return;
     }
 
-    const product = await createProductMutation.mutateAsync({
+    await createProductMutation.mutateAsync({
       name: newProductForm.name,
       description: newProductForm.description || undefined,
       price: newProductForm.price,
@@ -294,9 +289,6 @@ export default function AdminPanel() {
       minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
       maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
     });
-
-    console.log('Produto criado:', product);
-    console.log('Prazos:', deliveryOptions.filter(o => o.isActive));
   };
 
   return (
@@ -433,63 +425,53 @@ export default function AdminPanel() {
                     </div>
                   </>
                 )}
-                {(newProductForm as any).calculationType === 'm2' && (
-                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <label className="block text-sm font-bold text-blue-900">Prazos de Producao</label>
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-blue-900 bg-blue-50 p-2 rounded">Prazos de Produção</label>
+                  <div className="space-y-2">
                     {deliveryOptions.map((option, idx) => (
-                      <div key={idx} className="space-y-2 p-2 bg-white rounded border">
-                        <div className="flex items-center justify-between">
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={option.isActive}
+                      <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded border">
+                        <input
+                          type="checkbox"
+                          checked={option.isActive}
+                          onChange={(e) => {
+                            const updated = [...deliveryOptions];
+                            updated[idx].isActive = e.target.checked;
+                            setDeliveryOptions(updated);
+                          }}
+                          className="w-4 h-4"
+                        />
+                        <span className="font-medium text-sm flex-1">{option.name}</span>
+                        {option.isActive && (
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              value={option.daysToDeliver}
                               onChange={(e) => {
                                 const updated = [...deliveryOptions];
-                                updated[idx].isActive = e.target.checked;
+                                updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
                                 setDeliveryOptions(updated);
                               }}
-                              className="w-4 h-4"
+                              className="w-16 h-8 text-xs"
+                              placeholder="dias"
                             />
-                            <span className="text-sm font-medium">{option.name}</span>
-                          </label>
-                        </div>
-                        {option.isActive && (
-                          <div className="grid grid-cols-2 gap-2 ml-6">
-                            {option.name !== 'Normal' && (
-                              <div>
-                                <label className="text-xs text-gray-600">Valor Adicional (R$/m2)</label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={option.pricePerM2}
-                                  onChange={(e) => {
-                                    const updated = [...deliveryOptions];
-                                    updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
-                                    setDeliveryOptions(updated);
-                                  }}
-                                  className="h-8 text-sm"
-                                />
-                              </div>
-                            )}
-                            <div>
-                              <label className="text-xs text-gray-600">Dias Uteis</label>
-                              <Input
-                                type="number"
-                                value={option.daysToDeliver}
-                                onChange={(e) => {
-                                  const updated = [...deliveryOptions];
-                                  updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
-                                  setDeliveryOptions(updated);
-                                }}
-                                className="h-8 text-sm"
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={option.pricePerM2}
+                              onChange={(e) => {
+                                const updated = [...deliveryOptions];
+                                updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
+                                setDeliveryOptions(updated);
+                              }}
+                              className="w-20 h-8 text-xs"
+                              placeholder="R$/m²"
+                            />
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
