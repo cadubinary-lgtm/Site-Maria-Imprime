@@ -62,12 +62,6 @@ export default function AdminPanel() {
     price: '',
     segment: 'servicos',
     imageUrl: '',
-    calculationType: 'unidade',
-    pricePerM2: '',
-    minWidth: '',
-    maxWidth: '',
-    minHeight: '',
-    maxHeight: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
@@ -132,12 +126,6 @@ export default function AdminPanel() {
         price: '',
         segment: 'servicos',
         imageUrl: '',
-        calculationType: 'unidade',
-        pricePerM2: '',
-        minWidth: '',
-        maxWidth: '',
-        minHeight: '',
-        maxHeight: '',
       });
       refetch();
     },
@@ -277,12 +265,6 @@ export default function AdminPanel() {
       price: newProductForm.price,
       segment: newProductForm.segment as any,
       imageUrl: newProductForm.imageUrl || undefined,
-      calculationType: (newProductForm as any).calculationType || 'unidade',
-      pricePerM2: (newProductForm as any).pricePerM2 || undefined,
-      minWidth: (newProductForm as any).minWidth ? (newProductForm as any).minWidth : undefined,
-      maxWidth: (newProductForm as any).maxWidth ? (newProductForm as any).maxWidth : undefined,
-      minHeight: (newProductForm as any).minHeight ? (newProductForm as any).minHeight : undefined,
-      maxHeight: (newProductForm as any).maxHeight ? (newProductForm as any).maxHeight : undefined,
     });
   };
 
@@ -350,76 +332,6 @@ export default function AdminPanel() {
                     placeholder="0.00"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Tipo de Cobrança</label>
-                  <Select value={(newProductForm as any).calculationType || 'unidade'} onValueChange={(val) => setNewProductForm({ ...newProductForm, calculationType: val } as any)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unidade">Unidade</SelectItem>
-                      <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {(newProductForm as any).calculationType === 'm2' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Preço por m²</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={(newProductForm as any).pricePerM2}
-                        onChange={(e) => setNewProductForm({ ...newProductForm, pricePerM2: e.target.value } as any)}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Largura Mín (m)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={(newProductForm as any).minWidth}
-                          onChange={(e) => setNewProductForm({ ...newProductForm, minWidth: e.target.value } as any)}
-                          placeholder="1.0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Largura Máx (m)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={(newProductForm as any).maxWidth}
-                          onChange={(e) => setNewProductForm({ ...newProductForm, maxWidth: e.target.value } as any)}
-                          placeholder="10.0"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Altura Mín (m)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={(newProductForm as any).minHeight}
-                          onChange={(e) => setNewProductForm({ ...newProductForm, minHeight: e.target.value } as any)}
-                          placeholder="1.0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Altura Máx (m)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={(newProductForm as any).maxHeight}
-                          onChange={(e) => setNewProductForm({ ...newProductForm, maxHeight: e.target.value } as any)}
-                          placeholder="10.0"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
