@@ -311,20 +311,20 @@ export default function AdminNewProduct() {
           )}
 
           {/* Prazos de Produção */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-gray-700">Prazos de Produção</label>
+          <div className="border border-gray-200 rounded-lg p-6 bg-white">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Prazos de Produção</h3>
               <Button
                 type="button"
                 onClick={() => setShowDeliveryForm(!showDeliveryForm)}
-                className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 px-4 py-2 rounded-lg"
               >
-                <Plus size={16} /> Novo Prazo
+                <Plus size={18} /> Novo Prazo
               </Button>
             </div>
 
             {showDeliveryForm && (
-              <Card className="mb-4 p-4">
+              <Card className="mb-6 p-4 bg-gray-50 border border-gray-200">
                 <div className="space-y-4">
                   <Input
                     placeholder="Nome (ex: Prazo Normal)"
@@ -352,7 +352,7 @@ export default function AdminNewProduct() {
                     />
                     <Input
                       type="number"
-                      placeholder="Multiplicador"
+                      placeholder="Preço/m²"
                       step="0.01"
                       value={newDelivery.priceMultiplier}
                       onChange={(e) => setNewDelivery(prev => ({ ...prev, priceMultiplier: e.target.value }))}
@@ -369,24 +369,54 @@ export default function AdminNewProduct() {
               </Card>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {deliveryOptions.map((option, index) => (
-                <Card key={index} className="p-3">
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{option.name}</p>
-                      <p className="text-sm text-gray-600">{option.daysMin} a {option.daysMax} dias • {option.priceMultiplier}x</p>
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="text-gray-400 text-xl">⋮⋮</div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900">{option.name}</p>
+                        <p className="text-sm text-gray-600">{option.daysMin} dias úteis • R$ {parseFloat(String(option.priceMultiplier)).toFixed(2)}/m²</p>
+                      </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveDelivery(index)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        ↑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        ↓
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        ✏️
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleRemoveDelivery(index)}
+                      >
+                        🗑️
+                      </Button>
+                    </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
