@@ -65,7 +65,7 @@ export default function AdminNewProduct() {
   });
 
   // Create product mutation
-  const createProductMutation = trpc.products.createProduct.useMutation({
+  const createProductMutation = trpc.admin.createProduct.useMutation({
     onSuccess: () => {
       showNotification('success', 'Produto criado com sucesso!');
       setTimeout(() => navigate('/admin'), 2000);

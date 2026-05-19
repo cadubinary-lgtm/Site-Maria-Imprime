@@ -260,11 +260,11 @@
 - [x] Testes de validação de arquivo
 
 ### FASE 7: Automação Inteligente
-- [ ] Criar sistema de notificações automáticas
-- [ ] Integrar WhatsApp (usando Manus API)
-- [ ] Integrar Email automático
-- [ ] Criar triggers de automação (pagamento, produção, entrega)
-- [ ] Testes de automação
+- [x] Criar sistema de notificações automáticas
+- [x] Integrar WhatsApp (usando Manus API)
+- [x] Integrar Email automático
+- [x] Criar triggers de automação (pagamento, produção, entrega)
+- [x] Testes de automação
 
 ### FASE 8: Dashboard Gerencial do ERP
 - [ ] Criar página ERPDashboard.tsx

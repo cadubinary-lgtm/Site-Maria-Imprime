@@ -366,8 +366,8 @@ export function ProductVariationManager() {
 
     try {
       await createVariationTypeMutation.mutateAsync({
-        productId: selectedProductId,
-        type: 'material',
+        productId: selectedProductId || null,
+        type: 'material' as const,
         name: newVariationTypeName,
         isRequired: newVariationTypeRequired,
       });
@@ -397,7 +397,7 @@ export function ProductVariationManager() {
       }));
 
       try {
-        await reorderVariationTypesMutation.mutateAsync({ updates: orderMap });
+        await reorderVariationTypesMutation.mutateAsync({ updates: orderMap as any });
         toast.success("Ordem atualizada!");
         if (selectedProductId) {
           await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
