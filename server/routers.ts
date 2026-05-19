@@ -235,26 +235,12 @@ export const appRouter = router({
           } as any);
           
           const newProductId = (result as any).insertId;
-          
-          // Criar 3 prazos fixos para o novo produto
-          const defaultDeadlines = [
-            { name: 'Prazo Normal', daysToDeliver: 5, pricePerM2: '0.00', order: 1 },
-            { name: '24 Horas', daysToDeliver: 1, pricePerM2: '10.00', order: 2 },
-            { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: '20.00', order: 3 },
-          ];
-          
-          for (const deadline of defaultDeadlines) {
+          const testProduct = await getProductByName('MODELO - Não Excluir');
+          if (testProduct && testProduct.id) {
             try {
-              await createDeliveryOption({
-                productId: newProductId,
-                name: deadline.name,
-                daysToDeliver: deadline.daysToDeliver,
-                pricePerM2: deadline.pricePerM2,
-                isActive: true,
-                order: deadline.order,
-              });
+              await copyDeliveryOptionsFromProduct(testProduct.id, newProductId);
             } catch (e) {
-              console.warn(`Erro ao criar prazo ${deadline.name}:`, e);
+              console.warn('Erro ao copiar prazos:', e);
             }
           }
           
