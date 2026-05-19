@@ -33,24 +33,9 @@ export default function AdminProducts() {
   });
 
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
-  const { data: productSegments } = trpc.productSegments.getProductSegments.useQuery(
-    editingId || 0,
-    { enabled: !!editingId }
-  );
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
-  const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
   const deleteProductMutation = trpc.admin.deleteProduct.useMutation();
   const deleteMultipleProductsMutation = trpc.admin.deleteMultipleProducts.useMutation();
-
-  // Atualizar segmentos quando carrega produto
-  useEffect(() => {
-    if (productSegments) {
-      setEditForm((prev) => ({
-        ...prev,
-        segmentIds: productSegments.map((s) => s.id),
-      }));
-    }
-  }, [productSegments]);
 
   // Memoizar handler para evitar loop infinito
   const handleSegmentsChange = useCallback((segmentIds: number[]) => {
@@ -141,12 +126,6 @@ export default function AdminProducts() {
         maxWidth: (editForm as any).calculationType === "m2" ? (editForm as any).maxWidth : undefined,
         minHeight: (editForm as any).calculationType === "m2" ? (editForm as any).minHeight : undefined,
         maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
-      });
-
-      // Atualizar múltiplos segmentos
-      await updateSegmentsMutation.mutateAsync({
-        productId: editingId,
-        segmentIds: editForm.segmentIds,
       });
 
       toast.success("Produto atualizado com sucesso!");
@@ -535,9 +514,9 @@ export default function AdminProducts() {
                             <Button
                               onClick={handleSave}
                               className="w-full bg-orange-500 hover:bg-orange-600"
-                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                              disabled={updateProductMutation.isPending}
                             >
-                              {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
+                              {updateProductMutation.isPending ? (
                                 <>
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                   Salvando...

@@ -17,6 +17,7 @@ import AllProducts from "./pages/AllProducts";
 import AdminPanel from "./pages/AdminPanel";
 import SegmentsManager from "./pages/SegmentsManager";
 import CalculadoraDemo from "./pages/CalculadoraDemo";
+import AdminNewProduct from "./pages/AdminNewProduct";
 
 
 import Catalog from "./pages/Catalog";
@@ -57,6 +58,7 @@ function Router() {
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
+          <Route path="/admin/produtos/novos" component={AdminNewProduct} />
           <Route path="/admin/segmentos" component={SegmentsManager} />
           <Route path="/admin/clientes" component={ClientsManager} />
           <Route path="/admin/financeiro" component={FinancialDashboard} />

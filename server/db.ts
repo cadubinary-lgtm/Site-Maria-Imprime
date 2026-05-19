@@ -189,12 +189,12 @@ export async function deleteSegment(id: number) {
 }
 
 // Categories queries
-export async function getCategoriesBySegment(segmentId: number) {
+export async function getCategoriesBySegment(segment: string) {
   const db = await getDb();
   if (!db) return [];
 
   const result = await db.select().from(categories)
-    .where(eq(categories.segmentId, segmentId))
+    .where(eq(categories.segment, segment as any))
     .limit(100);
   return result;
 }

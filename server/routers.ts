@@ -54,7 +54,6 @@ import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
 import { attributesRouter } from "./routers-attributes";
-import { productSegmentsRouter } from "./routers-product-segments";
 import { pricingRouter } from "./routers-pricing";
 import { pricingRulesRouter } from "./routers-pricing-rules";
 
@@ -169,8 +168,8 @@ export const appRouter = router({
   // Categories - Público
   categories: router({
     getBySegment: publicProcedure
-      .input(z.object({ segmentId: z.number() }))
-      .query(({ input }) => getCategoriesBySegment(input.segmentId)),
+      .input(z.object({ segment: z.string() }))
+      .query(({ input }) => getCategoriesBySegment(input.segment)),
     getProducts: publicProcedure
       .input(z.object({ categoryId: z.number() }))
       .query(({ input }) => getProductsByCategory(input.categoryId)),
@@ -529,8 +528,6 @@ export const appRouter = router({
   automation: automationRouter,
   // Attributes - Atributos Dinâmicos
   attributes: attributesRouter,
-  // Product Segments - Múltiplos Segmentos por Produto
-  productSegments: productSegmentsRouter,
   // Pricing - Precificação Dinâmica
   pricing: pricingRouter,
   // Pricing Rules - Regras de Precificação Reutilizáveis
