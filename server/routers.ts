@@ -235,7 +235,7 @@ export const appRouter = router({
           } as any);
           
           const newProductId = (result as any).insertId;
-          const testProduct = await getProductByName('Teste');
+          const testProduct = await getProductByName('MODELO - Não Excluir');
           if (testProduct && testProduct.id) {
             try {
               await copyDeliveryOptionsFromProduct(testProduct.id, newProductId);
