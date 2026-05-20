@@ -369,7 +369,7 @@ export function ProductConfigurator({
 
         {/* Calculadora de m² */}
         {calculationType === "m2" && (
-          <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+          <div className="space-y-4 bg-white p-4 rounded-lg">
             <h3 className="font-semibold text-lg">Calculadora de Área</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
