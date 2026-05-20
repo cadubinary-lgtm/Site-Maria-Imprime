@@ -14,7 +14,7 @@ import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
-import ProductConfigurator from "@/components/ProductConfigurator";
+import { ProductConfigurator } from "@/components/ProductConfigurator";
 
 
 export default function ProductDetail() {
