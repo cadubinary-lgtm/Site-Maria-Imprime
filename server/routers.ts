@@ -234,13 +234,31 @@ export const appRouter = router({
             isActive: true,
           } as any);
           
-          const newProductId = (result as any).insertId;
-          const testProduct = await getProductByName('MODELO - Não Excluir');
-          if (testProduct && testProduct.id) {
+          const insertedProducts = await db.select().from(products).where(eq(products.name, input.name)).limit(1);
+          const newProductId = insertedProducts[0]?.id;
+          
+          if (!newProductId) {
+            throw new Error('Falha ao obter ID do produto inserido');
+          }
+          
+          const defaultDeadlines = [
+            { name: 'Prazo Normal', daysToDeliver: 5, pricePerM2: 0, order: 1 },
+            { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, order: 2 },
+            { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, order: 3 },
+          ];
+          
+          for (const deadline of defaultDeadlines) {
             try {
-              await copyDeliveryOptionsFromProduct(testProduct.id, newProductId);
+              await createDeliveryOption({
+                productId: newProductId,
+                name: deadline.name,
+                daysToDeliver: deadline.daysToDeliver,
+                pricePerM2: deadline.pricePerM2.toString(),
+                isActive: true,
+                order: deadline.order,
+              });
             } catch (e) {
-              console.warn('Erro ao copiar prazos:', e);
+              console.warn(`Erro ao criar prazo ${deadline.name}:`, e);
             }
           }
           
