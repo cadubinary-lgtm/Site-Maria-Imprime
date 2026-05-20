@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,19 +13,14 @@ import { toast } from "sonner";
 
 import { ProductVariationManager } from "@/components/ProductVariationManager";
 
-const SEGMENTS: Array<{ id: "alimentacao" | "beleza" | "varejo" | "servicos"; label: string }> = [
-  { id: "alimentacao", label: "Alimentação" },
-  { id: "beleza", label: "Beleza & Saúde" },
-  { id: "varejo", label: "Varejo" },
-  { id: "servicos", label: "Serviços" },
-];
+
 
 export default function AdminDashboard() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    segment: "alimentacao",
+    segment: "",
     imageUrl: "",
     calculationType: "unidade",
     pricePerM2: "",
@@ -37,6 +32,16 @@ export default function AdminDashboard() {
 
   const { data: orders, isLoading: ordersLoading } = trpc.admin.getAllOrders.useQuery();
   const createProductMutation = trpc.admin.createProduct.useMutation();
+
+  // Carregar segmentos dinamicamente do banco
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const SEGMENTS = useMemo(() => {
+    if (!segmentsData || segmentsData.length === 0) return [];
+    return segmentsData.map((seg: any) => ({
+      id: seg.slug,
+      label: `${seg.icon || "📦"} ${seg.name}`,
+    }));
+  }, [segmentsData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +98,7 @@ export default function AdminDashboard() {
         name: formData.name,
         description: formData.description,
         price: formData.price,
-        segment: formData.segment as "alimentacao" | "beleza" | "varejo" | "servicos",
+        segment: formData.segment,
         imageUrl: formData.imageUrl,
         calculationType: formData.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
         pricePerM2: formData.calculationType === "m2" ? formData.pricePerM2 : undefined,
@@ -108,7 +113,7 @@ export default function AdminDashboard() {
         name: "",
         description: "",
         price: "",
-        segment: "alimentacao",
+        segment: "",
         imageUrl: "",
         calculationType: "unidade",
         pricePerM2: "",
@@ -210,9 +215,13 @@ export default function AdminDashboard() {
 
                     <div>
                       <Label htmlFor="segment">Segmento</Label>
-                      <Select value={formData.segment} onValueChange={(value) => setFormData({ ...formData, segment: value })}>
+                      <Select
+                        value={formData.segment}
+                        onValueChange={(value) => setFormData({ ...formData, segment: value })}
+                        disabled={segmentsLoading}
+                      >
                         <SelectTrigger id="segment">
-                          <SelectValue />
+                          <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
                         </SelectTrigger>
                         <SelectContent>
                           {SEGMENTS.map((seg) => (

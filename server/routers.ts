@@ -115,7 +115,7 @@ export const appRouter = router({
         name: z.string().optional(),
         description: z.string().optional(),
         price: z.string().optional(),
-        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]).optional(),
+        segment: z.string().optional(),
         imageUrl: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -202,7 +202,7 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
-        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]),
+        segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
@@ -257,7 +257,7 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
-        segment: z.enum(["alimentacao", "beleza", "varejo", "servicos"]),
+        segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),

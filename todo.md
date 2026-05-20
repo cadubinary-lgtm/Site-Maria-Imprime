@@ -1618,3 +1618,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Atualizar todo.md com conclusão
 - [ ] Criar checkpoint final
 - [ ] Entregar ao usuário
+
+## Correção: Segmentos Dinâmicos no Formulário Novo Produto
+- [x] Dropdown de Segmento no formulário "Novo Produto" (AdminDashboard) carrega dinamicamente do banco via trpc.segments.getAll
+- [x] Removido array SEGMENTS hardcoded com apenas 4 segmentos fixos
+- [x] Corrigido z.enum→z.string() em createProduct no routers.ts para aceitar qualquer segmento dinâmico
+- [x] Corrigido z.enum→z.string() em updateProduct no routers.ts
+- [x] TypeScript compilando sem erros após correções
