@@ -14,10 +14,10 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663628618790/UWGRo8uVP2ec6WHZ5QpBak",
-    "access_key_id": "ASIAZV3A2ECZM3B5Z5E5",
-    "secret_access_key": "Pz3xYqavnId3IfasOj6/J2K3DthaKbsD5XPXoBHl",
-    "session_token": "IQoJb3JpZ2luX2VjECQaCXVzLWVhc3QtMSJIMEYCIQCi4M66pB/4jln8vo8QePwtozK8sMjTdIWIhwPAl5p6XwIhAN8FEijbzsgy+QvY1SEBaJYSdy4FHmxCHjp3MigaQJUlKv8DCOz//////////wEQBBoMNjY1Mzg2MDk4ODY2Igw9UypRBtzYTA9vNjgq0wPptO9zbtawuvHh8qE7YmWb9CZ0CHqt9WFiRL5JDk9guiRo/VrcVfzvjeVewR/dKWNXvm7Opc6yD/VfjpJ5C9aTcBtyuKxEFtTkCrtyp1slPwwCphHpxcNxXCaLQ3HH5a5oI0Ykc+IjXfCxcOyh2IKSJCduQgqB5LV/jxZ1Gg1z5j8XzresiRKlS3qWd8IqE8D03T7E4NvjMLTGHFoZJ0Pu5i88dbyYgsglQsdbkApQnDNvL9ScS9xhMH+qXe4W5pQIr1nFxGqJSc8nzDZC7l1GvbrrKqlkJYZ3VX8uc4XNP1eGGZHdwZbSqiY5yur95OEj5po0uklMeuvN9JjVoUkyk4jzp30smtCeEzdmFWSmCwiNnJ6IIYQZtggnnAbw0OSjnafzNiQQlOzbfpR1EUyQspy7xutGBdCc2JxgCIcqB6mBbfe5XV/Vr0YhAg2Ex36YlFhnA7CIPXue2+1sKdJ6hT0Itcq/C13NwHSHiAxDiCQBUemx+RGDn9lXqSyKYHne9pV20po4q6nr5S2D/1jDHkkjrULd+6IDdXL+YkggX4Zk5UzGkOsHn/KAjS1tVnQszelvfgtnHkq5IXJdFwryF9z84qlZ0nOBqWOLvemGb+eGsTC3rbbQBjqcAYpYW5ZKh+4QjpKonHtgwqjV4VxWfqN1oODVnNbdU8UahepTu9VenCs602+GinJGcVpwpo5x4FSrGVaxUXnO9RW2vvHFDqKkqtG3X5B4AJQm75TYP5VPEhA8lqSgQAZG3uQwtM1mhTr9w9XqpvTWFkwHHvhbPw9HDfurfJs9kal+XJgoYH8FKVOyc9elLlw+szHEYsDOpJ8Dkpao+Q==",
-    "expiration": "2026-05-20T23:10:47.000Z"
+    "access_key_id": "ASIAZV3A2ECZIS3KJKAN",
+    "secret_access_key": "xHY79e2kpbMNsnfkTODboi6NZpTNY9gi7A+D602M",
+    "session_token": "IQoJb3JpZ2luX2VjEBwaCXVzLWVhc3QtMSJIMEYCIQCrAvo7ivT2XW8Wd9OZuOeIxT/lQ1r/NskhfmaJoB175QIhANyifaHyzkELvxmGwXpE3MHlwlR0JKIKwmeyI6fnx8YGKv8DCOX//////////wEQBBoMNjY1Mzg2MDk4ODY2Igyq6YVARpVFlz8PR7cq0wMALBex+DAh8eMRA4MdFnehDYvIcP8eV+LNFx7YO9ZxE2fMqHihO7A7SE8CtSrDiXb6LuMPV0c7X+EeCgewfvdxP8N4lAKt6Ebt56+w2fONM3DoQf8OVEaGB4KHHK3TT0SBLI4TRKy/FECIBFmbWfo1Zqi4hty6Ke2SNyofqH7dxudmS9tyBtkv2lL4pL+Zvrnbfo+u1BJU8nKGkqTXVCZkn/hwSJiD90CVAVIlm6AjYUuWnHeLrDaXr1R9lyr+XepI5ACP6IXNRgUcOSCkO+XFckcnt8iHB77RYJNQXreo2rC9R5bTh4Y67rV3O2w5m12vccndQPdSprseaHs12Z6Q/KY09pA6QU4fZUccThXOL6ZG3Hm6GZBXjmP+6Riuchp0W8x62qxn2xIZ0S9DX8oNMLLzMUlQEZNy4rTGMb6GhePKtAFun5++gtKaaQm5ZexeedkUtGKjXDkBKJCroXmzOhnmMSx/2zS+AebD3KY+3/jTRecxJ13owFxYLXUBI/XLsNmaKtPYa/js/ag4iGi0ziTNwbmSjx9hBmUgg8QK+aOf0mhKYvsTiFvzGkgSRk5OYv2m05XC0DSqwZaCGExPL68MV0yNTYdnc4gNOJhHSkgksTDq07TQBjqcAciJimVKHyHM+e66sWiXSycOLpYUYBxvw5j/qQ1+d8qStGXIy9gLwIdhclPzFJLtO8vTJIf5mQVuOLNB9MZOvmcNVXOEjkQppRbdAxSda9oAEPEA0PegmWyAJamI37tXPqt+AMDjk02p5TTfEQIkk8CLHgCh+fwu2yN1qAGXCBa4RffbE22qbt5jjEqZKzVWKn6s92VARSGEZZH2yA==",
+    "expiration": "2026-05-20T15:26:34.000Z"
   },
   "name": "grafica-ponto-digital",
   "path": "/home/ubuntu/grafica-ponto-digital",
