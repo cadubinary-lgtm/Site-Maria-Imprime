@@ -9,7 +9,6 @@ import { AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
 
-
 interface AttributeValue {
   id: number;
   value: string;
@@ -83,8 +82,6 @@ export function ProductConfigurator({
     const normalized = value.replace(',', '.');
     return parseFloat(normalized) || 0;
   };
-
-
 
   // Carregar variações reais do backend
   const { data: variationTypes = [] } = trpc.variations.getByProduct.useQuery(
