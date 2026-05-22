@@ -53,14 +53,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   deliveryOption,
   deliveryTax = 0,
 }) => {
-  // Calcular preço total com modificadores
+  // NOTA: basePrice já vem com os modificadores somados pelo ProductConfigurator.
+  // Os selectedAttributes são exibidos apenas para informação — NÃO somamos novamente.
   const totalModifier = useMemo(() => {
     return selectedAttributes.reduce((sum, attr) => {
       return sum + (attr.priceModifier || 0);
     }, 0);
   }, [selectedAttributes]);
 
-  const unitPrice = basePrice + totalModifier;
+  // unitPrice = basePrice (que já inclui modificadores do ProductConfigurator)
+  const unitPrice = basePrice;
   const totalPrice = unitPrice * quantity;
 
   // Calcular preço com área (se aplicável)
@@ -116,22 +118,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         {/* Preços */}
         <div className="space-y-2 pb-3 border-b">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Preço Base</span>
-            <span className="font-medium">R$ {basePrice.toFixed(2)}</span>
-          </div>
-
-          {totalModifier > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Modificadores</span>
-              <span className="text-green-600 font-medium">
-                +R$ {totalModifier.toFixed(2)}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between text-sm font-semibold">
-            <span>Preço Unitário</span>
-            <span>R$ {unitPrice.toFixed(2)}</span>
+            <span className="text-muted-foreground">Preço Unitário</span>
+            <span className="font-semibold">R$ {unitPrice.toFixed(2)}</span>
           </div>
         </div>
 
