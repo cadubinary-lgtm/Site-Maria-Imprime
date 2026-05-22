@@ -631,25 +631,35 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        // Buscar itens do carrinho
+        console.log("\n========== [CHECKOUT] DIAGNÓSTICO COMPLETO ==========");
+        console.log("[CHECKOUT] userId:", ctx.user.id);
+        console.log("[CHECKOUT] input:", JSON.stringify(input, null, 2));
+
+        // 1. Buscar itens do carrinho
         const cartItems = await getCartByUser(ctx.user.id);
+        console.log("[CHECKOUT] cartItems count:", cartItems?.length ?? 0);
+        console.log("[CHECKOUT] cartItems payload:", JSON.stringify(cartItems, null, 2));
+
         if (!cartItems || cartItems.length === 0) {
+          console.log("[CHECKOUT] ERRO: Carrinho vazio!");
           throw new TRPCError({ code: "BAD_REQUEST", message: "Carrinho vazio" });
         }
 
-        // Calcular total
+        // 2. Calcular total
         const totalPrice = cartItems.reduce(
           (sum: number, item: any) => sum + (parseFloat(item.priceAtCart) * item.quantity),
           0
         );
+        console.log("[CHECKOUT] totalPrice calculado:", totalPrice);
 
-        // Gerar número do pedido
+        // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        console.log("[CHECKOUT] orderNumber:", orderNumber);
 
-        // Criar pedido
-        const orderId = await createOrderFromCart({
+        // 4. Montar payload do createOrderFromCart
+        const orderPayload = {
           userId: ctx.user.id,
-          clientId: ctx.user.id, // usar userId como clientId por enquanto
+          clientId: ctx.user.id,
           orderNumber,
           totalPrice,
           notes: input.notes,
@@ -671,12 +681,28 @@ export const appRouter = router({
             artFileUrl: item.artFileUrl ?? undefined,
             notes: item.notes ?? undefined,
           })),
-        });
+        };
+        console.log("[CHECKOUT] orderPayload (sem cartItems):", JSON.stringify({ ...orderPayload, cartItems: `[${orderPayload.cartItems.length} items]` }, null, 2));
+        console.log("[CHECKOUT] orderPayload.cartItems:", JSON.stringify(orderPayload.cartItems, null, 2));
 
-        // Limpar carrinho
-        await clearCart(ctx.user.id);
+        // 5. Criar pedido
+        try {
+          const orderId = await createOrderFromCart(orderPayload);
+          console.log("[CHECKOUT] ✅ Pedido criado com sucesso! orderId:", orderId);
 
-        return { orderId, orderNumber };
+          // 6. Limpar carrinho
+          await clearCart(ctx.user.id);
+          console.log("[CHECKOUT] ✅ Carrinho limpo");
+          console.log("[CHECKOUT] ✅ FLUXO COMPLETO - orderId:", orderId, "orderNumber:", orderNumber);
+          console.log("========== [CHECKOUT] FIM ==========");
+
+          return { orderId, orderNumber };
+        } catch (error: any) {
+          console.error("[CHECKOUT] ❌ ERRO ao criar pedido:");
+          console.error("[CHECKOUT] message:", error.message);
+          console.error("[CHECKOUT] stack:", error.stack);
+          throw error;
+        }
       }),
 
     getMyOrders: protectedProcedure.query(async ({ ctx }) => {
