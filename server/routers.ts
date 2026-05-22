@@ -696,12 +696,68 @@ export const appRouter = router({
     getOrderHistory: protectedProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ ctx, input }) => {
-        // Verificar que o pedido pertence ao usuário
         const result = await getOrderDetailByUser(input.orderId, ctx.user.id);
         if (!result) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
         }
         return await getOrderStatusHistory(input.orderId);
+      }),
+    reorder: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // Buscar pedido original
+        const order = await getOrderDetailByUser(input.orderId, ctx.user.id);
+        if (!order) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        }
+        // Adicionar cada item do pedido ao carrinho
+        let addedCount = 0;
+        for (const item of (order as any).items ?? []) {
+          await addToCart({
+            userId: ctx.user.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            priceAtCart: parseFloat(item.priceAtOrder),
+            selectedAttributes: item.selectedAttributes ?? undefined,
+            artFileUrl: item.artFileUrl ?? undefined,
+            notes: item.notes ?? undefined,
+          });
+          addedCount++;
+        }
+        return { addedCount };
+      }),
+    getMyOrdersFiltered: protectedProcedure
+      .input(z.object({
+        status: z.string().optional(),
+        search: z.string().optional(),
+        orderBy: z.enum(["newest", "oldest", "highest", "lowest"]).optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const orders = await getOrdersByUser(ctx.user.id);
+        let filtered = orders as any[];
+        // Filter by status
+        if (input.status && input.status !== "all") {
+          filtered = filtered.filter((o: any) => o.status === input.status);
+        }
+        // Filter by search (order number)
+        if (input.search) {
+          const q = input.search.toLowerCase();
+          filtered = filtered.filter((o: any) =>
+            o.orderNumber?.toLowerCase().includes(q)
+          );
+        }
+        // Sort
+        if (input.orderBy === "oldest") {
+          filtered.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        } else if (input.orderBy === "highest") {
+          filtered.sort((a: any, b: any) => parseFloat(b.totalPrice) - parseFloat(a.totalPrice));
+        } else if (input.orderBy === "lowest") {
+          filtered.sort((a: any, b: any) => parseFloat(a.totalPrice) - parseFloat(b.totalPrice));
+        } else {
+          // newest (default)
+          filtered.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+        return filtered;
       }),
   }),
 });

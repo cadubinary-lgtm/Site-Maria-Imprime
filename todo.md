@@ -1705,3 +1705,12 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Redirecionar para /meus-pedidos após finalizar
 - [ ] Registrar rotas no App.tsx
 - [ ] Validar TypeScript
+
+## FASE 3A: Melhorias de Pedidos + Recompra
+- [ ] Atualizar enum de status com todos os estados (Pedido Recebido, Aguardando Pagamento, Em Produção, Impressão, Acabamento, Pronto, Enviado, Entregue, Cancelado)
+- [ ] Adicionar procedure de recompra (adicionar itens do pedido ao carrinho)
+- [ ] Filtros na página /meus-pedidos (busca, status, ordenação)
+- [ ] Timeline visual completa no /pedido/:id
+- [ ] Botão Recomprar em /meus-pedidos e /pedido/:id
+- [ ] Campo de observações no pedido
+- [ ] Estrutura preparada para ERP

@@ -218,6 +218,13 @@
       "when": 1779453705058,
       "tag": "0030_fantastic_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1779467691041,
+      "tag": "0031_gifted_speed",
+      "breakpoints": true
     }
   ]
 }
