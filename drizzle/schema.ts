@@ -895,3 +895,68 @@ export const productDeliveryOptions = mysqlTable("productDeliveryOptions", {
 
 export type ProductDeliveryOption = typeof productDeliveryOptions.$inferSelect;
 export type InsertProductDeliveryOption = typeof productDeliveryOptions.$inferInsert;
+
+/**
+ * Cart Items - Itens no carrinho do cliente
+ */
+export const cartItems = mysqlTable("cartItems", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productId: int("productId").notNull(),
+  quantity: int("quantity").notNull().default(1),
+  selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
+  customDimensions: varchar("customDimensions", { length: 255 }), // Ex: "2.5x1.5" para m²
+  priceAtCart: decimal("priceAtCart", { precision: 10, scale: 2 }).notNull(), // Preço no momento da adição
+  artFileUrl: text("artFileUrl"), // URL do arquivo de arte
+  artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
+  notes: longtext("notes"), // Observações do cliente
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CartItem = typeof cartItems.$inferSelect;
+export type InsertCartItem = typeof cartItems.$inferInsert;
+
+/**
+ * Customer Addresses - Endereços de entrega do cliente
+ */
+export const customerAddresses = mysqlTable("customerAddresses", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Casa", "Escritório"
+  fullName: varchar("fullName", { length: 255 }).notNull(), // Nome completo para entrega
+  phone: varchar("phone", { length: 20 }).notNull(),
+  street: varchar("street", { length: 255 }).notNull(),
+  number: varchar("number", { length: 10 }).notNull(),
+  complement: varchar("complement", { length: 255 }), // Apto, sala, etc
+  neighborhood: varchar("neighborhood", { length: 255 }).notNull(),
+  city: varchar("city", { length: 255 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(), // UF
+  zipCode: varchar("zipCode", { length: 10 }).notNull(),
+  country: varchar("country", { length: 100 }).default("Brasil").notNull(),
+  isDefault: boolean("isDefault").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomerAddress = typeof customerAddresses.$inferSelect;
+export type InsertCustomerAddress = typeof customerAddresses.$inferInsert;
+
+/**
+ * Customer Profile - Perfil estendido do cliente
+ */
+export const customerProfiles = mysqlTable("customerProfiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  cpfCnpj: varchar("cpfCnpj", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  companyName: varchar("companyName", { length: 255 }),
+  totalSpent: decimal("totalSpent", { precision: 15, scale: 2 }).default("0").notNull(),
+  totalOrders: int("totalOrders").default(0).notNull(),
+  lastOrderDate: timestamp("lastOrderDate"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomerProfile = typeof customerProfiles.$inferSelect;
+export type InsertCustomerProfile = typeof customerProfiles.$inferInsert;

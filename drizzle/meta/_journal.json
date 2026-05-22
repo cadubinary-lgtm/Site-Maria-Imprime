@@ -211,6 +211,13 @@
       "when": 1779230153957,
       "tag": "0029_needy_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1779453705058,
+      "tag": "0030_fantastic_warlock",
+      "breakpoints": true
     }
   ]
 }

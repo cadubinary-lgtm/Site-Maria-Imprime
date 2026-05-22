@@ -23,6 +23,9 @@ import AdminRulesBuilder from "./pages/AdminRulesBuilder";
 import { AdminPricingRules } from "./pages/AdminPricingRules";
 import AdminRulesManager from "./pages/AdminRulesManager";
 import Catalog from "./pages/Catalog";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import MyAccountPage from "./pages/MyAccountPage";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -47,16 +50,25 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path={"/catalogo"} component={Catalog} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/cadastro" component={SignupPage} />
 
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
-      <Route path="/meus-pedidos" component={OrderTracking} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
       
-      {/* Admin routes - Acessível para todos os usuários logados */}
+      {/* Rotas protegidas do cliente */}
       {user && (
+        <Route path="/minha-conta" component={MyAccountPage} />
+      )}
+      {user && (
+        <Route path="/meus-pedidos" component={OrderTracking} />
+      )}
+      
+      {/* Admin routes - Acessível apenas para admins */}
+      {user?.role === "admin" && (
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
