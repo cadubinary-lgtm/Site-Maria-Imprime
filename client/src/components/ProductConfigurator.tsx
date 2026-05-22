@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, ChevronDown } from "lucide-react";
+import { AlertCircle, ChevronDown, Truck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
 
@@ -76,6 +76,19 @@ export function ProductConfigurator({
   const [error, setError] = useState<string | null>(null);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<number | null>(null);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
+
+  // Frete de entrega
+  const FRETE_OPTIONS = [
+    { id: "retirada",       name: "Retirar na Loja",  description: "Retire na loja",               price: 0,    days: "Conforme produção", logo: "🏪", highlight: false },
+    { id: "motoboy",        name: "Moto Express",     description: "Entrega rápida via motoboy",   price: 15,   days: "Mesmo dia*",        logo: "🛵", highlight: true  },
+    { id: "uber",           name: "Uber Entrega",     description: "Entrega via Uber Flash",       price: 20,   days: "Mesmo dia*",        logo: "🚗", highlight: true  },
+    { id: "jadlog",         name: "Jadlog",           description: "Transportadora Jadlog",        price: 25.9, days: "3 a 5 dias úteis",  logo: "📦", highlight: false },
+    { id: "correios_sedex", name: "Correios SEDEX",   description: "Correios SEDEX",               price: 18.5, days: "2 a 4 dias úteis",  logo: "📮", highlight: false },
+    { id: "correios_pac",   name: "Correios PAC",     description: "Correios PAC",                 price: 12.3, days: "5 a 8 dias úteis",  logo: "📮", highlight: false },
+    { id: "transportadora", name: "Transportadora",   description: "Transportadora parceira",      price: 35,   days: "5 a 10 dias úteis", logo: "🚛", highlight: false },
+  ] as const;
+  const [selectedFreteId, setSelectedFreteId] = useState<string>("retirada");
+  const selectedFrete = FRETE_OPTIONS.find(f => f.id === selectedFreteId) ?? FRETE_OPTIONS[0];
 
   // Converter vírgula para ponto
   const parseDecimal = (value: string): number => {
@@ -227,11 +240,17 @@ export function ProductConfigurator({
       productId,
       selectedVariations: selectedValues,
       quantity,
-      totalPrice: calculatedPrice,
+      totalPrice: calculatedPrice + selectedFrete.price,
       totalAdditionals,
       dimensions: {
         width: parseDecimal(dimensions.width as string),
         height: parseDecimal(dimensions.height as string),
+      },
+      selectedFrete: {
+        id: selectedFrete.id,
+        name: selectedFrete.name,
+        price: selectedFrete.price,
+        days: selectedFrete.days,
       },
     };
     onAddToCart?.(config);
@@ -451,6 +470,52 @@ export function ProductConfigurator({
           </div>
         )}
 
+        {/* Opções de Entrega (Frete) */}
+        <div className="space-y-3 border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="flex items-center gap-2 mb-1">
+            <Truck className="w-4 h-4 text-orange-500" />
+            <h3 className="font-semibold text-base">Opções de Entrega</h3>
+          </div>
+          <div className="space-y-2">
+            {FRETE_OPTIONS.map((option) => {
+              const isSelected = selectedFreteId === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setSelectedFreteId(option.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-all ${
+                    isSelected
+                      ? "border-orange-500 bg-orange-50 shadow-sm"
+                      : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/40"
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    isSelected ? "border-orange-500" : "border-gray-300"
+                  }`}>
+                    {isSelected && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                  </div>
+                  <span className="text-lg flex-shrink-0">{option.logo}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium leading-tight ${
+                      isSelected ? "text-orange-700" : "text-gray-800"
+                    }`}>{option.name}</p>
+                    <p className={`text-xs mt-0.5 ${
+                      option.highlight ? "text-green-600 font-medium" : "text-gray-500"
+                    }`}>{option.days}</p>
+                  </div>
+                  <span className={`text-sm font-bold flex-shrink-0 ${
+                    isSelected ? "text-orange-600" : "text-gray-700"
+                  }`}>
+                    {option.price === 0 ? "Grátis" : `R$ ${option.price.toFixed(2)}`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-orange-500 mt-1">* Mesmo dia válido para pedidos até 12h na região atendida.</p>
+        </div>
+
         {/* Quantidade (apenas para unidade) */}
         {calculationType !== "m2" && (
           <div className="space-y-2">
@@ -470,9 +535,14 @@ export function ProductConfigurator({
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold">Preço Total:</span>
             <span className="text-2xl font-bold text-orange-600">
-              R$ {calculatedPrice.toFixed(2)}
+              R$ {(calculatedPrice + selectedFrete.price).toFixed(2)}
             </span>
           </div>
+          {selectedFrete.price > 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              Produto: R$ {calculatedPrice.toFixed(2)} + Frete ({selectedFrete.name}): R$ {selectedFrete.price.toFixed(2)}
+            </p>
+          )}
         </div>
 
         {/* Botão Adicionar ao Carrinho */}
