@@ -27,6 +27,9 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -60,15 +63,25 @@ function Router() {
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
       
-      {/* Rotas protegidas do cliente */}
-      {user && (
-        <Route path="/minha-conta" component={MyAccountPage} />
-      )}
-      {user && (
-        <Route path="/meus-pedidos" component={OrderTracking} />
-      )}
       {/* Carrinho - acessível para todos, mostra login se não autenticado */}
       <Route path="/carrinho" component={CartPage} />
+
+      {/* Rotas protegidas do cliente */}
+      {user ? (
+        <>
+          <Route path="/minha-conta" component={MyAccountPage} />
+          <Route path="/meus-pedidos" component={MyOrdersPage} />
+          <Route path="/pedido/:id" component={OrderDetailPage} />
+          <Route path="/checkout" component={CheckoutPage} />
+        </>
+      ) : (
+        <>
+          <Route path="/minha-conta" component={LoginPage} />
+          <Route path="/meus-pedidos" component={LoginPage} />
+          <Route path="/pedido/:id" component={LoginPage} />
+          <Route path="/checkout" component={LoginPage} />
+        </>
+      )}
       
       {/* Admin routes - Acessível apenas para admins */}
       {user?.role === "admin" && (

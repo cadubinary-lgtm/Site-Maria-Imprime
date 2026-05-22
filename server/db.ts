@@ -784,3 +784,128 @@ export async function getCartItemCount(userId: number): Promise<number> {
   const row = (rows[0] as any[])[0];
   return Number(row?.total ?? 0);
 }
+
+// ============================================================
+// CHECKOUT HELPERS
+// ============================================================
+
+export async function createOrderFromCart(data: {
+  userId: number;
+  clientId: number;
+  orderNumber: string;
+  totalPrice: number;
+  notes?: string;
+  deliveryStreet: string;
+  deliveryNumber: string;
+  deliveryComplement?: string;
+  deliveryNeighborhood: string;
+  deliveryCity: string;
+  deliveryState: string;
+  deliveryZipCode: string;
+  deliveryFullName: string;
+  deliveryPhone: string;
+  cartItems: Array<{
+    productId: number;
+    productName: string;
+    quantity: number;
+    priceAtCart: number;
+    selectedAttributes?: string;
+    artFileUrl?: string;
+    notes?: string;
+  }>;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Criar o pedido
+  const orderResult = await db.execute(
+    sql`
+      INSERT INTO orders (
+        clientId, userId, orderNumber, status, totalPrice, paymentStatus, notes,
+        deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
+        deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone
+      ) VALUES (
+        ${data.clientId}, ${data.userId}, ${data.orderNumber}, 'aguardando',
+        ${data.totalPrice}, 'pendente', ${data.notes ?? null},
+        ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
+        ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
+        ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone}
+      )
+    `
+  );
+  const orderId = (orderResult as any).insertId as number;
+
+  // Inserir os itens do pedido
+  for (const item of data.cartItems) {
+    await db.execute(
+      sql`
+        INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, artFileUrl, notes)
+        VALUES (${orderId}, ${item.productId}, ${item.productName}, ${item.quantity}, ${item.priceAtCart},
+          ${item.selectedAttributes ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
+      `
+    );
+  }
+
+  // Registrar histórico de status
+  await db.execute(
+    sql`
+      INSERT INTO orderStatusHistory (orderId, newStatus, changedBy, notes)
+      VALUES (${orderId}, 'aguardando', ${data.userId}, 'Pedido criado pelo cliente')
+    `
+  ).catch(() => {}); // Ignorar erro se tabela não tiver campo changedBy
+
+  return orderId;
+}
+
+export async function getOrdersByUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.execute(
+    sql`
+      SELECT 
+        o.id, o.orderNumber, o.status, o.totalPrice, o.paymentStatus,
+        o.deliveryCity, o.deliveryState, o.createdAt, o.updatedAt,
+        COUNT(oi.id) as itemCount
+      FROM orders o
+      LEFT JOIN orderItems oi ON o.id = oi.orderId
+      WHERE o.userId = ${userId}
+      GROUP BY o.id
+      ORDER BY o.createdAt DESC
+    `
+  ) as any;
+  return (rows[0] ?? []) as any[];
+}
+
+export async function getOrderDetailByUser(orderId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Buscar o pedido
+  const orderRows = await db.execute(
+    sql`SELECT * FROM orders WHERE id = ${orderId} AND userId = ${userId}`
+  ) as any;
+  const order = ((orderRows[0] ?? []) as any[])[0];
+  if (!order) return null;
+
+  // Buscar os itens
+  const itemRows = await db.execute(
+    sql`
+      SELECT oi.*, p.imageUrl as productImage
+      FROM orderItems oi
+      LEFT JOIN products p ON oi.productId = p.id
+      WHERE oi.orderId = ${orderId}
+    `
+  ) as any;
+  const items = (itemRows[0] ?? []) as any[];
+
+  return { order, items };
+}
+
+export async function getOrderStatusHistory(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.execute(
+    sql`SELECT * FROM orderStatusHistory WHERE orderId = ${orderId} ORDER BY createdAt ASC`
+  ) as any;
+  return (rows[0] ?? []) as any[];
+}

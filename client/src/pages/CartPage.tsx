@@ -351,9 +351,7 @@ export default function CartPage() {
                   <Button
                     className="w-full bg-orange-500 hover:bg-orange-600 mt-2"
                     size="lg"
-                    onClick={() => {
-                      toast.info("Checkout em breve! (FASE 2B)");
-                    }}
+                    onClick={() => setLocation("/checkout")}
                   >
                     Finalizar Pedido
                   </Button>
