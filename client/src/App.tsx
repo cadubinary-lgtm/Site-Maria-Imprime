@@ -26,6 +26,7 @@ import Catalog from "./pages/Catalog";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MyAccountPage from "./pages/MyAccountPage";
+import CartPage from "./pages/CartPage";
 
 import ClientsManager from "./pages/ClientsManager";
 import FinancialDashboard from "./pages/FinancialDashboard";
@@ -66,6 +67,8 @@ function Router() {
       {user && (
         <Route path="/meus-pedidos" component={OrderTracking} />
       )}
+      {/* Carrinho - acessível para todos, mostra login se não autenticado */}
+      <Route path="/carrinho" component={CartPage} />
       
       {/* Admin routes - Acessível apenas para admins */}
       {user?.role === "admin" && (

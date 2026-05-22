@@ -4,8 +4,27 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Search, Menu, X, LogOut, User, Settings, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
+
+function CartIcon() {
+  const { data: count } = trpc.cart.getCount.useQuery(undefined, {
+    refetchInterval: 30000, // atualiza a cada 30s
+  });
+  const cartCount = Number(count ?? 0);
+  return (
+    <Link href="/carrinho">
+      <button className="relative p-2 hover:bg-gray-100 rounded-lg transition">
+        <ShoppingCart className="w-5 h-5 text-gray-600" />
+        {cartCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {cartCount > 99 ? "99+" : cartCount}
+          </span>
+        )}
+      </button>
+    </Link>
+  );
+}
 
 export default function Header() {
   const [, navigate] = useLocation();
@@ -171,6 +190,8 @@ export default function Header() {
 
           {/* User Menu */}
           <div className="flex items-center gap-3">
+            {/* Ícone do Carrinho - visível para usuários logados */}
+            {isAuthenticated && user && <CartIcon />}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 <Link href="/admin">

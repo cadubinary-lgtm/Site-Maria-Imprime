@@ -28,6 +28,12 @@ import {
   deleteVariationType,
   updateVariationType,
   deleteVariationOption,
+  getCartByUser,
+  addToCart,
+  updateCartItemQuantity,
+  removeFromCart,
+  clearCart,
+  getCartItemCount,
   updateVariationOption,
   reorderVariationTypes,
   getOrderItemVariations,
@@ -564,6 +570,43 @@ export const appRouter = router({
         return await reorderDeliveryOptions(input.updates);
       }),
   }),
+  cart: router({
+    getItems: protectedProcedure.query(async ({ ctx }) => {
+      return await getCartByUser(ctx.user.id);
+    }),
+    getCount: protectedProcedure.query(async ({ ctx }) => {
+      return await getCartItemCount(ctx.user.id);
+    }),
+    addItem: protectedProcedure
+      .input(z.object({
+        productId: z.number(),
+        quantity: z.number().min(1).default(1),
+        selectedAttributes: z.string().optional(),
+        customDimensions: z.string().optional(),
+        priceAtCart: z.number(),
+        artFileUrl: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await addToCart({ userId: ctx.user.id, ...input });
+        return { id };
+      }),
+    updateQuantity: protectedProcedure
+      .input(z.object({ id: z.number(), quantity: z.number().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        await updateCartItemQuantity(input.id, ctx.user.id, input.quantity);
+        return { success: true };
+      }),
+    removeItem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await removeFromCart(input.id, ctx.user.id);
+        return { success: true };
+      }),
+    clear: protectedProcedure.mutation(async ({ ctx }) => {
+      await clearCart(ctx.user.id);
+      return { success: true };
+    }),
+  }),
 });
-
 export type AppRouter = typeof appRouter;
