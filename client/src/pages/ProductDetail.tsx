@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 
 export default function ProductDetail() {
@@ -85,6 +86,9 @@ export default function ProductDetail() {
   );
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
+  const addToCartMutation = trpc.cart.addItem.useMutation();
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   // Processar regras dinâmicas
   const attributeState = useMemo(() => {
@@ -213,7 +217,9 @@ export default function ProductDetail() {
       return;
     }
 
-    if (!validateAttributes()) {
+    if (!user) {
+      toast.error("Faça login para adicionar ao carrinho");
+      setLocation("/login");
       return;
     }
 
@@ -225,12 +231,36 @@ export default function ProductDetail() {
     setIsProcessing(true);
 
     try {
-      const order = await createOrderMutation.mutateAsync({
+      // Serializar atributos selecionados
+      const attrsJson = Object.keys(selectedAttributes).length > 0
+        ? JSON.stringify(
+            Object.fromEntries(
+              Object.entries(selectedAttributes).map(([attrId, sel]) => {
+                const attr = productAttributes?.find((pa) => pa.attributeId === Number(attrId));
+                const value = attr?.values.find((v) => v.id === sel.valueIds[0]);
+                return [attr?.attribute?.name ?? attrId, value?.value ?? sel.customValue ?? ""];
+              })
+            )
+          )
+        : undefined;
+
+      const finalPrice = totalPrice > 0 ? totalPrice : parseFloat(product.price);
+
+      await addToCartMutation.mutateAsync({
         productId,
         quantity,
+        selectedAttributes: attrsJson,
+        priceAtCart: finalPrice,
+        notes: notes || undefined,
+        artFileUrl: artLink || undefined,
       });
 
-      toast.success("Produto adicionado ao carrinho!");
+      toast.success("Produto adicionado ao carrinho!", {
+        action: {
+          label: "Ver Carrinho",
+          onClick: () => setLocation("/carrinho"),
+        },
+      });
     } catch (error) {
       toast.error("Erro ao adicionar ao carrinho");
       console.error(error);
