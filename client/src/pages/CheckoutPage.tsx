@@ -176,6 +176,15 @@ export default function CheckoutPage() {
   const handleFinalize = async () => {
     if (!cartItems || cartItems.length === 0) { toast.error("Seu carrinho está vazio"); return; }
     setIsSubmitting(true);
+
+    console.log("\n========== [CHECKOUT-FRONTEND] DIAGNÓSTICO ==========");
+    console.log("[CHECKOUT-FRONTEND] cartItems:", JSON.stringify(cartItems, null, 2));
+    console.log("[CHECKOUT-FRONTEND] subtotal:", subtotal);
+    console.log("[CHECKOUT-FRONTEND] fretePrice:", fretePrice);
+    console.log("[CHECKOUT-FRONTEND] totalPrice:", totalPrice);
+    console.log("[CHECKOUT-FRONTEND] paymentMethod:", paymentMethod);
+    console.log("[CHECKOUT-FRONTEND] selectedFrete:", selectedFrete);
+
     try {
       const paymentLabel = paymentMethod === "pix" ? "PIX" : paymentMethod === "cartao" ? `Cartão (${cardInstallments}x)` : "";
       const notesWithInfo = [
@@ -184,7 +193,7 @@ export default function CheckoutPage() {
         paymentLabel ? `Pagamento: ${paymentLabel}` : "",
       ].filter(Boolean).join(" | ");
 
-      const result = await createOrderMutation.mutateAsync({
+      const payload = {
         deliveryFullName: fullName,
         deliveryPhone: phone,
         deliveryStreet: street,
@@ -195,10 +204,18 @@ export default function CheckoutPage() {
         deliveryState: stateUF,
         deliveryZipCode: zipCode.replace(/\D/g, ""),
         notes: notesWithInfo || undefined,
-      });
+      };
+      console.log("[CHECKOUT-FRONTEND] payload enviado:", JSON.stringify(payload, null, 2));
+
+      const result = await createOrderMutation.mutateAsync(payload);
+      console.log("[CHECKOUT-FRONTEND] ✅ SUCESSO:", result);
       toast.success(`Pedido ${result.orderNumber} criado com sucesso!`);
       setLocation(`/pedido/${result.orderId}`);
     } catch (err: any) {
+      console.error("[CHECKOUT-FRONTEND] ❌ ERRO:", err);
+      console.error("[CHECKOUT-FRONTEND] err.message:", err?.message);
+      console.error("[CHECKOUT-FRONTEND] err.data:", err?.data);
+      console.error("[CHECKOUT-FRONTEND] err.shape:", err?.shape);
       toast.error(err?.message ?? "Erro ao finalizar pedido");
     } finally {
       setIsSubmitting(false);
