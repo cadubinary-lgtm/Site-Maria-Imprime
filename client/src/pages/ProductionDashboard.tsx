@@ -7,13 +7,18 @@ import { Link } from "wouter";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-const STATUSES = ["aguardando", "em_producao", "enviado", "entregue"];
+const STATUSES = ["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"];
 
-const STATUS_CONFIG = {
-  aguardando: { label: "Aguardando", color: "bg-yellow-50 border-yellow-200" },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  pedido_recebido: { label: "Pedido Recebido", color: "bg-yellow-50 border-yellow-200" },
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-orange-50 border-orange-200" },
   em_producao: { label: "Em Produção", color: "bg-blue-50 border-blue-200" },
+  impressao: { label: "Impressão", color: "bg-indigo-50 border-indigo-200" },
+  acabamento: { label: "Acabamento", color: "bg-violet-50 border-violet-200" },
+  pronto: { label: "Pronto", color: "bg-teal-50 border-teal-200" },
   enviado: { label: "Enviado", color: "bg-purple-50 border-purple-200" },
   entregue: { label: "Entregue", color: "bg-green-50 border-green-200" },
+  cancelado: { label: "Cancelado", color: "bg-red-50 border-red-200" },
 };
 
 export default function ProductionDashboard() {
@@ -24,7 +29,7 @@ export default function ProductionDashboard() {
     try {
       await updateStatusMutation.mutateAsync({
         orderId,
-        newStatus: newStatus as "aguardando" | "em_producao" | "enviado" | "entregue",
+        newStatus: newStatus as "pedido_recebido" | "aguardando_pagamento" | "em_producao" | "impressao" | "acabamento" | "pronto" | "enviado" | "entregue" | "cancelado",
       });
       
       const statusLabel = STATUS_CONFIG[newStatus as keyof typeof STATUS_CONFIG]?.label || newStatus;

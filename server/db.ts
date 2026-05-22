@@ -825,7 +825,7 @@ export async function createOrderFromCart(data: {
         deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
         deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone
       ) VALUES (
-        ${data.clientId}, ${data.userId}, ${data.orderNumber}, 'aguardando',
+        ${data.clientId}, ${data.userId}, ${data.orderNumber}, 'pedido_recebido',
         ${data.totalPrice}, 'pendente', ${data.notes ?? null},
         ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
         ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
@@ -850,7 +850,7 @@ export async function createOrderFromCart(data: {
   await db.execute(
     sql`
       INSERT INTO orderStatusHistory (orderId, newStatus, changedBy, notes)
-      VALUES (${orderId}, 'aguardando', ${data.userId}, 'Pedido criado pelo cliente')
+      VALUES (${orderId}, 'pedido_recebido', ${data.userId}, 'Pedido criado pelo cliente')
     `
   ).catch(() => {}); // Ignorar erro se tabela não tiver campo changedBy
 

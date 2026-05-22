@@ -338,7 +338,7 @@ export const appRouter = router({
         const result = await createOrder({
           clientId: ctx.user.id,
           orderNumber,
-          status: "aguardando" as any,
+          status: "pedido_recebido" as any,
           totalPrice: totalPrice.toString() as any,
           artFileUrl: input.artFileUrl,
           artFileKey: input.artFileKey,
@@ -349,7 +349,7 @@ export const appRouter = router({
     updateStatus: productionProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["aguardando", "em_producao", "enviado", "entregue"]),
+        newStatus: z.enum(["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"]),
       }))
       .mutation(async ({ input }) => {
         const result = await updateOrderStatus(input.orderId, input.newStatus);

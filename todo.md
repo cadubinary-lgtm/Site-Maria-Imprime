@@ -1724,3 +1724,14 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Schema Drizzle atualizado com paymentMethod e paymentInstallments
 - [x] Migration gerada (drizzle/0032_huge_zarda.sql)
 - [x] TypeScript sem erros
+
+## Bug Crítico: INSERT orders falhando
+
+- [x] Identificado: status 'aguardando' não existe no enum da tabela orders
+- [x] Corrigido server/db.ts: createOrderFromCart usa 'pedido_recebido' (status correto)
+- [x] Corrigido server/db.ts: orderStatusHistory usa 'pedido_recebido'
+- [x] Corrigido server/routers.ts: createOrder legado usa 'pedido_recebido'
+- [x] Corrigido server/routers.ts: updateStatus aceita todos os 9 status válidos
+- [x] Corrigido client/src/pages/ProductionDashboard.tsx: STATUSES e STATUS_CONFIG com todos os 9 status
+- [x] TypeScript sem erros após todas as correções
+- [x] Validado: INSERT de pedido funciona corretamente com status 'pedido_recebido'
