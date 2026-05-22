@@ -97,6 +97,7 @@ export type InsertProductCategory = typeof productCategories.$inferInsert;
 export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   clientId: int("clientId").notNull(),
+  userId: int("userId"), // Relacionamento com usuário logado
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   status: mysqlEnum("status", ["aguardando", "em_producao", "enviado", "entregue"]).default("aguardando").notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
@@ -104,6 +105,16 @@ export const orders = mysqlTable("orders", {
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
   paymentStatus: mysqlEnum("paymentStatus", ["pendente", "pago", "falhou"]).default("pendente").notNull(),
   notes: longtext("notes"),
+  // Endereço de entrega
+  deliveryStreet: varchar("deliveryStreet", { length: 255 }),
+  deliveryNumber: varchar("deliveryNumber", { length: 10 }),
+  deliveryComplement: varchar("deliveryComplement", { length: 255 }),
+  deliveryNeighborhood: varchar("deliveryNeighborhood", { length: 255 }),
+  deliveryCity: varchar("deliveryCity", { length: 255 }),
+  deliveryState: varchar("deliveryState", { length: 2 }),
+  deliveryZipCode: varchar("deliveryZipCode", { length: 10 }),
+  deliveryFullName: varchar("deliveryFullName", { length: 255 }),
+  deliveryPhone: varchar("deliveryPhone", { length: 20 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -118,8 +129,12 @@ export const orderItems = mysqlTable("orderItems", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
   productId: int("productId").notNull(),
+  productName: varchar("productName", { length: 255 }), // Nome do produto no momento da compra
   quantity: int("quantity").notNull(),
   priceAtOrder: decimal("priceAtOrder", { precision: 10, scale: 2 }).notNull(),
+  selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
+  artFileUrl: text("artFileUrl"), // URL do arquivo de arte
+  notes: longtext("notes"), // Observações do cliente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

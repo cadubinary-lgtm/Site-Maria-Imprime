@@ -51,6 +51,10 @@ import {
   deleteDeliveryOption,
   reorderDeliveryOptions,
   copyDeliveryOptionsFromProduct,
+  createOrderFromCart,
+  getOrdersByUser,
+  getOrderDetailByUser,
+  getOrderStatusHistory,
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -607,6 +611,98 @@ export const appRouter = router({
       await clearCart(ctx.user.id);
       return { success: true };
     }),
+  }),
+
+  // ============================================================
+  // CHECKOUT ROUTER
+  // ============================================================
+  checkout: router({
+    createOrder: protectedProcedure
+      .input(z.object({
+        deliveryFullName: z.string().min(3),
+        deliveryPhone: z.string().min(8),
+        deliveryStreet: z.string().min(3),
+        deliveryNumber: z.string().min(1),
+        deliveryComplement: z.string().optional(),
+        deliveryNeighborhood: z.string().min(2),
+        deliveryCity: z.string().min(2),
+        deliveryState: z.string().length(2),
+        deliveryZipCode: z.string().min(8),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Buscar itens do carrinho
+        const cartItems = await getCartByUser(ctx.user.id);
+        if (!cartItems || cartItems.length === 0) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Carrinho vazio" });
+        }
+
+        // Calcular total
+        const totalPrice = cartItems.reduce(
+          (sum: number, item: any) => sum + (parseFloat(item.priceAtCart) * item.quantity),
+          0
+        );
+
+        // Gerar número do pedido
+        const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+        // Criar pedido
+        const orderId = await createOrderFromCart({
+          userId: ctx.user.id,
+          clientId: ctx.user.id, // usar userId como clientId por enquanto
+          orderNumber,
+          totalPrice,
+          notes: input.notes,
+          deliveryStreet: input.deliveryStreet,
+          deliveryNumber: input.deliveryNumber,
+          deliveryComplement: input.deliveryComplement,
+          deliveryNeighborhood: input.deliveryNeighborhood,
+          deliveryCity: input.deliveryCity,
+          deliveryState: input.deliveryState,
+          deliveryZipCode: input.deliveryZipCode,
+          deliveryFullName: input.deliveryFullName,
+          deliveryPhone: input.deliveryPhone,
+          cartItems: cartItems.map((item: any) => ({
+            productId: item.productId,
+            productName: item.productName ?? "Produto",
+            quantity: item.quantity,
+            priceAtCart: parseFloat(item.priceAtCart),
+            selectedAttributes: item.selectedAttributes ?? undefined,
+            artFileUrl: item.artFileUrl ?? undefined,
+            notes: item.notes ?? undefined,
+          })),
+        });
+
+        // Limpar carrinho
+        await clearCart(ctx.user.id);
+
+        return { orderId, orderNumber };
+      }),
+
+    getMyOrders: protectedProcedure.query(async ({ ctx }) => {
+      return await getOrdersByUser(ctx.user.id);
+    }),
+
+    getOrderById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const result = await getOrderDetailByUser(input.id, ctx.user.id);
+        if (!result) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        }
+        return result;
+      }),
+
+    getOrderHistory: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        // Verificar que o pedido pertence ao usuário
+        const result = await getOrderDetailByUser(input.orderId, ctx.user.id);
+        if (!result) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        }
+        return await getOrderStatusHistory(input.orderId);
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

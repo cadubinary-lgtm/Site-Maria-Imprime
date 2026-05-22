@@ -1693,3 +1693,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Implementar validação de campos
 - [ ] Testar fluxo completo
 - [ ] Salvar checkpoint FASE 1
+
+## FASE 2B: Checkout
+- [ ] Verificar/criar tabelas orders e orderItems no banco
+- [ ] Criar procedures tRPC: checkout.createOrder, checkout.getMyOrders, checkout.getOrderById
+- [ ] Criar página /checkout com etapas: dados, endereço, revisão, finalizar
+- [ ] Criar página /meus-pedidos com listagem de pedidos
+- [ ] Criar página /pedido/:id com detalhes do pedido
+- [ ] Vincular itens do carrinho ao pedido ao finalizar
+- [ ] Limpar carrinho após finalizar pedido
+- [ ] Redirecionar para /meus-pedidos após finalizar
+- [ ] Registrar rotas no App.tsx
+- [ ] Validar TypeScript
