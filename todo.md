@@ -1714,3 +1714,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Botão Recomprar em /meus-pedidos e /pedido/:id
 - [ ] Campo de observações no pedido
 - [ ] Estrutura preparada para ERP
+
+## Etapa Pagamento no Checkout
+
+- [x] CheckoutPage reescrita com 5 etapas: Dados → Endereço → Entrega → Pagamento → Revisão
+- [x] Etapa Pagamento: PIX (QR Code simulado + cópia de código) e Cartão (formulário completo)
+- [x] Resumo lateral mostra: produto, frete, forma de pagamento, total final
+- [x] Banco de dados: colunas payment_method e payment_installments adicionadas à tabela orders
+- [x] Schema Drizzle atualizado com paymentMethod e paymentInstallments
+- [x] Migration gerada (drizzle/0032_huge_zarda.sql)
+- [x] TypeScript sem erros
