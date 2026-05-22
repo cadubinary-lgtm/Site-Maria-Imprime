@@ -38,6 +38,9 @@ export default function ProductDetail() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
   const [deliveryTax, setDeliveryTax] = useState(0);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [configuradorRequiredCount, setConfiguradorRequiredCount] = useState(0);
+  const [configuradorSelectedCount, setConfiguradorSelectedCount] = useState(0);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -223,10 +226,19 @@ export default function ProductDetail() {
       return;
     }
 
-    if (!acceptedTerms) {
-      toast.error("Você deve aceitar os termos");
+    // Bug 2: Validar variações obrigatórias
+    if (configuradorRequiredCount > 0 && configuradorSelectedCount < configuradorRequiredCount) {
+      setValidationError(`Selecione todas as opções obrigatórias (${configuradorSelectedCount} de ${configuradorRequiredCount} selecionadas)`);
       return;
     }
+
+    // Bug 3: Validar termos com mensagem visível abaixo do botão
+    if (!acceptedTerms) {
+      setValidationError("Você deve aceitar os termos e condições antes de continuar");
+      return;
+    }
+
+    setValidationError(null);
 
     setIsProcessing(true);
 
@@ -473,6 +485,11 @@ export default function ProductDetail() {
                   }
                 });
                 setConfiguradorAttributes(attrs);
+                // Bug 2: Rastrear contagem de variações para validação
+                if (config.requiredCount !== undefined) {
+                  setConfiguradorRequiredCount(config.requiredCount);
+                  setConfiguradorSelectedCount(config.selectedCount);
+                }
                 // Rastrear prazo selecionado e taxa
                 if (config.selectedDeliveryOption && config.deliveryOptions) {
                   const selected = config.deliveryOptions.find((opt: any) => opt.id === config.selectedDeliveryOption);
@@ -571,15 +588,27 @@ export default function ProductDetail() {
           </Card>
 
           {/* Termos */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              checked={acceptedTerms}
-              onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
-            />
-            <Label htmlFor="terms" className="text-sm cursor-pointer">
-              Aceito os termos e condições
-            </Label>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={acceptedTerms}
+                onCheckedChange={(checked) => {
+                  setAcceptedTerms(checked as boolean);
+                  if (checked) setValidationError(null);
+                }}
+              />
+              <Label htmlFor="terms" className="text-sm cursor-pointer">
+                Aceito os termos e condições
+              </Label>
+            </div>
+            {/* Bug 3: Mensagem de erro visível, abaixo do botão */}
+            {validationError && (
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-700 font-medium">{validationError}</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1735,3 +1735,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigido client/src/pages/ProductionDashboard.tsx: STATUSES e STATUS_CONFIG com todos os 9 status
 - [x] TypeScript sem erros após todas as correções
 - [x] Validado: INSERT de pedido funciona corretamente com status 'pedido_recebido'
+
+## Bugs ProductConfigurator / Carrinho
+
+- [x] Bug 1: Soma duplicada das variações — OrderSummary não soma mais modificadores (basePrice já vem com mods do ProductConfigurator)
+- [x] Bug 2: Validação de variações obrigatórias — handleAddToCart bloqueia se não selecionou todas
+- [x] Bug 3: Mensagem de erro visível abaixo do checkbox de termos (card vermelho com ícone)
+- [x] Bug 4: Botão duplicado removido do ProductConfigurator — apenas OrderSummary tem o botão

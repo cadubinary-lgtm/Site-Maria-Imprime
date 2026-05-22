@@ -270,6 +270,10 @@ export function ProductConfigurator({
           deliveryTax = area * selectedOption.pricePerM2;
         }
       }
+
+      // Bug 2: Passar contagem de variações para validação no ProductDetail
+      const requiredAttrs = attributes.filter(a => a.isRequired);
+      const selectedCount = requiredAttrs.filter(a => selectedValues[a.id] !== undefined).length;
       
       const config = {
         productId,
@@ -279,10 +283,12 @@ export function ProductConfigurator({
         selectedDeliveryOption,
         deliveryOptions,
         deliveryTax,
+        requiredCount: requiredAttrs.length,
+        selectedCount,
       };
       onPriceUpdate(calculatedPrice, config);
     }
-  }, [calculatedPrice]);
+  }, [calculatedPrice, selectedValues, attributes]);
 
   if (isLoading) {
     return (
@@ -545,17 +551,7 @@ export function ProductConfigurator({
           )}
         </div>
 
-        {/* Botão Adicionar ao Carrinho */}
-        <Button
-          onClick={handleAddToCart}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-          disabled={
-            attributes.filter(a => a.isRequired).length !==
-            Object.keys(selectedValues).length
-          }
-        >
-          Adicionar ao Carrinho
-        </Button>
+
       </CardContent>
     </Card>
   );
