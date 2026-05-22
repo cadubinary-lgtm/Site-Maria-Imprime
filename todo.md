@@ -1625,3 +1625,71 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigido z.enum→z.string() em createProduct no routers.ts para aceitar qualquer segmento dinâmico
 - [x] Corrigido z.enum→z.string() em updateProduct no routers.ts
 - [x] TypeScript compilando sem erros após correções
+
+
+## Fase 24: Área de Cliente Completa
+
+### Fase 1: Estrutura Base
+- [ ] Atualizar schema: adicionar tabelas orders, order_items, cart_items, customer_addresses
+- [ ] Criar procedures tRPC para orders, cart, checkout
+- [ ] Criar componentes base: ClientLayout, ProtectedRoute
+- [ ] Criar páginas: Login, Cadastro, MinhaContaPage, MeusPedidosPage, PedidoPage, CarrinhoPage, CheckoutPage
+
+### Fase 2: Cadastro e Login
+- [ ] Implementar cadastro com validação (nome, whatsapp, email, cpf/cnpj, senha)
+- [ ] Implementar login com email/senha
+- [ ] Implementar recuperação de senha
+- [ ] Implementar permanecer conectado (remember me)
+- [ ] Proteger rotas privadas com ProtectedRoute
+
+### Fase 3: Carrinho e Checkout
+- [ ] Implementar adicionar ao carrinho
+- [ ] Implementar alterar quantidade
+- [ ] Implementar remover do carrinho
+- [ ] Implementar salvar carrinho do usuário no banco
+- [ ] Implementar cálculo de frete
+- [ ] Implementar checkout com dados de entrega
+- [ ] Implementar seleção de forma de pagamento
+- [ ] Implementar finalizar compra (criar order)
+
+### Fase 4: Meus Pedidos e Recompra
+- [ ] Implementar listar pedidos do cliente
+- [ ] Implementar visualizar detalhes do pedido
+- [ ] Implementar acompanhamento de status (etapas)
+- [ ] Implementar recompra (adicionar itens ao carrinho)
+- [ ] Implementar filtros por status/data
+
+### Fase 5: Minha Conta
+- [ ] Implementar editar dados da conta
+- [ ] Implementar alterar senha
+- [ ] Implementar gerenciar endereços
+- [ ] Implementar histórico de compras
+- [ ] Implementar logout
+
+### Fase 6: Testes e Checkpoint
+- [ ] Testar fluxo completo: cadastro → login → adicionar carrinho → checkout → pedido
+- [ ] Testar recompra
+- [ ] Testar acompanhamento de status
+- [ ] Testar edição de conta
+- [ ] Salvar checkpoint
+
+
+## FASE 24: Área de Cliente - FASE 1 (Autenticação + Cadastro)
+
+### Objetivos
+- [ ] Corrigir erro 404 do cadastro
+- [ ] Criar páginas: /login, /cadastro, /minha-conta
+- [ ] Sistema completo de autenticação
+- [ ] Proteção de rotas privadas
+- [ ] Estrutura preparada para fases futuras
+
+### Implementação
+- [ ] Revisar rotas no App.tsx
+- [ ] Criar página LoginPage.tsx
+- [ ] Criar página SignupPage.tsx
+- [ ] Criar página MyAccountPage.tsx
+- [ ] Criar componente ProtectedRoute.tsx
+- [ ] Criar procedures tRPC para signup/login
+- [ ] Implementar validação de campos
+- [ ] Testar fluxo completo
+- [ ] Salvar checkpoint FASE 1
