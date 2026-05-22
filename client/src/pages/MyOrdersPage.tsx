@@ -1,139 +1,255 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, ShoppingBag, Eye, RefreshCw, Package } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Package, Search, RefreshCw, Eye, ShoppingBag,
+  ArrowLeft, AlertCircle, Filter, Calendar,
+} from "lucide-react";
+import { toast } from "sonner";
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  aguardando: { label: "Pedido Recebido", color: "bg-yellow-100 text-yellow-800" },
-  em_producao: { label: "Em Produção", color: "bg-blue-100 text-blue-800" },
-  enviado: { label: "Enviado", color: "bg-purple-100 text-purple-800" },
-  entregue: { label: "Entregue", color: "bg-green-100 text-green-800" },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  pedido_recebido:      { label: "Pedido Recebido",      color: "bg-blue-100 text-blue-700" },
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-yellow-100 text-yellow-700" },
+  em_producao:          { label: "Em Produção",          color: "bg-purple-100 text-purple-700" },
+  impressao:            { label: "Impressão",            color: "bg-indigo-100 text-indigo-700" },
+  acabamento:           { label: "Acabamento",           color: "bg-pink-100 text-pink-700" },
+  pronto:               { label: "Pronto",               color: "bg-teal-100 text-teal-700" },
+  enviado:              { label: "Enviado",              color: "bg-orange-100 text-orange-700" },
+  entregue:             { label: "Entregue",             color: "bg-green-100 text-green-700" },
+  cancelado:            { label: "Cancelado",            color: "bg-red-100 text-red-700" },
 };
 
-const PAYMENT_MAP: Record<string, { label: string; color: string }> = {
-  pendente: { label: "Pagamento Pendente", color: "bg-orange-100 text-orange-800" },
-  pago: { label: "Pago", color: "bg-green-100 text-green-800" },
-  falhou: { label: "Pagamento Falhou", color: "bg-red-100 text-red-800" },
-};
+function StatusBadge({ status }: { status: string }) {
+  const cfg = STATUS_CONFIG[status] ?? { label: status, color: "bg-gray-100 text-gray-700" };
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.color}`}>
+      {cfg.label}
+    </span>
+  );
+}
+
+function formatCurrency(value: number | string) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
+}
+
+function formatDate(dateStr: string | Date) {
+  return new Date(dateStr).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 
 export default function MyOrdersPage() {
+  const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: orders, isLoading } = trpc.checkout.getMyOrders.useQuery();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [orderBy, setOrderBy] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
 
-  if (isLoading) {
+  const { data: orders, isLoading, refetch } = trpc.checkout.getMyOrdersFiltered.useQuery(
+    { status: statusFilter, search, orderBy },
+    { enabled: !!user }
+  );
+
+  const reorderMutation = trpc.checkout.reorder.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.addedCount} ${data.addedCount === 1 ? "item adicionado" : "itens adicionados"} ao carrinho!`, {
+        action: { label: "Ver carrinho", onClick: () => setLocation("/carrinho") },
+      });
+    },
+    onError: () => toast.error("Erro ao recomprar pedido"),
+  });
+
+  if (!authLoading && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-8 pb-6">
+            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">Faça login para ver seus pedidos</h2>
+            <p className="text-gray-500 mb-6">Você precisa estar logado para acessar seus pedidos</p>
+            <Button className="bg-orange-500 hover:bg-orange-600 w-full" onClick={() => setLocation("/login")}>
+              Fazer Login
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  const orderList = (orders ?? []) as any[];
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Meus Pedidos</h1>
-            <p className="text-gray-500 mt-1">Acompanhe o status dos seus pedidos</p>
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/")} className="text-gray-600">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Início
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Package className="h-6 w-6 text-orange-500" />
+              Meus Pedidos
+            </h1>
+            {!isLoading && (
+              <p className="text-sm text-gray-500">
+                {orderList.length} {orderList.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
+              </p>
+            )}
           </div>
-          <Button
-            onClick={() => setLocation("/catalogo")}
-            className="bg-orange-500 hover:bg-orange-600"
-          >
-            <ShoppingBag className="w-4 h-4 mr-2" />
-            Fazer Novo Pedido
+          <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setLocation("/catalogo")}>
+            <ShoppingBag className="h-4 w-4 mr-2" />
+            Novo Pedido
           </Button>
         </div>
 
-        {/* Lista de pedidos */}
-        {!orders || orders.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-              <Package className="w-16 h-16 text-gray-300" />
-              <h2 className="text-xl font-semibold text-gray-600">Nenhum pedido ainda</h2>
-              <p className="text-gray-400 text-center">
-                Você ainda não realizou nenhum pedido. Explore nosso catálogo!
-              </p>
-              <Button
-                onClick={() => setLocation("/catalogo")}
-                className="bg-orange-500 hover:bg-orange-600 mt-2"
-              >
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar por número do pedido..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-52">
+                  <Filter className="h-4 w-4 mr-2 text-gray-400" />
+                  <SelectValue placeholder="Todos os status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
+                <SelectTrigger className="w-full sm:w-44">
+                  <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mais recentes</SelectItem>
+                  <SelectItem value="oldest">Mais antigos</SelectItem>
+                  <SelectItem value="highest">Maior valor</SelectItem>
+                  <SelectItem value="lowest">Menor valor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Loading */}
+        {(isLoading || authLoading) && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-8 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && !authLoading && orderList.length === 0 && (
+          <div className="text-center py-16">
+            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">
+              {search || statusFilter !== "all" ? "Nenhum pedido encontrado" : "Você ainda não fez nenhum pedido"}
+            </h2>
+            <p className="text-gray-500 mb-6">
+              {search || statusFilter !== "all"
+                ? "Tente ajustar os filtros de busca"
+                : "Comece a comprar e seus pedidos aparecerão aqui"}
+            </p>
+            {!search && statusFilter === "all" && (
+              <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setLocation("/catalogo")}>
                 Ver Produtos
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
+            )}
+          </div>
+        )}
+
+        {/* Orders list */}
+        {!isLoading && !authLoading && orderList.length > 0 && (
           <div className="space-y-4">
-            {orders.map((order: any) => {
-              const status = STATUS_MAP[order.status] ?? { label: order.status, color: "bg-gray-100 text-gray-700" };
-              const payment = PAYMENT_MAP[order.paymentStatus] ?? { label: order.paymentStatus, color: "bg-gray-100 text-gray-700" };
-              const date = new Date(order.createdAt).toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              });
-
-              return (
-                <Card key={order.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      {/* Info principal */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-bold text-gray-900 text-sm">#{order.orderNumber}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.color}`}>
-                            {status.label}
-                          </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${payment.color}`}>
-                            {payment.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>📅 {date}</span>
-                          <span>📦 {order.itemCount} {Number(order.itemCount) === 1 ? "item" : "itens"}</span>
-                          {order.deliveryCity && (
-                            <span>📍 {order.deliveryCity} - {order.deliveryState}</span>
-                          )}
-                        </div>
+            {orderList.map((order: any) => (
+              <Card key={order.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 flex-wrap mb-1">
+                        <span className="font-bold text-gray-900">{order.orderNumber}</span>
+                        <StatusBadge status={order.status} />
                       </div>
-
-                      {/* Valor e ações */}
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Total</p>
-                          <p className="font-bold text-orange-600 text-lg">
-                            R$ {parseFloat(order.totalPrice).toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setLocation(`/pedido/${order.id}`)}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="w-3 h-3" />
-                            Ver
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setLocation("/carrinho")}
-                            className="flex items-center gap-1 text-orange-600 hover:text-orange-700"
-                          >
-                            <RefreshCw className="w-3 h-3" />
-                            Recomprar
-                          </Button>
-                        </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(order.createdAt)}
+                        </span>
+                        <span className="font-semibold text-orange-600 text-base">
+                          {formatCurrency(order.totalPrice)}
+                        </span>
+                        {order.itemCount && (
+                          <span>{order.itemCount} {Number(order.itemCount) === 1 ? "item" : "itens"}</span>
+                        )}
                       </div>
+                      {order.deliveryCity && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Entrega: {order.deliveryCity}/{order.deliveryState}
+                        </p>
+                      )}
+                      {order.notes && (
+                        <p className="text-xs text-gray-500 mt-1 italic line-clamp-1">"{order.notes}"</p>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLocation(`/pedido/${order.id}`)}
+                        className="text-gray-700"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => reorderMutation.mutate({ orderId: order.id })}
+                        disabled={reorderMutation.isPending}
+                        className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-1 ${reorderMutation.isPending ? "animate-spin" : ""}`} />
+                        Recomprar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>
