@@ -9,10 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, ShoppingBag, MapPin,
-  ClipboardList, CheckCircle2, Loader2, Truck,
+  ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
+  QrCode, Copy, Check,
 } from "lucide-react";
 
-type Step = "dados" | "endereco" | "entrega" | "revisao";
+type Step = "dados" | "endereco" | "entrega" | "pagamento" | "revisao";
+type PaymentMethod = "pix" | "cartao";
 
 interface FreteOption {
   id: string;
@@ -25,81 +27,35 @@ interface FreteOption {
 }
 
 const FRETE_OPTIONS: FreteOption[] = [
-  {
-    id: "retirada",
-    name: "Retirar na Loja",
-    description: "Retire seu pedido diretamente em nossa loja",
-    price: 0,
-    days: "Conforme produção",
-    logo: "🏪",
-  },
-  {
-    id: "motoboy",
-    name: "Moto Express",
-    description: "Entrega rápida via motoboy",
-    price: 15,
-    days: "Entrega no mesmo dia*",
-    highlight: "Entrega no mesmo dia*",
-    logo: "🛵",
-  },
-  {
-    id: "uber",
-    name: "Uber Entrega",
-    description: "Entrega via Uber Flash",
-    price: 20,
-    days: "Entrega no mesmo dia*",
-    highlight: "Entrega no mesmo dia*",
-    logo: "🚗",
-  },
-  {
-    id: "jadlog",
-    name: "Jadlog",
-    description: "Entrega via transportadora Jadlog",
-    price: 25.9,
-    days: "3 a 5 dias úteis",
-    logo: "📦",
-  },
-  {
-    id: "correios_sedex",
-    name: "Correios SEDEX",
-    description: "Entrega via Correios SEDEX",
-    price: 18.5,
-    days: "2 a 4 dias úteis",
-    logo: "📮",
-  },
-  {
-    id: "correios_pac",
-    name: "Correios PAC",
-    description: "Entrega via Correios PAC",
-    price: 12.3,
-    days: "5 a 8 dias úteis",
-    logo: "📮",
-  },
-  {
-    id: "transportadora",
-    name: "Transportadora",
-    description: "Entrega via transportadora parceira",
-    price: 35,
-    days: "5 a 10 dias úteis",
-    logo: "🚛",
-  },
+  { id: "retirada",        name: "Retirar na Loja",   description: "Retire seu pedido diretamente em nossa loja", price: 0,    days: "Conforme produção",    logo: "🏪" },
+  { id: "motoboy",         name: "Moto Express",      description: "Entrega rápida via motoboy",                  price: 15,   days: "Entrega no mesmo dia*", highlight: "Entrega no mesmo dia*", logo: "🛵" },
+  { id: "uber",            name: "Uber Entrega",      description: "Entrega via Uber Flash",                      price: 20,   days: "Entrega no mesmo dia*", highlight: "Entrega no mesmo dia*", logo: "🚗" },
+  { id: "jadlog",          name: "Jadlog",            description: "Entrega via transportadora Jadlog",           price: 25.9, days: "3 a 5 dias úteis",      logo: "📦" },
+  { id: "correios_sedex",  name: "Correios SEDEX",    description: "Entrega via Correios SEDEX",                  price: 18.5, days: "2 a 4 dias úteis",      logo: "📮" },
+  { id: "correios_pac",    name: "Correios PAC",      description: "Entrega via Correios PAC",                    price: 12.3, days: "5 a 8 dias úteis",      logo: "📮" },
+  { id: "transportadora",  name: "Transportadora",    description: "Entrega via transportadora parceira",         price: 35,   days: "5 a 10 dias úteis",     logo: "🚛" },
 ];
 
 const STEPS: { id: Step; label: string; icon: React.ReactNode }[] = [
-  { id: "dados",    label: "Dados",     icon: <ShoppingBag className="w-4 h-4" /> },
-  { id: "endereco", label: "Endereço",  icon: <MapPin className="w-4 h-4" /> },
-  { id: "entrega",  label: "Entrega",   icon: <Truck className="w-4 h-4" /> },
-  { id: "revisao",  label: "Revisão",   icon: <ClipboardList className="w-4 h-4" /> },
+  { id: "dados",     label: "Dados",     icon: <ShoppingBag className="w-4 h-4" /> },
+  { id: "endereco",  label: "Endereço",  icon: <MapPin className="w-4 h-4" /> },
+  { id: "entrega",   label: "Entrega",   icon: <Truck className="w-4 h-4" /> },
+  { id: "pagamento", label: "Pagamento", icon: <CreditCard className="w-4 h-4" /> },
+  { id: "revisao",   label: "Revisão",   icon: <ClipboardList className="w-4 h-4" /> },
 ];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+// PIX simulado
+const SIMULATED_PIX_KEY = "00020126580014BR.GOV.BCB.PIX0136grafica-ponto-digital@pix.com.br5204000053039865802BR5925Grafica Ponto Digital6009SAO PAULO62070503***6304ABCD";
+
 export default function CheckoutPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("dados");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pixCopied, setPixCopied] = useState(false);
 
   // Dados do cliente
   const [fullName, setFullName] = useState("");
@@ -117,6 +73,15 @@ export default function CheckoutPage() {
 
   // Frete
   const [selectedFrete, setSelectedFrete] = useState<FreteOption | null>(null);
+
+  // Pagamento
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  // Cartão
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [cardInstallments, setCardInstallments] = useState("1");
 
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
@@ -146,13 +111,18 @@ export default function CheckoutPage() {
     } catch { /* silencioso */ }
   };
 
+  const formatCardNumber = (val: string) =>
+    val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+
+  const formatExpiry = (val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, 4);
+    if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return digits;
+  };
+
   const validateDados = () => {
-    if (!fullName.trim() || fullName.trim().length < 3) {
-      toast.error("Informe seu nome completo"); return false;
-    }
-    if (!phone.trim() || phone.replace(/\D/g, "").length < 8) {
-      toast.error("Informe um telefone válido"); return false;
-    }
+    if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Informe seu nome completo"); return false; }
+    if (!phone.trim() || phone.replace(/\D/g, "").length < 8) { toast.error("Informe um telefone válido"); return false; }
     return true;
   };
 
@@ -171,10 +141,22 @@ export default function CheckoutPage() {
     return true;
   };
 
+  const validatePagamento = () => {
+    if (!paymentMethod) { toast.error("Selecione uma forma de pagamento"); return false; }
+    if (paymentMethod === "cartao") {
+      if (cardNumber.replace(/\s/g, "").length < 16) { toast.error("Informe o número do cartão completo"); return false; }
+      if (!cardName.trim()) { toast.error("Informe o nome no cartão"); return false; }
+      if (cardExpiry.length < 5) { toast.error("Informe a validade do cartão"); return false; }
+      if (cardCvv.length < 3) { toast.error("Informe o CVV do cartão"); return false; }
+    }
+    return true;
+  };
+
   const handleNext = () => {
-    if (step === "dados" && !validateDados()) return;
-    if (step === "endereco" && !validateEndereco()) return;
-    if (step === "entrega" && !validateEntrega()) return;
+    if (step === "dados"     && !validateDados())     return;
+    if (step === "endereco"  && !validateEndereco())  return;
+    if (step === "entrega"   && !validateEntrega())   return;
+    if (step === "pagamento" && !validatePagamento()) return;
     const next = STEPS[stepIndex + 1];
     if (next) setStep(next.id);
   };
@@ -184,10 +166,24 @@ export default function CheckoutPage() {
     if (prev) setStep(prev.id);
   };
 
+  const handleCopyPix = () => {
+    navigator.clipboard.writeText(SIMULATED_PIX_KEY).then(() => {
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 3000);
+    });
+  };
+
   const handleFinalize = async () => {
     if (!cartItems || cartItems.length === 0) { toast.error("Seu carrinho está vazio"); return; }
     setIsSubmitting(true);
     try {
+      const paymentLabel = paymentMethod === "pix" ? "PIX" : paymentMethod === "cartao" ? `Cartão (${cardInstallments}x)` : "";
+      const notesWithInfo = [
+        notes,
+        selectedFrete ? `Frete: ${selectedFrete.name} (${formatCurrency(selectedFrete.price)})` : "",
+        paymentLabel ? `Pagamento: ${paymentLabel}` : "",
+      ].filter(Boolean).join(" | ");
+
       const result = await createOrderMutation.mutateAsync({
         deliveryFullName: fullName,
         deliveryPhone: phone,
@@ -198,11 +194,7 @@ export default function CheckoutPage() {
         deliveryCity: city,
         deliveryState: stateUF,
         deliveryZipCode: zipCode.replace(/\D/g, ""),
-        notes: notes
-          ? `${notes}${selectedFrete ? ` | Frete: ${selectedFrete.name} (${formatCurrency(selectedFrete.price)})` : ""}`
-          : selectedFrete
-          ? `Frete: ${selectedFrete.name} (${formatCurrency(selectedFrete.price)})`
-          : undefined,
+        notes: notesWithInfo || undefined,
       });
       toast.success(`Pedido ${result.orderNumber} criado com sucesso!`);
       setLocation(`/pedido/${result.orderId}`);
@@ -272,13 +264,17 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {STEPS[stepIndex].icon}
-                  {step === "dados"    && "Dados para Entrega"}
-                  {step === "endereco" && "Endereço de Entrega"}
-                  {step === "entrega"  && "Opções de Entrega"}
-                  {step === "revisao"  && "Revisão do Pedido"}
+                  {step === "dados"     && "Dados para Entrega"}
+                  {step === "endereco"  && "Endereço de Entrega"}
+                  {step === "entrega"   && "Opções de Entrega"}
+                  {step === "pagamento" && "Forma de Pagamento"}
+                  {step === "revisao"   && "Revisão do Pedido"}
                 </CardTitle>
                 {step === "entrega" && (
                   <p className="text-sm text-gray-500">Escolha a melhor opção para você</p>
+                )}
+                {step === "pagamento" && (
+                  <p className="text-sm text-gray-500">Selecione como deseja pagar</p>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
@@ -288,21 +284,11 @@ export default function CheckoutPage() {
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="fullName">Nome Completo *</Label>
-                      <Input
-                        id="fullName"
-                        placeholder="Seu nome completo"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                      />
+                      <Input id="fullName" placeholder="Seu nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone / WhatsApp *</Label>
-                      <Input
-                        id="phone"
-                        placeholder="(11) 99999-9999"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                      />
+                      <Input id="phone" placeholder="(11) 99999-9999" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="notes">Observações (opcional)</Label>
@@ -323,14 +309,7 @@ export default function CheckoutPage() {
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="zipCode">CEP *</Label>
-                      <Input
-                        id="zipCode"
-                        placeholder="00000-000"
-                        value={zipCode}
-                        onChange={(e) => setZipCode(e.target.value)}
-                        onBlur={handleCepBlur}
-                        maxLength={9}
-                      />
+                      <Input id="zipCode" placeholder="00000-000" value={zipCode} onChange={(e) => setZipCode(e.target.value)} onBlur={handleCepBlur} maxLength={9} />
                       <p className="text-xs text-gray-500">Digite o CEP para preencher o endereço automaticamente</p>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -358,13 +337,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="stateUF">UF *</Label>
-                        <Input
-                          id="stateUF"
-                          placeholder="SP"
-                          value={stateUF}
-                          onChange={(e) => setStateUF(e.target.value.toUpperCase().slice(0, 2))}
-                          maxLength={2}
-                        />
+                        <Input id="stateUF" placeholder="SP" value={stateUF} onChange={(e) => setStateUF(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} />
                       </div>
                     </div>
                   </>
@@ -381,30 +354,17 @@ export default function CheckoutPage() {
                           type="button"
                           onClick={() => setSelectedFrete(option)}
                           className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                            isSelected
-                              ? "border-orange-500 bg-orange-50 shadow-md"
-                              : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/40"
+                            isSelected ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
                           }`}
                         >
-                          {/* Radio circle */}
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            isSelected ? "border-orange-500" : "border-gray-300"
-                          }`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? "border-orange-500" : "border-gray-300"}`}>
                             {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
                           </div>
-
-                          {/* Logo */}
                           <span className="text-2xl flex-shrink-0">{option.logo}</span>
-
-                          {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className={`font-semibold text-sm ${isSelected ? "text-orange-700" : "text-gray-800"}`}>
-                              {option.name}
-                            </p>
+                            <p className={`font-semibold text-sm ${isSelected ? "text-orange-700" : "text-gray-800"}`}>{option.name}</p>
                             <p className="text-xs text-gray-500 mt-0.5">{option.description}</p>
                           </div>
-
-                          {/* Price & days */}
                           <div className="text-right flex-shrink-0">
                             <p className={`font-bold text-sm ${isSelected ? "text-orange-600" : "text-gray-900"}`}>
                               {option.price === 0 ? "Grátis" : formatCurrency(option.price)}
@@ -416,14 +376,184 @@ export default function CheckoutPage() {
                         </button>
                       );
                     })}
-
                     <p className="text-xs text-orange-600 mt-2">
                       * Entregas no mesmo dia válidas para pedidos confirmados até 12h e para a região atendida.
                     </p>
                   </div>
                 )}
 
-                {/* ETAPA 4: Revisão */}
+                {/* ETAPA 4: Pagamento */}
+                {step === "pagamento" && (
+                  <div className="space-y-4">
+                    {/* Seleção do método */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* PIX */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("pix")}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          paymentMethod === "pix" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "pix" ? "bg-orange-100" : "bg-gray-100"}`}>
+                          <QrCode className={`w-6 h-6 ${paymentMethod === "pix" ? "text-orange-600" : "text-gray-500"}`} />
+                        </div>
+                        <div className="text-center">
+                          <p className={`font-semibold text-sm ${paymentMethod === "pix" ? "text-orange-700" : "text-gray-800"}`}>PIX</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Aprovação imediata</p>
+                        </div>
+                        {paymentMethod === "pix" && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
+                        )}
+                      </button>
+
+                      {/* Cartão */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("cartao")}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          paymentMethod === "cartao" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "cartao" ? "bg-orange-100" : "bg-gray-100"}`}>
+                          <CreditCard className={`w-6 h-6 ${paymentMethod === "cartao" ? "text-orange-600" : "text-gray-500"}`} />
+                        </div>
+                        <div className="text-center">
+                          <p className={`font-semibold text-sm ${paymentMethod === "cartao" ? "text-orange-700" : "text-gray-800"}`}>Cartão</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Crédito ou débito</p>
+                        </div>
+                        {paymentMethod === "cartao" && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* PIX: QR Code simulado */}
+                    {paymentMethod === "pix" && (
+                      <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <QrCode className="w-5 h-5 text-orange-500" />
+                          <p className="font-semibold text-gray-800">Pagamento via PIX</p>
+                        </div>
+
+                        {/* QR Code simulado */}
+                        <div className="flex justify-center">
+                          <div className="w-40 h-40 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center">
+                            <div className="grid grid-cols-7 gap-0.5 p-2">
+                              {Array.from({ length: 49 }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-4 h-4 rounded-sm ${
+                                    [0,1,2,3,4,5,6,7,13,14,20,21,27,28,34,35,41,42,43,44,45,46,47,48,8,15,22,29,36,9,16,23,30,37,11,18,25,32,39,10,17,24,31,38,12,19,26,33,40].includes(i)
+                                      ? "bg-gray-900" : "bg-white"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-500 text-center">Ou copie o código PIX abaixo:</p>
+                          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-3">
+                            <p className="text-xs text-gray-600 flex-1 truncate font-mono">{SIMULATED_PIX_KEY.slice(0, 40)}...</p>
+                            <button
+                              type="button"
+                              onClick={handleCopyPix}
+                              className="flex items-center gap-1 text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex-shrink-0"
+                            >
+                              {pixCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                              {pixCopied ? "Copiado!" : "Copiar"}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-xs text-blue-700 font-medium">ℹ️ Ambiente de teste</p>
+                          <p className="text-xs text-blue-600 mt-0.5">
+                            Este é um QR Code simulado. A integração real com Mercado Pago será ativada em breve.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Cartão: formulário */}
+                    {paymentMethod === "cartao" && (
+                      <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-orange-500" />
+                          <p className="font-semibold text-gray-800">Dados do Cartão</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="cardNumber">Número do Cartão *</Label>
+                          <Input
+                            id="cardNumber"
+                            placeholder="0000 0000 0000 0000"
+                            value={cardNumber}
+                            onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                            maxLength={19}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="cardName">Nome no Cartão *</Label>
+                          <Input
+                            id="cardName"
+                            placeholder="Como está no cartão"
+                            value={cardName}
+                            onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="cardExpiry">Validade *</Label>
+                            <Input
+                              id="cardExpiry"
+                              placeholder="MM/AA"
+                              value={cardExpiry}
+                              onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                              maxLength={5}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="cardCvv">CVV *</Label>
+                            <Input
+                              id="cardCvv"
+                              placeholder="123"
+                              value={cardCvv}
+                              onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                              maxLength={4}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="cardInstallments">Parcelas</Label>
+                          <select
+                            id="cardInstallments"
+                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                            value={cardInstallments}
+                            onChange={(e) => setCardInstallments(e.target.value)}
+                          >
+                            <option value="1">1x de {formatCurrency(totalPrice)} (sem juros)</option>
+                            <option value="2">2x de {formatCurrency(totalPrice / 2)} (sem juros)</option>
+                            <option value="3">3x de {formatCurrency(totalPrice / 3)} (sem juros)</option>
+                            <option value="6">6x de {formatCurrency(totalPrice / 6)} (sem juros)</option>
+                            <option value="12">12x de {formatCurrency(totalPrice / 12)} (sem juros)</option>
+                          </select>
+                        </div>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-xs text-blue-700 font-medium">ℹ️ Ambiente de teste</p>
+                          <p className="text-xs text-blue-600 mt-0.5">
+                            Processamento simulado. A integração real com Mercado Pago será ativada em breve.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ETAPA 5: Revisão */}
                 {step === "revisao" && (
                   <div className="space-y-4">
                     {/* Grid dados + endereço */}
@@ -458,6 +588,24 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
+                    {/* Forma de pagamento */}
+                    {paymentMethod && (
+                      <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-3">
+                        {paymentMethod === "pix" ? (
+                          <QrCode className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                        ) : (
+                          <CreditCard className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                        )}
+                        <div>
+                          <h3 className="font-semibold text-gray-800 text-sm">Forma de Pagamento</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">
+                            {paymentMethod === "pix" && "PIX — Aprovação imediata"}
+                            {paymentMethod === "cartao" && `Cartão — ${cardInstallments}x de ${formatCurrency(totalPrice / parseInt(cardInstallments))}`}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Itens */}
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-3 text-sm">Itens do Pedido</h3>
@@ -477,14 +625,6 @@ export default function CheckoutPage() {
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Aviso pagamento */}
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                      <p className="text-sm text-orange-800 font-medium">💡 Forma de Pagamento</p>
-                      <p className="text-xs text-orange-700 mt-1">
-                        Após confirmar o pedido, entraremos em contato via WhatsApp para combinar a forma de pagamento.
-                      </p>
                     </div>
                   </div>
                 )}
@@ -572,6 +712,17 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
+                {/* Forma de pagamento */}
+                {paymentMethod && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Pagamento</span>
+                    <span className="text-gray-800 font-medium">
+                      {paymentMethod === "pix" && "PIX"}
+                      {paymentMethod === "cartao" && `Cartão ${cardInstallments}x`}
+                    </span>
+                  </div>
+                )}
+
                 <Separator />
 
                 {/* Total */}
@@ -588,6 +739,17 @@ export default function CheckoutPage() {
                     className="w-full text-xs text-center text-gray-500 border border-gray-200 rounded-lg py-1.5 hover:border-orange-300 hover:text-orange-600 transition-colors"
                   >
                     Alterar frete
+                  </button>
+                )}
+
+                {/* Alterar pagamento */}
+                {paymentMethod && step !== "pagamento" && (
+                  <button
+                    type="button"
+                    onClick={() => setStep("pagamento")}
+                    className="w-full text-xs text-center text-gray-500 border border-gray-200 rounded-lg py-1.5 hover:border-orange-300 hover:text-orange-600 transition-colors"
+                  >
+                    Alterar pagamento
                   </button>
                 )}
               </CardContent>
