@@ -160,15 +160,10 @@ export default function AdminDashboard() {
 
           {/* Produtos Tab */}
           <TabsContent value="produtos" className="mt-8">
-            <div className="mb-6 flex flex-wrap gap-3">
+            <div className="mb-6">
               <Link href="/admin/produtos">
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   Gerenciar Produtos Existentes
-                </Button>
-              </Link>
-              <Link href="/admin/clientes-loja">
-                <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
-                  Clientes da Loja
                 </Button>
               </Link>
             </div>

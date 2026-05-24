@@ -719,49 +719,28 @@ export async function reorderDeliveryOptions(updates: Array<{ id: number; order:
 // CART HELPERS
 // ============================================================
 
-export async function getCartByUser(userId: number | null, sessionId?: string | null) {
+export async function getCartByUser(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  let rows: any;
-  if (userId) {
-    rows = await db.execute(
-      sql`
-        SELECT 
-          ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
-          ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
-          ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
-          p.name as productName, p.imageUrl as productImage,
-          p.calculationType, p.unit
-        FROM cartItems ci
-        JOIN products p ON ci.productId = p.id
-        WHERE ci.userId = ${userId}
-        ORDER BY ci.createdAt DESC
-      `
-    ) as any;
-  } else if (sessionId) {
-    rows = await db.execute(
-      sql`
-        SELECT 
-          ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
-          ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
-          ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
-          p.name as productName, p.imageUrl as productImage,
-          p.calculationType, p.unit
-        FROM cartItems ci
-        JOIN products p ON ci.productId = p.id
-        WHERE ci.sessionId = ${sessionId}
-        ORDER BY ci.createdAt DESC
-      `
-    ) as any;
-  } else {
-    return [];
-  }
+  const rows = await db.execute(
+    sql`
+      SELECT 
+        ci.id, ci.userId, ci.productId, ci.quantity,
+        ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
+        ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
+        p.name as productName, p.imageUrl as productImage,
+        p.calculationType, p.unit
+      FROM cartItems ci
+      JOIN products p ON ci.productId = p.id
+      WHERE ci.userId = ${userId}
+      ORDER BY ci.createdAt DESC
+    `
+  ) as any;
   return (rows[0] ?? []) as any[];
 }
 
 export async function addToCart(data: {
-  userId?: number | null;
-  sessionId?: string | null;
+  userId: number;
   productId: number;
   quantity: number;
   selectedAttributes?: string;
@@ -774,70 +753,43 @@ export async function addToCart(data: {
   if (!db) throw new Error("Database not available");
   const result = await db.execute(
     sql`
-      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes)
-      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null})
+      INSERT INTO cartItems (userId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes)
+      VALUES (${data.userId}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null})
     `
   );
   return (result as any).insertId as number;
 }
 
-export async function updateCartItemQuantity(id: number, userId: number | null, quantity: number, sessionId?: string | null) {
+export async function updateCartItemQuantity(id: number, userId: number, quantity: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (userId) {
-    await db.execute(
-      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
-    );
-  } else if (sessionId) {
-    await db.execute(
-      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND sessionId = ${sessionId}`
-    );
-  }
+  await db.execute(
+    sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
+  );
 }
 
-export async function removeFromCart(id: number, userId: number | null, sessionId?: string | null) {
+export async function removeFromCart(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (userId) {
-    await db.execute(
-      sql`DELETE FROM cartItems WHERE id = ${id} AND userId = ${userId}`
-    );
-  } else if (sessionId) {
-    await db.execute(
-      sql`DELETE FROM cartItems WHERE id = ${id} AND sessionId = ${sessionId}`
-    );
-  }
+  await db.execute(
+    sql`DELETE FROM cartItems WHERE id = ${id} AND userId = ${userId}`
+  );
 }
 
-export async function clearCart(userId: number | null, sessionId?: string | null) {
+export async function clearCart(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (userId) {
-    await db.execute(
-      sql`DELETE FROM cartItems WHERE userId = ${userId}`
-    );
-  } else if (sessionId) {
-    await db.execute(
-      sql`DELETE FROM cartItems WHERE sessionId = ${sessionId}`
-    );
-  }
+  await db.execute(
+    sql`DELETE FROM cartItems WHERE userId = ${userId}`
+  );
 }
 
-export async function getCartItemCount(userId: number | null, sessionId?: string | null): Promise<number> {
+export async function getCartItemCount(userId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  let rows: any;
-  if (userId) {
-    rows = await db.execute(
-      sql`SELECT SUM(quantity) as total FROM cartItems WHERE userId = ${userId}`
-    ) as any;
-  } else if (sessionId) {
-    rows = await db.execute(
-      sql`SELECT SUM(quantity) as total FROM cartItems WHERE sessionId = ${sessionId}`
-    ) as any;
-  } else {
-    return 0;
-  }
+  const rows = await db.execute(
+    sql`SELECT SUM(quantity) as total FROM cartItems WHERE userId = ${userId}`
+  ) as any;
   const row = (rows[0] as any[])[0];
   return Number(row?.total ?? 0);
 }
@@ -874,6 +826,26 @@ export async function createOrderFromCart(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  console.log("\n--- [DB] createOrderFromCart INICIO ---");
+  console.log("[DB] INSERT orders payload:", JSON.stringify({
+    clientId: data.clientId,
+    userId: data.userId,
+    orderNumber: data.orderNumber,
+    status: 'pedido_recebido',
+    totalPrice: data.totalPrice,
+    paymentStatus: 'pendente',
+    notes: data.notes ?? null,
+    deliveryStreet: data.deliveryStreet,
+    deliveryNumber: data.deliveryNumber,
+    deliveryComplement: data.deliveryComplement ?? null,
+    deliveryNeighborhood: data.deliveryNeighborhood,
+    deliveryCity: data.deliveryCity,
+    deliveryState: data.deliveryState,
+    deliveryZipCode: data.deliveryZipCode,
+    deliveryFullName: data.deliveryFullName,
+    deliveryPhone: data.deliveryPhone,
+  }, null, 2));
+
   // Criar o pedido
   let orderId: number;
   try {
@@ -893,6 +865,8 @@ export async function createOrderFromCart(data: {
       `
     );
     // Logar o resultado bruto para diagnóstico
+    console.log("[DB] orderResult bruto (tipo):", typeof orderResult, Array.isArray(orderResult) ? 'array' : 'object');
+    console.log("[DB] orderResult bruto:", JSON.stringify(orderResult));
 
     // drizzle-orm/mysql2: db.execute() retorna [ResultSetHeader, FieldPacket[]]
     // ResultSetHeader tem insertId diretamente em result[0].insertId
@@ -903,10 +877,12 @@ export async function createOrderFromCart(data: {
       (orderResult as any).lastInsertRowid;
 
     orderId = Number(rawId);
+    console.log("[DB] orderId capturado:", orderId, "(rawId:", rawId, ")");
 
     if (!orderId || isNaN(orderId) || orderId <= 0) {
       throw new Error(`orderId não foi gerado corretamente. orderResult: ${JSON.stringify(orderResult)}`);
     }
+    console.log("[DB] ✅ INSERT orders SUCCESS - orderId:", orderId);
   } catch (err: any) {
     console.error("[DB] ❌ INSERT orders FALHOU:");
     console.error("[DB] tabela: orders");
@@ -917,6 +893,16 @@ export async function createOrderFromCart(data: {
   // Inserir os itens do pedido
   for (let i = 0; i < data.cartItems.length; i++) {
     const item = data.cartItems[i];
+    console.log(`[DB] INSERT orderItems [${i}]:`, JSON.stringify({
+      orderId,
+      productId: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      priceAtOrder: item.priceAtCart,
+      selectedAttributes: item.selectedAttributes ?? null,
+      artFileUrl: item.artFileUrl ?? null,
+      notes: item.notes ?? null,
+    }));
     try {
       await db.execute(
         sql`
@@ -925,6 +911,7 @@ export async function createOrderFromCart(data: {
             ${item.selectedAttributes ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
         `
       );
+      console.log(`[DB] ✅ INSERT orderItems [${i}] SUCCESS`);
     } catch (err: any) {
       console.error(`[DB] ❌ INSERT orderItems [${i}] FALHOU:`);
       console.error("[DB] tabela: orderItems");
@@ -941,11 +928,13 @@ export async function createOrderFromCart(data: {
         VALUES (${orderId}, 'pedido_recebido', ${data.userId}, 'Pedido criado pelo cliente')
       `
     );
+    console.log("[DB] ✅ INSERT orderStatusHistory SUCCESS");
   } catch (err: any) {
     console.error("[DB] ⚠️ INSERT orderStatusHistory FALHOU (não-crítico):", err.message);
     // Não re-throw - não é crítico
   }
 
+  console.log("--- [DB] createOrderFromCart FIM - orderId:", orderId, "---\n");
   return orderId;
 }
 

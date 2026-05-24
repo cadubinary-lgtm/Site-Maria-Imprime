@@ -49,11 +49,11 @@ function formatDate(dateStr: string | Date, includeTime = false) {
 export default function OrderDetailPage() {
   const [, params] = useRoute("/pedido/:id");
   const [, setLocation] = useLocation();
-  const orderNumber = params?.id ?? "";
+  const orderId = params?.id ? parseInt(params.id) : 0;
 
-  const { data, isLoading, error } = trpc.checkout.getOrderByNumber.useQuery(
-    { orderNumber },
-    { enabled: !!orderNumber }
+  const { data, isLoading, error } = trpc.checkout.getOrderById.useQuery(
+    { id: orderId },
+    { enabled: !!orderId }
   );
 
   const reorderMutation = trpc.checkout.reorder.useMutation({
@@ -91,9 +91,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  // getOrderByNumber returns the order directly; items come from a separate query
-  const order = (data as any)?.order ?? data as any;
-  const items = (data as any)?.items ?? [];
+  const { order, items } = data as any;
   const isCancelled = order.status === "cancelado";
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
   const progressPercent = currentStepIndex >= 0
