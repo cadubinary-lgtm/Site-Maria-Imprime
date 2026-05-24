@@ -1,4 +1,4 @@
-import { router, publicProcedure, adminProcedure } from "./_core/trpc";
+import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import {
   addSegmentToProduct,
@@ -10,19 +10,19 @@ import {
 } from "./db-product-segments";
 
 export const productSegmentsRouter = router({
-  // Obter todos os segmentos disponíveis (PÚBLICO - catálogo)
-  getAllSegments: publicProcedure.query(async () => {
+  // Obter todos os segmentos disponíveis
+  getAllSegments: protectedProcedure.query(async () => {
     return await getAllSegments();
   }),
 
-  // Obter segmentos de um produto (PÚBLICO - catálogo)
-  getProductSegments: publicProcedure
+  // Obter segmentos de um produto
+  getProductSegments: protectedProcedure
     .input(z.number())
     .query(async ({ input: productId }) => {
       return await getProductSegments(productId);
     }),
 
-  // Adicionar segmento a um produto (ADMIN)
+  // Adicionar segmento a um produto
   addSegment: adminProcedure
     .input(
       z.object({
@@ -34,7 +34,7 @@ export const productSegmentsRouter = router({
       return await addSegmentToProduct(input.productId, input.segmentId);
     }),
 
-  // Remover segmento de um produto (ADMIN)
+  // Remover segmento de um produto
   removeSegment: adminProcedure
     .input(
       z.object({
@@ -46,7 +46,7 @@ export const productSegmentsRouter = router({
       return await removeSegmentFromProduct(input.productId, input.segmentId);
     }),
 
-  // Atualizar múltiplos segmentos de um produto (ADMIN)
+  // Atualizar múltiplos segmentos de um produto
   updateSegments: adminProcedure
     .input(
       z.object({
@@ -58,8 +58,8 @@ export const productSegmentsRouter = router({
       return await updateProductSegments(input.productId, input.segmentIds);
     }),
 
-  // Obter produtos por segmento (PÚBLICO - catálogo)
-  getProductsBySegment: publicProcedure
+  // Obter produtos por segmento
+  getProductsBySegment: protectedProcedure
     .input(z.number())
     .query(async ({ input: segmentId }) => {
       return await getProductsBySegment(segmentId);
