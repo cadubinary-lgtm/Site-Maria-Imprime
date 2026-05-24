@@ -32,6 +32,16 @@ export default function CustomerRegister() {
       setError("");
     },
     onError: (err) => {
+      // Extrair mensagem amigável de erros Zod (array de issues)
+      try {
+        const issues = JSON.parse(err.message) as Array<{ message: string }>;
+        if (Array.isArray(issues) && issues.length > 0) {
+          setError(issues.map(i => i.message).join(" "));
+          return;
+        }
+      } catch {
+        // não é JSON, usar mensagem direta
+      }
       setError(err.message);
     },
   });
@@ -45,6 +55,19 @@ export default function CustomerRegister() {
     e.preventDefault();
     setError("");
 
+    // Validações de senha no frontend (antes de enviar ao servidor)
+    if (form.password.length < 8) {
+      setError("A senha deve ter no mínimo 8 caracteres.");
+      return;
+    }
+    if (!/[A-Z]/.test(form.password)) {
+      setError("A senha deve conter ao menos uma letra maiúscula.");
+      return;
+    }
+    if (!/[0-9]/.test(form.password)) {
+      setError("A senha deve conter ao menos um número.");
+      return;
+    }
     if (form.password !== form.confirmPassword) {
       setError("As senhas não coincidem.");
       return;
