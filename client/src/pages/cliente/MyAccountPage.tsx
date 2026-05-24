@@ -1,139 +1,372 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, User, MapPin, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  LogOut,
+  User,
+  ShoppingBag,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Package,
+  Clock,
+  ChevronRight,
+  Edit2,
+  Save,
+  X,
+} from "lucide-react";
+
+const STATUS_LABELS: Record<string, string> = {
+  pedido_recebido: "Pedido Recebido",
+  pagamento_aprovado: "Pagamento Aprovado",
+  arte_em_analise: "Arte em Análise",
+  aguardando_aprovacao: "Aguardando Aprovação",
+  em_producao: "Em Produção",
+  impressao: "Impressão",
+  acabamento: "Acabamento",
+  pronto: "Pronto",
+  saiu_para_entrega: "Saiu para Entrega",
+  entregue: "Entregue",
+  cancelado: "Cancelado",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  pedido_recebido: "bg-blue-100 text-blue-700",
+  pagamento_aprovado: "bg-green-100 text-green-700",
+  arte_em_analise: "bg-yellow-100 text-yellow-700",
+  aguardando_aprovacao: "bg-orange-100 text-orange-700",
+  em_producao: "bg-purple-100 text-purple-700",
+  impressao: "bg-indigo-100 text-indigo-700",
+  acabamento: "bg-pink-100 text-pink-700",
+  pronto: "bg-teal-100 text-teal-700",
+  saiu_para_entrega: "bg-cyan-100 text-cyan-700",
+  entregue: "bg-emerald-100 text-emerald-700",
+  cancelado: "bg-red-100 text-red-700",
+};
 
 export default function MyAccountPage() {
-  const { user, logout, loading } = useAuth();
-  const [, setLocation] = useLocation();
+  const { customer, isAuthenticated, isLoading, refetch } = useCustomerAuth();
+  const [, navigate] = useLocation();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", phone: "" });
+
+  const { data: ordersData, isLoading: ordersLoading } = trpc.checkout.getMyOrdersFiltered.useQuery(
+    { status: "all", search: "", orderBy: "newest" },
+    { enabled: isAuthenticated }
+  );
+
+  const updateProfile = trpc.customerAuth.updateProfile.useMutation({
+    onSuccess: () => {
+      toast.success("Perfil atualizado com sucesso!");
+      setIsEditing(false);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const logout = trpc.customerAuth.logout.useMutation({
+    onSuccess: () => {
+      refetch();
+      navigate("/");
+    },
+  });
 
   useEffect(() => {
-    if (!loading && !user) {
-      setLocation("/login");
+    if (!isLoading && !isAuthenticated) {
+      navigate("/login-cliente");
     }
-  }, [user, loading, setLocation]);
+  }, [isAuthenticated, isLoading, navigate]);
 
-  if (loading) {
+  useEffect(() => {
+    if (customer) {
+      setEditForm({
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        phone: customer.phone || "",
+      });
+    }
+  }, [customer]);
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!isAuthenticated || !customer) return null;
 
-  const handleLogout = async () => {
-    await logout();
-    setLocation("/");
-  };
+  const orders = ordersData || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Minha Conta</h1>
-          <p className="text-gray-600 mt-2">Gerencie suas informações e pedidos</p>
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Minha Conta</h1>
+            <p className="text-gray-500 mt-1">
+              Olá, <span className="font-semibold text-orange-600">{customer.firstName}</span>! Bem-vindo(a) de volta.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+            className="text-red-600 border-red-200 hover:bg-red-50"
+          >
+            {logout.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <LogOut className="w-4 h-4 mr-2" />
+            )}
+            Sair
+          </Button>
         </div>
 
-        <Tabs defaultValue="perfil" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="perfil">Perfil</TabsTrigger>
-            <TabsTrigger value="endereco">Endereços</TabsTrigger>
-            <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+        {/* Verificação de email */}
+        {!customer.emailVerified && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-yellow-800">Email não confirmado</p>
+              <p className="text-sm text-yellow-700 mt-1">
+                Confirme seu email para ter acesso completo à sua conta.{" "}
+                <Link href="/reenviar-verificacao" className="underline font-medium">
+                  Reenviar email
+                </Link>
+              </p>
+            </div>
+          </div>
+        )}
+
+        <Tabs defaultValue="pedidos" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="pedidos" className="flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4" />
+              Meus Pedidos
+            </TabsTrigger>
+            <TabsTrigger value="perfil" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Perfil
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="perfil" className="space-y-4">
+          {/* ── Aba Pedidos ── */}
+          <TabsContent value="pedidos">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Informações Pessoais
+                  <Package className="w-5 h-5 text-orange-500" />
+                  Histórico de Pedidos
                 </CardTitle>
-                <CardDescription>Atualize seus dados de perfil</CardDescription>
+                <CardDescription>Acompanhe o status dos seus pedidos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {ordersLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium">Você ainda não fez nenhum pedido</p>
+                    <p className="text-gray-400 text-sm mt-1">Explore nosso catálogo e faça seu primeiro pedido!</p>
+                    <Button asChild className="mt-6 bg-orange-500 hover:bg-orange-600">
+                      <Link href="/catalogo">Ver Catálogo</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.map((order: any) => (
+                      <Link key={order.id} href={`/pedido/${order.orderNumber}`}>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-orange-200 hover:bg-orange-50/30 transition cursor-pointer group">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                              <Package className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                Pedido #{order.orderNumber}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                <span className="text-xs text-gray-500">
+                                  {new Date(order.createdAt).toLocaleDateString("pt-BR")}
+                                </span>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs font-medium text-gray-700">
+                                  R$ {parseFloat(order.totalAmount || "0").toFixed(2).replace(".", ",")}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                                STATUS_COLORS[order.status] || "bg-gray-100 text-gray-600"
+                              }`}
+                            >
+                              {STATUS_LABELS[order.status] || order.status}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Aba Perfil ── */}
+          <TabsContent value="perfil">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-orange-500" />
+                      Informações Pessoais
+                    </CardTitle>
+                    <CardDescription>Seus dados de cadastro</CardDescription>
+                  </div>
+                  {!isEditing ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Editar
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => updateProfile.mutate(editForm)}
+                        disabled={updateProfile.isPending}
+                        className="bg-orange-500 hover:bg-orange-600"
+                      >
+                        {updateProfile.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4" />
+                        )}
+                        <span className="ml-1">Salvar</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditForm({
+                            firstName: customer.firstName,
+                            lastName: customer.lastName,
+                            phone: customer.phone || "",
+                          });
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
-                    <Input
-                      id="name"
-                      value={user.name || ""}
-                      readOnly
-                      className="bg-gray-100"
-                    />
+                  <div className="space-y-1">
+                    <Label>Nome</Label>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.firstName}
+                        onChange={(e) => setEditForm((p) => ({ ...p, firstName: e.target.value }))}
+                        placeholder="Nome"
+                      />
+                    ) : (
+                      <p className="text-gray-900 font-medium py-2">{customer.firstName}</p>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      value={user.email || ""}
-                      readOnly
-                      className="bg-gray-100"
-                    />
+                  <div className="space-y-1">
+                    <Label>Sobrenome</Label>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.lastName}
+                        onChange={(e) => setEditForm((p) => ({ ...p, lastName: e.target.value }))}
+                        placeholder="Sobrenome"
+                      />
+                    ) : (
+                      <p className="text-gray-900 font-medium py-2">{customer.lastName}</p>
+                    )}
                   </div>
                 </div>
+
+                <div className="space-y-1">
+                  <Label>Email</Label>
+                  <div className="flex items-center gap-2">
+                    <p className="text-gray-900 font-medium py-2">{customer.email}</p>
+                    {customer.emailVerified ? (
+                      <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        <CheckCircle className="w-3 h-3" />
+                        Verificado
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
+                        <AlertCircle className="w-3 h-3" />
+                        Não verificado
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Telefone / WhatsApp</Label>
+                  {isEditing ? (
+                    <Input
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+                      placeholder="(11) 99999-9999"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium py-2">
+                      {customer.phone || <span className="text-gray-400 italic">Não informado</span>}
+                    </p>
+                  )}
+                </div>
+
+                {customer.cpfCnpj && (
+                  <div className="space-y-1">
+                    <Label>CPF / CNPJ</Label>
+                    <p className="text-gray-900 font-medium py-2">{customer.cpfCnpj}</p>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t">
-                  <h3 className="font-semibold mb-3">Segurança</h3>
-                  <Button variant="outline">Alterar Senha</Button>
+                  <p className="text-sm text-gray-500">
+                    Membro desde{" "}
+                    <span className="font-medium">
+                      {new Date(customer.createdAt).toLocaleDateString("pt-BR", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </p>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <Button
-                    variant="destructive"
-                    onClick={handleLogout}
-                    className="flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sair da Conta
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="endereco" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Meus Endereços
-                </CardTitle>
-                <CardDescription>Gerencie seus endereços de entrega</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <p>Nenhum endereço cadastrado</p>
-                  <Button className="mt-4" variant="outline">
-                    Adicionar Endereço
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pedidos" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5" />
-                  Meus Pedidos
-                </CardTitle>
-                <CardDescription>Visualize e acompanhe seus pedidos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <p>Você ainda não fez nenhum pedido</p>
-                  <Button className="mt-4" variant="outline" onClick={() => setLocation("/catalogo")}>
-                    Ir ao Catálogo
+                <div className="pt-2 border-t">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/recuperar-senha">Alterar Senha</Link>
                   </Button>
                 </div>
               </CardContent>

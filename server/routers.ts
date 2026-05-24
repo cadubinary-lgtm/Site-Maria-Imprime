@@ -61,6 +61,7 @@ import { nanoid } from "nanoid";
 import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { crmRouter } from "./routers-crm";
+import { customerAuthRouter } from "./routers/customerAuth";
 import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
@@ -87,6 +88,7 @@ export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  customerAuth: customerAuthRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
