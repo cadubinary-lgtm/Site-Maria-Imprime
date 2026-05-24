@@ -510,19 +510,19 @@ export default function ProductDetail() {
             <CardContent className="space-y-3">
 
               {/* Linha 1: Upload de Arquivo */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 min-w-0">
                 <button
                   onClick={() => setUseLink(false)}
-                  className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
+                  className={`text-xs font-medium px-2.5 py-1.5 rounded-md transition-all whitespace-nowrap flex-shrink-0 ${
                     !useLink
                       ? "bg-orange-500 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  Upload de Arquivo
+                  Upload
                 </button>
-                <div className="flex-1">
-                  <div className="border border-dashed border-gray-300 rounded-lg px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="border border-dashed border-gray-300 rounded-lg px-2 py-2 flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 transition overflow-hidden">
                     <input
                       type="file"
                       onChange={handleFileChange}
@@ -530,10 +530,10 @@ export default function ProductDetail() {
                       id="art-upload"
                       accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
                     />
-                    <label htmlFor="art-upload" className="cursor-pointer flex items-center gap-2 w-full">
-                      <Upload className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-500 truncate">
-                        {artFile ? artFile.name : "Clique para selecionar (PDF, AI, CDR, PSD, EPS, JPG, PNG — máx 50MB)"}
+                    <label htmlFor="art-upload" className="cursor-pointer flex items-center gap-1.5 w-full min-w-0 overflow-hidden">
+                      <Upload className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                      <span className="text-xs text-gray-500 truncate block">
+                        {artFile ? artFile.name : "Selecionar arquivo (PDF, AI, CDR, PSD, EPS, JPG, PNG)"}
                       </span>
                     </label>
                   </div>
@@ -541,10 +541,10 @@ export default function ProductDetail() {
               </div>
 
               {/* Linha 2: Link/URL */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 min-w-0">
                 <button
                   onClick={() => setUseLink(true)}
-                  className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
+                  className={`text-xs font-medium px-2.5 py-1.5 rounded-md transition-all whitespace-nowrap flex-shrink-0 ${
                     useLink
                       ? "bg-orange-500 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -552,14 +552,14 @@ export default function ProductDetail() {
                 >
                   Link / URL
                 </button>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Input
                     id="art-link"
                     type="url"
                     placeholder="https://exemplo.com/sua-arte.pdf"
                     value={artLink}
                     onChange={(e) => setArtLink(e.target.value)}
-                    className="w-full text-sm"
+                    className="w-full text-xs h-8"
                   />
                 </div>
               </div>
