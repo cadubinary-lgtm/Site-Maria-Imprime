@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const TIMELINE_STEPS = [
-  { key: "pagamento_aprovado", label: "Pagamento em Análise", icon: Clock },
-  { key: "pedido_recebido",    label: "Pedido em Análise",   icon: CheckCircle2 },
+  { key: "pagamento_aprovado", label: "Pagamento Aprovado",   icon: Clock },
+  { key: "pedido_recebido",    label: "Pedido em Andamento",  icon: CheckCircle2 },
   { key: "em_producao",        label: "Em Produção",          icon: Package },
   { key: "impressao",          label: "Impressão",            icon: Printer },
   { key: "acabamento",         label: "Acabamento",           icon: Scissors },
@@ -57,8 +57,8 @@ export default function OrderConfirmation() {
   const isCancelled = order.status === "cancelado";
 
   const STATUS_LABELS: Record<string, string> = {
-    pagamento_aprovado: "Pagamento em Análise",
-    pedido_recebido: "Pedido em Análise",
+    pagamento_aprovado: "Pagamento Aprovado",
+    pedido_recebido: "Pedido em Andamento",
     arte_em_analise: "Arte em Análise",
     aguardando_aprovacao: "Aguardando Aprovação",
     em_producao: "Em Produção",

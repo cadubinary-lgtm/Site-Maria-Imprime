@@ -10,8 +10,8 @@ import { toast } from "sonner";
 const STATUSES = ["pagamento_aprovado", "pedido_recebido", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pagamento_aprovado:   { label: "Pagamento em Análise", color: "bg-yellow-50 border-yellow-200" },
-  pedido_recebido:      { label: "Pedido em Análise",    color: "bg-blue-50 border-blue-200" },
+  pagamento_aprovado:   { label: "Pagamento Aprovado",   color: "bg-green-50 border-green-200" },
+  pedido_recebido:      { label: "Pedido em Andamento",  color: "bg-blue-50 border-blue-200" },
   arte_em_analise:      { label: "Arte em Análise",      color: "bg-orange-50 border-orange-200" },
   aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-amber-50 border-amber-200" },
   em_producao:          { label: "Em Produção",          color: "bg-purple-50 border-purple-200" },
