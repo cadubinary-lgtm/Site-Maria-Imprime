@@ -826,26 +826,6 @@ export async function createOrderFromCart(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  console.log("\n--- [DB] createOrderFromCart INICIO ---");
-  console.log("[DB] INSERT orders payload:", JSON.stringify({
-    clientId: data.clientId,
-    userId: data.userId,
-    orderNumber: data.orderNumber,
-    status: 'pedido_recebido',
-    totalPrice: data.totalPrice,
-    paymentStatus: 'pendente',
-    notes: data.notes ?? null,
-    deliveryStreet: data.deliveryStreet,
-    deliveryNumber: data.deliveryNumber,
-    deliveryComplement: data.deliveryComplement ?? null,
-    deliveryNeighborhood: data.deliveryNeighborhood,
-    deliveryCity: data.deliveryCity,
-    deliveryState: data.deliveryState,
-    deliveryZipCode: data.deliveryZipCode,
-    deliveryFullName: data.deliveryFullName,
-    deliveryPhone: data.deliveryPhone,
-  }, null, 2));
-
   // Criar o pedido
   let orderId: number;
   try {
@@ -865,8 +845,6 @@ export async function createOrderFromCart(data: {
       `
     );
     // Logar o resultado bruto para diagnóstico
-    console.log("[DB] orderResult bruto (tipo):", typeof orderResult, Array.isArray(orderResult) ? 'array' : 'object');
-    console.log("[DB] orderResult bruto:", JSON.stringify(orderResult));
 
     // drizzle-orm/mysql2: db.execute() retorna [ResultSetHeader, FieldPacket[]]
     // ResultSetHeader tem insertId diretamente em result[0].insertId
@@ -877,12 +855,10 @@ export async function createOrderFromCart(data: {
       (orderResult as any).lastInsertRowid;
 
     orderId = Number(rawId);
-    console.log("[DB] orderId capturado:", orderId, "(rawId:", rawId, ")");
 
     if (!orderId || isNaN(orderId) || orderId <= 0) {
       throw new Error(`orderId não foi gerado corretamente. orderResult: ${JSON.stringify(orderResult)}`);
     }
-    console.log("[DB] ✅ INSERT orders SUCCESS - orderId:", orderId);
   } catch (err: any) {
     console.error("[DB] ❌ INSERT orders FALHOU:");
     console.error("[DB] tabela: orders");
@@ -893,16 +869,6 @@ export async function createOrderFromCart(data: {
   // Inserir os itens do pedido
   for (let i = 0; i < data.cartItems.length; i++) {
     const item = data.cartItems[i];
-    console.log(`[DB] INSERT orderItems [${i}]:`, JSON.stringify({
-      orderId,
-      productId: item.productId,
-      productName: item.productName,
-      quantity: item.quantity,
-      priceAtOrder: item.priceAtCart,
-      selectedAttributes: item.selectedAttributes ?? null,
-      artFileUrl: item.artFileUrl ?? null,
-      notes: item.notes ?? null,
-    }));
     try {
       await db.execute(
         sql`
@@ -911,7 +877,6 @@ export async function createOrderFromCart(data: {
             ${item.selectedAttributes ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
         `
       );
-      console.log(`[DB] ✅ INSERT orderItems [${i}] SUCCESS`);
     } catch (err: any) {
       console.error(`[DB] ❌ INSERT orderItems [${i}] FALHOU:`);
       console.error("[DB] tabela: orderItems");
@@ -928,13 +893,11 @@ export async function createOrderFromCart(data: {
         VALUES (${orderId}, 'pedido_recebido', ${data.userId}, 'Pedido criado pelo cliente')
       `
     );
-    console.log("[DB] ✅ INSERT orderStatusHistory SUCCESS");
   } catch (err: any) {
     console.error("[DB] ⚠️ INSERT orderStatusHistory FALHOU (não-crítico):", err.message);
     // Não re-throw - não é crítico
   }
 
-  console.log("--- [DB] createOrderFromCart FIM - orderId:", orderId, "---\n");
   return orderId;
 }
 
