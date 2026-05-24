@@ -1846,3 +1846,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Confirmar credentials:'include' no cliente tRPC (já estava correto)
 - [x] TypeScript sem erros
 - [x] 34 testes passando (13 novos testes de cookie)
+
+## Fase 31: Correção — Visualização de Pedidos do Cliente
+
+- [x] Diagnosticar procedure getMyOrders e vínculo pedido → customer_session
+- [x] Verificar se checkout.createOrder salva o customerId corretamente no pedido
+- [x] Corrigir procedure getMyOrders para retornar pedidos do cliente logado
+- [x] Verificar/criar página de pedidos do cliente (Meus Pedidos)
+- [x] Garantir rota acessível no App.tsx
+- [x] Adicionar link "Meus Pedidos" no header para clientes logados
+- [x] Testar fluxo completo: compra → visualização de pedidos → status
