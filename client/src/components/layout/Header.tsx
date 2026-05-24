@@ -113,7 +113,9 @@ export default function Header() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
-                type="text"
+                type="search"
+                name="site-search"
+                autoComplete="off"
                 placeholder="Buscar produtos, materiais ou serviços…"
                 value={searchQuery}
                 onChange={handleSearch}
@@ -308,7 +310,9 @@ export default function Header() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  type="text"
+                  type="search"
+                  name="site-search-mobile"
+                  autoComplete="off"
                   placeholder="Buscar…"
                   value={searchQuery}
                   onChange={handleSearch}

@@ -344,9 +344,13 @@ export default function CheckoutPage() {
                       <>
                         <div className="space-y-2">
                           <Label htmlFor="guestEmail">E-mail *</Label>
+                          {/* Campo oculto para enganar o gerenciador de senhas do browser */}
+                          <input type="text" name="fake-username" style={{display:'none'}} readOnly tabIndex={-1} />
                           <Input
                             id="guestEmail"
                             type="email"
+                            name="guest-email"
+                            autoComplete="email"
                             placeholder="seu@email.com"
                             value={guestEmail}
                             onChange={(e) => setGuestEmail(e.target.value)}
@@ -365,6 +369,8 @@ export default function CheckoutPage() {
                               <Input
                                 id="createAccountPassword"
                                 type={showPassword ? "text" : "password"}
+                                name="new-account-password"
+                                autoComplete="new-password"
                                 placeholder="Mínimo 6 caracteres"
                                 value={createAccountPassword}
                                 onChange={(e) => setCreateAccountPassword(e.target.value)}

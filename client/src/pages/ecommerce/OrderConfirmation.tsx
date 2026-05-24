@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { useRoute, Link } from "wouter";
-import { Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home, ExternalLink, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const TIMELINE_STEPS = [
   { key: "pagamento_aprovado", label: "Pagamento Aprovado",   icon: Clock },
@@ -55,6 +56,9 @@ export default function OrderConfirmation() {
 
   const currentStepIndex = getStepIndex(order.status);
   const isCancelled = order.status === "cancelado";
+  const trackUrl = order.guestToken
+    ? `${window.location.origin}/pedido/acompanhar/${order.guestToken}`
+    : null;
 
   const STATUS_LABELS: Record<string, string> = {
     pagamento_aprovado: "Pagamento Aprovado",
@@ -71,26 +75,75 @@ export default function OrderConfirmation() {
     cancelado: "Cancelado",
   };
 
+  const handleCopyLink = () => {
+    if (trackUrl) {
+      navigator.clipboard.writeText(trackUrl);
+      toast.success("Link copiado!");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
+
         {/* Cabeçalho de sucesso */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+            <CheckCircle2 className="w-10 h-10 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Pedido Confirmado!</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900">Pedido realizado com sucesso!</h1>
+          <p className="text-gray-600 mt-2 text-base">
+            Seu pedido foi confirmado e já está em processamento.
+          </p>
+          <p className="text-gray-500 mt-1 text-sm">
+            Enviamos todos os detalhes para o seu e-mail.
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
             Número do pedido: <span className="font-semibold text-gray-900">{order.orderNumber}</span>
           </p>
         </div>
+
+        {/* Destaque do link de acompanhamento para convidados */}
+        {trackUrl && (
+          <Card className="mb-6 border-2 border-blue-300 bg-blue-50 shadow-md">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <p className="text-gray-700 text-base">
+                  Você pode acompanhar seu pedido a qualquer momento pelo link abaixo:
+                </p>
+                <a
+                  href={trackUrl}
+                  className="inline-flex items-center gap-2 text-blue-700 font-bold text-lg hover:text-blue-900 underline underline-offset-4 transition-colors"
+                >
+                  👉 Acompanhar meu pedido
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <code className="text-xs bg-white border border-blue-200 rounded px-3 py-1.5 text-blue-700 break-all max-w-xs truncate">
+                    {trackUrl}
+                  </code>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-300 rounded px-2 py-1.5 bg-white hover:bg-blue-50 transition-colors flex-shrink-0"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copiar
+                  </button>
+                </div>
+                <p className="text-xs text-blue-600">
+                  Guarde este link — ele também foi enviado para o seu e-mail.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Acompanhamento do Pedido */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Clock className="w-5 h-5 text-orange-500" />
-              Acompanhamento do Pedido
+              Status do Pedido
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -158,7 +211,7 @@ export default function OrderConfirmation() {
         {/* Resumo */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">Resumo</CardTitle>
+            <CardTitle className="text-lg">Resumo do Pedido</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
@@ -188,35 +241,6 @@ export default function OrderConfirmation() {
           </CardContent>
         </Card>
 
-        {/* E-mail enviado / link de acompanhamento para convidados */}
-        {order.guestToken && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-blue-800">Confirmação enviada por e-mail!</p>
-                <p className="text-sm text-blue-700 mt-1">
-                  Enviamos o número do pedido e o link de acompanhamento para o seu e-mail.
-                  Guarde o link abaixo para acompanhar seu pedido sem precisar fazer login:
-                </p>
-                <div className="mt-2 flex items-center gap-2 flex-wrap">
-                  <code className="text-xs bg-white border border-blue-200 rounded px-2 py-1 text-blue-800 break-all">
-                    {window.location.origin}/pedido/acompanhar/{order.guestToken}
-                  </code>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/pedido/acompanhar/${order.guestToken}`);
-                    }}
-                    className="text-xs text-blue-600 hover:text-blue-800 underline flex-shrink-0"
-                  >
-                    Copiar link
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Ações */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/catalogo">
@@ -224,12 +248,12 @@ export default function OrderConfirmation() {
               Continuar Comprando
             </Button>
           </Link>
-          {order.guestToken ? (
-            <Link href={`/pedido/acompanhar/${order.guestToken}`}>
+          {trackUrl ? (
+            <a href={trackUrl}>
               <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
-                Acompanhar Pedido
+                👉 Acompanhar meu pedido
               </Button>
-            </Link>
+            </a>
           ) : (
             <Link href="/meus-pedidos">
               <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
@@ -238,6 +262,7 @@ export default function OrderConfirmation() {
             </Link>
           )}
         </div>
+
       </div>
     </div>
   );
