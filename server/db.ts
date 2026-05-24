@@ -850,6 +850,9 @@ export async function createOrderFromCart(data: {
   userId: number;
   clientId: number;
   customerId?: number | null; // ID do cliente da loja (customer auth)
+  guestToken?: string | null;
+  guestEmail?: string | null;
+  guestName?: string | null;
   orderNumber: string;
   totalPrice: number;
   notes?: string;
@@ -883,13 +886,15 @@ export async function createOrderFromCart(data: {
         INSERT INTO orders (
           clientId, userId, customerId, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
-          deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone
+          deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
+          guestToken, guestEmail, guestName
         ) VALUES (
           ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'pedido_recebido',
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
-          ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone}
+          ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone},
+          ${data.guestToken ?? null}, ${data.guestEmail ?? null}, ${data.guestName ?? null}
         )
       `
     );
