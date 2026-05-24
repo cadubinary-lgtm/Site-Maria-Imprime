@@ -19,8 +19,23 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
+  // NÃO redirecionar se estamos em rota de cliente (customer auth)
+  // Deixar a página lidar com o erro (ex: MyAccountPage redireciona para /login-cliente)
+  const isCustomerRoute = window.location.pathname.startsWith('/minha-conta') ||
+                          window.location.pathname.startsWith('/meus-pedidos') ||
+                          window.location.pathname.startsWith('/pedido/') ||
+                          window.location.pathname.startsWith('/rastreamento/');
+
+  if (isCustomerRoute) return;
+
+  // Redirecionar apenas para rotas admin que exigem Manus OAuth
+  const isAdminRoute = window.location.pathname.startsWith('/admin') ||
+                       window.location.pathname.startsWith('/producao');
+
+  if (!isAdminRoute) return; // Não redirecionar para rotas públicas
+
   window.location.href = getLoginUrl();
-};
+}
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {

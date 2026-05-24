@@ -627,4 +627,110 @@ export const customerAuthRouter = router({
 
       return { success: true };
     }),
+
+  /**
+   * Buscar pedidos do cliente autenticado (customer auth)
+   */
+  getMyOrders: publicProcedure
+    .input(
+      z.object({
+        status: z.string().optional(),
+        search: z.string().optional(),
+        orderBy: z.enum(["newest", "oldest", "highest", "lowest"]).optional(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const req = ctx.req as { cookies?: Record<string, string> };
+      const token = req.cookies?.customer_session;
+      if (!token) return [];
+
+      const db = await requireDb();
+      const now = Date.now();
+
+      const [session] = await db
+        .select()
+        .from(customerSessions)
+        .where(and(eq(customerSessions.token, token), gt(customerSessions.expiresAt, now)))
+        .limit(1);
+
+      if (!session) return [];
+
+      const { sql: sqlFn } = await import("drizzle-orm");
+      const rows = await db.execute(
+        sqlFn`
+          SELECT 
+            o.id, o.orderNumber, o.status, o.totalPrice, o.paymentStatus,
+            o.deliveryCity, o.deliveryState, o.createdAt, o.updatedAt,
+            COUNT(oi.id) as itemCount
+          FROM orders o
+          LEFT JOIN orderItems oi ON o.id = oi.orderId
+          WHERE o.customerId = ${session.customerId}
+          GROUP BY o.id
+          ORDER BY o.createdAt DESC
+        `
+      ) as any;
+
+      let orders = (rows[0] ?? []) as any[];
+
+      // Filtro por status
+      if (input.status && input.status !== "all") {
+        orders = orders.filter((o: any) => o.status === input.status);
+      }
+      // Filtro por número do pedido
+      if (input.search) {
+        const q = input.search.toLowerCase();
+        orders = orders.filter((o: any) => o.orderNumber?.toLowerCase().includes(q));
+      }
+      // Ordenação
+      if (input.orderBy === "oldest") {
+        orders.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      } else if (input.orderBy === "highest") {
+        orders.sort((a: any, b: any) => parseFloat(b.totalPrice) - parseFloat(a.totalPrice));
+      } else if (input.orderBy === "lowest") {
+        orders.sort((a: any, b: any) => parseFloat(a.totalPrice) - parseFloat(b.totalPrice));
+      } else {
+        orders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+
+      return orders;
+    }),
+
+  /**
+   * Buscar detalhe de um pedido do cliente autenticado
+   */
+  getOrderDetail: publicProcedure
+    .input(z.object({ orderNumber: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const req = ctx.req as { cookies?: Record<string, string> };
+      const token = req.cookies?.customer_session;
+      if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Não autenticado." });
+
+      const db = await requireDb();
+      const now = Date.now();
+
+      const [session] = await db
+        .select()
+        .from(customerSessions)
+        .where(and(eq(customerSessions.token, token), gt(customerSessions.expiresAt, now)))
+        .limit(1);
+
+      if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada." });
+
+      const { sql: sqlFn } = await import("drizzle-orm");
+      const rows = await db.execute(
+        sqlFn`
+          SELECT o.*, COUNT(oi.id) as itemCount
+          FROM orders o
+          LEFT JOIN orderItems oi ON o.id = oi.orderId
+          WHERE o.orderNumber = ${input.orderNumber} AND o.customerId = ${session.customerId}
+          GROUP BY o.id
+          LIMIT 1
+        `
+      ) as any;
+
+      const order = ((rows[0] ?? []) as any[])[0];
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado." });
+
+      return order;
+    }),
 });

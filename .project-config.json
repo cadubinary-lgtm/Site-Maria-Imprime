@@ -15,10 +15,10 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663628618790/UWGRo8uVP2ec6WHZ5QpBak",
-    "access_key_id": "ASIAZV3A2ECZHPFW5FRL",
-    "secret_access_key": "1lJFSNxTabQKzZkuY8DLaR5muTABD0N2wY+dhm+w",
-    "session_token": "IQoJb3JpZ2luX2VjEH4aCXVzLWVhc3QtMSJHMEUCICgpAUl468I/MtSQKjBJzilq1SYqaoly+PvlzyM0crcqAiEAmhr6+IwuVgImoR3sPZ7cbZ4zKJjjZNDik6nsdvZsmMsq9gMIRhAEGgw2NjUzODYwOTg4NjYiDOHlccpKnJ4H83MfdCrTAyM9685Iy9xGh6lTnpPvLOZxfV3d0+/aJUF8Uoc0z/pbmVdAbJq2bZaWDt80AYAzpwN1PhBzbeUAQV+mJEuoRJiEWL024rLebeY47o6oWKy02RxmVMwRsT4qJf24lI/WCEF+xEQpf2grwHvxPQzxFzKYGk1l9/nYIcJjBYoN4Pzu9xFxobECophH3rMFkXeE8GB/g2TXLRFOyYXh36ofiVcjCb64gfJhXDyttlszxEgJzkJEcsmVX2bJsVkzAPBI7qc7+yCIYNnuBa9mZjEWD3OBjorxyMDPiWAiWsI39u2QmvG7W2V3zZufRwIpGZeJ1ygKtQGTBeRnhX4GFhSqSsoOoSLqoyEYw6RCBo2H1S7k3GnScJqJYgyNabTZXTOw/dsHjnRuyX62E42P8LqSPgbU2ktg+o7Z86d4D1/tR566lLPCRxO66vNWK85UJ9P3XCUMaNuf/1q2P7JkWBRKXt1dPJwnSIDwSRJsFkcscvtfbyj0yIibK/Ij9uSOjruZyqnlP4j8YJKLJZ1gIA5Tf1daivq/S6TgV5+m9zDvRHs/lo7idcsHS7kyN4NGiqGpY25sCgMJ3AUdNKNfZgZwcLhTWtw9n1DEG2HiCpZZZnI2GfTlMM6TytAGOp0B5KFCFSKSS61/6YLm4a3xFLTv2X7JwBzdyMshXer/NGVRLZtB0rnaOtd4wSMtps/b7D+C3HzH/vbZST1aPqkM8Ga0Q5QqJxqgvoo5SJdQ5YVTsD+GHJ08ICs+MdZHPzA5HY8N58QBDwRjx1RC8Yy2AbaXr9uBP+I8+EQOEx9K9EZ8A/9J/M7exW1F3FEMlmpXLUS3BsoPbN5zB3xWbw==",
-    "expiration": "2026-05-24T17:17:02.000Z"
+    "access_key_id": "ASIAZV3A2ECZM3FSZBLA",
+    "secret_access_key": "tKsf9mmDY9Z7pTQ9AYvFZakx89Af3sDp8QmoGY2z",
+    "session_token": "IQoJb3JpZ2luX2VjEIj//////////wEaCXVzLWVhc3QtMSJHMEUCIBRSMBabyWEqJkoWD98ylLwruxAa2xy+BeTgraGzWypYAiEAi1hI9eOaT2CO3RiqnJdgJSftyw1crsojPdlwnXZtbWcq9gMIURAEGgw2NjUzODYwOTg4NjYiDGwEgxCU+tvspJj2+yrTA7tBPUinAtkiwXOIFDrXfHCiMNoXmZupT6jukd3APocTRcA8S2kvfwc73h/aSP88NNA7P5ICYQiDVDUaJCOzxQq+PwmS4+i4EdiffEMSBiczzEkZpAHaEfFNvTP5/m7w2/knHRpSgl3ww0uXvCs/RGB3jdrGcK3BpH8bgxcbkNorR97/xTjX7tZcOAxtCYhHGzKf9LfI2YtRG5Zk5AlclKMnJXcYBTaAdcksucHFBREh4yiGu9IhNaCG5mM3KJ9AGkKXjpIYfNgq0Dsek7+yqgoigfuetdv0NWBxcHBfW+XVwvP/bUndTzY3kjnQMOwIx3EOWpfkflb9SD+7xe8a81gVCZShXHh3QNq37kQp82bedbiZaF8ZeAX3FCZxfkv2Lz3AwS5W5mJxubH7vfib5xtVhBQnfX+j1SfIWPNazkNMYTCAEpR7q2yPgt65V+RHcyDcWUQa4FB9a08LqLetnhVS+WpmTar+5gwoGyEO97nhPCikMBkZBHsRM0TXLI/itBLnab/cF/Qq/MEgu+um+bpOjUsRRNV81V6igKgw2IG7qUCCI3lQ1D2XsTyytxROXNQFsRcBF3rtdnRv6ecbcc79hGAHrE/HLUx4tidGckVpaJRGMOS7zNAGOp0BF4IEJq1Tu/2O6U87c4cnTVwwDiW/ExhnzPvyy+FZYiOpbhTpYKpKlJahyYHgIZzmEBzbvnlFbeEThtbzgpeR1YO80l8Bapk4e/pQLaaCcVnUGQseaCUZ79cKcsPAHQP8104moFNTaJT0BSD6WcqKa35FAbyi49vT/k4S9IOCB1uith/th+e3n4FLVuVs0LLOLw1Zq/LvuJk6zye6Zg==",
+    "expiration": "2026-05-25T03:48:52.000Z"
   },
   "name": "grafica-ponto-digital",
   "path": "/home/ubuntu/grafica-ponto-digital",
@@ -30,8 +30,8 @@
     "OAUTH_SERVER_URL": "https://api.manus.im",
     "OWNER_NAME": "Carlos Eduardo",
     "OWNER_OPEN_ID": "FaD4JNo9TBPNkZoPuSCuH2",
-    "RESEND_API_KEY": "re_dVtAULdj_HgwgNDgNChSKGfyrsWTyiMMr",
-    "RESEND_FROM_EMAIL": "onboarding@resend.dev",
+    "RESEND_API_KEY": "re_BHyUjdXE_NDLG3eZ21WReYvJvEmJgNEZS",
+    "RESEND_FROM_EMAIL": "noreply@mail.graficapontodigital.com.br",
     "RESEND_FROM_NAME": "Gráfica Ponto Digital",
     "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
     "VITE_ANALYTICS_WEBSITE_ID": "f7d28feb-46ad-469b-9282-30299a8a0eb3",

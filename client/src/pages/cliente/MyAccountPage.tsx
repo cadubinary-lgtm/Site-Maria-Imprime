@@ -58,7 +58,7 @@ export default function MyAccountPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ firstName: "", lastName: "", phone: "" });
 
-  const { data: ordersData, isLoading: ordersLoading } = trpc.checkout.getMyOrdersFiltered.useQuery(
+  const { data: ordersData, isLoading: ordersLoading } = trpc.customerAuth.getMyOrders.useQuery(
     { status: "all", search: "", orderBy: "newest" },
     { enabled: isAuthenticated }
   );
