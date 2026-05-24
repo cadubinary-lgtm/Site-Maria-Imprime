@@ -21,6 +21,12 @@ import ProductDetail from "./pages/ecommerce/ProductDetail";
 import CartPage from "./pages/ecommerce/CartPage";
 import CheckoutPage from "./pages/ecommerce/CheckoutPage";
 import OrderConfirmation from "./pages/ecommerce/OrderConfirmation";
+import CustomerRegister from "./pages/ecommerce/CustomerRegister";
+import CustomerLogin from "./pages/ecommerce/CustomerLogin";
+import VerifyEmail from "./pages/ecommerce/VerifyEmail";
+import ForgotPassword from "./pages/ecommerce/ForgotPassword";
+import ResetPassword from "./pages/ecommerce/ResetPassword";
+import ResendVerification from "./pages/ecommerce/ResendVerification";
 
 // ─── Páginas do Cliente ──────────────────────────────────────────────────────
 import MyAccountPage from "./pages/cliente/MyAccountPage";
@@ -40,6 +46,7 @@ import AdminRulesManager from "./pages/admin/AdminRulesManager";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import ClientsManager from "./pages/admin/ClientsManager";
+import AdminCustomers from "./pages/admin/AdminCustomers";
 import FileValidationManager from "./pages/admin/FileValidationManager";
 
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
@@ -66,34 +73,29 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/catalogo" component={Catalog} />
       <Route path="/login" component={LoginPage} />
-      <Route path="/cadastro" component={SignupPage} />
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
 
+      {/* ── Autenticação de Clientes ────────────────────────────────────── */}
+      <Route path="/cadastro" component={CustomerRegister} />
+      <Route path="/login-cliente" component={CustomerLogin} />
+      <Route path="/verificar-email" component={VerifyEmail} />
+      <Route path="/recuperar-senha" component={ForgotPassword} />
+      <Route path="/nova-senha" component={ResetPassword} />
+      <Route path="/reenviar-verificacao" component={ResendVerification} />
+
       {/* ── Carrinho — acessível para todos ────────────────────────────── */}
       <Route path="/carrinho" component={CartPage} />
 
-      {/* ── Rotas do Cliente (protegidas) ──────────────────────────────── */}
-      {user ? (
-        <>
-          <Route path="/minha-conta" component={MyAccountPage} />
-          <Route path="/meus-pedidos" component={MyOrdersPage} />
-          <Route path="/pedido/:id" component={OrderDetailPage} />
-          <Route path="/checkout" component={CheckoutPage} />
-          <Route path="/rastreamento/:id" component={OrderTracking} />
-        </>
-      ) : (
-        <>
-          <Route path="/minha-conta" component={LoginPage} />
-          <Route path="/meus-pedidos" component={LoginPage} />
-          <Route path="/pedido/:id" component={LoginPage} />
-          <Route path="/checkout" component={LoginPage} />
-          <Route path="/rastreamento/:id" component={LoginPage} />
-        </>
-      )}
+      {/* ── Área do Cliente (proteção interna via CustomerAuthContext) ──── */}
+      <Route path="/minha-conta" component={MyAccountPage} />
+      <Route path="/meus-pedidos" component={MyOrdersPage} />
+      <Route path="/pedido/:id" component={OrderDetailPage} />
+      <Route path="/checkout" component={CheckoutPage} />
+      <Route path="/rastreamento/:id" component={OrderTracking} />
 
       {/* ── Rotas Admin (role: admin) ───────────────────────────────────── */}
       {user?.role === "admin" && (
@@ -109,6 +111,7 @@ function Router() {
           <Route path="/admin/pedidos" component={AdminOrders} />
           <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
           <Route path="/admin/clientes" component={ClientsManager} />
+          <Route path="/admin/clientes-loja" component={AdminCustomers} />
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
           {/* ── Rotas ERP ─────────────────────────────────────────────── */}
           <Route path="/admin/erp" component={ERPDashboard} />

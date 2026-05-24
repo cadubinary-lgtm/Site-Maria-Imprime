@@ -1755,3 +1755,42 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] ProductionDashboard.tsx: kanban com 11 colunas
 - [x] MyOrdersPage.tsx: badges com 11 status
 - [x] App.tsx: rotas /admin/pedidos e /admin/pedidos/:id registradas
+
+## Sistema de Autenticação de Clientes (Resend + email/senha)
+
+- [ ] Instalar dependências: resend, bcryptjs, @types/bcryptjs, nanoid
+- [ ] Configurar RESEND_API_KEY e RESEND_FROM_EMAIL via secrets
+- [ ] Criar tabela customer_accounts no banco (nome, sobrenome, email, telefone, cpfCnpj, passwordHash, emailVerified, emailVerificationToken, resetPasswordToken, resetPasswordExpires, status, lastLogin, loginAttempts, lockedUntil)
+- [ ] Criar helper server/emailService.ts com Resend integrado
+- [ ] Criar templates HTML: boas-vindas, confirmação de email, recuperação de senha, alerta de login suspeito
+- [ ] Criar procedures tRPC: customers.register, customers.login, customers.logout, customers.verifyEmail, customers.requestPasswordReset, customers.resetPassword, customers.me
+- [ ] Criar middleware de sessão de cliente (JWT em cookie httpOnly separado do admin)
+- [ ] Criar páginas: /cadastro, /login-cliente, /verificar-email, /recuperar-senha, /nova-senha
+- [ ] Integrar cliente autenticado com checkout (pré-preencher dados de entrega)
+- [ ] Criar área /minha-conta com pedidos e dados do cliente
+- [ ] Criar painel admin /admin/clientes no ERP
+- [ ] Verificar TypeScript e salvar checkpoint
+
+## Sistema de Autenticação de Clientes — IMPLEMENTAÇÃO ATUAL
+
+- [x] Dependências instaladas: resend, bcryptjs, nanoid
+- [x] Tabelas customer_accounts e customer_sessions criadas no banco
+- [x] Schema Drizzle atualizado com customer_accounts e customer_sessions
+- [x] emailService.ts criado com Resend + 7 templates HTML profissionais
+- [x] customerAuth router criado com procedures: register, login, logout, me, verifyEmail, resendVerification, requestPasswordReset, resetPassword, updateProfile
+- [x] customerAuth router registrado no routers.ts
+- [x] CustomerAuthContext criado (useCustomerAuth hook)
+- [x] CustomerRegister.tsx criado (/cadastro)
+- [x] CustomerLogin.tsx criado (/login-cliente)
+- [x] VerifyEmail.tsx criado (/verificar-email)
+- [x] ForgotPassword.tsx criado (/recuperar-senha)
+- [x] ResetPassword.tsx criado (/nova-senha)
+- [x] ResendVerification.tsx criado (/reenviar-verificacao)
+- [x] Registrar rotas no App.tsx (/cadastro, /login-cliente, /verificar-email, /recuperar-senha, /nova-senha, /reenviar-verificacao)
+- [x] Adicionar CustomerAuthProvider no main.tsx
+- [x] Atualizar Header com links de login/cadastro para clientes
+- [x] Reescrever MyAccountPage.tsx usando CustomerAuthContext
+- [x] Criar página /minha-conta completa com histórico de pedidos
+- [x] Integrar CustomerAuth no checkout (pré-preencher dados via CustomerAuthContext)
+- [x] Criar painel admin /admin/clientes-loja para customer_accounts (AdminCustomers.tsx)
+- [x] Verificar TypeScript final (sem erros) e salvar checkpoint

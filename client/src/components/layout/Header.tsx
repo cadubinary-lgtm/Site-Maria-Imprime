@@ -2,14 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User, Settings, ShoppingCart } from "lucide-react";
+import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle } from "lucide-react";
 import { toast } from "sonner";
 
 function CartIcon() {
   const { data: count } = trpc.cart.getCount.useQuery(undefined, {
-    refetchInterval: 30000, // atualiza a cada 30s
+    refetchInterval: 30000,
   });
   const cartCount = Number(count ?? 0);
   return (
@@ -29,24 +30,32 @@ function CartIcon() {
 export default function Header() {
   const [, navigate] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+  const { customer, isAuthenticated: isCustomerAuth, refetch: refetchCustomer } = useCustomerAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const customerLogout = trpc.customerAuth.logout.useMutation({
+    onSuccess: () => {
+      refetchCustomer();
+      toast.success("Desconectado com sucesso");
+      navigate("/");
+      setMobileMenuOpen(false);
+    },
+  });
 
   const { data: searchResults, isLoading: isSearching } = trpc.search.global.useQuery(
     { query: searchQuery },
     { enabled: searchQuery.length > 0 }
   );
 
-  // Fechar resultados ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowResults(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -56,14 +65,14 @@ export default function Header() {
     setShowResults(true);
   };
 
-  const handleSelectProduct = (productId: number, productName: string) => {
+  const handleSelectProduct = (productId: number) => {
     navigate(`/produto/${productId}`);
     setSearchQuery("");
     setShowResults(false);
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = async () => {
+  const handleAdminLogout = async () => {
     await logout();
     toast.success("Desconectado com sucesso");
     navigate("/");
@@ -72,13 +81,13 @@ export default function Header() {
 
   const handleLogoClick = () => {
     navigate("/");
-    // Rolar para o topo da página
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, 0);
   };
 
-  const totalResults = (searchResults?.products.length || 0) +
+  const totalResults =
+    (searchResults?.products.length || 0) +
     (searchResults?.categories.length || 0) +
     (searchResults?.materials.length || 0);
 
@@ -88,13 +97,13 @@ export default function Header() {
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo */}
-          <div 
+          <div
             onClick={handleLogoClick}
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
           >
-            <img 
-              src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
-              alt="Gráfica Ponto Digital" 
+            <img
+              src="/manus-storage/logo-ponto-digital_8ede665b.webp"
+              alt="Gráfica Ponto Digital"
               className="h-12 w-auto"
             />
           </div>
@@ -122,7 +131,6 @@ export default function Header() {
                   <div className="p-4 text-center text-gray-500">Nenhum resultado encontrado</div>
                 ) : (
                   <div className="divide-y">
-                    {/* Produtos */}
                     {searchResults?.products && searchResults.products.length > 0 && (
                       <div>
                         <div className="px-4 py-2 bg-gray-50 font-semibold text-sm text-gray-700">
@@ -131,7 +139,7 @@ export default function Header() {
                         {searchResults.products.map((product) => (
                           <button
                             key={product.id}
-                            onClick={() => handleSelectProduct(product.id, product.name)}
+                            onClick={() => handleSelectProduct(product.id)}
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 transition text-sm"
                           >
                             <div className="font-medium text-gray-900">{product.name}</div>
@@ -140,8 +148,6 @@ export default function Header() {
                         ))}
                       </div>
                     )}
-
-                    {/* Categorias */}
                     {searchResults?.categories && searchResults.categories.length > 0 && (
                       <div>
                         <div className="px-4 py-2 bg-gray-50 font-semibold text-sm text-gray-700">
@@ -162,18 +168,13 @@ export default function Header() {
                         ))}
                       </div>
                     )}
-
-                    {/* Materiais */}
                     {searchResults?.materials && searchResults.materials.length > 0 && (
                       <div>
                         <div className="px-4 py-2 bg-gray-50 font-semibold text-sm text-gray-700">
                           Materiais ({searchResults.materials.length})
                         </div>
                         {searchResults.materials.map((material) => (
-                          <div
-                            key={material.id}
-                            className="px-4 py-2 hover:bg-gray-50 transition text-sm"
-                          >
+                          <div key={material.id} className="px-4 py-2 hover:bg-gray-50 transition text-sm">
                             <div className="font-medium text-gray-900">{material.name}</div>
                             {material.description && (
                               <div className="text-gray-600 text-xs">{material.description}</div>
@@ -190,8 +191,10 @@ export default function Header() {
 
           {/* User Menu */}
           <div className="flex items-center gap-3">
-            {/* Ícone do Carrinho - visível para usuários logados */}
-            {isAuthenticated && user && <CartIcon />}
+            {/* Carrinho sempre visível */}
+            <CartIcon />
+
+            {/* Admin logado via Manus OAuth */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 <Link href="/admin">
@@ -209,7 +212,7 @@ export default function Header() {
                   <span className="text-gray-700">{user.name || user.email}</span>
                 </div>
                 <Button
-                  onClick={handleLogout}
+                  onClick={handleAdminLogout}
                   variant="ghost"
                   size="sm"
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -218,9 +221,34 @@ export default function Header() {
                   Sair
                 </Button>
               </div>
+            ) : isCustomerAuth && customer ? (
+              /* Cliente logado via email/senha */
+              <div className="flex items-center gap-3">
+                <Link href="/minha-conta">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-orange-200 text-orange-700 hover:bg-orange-50 flex items-center gap-2"
+                  >
+                    <UserCircle className="w-4 h-4" />
+                    {customer.firstName}
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => customerLogout.mutate()}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  disabled={customerLogout.isPending}
+                >
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Sair
+                </Button>
+              </div>
             ) : (
+              /* Visitante */
               <>
-                <Link href="/login">
+                <Link href="/login-cliente">
                   <Button variant="ghost" size="sm">
                     Login
                   </Button>
@@ -237,38 +265,29 @@ export default function Header() {
 
         {/* Mobile Layout */}
         <div className="md:hidden flex items-center justify-between">
-          {/* Logo */}
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img 
-                src="/manus-storage/logo-ponto-digital_8ede665b.webp" 
-                alt="Gráfica Ponto Digital" 
+              <img
+                src="/manus-storage/logo-ponto-digital_8ede665b.webp"
+                alt="Gráfica Ponto Digital"
                 className="h-10 w-auto"
               />
             </div>
           </Link>
 
-          {/* Search Icon */}
-          <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-2">
+            <CartIcon />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
-              <Search className="w-5 h-5 text-gray-600" />
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5 text-gray-600" />
+              ) : (
+                <Menu className="w-5 h-5 text-gray-600" />
+              )}
             </button>
           </div>
-
-          {/* Menu Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-5 h-5 text-gray-600" />
-            ) : (
-              <Menu className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
         </div>
 
         {/* Mobile Menu */}
@@ -286,8 +305,6 @@ export default function Header() {
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg"
                 />
               </div>
-
-              {/* Mobile Search Results */}
               {showResults && searchQuery && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50">
                   {isSearching ? (
@@ -299,7 +316,7 @@ export default function Header() {
                       {searchResults?.products?.map((product) => (
                         <button
                           key={product.id}
-                          onClick={() => handleSelectProduct(product.id, product.name)}
+                          onClick={() => handleSelectProduct(product.id)}
                           className="w-full text-left px-4 py-2 hover:bg-gray-50 transition text-sm"
                         >
                           <div className="font-medium text-gray-900">{product.name}</div>
@@ -313,6 +330,7 @@ export default function Header() {
 
             {/* Mobile User Menu */}
             {isAuthenticated && user ? (
+              /* Admin */
               <div className="space-y-2">
                 <div className="text-sm text-gray-700">{user.name || user.email}</div>
                 <Link href="/admin">
@@ -320,13 +338,14 @@ export default function Header() {
                     variant="default"
                     size="sm"
                     className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Painel Admin
                   </Button>
                 </Link>
                 <Button
-                  onClick={handleLogout}
+                  onClick={handleAdminLogout}
                   variant="ghost"
                   size="sm"
                   className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -335,15 +354,53 @@ export default function Header() {
                   Sair
                 </Button>
               </div>
-            ) : (
+            ) : isCustomerAuth && customer ? (
+              /* Cliente */
               <div className="space-y-2">
-                <Link href="/login">
-                  <Button variant="outline" size="sm" className="w-full">
+                <div className="text-sm font-medium text-gray-800">
+                  Olá, {customer.firstName}!
+                </div>
+                <Link href="/minha-conta">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start border-orange-200 text-orange-700"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserCircle className="w-4 h-4 mr-2" />
+                    Minha Conta
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => customerLogout.mutate()}
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  disabled={customerLogout.isPending}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            ) : (
+              /* Visitante */
+              <div className="space-y-2">
+                <Link href="/login-cliente">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Login
                   </Button>
                 </Link>
                 <Link href="/cadastro">
-                  <Button size="sm" className="w-full bg-orange-500 hover:bg-orange-600">
+                  <Button
+                    size="sm"
+                    className="w-full bg-orange-500 hover:bg-orange-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Cadastrar
                   </Button>
                 </Link>
