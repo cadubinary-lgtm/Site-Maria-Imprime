@@ -232,6 +232,13 @@
       "when": 1779484150497,
       "tag": "0032_huge_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1779604094002,
+      "tag": "0033_supreme_manta",
+      "breakpoints": true
     }
   ]
 }

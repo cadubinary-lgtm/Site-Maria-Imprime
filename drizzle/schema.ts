@@ -918,7 +918,8 @@ export type InsertProductDeliveryOption = typeof productDeliveryOptions.$inferIn
  */
 export const cartItems = mysqlTable("cartItems", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId"),          // null para visitantes anônimos
+  sessionId: varchar("sessionId", { length: 64 }), // cart_session cookie para visitantes
   productId: int("productId").notNull(),
   quantity: int("quantity").notNull().default(1),
   selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
