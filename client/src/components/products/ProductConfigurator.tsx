@@ -190,7 +190,10 @@ export function ProductConfigurator({
     if (calculationType === "m2" && pricePerM2) {
       const width = parseDecimal(dimensions.width as string);
       const height = parseDecimal(dimensions.height as string);
-      const area = width * height;
+      const rawArea = width * height;
+      // Área mínima de 1m² — nunca vender menos que 1m²
+      // Se os campos estiverem vazios (area = 0), usar basePrice como mínimo
+      const area = rawArea > 0 ? Math.max(rawArea, 1) : 0;
       
       // Calcular taxa de prazo (se selecionado)
       let deliveryAdditional = 0;
@@ -201,7 +204,9 @@ export function ProductConfigurator({
         }
       }
       
-      totalPrice = (area * pricePerM2) + totalAdditionals + deliveryAdditional;
+      const calculatedFromArea = (area * pricePerM2) + totalAdditionals + deliveryAdditional;
+      // Se campos vazios, mostrar basePrice; caso contrário, nunca abaixo do basePrice
+      totalPrice = area === 0 ? basePrice : Math.max(calculatedFromArea, basePrice);
     } else {
       totalPrice += totalAdditionals;
       totalPrice = totalPrice * quantity;
