@@ -259,15 +259,24 @@ export async function createOrder(order: InsertOrder) {
   return result;
 }
 
-export async function updateOrderStatus(orderId: number, status: string) {
+export async function updateOrderStatus(orderId: number, status: string, notes?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-
-  const result = await db.update(orders)
+  // Buscar status atual para registrar no histórico
+  const currentOrder = await db.select({ status: orders.status }).from(orders).where(eq(orders.id, orderId)).limit(1);
+  const previousStatus = currentOrder[0]?.status ?? null;
+  // Atualizar status do pedido
+  await db.update(orders)
     .set({ status: status as any, updatedAt: new Date() })
     .where(eq(orders.id, orderId));
-
-  return result;
+  // Registrar no histórico
+  await db.insert(orderStatusHistory).values({
+    orderId,
+    previousStatus: previousStatus as any,
+    newStatus: status as any,
+    notes: notes ?? `Status alterado para ${status}`,
+  });
+  return { success: true, orderId, newStatus: status };
 }
 
 // Variation Types queries

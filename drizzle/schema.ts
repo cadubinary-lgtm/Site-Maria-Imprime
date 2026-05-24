@@ -99,7 +99,7 @@ export const orders = mysqlTable("orders", {
   clientId: int("clientId").notNull(),
   userId: int("userId"), // Relacionamento com usuário logado
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
-  status: mysqlEnum("status", ["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"]).default("pedido_recebido").notNull(),
+  status: mysqlEnum("status", ["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]).default("pedido_recebido").notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte enviado
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
@@ -149,8 +149,8 @@ export type InsertOrderItem = typeof orderItems.$inferInsert;
 export const orderStatusHistory = mysqlTable("orderStatusHistory", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
-  previousStatus: mysqlEnum("previousStatus", ["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"]),
-  newStatus: mysqlEnum("newStatus", ["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"]).notNull(),
+  previousStatus: mysqlEnum("previousStatus", ["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
+  newStatus: mysqlEnum("newStatus", ["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]).notNull(),
   changedBy: int("changedBy"), // ID do usuário que fez a mudança (admin/production)
   notes: longtext("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

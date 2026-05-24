@@ -15,13 +15,15 @@ import { toast } from "sonner";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pedido_recebido:      { label: "Pedido Recebido",      color: "bg-blue-100 text-blue-700" },
-  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-yellow-100 text-yellow-700" },
+  pagamento_aprovado:   { label: "Pagamento Aprovado",   color: "bg-green-100 text-green-700" },
+  arte_em_analise:      { label: "Arte em Análise",      color: "bg-yellow-100 text-yellow-700" },
+  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-orange-100 text-orange-700" },
   em_producao:          { label: "Em Produção",          color: "bg-purple-100 text-purple-700" },
   impressao:            { label: "Impressão",            color: "bg-indigo-100 text-indigo-700" },
   acabamento:           { label: "Acabamento",           color: "bg-pink-100 text-pink-700" },
   pronto:               { label: "Pronto",               color: "bg-teal-100 text-teal-700" },
-  enviado:              { label: "Enviado",              color: "bg-orange-100 text-orange-700" },
-  entregue:             { label: "Entregue",             color: "bg-green-100 text-green-700" },
+  saiu_para_entrega:    { label: "Saiu para Entrega",    color: "bg-cyan-100 text-cyan-700" },
+  entregue:             { label: "Entregue",             color: "bg-emerald-100 text-emerald-700" },
   cancelado:            { label: "Cancelado",            color: "bg-red-100 text-red-700" },
 };
 
