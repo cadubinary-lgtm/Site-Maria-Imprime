@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean, date } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean, date, bigint } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -97,7 +97,8 @@ export type InsertProductCategory = typeof productCategories.$inferInsert;
 export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   clientId: int("clientId").notNull(),
-  userId: int("userId"), // Relacionamento com usuário logado
+  userId: int("userId"), // Relacionamento com usuário Manus OAuth (admin)
+  customerId: int("customerId"), // Relacionamento com cliente da loja (customer auth)
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   status: mysqlEnum("status", ["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]).default("pedido_recebido").notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
@@ -112,7 +113,7 @@ export const orders = mysqlTable("orders", {
   deliveryNeighborhood: varchar("deliveryNeighborhood", { length: 255 }),
   deliveryCity: varchar("deliveryCity", { length: 255 }),
   deliveryState: varchar("deliveryState", { length: 2 }),
-  deliveryZipCode: varchar("delivery_zip_code", { length: 20 }),
+  deliveryZipCode: varchar("deliveryZipCode", { length: 20 }),
   paymentMethod: varchar("payment_method", { length: 50 }),
   paymentInstallments: int("payment_installments").default(1),
   deliveryFullName: varchar("deliveryFullName", { length: 255 }),
@@ -918,7 +919,8 @@ export type InsertProductDeliveryOption = typeof productDeliveryOptions.$inferIn
  */
 export const cartItems = mysqlTable("cartItems", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId"),          // null para visitantes anônimos
+  sessionId: varchar("sessionId", { length: 64 }), // cart_session cookie para visitantes
   productId: int("productId").notNull(),
   quantity: int("quantity").notNull().default(1),
   selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
@@ -977,3 +979,49 @@ export const customerProfiles = mysqlTable("customerProfiles", {
 
 export type CustomerProfile = typeof customerProfiles.$inferSelect;
 export type InsertCustomerProfile = typeof customerProfiles.$inferInsert;
+
+// ============================================================
+// CUSTOMER AUTH — Autenticação própria de clientes (email/senha)
+// ============================================================
+
+/**
+ * Customer Accounts — contas de clientes com email/senha próprio
+ * Separado do sistema Manus OAuth (que é usado pelo admin)
+ */
+export const customerAccounts = mysqlTable("customer_accounts", {
+  id: int("id").autoincrement().primaryKey(),
+  firstName: varchar("firstName", { length: 100 }).notNull(),
+  lastName: varchar("lastName", { length: 100 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  phone: varchar("phone", { length: 20 }),
+  cpfCnpj: varchar("cpfCnpj", { length: 20 }).unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  emailVerified: boolean("emailVerified").default(false).notNull(),
+  emailVerificationToken: varchar("emailVerificationToken", { length: 255 }),
+  emailVerificationExpires: bigint("emailVerificationExpires", { mode: "number" }),
+  resetPasswordToken: varchar("resetPasswordToken", { length: 255 }),
+  resetPasswordExpires: bigint("resetPasswordExpires", { mode: "number" }),
+  status: mysqlEnum("status", ["active", "inactive", "blocked"]).default("inactive").notNull(),
+  lastLogin: bigint("lastLogin", { mode: "number" }),
+  loginAttempts: int("loginAttempts").default(0).notNull(),
+  lockedUntil: bigint("lockedUntil", { mode: "number" }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+export type CustomerAccount = typeof customerAccounts.$inferSelect;
+export type InsertCustomerAccount = typeof customerAccounts.$inferInsert;
+
+/**
+ * Customer Sessions — sessões de clientes autenticados
+ */
+export const customerSessions = mysqlTable("customer_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  customerId: int("customerId").notNull().references(() => customerAccounts.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  ipAddress: varchar("ipAddress", { length: 50 }),
+  userAgent: varchar("userAgent", { length: 500 }),
+});
+export type CustomerSession = typeof customerSessions.$inferSelect;
+export type InsertCustomerSession = typeof customerSessions.$inferInsert;

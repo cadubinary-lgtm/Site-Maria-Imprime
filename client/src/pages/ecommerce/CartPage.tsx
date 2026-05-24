@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -153,13 +153,12 @@ function CartItemCard({
 }
 
 export default function CartPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { customer } = useCustomerAuth();
   const [, setLocation] = useLocation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  const { data: items, isLoading, refetch } = trpc.cart.getItems.useQuery(undefined, {
-    enabled: !!user,
-  });
+  // Carrinho funciona para todos: visitantes (cart_session), clientes (customer_session) e admin (session_token)
+  const { data: items, isLoading, refetch } = trpc.cart.getItems.useQuery();
 
   const updateQty = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => refetch(),
@@ -195,28 +194,7 @@ export default function CartPage() {
     setUpdatingId(null);
   };
 
-  // Redirecionar para login se não autenticado
-  if (!authLoading && !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-8 pb-6">
-            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Faça login para ver seu carrinho</h2>
-            <p className="text-gray-500 mb-6">
-              Você precisa estar logado para acessar o carrinho
-            </p>
-            <Button
-              className="bg-orange-500 hover:bg-orange-600 w-full"
-              onClick={() => setLocation("/login")}
-            >
-              Fazer Login
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Carrinho agora é público - não bloqueia visitantes
 
   const cartItems = (items ?? []) as CartItem[];
   const total = cartItems.reduce(
@@ -249,7 +227,7 @@ export default function CartPage() {
         </div>
 
         {/* Loading */}
-        {(isLoading || authLoading) && (
+        {isLoading && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {[1, 2, 3].map((i) => (
@@ -272,7 +250,7 @@ export default function CartPage() {
         )}
 
         {/* Carrinho vazio */}
-        {!isLoading && !authLoading && cartItems.length === 0 && (
+        {!isLoading && cartItems.length === 0 && (
           <div className="text-center py-16">
             <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
@@ -291,7 +269,7 @@ export default function CartPage() {
         )}
 
         {/* Carrinho com itens */}
-        {!isLoading && !authLoading && cartItems.length > 0 && (
+        {!isLoading && cartItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Lista de itens */}
             <div className="lg:col-span-2">

@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import { CustomerAuthProvider } from "./contexts/CustomerAuthContext";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -18,14 +19,36 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
+  // NÃO redirecionar se estamos em rota de cliente (customer auth)
+  // Deixar a página lidar com o erro (ex: MyAccountPage redireciona para /login-cliente)
+  const isCustomerRoute = window.location.pathname.startsWith('/minha-conta') ||
+                          window.location.pathname.startsWith('/meus-pedidos') ||
+                          window.location.pathname.startsWith('/pedido/') ||
+                          window.location.pathname.startsWith('/rastreamento/');
+
+  if (isCustomerRoute) return;
+
+  // Redirecionar apenas para rotas admin que exigem Manus OAuth
+  const isAdminRoute = window.location.pathname.startsWith('/admin') ||
+                       window.location.pathname.startsWith('/producao');
+
+  if (!isAdminRoute) return; // Não redirecionar para rotas públicas
+
   window.location.href = getLoginUrl();
-};
+}
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
+
+    // Não logar erros UNAUTHORIZED de auth.me — é comportamento esperado para visitantes
+    const queryKey = event.query.queryKey as string[];
+    const isAuthMeQuery = queryKey?.some?.(k => typeof k === 'string' && k.includes('auth'));
+    const isExpectedUnauth = error instanceof TRPCClientError && error.message === UNAUTHED_ERR_MSG;
+    if (!(isAuthMeQuery && isExpectedUnauth)) {
+      console.error("[API Query Error]", error);
+    }
   }
 });
 
@@ -55,7 +78,9 @@ const trpcClient = trpc.createClient({
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <CustomerAuthProvider>
+        <App />
+      </CustomerAuthProvider>
     </QueryClientProvider>
   </trpc.Provider>
 );
