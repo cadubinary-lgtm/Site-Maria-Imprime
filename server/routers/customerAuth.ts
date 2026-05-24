@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request, Response } from "express";
-import { getDb } from "../db";
+import { getDb, addToCart } from "../db";
 import {
   customerAccounts,
   customerSessions,
@@ -746,5 +746,57 @@ export const customerAuthRouter = router({
       if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado." });
 
       return order;
+    }),
+
+  /**
+   * Recomprar pedido (adicionar itens ao carrinho) — cliente autenticado
+   */
+  reorder: publicProcedure
+    .input(z.object({ orderId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
+      if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Não autenticado." });
+
+      const db = await requireDb();
+      const now = Date.now();
+
+      const [session] = await db
+        .select()
+        .from(customerSessions)
+        .where(and(eq(customerSessions.token, token), gt(customerSessions.expiresAt, now)))
+        .limit(1);
+
+      if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada." });
+
+      const { sql: sqlFn } = await import("drizzle-orm");
+      // Buscar itens do pedido original
+      const rows = await db.execute(
+        sqlFn`
+          SELECT oi.productId, oi.quantity, oi.priceAtOrder, oi.selectedAttributes, oi.artFileUrl, oi.notes
+          FROM orderItems oi
+          INNER JOIN orders o ON o.id = oi.orderId
+          WHERE o.id = ${input.orderId} AND o.customerId = ${session.customerId}
+        `
+      ) as any;
+
+      const items = (rows[0] ?? []) as any[];
+      if (!items.length) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado." });
+
+      let addedCount = 0;
+      for (const item of items) {
+        await addToCart({
+          sessionId: `cust_${session.customerId}`,
+          productId: item.productId,
+          quantity: item.quantity,
+          priceAtCart: parseFloat(item.priceAtOrder),
+          selectedAttributes: item.selectedAttributes ?? undefined,
+          artFileUrl: item.artFileUrl ?? undefined,
+          notes: item.notes ?? undefined,
+        });
+        addedCount++;
+      }
+
+      return { addedCount };
     }),
 });

@@ -5,7 +5,7 @@ import { useAdminAuth } from "@/_core/hooks/useAdminAuth";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle } from "lucide-react";
+import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle, Package } from "lucide-react";
 import { toast } from "sonner";
 
 function CartIcon() {
@@ -224,6 +224,16 @@ export default function Header() {
             ) : isCustomerAuth && customer ? (
               /* Cliente logado via email/senha */
               <div className="flex items-center gap-3">
+                <Link href="/meus-pedidos">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-700 hover:text-orange-600 flex items-center gap-1.5"
+                  >
+                    <Package className="w-4 h-4" />
+                    Meus Pedidos
+                  </Button>
+                </Link>
                 <Link href="/minha-conta">
                   <Button
                     variant="outline"
@@ -360,11 +370,22 @@ export default function Header() {
                 <div className="text-sm font-medium text-gray-800">
                   Olá, {customer.firstName}!
                 </div>
-                <Link href="/minha-conta">
+                <Link href="/meus-pedidos">
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-full justify-start border-orange-200 text-orange-700"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Meus Pedidos
+                  </Button>
+                </Link>
+                <Link href="/minha-conta">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-gray-700"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <UserCircle className="w-4 h-4 mr-2" />

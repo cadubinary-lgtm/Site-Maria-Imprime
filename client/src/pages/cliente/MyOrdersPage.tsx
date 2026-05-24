@@ -56,7 +56,7 @@ export default function MyOrdersPage() {
     { enabled: isAuthenticated }
   );
 
-  const reorderMutation = trpc.checkout.reorder.useMutation({
+  const reorderMutation = trpc.customerAuth.reorder.useMutation({
     onSuccess: (data) => {
       toast.success(`${data.addedCount} ${data.addedCount === 1 ? "item adicionado" : "itens adicionados"} ao carrinho!`, {
         action: { label: "Ver carrinho", onClick: () => setLocation("/carrinho") },

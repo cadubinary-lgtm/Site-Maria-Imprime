@@ -826,6 +826,7 @@ export const appRouter = router({
         const orderPayload = {
           userId: userId ?? 0, // 0 = pedido de visitante
           clientId: userId ?? 0,
+          customerId: resolvedCustomerId ?? null, // ID do cliente da loja (customer auth)
           orderNumber,
           totalPrice,
           notes: input.notes,

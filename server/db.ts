@@ -849,6 +849,7 @@ export async function getCartItemCount(userId: number | null, sessionId?: string
 export async function createOrderFromCart(data: {
   userId: number;
   clientId: number;
+  customerId?: number | null; // ID do cliente da loja (customer auth)
   orderNumber: string;
   totalPrice: number;
   notes?: string;
@@ -880,11 +881,11 @@ export async function createOrderFromCart(data: {
     const orderResult = await db.execute(
       sql`
         INSERT INTO orders (
-          clientId, userId, orderNumber, status, totalPrice, paymentStatus, notes,
+          clientId, userId, customerId, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone
         ) VALUES (
-          ${data.clientId}, ${data.userId}, ${data.orderNumber}, 'pedido_recebido',
+          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'pedido_recebido',
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
