@@ -207,6 +207,24 @@ export async function sendOrderConfirmationEmail(to: string, firstName: string, 
   return send(to, `Pedido #${orderNumber} confirmado — Gráfica Ponto Digital`, templateOrderConfirmation(firstName, orderNumber, total));
 }
 
+export function templateOrderConfirmationWithLink(firstName: string, orderNumber: string, total: string, trackUrl: string): string {
+  return baseTemplate("Pedido confirmado!", `
+    ${h1(`Pedido #${orderNumber} confirmado! 🎉`)}
+    ${p(`Olá, <strong>${firstName}</strong>! Seu pedido foi recebido com sucesso e já está sendo processado.`)}
+    <div style="background:#f0fdf4;border:1px solid #22c55e;border-radius:8px;padding:16px;margin:16px 0;">
+      <p style="color:#166534;font-size:15px;margin:0;"><strong>Número do pedido:</strong> #${orderNumber}<br/><strong>Total:</strong> R$ ${total}<br/><strong>Status inicial:</strong> Pagamento Aprovado</p>
+    </div>
+    ${p("Acompanhe o status do seu pedido em tempo real clicando no botão abaixo. Não é necessário fazer login:")}
+    <div style="text-align:center;">${btn("Acompanhar meu pedido", trackUrl)}</div>
+    ${divider()}
+    ${p("Guarde este e-mail para acessar seu pedido a qualquer momento. Dúvidas? Entre em contato pelo WhatsApp.")}
+  `);
+}
+
+export async function sendOrderConfirmationWithLink(to: string, firstName: string, orderNumber: string, total: string, trackUrl: string): Promise<SendResult> {
+  return send(to, `Pedido #${orderNumber} confirmado — Gráfica Ponto Digital`, templateOrderConfirmationWithLink(firstName, orderNumber, total, trackUrl));
+}
+
 export async function sendOrderStatusUpdateEmail(to: string, firstName: string, orderNumber: string, newStatus: string): Promise<SendResult> {
   return send(to, `Pedido #${orderNumber} atualizado — Gráfica Ponto Digital`, templateOrderStatusUpdate(firstName, orderNumber, newStatus));
 }

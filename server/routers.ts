@@ -768,9 +768,12 @@ export const appRouter = router({
         deliveryState: z.string().length(2),
         deliveryZipCode: z.string().min(8),
         notes: z.string().optional(),
-        // Email para pedidos de visitantes
+        // Compra como convidado
         guestEmail: z.string().email().optional(),
         guestName: z.string().optional(),
+        // Criação opcional de conta
+        createAccount: z.boolean().optional(),
+        accountPassword: z.string().min(6).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
@@ -822,11 +825,76 @@ export const appRouter = router({
         // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-        // 4. Montar payload
+        // 3b. Criar conta opcional (se cliente não logado e forneceu senha)
+        let finalCustomerId = resolvedCustomerId;
+        if (!userId && !resolvedCustomerId && input.createAccount && input.accountPassword && input.guestEmail) {
+          try {
+            const { customerAccounts, customerSessions } = await import("../drizzle/schema");
+            const { eq: eqInner } = await import("drizzle-orm");
+            const bcryptInner = await import("bcryptjs");
+            const { nanoid: nanoidInner } = await import("nanoid");
+            const db = await (await import("./db")).getDb();
+            if (db) {
+              // Verificar se email já existe
+              const [existing] = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eqInner(customerAccounts.email, input.guestEmail)).limit(1);
+              if (!existing) {
+                const nameParts = (input.guestName ?? input.deliveryFullName).trim().split(" ");
+                const firstName = nameParts[0] ?? "Cliente";
+                const lastName = nameParts.slice(1).join(" ") || "";
+                const passwordHash = await bcryptInner.default.hash(input.accountPassword, 10);
+                const emailVerificationToken = nanoidInner(32);
+                const now = Date.now();
+                const [inserted] = await db.insert(customerAccounts).values({
+                  email: input.guestEmail,
+                  passwordHash,
+                  firstName,
+                  lastName,
+                  phone: input.deliveryPhone,
+                  addressZipCode: input.deliveryZipCode,
+                  addressStreet: input.deliveryStreet,
+                  addressNumber: input.deliveryNumber,
+                  addressComplement: input.deliveryComplement ?? null,
+                  addressNeighborhood: input.deliveryNeighborhood,
+                  addressCity: input.deliveryCity,
+                  addressState: input.deliveryState,
+                  status: "active" as const,
+                  emailVerified: false,
+                  emailVerificationToken,
+                  createdAt: now,
+                  updatedAt: now,
+                });
+                if (inserted?.insertId) {
+                  finalCustomerId = Number(inserted.insertId);
+                  // Criar sessão automática
+                  const sessionToken = nanoidInner(48);
+                  const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
+                  await db.insert(customerSessions).values({ token: sessionToken, customerId: finalCustomerId, expiresAt, createdAt: now });
+                  // Definir cookie de sessão
+                  const { getSessionCookieOptions } = await import("./_core/cookies");
+                  res.cookie("customer_session", sessionToken, getSessionCookieOptions(req));
+                }
+              } else {
+                finalCustomerId = existing.id;
+              }
+            }
+          } catch (e) {
+            console.error("[CHECKOUT] Erro ao criar conta opcional:", e);
+          }
+        }
+
+        // 4. Gerar guestToken para convidados (sem conta)
+        const isGuest = !userId && !finalCustomerId;
+        let guestToken: string | null = null;
+        if (isGuest) {
+          const { nanoid: nanoidGuest } = await import("nanoid");
+          guestToken = nanoidGuest(48);
+        }
+
+        // 5. Montar payload
         const orderPayload = {
           userId: userId ?? 0, // 0 = pedido de visitante
           clientId: userId ?? 0,
-          customerId: resolvedCustomerId ?? null, // ID do cliente da loja (customer auth)
+          customerId: finalCustomerId ?? null,
           orderNumber,
           totalPrice,
           notes: input.notes,
@@ -839,6 +907,9 @@ export const appRouter = router({
           deliveryZipCode: input.deliveryZipCode,
           deliveryFullName: input.deliveryFullName,
           deliveryPhone: input.deliveryPhone,
+          guestToken,
+          guestEmail: isGuest ? (input.guestEmail ?? null) : null,
+          guestName: isGuest ? (input.guestName ?? input.deliveryFullName) : null,
           cartItems: cartItems.map((item: any) => ({
             productId: item.productId,
             productName: item.productName ?? "Produto",
@@ -850,21 +921,35 @@ export const appRouter = router({
           })),
         };
 
-        // 5. Criar pedido
+        // 6. Criar pedido
         const orderId = await createOrderFromCart(orderPayload);
 
-        // 6. Limpar carrinho
+        // 7. Limpar carrinho
         if (userId) {
           await clearCart(userId);
-        } else if (resolvedCustomerId) {
-          await clearCart(null, `cust_${resolvedCustomerId}`);
+        } else if (finalCustomerId) {
+          await clearCart(null, `cust_${finalCustomerId}`);
         } else if (cartSessionId) {
           await clearCart(null, cartSessionId);
-          // Limpar cookie do carrinho
           res.clearCookie("cart_session");
         }
 
-        return { orderId, orderNumber };
+        // 8. Enviar e-mail de confirmação
+        const emailTo = input.guestEmail ?? (isGuest ? null : null);
+        if (emailTo) {
+          try {
+            const { sendOrderConfirmationWithLink } = await import("./emailService");
+            const firstName = (input.guestName ?? input.deliveryFullName).split(" ")[0] ?? "Cliente";
+            const trackUrl = guestToken
+              ? `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/acompanhar/${guestToken}`
+              : `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/${orderNumber}`;
+            await sendOrderConfirmationWithLink(emailTo, firstName, orderNumber, totalPrice.toFixed(2), trackUrl);
+          } catch (e) {
+            console.error("[CHECKOUT] Erro ao enviar e-mail de confirmação:", e);
+          }
+        }
+
+        return { orderId, orderNumber, guestToken };
       }),
 
     getOrderByNumber: publicProcedure
@@ -886,6 +971,25 @@ export const appRouter = router({
         const items = (itemRows[0] ?? []) as any[];
         return { order, items };
       }),
+    getOrderByToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const dbInstance = await getDb();
+        if (!dbInstance) return null;
+        const { orders, orderItems, orderStatusHistory } = await import("../drizzle/schema");
+        const { eq, sql: drizzleSql } = await import("drizzle-orm");
+        const orderRows = await dbInstance.select().from(orders).where(eq(orders.guestToken, input.token)).limit(1);
+        const order = orderRows[0] ?? null;
+        if (!order) return null;
+        const itemRows = await dbInstance.execute(
+          drizzleSql`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${order.id}`
+        ) as any;
+        const items = (itemRows[0] ?? []) as any[];
+        const history = await dbInstance.select().from(orderStatusHistory).where(eq(orderStatusHistory.orderId, order.id));
+        return { order, items, history };
+      }),
+
     getMyOrders: protectedProcedure.query(async ({ ctx }) => {
       return await getOrdersByUser(ctx.user.id);
     }),

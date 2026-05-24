@@ -83,6 +83,11 @@ export default function CheckoutPage() {
   const [cardCvv, setCardCvv] = useState("");
   const [cardInstallments, setCardInstallments] = useState("1");
 
+  // Convidado / conta opcional
+  const [guestEmail, setGuestEmail] = useState("");
+  const [createAccountPassword, setCreateAccountPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
@@ -142,6 +147,10 @@ export default function CheckoutPage() {
   const validateDados = () => {
     if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Informe seu nome completo"); return false; }
     if (!phone.trim() || phone.replace(/\D/g, "").length < 8) { toast.error("Informe um telefone válido"); return false; }
+    if (!customerProfile) {
+      if (!guestEmail.trim() || !/^[^@]+@[^@]+\.[^@]+$/.test(guestEmail.trim())) { toast.error("Informe um e-mail válido"); return false; }
+      if (createAccountPassword && createAccountPassword.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return false; }
+    }
     return true;
   };
 
@@ -223,6 +232,9 @@ export default function CheckoutPage() {
         deliveryState: stateUF,
         deliveryZipCode: zipCode.replace(/\D/g, ""),
         notes: notesWithInfo || undefined,
+        guestEmail: guestEmail.trim() || undefined,
+        guestName: fullName.trim() || undefined,
+        createAccountPassword: createAccountPassword.trim() || undefined,
       };
       console.log("[CHECKOUT-FRONTEND] payload enviado:", JSON.stringify(payload, null, 2));
 
@@ -326,6 +338,54 @@ export default function CheckoutPage() {
                       <Label htmlFor="phone">Telefone / WhatsApp *</Label>
                       <Input id="phone" placeholder="(11) 99999-9999" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
+
+                    {/* E-mail para convidados (se não estiver logado) */}
+                    {!customerProfile && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="guestEmail">E-mail *</Label>
+                          <Input
+                            id="guestEmail"
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={guestEmail}
+                            onChange={(e) => setGuestEmail(e.target.value)}
+                          />
+                          <p className="text-xs text-gray-500">Você receberá a confirmação e o link de acompanhamento neste e-mail</p>
+                        </div>
+
+                        <div className="border border-dashed border-orange-200 rounded-lg p-4 bg-orange-50/50 space-y-3">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Criar conta para acompanhar pedidos futuros</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Opcional — deixe em branco para finalizar como convidado</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="createAccountPassword" className="text-sm">Criar senha (opcional)</Label>
+                            <div className="relative">
+                              <Input
+                                id="createAccountPassword"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Mínimo 6 caracteres"
+                                value={createAccountPassword}
+                                onChange={(e) => setCreateAccountPassword(e.target.value)}
+                                className="pr-10"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                              >
+                                {showPassword ? "🙈" : "👁"}
+                              </button>
+                            </div>
+                            {createAccountPassword && createAccountPassword.length < 6 && (
+                              <p className="text-xs text-red-500">Senha deve ter pelo menos 6 caracteres</p>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
                     <div className="space-y-2">
                       <Label htmlFor="notes">Observações (opcional)</Label>
                       <textarea

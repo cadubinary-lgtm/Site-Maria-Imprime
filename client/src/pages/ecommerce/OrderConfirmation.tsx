@@ -188,6 +188,35 @@ export default function OrderConfirmation() {
           </CardContent>
         </Card>
 
+        {/* E-mail enviado / link de acompanhamento para convidados */}
+        {order.guestToken && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-blue-800">Confirmação enviada por e-mail!</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  Enviamos o número do pedido e o link de acompanhamento para o seu e-mail.
+                  Guarde o link abaixo para acompanhar seu pedido sem precisar fazer login:
+                </p>
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                  <code className="text-xs bg-white border border-blue-200 rounded px-2 py-1 text-blue-800 break-all">
+                    {window.location.origin}/pedido/acompanhar/{order.guestToken}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/pedido/acompanhar/${order.guestToken}`);
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline flex-shrink-0"
+                  >
+                    Copiar link
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Ações */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/catalogo">
@@ -195,11 +224,19 @@ export default function OrderConfirmation() {
               Continuar Comprando
             </Button>
           </Link>
-          <Link href="/meus-pedidos">
-            <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
-              Meus Pedidos
-            </Button>
-          </Link>
+          {order.guestToken ? (
+            <Link href={`/pedido/acompanhar/${order.guestToken}`}>
+              <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
+                Acompanhar Pedido
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/meus-pedidos">
+              <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
+                Meus Pedidos
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
