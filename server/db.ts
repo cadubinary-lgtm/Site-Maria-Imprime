@@ -719,28 +719,49 @@ export async function reorderDeliveryOptions(updates: Array<{ id: number; order:
 // CART HELPERS
 // ============================================================
 
-export async function getCartByUser(userId: number) {
+export async function getCartByUser(userId: number | null, sessionId?: string | null) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const rows = await db.execute(
-    sql`
-      SELECT 
-        ci.id, ci.userId, ci.productId, ci.quantity,
-        ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
-        ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
-        p.name as productName, p.imageUrl as productImage,
-        p.calculationType, p.unit
-      FROM cartItems ci
-      JOIN products p ON ci.productId = p.id
-      WHERE ci.userId = ${userId}
-      ORDER BY ci.createdAt DESC
-    `
-  ) as any;
+  let rows: any;
+  if (userId) {
+    rows = await db.execute(
+      sql`
+        SELECT 
+          ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
+          ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
+          ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
+          p.name as productName, p.imageUrl as productImage,
+          p.calculationType, p.unit
+        FROM cartItems ci
+        JOIN products p ON ci.productId = p.id
+        WHERE ci.userId = ${userId}
+        ORDER BY ci.createdAt DESC
+      `
+    ) as any;
+  } else if (sessionId) {
+    rows = await db.execute(
+      sql`
+        SELECT 
+          ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
+          ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
+          ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
+          p.name as productName, p.imageUrl as productImage,
+          p.calculationType, p.unit
+        FROM cartItems ci
+        JOIN products p ON ci.productId = p.id
+        WHERE ci.sessionId = ${sessionId}
+        ORDER BY ci.createdAt DESC
+      `
+    ) as any;
+  } else {
+    return [];
+  }
   return (rows[0] ?? []) as any[];
 }
 
 export async function addToCart(data: {
-  userId: number;
+  userId?: number | null;
+  sessionId?: string | null;
   productId: number;
   quantity: number;
   selectedAttributes?: string;
@@ -753,43 +774,70 @@ export async function addToCart(data: {
   if (!db) throw new Error("Database not available");
   const result = await db.execute(
     sql`
-      INSERT INTO cartItems (userId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes)
-      VALUES (${data.userId}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null})
+      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes)
+      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null})
     `
   );
   return (result as any).insertId as number;
 }
 
-export async function updateCartItemQuantity(id: number, userId: number, quantity: number) {
+export async function updateCartItemQuantity(id: number, userId: number | null, quantity: number, sessionId?: string | null) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.execute(
-    sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
-  );
+  if (userId) {
+    await db.execute(
+      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
+    );
+  } else if (sessionId) {
+    await db.execute(
+      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND sessionId = ${sessionId}`
+    );
+  }
 }
 
-export async function removeFromCart(id: number, userId: number) {
+export async function removeFromCart(id: number, userId: number | null, sessionId?: string | null) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.execute(
-    sql`DELETE FROM cartItems WHERE id = ${id} AND userId = ${userId}`
-  );
+  if (userId) {
+    await db.execute(
+      sql`DELETE FROM cartItems WHERE id = ${id} AND userId = ${userId}`
+    );
+  } else if (sessionId) {
+    await db.execute(
+      sql`DELETE FROM cartItems WHERE id = ${id} AND sessionId = ${sessionId}`
+    );
+  }
 }
 
-export async function clearCart(userId: number) {
+export async function clearCart(userId: number | null, sessionId?: string | null) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.execute(
-    sql`DELETE FROM cartItems WHERE userId = ${userId}`
-  );
+  if (userId) {
+    await db.execute(
+      sql`DELETE FROM cartItems WHERE userId = ${userId}`
+    );
+  } else if (sessionId) {
+    await db.execute(
+      sql`DELETE FROM cartItems WHERE sessionId = ${sessionId}`
+    );
+  }
 }
 
-export async function getCartItemCount(userId: number): Promise<number> {
+export async function getCartItemCount(userId: number | null, sessionId?: string | null): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const rows = await db.execute(
-    sql`SELECT SUM(quantity) as total FROM cartItems WHERE userId = ${userId}`
-  ) as any;
+  let rows: any;
+  if (userId) {
+    rows = await db.execute(
+      sql`SELECT SUM(quantity) as total FROM cartItems WHERE userId = ${userId}`
+    ) as any;
+  } else if (sessionId) {
+    rows = await db.execute(
+      sql`SELECT SUM(quantity) as total FROM cartItems WHERE sessionId = ${sessionId}`
+    ) as any;
+  } else {
+    return 0;
+  }
   const row = (rows[0] as any[])[0];
   return Number(row?.total ?? 0);
 }
