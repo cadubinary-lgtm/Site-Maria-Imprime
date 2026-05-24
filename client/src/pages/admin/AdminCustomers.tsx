@@ -18,7 +18,19 @@ import {
   RefreshCw,
   Mail,
   Phone,
+  Trash2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const STATUS_LABELS: Record<string, string> = {
   active: "Ativo",
@@ -46,6 +58,14 @@ export default function AdminCustomers() {
   const updateStatus = trpc.customerAuth.adminUpdateCustomerStatus.useMutation({
     onSuccess: () => {
       toast.success("Status atualizado com sucesso!");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const deleteCustomer = trpc.customerAuth.adminDeleteCustomer.useMutation({
+    onSuccess: () => {
+      toast.success("Cliente excluído com sucesso!");
       refetch();
     },
     onError: (err) => toast.error(err.message),
@@ -285,6 +305,39 @@ export default function AdminCustomers() {
                                 Ativar
                               </Button>
                             )}
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-gray-500 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs"
+                                  disabled={deleteCustomer.isPending}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                  Excluir
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Você está prestes a excluir permanentemente a conta de{" "}
+                                    <strong>{customer.firstName} {customer.lastName}</strong> ({customer.email}).
+                                    Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                    onClick={() => deleteCustomer.mutate({ customerId: customer.id })}
+                                  >
+                                    Sim, excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </td>
                       </tr>
