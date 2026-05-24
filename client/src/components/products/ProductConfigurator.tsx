@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, ChevronDown, Truck } from "lucide-react";
+import { AlertCircle, Truck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
 
@@ -71,7 +71,6 @@ export function ProductConfigurator({
   const [dimensions, setDimensions] = useState({ width: "", height: "" });
   const [quantity, setQuantity] = useState(1);
   const [calculatorConfig, setCalculatorConfig] = useState<ProductCalculatorConfig | null>(null);
-  const [expandedAttribute, setExpandedAttribute] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<number | null>(null);
@@ -331,115 +330,79 @@ export function ProductConfigurator({
           </p>
         </div>
 
-        {/* Atributos */}
-        {attributes.map((attribute) => (
+        {/* Atributos — sempre visíveis com dropdown direto */}
+        {attributes.map((attribute, idx) => (
           <div key={attribute.id} className="space-y-2">
-            <div
-              className="flex items-center justify-between cursor-pointer p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
-              onClick={() =>
-                setExpandedAttribute(
-                  expandedAttribute === attribute.id ? null : attribute.id
-                )
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex-shrink-0">
+                {idx + 1}
+              </div>
+              <Label className="font-semibold text-gray-800">
+                {attribute.attributeName}
+                {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
+              </Label>
+            </div>
+            <Select
+              value={selectedValues[attribute.id]?.toString() || ""}
+              onValueChange={(value) =>
+                handleSelectChange(attribute.id, parseInt(value))
               }
             >
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold">
-                  {attributes.indexOf(attribute) + 1}
-                </div>
-                <div>
-                  <Label className="font-semibold cursor-pointer">
-                    {attribute.attributeName}
-                    {attribute.isRequired && <span className="text-red-500 ml-1">*</span>}
-                  </Label>
-                  <p className="text-xs text-gray-500">
-                    {selectedValues[attribute.id] ? "Selecionado" : "Não selecionado"}
-                  </p>
-                </div>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  expandedAttribute === attribute.id ? "rotate-180" : ""
-                }`}
-              />
-            </div>
-
-            {expandedAttribute === attribute.id && (
-              <Select
-                value={selectedValues[attribute.id]?.toString() || ""}
-                onValueChange={(value) =>
-                  handleSelectChange(attribute.id, parseInt(value))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione uma opção" />
-                </SelectTrigger>
-                <SelectContent>
-                  {attribute.values.map((value) => (
-                    <SelectItem key={value.id} value={value.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <span>{value.value}</span>
-                        {value.priceModifier > 0 && (
-                          <span className="text-green-600 font-semibold">
-                            +R$ {value.priceModifier.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+              <SelectTrigger className="w-full bg-white">
+                <SelectValue placeholder="Selecione uma opção" />
+              </SelectTrigger>
+              <SelectContent>
+                {attribute.values.map((value) => (
+                  <SelectItem key={value.id} value={value.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <span>{value.value}</span>
+                      {value.priceModifier > 0 && (
+                        <span className="text-green-600 font-semibold">
+                          +R$ {value.priceModifier.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         ))}
 
-        {/* Calculadora de m² */}
+        {/* Dimensões (m²) */}
         {calculationType === "m2" && (
-          <div className="space-y-4 bg-white p-4 rounded-lg">
-            <h3 className="font-semibold text-lg">Calculadora de Área</h3>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <Label className="font-semibold text-gray-800">Medidas</Label>
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="width">Largura (m)</Label>
+                <Label htmlFor="width" className="text-xs text-gray-500 mb-1 block">Largura (m)</Label>
                 <Input
                   id="width"
                   type="text"
                   inputMode="decimal"
                   value={dimensions.width}
                   onChange={(e) => setDimensions({ ...dimensions, width: e.target.value })}
-                  placeholder="1.50 ou 1,50"
+                  placeholder="ex: 1,50"
+                  className="bg-white"
                 />
                 {minWidth && maxWidth && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    Min: {minWidth}m | Max: {maxWidth}m
-                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Min: {minWidth}m — Max: {maxWidth}m</p>
                 )}
               </div>
               <div>
-                <Label htmlFor="height">Altura (m)</Label>
+                <Label htmlFor="height" className="text-xs text-gray-500 mb-1 block">Altura (m)</Label>
                 <Input
                   id="height"
                   type="text"
                   inputMode="decimal"
                   value={dimensions.height}
                   onChange={(e) => setDimensions({ ...dimensions, height: e.target.value })}
-                  placeholder="2.00 ou 2,00"
+                  placeholder="ex: 2,00"
+                  className="bg-white"
                 />
                 {minHeight && maxHeight && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    Min: {minHeight}m | Max: {maxHeight}m
-                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Min: {minHeight}m — Max: {maxHeight}m</p>
                 )}
-              </div>
-            </div>
-            <div className="bg-white p-3 rounded border border-blue-200">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-gray-600">Área total:</p>
-                  <p className="font-semibold text-lg">{(parseDecimal(dimensions.width as string) * parseDecimal(dimensions.height as string)).toFixed(2)} m²</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Valor por m²:</p>
-                  <p className="font-semibold text-lg">R$ {pricePerM2?.toFixed(2)}</p>
-                </div>
               </div>
             </div>
           </div>
