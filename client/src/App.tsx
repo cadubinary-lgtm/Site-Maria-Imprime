@@ -21,6 +21,7 @@ import ProductDetail from "./pages/ecommerce/ProductDetail";
 import CartPage from "./pages/ecommerce/CartPage";
 import CheckoutPage from "./pages/ecommerce/CheckoutPage";
 import OrderConfirmation from "./pages/ecommerce/OrderConfirmation";
+import GuestOrderTracking from "./pages/ecommerce/GuestOrderTracking";
 import CustomerRegister from "./pages/ecommerce/CustomerRegister";
 import CustomerLogin from "./pages/ecommerce/CustomerLogin";
 import VerifyEmail from "./pages/ecommerce/VerifyEmail";
@@ -132,6 +133,7 @@ function Router() {
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />
+      <Route path="/pedido/acompanhar/:token" component={GuestOrderTracking} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
 

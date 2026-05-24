@@ -118,6 +118,10 @@ export const orders = mysqlTable("orders", {
   paymentInstallments: int("payment_installments").default(1),
   deliveryFullName: varchar("deliveryFullName", { length: 255 }),
   deliveryPhone: varchar("deliveryPhone", { length: 20 }),
+  // Compra como convidado
+  guestToken: varchar("guestToken", { length: 64 }), // Token único para acompanhamento sem login
+  guestEmail: varchar("guestEmail", { length: 255 }), // Email do convidado
+  guestName: varchar("guestName", { length: 255 }), // Nome do convidado
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
