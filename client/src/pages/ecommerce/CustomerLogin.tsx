@@ -9,11 +9,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, LogIn, ArrowLeft, Mail } from "lucide-react";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
+const EMAIL_NOT_VERIFIED_MSG = "Confirme seu email antes de fazer login";
+
 export default function CustomerLogin() {
   const [, navigate] = useLocation();
   const { refetch } = useCustomerAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
 
   const login = trpc.customerAuth.login.useMutation({
@@ -22,7 +25,13 @@ export default function CustomerLogin() {
       navigate("/minha-conta");
     },
     onError: (err) => {
-      setError(err.message);
+      if (err.message.includes(EMAIL_NOT_VERIFIED_MSG)) {
+        setEmailNotVerified(true);
+        setError("");
+      } else {
+        setEmailNotVerified(false);
+        setError(err.message);
+      }
     },
   });
 
@@ -63,6 +72,25 @@ export default function CustomerLogin() {
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {emailNotVerified && (
+                <Alert className="border-orange-200 bg-orange-50">
+                  <Mail className="h-4 w-4 text-orange-500" />
+                  <AlertDescription className="text-orange-800">
+                    <p className="font-medium mb-1">Email não confirmado</p>
+                    <p className="text-sm mb-3">
+                      Enviamos um link de confirmação para <strong>{form.email}</strong>.
+                      Verifique sua caixa de entrada e a pasta de spam.
+                    </p>
+                    <Link
+                      href={`/reenviar-verificacao?email=${encodeURIComponent(form.email)}`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700 underline"
+                    >
+                      Reenviar email de confirmação
+                    </Link>
+                  </AlertDescription>
                 </Alert>
               )}
 
