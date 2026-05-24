@@ -4,6 +4,16 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { parse as parseCookieHeader } from "cookie";
+import type { Request as ExpressRequest, Response as ExpressResponse } from "express";
+
+/** Lê um cookie diretamente do header Cookie da requisição (sem cookie-parser) */
+function getCookieFromReq(req: ExpressRequest, name: string): string | undefined {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return undefined;
+  const parsed = parseCookieHeader(cookieHeader);
+  return parsed[name] || undefined;
+}
 import {
   getAllProducts,
   getProductsBySegment,
@@ -588,9 +598,9 @@ export const appRouter = router({
      *  - visitante anônimo (cookie cart_session)
      */
     getItems: publicProcedure.query(async ({ ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
+      const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
-      const customerSessionToken = req.cookies?.customer_session;
+      const customerSessionToken = getCookieFromReq(req, "customer_session");
       let sessionId: string | null = null;
 
       // Tentar resolver customerId via customer_session
@@ -616,7 +626,7 @@ export const appRouter = router({
 
       // Visitante anônimo via cart_session cookie
       if (!userId) {
-        sessionId = req.cookies?.cart_session ?? null;
+        sessionId = getCookieFromReq(req, "cart_session") ?? null;
         return await getCartByUser(null, sessionId);
       }
 
@@ -624,9 +634,9 @@ export const appRouter = router({
     }),
 
     getCount: publicProcedure.query(async ({ ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
+      const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
-      const customerSessionToken = req.cookies?.customer_session;
+      const customerSessionToken = getCookieFromReq(req, "customer_session");
 
       if (!userId && customerSessionToken) {
         try {
@@ -649,7 +659,7 @@ export const appRouter = router({
       }
 
       if (!userId) {
-        const sessionId = req.cookies?.cart_session ?? null;
+        const sessionId = getCookieFromReq(req, "cart_session") ?? null;
         return await getCartItemCount(null, sessionId);
       }
 
@@ -667,10 +677,10 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const req = ctx.req as { cookies?: Record<string, string> };
-        const res = ctx.res as any;
+        const req = ctx.req as ExpressRequest;
+        const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
-        const customerSessionToken = req.cookies?.customer_session;
+        const customerSessionToken = getCookieFromReq(req, "customer_session");
 
         // Resolver customerId via customer_session
         if (!userId && customerSessionToken) {
@@ -700,15 +710,13 @@ export const appRouter = router({
         }
 
         // Visitante anônimo: gerar/usar cart_session cookie
-        let sessionId = req.cookies?.cart_session;
+        let sessionId = getCookieFromReq(req, "cart_session");
         if (!sessionId) {
           const { nanoid: nid } = await import("nanoid");
           sessionId = nid(32);
           res.cookie("cart_session", sessionId, {
-            httpOnly: true,
-            sameSite: "lax",
+            ...getSessionCookieOptions(req),
             maxAge: 60 * 60 * 24 * 30, // 30 dias
-            secure: process.env.NODE_ENV === "production",
           });
         }
         const id = await addToCart({ sessionId, ...input });
@@ -718,9 +726,9 @@ export const appRouter = router({
     updateQuantity: publicProcedure
       .input(z.object({ id: z.number(), quantity: z.number().min(1) }))
       .mutation(async ({ ctx, input }) => {
-        const req = ctx.req as { cookies?: Record<string, string> };
+        const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        const sessionId = req.cookies?.cart_session ?? null;
+        const sessionId = getCookieFromReq(req, "cart_session") ?? null;
         await updateCartItemQuantity(input.id, userId, input.quantity, sessionId);
         return { success: true };
       }),
@@ -728,17 +736,17 @@ export const appRouter = router({
     removeItem: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const req = ctx.req as { cookies?: Record<string, string> };
+        const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        const sessionId = req.cookies?.cart_session ?? null;
+        const sessionId = getCookieFromReq(req, "cart_session") ?? null;
         await removeFromCart(input.id, userId, sessionId);
         return { success: true };
       }),
 
     clear: publicProcedure.mutation(async ({ ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
+      const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
-      const sessionId = req.cookies?.cart_session ?? null;
+      const sessionId = getCookieFromReq(req, "cart_session") ?? null;
       await clearCart(userId, sessionId);
       return { success: true };
     }),
@@ -765,11 +773,11 @@ export const appRouter = router({
         guestName: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const req = ctx.req as { cookies?: Record<string, string> };
-        const res = ctx.res as any;
+        const req = ctx.req as ExpressRequest;
+        const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
-        const customerSessionToken = req.cookies?.customer_session;
-        const cartSessionId = req.cookies?.cart_session ?? null;
+        const customerSessionToken = getCookieFromReq(req, "customer_session");
+        const cartSessionId = getCookieFromReq(req, "cart_session") ?? null;
 
         // Resolver customerId via customer_session
         let resolvedCustomerId: number | null = null;
