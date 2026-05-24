@@ -210,7 +210,7 @@ export default function CheckoutPage() {
       const result = await createOrderMutation.mutateAsync(payload);
       console.log("[CHECKOUT-FRONTEND] ✅ SUCESSO:", result);
       toast.success(`Pedido ${result.orderNumber} criado com sucesso!`);
-      setLocation(`/pedido/${result.orderId}`);
+      setLocation(`/confirmacao/${result.orderNumber}`);
     } catch (err: any) {
       console.error("[CHECKOUT-FRONTEND] ❌ ERRO:", err);
       console.error("[CHECKOUT-FRONTEND] err.message:", err?.message);
