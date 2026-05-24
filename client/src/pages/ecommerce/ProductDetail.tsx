@@ -15,7 +15,7 @@ import { OrderSummary } from "@/components/OrderSummary";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { ConfiguradorVisual } from "@/components/ConfiguradorVisual";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
-import { useAuth } from "@/_core/hooks/useAuth";
+// useAuth removido - carrinho funciona sem login
 
 
 export default function ProductDetail() {
@@ -90,7 +90,7 @@ export default function ProductDetail() {
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
   const addToCartMutation = trpc.cart.addItem.useMutation();
-  const { user } = useAuth();
+  // Carrinho agora é público - não exige login
   const [, setLocation] = useLocation();
 
   // Processar regras dinâmicas
@@ -220,11 +220,7 @@ export default function ProductDetail() {
       return;
     }
 
-    if (!user) {
-      toast.error("Faça login para adicionar ao carrinho");
-      setLocation("/login");
-      return;
-    }
+    // Carrinho público - visitantes podem adicionar itens sem login
 
     // Bug 2: Validar variações obrigatórias
     if (configuradorRequiredCount > 0 && configuradorSelectedCount < configuradorRequiredCount) {
