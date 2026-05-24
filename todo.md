@@ -1742,3 +1742,16 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Bug 2: Validação de variações obrigatórias — handleAddToCart bloqueia se não selecionou todas
 - [x] Bug 3: Mensagem de erro visível abaixo do checkbox de termos (card vermelho com ícone)
 - [x] Bug 4: Botão duplicado removido do ProductConfigurator — apenas OrderSummary tem o botão
+
+## Painel Operacional de Pedidos — CONCLUÍDO
+
+- [x] Enum do banco atualizado para 11 status operacionais
+- [x] Schema Drizzle atualizado (orders + orderStatusHistory)
+- [x] server/db.ts: updateOrderStatus registra histórico automático
+- [x] server/routers.ts: checkout.getAllOrders, checkout.updateOrderStatus
+- [x] Criada página /admin/pedidos (AdminOrders.tsx)
+- [x] Criada página /admin/pedidos/:id (AdminOrderDetail.tsx)
+- [x] OrderTracking.tsx: timeline com 11 etapas e barra de progresso
+- [x] ProductionDashboard.tsx: kanban com 11 colunas
+- [x] MyOrdersPage.tsx: badges com 11 status
+- [x] App.tsx: rotas /admin/pedidos e /admin/pedidos/:id registradas

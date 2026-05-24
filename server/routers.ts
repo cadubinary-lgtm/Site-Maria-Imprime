@@ -349,7 +349,7 @@ export const appRouter = router({
     updateStatus: productionProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["pedido_recebido", "aguardando_pagamento", "em_producao", "impressao", "acabamento", "pronto", "enviado", "entregue", "cancelado"]),
+        newStatus: z.enum(["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
       }))
       .mutation(async ({ input }) => {
         const result = await updateOrderStatus(input.orderId, input.newStatus);
@@ -751,6 +751,23 @@ export const appRouter = router({
           addedCount++;
         }
         return { addedCount };
+      }),
+    getAllOrders: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const { orders: ordersTable } = await import("../drizzle/schema.js");
+      const { desc } = await import("drizzle-orm");
+      return db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+    }),
+    updateOrderStatus: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        newStatus: z.enum(["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await updateOrderStatus(input.orderId, input.newStatus, input.notes);
+        return result;
       }),
     getMyOrdersFiltered: protectedProcedure
       .input(z.object({

@@ -36,6 +36,8 @@ import FinancialDashboard from "./pages/FinancialDashboard";
 import FileValidationManager from "./pages/FileValidationManager";
 import AutomationDashboard from "./pages/AutomationDashboard";
 import ERPDashboard from "./pages/ERPDashboard";
+import AdminOrders from "./pages/AdminOrders";
+import AdminOrderDetail from "./pages/AdminOrderDetail";
 import { useAuth } from "./_core/hooks/useAuth";
 import Header from "./components/Header";
 
@@ -95,6 +97,8 @@ function Router() {
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
         <Route path="/admin/automacao" component={AutomationDashboard} />
         <Route path="/admin/erp" component={ERPDashboard} />
+          <Route path="/admin/pedidos" component={AdminOrders} />
+          <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
         <Route path="/admin/atributos" component={AdminAttributesManager} />
         <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
