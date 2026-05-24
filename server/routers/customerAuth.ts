@@ -906,4 +906,21 @@ export const customerAuthRouter = router({
 
       return { addedCount };
     }),
+
+  /**
+   * Excluir cliente (admin)
+   * Remove a conta e todas as sessões vinculadas
+   */
+  adminDeleteCustomer: publicProcedure
+    .input(z.object({ customerId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.user;
+      if (!user || user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
+      }
+      const db = await requireDb();
+      // Sessões são removidas em cascata pelo banco (onDelete: cascade)
+      await db.delete(customerAccounts).where(eq(customerAccounts.id, input.customerId));
+      return { success: true };
+    }),
 });
