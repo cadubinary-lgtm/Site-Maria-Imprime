@@ -384,6 +384,7 @@ export function ProductConfigurator({
                   onChange={(e) => setDimensions({ ...dimensions, width: e.target.value })}
                   placeholder="ex: 1,50"
                   className="bg-white"
+                  autoComplete="off"
                 />
                 {minWidth && maxWidth && (
                   <p className="text-xs text-gray-400 mt-1">Min: {minWidth}m — Max: {maxWidth}m</p>
@@ -399,6 +400,7 @@ export function ProductConfigurator({
                   onChange={(e) => setDimensions({ ...dimensions, height: e.target.value })}
                   placeholder="ex: 2,00"
                   className="bg-white"
+                  autoComplete="off"
                 />
                 {minHeight && maxHeight && (
                   <p className="text-xs text-gray-400 mt-1">Min: {minHeight}m — Max: {maxHeight}m</p>

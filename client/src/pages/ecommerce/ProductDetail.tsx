@@ -502,40 +502,27 @@ export default function ProductDetail() {
             />
           )}
 
-          {/* Upload de Arquivo */}
+          {/* Envie seu Arquivo */}
           <Card>
-            <CardHeader>
-              <CardTitle>Arquivo de Arte</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Envie seu Arquivo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Toggle entre Upload e Link */}
-              <div className="flex gap-4 mb-4">
+            <CardContent className="space-y-3">
+
+              {/* Linha 1: Upload de Arquivo */}
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => setUseLink(false)}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                  className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
                     !useLink
                       ? "bg-orange-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
                   Upload de Arquivo
                 </button>
-                <button
-                  onClick={() => setUseLink(true)}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                    useLink
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  Link/URL
-                </button>
-              </div>
-
-              {/* Upload de Arquivo */}
-              {!useLink && (
-                <>
-                  <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50">
+                <div className="flex-1">
+                  <div className="border border-dashed border-gray-300 rounded-lg px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition">
                     <input
                       type="file"
                       onChange={handleFileChange}
@@ -543,43 +530,54 @@ export default function ProductDetail() {
                       id="art-upload"
                       accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.png"
                     />
-                    <label htmlFor="art-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm font-medium">Clique para fazer upload</p>
-                      <p className="text-xs text-gray-500">PDF, AI, CDR, PSD, EPS, JPG, PNG (máx 50MB)</p>
+                    <label htmlFor="art-upload" className="cursor-pointer flex items-center gap-2 w-full">
+                      <Upload className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-sm text-gray-500 truncate">
+                        {artFile ? artFile.name : "Clique para selecionar (PDF, AI, CDR, PSD, EPS, JPG, PNG — máx 50MB)"}
+                      </span>
                     </label>
                   </div>
-                  {artFile && (
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>Arquivo selecionado: {artFile.name}</AlertDescription>
-                    </Alert>
-                  )}
-                </>
+                </div>
+              </div>
+
+              {/* Linha 2: Link/URL */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setUseLink(true)}
+                  className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
+                    useLink
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Link / URL
+                </button>
+                <div className="flex-1">
+                  <Input
+                    id="art-link"
+                    type="url"
+                    placeholder="https://exemplo.com/sua-arte.pdf"
+                    value={artLink}
+                    onChange={(e) => setArtLink(e.target.value)}
+                    className="w-full text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Feedback */}
+              {artFile && !useLink && (
+                <Alert className="py-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription className="text-xs">Arquivo selecionado: {artFile.name}</AlertDescription>
+                </Alert>
+              )}
+              {artLink && useLink && (
+                <Alert className="py-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription className="text-xs">Link adicionado com sucesso</AlertDescription>
+                </Alert>
               )}
 
-              {/* Campo de Link */}
-              {useLink && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="art-link">Cole o link da sua arte aqui</Label>
-                    <Input
-                      id="art-link"
-                      type="url"
-                      placeholder="https://exemplo.com/sua-arte.pdf"
-                      value={artLink}
-                      onChange={(e) => setArtLink(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                  {artLink && (
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>Link adicionado com sucesso</AlertDescription>
-                    </Alert>
-                  )}
-                </>
-              )}
             </CardContent>
           </Card>
 
