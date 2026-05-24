@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,15 +45,15 @@ function formatDate(dateStr: string | Date) {
 }
 
 export default function MyOrdersPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useCustomerAuth();
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [orderBy, setOrderBy] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
 
-  const { data: orders, isLoading, refetch } = trpc.checkout.getMyOrdersFiltered.useQuery(
+  const { data: orders, isLoading, refetch } = trpc.customerAuth.getMyOrders.useQuery(
     { status: statusFilter, search, orderBy },
-    { enabled: !!user }
+    { enabled: isAuthenticated }
   );
 
   const reorderMutation = trpc.checkout.reorder.useMutation({
@@ -65,7 +65,7 @@ export default function MyOrdersPage() {
     onError: () => toast.error("Erro ao recomprar pedido"),
   });
 
-  if (!authLoading && !user) {
+  if (!authLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">
@@ -73,7 +73,7 @@ export default function MyOrdersPage() {
             <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Faça login para ver seus pedidos</h2>
             <p className="text-gray-500 mb-6">Você precisa estar logado para acessar seus pedidos</p>
-            <Button className="bg-orange-500 hover:bg-orange-600 w-full" onClick={() => setLocation("/login")}>
+            <Button className="bg-orange-500 hover:bg-orange-600 w-full" onClick={() => setLocation("/login-cliente")}>
               Fazer Login
             </Button>
           </CardContent>

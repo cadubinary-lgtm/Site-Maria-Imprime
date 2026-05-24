@@ -61,6 +61,7 @@ import { nanoid } from "nanoid";
 import { products, orders, orderItems, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { crmRouter } from "./routers-crm";
+import { customerAuthRouter } from "./routers/customerAuth";
 import { financialRouter } from "./routers-financial";
 import { web2printRouter } from "./routers-web2print";
 import { automationRouter } from "./routers-automation";
@@ -87,6 +88,7 @@ export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  customerAuth: customerAuthRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -578,13 +580,83 @@ export const appRouter = router({
       }),
   }),
   cart: router({
-    getItems: protectedProcedure.query(async ({ ctx }) => {
-      return await getCartByUser(ctx.user.id);
+    /**
+     * Retorna os itens do carrinho.
+     * Funciona para:
+     *  - admin logado via Manus OAuth (ctx.user)
+     *  - cliente logado via email/senha (cookie customer_session → customerId)
+     *  - visitante anônimo (cookie cart_session)
+     */
+    getItems: publicProcedure.query(async ({ ctx }) => {
+      const req = ctx.req as { cookies?: Record<string, string> };
+      const userId = ctx.user?.id ?? null;
+      const customerSessionToken = req.cookies?.customer_session;
+      let sessionId: string | null = null;
+
+      // Tentar resolver customerId via customer_session
+      if (!userId && customerSessionToken) {
+        try {
+          const { getDb: getDbInner } = await import("./db");
+          const { customerSessions, customerAccounts } = await import("../drizzle/schema");
+          const { eq, gt, and } = await import("drizzle-orm");
+          const db = await getDbInner();
+          if (db) {
+            const now = Date.now();
+            const [sess] = await db
+              .select({ customerId: customerSessions.customerId })
+              .from(customerSessions)
+              .where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now)))
+              .limit(1);
+            if (sess) {
+              return await getCartByUser(null, `cust_${sess.customerId}`);
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Visitante anônimo via cart_session cookie
+      if (!userId) {
+        sessionId = req.cookies?.cart_session ?? null;
+        return await getCartByUser(null, sessionId);
+      }
+
+      return await getCartByUser(userId);
     }),
-    getCount: protectedProcedure.query(async ({ ctx }) => {
-      return await getCartItemCount(ctx.user.id);
+
+    getCount: publicProcedure.query(async ({ ctx }) => {
+      const req = ctx.req as { cookies?: Record<string, string> };
+      const userId = ctx.user?.id ?? null;
+      const customerSessionToken = req.cookies?.customer_session;
+
+      if (!userId && customerSessionToken) {
+        try {
+          const { getDb: getDbInner } = await import("./db");
+          const { customerSessions } = await import("../drizzle/schema");
+          const { eq, gt, and } = await import("drizzle-orm");
+          const db = await getDbInner();
+          if (db) {
+            const now = Date.now();
+            const [sess] = await db
+              .select({ customerId: customerSessions.customerId })
+              .from(customerSessions)
+              .where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now)))
+              .limit(1);
+            if (sess) {
+              return await getCartItemCount(null, `cust_${sess.customerId}`);
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!userId) {
+        const sessionId = req.cookies?.cart_session ?? null;
+        return await getCartItemCount(null, sessionId);
+      }
+
+      return await getCartItemCount(userId);
     }),
-    addItem: protectedProcedure
+
+    addItem: publicProcedure
       .input(z.object({
         productId: z.number(),
         quantity: z.number().min(1).default(1),
@@ -595,23 +667,79 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const id = await addToCart({ userId: ctx.user.id, ...input });
+        const req = ctx.req as { cookies?: Record<string, string> };
+        const res = ctx.res as any;
+        const userId = ctx.user?.id ?? null;
+        const customerSessionToken = req.cookies?.customer_session;
+
+        // Resolver customerId via customer_session
+        if (!userId && customerSessionToken) {
+          try {
+            const { getDb: getDbInner } = await import("./db");
+            const { customerSessions } = await import("../drizzle/schema");
+            const { eq, gt, and } = await import("drizzle-orm");
+            const db = await getDbInner();
+            if (db) {
+              const now = Date.now();
+              const [sess] = await db
+                .select({ customerId: customerSessions.customerId })
+                .from(customerSessions)
+                .where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now)))
+                .limit(1);
+              if (sess) {
+                const id = await addToCart({ sessionId: `cust_${sess.customerId}`, ...input });
+                return { id };
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (userId) {
+          const id = await addToCart({ userId, ...input });
+          return { id };
+        }
+
+        // Visitante anônimo: gerar/usar cart_session cookie
+        let sessionId = req.cookies?.cart_session;
+        if (!sessionId) {
+          const { nanoid: nid } = await import("nanoid");
+          sessionId = nid(32);
+          res.cookie("cart_session", sessionId, {
+            httpOnly: true,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 30, // 30 dias
+            secure: process.env.NODE_ENV === "production",
+          });
+        }
+        const id = await addToCart({ sessionId, ...input });
         return { id };
       }),
-    updateQuantity: protectedProcedure
+
+    updateQuantity: publicProcedure
       .input(z.object({ id: z.number(), quantity: z.number().min(1) }))
       .mutation(async ({ ctx, input }) => {
-        await updateCartItemQuantity(input.id, ctx.user.id, input.quantity);
+        const req = ctx.req as { cookies?: Record<string, string> };
+        const userId = ctx.user?.id ?? null;
+        const sessionId = req.cookies?.cart_session ?? null;
+        await updateCartItemQuantity(input.id, userId, input.quantity, sessionId);
         return { success: true };
       }),
-    removeItem: protectedProcedure
+
+    removeItem: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await removeFromCart(input.id, ctx.user.id);
+        const req = ctx.req as { cookies?: Record<string, string> };
+        const userId = ctx.user?.id ?? null;
+        const sessionId = req.cookies?.cart_session ?? null;
+        await removeFromCart(input.id, userId, sessionId);
         return { success: true };
       }),
-    clear: protectedProcedure.mutation(async ({ ctx }) => {
-      await clearCart(ctx.user.id);
+
+    clear: publicProcedure.mutation(async ({ ctx }) => {
+      const req = ctx.req as { cookies?: Record<string, string> };
+      const userId = ctx.user?.id ?? null;
+      const sessionId = req.cookies?.cart_session ?? null;
+      await clearCart(userId, sessionId);
       return { success: true };
     }),
   }),
@@ -620,7 +748,7 @@ export const appRouter = router({
   // CHECKOUT ROUTER
   // ============================================================
   checkout: router({
-    createOrder: protectedProcedure
+    createOrder: publicProcedure
       .input(z.object({
         deliveryFullName: z.string().min(3),
         deliveryPhone: z.string().min(8),
@@ -632,19 +760,48 @@ export const appRouter = router({
         deliveryState: z.string().length(2),
         deliveryZipCode: z.string().min(8),
         notes: z.string().optional(),
+        // Email para pedidos de visitantes
+        guestEmail: z.string().email().optional(),
+        guestName: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        console.log("\n========== [CHECKOUT] DIAGNÓSTICO COMPLETO ==========");
-        console.log("[CHECKOUT] userId:", ctx.user.id);
-        console.log("[CHECKOUT] input:", JSON.stringify(input, null, 2));
+        const req = ctx.req as { cookies?: Record<string, string> };
+        const res = ctx.res as any;
+        const userId = ctx.user?.id ?? null;
+        const customerSessionToken = req.cookies?.customer_session;
+        const cartSessionId = req.cookies?.cart_session ?? null;
+
+        // Resolver customerId via customer_session
+        let resolvedCustomerId: number | null = null;
+        if (!userId && customerSessionToken) {
+          try {
+            const { getDb: getDbInner } = await import("./db");
+            const { customerSessions } = await import("../drizzle/schema");
+            const { eq, gt, and } = await import("drizzle-orm");
+            const db = await getDbInner();
+            if (db) {
+              const now = Date.now();
+              const [sess] = await db
+                .select({ customerId: customerSessions.customerId })
+                .from(customerSessions)
+                .where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now)))
+                .limit(1);
+              if (sess) resolvedCustomerId = sess.customerId;
+            }
+          } catch (_) {}
+        }
 
         // 1. Buscar itens do carrinho
-        const cartItems = await getCartByUser(ctx.user.id);
-        console.log("[CHECKOUT] cartItems count:", cartItems?.length ?? 0);
-        console.log("[CHECKOUT] cartItems payload:", JSON.stringify(cartItems, null, 2));
+        let cartItems: any[];
+        if (userId) {
+          cartItems = await getCartByUser(userId);
+        } else if (resolvedCustomerId) {
+          cartItems = await getCartByUser(null, `cust_${resolvedCustomerId}`);
+        } else {
+          cartItems = await getCartByUser(null, cartSessionId);
+        }
 
         if (!cartItems || cartItems.length === 0) {
-          console.log("[CHECKOUT] ERRO: Carrinho vazio!");
           throw new TRPCError({ code: "BAD_REQUEST", message: "Carrinho vazio" });
         }
 
@@ -653,16 +810,14 @@ export const appRouter = router({
           (sum: number, item: any) => sum + (parseFloat(item.priceAtCart) * item.quantity),
           0
         );
-        console.log("[CHECKOUT] totalPrice calculado:", totalPrice);
 
         // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        console.log("[CHECKOUT] orderNumber:", orderNumber);
 
-        // 4. Montar payload do createOrderFromCart
+        // 4. Montar payload
         const orderPayload = {
-          userId: ctx.user.id,
-          clientId: ctx.user.id,
+          userId: userId ?? 0, // 0 = pedido de visitante
+          clientId: userId ?? 0,
           orderNumber,
           totalPrice,
           notes: input.notes,
@@ -685,39 +840,42 @@ export const appRouter = router({
             notes: item.notes ?? undefined,
           })),
         };
-        console.log("[CHECKOUT] orderPayload (sem cartItems):", JSON.stringify({ ...orderPayload, cartItems: `[${orderPayload.cartItems.length} items]` }, null, 2));
-        console.log("[CHECKOUT] orderPayload.cartItems:", JSON.stringify(orderPayload.cartItems, null, 2));
 
         // 5. Criar pedido
-        try {
-          const orderId = await createOrderFromCart(orderPayload);
-          console.log("[CHECKOUT] ✅ Pedido criado com sucesso! orderId:", orderId);
+        const orderId = await createOrderFromCart(orderPayload);
 
-          // 6. Limpar carrinho
-          await clearCart(ctx.user.id);
-          console.log("[CHECKOUT] ✅ Carrinho limpo");
-          console.log("[CHECKOUT] ✅ FLUXO COMPLETO - orderId:", orderId, "orderNumber:", orderNumber);
-          console.log("========== [CHECKOUT] FIM ==========");
-
-          return { orderId, orderNumber };
-        } catch (error: any) {
-          console.error("[CHECKOUT] ❌ ERRO ao criar pedido:");
-          console.error("[CHECKOUT] message:", error.message);
-          console.error("[CHECKOUT] stack:", error.stack);
-          throw error;
+        // 6. Limpar carrinho
+        if (userId) {
+          await clearCart(userId);
+        } else if (resolvedCustomerId) {
+          await clearCart(null, `cust_${resolvedCustomerId}`);
+        } else if (cartSessionId) {
+          await clearCart(null, cartSessionId);
+          // Limpar cookie do carrinho
+          res.clearCookie("cart_session");
         }
+
+        return { orderId, orderNumber };
       }),
 
     getOrderByNumber: publicProcedure
       .input(z.object({ orderNumber: z.string() }))
       .query(async ({ input }) => {
-        const db = (await import("./db")).getDb;
-        const dbInstance = await db();
+        const { getDb } = await import("./db");
+        const dbInstance = await getDb();
         if (!dbInstance) return null;
-        const { orders } = await import("../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const result = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
-        return result[0] ?? null;
+        const { orders, orderItems } = await import("../drizzle/schema");
+        const { eq, sql: drizzleSql } = await import("drizzle-orm");
+        // Fetch order
+        const orderRows = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
+        const order = orderRows[0] ?? null;
+        if (!order) return null;
+        // Fetch items with product image
+        const itemRows = await dbInstance.execute(
+          drizzleSql`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${order.id}`
+        ) as any;
+        const items = (itemRows[0] ?? []) as any[];
+        return { order, items };
       }),
     getMyOrders: protectedProcedure.query(async ({ ctx }) => {
       return await getOrdersByUser(ctx.user.id);

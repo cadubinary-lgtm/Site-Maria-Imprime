@@ -1755,3 +1755,82 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] ProductionDashboard.tsx: kanban com 11 colunas
 - [x] MyOrdersPage.tsx: badges com 11 status
 - [x] App.tsx: rotas /admin/pedidos e /admin/pedidos/:id registradas
+
+## Sistema de Autenticação de Clientes (Resend + email/senha)
+
+- [ ] Instalar dependências: resend, bcryptjs, @types/bcryptjs, nanoid
+- [ ] Configurar RESEND_API_KEY e RESEND_FROM_EMAIL via secrets
+- [ ] Criar tabela customer_accounts no banco (nome, sobrenome, email, telefone, cpfCnpj, passwordHash, emailVerified, emailVerificationToken, resetPasswordToken, resetPasswordExpires, status, lastLogin, loginAttempts, lockedUntil)
+- [ ] Criar helper server/emailService.ts com Resend integrado
+- [ ] Criar templates HTML: boas-vindas, confirmação de email, recuperação de senha, alerta de login suspeito
+- [ ] Criar procedures tRPC: customers.register, customers.login, customers.logout, customers.verifyEmail, customers.requestPasswordReset, customers.resetPassword, customers.me
+- [ ] Criar middleware de sessão de cliente (JWT em cookie httpOnly separado do admin)
+- [ ] Criar páginas: /cadastro, /login-cliente, /verificar-email, /recuperar-senha, /nova-senha
+- [ ] Integrar cliente autenticado com checkout (pré-preencher dados de entrega)
+- [ ] Criar área /minha-conta com pedidos e dados do cliente
+- [ ] Criar painel admin /admin/clientes no ERP
+- [ ] Verificar TypeScript e salvar checkpoint
+
+## Sistema de Autenticação de Clientes — IMPLEMENTAÇÃO ATUAL
+
+- [x] Dependências instaladas: resend, bcryptjs, nanoid
+- [x] Tabelas customer_accounts e customer_sessions criadas no banco
+- [x] Schema Drizzle atualizado com customer_accounts e customer_sessions
+- [x] emailService.ts criado com Resend + 7 templates HTML profissionais
+- [x] customerAuth router criado com procedures: register, login, logout, me, verifyEmail, resendVerification, requestPasswordReset, resetPassword, updateProfile
+- [x] customerAuth router registrado no routers.ts
+- [x] CustomerAuthContext criado (useCustomerAuth hook)
+- [x] CustomerRegister.tsx criado (/cadastro)
+- [x] CustomerLogin.tsx criado (/login-cliente)
+- [x] VerifyEmail.tsx criado (/verificar-email)
+- [x] ForgotPassword.tsx criado (/recuperar-senha)
+- [x] ResetPassword.tsx criado (/nova-senha)
+- [x] ResendVerification.tsx criado (/reenviar-verificacao)
+- [x] Registrar rotas no App.tsx (/cadastro, /login-cliente, /verificar-email, /recuperar-senha, /nova-senha, /reenviar-verificacao)
+- [x] Adicionar CustomerAuthProvider no main.tsx
+- [x] Atualizar Header com links de login/cadastro para clientes
+- [x] Reescrever MyAccountPage.tsx usando CustomerAuthContext
+- [x] Criar página /minha-conta completa com histórico de pedidos
+- [x] Integrar CustomerAuth no checkout (pré-preencher dados via CustomerAuthContext)
+- [x] Criar painel admin /admin/clientes-loja para customer_accounts (AdminCustomers.tsx)
+- [x] Verificar TypeScript final (sem erros) e salvar checkpoint
+
+## Correções Críticas de Autenticação (2026-05-24)
+
+- [x] Atualizar RESEND_API_KEY com nova chave gerada após verificação do domínio
+- [x] Atualizar RESEND_FROM_EMAIL para noreply@mail.graficapontodigital.com.br
+- [x] Atualizar RESEND_FROM_NAME para "Gráfica Ponto Digital"
+- [x] Corrigir interceptador global main.tsx para não redirecionar rotas públicas para OAuth
+- [x] Corrigir interceptador para não redirecionar rotas de cliente (/minha-conta, /meus-pedidos) para OAuth
+- [x] Interceptador redireciona APENAS rotas /admin e /producao para Manus OAuth
+- [x] Adicionar coluna customerId na tabela orders (vincula pedidos a customer auth)
+- [x] Criar procedure customerAuth.getMyOrders (usa customer_session, não Manus OAuth)
+- [x] Criar procedure customerAuth.getOrderDetail (usa customer_session, não Manus OAuth)
+- [x] Atualizar MyAccountPage para usar customerAuth.getMyOrders
+- [x] Atualizar MyOrdersPage para usar customerAuth.getMyOrders e useCustomerAuth
+- [x] Remover import useAuth (Manus OAuth) do MyOrdersPage
+- [x] 18 testes passando (separação auth + Resend)
+- [x] TypeScript sem erros após todas as correções
+- [x] Checkpoint salvo
+
+## Correção Carrinho e Produto para Visitantes (2026-05-24)
+
+- [x] CartPage.tsx: remover bloqueio de login obrigatório, permitir carrinho anônimo
+- [x] ProductDetail.tsx: remover bloqueio de login para adicionar ao carrinho
+- [x] Ambos devem funcionar com cookie cart_session (visitante) ou customer_session (cliente logado)
+- [x] Manter useAuth apenas para admin, usar useCustomerAuth para clientes
+- [x] productSegments.getAllSegments convertido para publicProcedure
+- [x] productSegments.getProductsBySegment convertido para publicProcedure
+- [x] productSegments.getProductSegments convertido para publicProcedure
+- [x] Zero erros 401/502/500 nos logs após correção
+- [x] Carrinho funciona como visitante (testado no browser)
+- [x] Catálogo carrega segmentos e produtos sem login
+- [x] Cadastro de cliente funciona sem redirecionamento para OAuth
+
+## Correção Query Global OAuth (2026-05-24)
+
+- [x] Identificar query global trpc.auth.me ou useAuth disparando redirect OAuth em páginas públicas
+- [x] Isolar query OAuth apenas para rotas /admin e /producao
+- [x] Garantir que visitantes navegam sem redirect automático
+- [x] Testar catálogo, carrinho, cadastro como visitante após correção
+- [x] Salvar checkpoint final
