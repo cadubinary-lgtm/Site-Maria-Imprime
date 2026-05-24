@@ -346,12 +346,15 @@ export const appRouter = router({
         });
         return result;
       }),
-    updateStatus: productionProcedure
+    updateStatus: protectedProcedure
       .input(z.object({
         orderId: z.number(),
         newStatus: z.enum(["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "production") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Sem permissão" });
+        }
         const result = await updateOrderStatus(input.orderId, input.newStatus);
         return result;
       }),
@@ -705,26 +708,43 @@ export const appRouter = router({
         }
       }),
 
+    getOrderByNumber: publicProcedure
+      .input(z.object({ orderNumber: z.string() }))
+      .query(async ({ input }) => {
+        const db = (await import("./db")).getDb;
+        const dbInstance = await db();
+        if (!dbInstance) return null;
+        const { orders } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const result = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
+        return result[0] ?? null;
+      }),
     getMyOrders: protectedProcedure.query(async ({ ctx }) => {
       return await getOrdersByUser(ctx.user.id);
     }),
 
-    getOrderById: protectedProcedure
+        getOrderById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
+        // Admin pode ver qualquer pedido
+        if (ctx.user.role === "admin") {
+          return await getOrderById(input.id);
+        }
         const result = await getOrderDetailByUser(input.id, ctx.user.id);
         if (!result) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
         }
         return result;
       }),
-
     getOrderHistory: protectedProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ ctx, input }) => {
-        const result = await getOrderDetailByUser(input.orderId, ctx.user.id);
-        if (!result) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        // Admin pode ver histórico de qualquer pedido
+        if (ctx.user.role !== "admin") {
+          const result = await getOrderDetailByUser(input.orderId, ctx.user.id);
+          if (!result) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+          }
         }
         return await getOrderStatusHistory(input.orderId);
       }),
