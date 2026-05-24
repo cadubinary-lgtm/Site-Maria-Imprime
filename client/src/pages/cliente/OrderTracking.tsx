@@ -8,10 +8,10 @@ import { useEffect } from "react";
 
 // ─── Status operacionais (11 etapas) ────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  pedido_recebido:      { label: "Pedido Recebido",      color: "bg-blue-100 text-blue-800",     icon: "📦" },
-  pagamento_aprovado:   { label: "Pagamento Aprovado",   color: "bg-green-100 text-green-800",   icon: "✅" },
-  arte_em_analise:      { label: "Arte em Análise",      color: "bg-yellow-100 text-yellow-800", icon: "🔍" },
-  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-orange-100 text-orange-800", icon: "⏳" },
+  pagamento_aprovado:   { label: "Pagamento em Análise", color: "bg-yellow-100 text-yellow-800", icon: "💳" },
+  pedido_recebido:      { label: "Pedido em Análise",    color: "bg-blue-100 text-blue-800",    icon: "📋" },
+  arte_em_analise:      { label: "Arte em Análise",      color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-amber-100 text-amber-800",   icon: "⏳" },
   em_producao:          { label: "Em Produção",          color: "bg-purple-100 text-purple-800", icon: "⚙️" },
   impressao:            { label: "Impressão",            color: "bg-indigo-100 text-indigo-800", icon: "🖨️" },
   acabamento:           { label: "Acabamento",           color: "bg-pink-100 text-pink-800",     icon: "✨" },
@@ -23,8 +23,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string
 
 // Ordem linear de progresso (excluindo cancelado)
 const PROGRESS_STEPS = [
-  "pedido_recebido",
   "pagamento_aprovado",
+  "pedido_recebido",
   "arte_em_analise",
   "aguardando_aprovacao",
   "em_producao",

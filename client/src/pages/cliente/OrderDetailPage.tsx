@@ -13,19 +13,19 @@ import { toast } from "sonner";
 
 // All 9 status steps in order
 const STATUS_STEPS = [
-  { key: "pedido_recebido",      label: "Pedido\nRecebido",      emoji: "📋" },
-  { key: "aguardando_pagamento", label: "Aguardando\nPagamento", emoji: "💳" },
-  { key: "em_producao",          label: "Em\nProdução",          emoji: "🏭" },
-  { key: "impressao",            label: "Impressão",             emoji: "🖨️" },
-  { key: "acabamento",           label: "Acabamento",            emoji: "✂️" },
-  { key: "pronto",               label: "Pronto",                emoji: "📦" },
-  { key: "enviado",              label: "Enviado",               emoji: "🚚" },
-  { key: "entregue",             label: "Entregue",              emoji: "✅" },
+  { key: "pagamento_aprovado",   label: "Pagamento\nem Análise",  emoji: "💳" },
+  { key: "pedido_recebido",      label: "Pedido\nem Análise",     emoji: "📋" },
+  { key: "em_producao",          label: "Em\nProdução",           emoji: "🏭" },
+  { key: "impressao",            label: "Impressão",              emoji: "🖨️" },
+  { key: "acabamento",           label: "Acabamento",             emoji: "✂️" },
+  { key: "pronto",               label: "Pronto",                 emoji: "📦" },
+  { key: "enviado",              label: "Enviado",                emoji: "🚚" },
+  { key: "entregue",             label: "Entregue",               emoji: "✅" },
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  pedido_recebido:      "Pedido Recebido",
-  aguardando_pagamento: "Aguardando Pagamento",
+  pagamento_aprovado:   "Pagamento em Análise",
+  pedido_recebido:      "Pedido em Análise",
   em_producao:          "Em Produção",
   impressao:            "Impressão",
   acabamento:           "Acabamento",
