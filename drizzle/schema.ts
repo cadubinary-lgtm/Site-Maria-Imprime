@@ -1005,6 +1005,14 @@ export const customerAccounts = mysqlTable("customer_accounts", {
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
   lockedUntil: bigint("lockedUntil", { mode: "number" }),
+  // Endereço de entrega padrão
+  addressZipCode: varchar("addressZipCode", { length: 10 }),
+  addressStreet: varchar("addressStreet", { length: 255 }),
+  addressNumber: varchar("addressNumber", { length: 20 }),
+  addressComplement: varchar("addressComplement", { length: 100 }),
+  addressNeighborhood: varchar("addressNeighborhood", { length: 100 }),
+  addressCity: varchar("addressCity", { length: 100 }),
+  addressState: varchar("addressState", { length: 2 }),
   createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
 });
