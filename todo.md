@@ -1834,3 +1834,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Garantir que visitantes navegam sem redirect automático
 - [x] Testar catálogo, carrinho, cadastro como visitante após correção
 - [x] Salvar checkpoint final
+
+## Fase 30: Correção Crítica — Persistência do Cookie customer_session
+
+- [x] Diagnosticar causa raiz: req.cookies sempre undefined (sem cookie-parser)
+- [x] Criar helper getCookieFromReq() que lê req.headers.cookie diretamente (padrão do sdk.ts)
+- [x] Corrigir customerAuth.ts: me, logout, updateProfile, getMyOrders, getOrderDetail
+- [x] Corrigir routers.ts: cart.getItems, getCount, addItem, updateQuantity, removeItem, clear, checkout.createOrder
+- [x] Corrigir atributos do cookie: sameSite:'none' + secure baseado em x-forwarded-proto (getSessionCookieOptions)
+- [x] Corrigir cart_session: mesmos atributos corretos (sameSite:'none' em vez de 'lax')
+- [x] Confirmar credentials:'include' no cliente tRPC (já estava correto)
+- [x] TypeScript sem erros
+- [x] 34 testes passando (13 novos testes de cookie)

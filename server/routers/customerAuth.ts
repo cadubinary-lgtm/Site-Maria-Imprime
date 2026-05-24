@@ -8,6 +8,8 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
+import { parse as parseCookieHeader } from "cookie";
+import type { Request, Response } from "express";
 import { getDb } from "../db";
 import {
   customerAccounts,
@@ -21,6 +23,7 @@ import {
   sendSuspiciousLoginAlert,
   sendVerificationEmail,
 } from "../emailService";
+import { getSessionCookieOptions } from "../_core/cookies";
 
 const SALT_ROUNDS = 12;
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
@@ -37,6 +40,17 @@ function getClientIp(req: Record<string, unknown>): string {
   if (forwarded) return (Array.isArray(forwarded) ? forwarded[0] : forwarded).split(",")[0].trim();
   const socket = req.socket as { remoteAddress?: string } | undefined;
   return socket?.remoteAddress || "unknown";
+}
+
+/**
+ * Lê o cookie customer_session diretamente do header Cookie da requisição.
+ * Não depende de cookie-parser — usa o mesmo padrão do sdk.ts (Manus OAuth).
+ */
+function getCustomerSessionToken(req: Request): string | undefined {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return undefined;
+  const parsed = parseCookieHeader(cookieHeader);
+  return parsed["customer_session"] || undefined;
 }
 
 async function requireDb() {
@@ -146,7 +160,9 @@ export const customerAuthRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await requireDb();
       const now = Date.now();
-      const ip = getClientIp(ctx.req as unknown as Record<string, unknown>);
+      const req = ctx.req as Request;
+      const res = ctx.res as Response;
+      const ip = getClientIp(req as unknown as Record<string, unknown>);
 
       // Buscar cliente
       const [customer] = await db
@@ -221,7 +237,7 @@ export const customerAuthRouter = router({
       const sessionToken = nanoid(64);
       const expiresAt = now + SESSION_DURATION_MS;
 
-      const reqHeaders = ((ctx.req as unknown as Record<string, unknown>).headers) as Record<string, string | undefined>;
+      const reqHeaders = (req.headers) as Record<string, string | undefined>;
       await db.insert(customerSessions).values({
         customerId: customer.id,
         token: sessionToken,
@@ -242,14 +258,10 @@ export const customerAuthRouter = router({
         })
         .where(eq(customerAccounts.id, customer.id));
 
-      // Definir cookie de sessão
-      const res = ctx.res as { cookie: (name: string, value: string, opts: Record<string, unknown>) => void };
+      // Definir cookie de sessão usando getSessionCookieOptions (sameSite:'none', secure baseado em x-forwarded-proto)
       res.cookie("customer_session", sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        ...getSessionCookieOptions(req),
         maxAge: SESSION_DURATION_MS / 1000,
-        path: "/",
       });
 
       return {
@@ -268,8 +280,9 @@ export const customerAuthRouter = router({
    * Logout de cliente
    */
   logout: publicProcedure.mutation(async ({ ctx }) => {
-    const req = ctx.req as { cookies?: Record<string, string> };
-    const token = req.cookies?.customer_session;
+    const req = ctx.req as Request;
+    const res = ctx.res as Response;
+    const token = getCustomerSessionToken(req);
 
     if (token) {
       const db = await getDb();
@@ -278,8 +291,9 @@ export const customerAuthRouter = router({
       }
     }
 
-    const res = ctx.res as { clearCookie: (name: string, opts: Record<string, unknown>) => void };
-    res.clearCookie("customer_session", { path: "/" });
+    res.clearCookie("customer_session", {
+      ...getSessionCookieOptions(req),
+    });
 
     return { success: true };
   }),
@@ -288,8 +302,8 @@ export const customerAuthRouter = router({
    * Obter cliente autenticado atual
    */
   me: publicProcedure.query(async ({ ctx }) => {
-    const req = ctx.req as { cookies?: Record<string, string> };
-    const token = req.cookies?.customer_session;
+    const req = ctx.req as Request;
+    const token = getCustomerSessionToken(req);
     if (!token) return null;
 
     const db = await getDb();
@@ -600,8 +614,8 @@ export const customerAuthRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
-      const token = req.cookies?.customer_session;
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
       if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Não autenticado." });
 
       const db = await requireDb();
@@ -640,8 +654,8 @@ export const customerAuthRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
-      const token = req.cookies?.customer_session;
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
       if (!token) return [];
 
       const db = await requireDb();
@@ -701,8 +715,8 @@ export const customerAuthRouter = router({
   getOrderDetail: publicProcedure
     .input(z.object({ orderNumber: z.string() }))
     .query(async ({ input, ctx }) => {
-      const req = ctx.req as { cookies?: Record<string, string> };
-      const token = req.cookies?.customer_session;
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
       if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Não autenticado." });
 
       const db = await requireDb();
