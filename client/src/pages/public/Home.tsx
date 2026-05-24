@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAdminAuth } from "@/_core/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Zap, Truck, Palette, Headphones, Star } from "lucide-react";
@@ -130,15 +130,8 @@ function FeaturedProductsSection() {
 }
 
 export default function Home() {
-  const { user, loading, isAuthenticated } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
-      </div>
-    );
-  }
+  // useAdminAuth não bloqueia renderização da página pública
+  const { isAuthenticated } = useAdminAuth();
 
   return (
     <div className="min-h-screen bg-background">

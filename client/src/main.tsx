@@ -41,7 +41,14 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
+
+    // Não logar erros UNAUTHORIZED de auth.me — é comportamento esperado para visitantes
+    const queryKey = event.query.queryKey as string[];
+    const isAuthMeQuery = queryKey?.some?.(k => typeof k === 'string' && k.includes('auth'));
+    const isExpectedUnauth = error instanceof TRPCClientError && error.message === UNAUTHED_ERR_MSG;
+    if (!(isAuthMeQuery && isExpectedUnauth)) {
+      console.error("[API Query Error]", error);
+    }
   }
 });
 
