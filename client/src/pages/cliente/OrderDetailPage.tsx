@@ -13,8 +13,8 @@ import { toast } from "sonner";
 
 // All 9 status steps in order
 const STATUS_STEPS = [
-  { key: "pagamento_aprovado",   label: "Pagamento\nem Análise",  emoji: "💳" },
-  { key: "pedido_recebido",      label: "Pedido\nem Análise",     emoji: "📋" },
+  { key: "pagamento_aprovado",   label: "Pagamento\nAprovado",    emoji: "💳" },
+  { key: "pedido_recebido",      label: "Pedido em\nAndamento",   emoji: "📋" },
   { key: "em_producao",          label: "Em\nProdução",           emoji: "🏭" },
   { key: "impressao",            label: "Impressão",              emoji: "🖨️" },
   { key: "acabamento",           label: "Acabamento",             emoji: "✂️" },
@@ -24,8 +24,8 @@ const STATUS_STEPS = [
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  pagamento_aprovado:   "Pagamento em Análise",
-  pedido_recebido:      "Pedido em Análise",
+  pagamento_aprovado:   "Pagamento Aprovado",
+  pedido_recebido:      "Pedido em Andamento",
   em_producao:          "Em Produção",
   impressao:            "Impressão",
   acabamento:           "Acabamento",
@@ -159,34 +159,37 @@ export default function OrderDetailPage() {
                       </div>
                     </div>
 
-                    {/* Progress bar */}
+                      {/* Progress bar */}
                     <div className="relative mb-8">
                       {/* Background line */}
                       <div className="absolute top-5 left-5 right-5 h-1 bg-gray-200 rounded-full" />
-                      {/* Progress line */}
+                      {/* Progress line (only up to current step) */}
                       <div
                         className="absolute top-5 left-5 h-1 bg-orange-500 rounded-full transition-all duration-700"
-                        style={{ width: `calc(${progressPercent}% - ${progressPercent > 0 ? "0px" : "0px"})`, maxWidth: "calc(100% - 2.5rem)" }}
+                        style={{ width: currentStepIndex >= 0 ? `calc(${(currentStepIndex / (STATUS_STEPS.length - 1)) * 100}% - 0px)` : "0%", maxWidth: "calc(100% - 2.5rem)" }}
                       />
                       {/* Steps */}
                       <div className="relative flex justify-between">
                         {STATUS_STEPS.map((step, i) => {
-                          const isCompleted = i <= currentStepIndex;
+                          const isPast = i < currentStepIndex;
                           const isCurrent = i === currentStepIndex;
+                          const isFuture = i > currentStepIndex;
                           return (
                             <div key={step.key} className="flex flex-col items-center gap-1.5" style={{ width: `${100 / STATUS_STEPS.length}%` }}>
                               <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center text-sm border-2 transition-all z-10 relative ${
-                                  isCompleted
-                                    ? "bg-orange-500 border-orange-500 text-white shadow-md"
-                                    : "bg-white border-gray-200 text-gray-400"
-                                } ${isCurrent ? "ring-4 ring-orange-100 scale-110" : ""}`}
+                                  isCurrent
+                                    ? "bg-orange-500 border-orange-500 text-white shadow-md ring-4 ring-orange-100 scale-110"
+                                    : isPast
+                                    ? "bg-orange-400 border-orange-400 text-white"
+                                    : "bg-gray-100 border-gray-200 text-gray-300"
+                                }`}
                               >
-                                {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-base">{step.emoji}</span>}
+                                {isPast ? <CheckCircle2 className="w-4 h-4" /> : isCurrent ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-base opacity-40">{step.emoji}</span>}
                               </div>
                               <span
                                 className={`text-xs text-center font-medium leading-tight whitespace-pre-line ${
-                                  isCompleted ? "text-orange-600" : "text-gray-400"
+                                  isCurrent ? "text-orange-600 font-bold" : isPast ? "text-orange-400" : "text-gray-300"
                                 }`}
                                 style={{ fontSize: "0.65rem" }}
                               >

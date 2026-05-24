@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
-  pagamento_aprovado: "Pagamento em Análise",
-  pedido_recebido: "Pedido em Análise",
+  pagamento_aprovado: "Pagamento Aprovado",
+  pedido_recebido: "Pedido em Andamento",
   arte_em_analise: "Arte em Análise",
   aguardando_aprovacao: "Aguardando Aprovação",
   em_producao: "Em Produção",
@@ -39,7 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pagamento_aprovado: "bg-yellow-100 text-yellow-700",
+  pagamento_aprovado: "bg-green-100 text-green-700",
   pedido_recebido: "bg-blue-100 text-blue-700",
   arte_em_analise: "bg-orange-100 text-orange-700",
   aguardando_aprovacao: "bg-amber-100 text-amber-700",
