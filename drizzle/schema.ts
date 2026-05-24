@@ -97,7 +97,8 @@ export type InsertProductCategory = typeof productCategories.$inferInsert;
 export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   clientId: int("clientId").notNull(),
-  userId: int("userId"), // Relacionamento com usuário logado
+  userId: int("userId"), // Relacionamento com usuário Manus OAuth (admin)
+  customerId: int("customerId"), // Relacionamento com cliente da loja (customer auth)
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   status: mysqlEnum("status", ["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]).default("pedido_recebido").notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),

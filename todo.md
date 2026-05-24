@@ -1794,3 +1794,21 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Integrar CustomerAuth no checkout (pré-preencher dados via CustomerAuthContext)
 - [x] Criar painel admin /admin/clientes-loja para customer_accounts (AdminCustomers.tsx)
 - [x] Verificar TypeScript final (sem erros) e salvar checkpoint
+
+## Correções Críticas de Autenticação (2026-05-24)
+
+- [x] Atualizar RESEND_API_KEY com nova chave gerada após verificação do domínio
+- [x] Atualizar RESEND_FROM_EMAIL para noreply@mail.graficapontodigital.com.br
+- [x] Atualizar RESEND_FROM_NAME para "Gráfica Ponto Digital"
+- [x] Corrigir interceptador global main.tsx para não redirecionar rotas públicas para OAuth
+- [x] Corrigir interceptador para não redirecionar rotas de cliente (/minha-conta, /meus-pedidos) para OAuth
+- [x] Interceptador redireciona APENAS rotas /admin e /producao para Manus OAuth
+- [x] Adicionar coluna customerId na tabela orders (vincula pedidos a customer auth)
+- [x] Criar procedure customerAuth.getMyOrders (usa customer_session, não Manus OAuth)
+- [x] Criar procedure customerAuth.getOrderDetail (usa customer_session, não Manus OAuth)
+- [x] Atualizar MyAccountPage para usar customerAuth.getMyOrders
+- [x] Atualizar MyOrdersPage para usar customerAuth.getMyOrders e useCustomerAuth
+- [x] Remover import useAuth (Manus OAuth) do MyOrdersPage
+- [x] 18 testes passando (separação auth + Resend)
+- [x] TypeScript sem erros após todas as correções
+- [x] Checkpoint salvo
