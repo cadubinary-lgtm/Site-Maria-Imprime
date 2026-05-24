@@ -711,13 +711,21 @@ export const appRouter = router({
     getOrderByNumber: publicProcedure
       .input(z.object({ orderNumber: z.string() }))
       .query(async ({ input }) => {
-        const db = (await import("./db")).getDb;
-        const dbInstance = await db();
+        const { getDb } = await import("./db");
+        const dbInstance = await getDb();
         if (!dbInstance) return null;
-        const { orders } = await import("../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const result = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
-        return result[0] ?? null;
+        const { orders, orderItems } = await import("../drizzle/schema");
+        const { eq, sql: drizzleSql } = await import("drizzle-orm");
+        // Fetch order
+        const orderRows = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
+        const order = orderRows[0] ?? null;
+        if (!order) return null;
+        // Fetch items with product image
+        const itemRows = await dbInstance.execute(
+          drizzleSql`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${order.id}`
+        ) as any;
+        const items = (itemRows[0] ?? []) as any[];
+        return { order, items };
       }),
     getMyOrders: protectedProcedure.query(async ({ ctx }) => {
       return await getOrdersByUser(ctx.user.id);

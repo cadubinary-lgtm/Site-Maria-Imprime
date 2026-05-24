@@ -27,10 +27,12 @@ export default function OrderConfirmation() {
   const [, params] = useRoute("/confirmacao/:orderNumber");
   const orderNumber = params?.orderNumber ?? "";
 
-  const { data: order, isLoading } = trpc.checkout.getOrderByNumber.useQuery(
+  const { data: orderData, isLoading } = trpc.checkout.getOrderByNumber.useQuery(
     { orderNumber },
     { enabled: !!orderNumber, refetchInterval: 10000 }
   );
+
+  const order = (orderData as any)?.order ?? orderData as any;
 
   if (isLoading) {
     return (
@@ -40,7 +42,7 @@ export default function OrderConfirmation() {
     );
   }
 
-  if (!order) {
+  if (!order || !order.status) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
         <p className="text-gray-600">Pedido não encontrado</p>
