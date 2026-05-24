@@ -1812,3 +1812,17 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] 18 testes passando (separação auth + Resend)
 - [x] TypeScript sem erros após todas as correções
 - [x] Checkpoint salvo
+
+## Correção Carrinho e Produto para Visitantes (2026-05-24)
+
+- [x] CartPage.tsx: remover bloqueio de login obrigatório, permitir carrinho anônimo
+- [x] ProductDetail.tsx: remover bloqueio de login para adicionar ao carrinho
+- [x] Ambos devem funcionar com cookie cart_session (visitante) ou customer_session (cliente logado)
+- [x] Manter useAuth apenas para admin, usar useCustomerAuth para clientes
+- [x] productSegments.getAllSegments convertido para publicProcedure
+- [x] productSegments.getProductsBySegment convertido para publicProcedure
+- [x] productSegments.getProductSegments convertido para publicProcedure
+- [x] Zero erros 401/502/500 nos logs após correção
+- [x] Carrinho funciona como visitante (testado no browser)
+- [x] Catálogo carrega segmentos e produtos sem login
+- [x] Cadastro de cliente funciona sem redirecionamento para OAuth
