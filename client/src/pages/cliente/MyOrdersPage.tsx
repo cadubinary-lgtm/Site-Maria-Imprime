@@ -231,7 +231,7 @@ export default function MyOrdersPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/pedido/${order.id}`)}
+                        onClick={() => setLocation(`/pedido/${order.orderNumber}`)}
                         className="text-gray-700"
                       >
                         <Eye className="h-4 w-4 mr-1" />
