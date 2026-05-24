@@ -14,10 +14,10 @@ import {
 import { toast } from "sonner";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pedido_recebido:      { label: "Pedido Recebido",      color: "bg-blue-100 text-blue-700" },
-  pagamento_aprovado:   { label: "Pagamento Aprovado",   color: "bg-green-100 text-green-700" },
-  arte_em_analise:      { label: "Arte em Análise",      color: "bg-yellow-100 text-yellow-700" },
-  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-orange-100 text-orange-700" },
+  pagamento_aprovado:   { label: "Pagamento em Análise", color: "bg-yellow-100 text-yellow-700" },
+  pedido_recebido:      { label: "Pedido em Análise",    color: "bg-blue-100 text-blue-700" },
+  arte_em_analise:      { label: "Arte em Análise",      color: "bg-orange-100 text-orange-700" },
+  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-amber-100 text-amber-700" },
   em_producao:          { label: "Em Produção",          color: "bg-purple-100 text-purple-700" },
   impressao:            { label: "Impressão",            color: "bg-indigo-100 text-indigo-700" },
   acabamento:           { label: "Acabamento",           color: "bg-pink-100 text-pink-700" },
