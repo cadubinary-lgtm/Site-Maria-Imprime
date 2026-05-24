@@ -38,6 +38,8 @@ import AutomationDashboard from "./pages/AutomationDashboard";
 import ERPDashboard from "./pages/ERPDashboard";
 import OrdersManager from "./pages/OrdersManager";
 import OrderDetail from "./pages/OrderDetail";
+import AdminOrders from "./pages/AdminOrders";
+import AdminOrderDetail from "./pages/AdminOrderDetail";
 import { useAuth } from "./_core/hooks/useAuth";
 import Header from "./components/Header";
 
@@ -99,6 +101,8 @@ function Router() {
         <Route path="/admin/erp" component={ERPDashboard} />
         <Route path="/admin/erp/pedidos" component={OrdersManager} />
         <Route path="/admin/erp/pedidos/:id" component={OrderDetail} />
+        <Route path="/admin/pedidos" component={AdminOrders} />
+        <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
         <Route path="/admin/atributos" component={AdminAttributesManager} />
         <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
         <Route path="/admin/regras" component={AdminPricingRules} />
