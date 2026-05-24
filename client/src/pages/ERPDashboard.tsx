@@ -193,27 +193,6 @@ export default function ERPDashboard() {
             </Card>
           </Link>
 
-          {/* Pedidos */}
-          <Link href="/admin/erp/pedidos">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-indigo-600" />
-                  Pedidos
-                </CardTitle>
-                <CardDescription>Gestão operacional de pedidos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  Acompanhe, filtre e gerencie pedidos, alterações de status e produção.
-                </p>
-                <Button variant="ghost" size="sm" className="w-full justify-between">
-                  Acessar <ArrowRight className="w-4 h-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </Link>
-
           {/* Produtos */}
           <Link href="/admin/produtos">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">

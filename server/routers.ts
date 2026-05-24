@@ -785,32 +785,6 @@ export const appRouter = router({
         }
         return filtered;
       }),
-
-    getAllOrders: adminProcedure.query(async () => {
-      return await getAllOrders();
-    }),
-
-    updateOrderStatus: adminProcedure
-      .input(z.object({
-        orderId: z.number(),
-        newStatus: z.enum([
-          "pedido_recebido",
-          "pagamento_aprovado",
-          "arte_em_analise",
-          "aguardando_aprovacao",
-          "em_producao",
-          "impressao",
-          "acabamento",
-          "pronto",
-          "enviado",
-          "entregue",
-          "cancelado",
-        ]),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        await updateOrderStatus(input.orderId, input.newStatus);
-        return { success: true };
-      }),
   }),
 });
 export type AppRouter = typeof appRouter;
