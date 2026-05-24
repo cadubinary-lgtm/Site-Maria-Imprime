@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./_core/hooks/useAuth";
@@ -56,7 +56,12 @@ import FinancialDashboard from "./pages/erp/FinancialDashboard";
 import AutomationDashboard from "./pages/erp/AutomationDashboard";
 import SegmentsManager from "./pages/erp/SegmentsManager";
 
-function Router() {
+/**
+ * AdminRoutes — só renderiza quando a rota começa com /admin ou /producao.
+ * useAuth() (Manus OAuth) é chamado APENAS aqui, nunca globalmente.
+ * Isso evita que trpc.auth.me.useQuery() execute em páginas públicas.
+ */
+function AdminRoutes() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -65,6 +70,57 @@ function Router() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  return (
+    <Switch>
+      {user?.role === "admin" && (
+        <>
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/produtos" component={AdminProducts} />
+          <Route path="/admin/precos" component={AdminPanel} />
+          <Route path="/admin/atributos" component={AdminAttributesManager} />
+          <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
+          <Route path="/admin/regras" component={AdminPricingRules} />
+          <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
+          <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
+          <Route path="/admin/pedidos" component={AdminOrders} />
+          <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
+          <Route path="/admin/clientes" component={ClientsManager} />
+          <Route path="/admin/clientes-loja" component={AdminCustomers} />
+          <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
+          <Route path="/admin/erp" component={ERPDashboard} />
+          <Route path="/admin/financeiro" component={FinancialDashboard} />
+          <Route path="/admin/automacao" component={AutomationDashboard} />
+          <Route path="/admin/segmentos" component={SegmentsManager} />
+        </>
+      )}
+      {user?.role === "production" && (
+        <Route path="/producao" component={ProductionDashboard} />
+      )}
+      {/* Se não autenticado ou sem role, redireciona para login */}
+      {!loading && !user && (
+        <Route>
+          {() => {
+            window.location.href = "/login";
+            return null;
+          }}
+        </Route>
+      )}
+    </Switch>
+  );
+}
+
+/**
+ * Router — rotas públicas e de cliente.
+ * NÃO usa useAuth() aqui para não disparar trpc.auth.me em páginas públicas.
+ */
+function Router() {
+  const [location] = useLocation();
+
+  // Rotas admin e produção são tratadas pelo AdminRoutes
+  if (location.startsWith("/admin") || location.startsWith("/producao")) {
+    return <AdminRoutes />;
   }
 
   return (
@@ -96,37 +152,6 @@ function Router() {
       <Route path="/pedido/:id" component={OrderDetailPage} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/rastreamento/:id" component={OrderTracking} />
-
-      {/* ── Rotas Admin (role: admin) ───────────────────────────────────── */}
-      {user?.role === "admin" && (
-        <>
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/produtos" component={AdminProducts} />
-          <Route path="/admin/precos" component={AdminPanel} />
-          <Route path="/admin/atributos" component={AdminAttributesManager} />
-          <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
-          <Route path="/admin/regras" component={AdminPricingRules} />
-          <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
-          <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
-          <Route path="/admin/pedidos" component={AdminOrders} />
-          <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
-          <Route path="/admin/clientes" component={ClientsManager} />
-          <Route path="/admin/clientes-loja" component={AdminCustomers} />
-          <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
-          {/* ── Rotas ERP ─────────────────────────────────────────────── */}
-          <Route path="/admin/erp" component={ERPDashboard} />
-          <Route path="/admin/financeiro" component={FinancialDashboard} />
-          <Route path="/admin/automacao" component={AutomationDashboard} />
-          <Route path="/admin/segmentos" component={SegmentsManager} />
-        </>
-      )}
-
-      {/* ── Rotas de Produção (role: production) ───────────────────────── */}
-      {user?.role === "production" && (
-        <>
-          <Route path="/producao" component={ProductionDashboard} />
-        </>
-      )}
 
       {/* ── 404 ────────────────────────────────────────────────────────── */}
       <Route path="/404" component={NotFound} />

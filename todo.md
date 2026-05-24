@@ -1826,3 +1826,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Carrinho funciona como visitante (testado no browser)
 - [x] Catálogo carrega segmentos e produtos sem login
 - [x] Cadastro de cliente funciona sem redirecionamento para OAuth
+
+## Correção Query Global OAuth (2026-05-24)
+
+- [x] Identificar query global trpc.auth.me ou useAuth disparando redirect OAuth em páginas públicas
+- [x] Isolar query OAuth apenas para rotas /admin e /producao
+- [x] Garantir que visitantes navegam sem redirect automático
+- [x] Testar catálogo, carrinho, cadastro como visitante após correção
+- [x] Salvar checkpoint final
