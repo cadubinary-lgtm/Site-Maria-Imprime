@@ -22,7 +22,7 @@ export default function CustomerLogin() {
   const login = trpc.customerAuth.login.useMutation({
     onSuccess: () => {
       refetch();
-      navigate("/minha-conta");
+      navigate("/");
     },
     onError: (err) => {
       if (err.message.includes(EMAIL_NOT_VERIFIED_MSG)) {
