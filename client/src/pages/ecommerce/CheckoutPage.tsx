@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,26 @@ export default function CheckoutPage() {
   const [cardInstallments, setCardInstallments] = useState("1");
 
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
+  const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
+
+  // Pré-preencher com dados do perfil do cliente quando carregarem
+  useEffect(() => {
+    if (!customerProfile) return;
+    const { firstName, lastName, phone: cPhone, addressZipCode, addressStreet, addressNumber, addressComplement, addressNeighborhood, addressCity, addressState } = customerProfile;
+    if (firstName || lastName) setFullName(`${firstName ?? ""} ${lastName ?? ""}`.trim());
+    if (cPhone) setPhone(cPhone);
+    if (addressZipCode) {
+      const z = addressZipCode.replace(/\D/g, "");
+      setZipCode(z.length === 8 ? `${z.slice(0, 5)}-${z.slice(5)}` : z);
+    }
+    if (addressStreet) setStreet(addressStreet);
+    if (addressNumber) setNumber(addressNumber);
+    if (addressComplement) setComplement(addressComplement);
+    if (addressNeighborhood) setNeighborhood(addressNeighborhood);
+    if (addressCity) setCity(addressCity);
+    if (addressState) setStateUF(addressState);
+  }, [customerProfile]);
 
   const subtotal = cartItems?.reduce(
     (sum: number, item: any) => sum + parseFloat(item.priceAtCart) * item.quantity,
@@ -324,6 +343,12 @@ export default function CheckoutPage() {
                 {/* ETAPA 2: Endereço */}
                 {step === "endereco" && (
                   <>
+                    {customerProfile?.addressZipCode && (
+                      <div className="flex items-start gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-800">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-green-600" />
+                        <span>Endereço preenchido automaticamente com os dados do seu cadastro. Você pode editar se necessário.</span>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="zipCode">CEP *</Label>
                       <Input id="zipCode" placeholder="00000-000" value={zipCode} onChange={(e) => setZipCode(e.target.value)} onBlur={handleCepBlur} maxLength={9} />

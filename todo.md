@@ -1856,3 +1856,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Garantir rota acessível no App.tsx
 - [x] Adicionar link "Meus Pedidos" no header para clientes logados
 - [x] Testar fluxo completo: compra → visualização de pedidos → status
+
+## Fase 32: Endereço de Entrega no Perfil do Cliente
+
+- [x] Adicionar colunas de endereço na tabela customerAccounts (zipCode, street, number, complement, neighborhood, city, state)
+- [x] Migrar banco de dados com as novas colunas
+- [x] Criar procedure customerAuth.saveAddress para salvar endereço
+- [x] Criar procedure customerAuth.getProfile para retornar dados completos do cliente incluindo endereço
+- [x] Adicionar campos de endereço no formulário de cadastro com busca de CEP automática (ViaCEP)
+- [x] Pré-preencher checkout com endereço salvo do cliente automaticamente
+- [x] Validar fluxo: cadastrar endereço → finalizar pedido com dados pré-preenchidos

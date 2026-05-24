@@ -78,6 +78,14 @@ export const customerAuthRouter = router({
           .min(8, "Senha deve ter ao menos 8 caracteres")
           .regex(/[A-Z]/, "Senha deve conter ao menos uma letra maiúscula")
           .regex(/[0-9]/, "Senha deve conter ao menos um número"),
+        // Endereço de entrega (opcional no cadastro)
+        addressZipCode: z.string().optional(),
+        addressStreet: z.string().optional(),
+        addressNumber: z.string().optional(),
+        addressComplement: z.string().optional(),
+        addressNeighborhood: z.string().optional(),
+        addressCity: z.string().optional(),
+        addressState: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -134,6 +142,14 @@ export const customerAuthRouter = router({
         emailVerificationExpires,
         status: "inactive",
         loginAttempts: 0,
+        // Endereço de entrega (opcional)
+        addressZipCode: input.addressZipCode?.replace(/\D/g, "") || null,
+        addressStreet: input.addressStreet?.trim() || null,
+        addressNumber: input.addressNumber?.trim() || null,
+        addressComplement: input.addressComplement?.trim() || null,
+        addressNeighborhood: input.addressNeighborhood?.trim() || null,
+        addressCity: input.addressCity?.trim() || null,
+        addressState: input.addressState?.toUpperCase() || null,
         createdAt: now,
         updatedAt: now,
       });
@@ -635,6 +651,97 @@ export const customerAuthRouter = router({
           ...(input.firstName && { firstName: input.firstName }),
           ...(input.lastName && { lastName: input.lastName }),
           ...(input.phone !== undefined && { phone: input.phone }),
+          updatedAt: now,
+        })
+        .where(eq(customerAccounts.id, session.customerId));
+
+      return { success: true };
+    }),
+
+  /**
+   * Buscar perfil completo do cliente autenticado (inclui endereço)
+   */
+  getProfile: publicProcedure
+    .query(async ({ ctx }) => {
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
+      if (!token) return null;
+
+      const db = await requireDb();
+      const now = Date.now();
+
+      const [session] = await db
+        .select()
+        .from(customerSessions)
+        .where(and(eq(customerSessions.token, token), gt(customerSessions.expiresAt, now)))
+        .limit(1);
+
+      if (!session) return null;
+
+      const [customer] = await db
+        .select({
+          id: customerAccounts.id,
+          firstName: customerAccounts.firstName,
+          lastName: customerAccounts.lastName,
+          email: customerAccounts.email,
+          phone: customerAccounts.phone,
+          cpfCnpj: customerAccounts.cpfCnpj,
+          addressZipCode: customerAccounts.addressZipCode,
+          addressStreet: customerAccounts.addressStreet,
+          addressNumber: customerAccounts.addressNumber,
+          addressComplement: customerAccounts.addressComplement,
+          addressNeighborhood: customerAccounts.addressNeighborhood,
+          addressCity: customerAccounts.addressCity,
+          addressState: customerAccounts.addressState,
+        })
+        .from(customerAccounts)
+        .where(eq(customerAccounts.id, session.customerId))
+        .limit(1);
+
+      return customer ?? null;
+    }),
+
+  /**
+   * Salvar endereço de entrega padrão do cliente autenticado
+   */
+  saveAddress: publicProcedure
+    .input(
+      z.object({
+        addressZipCode: z.string().min(8, "CEP inválido"),
+        addressStreet: z.string().min(2, "Rua obrigatória"),
+        addressNumber: z.string().min(1, "Número obrigatório"),
+        addressComplement: z.string().optional(),
+        addressNeighborhood: z.string().min(2, "Bairro obrigatório"),
+        addressCity: z.string().min(2, "Cidade obrigatória"),
+        addressState: z.string().length(2, "UF deve ter 2 letras"),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const req = ctx.req as Request;
+      const token = getCustomerSessionToken(req);
+      if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Não autenticado." });
+
+      const db = await requireDb();
+      const now = Date.now();
+
+      const [session] = await db
+        .select()
+        .from(customerSessions)
+        .where(and(eq(customerSessions.token, token), gt(customerSessions.expiresAt, now)))
+        .limit(1);
+
+      if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada." });
+
+      await db
+        .update(customerAccounts)
+        .set({
+          addressZipCode: input.addressZipCode.replace(/\D/g, ""),
+          addressStreet: input.addressStreet.trim(),
+          addressNumber: input.addressNumber.trim(),
+          addressComplement: input.addressComplement?.trim() || null,
+          addressNeighborhood: input.addressNeighborhood.trim(),
+          addressCity: input.addressCity.trim(),
+          addressState: input.addressState.toUpperCase(),
           updatedAt: now,
         })
         .where(eq(customerAccounts.id, session.customerId));
