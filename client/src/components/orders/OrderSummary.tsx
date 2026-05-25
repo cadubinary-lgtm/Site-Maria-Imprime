@@ -10,7 +10,7 @@ import React from "react";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input"; // usado no campo de quantidade
+import { Input } from "@/components/ui/input";
 
 interface SelectedAttribute {
   name: string;
@@ -21,6 +21,7 @@ interface SelectedAttribute {
 interface OrderSummaryProps {
   productName: string;
   productImage?: string;
+  /** Preço já calculado pelo ProductConfigurator (total para m², unitário para unidade) */
   basePrice: number;
   selectedAttributes: SelectedAttribute[];
   quantity: number;
@@ -34,6 +35,8 @@ interface OrderSummaryProps {
   onNotesChange?: (notes: string) => void;
   deliveryOption?: any;
   deliveryTax?: number;
+  /** Indica explicitamente se é produto cobrado por m² */
+  isAreaProduct?: boolean;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -52,15 +55,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   onNotesChange,
   deliveryOption,
   deliveryTax = 0,
+  isAreaProduct: isAreaProductProp,
 }) => {
-  // NOTA: basePrice já vem calculado pelo ProductConfigurator (inclui área m², modificadores e quantidade).
-  // Para produtos m²: basePrice = preço_total_calculado (não multiplicar por quantity novamente)
-  // Para produtos por unidade: basePrice = preço_unitário (multiplicar por quantity)
-  // calculatorValue > 0 indica produto m² (já calculado)
-  const isAreaProduct = calculatorValue !== undefined && calculatorValue > 0;
-  const unitPrice = basePrice;
-  // Para produto m²: basePrice já é o total calculado pelo ProductConfigurator
-  // Para produto por unidade: multiplicar por quantity
+  /**
+   * Regras de cálculo:
+   * - Produto m² (isAreaProduct=true): basePrice já é o total calculado pelo ProductConfigurator
+   *   (inclui área × pricePerM2 × modificadores). NÃO multiplicar por quantity.
+   * - Produto por unidade (isAreaProduct=false): basePrice é o preço unitário.
+   *   Multiplicar por quantity para obter o total.
+   */
+  const isAreaProduct = isAreaProductProp === true || (calculatorValue !== undefined && calculatorValue > 0);
   const finalPrice = isAreaProduct ? basePrice : basePrice * quantity;
 
   return (
@@ -105,14 +109,22 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         {/* Preços */}
         <div className="space-y-2 pb-3 border-b">
           {isAreaProduct ? (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Área</span>
-              <span className="font-semibold">{(calculatorValue! / 10000).toFixed(2)} m²</span>
-            </div>
+            <>
+              {calculatorValue && calculatorValue > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Área</span>
+                  <span className="font-semibold">{(calculatorValue / 10000).toFixed(2)} m²</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Valor calculado</span>
+                <span className="font-semibold">R$ {basePrice.toFixed(2)}</span>
+              </div>
+            </>
           ) : (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Preço Unitário</span>
-              <span className="font-semibold">R$ {unitPrice.toFixed(2)}</span>
+              <span className="font-semibold">R$ {basePrice.toFixed(2)}</span>
             </div>
           )}
         </div>
@@ -189,7 +201,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
           {!isAreaProduct && (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal ({quantity}x)</span>
-              <span className="font-medium">R$ {(unitPrice * quantity).toFixed(2)}</span>
+              <span className="font-medium">R$ {(basePrice * quantity).toFixed(2)}</span>
             </div>
           )}
           {deliveryTax > 0 && (

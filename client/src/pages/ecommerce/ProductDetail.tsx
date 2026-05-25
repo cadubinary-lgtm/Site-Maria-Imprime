@@ -643,6 +643,7 @@ export default function ProductDetail() {
             deliveryTax={deliveryTax}
             calculatorValue={calculatorArea}
             onCalculatorChange={setCalculatorArea}
+            isAreaProduct={product.calculationType === 'm2'}
           />
         </div>
       </div>

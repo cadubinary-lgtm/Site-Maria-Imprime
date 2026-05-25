@@ -262,7 +262,7 @@ export function ProductConfigurator({
 
   // Chamar onPriceUpdate quando calculatedPrice muda (sem dependência circular)
   useEffect(() => {
-    if (onPriceUpdate && calculatedPrice > 0) {
+    if (onPriceUpdate) {
       // Calcular taxa de prazo
       let deliveryTax = 0;
       if (selectedDeliveryOption && deliveryOptions.length > 0) {
@@ -310,7 +310,8 @@ export function ProductConfigurator({
     );
   }
 
-  if (error || attributes.length === 0) {
+  // Para produtos m², renderizar mesmo sem atributos (os campos de dimensão são o essencial)
+  if ((error || attributes.length === 0) && calculationType !== 'm2') {
     return (
       <Card>
         <CardContent className="pt-6">
