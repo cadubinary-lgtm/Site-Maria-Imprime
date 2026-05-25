@@ -350,7 +350,7 @@ export default function AdminPanel() {
                 Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Novo Produto</DialogTitle>
                 <DialogDescription>Preencha os dados do novo produto para adicioná-lo ao catálogo.</DialogDescription>
