@@ -41,6 +41,7 @@ export default function ProductDetail() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [configuradorRequiredCount, setConfiguradorRequiredCount] = useState(0);
   const [configuradorSelectedCount, setConfiguradorSelectedCount] = useState(0);
+  const [calculatorArea, setCalculatorArea] = useState(0);
 
   // Carregar produto
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -478,6 +479,11 @@ export default function ProductDetail() {
               onPriceUpdate={(price, config) => {
                 // Atualizar preço e atributos no resumo
                 setTotalPrice(price);
+                // Calcular área se for m² (dimensions em cm, área em cm²)
+                if (product.calculationType === 'm2' && config.dimensions) {
+                  const area = (config.dimensions.width * 100) * (config.dimensions.height * 100);
+                  setCalculatorArea(area);
+                }
                 // Construir array de atributos selecionados para o OrderSummary
                 const attrs: any[] = [];
                 Object.entries(config.selectedVariations || {}).forEach(([attrId, valueId]) => {
@@ -635,6 +641,8 @@ export default function ProductDetail() {
             isLoading={isProcessing}
             deliveryOption={selectedDeliveryOption}
             deliveryTax={deliveryTax}
+            calculatorValue={calculatorArea}
+            onCalculatorChange={setCalculatorArea}
           />
         </div>
       </div>
