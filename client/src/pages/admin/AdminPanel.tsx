@@ -70,11 +70,12 @@ export default function AdminPanel() {
     minHeight: '',
     maxHeight: '',
   });
-  const [deliveryOptions, setDeliveryOptions] = useState([
-    { name: 'Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true },
-    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, isActive: false },
-    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, isActive: false },
-  ]);
+  const DEFAULT_DELIVERY_OPTIONS = [
+    { name: 'Prazo Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true },
+    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, isActive: true },
+    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, isActive: true },
+  ];
+  const [deliveryOptions, setDeliveryOptions] = useState(DEFAULT_DELIVERY_OPTIONS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,9 +128,32 @@ export default function AdminPanel() {
     },
   });
 
+  // Create delivery option mutation (usado após criar produto)
+  const createDeliveryOptionMutation = trpc.deliveryOptions.create.useMutation();
+
   // Create product mutation
   const createProductMutation = trpc.admin.createProduct.useMutation({
-    onSuccess: () => {
+    onSuccess: async (newProduct: any) => {
+      // Salvar os prazos de produção ativos para o novo produto
+      const activeOptions = deliveryOptions.filter(opt => opt.isActive);
+      if (activeOptions.length > 0 && newProduct?.id) {
+        try {
+          await Promise.all(
+            activeOptions.map((opt, idx) =>
+              createDeliveryOptionMutation.mutateAsync({
+                productId: newProduct.id,
+                name: opt.name,
+                daysToDeliver: opt.daysToDeliver,
+                pricePerM2: opt.pricePerM2,
+                isActive: true,
+                order: idx,
+              })
+            )
+          );
+        } catch (e) {
+          console.error('Erro ao criar prazos:', e);
+        }
+      }
       showNotification('success', 'Produto criado com sucesso!');
       setIsCreatingProduct(false);
       setNewProductForm({
@@ -145,6 +169,7 @@ export default function AdminPanel() {
         minHeight: '',
         maxHeight: '',
       });
+      setDeliveryOptions(DEFAULT_DELIVERY_OPTIONS);
       refetch();
     },
     onError: (error) => {
@@ -427,52 +452,89 @@ export default function AdminPanel() {
                     </div>
                   </>
                 )}
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-blue-900 bg-blue-50 p-2 rounded">Prazos de Produção</label>
+                <div className="border rounded-lg p-3 bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-bold text-gray-800">Prazos de Produção</label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs border-red-400 text-red-600 hover:bg-red-50"
+                      onClick={() => setDeliveryOptions(prev => [
+                        ...prev,
+                        { name: 'Novo Prazo', daysToDeliver: 3, pricePerM2: 0, isActive: true }
+                      ])}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Novo Prazo
+                    </Button>
+                  </div>
                   <div className="space-y-2">
                     {deliveryOptions.map((option, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded border">
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border">
                         <input
                           type="checkbox"
                           checked={option.isActive}
                           onChange={(e) => {
                             const updated = [...deliveryOptions];
-                            updated[idx].isActive = e.target.checked;
+                            updated[idx] = { ...updated[idx], isActive: e.target.checked };
                             setDeliveryOptions(updated);
                           }}
-                          className="w-4 h-4"
+                          className="w-4 h-4 flex-shrink-0"
                         />
-                        <span className="font-medium text-sm flex-1">{option.name}</span>
-                        {option.isActive && (
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              value={option.daysToDeliver}
-                              onChange={(e) => {
-                                const updated = [...deliveryOptions];
-                                updated[idx].daysToDeliver = parseInt(e.target.value) || 0;
-                                setDeliveryOptions(updated);
-                              }}
-                              className="w-16 h-8 text-xs"
-                              placeholder="dias"
-                            />
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={option.pricePerM2}
-                              onChange={(e) => {
-                                const updated = [...deliveryOptions];
-                                updated[idx].pricePerM2 = parseFloat(e.target.value) || 0;
-                                setDeliveryOptions(updated);
-                              }}
-                              className="w-20 h-8 text-xs"
-                              placeholder="R$/m²"
-                            />
-                          </div>
-                        )}
+                        <Input
+                          value={option.name}
+                          onChange={(e) => {
+                            const updated = [...deliveryOptions];
+                            updated[idx] = { ...updated[idx], name: e.target.value };
+                            setDeliveryOptions(updated);
+                          }}
+                          className="h-7 text-xs flex-1 min-w-0"
+                          placeholder="Nome do prazo"
+                        />
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Input
+                            type="number"
+                            value={option.daysToDeliver}
+                            onChange={(e) => {
+                              const updated = [...deliveryOptions];
+                              updated[idx] = { ...updated[idx], daysToDeliver: parseInt(e.target.value) || 0 };
+                              setDeliveryOptions(updated);
+                            }}
+                            className="w-14 h-7 text-xs"
+                            placeholder="dias"
+                            title="Dias úteis"
+                          />
+                          <span className="text-xs text-gray-400">d</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={option.pricePerM2}
+                            onChange={(e) => {
+                              const updated = [...deliveryOptions];
+                              updated[idx] = { ...updated[idx], pricePerM2: parseFloat(e.target.value) || 0 };
+                              setDeliveryOptions(updated);
+                            }}
+                            className="w-16 h-7 text-xs"
+                            placeholder="R$/m²"
+                            title="Preço adicional por m²"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setDeliveryOptions(prev => prev.filter((_, i) => i !== idx))}
+                            className="text-red-400 hover:text-red-600 p-0.5"
+                            title="Remover prazo"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
+                    {deliveryOptions.length === 0 && (
+                      <p className="text-xs text-gray-400 text-center py-2">Nenhum prazo adicionado. Clique em "+ Novo Prazo".</p>
+                    )}
                   </div>
+                  <p className="text-xs text-gray-400 mt-2">Dias = dias úteis de produção • R$/m² = taxa adicional por metro quadrado</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>

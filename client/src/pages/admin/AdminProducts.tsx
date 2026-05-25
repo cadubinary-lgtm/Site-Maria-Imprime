@@ -38,8 +38,17 @@ export default function AdminProducts() {
   );
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
   const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
-  const deleteProductMutation = trpc.admin.deleteProduct.useMutation();
-  const deleteMultipleProductsMutation = trpc.admin.deleteMultipleProducts.useMutation();
+  const utils = trpc.useUtils();
+  const deleteProductMutation = trpc.admin.deleteProduct.useMutation({
+    onSuccess: () => {
+      utils.products.getAll.invalidate();
+    },
+  });
+  const deleteMultipleProductsMutation = trpc.admin.deleteMultipleProducts.useMutation({
+    onSuccess: () => {
+      utils.products.getAll.invalidate();
+    },
+  });
 
   // Atualizar segmentos quando carrega produto
   useEffect(() => {
@@ -187,7 +196,6 @@ export default function AdminProducts() {
       await deleteMultipleProductsMutation.mutateAsync({ ids: Array.from(selectedProducts) });
       toast.success(`${selectedProducts.size} produto(s) removido(s) com sucesso!`);
       setSelectedProducts(new Set());
-      refetch();
     } catch (error) {
       toast.error("Erro ao remover produtos");
     }
@@ -197,10 +205,15 @@ export default function AdminProducts() {
     if (!confirm("Tem certeza que deseja remover este produto?")) return;
 
     try {
+      // Optimistic update: remover da lista imediatamente
+      utils.products.getAll.setData(undefined, (old: any) =>
+        old ? old.filter((p: any) => p.id !== id) : old
+      );
       await deleteProductMutation.mutateAsync({ id });
       toast.success("Produto removido com sucesso!");
-      refetch();
     } catch (error) {
+      // Reverter em caso de erro
+      utils.products.getAll.invalidate();
       toast.error("Erro ao remover produto");
     }
   };

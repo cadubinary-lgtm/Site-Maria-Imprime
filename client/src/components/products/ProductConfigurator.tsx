@@ -289,10 +289,14 @@ export function ProductConfigurator({
         deliveryTax,
         requiredCount: requiredAttrs.length,
         selectedCount,
+        dimensions: {
+          width: parseDecimal(dimensions.width as string),
+          height: parseDecimal(dimensions.height as string),
+        },
       };
       onPriceUpdate(calculatedPrice, config);
     }
-  }, [calculatedPrice, selectedValues, attributes]);
+  }, [calculatedPrice, selectedValues, attributes, dimensions, selectedDeliveryOption, deliveryOptions]);
 
   if (isLoading) {
     return (
