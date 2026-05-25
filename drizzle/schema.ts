@@ -1037,3 +1037,21 @@ export const customerSessions = mysqlTable("customer_sessions", {
 });
 export type CustomerSession = typeof customerSessions.$inferSelect;
 export type InsertCustomerSession = typeof customerSessions.$inferInsert;
+
+/**
+ * Order Art Previews — Prévias de arte enviadas pelo admin para o cliente
+ * O admin faz upload de uma imagem de prévia que fica visível na página de acompanhamento
+ */
+export const orderArtPreviews = mysqlTable("orderArtPreviews", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  imageUrl: text("imageUrl").notNull(),   // URL no S3
+  imageKey: varchar("imageKey", { length: 255 }).notNull(), // Chave no S3
+  uploadedBy: int("uploadedBy"),          // ID do admin que fez o upload
+  notes: text("notes"),                   // Observação opcional do admin
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type OrderArtPreview = typeof orderArtPreviews.$inferSelect;
+export type InsertOrderArtPreview = typeof orderArtPreviews.$inferInsert;

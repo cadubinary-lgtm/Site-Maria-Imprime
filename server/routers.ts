@@ -1060,6 +1060,82 @@ export const appRouter = router({
         const result = await updateOrderStatus(input.orderId, input.newStatus, input.notes);
         return result;
       }),
+
+    // ── Arquivos do cliente por pedido ──────────────────────────────────────
+    getOrderFiles: adminProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { orderItems: oi } = await import("../drizzle/schema.js");
+        const { eq, sql: drizzleSql } = await import("drizzle-orm");
+        const rows = await db.select().from(oi).where(eq(oi.orderId, input.orderId));
+        // Retorna apenas itens que possuem arquivo
+        return rows
+          .filter((r: any) => r.artFileUrl)
+          .map((r: any) => ({
+            id: r.id,
+            productName: r.productName ?? "Produto",
+            artFileUrl: r.artFileUrl,
+            quantity: r.quantity,
+          }));
+      }),
+
+    // ── Prévia de arte (admin envia imagem para o cliente ver) ──────────────
+    getArtPreviews: publicProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { orderArtPreviews } = await import("../drizzle/schema.js");
+        const { eq, desc } = await import("drizzle-orm");
+        return db.select().from(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId)).orderBy(desc(orderArtPreviews.createdAt));
+      }),
+
+    getArtPreviewsByToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { orders: ordersTable, orderArtPreviews } = await import("../drizzle/schema.js");
+        const { eq, desc } = await import("drizzle-orm");
+        const orderRows = await db.select().from(ordersTable).where(eq(ordersTable.guestToken, input.token)).limit(1);
+        const order = orderRows[0] ?? null;
+        if (!order) return [];
+        return db.select().from(orderArtPreviews).where(eq(orderArtPreviews.orderId, order.id)).orderBy(desc(orderArtPreviews.createdAt));
+      }),
+
+    saveArtPreview: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        imageUrl: z.string(),
+        imageKey: z.string(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderArtPreviews } = await import("../drizzle/schema.js");
+        await db.insert(orderArtPreviews).values({
+          orderId: input.orderId,
+          imageUrl: input.imageUrl,
+          imageKey: input.imageKey,
+          uploadedBy: ctx.user.id,
+          notes: input.notes ?? null,
+        });
+        return { success: true };
+      }),
+
+    deleteArtPreview: adminProcedure
+      .input(z.object({ previewId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderArtPreviews } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        await db.delete(orderArtPreviews).where(eq(orderArtPreviews.id, input.previewId));
+        return { success: true };
+      }),
     getMyOrdersFiltered: protectedProcedure
       .input(z.object({
         status: z.string().optional(),
