@@ -1896,3 +1896,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir toast "Enviando arquivo de arte..." durante o upload
 - [x] Exibir nome do arquivo no CartItemCard quando artFileUrl estiver preenchido
 - [x] Exibir ícone de link para URLs externas no CartItemCard
+
+## Fase 42: Correções de Calculadora, Delete e Prazos
+- [x] Corrigir ProductConfigurator para passar dimensions no config do onPriceUpdate
+- [x] Simplificar OrderSummary para usar basePrice diretamente (sem recalcular área)
+- [x] Corrigir AdminProducts: optimistic update ao deletar produto (página atualiza imediatamente)
+- [x] Pré-ativar 3 prazos padrão no formulário Novo Produto (Prazo Normal, 24 Horas, Mesmo Dia)
+- [x] Salvar prazos de produção no banco ao criar novo produto
+- [x] Melhorar visual da seção de prazos com botão Novo Prazo e campos editáveis inline

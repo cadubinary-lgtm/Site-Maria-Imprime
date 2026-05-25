@@ -6,11 +6,11 @@
  * calculadora e preço em tempo real
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // usado no campo de quantidade
 
 interface SelectedAttribute {
   name: string;
@@ -53,28 +53,15 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   deliveryOption,
   deliveryTax = 0,
 }) => {
-  // NOTA: basePrice já vem com os modificadores somados pelo ProductConfigurator.
-  // Os selectedAttributes são exibidos apenas para informação — NÃO somamos novamente.
-  const totalModifier = useMemo(() => {
-    return selectedAttributes.reduce((sum, attr) => {
-      return sum + (attr.priceModifier || 0);
-    }, 0);
-  }, [selectedAttributes]);
-
-  // unitPrice = basePrice (que já inclui modificadores do ProductConfigurator)
+  // NOTA: basePrice já vem calculado pelo ProductConfigurator (inclui área m², modificadores e quantidade).
+  // Para produtos m²: basePrice = preço_total_calculado (não multiplicar por quantity novamente)
+  // Para produtos por unidade: basePrice = preço_unitário (multiplicar por quantity)
+  // calculatorValue > 0 indica produto m² (já calculado)
+  const isAreaProduct = calculatorValue !== undefined && calculatorValue > 0;
   const unitPrice = basePrice;
-  const totalPrice = unitPrice * quantity;
-
-  // Calcular preço com área (se aplicável)
-  const priceWithArea = useMemo(() => {
-    if (!calculatorValue || calculatorValue === 0) {
-      return totalPrice;
-    }
-    // Exemplo: preço por m² = unitPrice / 10000 (conversão de cm² para m²)
-    return (unitPrice * calculatorValue) / 10000 * quantity;
-  }, [unitPrice, quantity, calculatorValue]);
-
-  const finalPrice = calculatorValue ? priceWithArea : totalPrice;
+  // Para produto m²: basePrice já é o total calculado pelo ProductConfigurator
+  // Para produto por unidade: multiplicar por quantity
+  const finalPrice = isAreaProduct ? basePrice : basePrice * quantity;
 
   return (
     <Card className="sticky top-4 bg-card shadow-lg">
@@ -117,32 +104,18 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
         {/* Preços */}
         <div className="space-y-2 pb-3 border-b">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Preço Unitário</span>
-            <span className="font-semibold">R$ {unitPrice.toFixed(2)}</span>
-          </div>
+          {isAreaProduct ? (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Área</span>
+              <span className="font-semibold">{(calculatorValue! / 10000).toFixed(2)} m²</span>
+            </div>
+          ) : (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Preço Unitário</span>
+              <span className="font-semibold">R$ {unitPrice.toFixed(2)}</span>
+            </div>
+          )}
         </div>
-
-        {/* Calculadora (se aplicável) */}
-        {calculatorValue !== undefined && onCalculatorChange && (
-          <div className="space-y-2 pb-3 border-b">
-            <p className="text-xs font-medium text-muted-foreground">
-              Área (cm²)
-            </p>
-            <Input
-              type="number"
-              value={calculatorValue}
-              onChange={(e) => onCalculatorChange(Number(e.target.value))}
-              placeholder="Digite a área em cm²"
-              className="text-sm"
-            />
-            {calculatorValue > 0 && (
-              <p className="text-xs text-muted-foreground">
-                ≈ {(calculatorValue / 10000).toFixed(2)} m²
-              </p>
-            )}
-          </div>
-        )}
 
         {/* Prazo */}
         {(deadline || deliveryOption) && (
@@ -213,19 +186,21 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
         {/* Total */}
         <div className="space-y-2 pb-4 border-b">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-medium">R$ {(unitPrice * quantity).toFixed(2)}</span>
-          </div>
-          {calculatorValue && calculatorValue > 0 && (
+          {!isAreaProduct && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Com Área</span>
-              <span className="font-medium">R$ {priceWithArea.toFixed(2)}</span>
+              <span className="text-muted-foreground">Subtotal ({quantity}x)</span>
+              <span className="font-medium">R$ {(unitPrice * quantity).toFixed(2)}</span>
+            </div>
+          )}
+          {deliveryTax > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Taxa Expressa</span>
+              <span className="font-medium text-orange-600">+R$ {deliveryTax.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span className="text-primary">R$ {finalPrice.toFixed(2)}</span>
+            <span className="text-primary">R$ {(finalPrice + deliveryTax).toFixed(2)}</span>
           </div>
         </div>
 
