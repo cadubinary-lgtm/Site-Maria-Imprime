@@ -22,6 +22,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -327,6 +328,7 @@ export default function AdminPanel() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Criar Novo Produto</DialogTitle>
+                <DialogDescription>Preencha os dados do novo produto para adicioná-lo ao catálogo.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

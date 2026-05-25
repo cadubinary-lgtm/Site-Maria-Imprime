@@ -13,6 +13,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -161,6 +162,7 @@ export default function SegmentsManager() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Criar Novo Segmento</DialogTitle>
+                <DialogDescription>Adicione um novo segmento de mercado ao catálogo.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

@@ -9,7 +9,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { storagePut } from "../storage";
+import { storagePut, storageGetSignedUrl } from "../storage";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -133,11 +133,40 @@ async function startServer() {
       const fileUrl = req.query.url as string;
       const fileName = (req.query.name as string) || 'arquivo';
       if (!fileUrl) return res.status(400).json({ error: 'URL não fornecida' });
-      // Apenas permite URLs do próprio storage
+
+      // Resolver a URL real do S3 a partir do caminho /manus-storage/{key}
+      let resolvedUrl = fileUrl;
+      if (fileUrl.startsWith('/manus-storage/')) {
+        const key = fileUrl.replace('/manus-storage/', '');
+        resolvedUrl = await storageGetSignedUrl(key);
+      } else if (!fileUrl.startsWith('http')) {
+        // Caminho relativo sem /manus-storage/ - tentar como key direto
+        resolvedUrl = await storageGetSignedUrl(fileUrl);
+      }
+
       const axios = (await import('axios')).default;
-      const response = await axios.get(fileUrl, { responseType: 'stream', timeout: 30000 });
+      const response = await axios.get(resolvedUrl, { responseType: 'stream', timeout: 60000 });
+      // Detectar extensão pelo nome do arquivo para Content-Type correto
+      const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+      const mimeMap: Record<string, string> = {
+        pdf: 'application/pdf',
+        ai: 'application/postscript',
+        eps: 'application/postscript',
+        psd: 'image/vnd.adobe.photoshop',
+        cdr: 'application/x-coreldraw',
+        jpg: 'image/jpeg', jpeg: 'image/jpeg',
+        png: 'image/png',
+        gif: 'image/gif',
+        webp: 'image/webp',
+        svg: 'image/svg+xml',
+        tif: 'image/tiff', tiff: 'image/tiff',
+      };
+      const contentType = mimeMap[ext] || response.headers['content-type'] || 'application/octet-stream';
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-      res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+      res.setHeader('Content-Type', contentType);
+      if (response.headers['content-length']) {
+        res.setHeader('Content-Length', response.headers['content-length']);
+      }
       (response.data as any).pipe(res);
     } catch (error) {
       console.error('Download proxy error:', error);

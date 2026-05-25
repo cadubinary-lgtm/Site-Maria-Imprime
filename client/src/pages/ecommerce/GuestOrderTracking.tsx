@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const TIMELINE_STEPS = [
   { key: "pagamento_aprovado", label: "Pagamento Aprovado",  icon: Clock },
@@ -301,9 +301,10 @@ export default function GuestOrderTracking() {
 
       {/* Lightbox */}
       <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
-        <DialogContent className="max-w-4xl p-2 bg-black/95">
+        <DialogContent className="max-w-4xl p-2 bg-black/95" aria-describedby={undefined}>
           <DialogHeader className="sr-only">
             <DialogTitle>Prévia da arte</DialogTitle>
+            <DialogDescription>Visualização em tela cheia da prévia da arte enviada pela gráfica</DialogDescription>
           </DialogHeader>
           <div className="relative">
             <button
