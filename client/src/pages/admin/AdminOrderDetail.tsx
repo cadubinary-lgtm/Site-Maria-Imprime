@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
@@ -687,9 +687,10 @@ export default function AdminOrderDetail() {
 
       {/* Lightbox */}
       <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
-        <DialogContent className="max-w-4xl p-2 bg-black/95">
+        <DialogContent className="max-w-4xl p-2 bg-black/95" aria-describedby={undefined}>
           <DialogHeader className="sr-only">
             <DialogTitle>Visualizar imagem</DialogTitle>
+            <DialogDescription>Visualização em tela cheia da imagem selecionada</DialogDescription>
           </DialogHeader>
           <div className="relative">
             <button

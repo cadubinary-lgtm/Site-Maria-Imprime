@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { GripVertical, Trash2, Edit2, Plus } from "lucide-react";
@@ -180,6 +180,7 @@ export function DeliveryOptionsManager({ productId, calculationType }: DeliveryO
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingId ? "Editar Prazo" : "Novo Prazo"}</DialogTitle>
+              <DialogDescription>{editingId ? "Edite as informações do prazo de entrega." : "Adicione um novo prazo de entrega para este produto."}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
