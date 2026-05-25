@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
+import { DeliveryOptionsManager, type DeliveryOptionData } from '@/components/products/DeliveryOptionsManager';
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimentacao: '🍔 Alimentação',
@@ -70,12 +71,7 @@ export default function AdminPanel() {
     minHeight: '',
     maxHeight: '',
   });
-  const DEFAULT_DELIVERY_OPTIONS = [
-    { name: 'Prazo Normal', daysToDeliver: 5, pricePerM2: 0, isActive: true },
-    { name: '24 Horas', daysToDeliver: 1, pricePerM2: 10, isActive: true },
-    { name: 'Mesmo Dia', daysToDeliver: 0, pricePerM2: 20, isActive: true },
-  ];
-  const [deliveryOptions, setDeliveryOptions] = useState(DEFAULT_DELIVERY_OPTIONS);
+  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -169,7 +165,7 @@ export default function AdminPanel() {
         minHeight: '',
         maxHeight: '',
       });
-      setDeliveryOptions(DEFAULT_DELIVERY_OPTIONS);
+      setDeliveryOptions([]);
       refetch();
     },
     onError: (error) => {
@@ -452,90 +448,10 @@ export default function AdminPanel() {
                     </div>
                   </>
                 )}
-                <div className="border rounded-lg p-3 bg-gray-50">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-bold text-gray-800">Prazos de Produção</label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-xs border-red-400 text-red-600 hover:bg-red-50"
-                      onClick={() => setDeliveryOptions(prev => [
-                        ...prev,
-                        { name: 'Novo Prazo', daysToDeliver: 3, pricePerM2: 0, isActive: true }
-                      ])}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      Novo Prazo
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {deliveryOptions.map((option, idx) => (
-                      <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border">
-                        <input
-                          type="checkbox"
-                          checked={option.isActive}
-                          onChange={(e) => {
-                            const updated = [...deliveryOptions];
-                            updated[idx] = { ...updated[idx], isActive: e.target.checked };
-                            setDeliveryOptions(updated);
-                          }}
-                          className="w-4 h-4 flex-shrink-0"
-                        />
-                        <Input
-                          value={option.name}
-                          onChange={(e) => {
-                            const updated = [...deliveryOptions];
-                            updated[idx] = { ...updated[idx], name: e.target.value };
-                            setDeliveryOptions(updated);
-                          }}
-                          className="h-7 text-xs flex-1 min-w-0"
-                          placeholder="Nome do prazo"
-                        />
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Input
-                            type="number"
-                            value={option.daysToDeliver}
-                            onChange={(e) => {
-                              const updated = [...deliveryOptions];
-                              updated[idx] = { ...updated[idx], daysToDeliver: parseInt(e.target.value) || 0 };
-                              setDeliveryOptions(updated);
-                            }}
-                            className="w-14 h-7 text-xs"
-                            placeholder="dias"
-                            title="Dias úteis"
-                          />
-                          <span className="text-xs text-gray-400">d</span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={option.pricePerM2}
-                            onChange={(e) => {
-                              const updated = [...deliveryOptions];
-                              updated[idx] = { ...updated[idx], pricePerM2: parseFloat(e.target.value) || 0 };
-                              setDeliveryOptions(updated);
-                            }}
-                            className="w-16 h-7 text-xs"
-                            placeholder="R$/m²"
-                            title="Preço adicional por m²"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setDeliveryOptions(prev => prev.filter((_, i) => i !== idx))}
-                            className="text-red-400 hover:text-red-600 p-0.5"
-                            title="Remover prazo"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {deliveryOptions.length === 0 && (
-                      <p className="text-xs text-gray-400 text-center py-2">Nenhum prazo adicionado. Clique em "+ Novo Prazo".</p>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2">Dias = dias úteis de produção • R$/m² = taxa adicional por metro quadrado</p>
-                </div>
+                {/* Prazos de Produção — mesmo componente do Editar Produto */}
+                <DeliveryOptionsManager
+                  onChange={setDeliveryOptions}
+                />
                 <div>
                   <label className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
