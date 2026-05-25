@@ -72,6 +72,42 @@ async function startServer() {
       res.status(500).json({ error: 'Falha ao fazer upload da imagem' });
     }
   });
+  // Upload endpoint para arte do cliente — aceita todos os formatos gráficos
+  const uploadArt = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  });
+  app.post('/api/upload-art', uploadArt.single('file'), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
+      const { originalname, buffer, mimetype } = req.file;
+      const allowedMimeTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+        'application/pdf',
+        'application/postscript', // .ai, .eps
+        'application/illustrator',
+        'image/vnd.adobe.photoshop', // .psd
+        'application/x-photoshop',
+        'application/octet-stream', // .cdr, .ai, .psd genérico
+        'application/x-coreldraw',
+        'application/vnd.corel-draw',
+      ];
+      // Também verificar extensão para formatos que chegam como octet-stream
+      const ext = originalname.split('.').pop()?.toLowerCase() ?? '';
+      const allowedExts = ['pdf', 'ai', 'cdr', 'psd', 'eps', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'tif', 'tiff'];
+      if (!allowedMimeTypes.includes(mimetype) && !allowedExts.includes(ext)) {
+        return res.status(400).json({ error: 'Formato não suportado. Use PDF, AI, CDR, PSD, EPS, JPG ou PNG' });
+      }
+      const timestamp = Date.now();
+      const filename = `client-art/${timestamp}-${originalname}`;
+      const { url, key } = await storagePut(filename, buffer, mimetype || 'application/octet-stream');
+      res.json({ url, key });
+    } catch (error) {
+      console.error('Art upload error:', error);
+      res.status(500).json({ error: 'Falha ao fazer upload do arquivo' });
+    }
+  });
+
   // Upload endpoint para prévia de arte (admin) — aceita imagens
   app.post('/api/upload-art-preview', upload.single('file'), async (req, res) => {
     try {
