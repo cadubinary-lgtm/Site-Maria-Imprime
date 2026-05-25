@@ -234,10 +234,8 @@ export default function ProductDetail() {
       return;
     }
 
-    setValidationError(null);
-
+        setValidationError(null);
     setIsProcessing(true);
-
     try {
       // Serializar atributos selecionados
       const attrsJson = Object.keys(selectedAttributes).length > 0
@@ -251,8 +249,23 @@ export default function ProductDetail() {
             )
           )
         : undefined;
-
       const finalPrice = totalPrice > 0 ? totalPrice : parseFloat(product.price);
+
+      // Fazer upload do arquivo de arte se selecionado
+      let resolvedArtFileUrl: string | undefined = artLink || undefined;
+      if (artFile && !useLink) {
+        toast.loading("Enviando arquivo de arte...", { id: "art-upload" });
+        const formData = new FormData();
+        formData.append("file", artFile);
+        const uploadRes = await fetch("/api/upload-art", { method: "POST", body: formData });
+        toast.dismiss("art-upload");
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json();
+          throw new Error(err.error || "Erro ao enviar arquivo de arte");
+        }
+        const { url } = await uploadRes.json();
+        resolvedArtFileUrl = url;
+      }
 
       await addToCartMutation.mutateAsync({
         productId,
@@ -260,7 +273,7 @@ export default function ProductDetail() {
         selectedAttributes: attrsJson,
         priceAtCart: finalPrice,
         notes: notes || undefined,
-        artFileUrl: artLink || undefined,
+        artFileUrl: resolvedArtFileUrl,
       });
 
       toast.success("Produto adicionado ao carrinho!", {

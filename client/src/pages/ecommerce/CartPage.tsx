@@ -15,6 +15,8 @@ import {
   ArrowLeft,
   Package,
   AlertCircle,
+  FileImage,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,6 +105,26 @@ function CartItemCard({
           </div>
         )}
 
+        {/* Arquivo de arte */}
+        {item.artFileUrl && (
+          <div className="flex items-center gap-1.5 mt-1">
+            {item.artFileUrl.startsWith('http') && !item.artFileUrl.includes('manus-storage') ? (
+              <>
+                <LinkIcon className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                <a href={item.artFileUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline truncate max-w-[200px]">
+                  {item.artFileUrl}
+                </a>
+              </>
+            ) : (
+              <>
+                <FileImage className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                <span className="text-xs text-green-700 font-medium">
+                  {item.artFileUrl.split('/').pop()?.replace(/^\d+-/, '') ?? 'Arquivo enviado'}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {/* Preço unitário */}
         <p className="text-sm text-gray-500 mt-1">
           {formatCurrency(item.priceAtCart)} / {item.unit}

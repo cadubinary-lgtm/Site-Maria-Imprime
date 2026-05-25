@@ -1887,3 +1887,12 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar GuestOrderTracking.tsx para exibir prévias de arte
 - [x] Implementar zoom ao clicar na prévia (lightbox) para o cliente
 - [x] Exibir data e observação de cada prévia para o cliente
+
+## Fase 41: Corrigir Upload de Arquivo de Arte do Cliente
+
+- [x] Identificar causa raiz: handleAddToCart não fazia upload do artFile, apenas salvava artLink
+- [x] Criar endpoint /api/upload-art no servidor Express (aceita PDF, AI, CDR, PSD, EPS, JPG, PNG, até 50MB)
+- [x] Corrigir handleAddToCart no ProductDetail.tsx para fazer upload do arquivo antes de salvar no carrinho
+- [x] Exibir toast "Enviando arquivo de arte..." durante o upload
+- [x] Exibir nome do arquivo no CartItemCard quando artFileUrl estiver preenchido
+- [x] Exibir ícone de link para URLs externas no CartItemCard
