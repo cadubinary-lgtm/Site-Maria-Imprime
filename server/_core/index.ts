@@ -72,6 +72,43 @@ async function startServer() {
       res.status(500).json({ error: 'Falha ao fazer upload da imagem' });
     }
   });
+  // Upload endpoint para prévia de arte (admin) — aceita imagens
+  app.post('/api/upload-art-preview', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
+      const { originalname, buffer, mimetype } = req.file;
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedMimeTypes.includes(mimetype)) {
+        return res.status(400).json({ error: 'Apenas formatos JPG, PNG, WEBP e GIF são aceitos' });
+      }
+      const timestamp = Date.now();
+      const filename = `art-previews/${timestamp}-${originalname}`;
+      const { url, key } = await storagePut(filename, buffer, mimetype);
+      res.json({ url, key });
+    } catch (error) {
+      console.error('Art preview upload error:', error);
+      res.status(500).json({ error: 'Falha ao fazer upload da prévia' });
+    }
+  });
+
+  // Download proxy — permite que o browser baixe arquivos do S3 com nome original
+  app.get('/api/download-file', async (req, res) => {
+    try {
+      const fileUrl = req.query.url as string;
+      const fileName = (req.query.name as string) || 'arquivo';
+      if (!fileUrl) return res.status(400).json({ error: 'URL não fornecida' });
+      // Apenas permite URLs do próprio storage
+      const axios = (await import('axios')).default;
+      const response = await axios.get(fileUrl, { responseType: 'stream', timeout: 30000 });
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
+      res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+      (response.data as any).pipe(res);
+    } catch (error) {
+      console.error('Download proxy error:', error);
+      res.status(500).json({ error: 'Falha ao baixar arquivo' });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

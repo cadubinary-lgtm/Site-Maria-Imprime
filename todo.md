@@ -1866,3 +1866,24 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar campos de endereço no formulário de cadastro com busca de CEP automática (ViaCEP)
 - [x] Pré-preencher checkout com endereço salvo do cliente automaticamente
 - [x] Validar fluxo: cadastrar endereço → finalizar pedido com dados pré-preenchidos
+
+## Fase 40: Arquivos do Cliente + Prévia da Arte no Admin
+
+- [x] Criar tabela orderArtPreviews no banco de dados
+- [x] Adicionar colunas guestToken, guestEmail, guestName em orders (migration)
+- [x] Criar endpoint /api/upload-art-preview no servidor Express
+- [x] Criar endpoint /api/download-file (proxy de download)
+- [x] Criar procedure checkout.getOrderFiles (admin: lista arquivos do cliente)
+- [x] Criar procedure checkout.getArtPreviews (lista prévias por orderId)
+- [x] Criar procedure checkout.getArtPreviewsByToken (lista prévias por token de convidado)
+- [x] Criar procedure checkout.saveArtPreview (admin: salva prévia)
+- [x] Criar procedure checkout.deleteArtPreview (admin: remove prévia)
+- [x] Atualizar AdminOrderDetail.tsx com seção "Arquivos Enviados pelo Cliente"
+- [x] Implementar download individual de arquivo no admin
+- [x] Implementar download de todos os arquivos (sequencial) no admin
+- [x] Implementar upload de prévia de arte no admin com notas opcionais
+- [x] Implementar galeria de prévias enviadas no admin com lightbox
+- [x] Implementar exclusão de prévia no admin
+- [x] Atualizar GuestOrderTracking.tsx para exibir prévias de arte
+- [x] Implementar zoom ao clicar na prévia (lightbox) para o cliente
+- [x] Exibir data e observação de cada prévia para o cliente

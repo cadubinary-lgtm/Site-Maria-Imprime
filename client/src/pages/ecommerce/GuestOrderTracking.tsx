@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useRoute, Link } from "wouter";
-import { Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home } from "lucide-react";
+import {
+  Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home, X, ZoomIn,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const TIMELINE_STEPS = [
   { key: "pagamento_aprovado", label: "Pagamento Aprovado",  icon: Clock },
@@ -45,6 +49,7 @@ function formatCurrency(value: number | string) {
 export default function GuestOrderTracking() {
   const [, params] = useRoute("/pedido/acompanhar/:token");
   const token = params?.token ?? "";
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const { data, isLoading } = trpc.checkout.getOrderByToken.useQuery(
     { token },
@@ -54,6 +59,13 @@ export default function GuestOrderTracking() {
   const order = (data as any)?.order ?? null;
   const items = (data as any)?.items ?? [];
   const history = (data as any)?.history ?? [];
+
+  // Buscar prévias de arte pelo token
+  const { data: artPreviews = [] } = trpc.checkout.getArtPreviewsByToken.useQuery(
+    { token },
+    { enabled: !!token, refetchInterval: 15000 }
+  );
+  const previews = artPreviews as any[];
 
   if (isLoading) {
     return (
@@ -172,6 +184,56 @@ export default function GuestOrderTracking() {
           </CardContent>
         </Card>
 
+        {/* ── Prévia da Arte (enviada pela gráfica) ── */}
+        {previews.length > 0 && (
+          <Card className="mb-6 border-2 border-purple-200 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg text-purple-800">
+                <ZoomIn className="w-5 h-5 text-purple-600" />
+                Prévia da Arte
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">
+                A gráfica enviou uma prévia da arte do seu pedido. Clique na imagem para ampliar.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {previews.map((p: any) => (
+                  <div
+                    key={p.id}
+                    className="relative group rounded-xl overflow-hidden border border-purple-100 cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setLightboxUrl(p.imageUrl)}
+                  >
+                    <img
+                      src={p.imageUrl}
+                      alt="Prévia da arte"
+                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {/* Overlay de zoom */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                      <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                        <ZoomIn className="w-5 h-5 text-purple-700" />
+                      </div>
+                    </div>
+                    {/* Data e observação */}
+                    <div className="px-2 py-1.5 bg-white border-t border-purple-100">
+                      <p className="text-xs text-gray-500">
+                        {new Date(p.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                      {p.notes && (
+                        <p className="text-xs text-purple-700 font-medium truncate">{p.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-3 text-center">
+                Toque ou clique em qualquer imagem para ver em tamanho completo
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Itens do pedido */}
         {items.length > 0 && (
           <Card className="mb-6">
@@ -236,6 +298,30 @@ export default function GuestOrderTracking() {
           </Link>
         </div>
       </div>
+
+      {/* Lightbox */}
+      <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+        <DialogContent className="max-w-4xl p-2 bg-black/95">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Prévia da arte</DialogTitle>
+          </DialogHeader>
+          <div className="relative">
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            {lightboxUrl && (
+              <img
+                src={lightboxUrl}
+                alt="Prévia da arte"
+                className="w-full max-h-[85vh] object-contain rounded-lg"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
