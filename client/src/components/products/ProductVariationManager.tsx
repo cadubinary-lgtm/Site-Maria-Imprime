@@ -190,6 +190,7 @@ export function ProductVariationManager() {
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
   const linkGlobalMutation = trpc.adminVariations.linkGlobal.useMutation();
+  const syncGlobalOptionsMutation = trpc.adminVariations.syncGlobalOptions.useMutation();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -253,7 +254,10 @@ export function ProductVariationManager() {
         priceModifier: (parseFloat(price) || 0).toString(),
       });
 
-      toast.success("Opção adicionada!");
+      // Propagar a nova opção para todas as cópias vinculadas ao produto
+      await syncGlobalOptionsMutation.mutateAsync({ globalVariationId: variationId });
+
+      toast.success("Opção adicionada e sincronizada com os produtos vinculados!");
       setGlobalOptionNames((prev) => ({ ...prev, [variationId]: "" }));
       setGlobalOptionPrices((prev) => ({ ...prev, [variationId]: "" }));
       // Invalidar ambas as listas para sincronizar
@@ -279,11 +283,15 @@ export function ProductVariationManager() {
     }
   };
 
-  const handleDeleteOption = async (id: number) => {
+  const handleDeleteOption = async (id: number, globalVariationId?: number) => {
     if (!confirm("Tem certeza que deseja remover esta opção?")) return;
 
     try {
       await deleteVariationOptionMutation.mutateAsync({ id });
+      // Se a opção pertence a uma variação global, propagar a exclusão para todas as cópias
+      if (globalVariationId) {
+        await syncGlobalOptionsMutation.mutateAsync({ globalVariationId });
+      }
       toast.success("Opção removida!");
       // Invalidar ambas as listas
       await invalidateBoth();
@@ -293,7 +301,7 @@ export function ProductVariationManager() {
     }
   };
 
-  const handleUpdateOption = async () => {
+  const handleUpdateOption = async (globalVariationId?: number) => {
     if (!editingOptionId || !editingOptionName) {
       toast.error("Preencha o nome da opção");
       return;
@@ -305,6 +313,11 @@ export function ProductVariationManager() {
         name: editingOptionName,
         priceModifier: (parseFloat(editingOptionPrice) || 0).toString(),
       });
+
+      // Se a opção pertence a uma variação global, propagar a atualização para todas as cópias
+      if (globalVariationId) {
+        await syncGlobalOptionsMutation.mutateAsync({ globalVariationId });
+      }
 
       toast.success("Opção atualizada!");
       setEditingOptionId(null);
@@ -784,7 +797,7 @@ export function ProductVariationManager() {
                               </div>
                               <div className="flex items-end gap-2">
                                 <Button
-                                  onClick={handleUpdateOption}
+                                  onClick={() => handleUpdateOption(vt.id)}
                                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
                                   disabled={updateVariationOptionMutation.isPending}
                                 >
@@ -835,7 +848,7 @@ export function ProductVariationManager() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      onClick={() => handleDeleteOption(option.id)}
+                                      onClick={() => handleDeleteOption(option.id, vt.id)}
                                       className="text-red-500 hover:text-red-700"
                                     >
                                       <Trash2 className="w-4 h-4" />

@@ -46,6 +46,7 @@ import {
   getCartItemCount,
   updateVariationOption,
   reorderVariationTypes,
+  syncGlobalVariationOptions,
   getOrderItemVariations,
   addOrderItemVariation,
   createFileCheck,
@@ -485,6 +486,13 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await linkGlobalVariationToProduct(input.globalVariationId, input.productId);
+      }),
+    syncGlobalOptions: adminProcedure
+      .input(z.object({
+        globalVariationId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return await syncGlobalVariationOptions(input.globalVariationId);
       }),
   }),
 
