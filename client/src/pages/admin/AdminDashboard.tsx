@@ -352,6 +352,7 @@ export default function AdminDashboard() {
 
                     {/* Prazos de Produção — mesmo componente do Editar Produto */}
                     <DeliveryOptionsManager
+                      calculationType={formData.calculationType}
                       onChange={setDeliveryOptions}
                     />
 

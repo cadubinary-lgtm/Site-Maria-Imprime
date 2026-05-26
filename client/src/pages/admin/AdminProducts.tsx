@@ -515,10 +515,10 @@ export default function AdminProducts() {
                               </>
                             )}
 
-                            {(editForm as any).calculationType === "m2" && editingId && (
+                            {editingId && (
                               <DeliveryOptionsManager
                                 productId={editingId}
-                                calculationType="m2"
+                                calculationType={(editForm as any).calculationType || "m2"}
                               />
                             )}
 

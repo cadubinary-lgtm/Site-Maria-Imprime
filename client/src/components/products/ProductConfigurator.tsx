@@ -76,6 +76,11 @@ export function ProductConfigurator({
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<number | null>(null);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
 
+  // Determinar se é m² ou unidade
+  const isM2 = calculationType === "m2";
+  // Sufixo de preço para prazos
+  const priceSuffix = isM2 ? "/m²" : "/unid.";
+
   // Frete de entrega
   const FRETE_OPTIONS = [
     { id: "retirada",       name: "Retirar na Loja",  description: "Retire na loja",               price: 0,    days: "Conforme produção", logo: "🏪", highlight: false },
@@ -101,10 +106,10 @@ export function ProductConfigurator({
     { enabled: !!productId }
   );
 
-  // Carregar prazos de entrega (apenas se for m²)
+  // Carregar prazos de entrega para qualquer tipo de produto
   const { data: deliveryOptionsData = [] } = trpc.deliveryOptions.getByProduct.useQuery(
     { productId },
-    { enabled: !!productId && calculationType === "m2" }
+    { enabled: !!productId }
   );
 
   // Atualizar delivery options quando carregar
@@ -187,7 +192,7 @@ export function ProductConfigurator({
     });
 
     // Se for m², calcular por área
-    if (calculationType === "m2" && pricePerM2) {
+    if (isM2 && pricePerM2) {
       const width = parseDecimal(dimensions.width as string);
       const height = parseDecimal(dimensions.height as string);
       const rawArea = width * height;
@@ -195,7 +200,7 @@ export function ProductConfigurator({
       // Se os campos estiverem vazios (area = 0), usar basePrice como mínimo
       const area = rawArea > 0 ? Math.max(rawArea, 1) : 0;
       
-      // Calcular taxa de prazo (se selecionado)
+      // Calcular taxa de prazo para m²: pricePerM2 * área
       let deliveryAdditional = 0;
       if (selectedDeliveryOption && deliveryOptions.length > 0) {
         const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedDeliveryOption);
@@ -208,12 +213,20 @@ export function ProductConfigurator({
       // Se campos vazios, mostrar basePrice; caso contrário, nunca abaixo do basePrice
       totalPrice = area === 0 ? basePrice : Math.max(calculatedFromArea, basePrice);
     } else {
-      totalPrice += totalAdditionals;
-      totalPrice = totalPrice * quantity;
+      // Para unidade: calcular taxa de prazo por quantidade
+      let deliveryAdditional = 0;
+      if (selectedDeliveryOption && deliveryOptions.length > 0) {
+        const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedDeliveryOption);
+        if (selectedOption) {
+          // pricePerM2 aqui representa "valor por unidade" para produtos do tipo unidade
+          deliveryAdditional = quantity * selectedOption.pricePerM2;
+        }
+      }
+      totalPrice = (totalPrice + totalAdditionals) * quantity + deliveryAdditional;
     }
 
     return totalPrice;
-  }, [selectedValues, attributes, basePrice, quantity, calculationType, pricePerM2, dimensions, parseDecimal, selectedDeliveryOption, deliveryOptions]);
+  }, [selectedValues, attributes, basePrice, quantity, isM2, pricePerM2, dimensions, parseDecimal, selectedDeliveryOption, deliveryOptions]);
 
   const handleSelectChange = (attributeId: number, valueId: number) => {
     setSelectedValues((prev) => {
@@ -221,8 +234,6 @@ export function ProductConfigurator({
         ...prev,
         [attributeId]: valueId,
       };
-      // Chamar onPriceUpdate imediatamente após atualizar estado
-      // Será chamado no próximo render com o novo calculatedPrice
       return updated;
     });
   };
@@ -267,11 +278,16 @@ export function ProductConfigurator({
       let deliveryTax = 0;
       if (selectedDeliveryOption && deliveryOptions.length > 0) {
         const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedDeliveryOption);
-        if (selectedOption && calculationType === "m2") {
-          const width = parseDecimal(dimensions.width as string);
-          const height = parseDecimal(dimensions.height as string);
-          const area = width * height;
-          deliveryTax = area * selectedOption.pricePerM2;
+        if (selectedOption) {
+          if (isM2) {
+            const width = parseDecimal(dimensions.width as string);
+            const height = parseDecimal(dimensions.height as string);
+            const area = width * height;
+            deliveryTax = area * selectedOption.pricePerM2;
+          } else {
+            // Para unidade: taxa por quantidade
+            deliveryTax = quantity * selectedOption.pricePerM2;
+          }
         }
       }
 
@@ -311,7 +327,7 @@ export function ProductConfigurator({
   }
 
   // Para produtos m², renderizar mesmo sem atributos (os campos de dimensão são o essencial)
-  if ((error || attributes.length === 0) && calculationType !== 'm2') {
+  if ((error || attributes.length === 0) && !isM2) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -380,7 +396,7 @@ export function ProductConfigurator({
         ))}
 
         {/* Dimensões (m²) */}
-        {calculationType === "m2" && (
+        {isM2 && (
           <div className="space-y-3">
             <Label className="font-semibold text-gray-800">Medidas</Label>
             <div className="grid grid-cols-2 gap-3">
@@ -420,8 +436,8 @@ export function ProductConfigurator({
           </div>
         )}
 
-        {/* Prazos de Entrega (apenas para m²) */}
-        {calculationType === "m2" && deliveryOptions.length > 0 && (
+        {/* Prazos de Produção (para qualquer tipo de produto) */}
+        {deliveryOptions.length > 0 && (
           <div className="space-y-4 bg-green-50 p-4 rounded-lg">
             <h3 className="font-semibold text-lg">Prazo de Produção</h3>
             <div className="space-y-3">
@@ -443,7 +459,9 @@ export function ProductConfigurator({
                     <p className="text-sm text-gray-600">{option.daysToDeliver} dias úteis</p>
                   </div>
                   {option.pricePerM2 > 0 && (
-                    <span className="font-semibold text-green-600">+R$ {option.pricePerM2.toFixed(2)}/m²</span>
+                    <span className="font-semibold text-green-600">
+                      +R$ {Number(option.pricePerM2).toFixed(2)}{priceSuffix}
+                    </span>
                   )}
                 </label>
               ))}
@@ -498,7 +516,7 @@ export function ProductConfigurator({
         </div>
 
         {/* Quantidade (apenas para unidade) */}
-        {calculationType !== "m2" && (
+        {!isM2 && (
           <div className="space-y-2">
             <Label htmlFor="quantity">Quantidade</Label>
             <Input

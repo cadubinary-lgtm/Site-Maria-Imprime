@@ -450,6 +450,7 @@ export default function AdminPanel() {
                 )}
                 {/* Prazos de Produção — mesmo componente do Editar Produto */}
                 <DeliveryOptionsManager
+                  calculationType={(newProductForm as any).calculationType || 'unidade'}
                   onChange={setDeliveryOptions}
                 />
                 <div>

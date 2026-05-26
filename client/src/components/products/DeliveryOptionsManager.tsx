@@ -21,6 +21,7 @@ export interface DeliveryOptionData {
 interface DeliveryOptionsManagerProps {
   /** Se fornecido, persiste no banco (modo edição). Se omitido, opera em memória (modo criação). */
   productId?: number;
+  /** Tipo de cobrança do produto: 'm2' ou 'unit'. Adapta rótulos e cálculos. */
   calculationType?: string;
   /** Callback chamado sempre que a lista muda (modo offline) */
   onChange?: (options: DeliveryOptionData[]) => void;
@@ -41,6 +42,11 @@ export function DeliveryOptionsManager({
   initialOptions,
 }: DeliveryOptionsManagerProps) {
   const isOfflineMode = !productId;
+  // Determinar se é cobrança por m² ou por unidade
+  const isM2 = !calculationType || calculationType === "m2";
+  // Rótulo do campo de valor adicional
+  const priceLabel = isM2 ? "Valor Adicional por m² (R$)" : "Valor Adicional por Unidade (R$)";
+  const priceSuffix = isM2 ? "/m²" : "/unid.";
 
   const [options, setOptions] = useState<DeliveryOptionData[]>(() => {
     if (isOfflineMode) {
@@ -57,10 +63,10 @@ export function DeliveryOptionsManager({
     isActive: true,
   });
 
-  // Modo online: buscar prazos do banco
+  // Modo online: buscar prazos do banco (para qualquer tipo de produto)
   const { data: deliveryOptions, isLoading } = trpc.deliveryOptions.getByProduct.useQuery(
     { productId: productId! },
-    { enabled: !isOfflineMode && calculationType === "m2" }
+    { enabled: !isOfflineMode }
   );
 
   useEffect(() => {
@@ -203,11 +209,6 @@ export function DeliveryOptionsManager({
     }
   };
 
-  // Mostrar apenas se for m² (ou sem tipo definido em modo offline)
-  if (calculationType && calculationType !== "m2") {
-    return null;
-  }
-
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -258,7 +259,7 @@ export function DeliveryOptionsManager({
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Valor Adicional por m² (R$)</label>
+                <label className="text-sm font-medium">{priceLabel}</label>
                 <Input
                   type="number"
                   value={formData.pricePerM2}
@@ -270,6 +271,11 @@ export function DeliveryOptionsManager({
                   placeholder="0.00"
                   className="mt-1"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {isM2
+                    ? "Valor extra cobrado por m² quando este prazo é selecionado."
+                    : "Valor extra cobrado por unidade quando este prazo é selecionado."}
+                </p>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -317,7 +323,10 @@ export function DeliveryOptionsManager({
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm">{option.name}</div>
                   <div className="text-xs text-gray-500">
-                    {option.daysToDeliver} dias úteis • R$ {Number(option.pricePerM2).toFixed(2)}/m²
+                    {option.daysToDeliver} dias úteis
+                    {Number(option.pricePerM2) > 0 && (
+                      <> • R$ {Number(option.pricePerM2).toFixed(2)}{priceSuffix}</>
+                    )}
                     {!option.isActive && (
                       <span className="ml-1 text-red-400">• Inativo</span>
                     )}
