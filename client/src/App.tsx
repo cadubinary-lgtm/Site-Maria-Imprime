@@ -50,6 +50,9 @@ import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import FileValidationManager from "./pages/admin/FileValidationManager";
 
+// ─── Layout Admin ───────────────────────────────────────────────────────────
+import AdminLayout from "./components/admin/AdminLayout";
+
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
 import ProductionDashboard from "./pages/erp/ProductionDashboard";
@@ -77,23 +80,23 @@ function AdminRoutes() {
     <Switch>
       {user?.role === "admin" && (
         <>
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/produtos" component={AdminProducts} />
-          <Route path="/admin/precos" component={AdminPanel} />
-          <Route path="/admin/atributos" component={AdminAttributesManager} />
-          <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
-          <Route path="/admin/regras" component={AdminPricingRules} />
-          <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
-          <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
-          <Route path="/admin/pedidos" component={AdminOrders} />
-          <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
-          <Route path="/admin/clientes" component={ClientsManager} />
-          <Route path="/admin/clientes-loja" component={AdminCustomers} />
-          <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
-          <Route path="/admin/erp" component={ERPDashboard} />
-          <Route path="/admin/financeiro" component={FinancialDashboard} />
-          <Route path="/admin/automacao" component={AutomationDashboard} />
-          <Route path="/admin/segmentos" component={SegmentsManager} />
+          <Route path="/admin">{() => <AdminLayout><AdminDashboard /></AdminLayout>}</Route>
+          <Route path="/admin/produtos">{() => <AdminLayout><AdminProducts /></AdminLayout>}</Route>
+          <Route path="/admin/precos">{() => <AdminLayout><AdminPanel /></AdminLayout>}</Route>
+          <Route path="/admin/atributos">{() => <AdminLayout><AdminAttributesManager /></AdminLayout>}</Route>
+          <Route path="/admin/vincular-atributos">{() => <AdminLayout><AdminProductAttributesLinker /></AdminLayout>}</Route>
+          <Route path="/admin/regras">{() => <AdminLayout><AdminPricingRules /></AdminLayout>}</Route>
+          <Route path="/admin/regras-builder">{() => <AdminLayout><AdminRulesBuilder /></AdminLayout>}</Route>
+          <Route path="/admin/regras-dinamicas">{() => <AdminLayout><AdminRulesManager /></AdminLayout>}</Route>
+          <Route path="/admin/pedidos/:id">{() => <AdminLayout><AdminOrderDetail /></AdminLayout>}</Route>
+          <Route path="/admin/pedidos">{() => <AdminLayout><AdminOrders /></AdminLayout>}</Route>
+          <Route path="/admin/clientes">{() => <AdminLayout><ClientsManager /></AdminLayout>}</Route>
+          <Route path="/admin/clientes-loja">{() => <AdminLayout><AdminCustomers /></AdminLayout>}</Route>
+          <Route path="/admin/validacao-arquivos">{() => <AdminLayout><FileValidationManager /></AdminLayout>}</Route>
+          <Route path="/admin/erp">{() => <AdminLayout><ERPDashboard /></AdminLayout>}</Route>
+          <Route path="/admin/financeiro">{() => <AdminLayout><FinancialDashboard /></AdminLayout>}</Route>
+          <Route path="/admin/automacao">{() => <AdminLayout><AutomationDashboard /></AdminLayout>}</Route>
+          <Route path="/admin/segmentos">{() => <AdminLayout><SegmentsManager /></AdminLayout>}</Route>
         </>
       )}
       {user?.role === "production" && (
