@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
+import { PrintOrderSheet } from "@/components/admin/PrintOrderSheet";
 
 // Ordem linear dos status para a linha do tempo
 const STATUS_STEPS = [
@@ -214,7 +215,7 @@ export default function AdminOrderDetail() {
   const previews = artPreviews as any[];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-gray-50 py-6">
       <div className="max-w-5xl mx-auto px-4 space-y-6">
 
         {/* Header */}
@@ -227,9 +228,15 @@ export default function AdminOrderDetail() {
               <h1 className="text-3xl font-bold text-gray-900">{o.orderNumber}</h1>
               <p className="text-gray-500 mt-1">Criado em {fmtDate(o.createdAt)}</p>
             </div>
-            <Badge className={`${sc.color} text-base px-4 py-2`}>
-              {sc.icon} {sc.label}
-            </Badge>
+            <div className="flex items-center gap-3 flex-wrap">
+              <PrintOrderSheet
+                order={{ ...o, items: (o.items ?? []) as any[] }}
+                baseUrl={window.location.origin}
+              />
+              <Badge className={`${sc.color} text-base px-4 py-2`}>
+                {sc.icon} {sc.label}
+              </Badge>
+            </div>
           </div>
         </div>
 
