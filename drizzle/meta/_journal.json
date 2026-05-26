@@ -253,6 +253,13 @@
       "when": 1779678091835,
       "tag": "0035_thick_martin_li",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1779759703870,
+      "tag": "0036_curved_white_queen",
+      "breakpoints": true
     }
   ]
 }

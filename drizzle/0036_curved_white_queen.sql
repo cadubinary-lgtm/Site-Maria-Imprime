@@ -1,0 +1,1 @@
+ALTER TABLE `variationTypes` ADD `globalVariationId` int;

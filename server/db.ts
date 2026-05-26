@@ -316,8 +316,10 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
   const gv = globalVariation[0];
   
   // Create a new variation for this product based on the global one
+  // Save globalVariationId to track the link for future sync
   const insertResult = await db.insert(variationTypes).values({
     productId,
+    globalVariationId,
     type: gv.type,
     name: gv.name,
     slug: gv.slug,
@@ -453,6 +455,52 @@ export async function deleteVariationType(id: number) {
   const result = await db.delete(variationTypes)
     .where(eq(variationTypes.id, id));
   return result;
+}
+
+/**
+ * Sincroniza as opções de uma variação global para todas as cópias vinculadas (globalVariationId).
+ * Chamada após criar, editar ou excluir uma opção na variação global.
+ */
+export async function syncGlobalVariationOptions(globalVariationId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Buscar todas as cópias de produto vinculadas a esta variação global
+  const linkedCopies = await db.select({ id: variationTypes.id })
+    .from(variationTypes)
+    .where(eq(variationTypes.globalVariationId, globalVariationId));
+
+  if (linkedCopies.length === 0) return { synced: 0 };
+
+  // Buscar as opções atuais da variação global
+  const globalOptions = await db.select().from(variationOptions)
+    .where(eq(variationOptions.variationTypeId, globalVariationId));
+
+  for (const copy of linkedCopies) {
+    // Remover todas as opções atuais da cópia
+    const existingOptions = await db.select({ id: variationOptions.id })
+      .from(variationOptions)
+      .where(eq(variationOptions.variationTypeId, copy.id));
+
+    for (const opt of existingOptions) {
+      await db.delete(orderItemVariations)
+        .where(eq(orderItemVariations.variationOptionId, opt.id));
+    }
+    await db.delete(variationOptions)
+      .where(eq(variationOptions.variationTypeId, copy.id));
+
+    // Recriar as opções a partir da variação global
+    for (const option of globalOptions) {
+      await db.insert(variationOptions).values({
+        variationTypeId: copy.id,
+        name: option.name,
+        description: option.description,
+        priceModifier: option.priceModifier,
+      });
+    }
+  }
+
+  return { synced: linkedCopies.length };
 }
 
 export async function updateVariationType(id: number, data: Partial<InsertVariationType>) {
