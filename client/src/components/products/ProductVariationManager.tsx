@@ -171,6 +171,16 @@ export function ProductVariationManager() {
   // Get utils for invalidation
   const utils = trpc.useUtils();
 
+  // Helper: invalidar ambas as listas
+  const invalidateBoth = async () => {
+    await utils.variations.getGlobal.invalidate();
+    refetchGlobalVariationTypes();
+    if (selectedProductId) {
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
+    }
+  };
+
   // Mutations
   const createVariationTypeMutation = trpc.adminVariations.createType.useMutation();
   const createVariationOptionMutation = trpc.adminVariations.createOption.useMutation();
@@ -192,14 +202,19 @@ export function ProductVariationManager() {
   // Form states
   const [newVariationTypeName, setNewVariationTypeName] = useState("");
   const [newVariationTypeRequired, setNewVariationTypeRequired] = useState(true);
+  const [newGlobalVariationTypeName, setNewGlobalVariationTypeName] = useState("");
+  const [newGlobalVariationTypeRequired, setNewGlobalVariationTypeRequired] = useState(true);
   const [newOptionName, setNewOptionName] = useState("");
   const [newOptionPrice, setNewOptionPrice] = useState("");
+  // Por variação global expandida: campos de nova opção separados
+  const [globalOptionNames, setGlobalOptionNames] = useState<Record<number, string>>({});
+  const [globalOptionPrices, setGlobalOptionPrices] = useState<Record<number, string>>({});
   const [editingOptionName, setEditingOptionName] = useState("");
   const [editingOptionPrice, setEditingOptionPrice] = useState("");
 
+  // Adicionar opção a uma variação do produto (aba Gerenciar)
   const handleAddOption = async () => {
     const variationId = editingVariationType || editingGlobalVariationType;
-    console.log("[DEBUG] handleAddOption - editingVariationType:", editingVariationType, "editingGlobalVariationType:", editingGlobalVariationType, "variationId:", variationId);
     if (!variationId || !newOptionName) {
       toast.error("Preencha o nome da opção");
       return;
@@ -215,12 +230,34 @@ export function ProductVariationManager() {
       toast.success("Opção adicionada!");
       setNewOptionName("");
       setNewOptionPrice("");
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
+      await invalidateBoth();
+    } catch (error) {
+      toast.error("Erro ao adicionar opção");
+      console.error(error);
+    }
+  };
+
+  // Adicionar opção diretamente a uma variação global (painel roxo)
+  const handleAddGlobalOption = async (variationId: number) => {
+    const name = globalOptionNames[variationId] || "";
+    const price = globalOptionPrices[variationId] || "0";
+    if (!name.trim()) {
+      toast.error("Preencha o nome da opção");
+      return;
+    }
+
+    try {
+      await createVariationOptionMutation.mutateAsync({
+        variationTypeId: variationId,
+        name,
+        priceModifier: (parseFloat(price) || 0).toString(),
+      });
+
+      toast.success("Opção adicionada!");
+      setGlobalOptionNames((prev) => ({ ...prev, [variationId]: "" }));
+      setGlobalOptionPrices((prev) => ({ ...prev, [variationId]: "" }));
+      // Invalidar ambas as listas para sincronizar
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao adicionar opção");
       console.error(error);
@@ -234,10 +271,8 @@ export function ProductVariationManager() {
       await deleteVariationTypeMutation.mutateAsync({ id });
       toast.success("Tipo de variação removido!");
       setEditingVariationType(null);
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
+      // Invalidar ambas as listas
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao remover tipo de variação");
       console.error(error);
@@ -250,12 +285,8 @@ export function ProductVariationManager() {
     try {
       await deleteVariationOptionMutation.mutateAsync({ id });
       toast.success("Opção removida!");
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
+      // Invalidar ambas as listas
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao remover opção");
       console.error(error);
@@ -279,12 +310,8 @@ export function ProductVariationManager() {
       setEditingOptionId(null);
       setEditingOptionName("");
       setEditingOptionPrice("");
-      if (selectedProductId) {
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      await utils.variations.getGlobal.invalidate();
-      refetchGlobalVariationTypes();
+      // Invalidar ambas as listas
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao atualizar opção");
       console.error(error);
@@ -306,22 +333,8 @@ export function ProductVariationManager() {
       toast.success("Nome atualizado!");
       setEditingNameId(null);
       setEditingNameValue("");
-      
-      // Verificar se a variação editada é do produto ou global
-      const editedVariation = variationTypes.find((vt: VariationType) => vt.id === editingNameId);
-      const isGlobalVariation = globalVariationTypes.find((vt: VariationType) => vt.id === editingNameId);
-      
-      if (editedVariation && selectedProductId) {
-        // Variação do produto
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      
-      if (isGlobalVariation) {
-        // Variação global
-        await utils.variations.getGlobal.invalidate();
-        refetchGlobalVariationTypes();
-      }
+      // Invalidar ambas as listas
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao atualizar nome");
       console.error(error);
@@ -336,28 +349,15 @@ export function ProductVariationManager() {
       });
 
       toast.success(newRequired ? "Marcado como Obrigatório" : "Marcado como Opcional");
-      
-      // Verificar se a variação editada é do produto ou global
-      const editedVariation = variationTypes.find((vt: VariationType) => vt.id === id);
-      const isGlobalVariation = globalVariationTypes.find((vt: VariationType) => vt.id === id);
-      
-      if (editedVariation && selectedProductId) {
-        // Variação do produto
-        await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
-        refetchVariationTypes();
-      }
-      
-      if (isGlobalVariation) {
-        // Variação global
-        await utils.variations.getGlobal.invalidate();
-        refetchGlobalVariationTypes();
-      }
+      // Invalidar ambas as listas
+      await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao atualizar obrigatoriedade");
       console.error(error);
     }
   };
 
+  // Adicionar variação ao produto selecionado (aba Gerenciar)
   const handleAddVariationType = async () => {
     if (!selectedProductId || !newVariationTypeName) {
       toast.error("Selecione um produto e preencha o nome da variação");
@@ -379,6 +379,32 @@ export function ProductVariationManager() {
       refetchVariationTypes();
     } catch (error) {
       toast.error("Erro ao adicionar tipo de variação");
+      console.error(error);
+    }
+  };
+
+  // Adicionar variação GLOBAL (painel roxo) — productId = null
+  const handleAddGlobalVariationType = async () => {
+    if (!newGlobalVariationTypeName.trim()) {
+      toast.error("Preencha o nome da variação");
+      return;
+    }
+
+    try {
+      await createVariationTypeMutation.mutateAsync({
+        productId: null,
+        type: 'material' as const,
+        name: newGlobalVariationTypeName,
+        isRequired: newGlobalVariationTypeRequired,
+      });
+
+      toast.success("Tipo de variação global criado!");
+      setNewGlobalVariationTypeName("");
+      setNewGlobalVariationTypeRequired(true);
+      // Invalidar ambas as listas para sincronizar
+      await invalidateBoth();
+    } catch (error) {
+      toast.error("Erro ao criar variação global");
       console.error(error);
     }
   };
@@ -599,47 +625,52 @@ export function ProductVariationManager() {
           <CardTitle className="text-purple-900">📚 Tipos de Variações Cadastrados no Sistema</CardTitle>
           <CardDescription>
             Variações globais disponíveis para reutilizar em qualquer produto. Clique para expandir e visualizar opções.
+            {selectedProductId && (
+              <span className="ml-2 text-purple-700 font-medium">
+                — Use o botão "Adicionar ao Produto" para vincular ao produto selecionado.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Add New Global Variation Type */}
           <div className="border rounded-lg p-4 bg-white">
-            <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variacao Global</h3>
+            <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação Global</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="globalVariationType">Nome da Variacao</Label>
+                  <Label htmlFor="globalVariationType">Nome da Variação</Label>
                   <Input
                     id="globalVariationType"
                     placeholder="Ex: Material, Acabamento, Tamanho"
-                    value={newVariationTypeName}
-                    onChange={(e) => setNewVariationTypeName(e.target.value)}
+                    value={newGlobalVariationTypeName}
+                    onChange={(e) => setNewGlobalVariationTypeName(e.target.value)}
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="globalRequired">Obrigatorio?</Label>
+                  <Label htmlFor="globalRequired">Obrigatório?</Label>
                   <Select
-                    value={newVariationTypeRequired ? "true" : "false"}
-                    onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
+                    value={newGlobalVariationTypeRequired ? "true" : "false"}
+                    onValueChange={(value) => setNewGlobalVariationTypeRequired(value === "true")}
                   >
                     <SelectTrigger id="globalRequired" className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="true">Sim</SelectItem>
-                      <SelectItem value="false">Nao</SelectItem>
+                      <SelectItem value="false">Não</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end">
                   <Button
-                    onClick={handleAddVariationType}
+                    onClick={handleAddGlobalVariationType}
                     className="w-full bg-purple-600 hover:bg-purple-700"
                     disabled={createVariationTypeMutation.isPending}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Tipo
+                    Adicionar Tipo Global
                   </Button>
                 </div>
               </div>
@@ -648,7 +679,7 @@ export function ProductVariationManager() {
 
           {/* Global Variation Types List */}
           {globalVariationTypes.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhuma variacao global cadastrada. Use o formulario acima para criar uma.</p>
+            <p className="text-gray-500 text-sm">Nenhuma variação global cadastrada. Use o formulário acima para criar uma.</p>
           ) : (
             <div className="grid gap-3">
               {globalVariationTypes.map((vt: VariationType) => {
@@ -719,7 +750,7 @@ export function ProductVariationManager() {
                             disabled={linkGlobalMutation.isPending}
                           >
                             <Plus className="w-4 h-4 mr-1" />
-                            Adicionar
+                            Adicionar ao Produto
                           </Button>
                         )}
                       </div>
@@ -728,6 +759,49 @@ export function ProductVariationManager() {
                     {/* Expanded Content - Opções */}
                     {isExpanded && (
                       <div className="border-t bg-gray-50 p-4 space-y-4">
+                        {/* Editar opção existente */}
+                        {editingOptionId && (
+                          <div className="border rounded-lg p-3 bg-yellow-50 border-yellow-300">
+                            <h5 className="font-semibold text-sm mb-3">Editar Opção</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <Label className="text-xs">Nome</Label>
+                                <Input
+                                  value={editingOptionName}
+                                  onChange={(e) => setEditingOptionName(e.target.value)}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Preço (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={editingOptionPrice}
+                                  onChange={(e) => setEditingOptionPrice(e.target.value)}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div className="flex items-end gap-2">
+                                <Button
+                                  onClick={handleUpdateOption}
+                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
+                                  disabled={updateVariationOptionMutation.isPending}
+                                >
+                                  Salvar
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); }}
+                                  className="text-sm"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         <div>
                           <h5 className="font-semibold text-sm mb-3">Opções ({vt.options?.length || 0})</h5>
                           {!vt.options || vt.options.length === 0 ? (
@@ -773,7 +847,7 @@ export function ProductVariationManager() {
                           )}
                         </div>
 
-                        {/* Adicionar Nova Opção */}
+                        {/* Adicionar Nova Opção — campos independentes por variação */}
                         <div className="border-t pt-4">
                           <h5 className="font-semibold text-sm mb-3">Adicionar Nova Opção</h5>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -782,8 +856,10 @@ export function ProductVariationManager() {
                               <Input
                                 id={`global-option-name-${vt.id}`}
                                 placeholder="Ex: Vinil Brilho"
-                                value={newOptionName}
-                                onChange={(e) => setNewOptionName(e.target.value)}
+                                value={globalOptionNames[vt.id] || ""}
+                                onChange={(e) =>
+                                  setGlobalOptionNames((prev) => ({ ...prev, [vt.id]: e.target.value }))
+                                }
                                 className="mt-1 text-sm"
                               />
                             </div>
@@ -794,17 +870,16 @@ export function ProductVariationManager() {
                                 type="number"
                                 step="0.01"
                                 placeholder="0.00"
-                                value={newOptionPrice}
-                                onChange={(e) => setNewOptionPrice(e.target.value)}
+                                value={globalOptionPrices[vt.id] || ""}
+                                onChange={(e) =>
+                                  setGlobalOptionPrices((prev) => ({ ...prev, [vt.id]: e.target.value }))
+                                }
                                 className="mt-1 text-sm"
                               />
                             </div>
                             <div className="flex items-end">
                               <Button
-                                onClick={() => {
-                                  setEditingGlobalVariationType(vt.id);
-                                  handleAddOption();
-                                }}
+                                onClick={() => handleAddGlobalOption(vt.id)}
                                 className="w-full bg-green-600 hover:bg-green-700 text-sm"
                                 disabled={createVariationOptionMutation.isPending}
                               >
@@ -819,6 +894,27 @@ export function ProductVariationManager() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Editar nome de variação (global ou produto) */}
+          {editingNameId && (
+            <div className="border rounded-lg p-4 bg-white">
+              <h3 className="font-semibold mb-3">Editar Nome da Variação</h3>
+              <div className="flex gap-3">
+                <Input
+                  value={editingNameValue}
+                  onChange={(e) => setEditingNameValue(e.target.value)}
+                  placeholder="Novo nome"
+                  className="flex-1"
+                />
+                <Button onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700">
+                  Salvar
+                </Button>
+                <Button variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(""); }}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
