@@ -825,9 +825,29 @@ export const appRouter = router({
         // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-        // 3b. Criar conta opcional (se cliente não logado e forneceu senha)
+        // 3b. Verificar se e-mail já está cadastrado (bloquear antes de criar pedido)
+        if (!userId && !resolvedCustomerId && input.guestEmail) {
+          try {
+            const { customerAccounts: caCheck } = await import("../drizzle/schema");
+            const { eq: eqCheck } = await import("drizzle-orm");
+            const dbCheck = await (await import("./db")).getDb();
+            if (dbCheck) {
+              const [existingCheck] = await dbCheck.select({ id: caCheck.id }).from(caCheck).where(eqCheck(caCheck.email, input.guestEmail)).limit(1);
+              if (existingCheck) {
+                throw new TRPCError({
+                  code: "CONFLICT",
+                  message: "Este e-mail já possui uma conta cadastrada. Por favor, faça login para continuar.",
+                });
+              }
+            }
+          } catch (e: any) {
+            if (e instanceof TRPCError) throw e;
+          }
+        }
+
+        // 3c. Criar conta opcional (se cliente não logado e forneceu senha)
         let finalCustomerId = resolvedCustomerId;
-        if (!userId && !resolvedCustomerId && input.createAccount && input.accountPassword && input.guestEmail) {
+        if (!userId && !resolvedCustomerId && input.accountPassword && input.guestEmail) {
           try {
             const { customerAccounts, customerSessions } = await import("../drizzle/schema");
             const { eq: eqInner } = await import("drizzle-orm");
@@ -872,10 +892,14 @@ export const appRouter = router({
                   // Definir cookie de sessão
                   const { getSessionCookieOptions } = await import("./_core/cookies");
                   res.cookie("customer_session", sessionToken, getSessionCookieOptions(req));
+                  // Enviar e-mail de boas-vindas
+                  try {
+                    const { sendWelcomeEmail } = await import("./emailService");
+                    await sendWelcomeEmail(input.guestEmail, firstName, emailVerificationToken);
+                  } catch (_) {}
                 }
-              } else {
-                finalCustomerId = existing.id;
               }
+              // E-mail já verificado acima, não deve chegar aqui
             }
           } catch (e) {
             console.error("[CHECKOUT] Erro ao criar conta opcional:", e);
