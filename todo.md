@@ -1904,3 +1904,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Pré-ativar 3 prazos padrão no formulário Novo Produto (Prazo Normal, 24 Horas, Mesmo Dia)
 - [x] Salvar prazos de produção no banco ao criar novo produto
 - [x] Melhorar visual da seção de prazos com botão Novo Prazo e campos editáveis inline
+
+## Fase 43: Correção Fluxo Checkout - Conta de Cliente
+- [ ] Criar conta customerAccount quando senha é fornecida no checkout
+- [ ] Bloquear e-mail já cadastrado em customerAccounts no checkout
+- [ ] Enviar e-mail de confirmação de conta criada
+- [ ] Exibir mensagem no frontend quando conta é criada com sucesso

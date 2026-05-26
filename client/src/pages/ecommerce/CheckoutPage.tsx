@@ -234,7 +234,7 @@ export default function CheckoutPage() {
         notes: notesWithInfo || undefined,
         guestEmail: guestEmail.trim() || undefined,
         guestName: fullName.trim() || undefined,
-        createAccountPassword: createAccountPassword.trim() || undefined,
+        accountPassword: createAccountPassword.trim() || undefined,
       };
       console.log("[CHECKOUT-FRONTEND] payload enviado:", JSON.stringify(payload, null, 2));
 
@@ -244,10 +244,15 @@ export default function CheckoutPage() {
       setLocation(`/confirmacao/${result.orderNumber}`);
     } catch (err: any) {
       console.error("[CHECKOUT-FRONTEND] ❌ ERRO:", err);
-      console.error("[CHECKOUT-FRONTEND] err.message:", err?.message);
-      console.error("[CHECKOUT-FRONTEND] err.data:", err?.data);
-      console.error("[CHECKOUT-FRONTEND] err.shape:", err?.shape);
-      toast.error(err?.message ?? "Erro ao finalizar pedido");
+      const errMsg = err?.message ?? err?.data?.message ?? "Erro ao finalizar pedido";
+      // Se e-mail já cadastrado, redirecionar para login
+      if (errMsg.includes("já possui uma conta") || err?.data?.httpStatus === 409) {
+        toast.error(errMsg, { duration: 6000 });
+        // Voltar para step de dados para o cliente ver o e-mail
+        setStep("dados");
+      } else {
+        toast.error(errMsg);
+      }
     } finally {
       setIsSubmitting(false);
     }
