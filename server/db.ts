@@ -458,6 +458,22 @@ export async function deleteVariationType(id: number) {
 }
 
 /**
+ * Sincroniza o nome de uma variação global para todas as cópias vinculadas.
+ * Chamada após editar o nome de uma variação global.
+ */
+export async function syncGlobalVariationName(globalVariationId: number, newName: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Atualizar o nome em todas as cópias vinculadas
+  await db.update(variationTypes)
+    .set({ name: newName, updatedAt: new Date() })
+    .where(eq(variationTypes.globalVariationId, globalVariationId));
+
+  return { success: true };
+}
+
+/**
  * Sincroniza as opções de uma variação global para todas as cópias vinculadas (globalVariationId).
  * Chamada após criar, editar ou excluir uma opção na variação global.
  */

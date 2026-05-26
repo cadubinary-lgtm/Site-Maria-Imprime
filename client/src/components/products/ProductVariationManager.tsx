@@ -191,6 +191,7 @@ export function ProductVariationManager() {
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
   const linkGlobalMutation = trpc.adminVariations.linkGlobal.useMutation();
   const syncGlobalOptionsMutation = trpc.adminVariations.syncGlobalOptions.useMutation();
+  const syncGlobalNameMutation = trpc.adminVariations.syncGlobalName.useMutation();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -342,6 +343,16 @@ export function ProductVariationManager() {
         id: editingNameId,
         name: editingNameValue,
       });
+
+      // Verificar se a variação editada é global (está na lista global)
+      const isGlobal = globalVariationTypes.some((vt: any) => vt.id === editingNameId);
+      if (isGlobal) {
+        // Propagar o novo nome para todas as cópias vinculadas ao produto
+        await syncGlobalNameMutation.mutateAsync({
+          globalVariationId: editingNameId,
+          newName: editingNameValue,
+        });
+      }
 
       toast.success("Nome atualizado!");
       setEditingNameId(null);
