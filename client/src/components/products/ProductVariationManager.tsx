@@ -56,7 +56,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
     >
       {/* Header - Clicável para expandir/recolher */}
       <div
-        onClick={() => onToggleExpand(vt.id)}
+        onClick={() => onToggleExpand(isExpanded ? null : vt.id)}
         className={`p-4 cursor-pointer transition ${
           isExpanded
             ? "bg-orange-50 border-b border-orange-300"
