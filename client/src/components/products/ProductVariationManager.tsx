@@ -701,21 +701,43 @@ export function ProductVariationManager() {
                   <div key={vt.id} className="border rounded-lg bg-white overflow-hidden">
                     {/* Header - Clicável para expandir/recolher */}
                     <div
-                      onClick={() => setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
-                      className="p-4 hover:bg-purple-50 transition cursor-pointer flex justify-between items-start gap-4"
+                      onClick={() => editingNameId === vt.id ? undefined : setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
+                      className={`p-4 hover:bg-purple-50 transition flex justify-between items-start gap-4 ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <div className={`transform transition-transform text-purple-900 ${isExpanded ? 'rotate-90' : ''}`}>
-                            ▶
+                            ►
                           </div>
-                          <h4 className="font-semibold text-purple-900">{vt.name}</h4>
+                          {editingNameId === vt.id ? (
+                            <div className="flex items-center gap-2 flex-1" onClick={(e) => e.stopPropagation()}>
+                              <Input
+                                autoFocus
+                                value={editingNameValue}
+                                onChange={(e) => setEditingNameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleEditName();
+                                  if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
+                                }}
+                                className="font-semibold text-purple-900 h-8 text-base"
+                              />
+                              <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>
+                                Salvar
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8">
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <h4 className="font-semibold text-purple-900">{vt.name}</h4>
+                          )}
                         </div>
                         <p className="text-sm text-gray-600 ml-6">
                           {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
                         </p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        {editingNameId !== vt.id && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -728,6 +750,7 @@ export function ProductVariationManager() {
                           <Edit2 className="w-4 h-4 mr-1" />
                           Editar Nome
                         </Button>
+                        )}
                         <div className="flex items-center gap-2">
                           <Label className="text-sm font-medium">Obrigatório:</Label>
                           <RadioGroup
@@ -910,26 +933,7 @@ export function ProductVariationManager() {
             </div>
           )}
 
-          {/* Editar nome de variação (global ou produto) */}
-          {editingNameId && (
-            <div className="border rounded-lg p-4 bg-white">
-              <h3 className="font-semibold mb-3">Editar Nome da Variação</h3>
-              <div className="flex gap-3">
-                <Input
-                  value={editingNameValue}
-                  onChange={(e) => setEditingNameValue(e.target.value)}
-                  placeholder="Novo nome"
-                  className="flex-1"
-                />
-                <Button onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700">
-                  Salvar
-                </Button>
-                <Button variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(""); }}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+
         </CardContent>
       </Card>
     </div>
