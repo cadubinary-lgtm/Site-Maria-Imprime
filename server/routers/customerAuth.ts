@@ -923,4 +923,19 @@ export const customerAuthRouter = router({
       await db.delete(customerAccounts).where(eq(customerAccounts.id, input.customerId));
       return { success: true };
     }),
+
+  /**
+   * Verificar se e-mail já está cadastrado (para validação no checkout)
+   */
+  checkEmailExists: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .query(async ({ input }) => {
+      const db = await requireDb();
+      const [existing] = await db
+        .select({ id: customerAccounts.id })
+        .from(customerAccounts)
+        .where(eq(customerAccounts.email, input.email.toLowerCase().trim()))
+        .limit(1);
+      return { exists: !!existing };
+    }),
 });
