@@ -47,6 +47,7 @@ import {
   updateVariationOption,
   reorderVariationTypes,
   syncGlobalVariationOptions,
+  syncGlobalVariationName,
   getOrderItemVariations,
   addOrderItemVariation,
   createFileCheck,
@@ -493,6 +494,14 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await syncGlobalVariationOptions(input.globalVariationId);
+      }),
+    syncGlobalName: adminProcedure
+      .input(z.object({
+        globalVariationId: z.number(),
+        newName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return await syncGlobalVariationName(input.globalVariationId, input.newName);
       }),
   }),
 
