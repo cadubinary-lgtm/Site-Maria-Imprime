@@ -91,6 +91,7 @@ export default function CheckoutPage() {
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
+  const trpcUtils = trpc.useUtils();
 
   // Pré-preencher com dados do perfil do cliente quando carregarem
   useEffect(() => {
@@ -180,8 +181,22 @@ export default function CheckoutPage() {
     return true;
   };
 
-  const handleNext = () => {
-    if (step === "dados"     && !validateDados())     return;
+  const handleNext = async () => {
+    if (step === "dados") {
+      if (!validateDados()) return;
+      // Verificar se e-mail já está cadastrado antes de avançar
+      if (!customerProfile && guestEmail.trim()) {
+        try {
+          const result = await trpcUtils.customerAuth.checkEmailExists.fetch({ email: guestEmail.trim() });
+          if (result.exists) {
+            toast.error("Este e-mail já possui uma conta cadastrada. Por favor, faça login para continuar.", { duration: 6000 });
+            return;
+          }
+        } catch {
+          // Ignorar erro de rede — validação também ocorre no backend
+        }
+      }
+    }
     if (step === "endereco"  && !validateEndereco())  return;
     if (step === "entrega"   && !validateEntrega())   return;
     if (step === "pagamento" && !validatePagamento()) return;
