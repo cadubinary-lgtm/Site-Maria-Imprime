@@ -37,6 +37,8 @@ interface OrderSummaryProps {
   deliveryTax?: number;
   /** Indica explicitamente se é produto cobrado por m² */
   isAreaProduct?: boolean;
+  /** Opção de frete selecionada no configurador */
+  selectedFrete?: { id: string; name: string; price: number; days: string } | null;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -56,6 +58,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   deliveryOption,
   deliveryTax = 0,
   isAreaProduct: isAreaProductProp,
+  selectedFrete,
 }) => {
   /**
    * Regras de cálculo:
@@ -65,6 +68,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
    *   Multiplicar por quantity para obter o total.
    */
   const isAreaProduct = isAreaProductProp === true || (calculatorValue !== undefined && calculatorValue > 0);
+  const fretePrice = selectedFrete?.price ?? 0;
   const finalPrice = isAreaProduct ? basePrice : basePrice * quantity;
 
   return (
@@ -196,6 +200,20 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
           </div>
         </div>
 
+        {/* Frete selecionado no configurador */}
+        {selectedFrete && (
+          <div className="space-y-1 pb-3 border-b">
+            <p className="text-xs font-medium text-muted-foreground">Entrega</p>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">{selectedFrete.name}</span>
+              <span className={`font-semibold ${selectedFrete.price === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                {selectedFrete.price === 0 ? 'Grátis' : `R$ ${selectedFrete.price.toFixed(2)}`}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">{selectedFrete.days}</p>
+          </div>
+        )}
+
         {/* Total */}
         <div className="space-y-2 pb-4 border-b">
           {!isAreaProduct && (
@@ -210,9 +228,15 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
               <span className="font-medium text-orange-600">+R$ {deliveryTax.toFixed(2)}</span>
             </div>
           )}
+          {fretePrice > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Frete</span>
+              <span className="font-medium">R$ {fretePrice.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span className="text-primary">R$ {(finalPrice + deliveryTax).toFixed(2)}</span>
+            <span className="text-primary">R$ {(finalPrice + deliveryTax + fretePrice).toFixed(2)}</span>
           </div>
         </div>
 

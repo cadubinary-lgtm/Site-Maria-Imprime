@@ -38,6 +38,7 @@ export default function ProductDetail() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
   const [deliveryTax, setDeliveryTax] = useState(0);
+  const [selectedFreteFromConfigurador, setSelectedFreteFromConfigurador] = useState<any>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [configuradorRequiredCount, setConfiguradorRequiredCount] = useState(0);
   const [configuradorSelectedCount, setConfiguradorSelectedCount] = useState(0);
@@ -519,6 +520,10 @@ export default function ProductDetail() {
                     setDeliveryTax(config.deliveryTax || 0);
                   }
                 }
+                // Rastrear frete selecionado (opção de entrega do configurador)
+                if (config.selectedFrete) {
+                  setSelectedFreteFromConfigurador(config.selectedFrete);
+                }
               }}
               onAddToCart={(config) => {
                 // Adicionar ao carrinho
@@ -650,6 +655,7 @@ export default function ProductDetail() {
             calculatorValue={calculatorArea}
             onCalculatorChange={setCalculatorArea}
             isAreaProduct={product.calculationType === 'm2'}
+            selectedFrete={selectedFreteFromConfigurador}
           />
         </div>
       </div>
