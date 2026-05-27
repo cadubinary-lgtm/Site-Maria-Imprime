@@ -45,6 +45,7 @@ import { AdminPricingRules } from "./pages/admin/AdminPricingRules";
 import AdminRulesBuilder from "./pages/admin/AdminRulesBuilder";
 import AdminRulesManager from "./pages/admin/AdminRulesManager";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminKanban from "./pages/admin/AdminKanban";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
@@ -85,6 +86,7 @@ function AdminRoutes() {
           <Route path="/admin/regras" component={AdminPricingRules} />
           <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
           <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
+          <Route path="/admin/pedidos/kanban" component={AdminKanban} />
           <Route path="/admin/pedidos" component={AdminOrders} />
           <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
           <Route path="/admin/clientes" component={ClientsManager} />
