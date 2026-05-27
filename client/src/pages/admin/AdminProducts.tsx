@@ -220,16 +220,38 @@ export default function AdminProducts() {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search Bar and Bulk Actions */}
-      <div className="mb-8 space-y-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/admin">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Link>
+            <h1 className="text-2xl font-bold text-gray-900">Gerenciar Produtos</h1>
+          </div>
+          <Link href="/admin">
+            <Button className="bg-orange-500 hover:bg-orange-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Produto
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      {/* Products List */}
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        {/* Search Bar and Bulk Actions */}
+        <div className="mb-8 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <Input
@@ -280,11 +302,11 @@ export default function AdminProducts() {
                 </Button>
               )}
             </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {!products || products.length === 0 ? (
-        <Card>
+        {!products || products.length === 0 ? (
+          <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-gray-600">Nenhum produto criado ainda</p>
               <Link href="/admin">
@@ -293,9 +315,9 @@ export default function AdminProducts() {
                 </Button>
               </Link>
             </CardContent>
-        </Card>
-      ) : filteredProducts.length === 0 ? (
-        <Card>
+          </Card>
+        ) : filteredProducts.length === 0 ? (
+          <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-gray-600">Nenhum produto encontrado com "{searchQuery}"</p>
               <Button
@@ -306,10 +328,10 @@ export default function AdminProducts() {
                 Limpar busca
               </Button>
             </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6">
-          {filteredProducts.map((product: any) => (
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {filteredProducts.map((product: any) => (
               <Card key={product.id} className={selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""}>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
@@ -551,9 +573,10 @@ export default function AdminProducts() {
                   </div>
                 </CardContent>
               </Card>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
