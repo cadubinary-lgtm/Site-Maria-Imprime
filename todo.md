@@ -1910,3 +1910,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Bloquear e-mail já cadastrado em customerAccounts no checkout
 - [ ] Enviar e-mail de confirmação de conta criada
 - [ ] Exibir mensagem no frontend quando conta é criada com sucesso
+
+## Correções de Checkout (Sessão Atual)
+- [x] Ocultar etapa de endereço quando retirada na loja selecionada (isStorePickupSelected)
+- [x] Vincular prazo de entrega selecionado no ProductDetail ao carrinho (campo notes)
+- [x] Verificar atualização do frete no resumo do pedido (já funcionava via selectedFrete state)

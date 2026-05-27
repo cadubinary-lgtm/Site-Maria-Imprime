@@ -230,7 +230,7 @@ export default function AdminCustomers() {
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Cadastro</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600">Retirada</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Pagamento na Retirada</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Ações</th>
                     </tr>
                   </thead>
