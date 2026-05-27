@@ -268,12 +268,18 @@ export default function ProductDetail() {
         resolvedArtFileUrl = url;
       }
 
+      // Incluir prazo de entrega nas notes se selecionado
+      const deliveryNote = selectedDeliveryOption
+        ? `Prazo: ${selectedDeliveryOption.name}${deliveryTax > 0 ? ` (+R$ ${deliveryTax.toFixed(2)})` : ""}`
+        : "";
+      const combinedNotes = [notes, deliveryNote].filter(Boolean).join(" | ") || undefined;
+
       await addToCartMutation.mutateAsync({
         productId,
         quantity,
         selectedAttributes: attrsJson,
         priceAtCart: finalPrice,
-        notes: notes || undefined,
+        notes: combinedNotes,
         artFileUrl: resolvedArtFileUrl,
       });
 

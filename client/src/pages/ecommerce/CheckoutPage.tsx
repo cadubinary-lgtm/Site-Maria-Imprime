@@ -120,6 +120,7 @@ export default function CheckoutPage() {
   const totalPrice = subtotal + fretePrice;
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
+  const isStorePickupSelected = selectedFrete?.id === "retirada";
 
   const handleCepBlur = async () => {
     const cep = zipCode.replace(/\D/g, "");
@@ -200,16 +201,33 @@ export default function CheckoutPage() {
           // Ignorar erro de rede — validação também ocorre no backend
         }
       }
+      // Pular endereço se retirada na loja já selecionada
+      if (isStorePickupSelected) { setStep("entrega"); return; }
     }
     if (step === "endereco"  && !validateEndereco())  return;
     if (step === "entrega"   && !validateEntrega())   return;
+    // Pular endereço ao voltar da entrega se retirada na loja
+    if (step === "entrega" && isStorePickupSelected) {
+      // ao avançar normalmente para pagamento
+    }
     if (step === "pagamento" && !validatePagamento()) return;
     const next = STEPS[stepIndex + 1];
+    // Pular etapa de endereço se retirada na loja
+    if (next?.id === "endereco" && isStorePickupSelected) {
+      setStep("entrega");
+      return;
+    }
     if (next) setStep(next.id);
   };
 
   const handleBack = () => {
     const prev = STEPS[stepIndex - 1];
+    // Pular etapa de endereço ao voltar se retirada na loja
+    if (prev?.id === "endereco" && isStorePickupSelected) {
+      const prevPrev = STEPS[stepIndex - 2];
+      if (prevPrev) setStep(prevPrev.id);
+      return;
+    }
     if (prev) setStep(prev.id);
   };
 
@@ -430,8 +448,8 @@ export default function CheckoutPage() {
                   </>
                 )}
 
-                {/* ETAPA 2: Endereço */}
-                {step === "endereco" && (
+                {/* ETAPA 2: Endereço — oculto para retirada na loja */}
+                {step === "endereco" && !isStorePickupSelected && (
                   <>
                     {customerProfile?.addressZipCode && (
                       <div className="flex items-start gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-800">
@@ -478,6 +496,15 @@ export default function CheckoutPage() {
                 {/* ETAPA 3: Entrega / Frete */}
                 {step === "entrega" && (
                   <div className="space-y-3">
+                    {isStorePickupSelected && (
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-2">
+                        <span className="text-2xl">🏪</span>
+                        <div>
+                          <p className="font-semibold text-green-800 text-sm">Retirada na Loja selecionada</p>
+                          <p className="text-xs text-green-600">Endereço de entrega não é necessário. Você retirará o pedido em nossa loja.</p>
+                        </div>
+                      </div>
+                    )}
                     {FRETE_OPTIONS.map((option) => {
                       const isSelected = selectedFrete?.id === option.id;
                       return (
