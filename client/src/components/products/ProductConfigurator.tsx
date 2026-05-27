@@ -309,10 +309,16 @@ export function ProductConfigurator({
           width: parseDecimal(dimensions.width as string),
           height: parseDecimal(dimensions.height as string),
         },
+        selectedFrete: {
+          id: selectedFrete.id,
+          name: selectedFrete.name,
+          price: selectedFrete.price,
+          days: selectedFrete.days,
+        },
       };
       onPriceUpdate(calculatedPrice, config);
     }
-  }, [calculatedPrice, selectedValues, attributes, dimensions, selectedDeliveryOption, deliveryOptions]);
+  }, [calculatedPrice, selectedValues, attributes, dimensions, selectedDeliveryOption, deliveryOptions, selectedFreteId]);
 
   if (isLoading) {
     return (
@@ -528,21 +534,6 @@ export function ProductConfigurator({
             />
           </div>
         )}
-
-        {/* Preço Total */}
-        <div className="bg-orange-50 p-4 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold">Preço Total:</span>
-            <span className="text-2xl font-bold text-orange-600">
-              R$ {(calculatedPrice + selectedFrete.price).toFixed(2)}
-            </span>
-          </div>
-          {selectedFrete.price > 0 && (
-            <p className="text-xs text-gray-500 mt-1">
-              Produto: R$ {calculatedPrice.toFixed(2)} + Frete ({selectedFrete.name}): R$ {selectedFrete.price.toFixed(2)}
-            </p>
-          )}
-        </div>
 
 
       </CardContent>
