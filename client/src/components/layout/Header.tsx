@@ -211,7 +211,7 @@ export default function Header() {
                 </Link>
                 <div className="flex items-center gap-2 text-sm">
                   <User className="w-4 h-4" />
-                  <span className="text-gray-700">{user.name || user.email}</span>
+                  <span className="text-gray-700" translate="no">{user.name || user.email}</span>
                 </div>
                 <Button
                   onClick={handleAdminLogout}
@@ -243,7 +243,7 @@ export default function Header() {
                     className="border-orange-200 text-orange-700 hover:bg-orange-50 flex items-center gap-2"
                   >
                     <UserCircle className="w-4 h-4" />
-                    {customer.firstName}
+                    <span translate="no">{customer.firstName}</span>
                   </Button>
                 </Link>
                 <Button
@@ -346,7 +346,7 @@ export default function Header() {
             {isAuthenticated && user ? (
               /* Admin */
               <div className="space-y-2">
-                <div className="text-sm text-gray-700">{user.name || user.email}</div>
+                <div className="text-sm text-gray-700" translate="no">{user.name || user.email}</div>
                 <Link href="/admin">
                   <Button
                     variant="default"
@@ -372,7 +372,7 @@ export default function Header() {
               /* Cliente */
               <div className="space-y-2">
                 <div className="text-sm font-medium text-gray-800">
-                  Olá, {customer.firstName}!
+                  <span translate="no">Olá, {customer.firstName}!</span>
                 </div>
                 <Link href="/meus-pedidos">
                   <Button
