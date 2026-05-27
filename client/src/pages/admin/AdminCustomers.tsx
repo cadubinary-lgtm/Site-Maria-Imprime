@@ -79,7 +79,7 @@ export default function AdminCustomers() {
   const unverifiedCount = customers.filter((c) => !c.emailVerified).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

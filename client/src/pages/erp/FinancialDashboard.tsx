@@ -67,19 +67,7 @@ export default function FinancialDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <Link href="/admin">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-        </Link>
-
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Financeiro</h1>
-          <p className="text-gray-600 mt-2">Visualize faturamento, custos e lucros</p>
-        </div>
+    <div className="space-y-6">
 
         {/* Seletor de período */}
         <Card className="mb-8">
@@ -284,7 +272,6 @@ export default function FinancialDashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

@@ -68,15 +68,15 @@ export default function AdminOrders() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="bg-gray-50 py-8">
+      <div>
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
