@@ -150,7 +150,28 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">AD</span>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Painel Admin</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-12">
         <Tabs defaultValue="produtos" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
@@ -421,6 +442,7 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+      </main>
     </div>
   );
 }

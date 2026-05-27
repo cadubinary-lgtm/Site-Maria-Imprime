@@ -126,7 +126,19 @@ export default function AutomationDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <Link href="/admin">
+          <Button variant="ghost" className="mb-6">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+        </Link>
+
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Automação Inteligente</h1>
+          <p className="text-gray-600 mt-2">Envie notificações por WhatsApp, Email, SMS e mais</p>
+        </div>
 
         {/* Cards de resumo */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
@@ -416,6 +428,7 @@ export default function AutomationDashboard() {
             )}
           </CardContent>
         </Card>
+      </div>
     </div>
   );
 }
