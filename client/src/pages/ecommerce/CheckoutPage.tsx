@@ -38,8 +38,8 @@ const FRETE_OPTIONS: FreteOption[] = [
 
 const STEPS: { id: Step; label: string; icon: React.ReactNode }[] = [
   { id: "dados",     label: "Dados",     icon: <ShoppingBag className="w-4 h-4" /> },
-  { id: "endereco",  label: "Endereço",  icon: <MapPin className="w-4 h-4" /> },
   { id: "entrega",   label: "Entrega",   icon: <Truck className="w-4 h-4" /> },
+  { id: "endereco",  label: "Endereço",  icon: <MapPin className="w-4 h-4" /> },
   { id: "pagamento", label: "Pagamento", icon: <CreditCard className="w-4 h-4" /> },
   { id: "revisao",   label: "Revisão",   icon: <ClipboardList className="w-4 h-4" /> },
 ];
@@ -201,31 +201,23 @@ export default function CheckoutPage() {
           // Ignorar erro de rede — validação também ocorre no backend
         }
       }
-      // Pular endereço se retirada na loja já selecionada
-      if (isStorePickupSelected) { setStep("entrega"); return; }
     }
-    if (step === "endereco"  && !validateEndereco())  return;
-    if (step === "entrega"   && !validateEntrega())   return;
-    // Pular endereço ao voltar da entrega se retirada na loja
+    if (step === "entrega" && !validateEntrega()) return;
+    // Após selecionar entrega: pular endereço se retirada na loja
     if (step === "entrega" && isStorePickupSelected) {
-      // ao avançar normalmente para pagamento
-    }
-    if (step === "pagamento" && !validatePagamento()) return;
-    const next = STEPS[stepIndex + 1];
-    // Pular etapa de endereço se retirada na loja
-    if (next?.id === "endereco" && isStorePickupSelected) {
-      setStep("entrega");
+      setStep("pagamento");
       return;
     }
+    if (step === "endereco" && !validateEndereco()) return;
+    if (step === "pagamento" && !validatePagamento()) return;
+    const next = STEPS[stepIndex + 1];
     if (next) setStep(next.id);
   };
-
   const handleBack = () => {
     const prev = STEPS[stepIndex - 1];
-    // Pular etapa de endereço ao voltar se retirada na loja
+    // Ao voltar do pagamento: pular endereço se retirada na loja
     if (prev?.id === "endereco" && isStorePickupSelected) {
-      const prevPrev = STEPS[stepIndex - 2];
-      if (prevPrev) setStep(prevPrev.id);
+      setStep("entrega");
       return;
     }
     if (prev) setStep(prev.id);
@@ -261,13 +253,17 @@ export default function CheckoutPage() {
       const payload = {
         deliveryFullName: fullName,
         deliveryPhone: phone,
-        deliveryStreet: street,
-        deliveryNumber: number,
-        deliveryComplement: complement || undefined,
-        deliveryNeighborhood: neighborhood,
-        deliveryCity: city,
-        deliveryState: stateUF,
-        deliveryZipCode: zipCode.replace(/\D/g, ""),
+        // Endereço só enviado quando não é retirada na loja
+        ...(isStorePickupSelected ? {} : {
+          deliveryStreet: street,
+          deliveryNumber: number,
+          deliveryComplement: complement || undefined,
+          deliveryNeighborhood: neighborhood,
+          deliveryCity: city,
+          deliveryState: stateUF,
+          deliveryZipCode: zipCode.replace(/\D/g, ""),
+        }),
+        freteId: selectedFrete?.id,
         notes: notesWithInfo || undefined,
         guestEmail: guestEmail.trim() || undefined,
         guestName: fullName.trim() || undefined,
@@ -755,20 +751,31 @@ export default function CheckoutPage() {
                 {step === "revisao" && (
                   <div className="space-y-4">
                     {/* Grid dados + endereço */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className={`grid gap-4 ${isStorePickupSelected ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
                       <div className="bg-gray-50 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-800 mb-2 text-sm">Dados para Entrega</h3>
+                        <h3 className="font-semibold text-gray-800 mb-2 text-sm">Dados do Cliente</h3>
                         <p className="text-sm text-gray-600">{fullName}</p>
                         <p className="text-sm text-gray-600">{phone}</p>
                         {notes && <p className="text-xs text-gray-500 mt-1 italic">Obs: {notes}</p>}
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-800 mb-2 text-sm">Endereço de Entrega</h3>
-                        <p className="text-sm text-gray-600">{street}, {number}{complement ? `, ${complement}` : ""}</p>
-                        <p className="text-sm text-gray-600">{neighborhood}</p>
-                        <p className="text-sm text-gray-600">{city} - {stateUF}</p>
-                        <p className="text-sm text-gray-600">CEP: {zipCode}</p>
-                      </div>
+                      {!isStorePickupSelected && (
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h3 className="font-semibold text-gray-800 mb-2 text-sm">Endereço de Entrega</h3>
+                          <p className="text-sm text-gray-600">{street}, {number}{complement ? `, ${complement}` : ""}</p>
+                          <p className="text-sm text-gray-600">{neighborhood}</p>
+                          <p className="text-sm text-gray-600">{city} - {stateUF}</p>
+                          <p className="text-sm text-gray-600">CEP: {zipCode}</p>
+                        </div>
+                      )}
+                      {isStorePickupSelected && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                          <span className="text-2xl">🏪</span>
+                          <div>
+                            <h3 className="font-semibold text-green-800 text-sm">Retirada na Loja</h3>
+                            <p className="text-xs text-green-600 mt-0.5">Sem necessidade de endereço de entrega</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Entrega selecionada */}

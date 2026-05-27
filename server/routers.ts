@@ -828,13 +828,14 @@ export const appRouter = router({
       .input(z.object({
         deliveryFullName: z.string().min(3),
         deliveryPhone: z.string().min(8),
-        deliveryStreet: z.string().min(3),
-        deliveryNumber: z.string().min(1),
+        deliveryStreet: z.string().optional().default(""),
+        deliveryNumber: z.string().optional().default(""),
         deliveryComplement: z.string().optional(),
-        deliveryNeighborhood: z.string().min(2),
-        deliveryCity: z.string().min(2),
-        deliveryState: z.string().length(2),
-        deliveryZipCode: z.string().min(8),
+        deliveryNeighborhood: z.string().optional().default(""),
+        deliveryCity: z.string().optional().default(""),
+        deliveryState: z.string().optional().default(""),
+        deliveryZipCode: z.string().optional().default(""),
+        freteId: z.string().optional(), // "retirada" = retirada na loja
         notes: z.string().optional(),
         // Compra como convidado
         guestEmail: z.string().email().optional(),
