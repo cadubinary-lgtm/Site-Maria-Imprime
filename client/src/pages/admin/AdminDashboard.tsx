@@ -1,448 +1,182 @@
-import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { Loader2, Package, ShoppingCart, Users, TrendingUp } from "lucide-react";
 
 import { ProductVariationManager } from "@/components/ProductVariationManager";
-import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 
 export default function AdminDashboard() {
-  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionData[]>([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    segment: "",
-    imageUrl: "",
-    calculationType: "unidade",
-    pricePerM2: "",
-    minWidth: "",
-    maxWidth: "",
-    minHeight: "",
-    maxHeight: "",
-  });
-
   const { data: orders, isLoading: ordersLoading } = trpc.admin.getAllOrders.useQuery();
-  const createProductMutation = trpc.admin.createProduct.useMutation();
-  const createDeliveryOptionMutation = trpc.deliveryOptions.create.useMutation();
+  const { data: products, isLoading: productsLoading } = trpc.products.getAll.useQuery();
 
-  // Carregar segmentos dinamicamente do banco
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
-  const SEGMENTS = useMemo(() => {
-    if (!segmentsData || segmentsData.length === 0) return [];
-    return segmentsData.map((seg: any) => ({
-      id: seg.slug,
-      label: `${seg.icon || "📦"} ${seg.name}`,
-    }));
-  }, [segmentsData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validações obrigatórias
-    if (!formData.name.trim()) {
-      toast.error("Nome do produto é obrigatório");
-      return;
-    }
-    
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      toast.error("Preço é obrigatório e deve ser maior que 0");
-      return;
-    }
-    
-    if (!formData.calculationType) {
-      toast.error("Tipo de cobrança é obrigatório");
-      return;
-    }
-    
-    if (formData.calculationType === "m2") {
-      if (!formData.pricePerM2 || parseFloat(formData.pricePerM2) <= 0) {
-        toast.error("Preço por m² é obrigatório e deve ser maior que 0");
-        return;
-      }
-      if (!formData.minWidth || parseFloat(formData.minWidth) <= 0) {
-        toast.error("Largura mínima é obrigatória e deve ser maior que 0");
-        return;
-      }
-      if (!formData.maxWidth || parseFloat(formData.maxWidth) <= 0) {
-        toast.error("Largura máxima é obrigatória e deve ser maior que 0");
-        return;
-      }
-      if (!formData.minHeight || parseFloat(formData.minHeight) <= 0) {
-        toast.error("Altura mínima é obrigatória e deve ser maior que 0");
-        return;
-      }
-      if (!formData.maxHeight || parseFloat(formData.maxHeight) <= 0) {
-        toast.error("Altura máxima é obrigatória e deve ser maior que 0");
-        return;
-      }
-      if (parseFloat(formData.minWidth) >= parseFloat(formData.maxWidth)) {
-        toast.error("Largura máxima deve ser maior que a mínima");
-        return;
-      }
-      if (parseFloat(formData.minHeight) >= parseFloat(formData.maxHeight)) {
-        toast.error("Altura máxima deve ser maior que a mínima");
-        return;
-      }
-    }
-    
-        try {
-      const result = await createProductMutation.mutateAsync({
-        name: formData.name,
-        description: formData.description,
-        price: formData.price,
-        segment: formData.segment,
-        imageUrl: formData.imageUrl,
-        calculationType: formData.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
-        pricePerM2: formData.calculationType === "m2" ? formData.pricePerM2 : undefined,
-        minWidth: formData.calculationType === "m2" ? formData.minWidth : undefined,
-        maxWidth: formData.calculationType === "m2" ? formData.maxWidth : undefined,
-        minHeight: formData.calculationType === "m2" ? formData.minHeight : undefined,
-        maxHeight: formData.calculationType === "m2" ? formData.maxHeight : undefined,
-      });
-      // Salvar prazos de produção ativos
-      const activeOptions = deliveryOptions.filter(opt => opt.isActive);
-      if (activeOptions.length > 0 && (result as any)?.id) {
-        try {
-          await Promise.all(
-            activeOptions.map((opt, idx) =>
-              createDeliveryOptionMutation.mutateAsync({
-                productId: (result as any).id,
-                name: opt.name,
-                daysToDeliver: opt.daysToDeliver,
-                pricePerM2: opt.pricePerM2,
-                isActive: true,
-                order: idx,
-              })
-            )
-          );
-        } catch (e) {
-          console.error('Erro ao criar prazos:', e);
-        }
-      }
-      toast.success("Produto criado com sucesso!");
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        segment: "",
-        imageUrl: "",
-        calculationType: "unidade",
-        pricePerM2: "",
-        minWidth: "",
-        maxWidth: "",
-        minHeight: "",
-        maxHeight: "",
-      });
-      setDeliveryOptions([]);
-    } catch (error) {
-      toast.error("Erro ao criar produto");
-      console.error(error);
-    }
-  };
+  // KPIs rápidos
+  const totalOrders = orders?.length ?? 0;
+  const totalProducts = products?.length ?? 0;
+  const pendingOrders = orders?.filter((o) => o.status === "pedido_recebido" || o.status === "arte_em_analise" || o.status === "aguardando_aprovacao").length ?? 0;
+  const totalRevenue = orders?.reduce((acc, o) => acc + parseFloat(o.totalPrice.toString()), 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">AD</span>
+    <div className="space-y-6">
+      {/* Título */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Painel Admin</h1>
+        <p className="text-sm text-gray-500 mt-1">Visão geral do sistema</p>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-orange-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Painel Admin</h1>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="produtos">Produtos</TabsTrigger>
-            <TabsTrigger value="variações">Gerenciar Variações</TabsTrigger>
-            <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
-          </TabsList>
-
-          {/* Produtos Tab */}
-          <TabsContent value="produtos" className="mt-8">
-            <div className="mb-6 flex flex-wrap gap-3">
-              <Link href="/admin/produtos">
-                <Button className="bg-orange-500 hover:bg-orange-600">
-                  Gerenciar Produtos Existentes
-                </Button>
-              </Link>
-              <Link href="/admin/clientes-loja">
-                <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
-                  Clientes da Loja
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Form */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Novo Produto
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Nome do Produto</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Ex: Adesivo Brilho"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">Descrição</Label>
-                      <Textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Descreva o produto"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="price">Preço (R$)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        step="0.01"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        placeholder="0.00"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="segment">Segmento</Label>
-                      <Select
-                        value={formData.segment}
-                        onValueChange={(value) => setFormData({ ...formData, segment: value })}
-                        disabled={segmentsLoading}
-                      >
-                        <SelectTrigger id="segment">
-                          <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SEGMENTS.map((seg) => (
-                            <SelectItem key={seg.id} value={seg.id}>
-                              {seg.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="imageUrl">URL da Imagem</Label>
-                      <Input
-                        id="imageUrl"
-                        value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                        placeholder="https://..."
-                      />
-                    </div>
-
-                    {/* Tipo de Cobrança */}
-                    <div>
-                      <Label htmlFor="calculationType">Tipo de Cobrança</Label>
-                      <Select value={formData.calculationType} onValueChange={(value) => setFormData({ ...formData, calculationType: value })}>
-                        <SelectTrigger id="calculationType">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="unidade">Unidade</SelectItem>
-                          <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Campos condicionais para m² */}
-                    {formData.calculationType === "m2" && (
-                      <>
-                        <div>
-                          <Label htmlFor="pricePerM2">Preço por m² (R$)</Label>
-                          <Input
-                            id="pricePerM2"
-                            type="number"
-                            step="0.01"
-                            value={formData.pricePerM2}
-                            onChange={(e) => setFormData({ ...formData, pricePerM2: e.target.value })}
-                            placeholder="45.00"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label htmlFor="minWidth">Largura Mínima (m)</Label>
-                            <Input
-                              id="minWidth"
-                              type="number"
-                              step="0.01"
-                              value={formData.minWidth}
-                              onChange={(e) => setFormData({ ...formData, minWidth: e.target.value })}
-                              placeholder="0.10"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="maxWidth">Largura Máxima (m)</Label>
-                            <Input
-                              id="maxWidth"
-                              type="number"
-                              step="0.01"
-                              value={formData.maxWidth}
-                              onChange={(e) => setFormData({ ...formData, maxWidth: e.target.value })}
-                              placeholder="5.00"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label htmlFor="minHeight">Altura Mínima (m)</Label>
-                            <Input
-                              id="minHeight"
-                              type="number"
-                              step="0.01"
-                              value={formData.minHeight}
-                              onChange={(e) => setFormData({ ...formData, minHeight: e.target.value })}
-                              placeholder="0.10"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="maxHeight">Altura Máxima (m)</Label>
-                            <Input
-                              id="maxHeight"
-                              type="number"
-                              step="0.01"
-                              value={formData.maxHeight}
-                              onChange={(e) => setFormData({ ...formData, maxHeight: e.target.value })}
-                              placeholder="5.00"
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Prazos de Produção — mesmo componente do Editar Produto */}
-                    <DeliveryOptionsManager
-                      calculationType={formData.calculationType}
-                      onChange={setDeliveryOptions}
-                    />
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={createProductMutation.isPending}
-                    >
-                      {createProductMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Criando...
-                        </>
-                      ) : (
-                        "Criar Produto"
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-
-              {/* Products List */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Produtos Cadastrados</CardTitle>
-                    <CardDescription>Lista de todos os produtos ativos</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600">
-                      Funcionalidade de listagem de produtos será implementada em breve.
-                    </p>
-                  </CardContent>
-                </Card>
+              <div>
+                <p className="text-sm text-gray-500">Total Pedidos</p>
+                <p className="text-2xl font-bold text-gray-900">{ordersLoading ? "..." : totalOrders}</p>
               </div>
             </div>
-          </TabsContent>
+          </CardContent>
+        </Card>
 
-          {/* Variações Tab */}
-          <TabsContent value="variações" className="mt-8">
-            <ProductVariationManager />
-          </TabsContent>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Loader2 className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Pendentes</p>
+                <p className="text-2xl font-bold text-gray-900">{ordersLoading ? "..." : pendingOrders}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Pedidos Tab */}
-          <TabsContent value="pedidos" className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Todos os Pedidos</CardTitle>
-                <CardDescription>Visualize e gerencie todos os pedidos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {ordersLoading ? (
-                  <div className="flex justify-center items-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                  </div>
-                ) : orders && orders.length > 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Package className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Produtos</p>
+                <p className="text-2xl font-bold text-gray-900">{productsLoading ? "..." : totalProducts}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Faturamento</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {ordersLoading ? "..." : `R$ ${totalRevenue.toFixed(2)}`}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Atalhos rápidos */}
+      <div className="flex flex-wrap gap-3">
+        <Link href="/admin/produtos">
+          <Button className="bg-orange-500 hover:bg-orange-600">
+            <Package className="w-4 h-4 mr-2" />
+            Gerenciar Produtos
+          </Button>
+        </Link>
+        <Link href="/admin/pedidos">
+          <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Ver Pedidos
+          </Button>
+        </Link>
+        <Link href="/admin/clientes-loja">
+          <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+            <Users className="w-4 h-4 mr-2" />
+            Clientes da Loja
+          </Button>
+        </Link>
+      </div>
+
+      {/* Tabs: Variações e Pedidos recentes */}
+      <Tabs defaultValue="variacoes" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="variacoes">Gerenciar Variações</TabsTrigger>
+          <TabsTrigger value="pedidos">Pedidos Recentes</TabsTrigger>
+        </TabsList>
+
+        {/* Variações Tab */}
+        <TabsContent value="variacoes" className="mt-6">
+          <ProductVariationManager />
+        </TabsContent>
+
+        {/* Pedidos Tab */}
+        <TabsContent value="pedidos" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pedidos Recentes</CardTitle>
+              <CardDescription>Últimos pedidos recebidos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {ordersLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                </div>
+              ) : orders && orders.length > 0 ? (
+                <>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2 px-4">Pedido</th>
-                          <th className="text-left py-2 px-4">Cliente</th>
-                          <th className="text-left py-2 px-4">Valor</th>
-                          <th className="text-left py-2 px-4">Status</th>
-                          <th className="text-left py-2 px-4">Pagamento</th>
-                          <th className="text-left py-2 px-4">Data</th>
+                          <th className="text-left py-2 px-4 text-sm font-semibold text-gray-600">Pedido</th>
+                          <th className="text-left py-2 px-4 text-sm font-semibold text-gray-600">Cliente</th>
+                          <th className="text-left py-2 px-4 text-sm font-semibold text-gray-600">Valor</th>
+                          <th className="text-left py-2 px-4 text-sm font-semibold text-gray-600">Status</th>
+                          <th className="text-left py-2 px-4 text-sm font-semibold text-gray-600">Data</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.map((order) => (
+                        {orders.slice(0, 10).map((order) => (
                           <tr key={order.id} className="border-b hover:bg-gray-50">
-                            <td className="py-2 px-4 font-semibold">{order.orderNumber}</td>
-                            <td className="py-2 px-4">Cliente #{order.clientId}</td>
-                            <td className="py-2 px-4">R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}</td>
-                            <td className="py-2 px-4 capitalize">{order.status}</td>
-                            <td className="py-2 px-4 capitalize">{order.paymentStatus}</td>
-                            <td className="py-2 px-4">{new Date(order.createdAt).toLocaleDateString("pt-BR")}</td>
+                            <td className="py-2 px-4 font-semibold text-orange-600">{order.orderNumber}</td>
+                            <td className="py-2 px-4 text-sm text-gray-700">Cliente #{order.clientId}</td>
+                            <td className="py-2 px-4 text-sm font-medium">R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}</td>
+                            <td className="py-2 px-4">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 capitalize">
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="py-2 px-4 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString("pt-BR")}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                ) : (
-                  <p className="text-gray-600 text-center py-8">Nenhum pedido encontrado.</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
+                  {orders.length > 10 && (
+                    <div className="mt-4 text-center">
+                      <Link href="/admin/pedidos">
+                        <Button variant="outline" size="sm">Ver todos os {orders.length} pedidos</Button>
+                      </Link>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-gray-600 text-center py-8">Nenhum pedido encontrado.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
