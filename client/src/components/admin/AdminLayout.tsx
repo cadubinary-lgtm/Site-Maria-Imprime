@@ -11,133 +11,149 @@ import {
   Users,
   DollarSign,
   BarChart3,
-  Settings,
   ChevronDown,
   ChevronRight,
   Menu,
   X,
-  LogOut,
   Printer,
-  Wrench,
   Layers,
   Calculator,
   Clock,
-  UserCheck,
   MessageSquare,
   CreditCard,
-  Wallet,
-  FileText,
   TrendingUp,
   Factory,
-  ShoppingBag,
-  UserCog,
-  Plug,
-  Bell,
-  Search,
   ExternalLink,
+  Zap,
+  Tag,
+  Link2,
+  CheckSquare,
+  Briefcase,
+  UserCheck,
+  FileSearch,
+  Settings,
+  PieChart,
+  Wrench,
 } from "lucide-react";
 
 // ─── Estrutura da navegação ──────────────────────────────────────────────────
 const NAV_SECTIONS = [
+  // ── Painel Admin (visão geral) ──────────────────────────────────────────────
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "Painel Admin",
     icon: LayoutDashboard,
     path: "/admin",
     exact: true,
   },
+
+  // ── Pedidos ─────────────────────────────────────────────────────────────────
   {
     id: "pedidos",
     label: "Pedidos",
     icon: ShoppingCart,
     children: [
-      { label: "Todos os Pedidos", path: "/admin/pedidos", icon: ShoppingCart },
-      { label: "Produção", path: "/admin/producao", icon: Factory },
-      { label: "Impressão", path: "/admin/pedidos?status=impressao", icon: Printer },
-      { label: "Acabamento", path: "/admin/pedidos?status=acabamento", icon: Wrench },
-      { label: "Expedição", path: "/admin/pedidos?status=saiu_para_entrega", icon: ShoppingBag },
+      { label: "Todos os Pedidos",   path: "/admin/pedidos",   icon: ShoppingCart },
     ],
   },
+
+  // ── Produção ────────────────────────────────────────────────────────────────
   {
-    id: "produtos",
-    label: "Produtos",
-    icon: Package,
+    id: "producao",
+    label: "Produção",
+    icon: Factory,
     children: [
-      { label: "Produtos", path: "/admin/produtos", icon: Package },
-      { label: "Variações", path: "/admin/variacoes", icon: Layers },
-      { label: "Atributos", path: "/admin/atributos", icon: Wrench },
-      { label: "Calculadoras", path: "/admin/regras-dinamicas", icon: Calculator },
-      { label: "Prazos de Produção", path: "/admin/precos", icon: Clock },
+      { label: "Painel de Produção", path: "/admin/producao",  icon: Factory },
     ],
   },
+
+  // ── ERP ─────────────────────────────────────────────────────────────────────
   {
-    id: "clientes",
-    label: "Clientes",
+    id: "erp",
+    label: "ERP",
+    icon: Briefcase,
+    children: [
+      { label: "Dashboard ERP",       path: "/admin/erp",               icon: PieChart },
+      { label: "Relatório Financeiro",path: "/admin/financeiro",        icon: CreditCard },
+      { label: "Automação",           path: "/admin/automacao",         icon: Zap },
+      { label: "Segmentos",           path: "/admin/segmentos",         icon: Tag },
+    ],
+  },
+
+  // ── CRM ─────────────────────────────────────────────────────────────────────
+  {
+    id: "crm",
+    label: "CRM",
     icon: Users,
     children: [
-      { label: "Clientes", path: "/admin/clientes-loja", icon: Users },
-      { label: "Orçamentos", path: "/admin/orcamentos", icon: FileText },
-      { label: "Atendimento", path: "/admin/clientes", icon: MessageSquare },
+      { label: "Base de Clientes",    path: "/admin/clientes-loja",     icon: Users },
+      { label: "Atendimento",         path: "/admin/clientes",          icon: MessageSquare },
     ],
   },
+
+  // ── Produtos & Catálogo ─────────────────────────────────────────────────────
   {
-    id: "financeiro",
-    label: "Financeiro",
-    icon: DollarSign,
+    id: "produtos",
+    label: "Produtos & Catálogo",
+    icon: Package,
     children: [
-      { label: "Pagamentos", path: "/admin/financeiro", icon: CreditCard },
-      { label: "Caixa", path: "/admin/caixa", icon: Wallet },
-      { label: "Faturas", path: "/admin/faturas", icon: FileText },
+      { label: "Produtos",            path: "/admin/produtos",           icon: Package },
+      { label: "Variações",           path: "/admin/variacoes",          icon: Layers },
+      { label: "Atributos",           path: "/admin/atributos",          icon: Tag },
+      { label: "Vincular Atributos",  path: "/admin/vincular-atributos", icon: Link2 },
     ],
   },
+
+  // ── Precificação ────────────────────────────────────────────────────────────
   {
-    id: "relatorios",
-    label: "Relatórios",
-    icon: BarChart3,
+    id: "precificacao",
+    label: "Precificação",
+    icon: Calculator,
     children: [
-      { label: "Vendas", path: "/admin/erp", icon: TrendingUp },
-      { label: "Produção", path: "/admin/automacao", icon: Factory },
-      { label: "Produtos", path: "/admin/relatorios-produtos", icon: Package },
+      { label: "Calculadoras",        path: "/admin/regras-dinamicas",   icon: Calculator },
+      { label: "Regras de Preço",     path: "/admin/regras",             icon: Zap },
+      { label: "Prazos de Produção",  path: "/admin/precos",             icon: Clock },
     ],
   },
+
+  // ── Configurações ───────────────────────────────────────────────────────────
   {
-    id: "sistema",
-    label: "Sistema",
+    id: "configuracoes",
+    label: "Configurações",
     icon: Settings,
     children: [
-      { label: "Usuários", path: "/admin/usuarios", icon: UserCog },
-      { label: "Configurações", path: "/admin/configuracoes", icon: Settings },
-      { label: "Integrações", path: "/admin/integracoes", icon: Plug },
+      { label: "Validação de Arq.",   path: "/admin/validacao-arquivos", icon: CheckSquare },
+      { label: "Painel Avançado",     path: "/admin/painel",             icon: Wrench },
     ],
   },
 ];
 
 // ─── Mapeamento de títulos por rota ──────────────────────────────────────────
 const PAGE_TITLES: Record<string, string> = {
-  "/admin": "Dashboard",
-  "/admin/pedidos": "Todos os Pedidos",
-  "/admin/produtos": "Produtos",
-  "/admin/variacoes": "Variações",
-  "/admin/atributos": "Atributos",
-  "/admin/regras-dinamicas": "Calculadoras",
-  "/admin/precos": "Prazos de Produção",
-  "/admin/clientes-loja": "Clientes",
-  "/admin/clientes": "Atendimento",
-  "/admin/financeiro": "Financeiro",
-  "/admin/erp": "Relatório de Vendas",
-  "/admin/automacao": "Relatório de Produção",
-  "/admin/producao": "Produção",
-  "/admin/segmentos": "Segmentos",
-  "/admin/vincular-atributos": "Vincular Atributos",
-  "/admin/regras": "Regras de Preço",
-  "/admin/regras-builder": "Construtor de Regras",
-  "/admin/validacao-arquivos": "Validação de Arquivos",
+  "/admin":                      "Painel Admin",
+  "/admin/pedidos":              "Todos os Pedidos",
+  "/admin/producao":             "Painel de Produção",
+  "/admin/produtos":             "Produtos",
+  "/admin/variacoes":            "Variações",
+  "/admin/atributos":            "Atributos",
+  "/admin/vincular-atributos":   "Vincular Atributos",
+  "/admin/regras-dinamicas":     "Calculadoras de Preço",
+  "/admin/regras":               "Regras de Preço",
+  "/admin/regras-builder":       "Construtor de Regras",
+  "/admin/precos":               "Prazos de Produção",
+  "/admin/validacao-arquivos":   "Validação de Arquivos",
+  "/admin/clientes-loja":        "Base de Clientes (CRM)",
+  "/admin/clientes":             "Atendimento (CRM)",
+  "/admin/financeiro":           "Relatório Financeiro (ERP)",
+  "/admin/erp":                  "Dashboard ERP",
+  "/admin/automacao":            "Automação (ERP)",
+  "/admin/segmentos":            "Segmentos (ERP)",
+  "/admin/painel":               "Painel Avançado",
 };
 
 function getPageTitle(location: string): string {
-  // Pedido específico
   if (/^\/admin\/pedidos\/\d+/.test(location)) return "Detalhes do Pedido";
-  return PAGE_TITLES[location] ?? "Admin";
+  return PAGE_TITLES[location] ?? "Painel Admin";
 }
 
 // ─── Item de navegação ───────────────────────────────────────────────────────
@@ -160,7 +176,7 @@ function NavItem({
       <Link href={item.path!}>
         <div
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 group",
+            "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150",
             isActive
               ? "bg-orange-500 text-white shadow-sm"
               : "text-slate-300 hover:bg-slate-700 hover:text-white"
@@ -174,7 +190,10 @@ function NavItem({
   }
 
   const isOpen = openSections.has(item.id);
-  const isAnyChildActive = item.children.some((c) => location.startsWith(c.path));
+  const isAnyChildActive = item.children.some((c) => {
+    const basePath = c.path.split("?")[0];
+    return location === basePath || location.startsWith(basePath + "/");
+  });
 
   return (
     <div>
@@ -203,7 +222,8 @@ function NavItem({
       {isOpen && !isCollapsed && (
         <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
           {item.children.map((child) => {
-            const isActive = location === child.path || location.startsWith(child.path.split("?")[0]);
+            const basePath = child.path.split("?")[0];
+            const isActive = location === basePath || location.startsWith(basePath + "/");
             return (
               <Link key={child.path} href={child.path}>
                 <div
@@ -233,13 +253,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(() => {
-    // Abrir a seção ativa por padrão
     const active = new Set<string>();
     NAV_SECTIONS.forEach((s) => {
-      if (s.children?.some((c) => location.startsWith(c.path.split("?")[0]))) {
+      if (
+        s.children?.some((c) => {
+          const basePath = c.path.split("?")[0];
+          return location === basePath || location.startsWith(basePath + "/");
+        })
+      ) {
         active.add(s.id);
       }
     });
+    // Abrir pedidos por padrão no dashboard
+    if (location === "/admin") active.add("pedidos");
     return active;
   });
 
@@ -264,7 +290,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {!isCollapsed && (
           <div>
             <p className="text-white font-bold text-sm leading-tight">Gráfica</p>
-            <p className="text-orange-400 text-xs font-medium">Ponto Digital</p>
+            <p className="text-orange-400 text-xs font-medium">Ponto Digital · Admin</p>
           </div>
         )}
       </div>
@@ -283,7 +309,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* Rodapé */}
-      <div className="border-t border-slate-700 p-3">
+      <div className="border-t border-slate-700 p-3 space-y-1">
         {!isCollapsed && user && (
           <div className="flex items-center gap-2 px-2 py-2 rounded-lg bg-slate-700/50 mb-2">
             <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -297,7 +323,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         )}
-        <Link href="/" target="_blank">
+        <Link href="/">
           <button className="w-full flex items-center gap-2 px-2 py-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors text-sm">
             <ExternalLink className="w-4 h-4 flex-shrink-0" />
             {!isCollapsed && <span>Ver Loja</span>}
@@ -313,7 +339,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         className={cn(
           "hidden lg:flex flex-col bg-slate-800 transition-all duration-300 flex-shrink-0",
-          isCollapsed ? "w-16" : "w-60"
+          isCollapsed ? "w-16" : "w-64"
         )}
       >
         {sidebarContent}
@@ -342,7 +368,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
         <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 flex items-center gap-4 flex-shrink-0 shadow-sm">
-          {/* Toggle sidebar */}
           <button
             onClick={() => {
               if (window.innerWidth >= 1024) setIsCollapsed((v) => !v);
@@ -353,10 +378,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Título da página */}
           <h1 className="text-slate-800 font-semibold text-lg flex-1">{pageTitle}</h1>
 
-          {/* Ações do topbar */}
           <div className="flex items-center gap-2">
             <Link href="/">
               <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5 text-slate-600">
