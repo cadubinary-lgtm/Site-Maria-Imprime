@@ -11,10 +11,12 @@ import { Loader2, Edit2, Trash2, Plus, Search, X, ChevronUp } from "lucide-react
 import { toast } from "sonner";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
+import { ProductVariationManager } from "@/components/ProductVariationManager";
 
 export default function AdminProducts() {
   // ─── Estado de criação ────────────────────────────────────────────────────
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showVariations, setShowVariations] = useState(false);
   const [createDeliveryOptions, setCreateDeliveryOptions] = useState<DeliveryOptionData[]>([]);
   const [createForm, setCreateForm] = useState({
     name: "",
@@ -287,17 +289,38 @@ export default function AdminProducts() {
           <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
           <p className="text-sm text-gray-500 mt-1">Gerencie o catálogo de produtos da gráfica</p>
         </div>
-        <Button
-          className="bg-orange-500 hover:bg-orange-600"
-          onClick={() => setShowCreateForm((v) => !v)}
-        >
-          {showCreateForm ? (
-            <><ChevronUp className="w-4 h-4 mr-2" /> Fechar Formulário</>
-          ) : (
-            <><Plus className="w-4 h-4 mr-2" /> Novo Produto</>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            className="bg-orange-500 hover:bg-orange-600"
+            onClick={() => { setShowVariations((v) => !v); setShowCreateForm(false); }}
+          >
+            {showVariations ? (
+              <><ChevronUp className="w-4 h-4 mr-2" /> Fechar Variações</>
+            ) : (
+              <><span className="mr-2">⚙</span> Gerenciar Variações</>
+            )}
+          </Button>
+          <Button
+            className="bg-orange-500 hover:bg-orange-600"
+            onClick={() => { setShowCreateForm((v) => !v); setShowVariations(false); }}
+          >
+            {showCreateForm ? (
+              <><ChevronUp className="w-4 h-4 mr-2" /> Fechar Formulário</>
+            ) : (
+              <><Plus className="w-4 h-4 mr-2" /> Novo Produto</>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* ─── Gerenciar Variações ─────────────────────────────────────────── */}
+      {showVariations && (
+        <Card className="border-orange-200">
+          <CardContent className="pt-6">
+            <ProductVariationManager />
+          </CardContent>
+        </Card>
+      )}
 
       {/* ─── Formulário de criação ─────────────────────────────────────────── */}
       {showCreateForm && (
