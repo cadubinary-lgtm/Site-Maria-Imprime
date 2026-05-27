@@ -745,7 +745,24 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        const sessionId = getCookieFromReq(req, "cart_session") ?? null;
+        let sessionId = getCookieFromReq(req, "cart_session") ?? null;
+        // Resolver customer_session para clientes autenticados
+        if (!userId && !sessionId) {
+          const customerSessionToken = getCookieFromReq(req, "customer_session");
+          if (customerSessionToken) {
+            try {
+              const { getDb: getDbInner } = await import("./db");
+              const { customerSessions } = await import("../drizzle/schema");
+              const { eq, gt, and } = await import("drizzle-orm");
+              const db = await getDbInner();
+              if (db) {
+                const now = Date.now();
+                const [sess] = await db.select({ customerId: customerSessions.customerId }).from(customerSessions).where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now))).limit(1);
+                if (sess) sessionId = `cust_${sess.customerId}`;
+              }
+            } catch (_) {}
+          }
+        }
         await updateCartItemQuantity(input.id, userId, input.quantity, sessionId);
         return { success: true };
       }),
@@ -755,7 +772,24 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        const sessionId = getCookieFromReq(req, "cart_session") ?? null;
+        let sessionId = getCookieFromReq(req, "cart_session") ?? null;
+        // Resolver customer_session para clientes autenticados
+        if (!userId && !sessionId) {
+          const customerSessionToken = getCookieFromReq(req, "customer_session");
+          if (customerSessionToken) {
+            try {
+              const { getDb: getDbInner } = await import("./db");
+              const { customerSessions } = await import("../drizzle/schema");
+              const { eq, gt, and } = await import("drizzle-orm");
+              const db = await getDbInner();
+              if (db) {
+                const now = Date.now();
+                const [sess] = await db.select({ customerId: customerSessions.customerId }).from(customerSessions).where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now))).limit(1);
+                if (sess) sessionId = `cust_${sess.customerId}`;
+              }
+            } catch (_) {}
+          }
+        }
         await removeFromCart(input.id, userId, sessionId);
         return { success: true };
       }),
@@ -763,7 +797,24 @@ export const appRouter = router({
     clear: publicProcedure.mutation(async ({ ctx }) => {
       const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
-      const sessionId = getCookieFromReq(req, "cart_session") ?? null;
+      let sessionId = getCookieFromReq(req, "cart_session") ?? null;
+      // Resolver customer_session para clientes autenticados
+      if (!userId && !sessionId) {
+        const customerSessionToken = getCookieFromReq(req, "customer_session");
+        if (customerSessionToken) {
+          try {
+            const { getDb: getDbInner } = await import("./db");
+            const { customerSessions } = await import("../drizzle/schema");
+            const { eq, gt, and } = await import("drizzle-orm");
+            const db = await getDbInner();
+            if (db) {
+              const now = Date.now();
+              const [sess] = await db.select({ customerId: customerSessions.customerId }).from(customerSessions).where(and(eq(customerSessions.token, customerSessionToken), gt(customerSessions.expiresAt, now))).limit(1);
+              if (sess) sessionId = `cust_${sess.customerId}`;
+            }
+          } catch (_) {}
+        }
+      }
       await clearCart(userId, sessionId);
       return { success: true };
     }),
