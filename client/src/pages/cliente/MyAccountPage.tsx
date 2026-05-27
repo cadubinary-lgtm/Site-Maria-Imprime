@@ -114,7 +114,7 @@ export default function MyAccountPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Minha Conta</h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-500 mt-1" translate="no">
               Olá, <span className="font-semibold text-orange-600">{customer.firstName}</span>! Bem-vindo(a) de volta.
             </p>
           </div>
@@ -203,7 +203,7 @@ export default function MyAccountPage() {
                                 <span className="text-xs text-gray-500">
                                   {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                                 </span>
-                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-400" aria-hidden="true">•</span>
                                 <span className="text-xs font-medium text-gray-700">
                                   R$ {parseFloat(order.totalAmount || "0").toFixed(2).replace(".", ",")}
                                 </span>
