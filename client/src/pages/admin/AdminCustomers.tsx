@@ -19,6 +19,8 @@ import {
   Mail,
   Phone,
   Trash2,
+  Store,
+  StoreIcon,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -66,6 +68,14 @@ export default function AdminCustomers() {
   const deleteCustomer = trpc.customerAuth.adminDeleteCustomer.useMutation({
     onSuccess: () => {
       toast.success("Cliente excluído com sucesso!");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const toggleStorePickup = trpc.customerAuth.adminToggleStorePickup.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(vars.allow ? "Retirada na loja liberada!" : "Retirada na loja revogada!");
       refetch();
     },
     onError: (err) => toast.error(err.message),
@@ -220,6 +230,7 @@ export default function AdminCustomers() {
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Cadastro</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Retirada</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Ações</th>
                     </tr>
                   </thead>
@@ -274,6 +285,33 @@ export default function AdminCustomers() {
                             <div className="text-gray-400">
                               Último login: {new Date(customer.lastLogin).toLocaleDateString("pt-BR")}
                             </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {customer.allowStorePickup ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                              onClick={() => toggleStorePickup.mutate({ customerId: customer.id, allow: false })}
+                              disabled={toggleStorePickup.isPending}
+                              title="Revogar permissão de retirada na loja"
+                            >
+                              <Store className="w-3.5 h-3.5 mr-1" />
+                              Liberado
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-gray-400 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                              onClick={() => toggleStorePickup.mutate({ customerId: customer.id, allow: true })}
+                              disabled={toggleStorePickup.isPending}
+                              title="Liberar pagamento na retirada da loja"
+                            >
+                              <StoreIcon className="w-3.5 h-3.5 mr-1" />
+                              Liberar
+                            </Button>
                           )}
                         </td>
                         <td className="px-4 py-3">

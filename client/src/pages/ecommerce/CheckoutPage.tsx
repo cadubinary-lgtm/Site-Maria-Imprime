@@ -10,11 +10,11 @@ import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
-  QrCode, Copy, Check,
+  QrCode, Copy, Check, Store,
 } from "lucide-react";
 
 type Step = "dados" | "endereco" | "entrega" | "pagamento" | "revisao";
-type PaymentMethod = "pix" | "cartao";
+type PaymentMethod = "pix" | "cartao" | "retirada_loja";
 
 interface FreteOption {
   id: string;
@@ -172,6 +172,10 @@ export default function CheckoutPage() {
 
   const validatePagamento = () => {
     if (!paymentMethod) { toast.error("Selecione uma forma de pagamento"); return false; }
+    if (paymentMethod === "retirada_loja" && !customerProfile?.allowStorePickup) {
+      toast.error("Pagamento na retirada não está disponível para sua conta.");
+      return false;
+    }
     if (paymentMethod === "cartao") {
       if (cardNumber.replace(/\s/g, "").length < 16) { toast.error("Informe o número do cartão completo"); return false; }
       if (!cardName.trim()) { toast.error("Informe o nome no cartão"); return false; }
@@ -229,7 +233,7 @@ export default function CheckoutPage() {
     console.log("[CHECKOUT-FRONTEND] selectedFrete:", selectedFrete);
 
     try {
-      const paymentLabel = paymentMethod === "pix" ? "PIX" : paymentMethod === "cartao" ? `Cartão (${cardInstallments}x)` : "";
+      const paymentLabel = paymentMethod === "pix" ? "PIX" : paymentMethod === "cartao" ? `Cartão (${cardInstallments}x)` : paymentMethod === "retirada_loja" ? "Pagamento na Retirada da Loja" : "";
       const notesWithInfo = [
         notes,
         selectedFrete ? `Frete: ${selectedFrete.name} (${formatCurrency(selectedFrete.price)})` : "",
@@ -535,6 +539,28 @@ export default function CheckoutPage() {
                         )}
                       </button>
 
+                      {/* Retirada na Loja — apenas para clientes com permissão */}
+                      {customerProfile?.allowStorePickup && (
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod("retirada_loja")}
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                            paymentMethod === "retirada_loja" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                          }`}
+                        >
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "retirada_loja" ? "bg-orange-100" : "bg-gray-100"}`}>
+                            <Store className={`w-6 h-6 ${paymentMethod === "retirada_loja" ? "text-orange-600" : "text-gray-500"}`} />
+                          </div>
+                          <div className="text-center">
+                            <p className={`font-semibold text-sm ${paymentMethod === "retirada_loja" ? "text-orange-700" : "text-gray-800"}`}>Retirada na Loja</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Pague ao retirar</p>
+                          </div>
+                          {paymentMethod === "retirada_loja" && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
+                          )}
+                        </button>
+                      )}
+
                       {/* Cartão */}
                       <button
                         type="button"
@@ -555,6 +581,23 @@ export default function CheckoutPage() {
                         )}
                       </button>
                     </div>
+
+                    {/* Retirada na Loja: instruções */}
+                    {paymentMethod === "retirada_loja" && (
+                      <div className="bg-orange-50 rounded-xl p-5 space-y-3 border border-orange-200">
+                        <div className="flex items-center gap-2">
+                          <Store className="w-5 h-5 text-orange-500" />
+                          <p className="font-semibold text-gray-800">Pagamento na Retirada</p>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Você pagará no momento da retirada do pedido em nossa loja. Aceitamos dinheiro, cartão de débito/crédito e PIX presencial.
+                        </p>
+                        <div className="bg-white rounded-lg p-3 border border-orange-100">
+                          <p className="text-xs text-orange-700 font-medium">Importante:</p>
+                          <p className="text-xs text-gray-500 mt-1">Aguarde o aviso de que seu pedido está pronto antes de vir buscar. Você será notificado por e-mail ou WhatsApp.</p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* PIX: QR Code simulado */}
                     {paymentMethod === "pix" && (
@@ -729,6 +772,7 @@ export default function CheckoutPage() {
                           <p className="text-sm text-gray-600 mt-0.5">
                             {paymentMethod === "pix" && "PIX — Aprovação imediata"}
                             {paymentMethod === "cartao" && `Cartão — ${cardInstallments}x de ${formatCurrency(totalPrice / parseInt(cardInstallments))}`}
+                            {paymentMethod === "retirada_loja" && "Pagamento na Retirada da Loja"}
                           </p>
                         </div>
                       </div>
@@ -847,6 +891,7 @@ export default function CheckoutPage() {
                     <span className="text-gray-800 font-medium">
                       {paymentMethod === "pix" && "PIX"}
                       {paymentMethod === "cartao" && `Cartão ${cardInstallments}x`}
+                      {paymentMethod === "retirada_loja" && "Retirada na Loja"}
                     </span>
                   </div>
                 )}

@@ -567,6 +567,7 @@ export const customerAuthRouter = router({
           status: customerAccounts.status,
           lastLogin: customerAccounts.lastLogin,
           createdAt: customerAccounts.createdAt,
+          allowStorePickup: customerAccounts.allowStorePickup,
         })
         .from(customerAccounts);
 
@@ -693,6 +694,7 @@ export const customerAuthRouter = router({
           addressNeighborhood: customerAccounts.addressNeighborhood,
           addressCity: customerAccounts.addressCity,
           addressState: customerAccounts.addressState,
+          allowStorePickup: customerAccounts.allowStorePickup,
         })
         .from(customerAccounts)
         .where(eq(customerAccounts.id, session.customerId))
@@ -921,6 +923,24 @@ export const customerAuthRouter = router({
       const db = await requireDb();
       // Sessões são removidas em cascata pelo banco (onDelete: cascade)
       await db.delete(customerAccounts).where(eq(customerAccounts.id, input.customerId));
+      return { success: true };
+    }),
+
+  /**
+   * Liberar/revogar pagamento na retirada da loja (admin)
+   */
+  adminToggleStorePickup: publicProcedure
+    .input(z.object({ customerId: z.number(), allow: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.user;
+      if (!user || user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
+      }
+      const db = await requireDb();
+      await db
+        .update(customerAccounts)
+        .set({ allowStorePickup: input.allow, updatedAt: Date.now() })
+        .where(eq(customerAccounts.id, input.customerId));
       return { success: true };
     }),
 

@@ -1,0 +1,1 @@
+ALTER TABLE `customer_accounts` ADD `allowStorePickup` boolean DEFAULT false NOT NULL;

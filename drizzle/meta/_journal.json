@@ -260,6 +260,13 @@
       "when": 1779759703870,
       "tag": "0036_curved_white_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1779922757227,
+      "tag": "0037_gigantic_avengers",
+      "breakpoints": true
     }
   ]
 }

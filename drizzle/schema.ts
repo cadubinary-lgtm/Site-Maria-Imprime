@@ -1010,6 +1010,8 @@ export const customerAccounts = mysqlTable("customer_accounts", {
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
   lockedUntil: bigint("lockedUntil", { mode: "number" }),
+  // Permissões especiais
+  allowStorePickup: boolean("allowStorePickup").default(false).notNull(),
   // Endereço de entrega padrão
   addressZipCode: varchar("addressZipCode", { length: 10 }),
   addressStreet: varchar("addressStreet", { length: 255 }),
