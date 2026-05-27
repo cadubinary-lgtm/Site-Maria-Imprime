@@ -268,7 +268,7 @@ export const appRouter = router({
             }
           }
           
-          return { success: true, message: 'Produto criado com sucesso' };
+          return { success: true, message: 'Produto criado com sucesso', id: newProductId as number };
         } catch (error) {
           console.error('Error creating product:', error);
           throw new Error(`Erro ao criar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
