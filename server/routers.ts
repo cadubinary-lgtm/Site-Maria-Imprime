@@ -372,6 +372,31 @@ export const appRouter = router({
         const result = await updateOrderStatus(input.orderId, input.newStatus);
         return result;
       }),
+    deleteOrder: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db.js");
+        const { orders: ordersTable, orderItems, orderStatusHistory } = await import("../drizzle/schema.js");
+        const { eq, and } = await import("drizzle-orm");
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        // Verificar se o pedido pertence ao cliente
+        const [order] = await db.select({ id: ordersTable.id, status: ordersTable.status })
+          .from(ordersTable)
+          .where(and(eq(ordersTable.id, input.orderId), eq(ordersTable.clientId, ctx.user.id)))
+          .limit(1);
+        if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        // Só permite excluir pedidos em status inicial (analisando) ou cancelados
+        const deletableStatuses = ["analisando", "pagamento_retirada", "cancelado"];
+        if (!deletableStatuses.includes(order.status as string)) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Não é possível excluir um pedido que já está em produção ou entregue" });
+        }
+        // Excluir histórico, itens e pedido
+        await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
+        await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
+        await db.delete(ordersTable).where(eq(ordersTable.id, input.orderId));
+        return { success: true };
+      }),
   }),
 
   // Variations - Procedimentos públicos para obter variações
