@@ -120,11 +120,14 @@ export default function CheckoutPage() {
   const totalPrice = subtotal + fretePrice;
 
   const isStorePickupSelected = selectedFrete?.id === "retirada";
-  // Endereço nunca aparece na barra de progresso (etapa intermediária condicional)
-  const visibleSteps = STEPS.filter((s) => s.id !== "endereco");
+  // Retirada na loja: ocultar Endereço da barra. Outras entregas: mostrar Endereço.
+  // Antes de selecionar frete (selectedFrete null): mostrar todos os steps
+  const visibleSteps = isStorePickupSelected
+    ? STEPS.filter((s) => s.id !== "endereco")
+    : STEPS;
   const stepIndex = STEPS.findIndex((s) => s.id === step);
-  // Para a barra de progresso: endereço é tratado como parte da etapa de entrega
-  const visibleStepForBar = step === "endereco" ? "entrega" : step;
+  // Para a barra: quando retirada na loja e está no step endereco (não deveria acontecer), mapear para entrega
+  const visibleStepForBar = (step === "endereco" && isStorePickupSelected) ? "entrega" : step;
   const visibleStepIndex = visibleSteps.findIndex((s) => s.id === visibleStepForBar);
 
   const handleCepBlur = async () => {
