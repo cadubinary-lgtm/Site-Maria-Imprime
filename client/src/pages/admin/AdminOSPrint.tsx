@@ -679,26 +679,52 @@ export default function AdminOSPrint() {
       {/* ════ ESTILOS DE IMPRESSÃO ═════════════════════════════════════════ */}
       <style>{`
         @media print {
-          .no-print { display: none !important; }
+          /* Oculta cabeçalho do site, barra de ações e qualquer elemento no-print */
+          .no-print,
+          header.no-print,
+          header,
+          nav {
+            display: none !important;
+          }
+
+          /* Remove margens e padding do body/html */
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+
+          /* Remove fundo cinza do wrapper */
           .print-wrapper {
             background: white !important;
             padding: 0 !important;
             margin: 0 !important;
+            min-height: unset !important;
           }
+
+          /* Documento ocupa toda a largura da folha A4 */
           .os-doc {
             width: 100% !important;
+            max-width: 100% !important;
             box-shadow: none !important;
             margin: 0 !important;
+            transform-origin: top left;
           }
+
+          /* Página A4 com margem pequena para caber tudo */
           @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 6mm;
           }
+
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
         }
+
+        /* Modo térmica na tela */
         .os-thermal .os-doc {
           font-size: 9px !important;
           line-height: 1.3;
