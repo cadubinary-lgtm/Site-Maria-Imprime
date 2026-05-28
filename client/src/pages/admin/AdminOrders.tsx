@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { Search, ChevronRight, Package, Filter, X, Loader2 } from "lucide-react";
+import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -37,6 +38,20 @@ export default function AdminOrders() {
   const [search, setSearch]       = useState("");
   const [filter, setFilter]       = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const utils = trpc.useUtils();
+
+  const deleteOrderMutation = trpc.admin.deleteOrder.useMutation({
+    onSuccess: () => {
+      toast.success("Pedido excluído com sucesso");
+      setConfirmDeleteId(null);
+      utils.checkout.getAllOrders.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erro ao excluir pedido");
+      setConfirmDeleteId(null);
+    },
+  });
 
   const { data: allOrders, isLoading } = trpc.checkout.getAllOrders.useQuery();
 
@@ -185,11 +200,42 @@ export default function AdminOrders() {
                           </td>
                           <td className="px-4 py-3 text-gray-600">{fmtDate(order.createdAt)}</td>
                           <td className="px-4 py-3">
-                            <Link href={`/admin/pedidos/${order.id}`}>
-                              <Button variant="ghost" size="sm">
-                                Ver <ChevronRight className="w-4 h-4 ml-1" />
-                              </Button>
-                            </Link>
+                            <div className="flex items-center gap-1">
+                              <Link href={`/admin/pedidos/${order.id}`}>
+                                <Button variant="ghost" size="sm">
+                                  Ver <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                              </Link>
+                              {confirmDeleteId === order.id ? (
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => deleteOrderMutation.mutate({ orderId: order.id })}
+                                    disabled={deleteOrderMutation.isPending}
+                                  >
+                                    {deleteOrderMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirmar"}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setConfirmDeleteId(null)}
+                                    disabled={deleteOrderMutation.isPending}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => setConfirmDeleteId(order.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
