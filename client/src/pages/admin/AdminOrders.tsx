@@ -99,9 +99,9 @@ export default function AdminOrders() {
             </h1>
             <p className="text-gray-500 mt-1">Acompanhe e gerencie todos os pedidos operacionais</p>
           </div>
-          <Link href="/admin">
-            <Button variant="outline" size="sm">← Voltar ao Admin</Button>
-          </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/admin">← Voltar ao Admin</Link>
+          </Button>
         </div>
 
         {/* Busca e Filtros */}
@@ -203,11 +203,11 @@ export default function AdminOrders() {
                           <td className="px-4 py-3 text-gray-600">{fmtDate(order.createdAt)}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1">
-                              <Link href={`/admin/pedidos/${order.id}`}>
-                                <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" asChild>
+                                <Link href={`/admin/pedidos/${order.id}`}>
                                   Ver <ChevronRight className="w-4 h-4 ml-1" />
-                                </Button>
-                              </Link>
+                                </Link>
+                              </Button>
                               {confirmDeleteId === order.id ? (
                                 <div className="flex items-center gap-1">
                                   <Button

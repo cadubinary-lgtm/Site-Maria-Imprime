@@ -65,7 +65,7 @@ function KpiCard({ icon, iconBg, title, value, sub, subColor, href }: {
         <p className="text-xs text-gray-500 font-medium">{title}</p>
         <p className="text-2xl font-bold text-gray-900 leading-tight mt-0.5">{value}</p>
         {sub && <p className={`text-xs mt-1 ${subColor ?? "text-gray-500"}`}>{sub}</p>}
-        {href && <Link href={href}><a className="text-xs text-orange-500 hover:underline mt-1 inline-block">Ver detalhes →</a></Link>}
+        {href && <Link href={href} className="text-xs text-orange-500 hover:underline mt-1 inline-block">Ver detalhes →</Link>}
       </div>
     </div>
   );
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">Últimos Pedidos</h2>
-                <Link href="/admin/pedidos"><a className="text-xs text-orange-500 hover:underline">Ver todos →</a></Link>
+                <Link href="/admin/pedidos" className="text-xs text-orange-500 hover:underline">Ver todos →</Link>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-2.5 text-xs text-gray-500">{fmtDate(order.createdAt)}</td>
                           <td className="py-2.5 pl-2">
-                            <Link href={`/admin/pedidos/${order.id}`}><a className="text-gray-400 hover:text-gray-700"><ChevronRight className="w-4 h-4" /></a></Link>
+                            <Link href={`/admin/pedidos/${order.id}`} className="text-gray-400 hover:text-gray-700"><ChevronRight className="w-4 h-4" /></Link>
                           </td>
                         </tr>
                       );
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Alertas Importantes</h2>
-                <Link href="/admin/pedidos"><a className="text-xs text-orange-500 hover:underline">Ver todos</a></Link>
+                <Link href="/admin/pedidos" className="text-xs text-orange-500 hover:underline">Ver todos</Link>
               </div>
               <div className="space-y-2">
                 {alerts.map((a, i) => <AlertItem key={i} {...a} />)}
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Produção - Kanban</h2>
-                <Link href="/admin/pedidos/kanban"><a className="text-xs text-orange-500 hover:underline">Ver quadro completo</a></Link>
+                <Link href="/admin/pedidos/kanban" className="text-xs text-orange-500 hover:underline">Ver quadro completo</Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {kanbanCols.map((col) => {
@@ -309,7 +309,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Produtos</h2>
-                <Link href="/admin/produtos"><a className="text-xs text-orange-500 hover:underline">Gerenciar</a></Link>
+                <Link href="/admin/produtos" className="text-xs text-orange-500 hover:underline">Gerenciar</Link>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -334,11 +334,9 @@ export default function AdminDashboard() {
                   { label: "Financeiro", icon: <DollarSign className="w-5 h-5" />,   href: "/admin/financeiro",     color: "text-green-500 bg-green-50" },
                   { label: "Relatórios", icon: <FileText className="w-5 h-5" />,     href: "/admin/erp",            color: "text-gray-500 bg-gray-50" },
                 ].map((action) => (
-                  <Link key={action.label} href={action.href}>
-                    <a className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl hover:shadow-md transition-all border border-gray-100 hover:border-gray-200">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.color}`}>{action.icon}</div>
-                      <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{action.label}</span>
-                    </a>
+                  <Link key={action.label} href={action.href} className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl hover:shadow-md transition-all border border-gray-100 hover:border-gray-200">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.color}`}>{action.icon}</div>
+                    <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{action.label}</span>
                   </Link>
                 ))}
               </div>
