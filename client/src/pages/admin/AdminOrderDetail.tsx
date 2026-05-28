@@ -439,45 +439,90 @@ export default function AdminOrderDetail() {
                     </Button>
                   </div>
                 )}
-                {/* Lista de arquivos */}
-                <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
+                {/* Lista de arquivos com preview automático */}
+                <div className="space-y-3">
                   {files.map((f: any, i: number) => {
                     const name = fileNameFromUrl(f.artFileUrl);
                     const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name);
+                    const isPdf = /\.pdf$/i.test(name);
+                    const canPreview = isImage || isPdf;
+                    const ext = (name.split('.').pop() ?? 'FILE').toUpperCase();
+                    const extColors: Record<string, string> = {
+                      PDF: 'bg-red-100 text-red-700',
+                      AI: 'bg-orange-100 text-orange-700',
+                      PSD: 'bg-blue-100 text-blue-700',
+                      CDR: 'bg-green-100 text-green-700',
+                      EPS: 'bg-purple-100 text-purple-700',
+                      SVG: 'bg-teal-100 text-teal-700',
+                      JPG: 'bg-yellow-100 text-yellow-700',
+                      JPEG: 'bg-yellow-100 text-yellow-700',
+                      PNG: 'bg-indigo-100 text-indigo-700',
+                    };
+                    const badgeColor = extColors[ext] ?? 'bg-gray-100 text-gray-700';
                     return (
-                      <div key={i} className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 transition-colors">
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                          {isImage ? (
-                            <FileImage className="w-5 h-5 text-blue-500" />
-                          ) : (
-                            <Download className="w-5 h-5 text-blue-500" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 text-sm truncate">{name}</p>
-                          <p className="text-xs text-gray-500">{f.productName} · Qtd: {f.quantity}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {isImage && (
+                      <div key={i} className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm">
+                        {/* Thumbnail inline para imagens */}
+                        {isImage && (
+                          <div
+                            className="w-full bg-gray-50 flex items-center justify-center cursor-pointer group relative overflow-hidden"
+                            style={{ minHeight: 160, maxHeight: 280 }}
+                            onClick={() => setLightboxUrl(f.artFileUrl)}
+                          >
+                            <img
+                              src={f.artFileUrl}
+                              alt={name}
+                              className="max-w-full max-h-64 object-contain transition-transform group-hover:scale-105"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3 shadow-lg">
+                                <Eye className="w-6 h-6 text-gray-800" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Card de preview para PDF */}
+                        {isPdf && (
+                          <div
+                            className="w-full bg-red-50 flex flex-col items-center justify-center cursor-pointer group py-8"
+                            onClick={() => setLightboxUrl(f.artFileUrl)}
+                          >
+                            <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-red-200 transition-colors">
+                              <FileImage className="w-8 h-8 text-red-600" />
+                            </div>
+                            <p className="text-sm font-semibold text-red-700">Visualizar PDF</p>
+                            <p className="text-xs text-red-500 mt-1">Clique para abrir</p>
+                          </div>
+                        )}
+                        {/* Rodapé com info e ações */}
+                        <div className="flex items-center gap-3 px-4 py-3">
+                          <span className={`text-xs font-bold px-2 py-1 rounded-md flex-shrink-0 ${badgeColor}`}>{ext}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">{name}</p>
+                            <p className="text-xs text-gray-500">{f.productName} · Qtd: {f.quantity}</p>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {canPreview && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600"
+                                title="Visualizar"
+                                onClick={() => setLightboxUrl(f.artFileUrl)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600"
-                              title="Visualizar"
-                              onClick={() => setLightboxUrl(f.artFileUrl)}
+                              className="h-8 w-8 p-0 text-gray-500 hover:text-blue-700"
+                              title="Baixar"
+                              onClick={() => downloadFile(f.artFileUrl, name)}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Download className="w-4 h-4" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-gray-500 hover:text-blue-700"
-                            title="Baixar"
-                            onClick={() => downloadFile(f.artFileUrl, name)}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     );

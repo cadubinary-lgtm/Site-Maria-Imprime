@@ -134,18 +134,6 @@ async function startServer() {
       const fileName = (req.query.name as string) || 'arquivo';
       if (!fileUrl) return res.status(400).json({ error: 'URL não fornecida' });
 
-      // Resolver a URL real do S3 a partir do caminho /manus-storage/{key}
-      let resolvedUrl = fileUrl;
-      if (fileUrl.startsWith('/manus-storage/')) {
-        const key = fileUrl.replace('/manus-storage/', '');
-        resolvedUrl = await storageGetSignedUrl(key);
-      } else if (!fileUrl.startsWith('http')) {
-        // Caminho relativo sem /manus-storage/ - tentar como key direto
-        resolvedUrl = await storageGetSignedUrl(fileUrl);
-      }
-
-      const axios = (await import('axios')).default;
-      const response = await axios.get(resolvedUrl, { responseType: 'stream', timeout: 60000 });
       // Detectar extensão pelo nome do arquivo para Content-Type correto
       const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
       const mimeMap: Record<string, string> = {
@@ -160,14 +148,50 @@ async function startServer() {
         webp: 'image/webp',
         svg: 'image/svg+xml',
         tif: 'image/tiff', tiff: 'image/tiff',
+        zip: 'application/zip',
+        rar: 'application/x-rar-compressed',
       };
-      const contentType = mimeMap[ext] || response.headers['content-type'] || 'application/octet-stream';
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-      res.setHeader('Content-Type', contentType);
-      if (response.headers['content-length']) {
-        res.setHeader('Content-Length', response.headers['content-length']);
+
+      // Resolver a URL real do S3 a partir do caminho /manus-storage/{key}
+      let resolvedUrl = fileUrl;
+      if (fileUrl.startsWith('/manus-storage/')) {
+        const key = fileUrl.replace('/manus-storage/', '');
+        resolvedUrl = await storageGetSignedUrl(key);
+      } else if (!fileUrl.startsWith('http')) {
+        resolvedUrl = await storageGetSignedUrl(fileUrl);
       }
-      (response.data as any).pipe(res);
+
+      // Buscar o arquivo do S3 seguindo redirects
+      const response = await fetch(resolvedUrl, {
+        redirect: 'follow',
+        headers: { 'User-Agent': 'GraficaPontoDigital/1.0' },
+      });
+
+      if (!response.ok) {
+        console.error(`Download proxy: upstream error ${response.status} for ${fileName}`);
+        return res.status(502).json({ error: `Erro ao acessar arquivo: ${response.status}` });
+      }
+
+      const contentType = mimeMap[ext] || response.headers.get('content-type') || 'application/octet-stream';
+      const contentLength = response.headers.get('content-length');
+
+      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`);
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'no-store');
+      if (contentLength) res.setHeader('Content-Length', contentLength);
+
+      // Pipe o body da resposta diretamente para o cliente
+      if (response.body) {
+        const { Readable } = await import('stream');
+        const readable = Readable.fromWeb(response.body as any);
+        readable.pipe(res);
+        readable.on('error', (err) => {
+          console.error('Stream error during download:', err);
+          if (!res.headersSent) res.status(500).end();
+        });
+      } else {
+        res.status(502).json({ error: 'Resposta vazia do servidor de arquivos' });
+      }
     } catch (error) {
       console.error('Download proxy error:', error);
       res.status(500).json({ error: 'Falha ao baixar arquivo' });
