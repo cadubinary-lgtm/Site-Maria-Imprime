@@ -93,18 +93,68 @@ export default function AdminOSPrint() {
   const handleExportPDF = useCallback(async () => {
     if (!printRef.current) return;
     setIsExporting(true);
+
+    // ── Injeta CSS temporário que substitui oklch por hex equivalente ──────
+    // html2canvas não suporta oklch (Tailwind 4). Sobrescrevemos as variáveis
+    // CSS com valores hex antes da captura e removemos depois.
+    const overrideStyle = document.createElement("style");
+    overrideStyle.id = "__pdf-oklch-override";
+    overrideStyle.textContent = `
+      * {
+        --background: #ffffff !important;
+        --foreground: #0a0a0a !important;
+        --card: #ffffff !important;
+        --card-foreground: #0a0a0a !important;
+        --popover: #ffffff !important;
+        --popover-foreground: #0a0a0a !important;
+        --primary: #f97316 !important;
+        --primary-foreground: #ffffff !important;
+        --secondary: #f5f5f5 !important;
+        --secondary-foreground: #171717 !important;
+        --muted: #f5f5f5 !important;
+        --muted-foreground: #737373 !important;
+        --accent: #f5f5f5 !important;
+        --accent-foreground: #171717 !important;
+        --destructive: #ef4444 !important;
+        --destructive-foreground: #ffffff !important;
+        --border: #e5e7eb !important;
+        --input: #e5e7eb !important;
+        --ring: #f97316 !important;
+        color-scheme: light !important;
+      }
+    `;
+    document.head.appendChild(overrideStyle);
+
     try {
       // Importação dinâmica para não aumentar bundle inicial
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
         import("jspdf"),
       ]);
+
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
+        // Ignora elementos que não precisam ser capturados
+        ignoreElements: (el) => el.classList.contains("print:hidden"),
+        onclone: (clonedDoc) => {
+          // No clone, força background branco em todos os elementos
+          // para evitar que oklch residual quebre a renderização
+          const allEls = clonedDoc.querySelectorAll("*");
+          allEls.forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            const computed = window.getComputedStyle(htmlEl);
+            const bg = computed.backgroundColor;
+            const color = computed.color;
+            // Substitui oklch por transparent/inherit se ainda passar
+            if (bg.includes("oklch")) htmlEl.style.backgroundColor = "transparent";
+            if (color.includes("oklch")) htmlEl.style.color = "#1a1a1a";
+          });
+        },
       });
+
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
@@ -124,6 +174,8 @@ export default function AdminOSPrint() {
     } catch (err) {
       console.error("Erro ao exportar PDF:", err);
     } finally {
+      // Remove o override de CSS
+      document.getElementById("__pdf-oklch-override")?.remove();
       setIsExporting(false);
     }
   }, [data, orderId]);
