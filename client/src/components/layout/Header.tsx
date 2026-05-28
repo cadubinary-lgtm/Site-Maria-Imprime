@@ -92,7 +92,7 @@ export default function Header() {
     (searchResults?.materials.length || 0);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm no-print">
       <div className="max-w-7xl mx-auto px-4 py-4">
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
