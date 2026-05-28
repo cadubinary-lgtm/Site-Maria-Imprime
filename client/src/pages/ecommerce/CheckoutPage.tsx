@@ -119,8 +119,13 @@ export default function CheckoutPage() {
   const fretePrice = selectedFrete?.price ?? 0;
   const totalPrice = subtotal + fretePrice;
 
-  const stepIndex = STEPS.findIndex((s) => s.id === step);
   const isStorePickupSelected = selectedFrete?.id === "retirada";
+  // Ocultar step de endereço na barra de progresso quando retirada na loja
+  const visibleSteps = isStorePickupSelected
+    ? STEPS.filter((s) => s.id !== "endereco")
+    : STEPS;
+  const stepIndex = STEPS.findIndex((s) => s.id === step);
+  const visibleStepIndex = visibleSteps.findIndex((s) => s.id === step);
 
   const handleCepBlur = async () => {
     const cep = zipCode.replace(/\D/g, "");
@@ -322,21 +327,21 @@ export default function CheckoutPage() {
 
         {/* Steps */}
         <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
-          {STEPS.map((s, i) => (
+          {visibleSteps.map((s, i) => (
             <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
               <div
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   s.id === step
                     ? "bg-orange-500 text-white shadow-md"
-                    : i < stepIndex
+                    : i < visibleStepIndex
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-400"
                 }`}
               >
-                {i < stepIndex ? <CheckCircle2 className="w-4 h-4" /> : s.icon}
+                {i < visibleStepIndex ? <CheckCircle2 className="w-4 h-4" /> : s.icon}
                 <span className="hidden sm:inline">{s.label}</span>
               </div>
-              {i < STEPS.length - 1 && (
+              {i < visibleSteps.length - 1 && (
                 <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
               )}
             </div>
@@ -445,6 +450,16 @@ export default function CheckoutPage() {
                 )}
 
                 {/* ETAPA 2: Endereço — oculto para retirada na loja */}
+                {step === "endereco" && isStorePickupSelected && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-6 flex flex-col items-center gap-3 text-center">
+                    <span className="text-4xl">🏪</span>
+                    <div>
+                      <p className="font-semibold text-green-800">Retirada na Loja selecionada</p>
+                      <p className="text-sm text-green-600 mt-1">Endereço de entrega não é necessário.</p>
+                      <p className="text-sm text-green-600">Clique em Avançar para continuar.</p>
+                    </div>
+                  </div>
+                )}
                 {step === "endereco" && !isStorePickupSelected && (
                   <>
                     {customerProfile?.addressZipCode && (
