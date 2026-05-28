@@ -225,6 +225,14 @@ export default function CartPage() {
   );
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Extrair freteId das notes do primeiro item para pré-selecionar no checkout
+  const extractFreteId = (): string | null => {
+    const firstItem = cartItems[0];
+    if (!firstItem?.notes) return null;
+    const match = firstItem.notes.match(/freteId:([\w_]+)/);
+    return match ? match[1] : null;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
@@ -351,7 +359,10 @@ export default function CartPage() {
                   <Button
                     className="w-full bg-orange-500 hover:bg-orange-600 mt-2"
                     size="lg"
-                    onClick={() => setLocation("/checkout")}
+                    onClick={() => {
+                      const freteId = extractFreteId();
+                      setLocation(freteId ? `/checkout?freteId=${freteId}` : "/checkout");
+                    }}
                   >
                     Finalizar Pedido
                   </Button>
