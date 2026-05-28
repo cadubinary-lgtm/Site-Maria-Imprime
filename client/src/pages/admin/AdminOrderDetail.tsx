@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -212,6 +213,7 @@ export default function AdminOrderDetail() {
   const previews = artPreviews as any[];
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4 space-y-6">
 
@@ -708,5 +710,6 @@ export default function AdminOrderDetail() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }

@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ExternalLink } from "lucide-react";
@@ -159,7 +160,8 @@ export default function AdminKanban() {
   const visibleCols = KANBAN_COLUMNS.filter(c => !hiddenCols.has(c.id));
 
   return (
-    <div className="space-y-4">
+    <AdminLayout>
+    <div className="p-5 space-y-4">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -236,5 +238,6 @@ export default function AdminKanban() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

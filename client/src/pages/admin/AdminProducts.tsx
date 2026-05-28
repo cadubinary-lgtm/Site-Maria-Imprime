@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -282,6 +283,7 @@ export default function AdminProducts() {
   }
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       {/* Cabeçalho da página */}
       <div className="flex items-center justify-between">
@@ -729,5 +731,6 @@ export default function AdminProducts() {
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 }

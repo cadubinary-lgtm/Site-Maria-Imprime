@@ -1915,3 +1915,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ocultar etapa de endereço quando retirada na loja selecionada (isStorePickupSelected)
 - [x] Vincular prazo de entrega selecionado no ProductDetail ao carrinho (campo notes)
 - [x] Verificar atualização do frete no resumo do pedido (já funcionava via selectedFrete state)
+
+## Fase: Novo Painel Admin Moderno
+- [x] Criar AdminLayout com sidebar escura completa (ERP, Produtos, CRM, Relatórios, Sistema)
+- [x] Criar novo AdminDashboard com KPIs em tempo real, gráficos de faturamento (recharts), donut de pedidos por status
+- [x] Adicionar tabela de últimos pedidos com badges de status coloridos
+- [x] Adicionar painel lateral com alertas, kanban resumido, ações rápidas
+- [x] Aplicar AdminLayout em todas as páginas admin e ERP
+- [x] Corrigir import do useAuth no AdminLayout

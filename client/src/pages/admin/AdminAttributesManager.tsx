@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import React from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -118,6 +119,7 @@ export default function AdminAttributesManager() {
   }, [attributes, searchQuery]);
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -316,5 +318,6 @@ export default function AdminAttributesManager() {
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 }

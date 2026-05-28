@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import React, { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -181,6 +182,7 @@ export default function AdminRulesManager() {
   }
 
   return (
+    <AdminLayout>
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Gerenciador de Regras de Atributos</h1>
@@ -533,5 +535,6 @@ export default function AdminRulesManager() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

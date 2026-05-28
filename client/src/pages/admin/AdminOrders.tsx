@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -86,8 +87,9 @@ export default function AdminOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <AdminLayout>
+    <div className="p-5">
+      <div>
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -248,5 +250,6 @@ export default function AdminOrders() {
         </Card>
       </div>
     </div>
+    </AdminLayout>
   );
 }

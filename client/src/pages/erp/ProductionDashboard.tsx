@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ export default function ProductionDashboard() {
   };
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
@@ -155,5 +157,6 @@ export default function ProductionDashboard() {
         )}
       </main>
     </div>
+    </AdminLayout>
   );
 }
