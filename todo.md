@@ -1923,3 +1923,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar painel lateral com alertas, kanban resumido, ações rápidas
 - [x] Aplicar AdminLayout em todas as páginas admin e ERP
 - [x] Corrigir import do useAuth no AdminLayout
+
+## Fase N: Preview Automático de Arquivos e Correção de Download
+
+- [x] Corrigir endpoint /api/download-file para usar fetch nativo com follow redirects (suporta PDF, AI, CDR, PSD, EPS, JPG, PNG, ZIP, RAR)
+- [x] Implementar preview automático de imagens (JPG, PNG, GIF, WEBP, SVG) com thumbnail inline no AdminOrderDetail
+- [x] Implementar card de preview para PDF com ícone vermelho e "Clique para abrir" no AdminOrderDetail
+- [x] Adicionar badges coloridos por extensão (PDF=vermelho, AI=laranja, PSD=azul, CDR=verde, EPS=roxo, SVG=teal, JPG=amarelo, PNG=índigo)
+- [x] Botão de visualizar (Eye) para imagens e PDFs via lightbox
+- [x] Botão de baixar para todos os tipos de arquivo
+- [x] Verificar que AdminOSPrint já exibe imagens dos arquivos do cliente para impressão
