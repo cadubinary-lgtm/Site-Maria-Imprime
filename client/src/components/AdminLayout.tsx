@@ -74,17 +74,16 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   }
 
   return (
-    <Link href={item.href || "#"}>
-      <a
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-          ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
-        `}
-        style={{ paddingLeft: `${12 + depth * 12}px` }}
-      >
-        {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
-        <span className="flex-1">{item.label}</span>
-        {item.badge ? <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
-      </a>
+    <Link
+      href={item.href || "#"}
+      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+        ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
+      `}
+      style={{ paddingLeft: `${12 + depth * 12}px` }}
+    >
+      {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
+      <span className="flex-1">{item.label}</span>
+      {item.badge ? <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
     </Link>
   );
 }
