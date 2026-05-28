@@ -275,6 +275,17 @@ export const appRouter = router({
         }
       }),
     getAllOrders: adminProcedure.query(() => getAllOrders()),
+    deleteOrder: adminProcedure
+      .input(z.object({ orderId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { orders: ordersTable, orderItems, orderStatusHistory } = await import("../drizzle/schema.js");
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
+        await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
+        await db.delete(ordersTable).where(eq(ordersTable.id, input.orderId));
+        return { success: true };
+      }),
     updateProduct: adminProcedure
       .input(z.object({
         id: z.number(),
