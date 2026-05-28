@@ -275,6 +275,22 @@ export const appRouter = router({
         }
       }),
     getAllOrders: adminProcedure.query(() => getAllOrders()),
+    getOrderWithItems: adminProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orders: ordersTable, orderItems: orderItemsTable } = await import("../drizzle/schema.js");
+        const { eq: eqOp, sql: sqlOp } = await import("drizzle-orm");
+        const orderRows = await db.select().from(ordersTable).where(eqOp(ordersTable.id, input.orderId)).limit(1);
+        const order = orderRows[0] ?? null;
+        if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        const itemRows = await db.execute(
+          sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.orderId}`
+        ) as any;
+        const items = (itemRows[0] ?? []) as any[];
+        return { order, items };
+      }),
     deleteOrder: adminProcedure
       .input(z.object({ orderId: z.number() }))
       .mutation(async ({ input }) => {
