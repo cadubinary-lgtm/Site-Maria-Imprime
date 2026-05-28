@@ -47,6 +47,8 @@ import AdminRulesManager from "./pages/admin/AdminRulesManager";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminKanban from "./pages/admin/AdminKanban";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
+import AdminOS from "./pages/admin/AdminOS";
+import AdminOSPrint from "./pages/admin/AdminOSPrint";
 import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import FileValidationManager from "./pages/admin/FileValidationManager";
@@ -89,6 +91,8 @@ function AdminRoutes() {
           <Route path="/admin/pedidos/kanban" component={AdminKanban} />
           <Route path="/admin/pedidos" component={AdminOrders} />
           <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
+          <Route path="/admin/os" component={AdminOS} />
+          <Route path="/admin/os/:id" component={AdminOSPrint} />
           <Route path="/admin/clientes" component={ClientsManager} />
           <Route path="/admin/clientes-loja" component={AdminCustomers} />
           <Route path="/admin/validacao-arquivos" component={FileValidationManager} />

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
-  Download, FileImage, Upload, Trash2, Eye, Archive, ImagePlus, X,
+  Download, FileImage, Upload, Trash2, Eye, Archive, ImagePlus, X, Printer, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
@@ -219,9 +219,28 @@ export default function AdminOrderDetail() {
 
         {/* Header */}
         <div>
-          <Button variant="ghost" onClick={() => setLocation("/admin/pedidos")} className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Voltar para Pedidos
-          </Button>
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" onClick={() => setLocation("/admin/pedidos")}>
+              <ChevronLeft className="w-4 h-4 mr-1" /> Voltar para Pedidos
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/admin/os")}
+                className="border-orange-200 text-orange-600 hover:bg-orange-50"
+              >
+                <FileText className="w-4 h-4 mr-1" /> Ver todas as OS
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setLocation(`/admin/os/${o.id}`)}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                <Printer className="w-4 h-4 mr-1" /> Imprimir OS
+              </Button>
+            </div>
+          </div>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{o.orderNumber}</h1>
