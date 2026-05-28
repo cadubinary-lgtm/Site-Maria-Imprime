@@ -1933,3 +1933,23 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Botão de visualizar (Eye) para imagens e PDFs via lightbox
 - [x] Botão de baixar para todos os tipos de arquivo
 - [x] Verificar que AdminOSPrint já exibe imagens dos arquivos do cliente para impressão
+
+## Fase OS: Impressão A4 Profissional com QR Code
+
+- [x] Instalar qrcode.react para geração de QR Code dinâmico
+- [x] Instalar html2canvas e jspdf para exportação PDF
+- [x] Redesenhar layout da OS para A4 (210mm × 297mm) com cabeçalho escuro profissional
+- [x] Faixa laranja com metadados do pedido (ID, data, entrega, pagamento)
+- [x] Grid 3 colunas: Dados do Cliente | Entrega/Retirada | QR Code
+- [x] QR Code dinâmico com link de acompanhamento do pedido (URL rastreável)
+- [x] Mini QR Code no rodapé da OS
+- [x] Tabela de produtos com zebra striping e cabeçalho escuro
+- [x] Grid 2 colunas: Resumo Financeiro | Arquivos do Cliente (miniaturas)
+- [x] Seção de Prévias de Arte aprovadas (quando houver)
+- [x] Campo de Controle de Produção com 3 assinaturas (Recebido, Produzido, Entregue)
+- [x] Rodapé com URL de acompanhamento e mini QR Code
+- [x] Botão "Exportar PDF" com html2canvas + jsPDF (importação dinâmica)
+- [x] Seletor de modo A4 / Térmica 80mm na barra de ações
+- [x] Estilos CSS de impressão: @page A4, print-color-adjust, classes print:hidden
+- [x] Modo Térmica 80mm preparado (preview na tela e CSS de impressão)
+- [x] TypeScript sem erros
