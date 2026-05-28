@@ -269,11 +269,15 @@ export default function ProductDetail() {
         resolvedArtFileUrl = url;
       }
 
-      // Incluir prazo de entrega nas notes se selecionado
+      // Incluir prazo de entrega e freteId nas notes se selecionado
       const deliveryNote = selectedDeliveryOption
         ? `Prazo: ${selectedDeliveryOption.name}${deliveryTax > 0 ? ` (+R$ ${deliveryTax.toFixed(2)})` : ""}`
         : "";
-      const combinedNotes = [notes, deliveryNote].filter(Boolean).join(" | ") || undefined;
+      // Salvar freteId nas notes para pré-selecionar no checkout
+      const freteNote = selectedFreteFromConfigurador?.id
+        ? `freteId:${selectedFreteFromConfigurador.id}`
+        : "";
+      const combinedNotes = [notes, deliveryNote, freteNote].filter(Boolean).join(" | ") || undefined;
 
       await addToCartMutation.mutateAsync({
         productId,

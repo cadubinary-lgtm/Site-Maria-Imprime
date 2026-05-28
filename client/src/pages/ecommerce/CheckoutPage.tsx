@@ -52,7 +52,7 @@ function formatCurrency(value: number) {
 const SIMULATED_PIX_KEY = "00020126580014BR.GOV.BCB.PIX0136grafica-ponto-digital@pix.com.br5204000053039865802BR5925Grafica Ponto Digital6009SAO PAULO62070503***6304ABCD";
 
 export default function CheckoutPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("dados");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
@@ -92,6 +92,16 @@ export default function CheckoutPage() {
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
   const trpcUtils = trpc.useUtils();
+
+  // Pré-selecionar frete via query string (?freteId=motoboy)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const freteId = params.get("freteId");
+    if (freteId) {
+      const found = FRETE_OPTIONS.find((f) => f.id === freteId);
+      if (found) setSelectedFrete(found);
+    }
+  }, []);
 
   // Pré-preencher com dados do perfil do cliente quando carregarem
   useEffect(() => {
