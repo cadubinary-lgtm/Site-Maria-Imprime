@@ -1,0 +1,3 @@
+ALTER TABLE `orderStatusHistory` MODIFY COLUMN `previousStatus` enum('pagamento_aprovado','pagamento_retirada','analisando','com_problemas','em_producao','pronto_entrega','pronto_retirada','entregue','cancelado');--> statement-breakpoint
+ALTER TABLE `orderStatusHistory` MODIFY COLUMN `newStatus` enum('pagamento_aprovado','pagamento_retirada','analisando','com_problemas','em_producao','pronto_entrega','pronto_retirada','entregue','cancelado') NOT NULL;--> statement-breakpoint
+ALTER TABLE `orders` MODIFY COLUMN `status` enum('pagamento_aprovado','pagamento_retirada','analisando','com_problemas','em_producao','pronto_entrega','pronto_retirada','entregue','cancelado') NOT NULL DEFAULT 'analisando';

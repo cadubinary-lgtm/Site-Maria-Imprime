@@ -21,14 +21,12 @@ import { ORDER_STATUS } from "./AdminOrders";
 // Ordem linear dos status para a linha do tempo
 const STATUS_STEPS = [
   { key: "pagamento_aprovado" },
-  { key: "pedido_recebido" },
-  { key: "arte_em_analise" },
-  { key: "aguardando_aprovacao" },
+  { key: "pagamento_retirada" },
+  { key: "analisando" },
+  { key: "com_problemas" },
   { key: "em_producao" },
-  { key: "impressao" },
-  { key: "acabamento" },
-  { key: "pronto" },
-  { key: "saiu_para_entrega" },
+  { key: "pronto_entrega" },
+  { key: "pronto_retirada" },
   { key: "entregue" },
 ];
 
@@ -207,7 +205,7 @@ export default function AdminOrderDetail() {
   }
 
   const o = order as any;
-  const sc = ORDER_STATUS[o.status] ?? ORDER_STATUS.pedido_recebido;
+  const sc = ORDER_STATUS[o.status] ?? ORDER_STATUS.analisando;
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === o.status);
   const isCancelled = o.status === "cancelado";
   const files = orderFiles as any[];
@@ -356,7 +354,7 @@ export default function AdminOrderDetail() {
               ) : history && (history as any[]).length > 0 ? (
                 <div className="space-y-3">
                   {(history as any[]).map((entry, idx) => {
-                    const cfg = ORDER_STATUS[entry.newStatus] ?? ORDER_STATUS.pedido_recebido;
+                    const cfg = ORDER_STATUS[entry.newStatus] ?? ORDER_STATUS.analisando;
                     return (
                       <div key={idx} className="flex gap-3 items-start">
                         <div className="flex flex-col items-center">

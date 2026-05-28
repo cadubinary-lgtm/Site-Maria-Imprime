@@ -352,7 +352,7 @@ export const appRouter = router({
         const result = await createOrder({
           clientId: ctx.user.id,
           orderNumber,
-          status: "pedido_recebido" as any,
+          status: "analisando" as any,
           totalPrice: totalPrice.toString() as any,
           artFileUrl: input.artFileUrl,
           artFileKey: input.artFileKey,
@@ -363,7 +363,7 @@ export const appRouter = router({
     updateStatus: protectedProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
+        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
       }))
       .mutation(async ({ ctx, input }) => {
         if (ctx.user.role !== "admin" && ctx.user.role !== "production") {
@@ -1146,7 +1146,7 @@ export const appRouter = router({
     updateOrderStatus: adminProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["pedido_recebido", "pagamento_aprovado", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"]),
+        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {

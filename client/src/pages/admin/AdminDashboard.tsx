@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   const totalOrders = orders?.length ?? 0;
   const totalProducts = products?.length ?? 0;
   const pendingOrders = orders?.filter((o) =>
-    o.status === "pedido_recebido" || o.status === "arte_em_analise" || o.status === "aguardando_aprovacao"
+    o.status === "analisando" || o.status === "com_problemas" || o.status === "pagamento_aprovado" || o.status === "pagamento_retirada"
   ).length ?? 0;
   const totalRevenue = orders?.reduce((acc, o) => acc + parseFloat(o.totalPrice.toString()), 0) ?? 0;
 

@@ -6,30 +6,26 @@ import { toast } from "sonner";
 
 // ─── Colunas do Kanban (fluxo de produção) ──────────────────────────────────
 const KANBAN_COLUMNS = [
-  { id: "pedido_recebido",      label: "Pedido Recebido",     icon: "📋", bg: "bg-blue-50",    border: "border-blue-200",    badge: "bg-blue-100 text-blue-800",    header: "bg-blue-500" },
-  { id: "pagamento_aprovado",   label: "Pagamento Aprovado",  icon: "💳", bg: "bg-green-50",   border: "border-green-200",   badge: "bg-green-100 text-green-800",  header: "bg-green-500" },
-  { id: "arte_em_analise",      label: "Arte em Análise",     icon: "🔍", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800",header: "bg-orange-500" },
-  { id: "aguardando_aprovacao", label: "Aguard. Aprovação",   icon: "⏳", bg: "bg-amber-50",   border: "border-amber-200",   badge: "bg-amber-100 text-amber-800",  header: "bg-amber-500" },
-  { id: "em_producao",          label: "Em Produção",         icon: "⚙️", bg: "bg-purple-50",  border: "border-purple-200",  badge: "bg-purple-100 text-purple-800",header: "bg-purple-500" },
-  { id: "impressao",            label: "Impressão",           icon: "🖨️", bg: "bg-indigo-50",  border: "border-indigo-200",  badge: "bg-indigo-100 text-indigo-800",header: "bg-indigo-500" },
-  { id: "acabamento",           label: "Acabamento",          icon: "✨", bg: "bg-pink-50",    border: "border-pink-200",    badge: "bg-pink-100 text-pink-800",    header: "bg-pink-500" },
-  { id: "pronto",               label: "Pronto",              icon: "🎁", bg: "bg-teal-50",    border: "border-teal-200",    badge: "bg-teal-100 text-teal-800",    header: "bg-teal-500" },
-  { id: "saiu_para_entrega",    label: "Saiu p/ Entrega",     icon: "🚚", bg: "bg-cyan-50",    border: "border-cyan-200",    badge: "bg-cyan-100 text-cyan-800",    header: "bg-cyan-500" },
-  { id: "entregue",             label: "Entregue",            icon: "✔️", bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-800",header: "bg-emerald-500" },
-  { id: "cancelado",            label: "Cancelado",           icon: "❌", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
+  { id: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: "💳", bg: "bg-green-50",   border: "border-green-200",   badge: "bg-green-100 text-green-800",   header: "bg-green-500" },
+  { id: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: "🏪", bg: "bg-blue-50",    border: "border-blue-200",    badge: "bg-blue-100 text-blue-800",    header: "bg-blue-500" },
+  { id: "analisando",          label: "Analisando",             icon: "🔍", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800", header: "bg-orange-500" },
+  { id: "com_problemas",       label: "Com Problemas",          icon: "⚠️", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
+  { id: "em_producao",         label: "Em Produção",            icon: "⚙️", bg: "bg-purple-50",  border: "border-purple-200",  badge: "bg-purple-100 text-purple-800", header: "bg-purple-500" },
+  { id: "pronto_entrega",      label: "Pronto para Entrega",    icon: "🚚", bg: "bg-teal-50",    border: "border-teal-200",    badge: "bg-teal-100 text-teal-800",    header: "bg-teal-500" },
+  { id: "pronto_retirada",     label: "Pronto para Retirada",   icon: "🎁", bg: "bg-cyan-50",    border: "border-cyan-200",    badge: "bg-cyan-100 text-cyan-800",    header: "bg-cyan-500" },
+  { id: "entregue",            label: "Entregue",               icon: "✔️", bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-800",header: "bg-emerald-500" },
+  { id: "cancelado",           label: "Cancelado",              icon: "❌", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
 ];
 
 // Status seguintes para avançar o pedido
 const NEXT_STATUS: Record<string, string> = {
-  pedido_recebido:      "pagamento_aprovado",
-  pagamento_aprovado:   "arte_em_analise",
-  arte_em_analise:      "aguardando_aprovacao",
-  aguardando_aprovacao: "em_producao",
-  em_producao:          "impressao",
-  impressao:            "acabamento",
-  acabamento:           "pronto",
-  pronto:               "saiu_para_entrega",
-  saiu_para_entrega:    "entregue",
+  pagamento_aprovado:  "analisando",
+  pagamento_retirada:  "analisando",
+  analisando:          "em_producao",
+  com_problemas:       "analisando",
+  em_producao:         "pronto_entrega",
+  pronto_entrega:      "entregue",
+  pronto_retirada:     "entregue",
 };
 
 type Order = {
