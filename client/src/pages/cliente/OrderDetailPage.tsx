@@ -13,26 +13,26 @@ import { toast } from "sonner";
 
 // All 9 status steps in order
 const STATUS_STEPS = [
-  { key: "pagamento_aprovado",   label: "Pagamento\nAprovado",    emoji: "💳" },
-  { key: "pedido_recebido",      label: "Pedido em\nAndamento",   emoji: "📋" },
-  { key: "em_producao",          label: "Em\nProdução",           emoji: "🏭" },
-  { key: "impressao",            label: "Impressão",              emoji: "🖨️" },
-  { key: "acabamento",           label: "Acabamento",             emoji: "✂️" },
-  { key: "pronto",               label: "Pronto",                 emoji: "📦" },
-  { key: "enviado",              label: "Enviado",                emoji: "🚚" },
-  { key: "entregue",             label: "Entregue",               emoji: "✅" },
+  { key: "pagamento_aprovado",  label: "Pagamento\nAprovado",      emoji: "💳" },
+  { key: "pagamento_retirada",  label: "Pagamento\nna Retirada",   emoji: "🏪" },
+  { key: "analisando",          label: "Analisando",               emoji: "🔍" },
+  { key: "com_problemas",       label: "Com\nProblemas",           emoji: "⚠️" },
+  { key: "em_producao",         label: "Em\nProdução",             emoji: "🏭" },
+  { key: "pronto_entrega",      label: "Pronto p/\nEntrega",       emoji: "🚚" },
+  { key: "pronto_retirada",     label: "Pronto p/\nRetirada",      emoji: "🎁" },
+  { key: "entregue",            label: "Entregue",                 emoji: "✅" },
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  pagamento_aprovado:   "Pagamento Aprovado",
-  pedido_recebido:      "Pedido em Andamento",
-  em_producao:          "Em Produção",
-  impressao:            "Impressão",
-  acabamento:           "Acabamento",
-  pronto:               "Pronto",
-  enviado:              "Enviado",
-  entregue:             "Entregue",
-  cancelado:            "Cancelado",
+  pagamento_aprovado:  "Pagamento Aprovado",
+  pagamento_retirada:  "Pagamento na Retirada",
+  analisando:          "Analisando",
+  com_problemas:       "Com Problemas",
+  em_producao:         "Em Produção",
+  pronto_entrega:      "Pronto para Entrega",
+  pronto_retirada:     "Pronto para Retirada",
+  entregue:            "Entregue",
+  cancelado:           "Cancelado",
 };
 
 function formatCurrency(value: number | string) {

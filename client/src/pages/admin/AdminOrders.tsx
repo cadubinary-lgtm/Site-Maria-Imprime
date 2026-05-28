@@ -9,32 +9,28 @@ import { Search, ChevronRight, Package, Filter, X, Loader2 } from "lucide-react"
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
-  pagamento_aprovado:  { label: "Pagamento Aprovado",   color: "bg-green-100 text-green-800",  icon: "💳" },
-  pedido_recebido:     { label: "Pedido em Andamento",  color: "bg-blue-100 text-blue-800",    icon: "📋" },
-  arte_em_analise:     { label: "Arte em Análise",      color: "bg-orange-100 text-orange-800", icon: "🔍" },
-  aguardando_aprovacao:{ label: "Aguardando Aprovação", color: "bg-amber-100 text-amber-800",   icon: "⏳" },
-  em_producao:         { label: "Em Produção",          color: "bg-purple-100 text-purple-800", icon: "⚙️" },
-  impressao:           { label: "Impressão",            color: "bg-indigo-100 text-indigo-800", icon: "🖨️" },
-  acabamento:          { label: "Acabamento",           color: "bg-pink-100 text-pink-800",     icon: "✨" },
-  pronto:              { label: "Pronto",               color: "bg-teal-100 text-teal-800",     icon: "🎁" },
-  saiu_para_entrega:   { label: "Saiu para Entrega",    color: "bg-cyan-100 text-cyan-800",     icon: "🚚" },
-  entregue:            { label: "Entregue",             color: "bg-emerald-100 text-emerald-800",icon: "✔️" },
-  cancelado:           { label: "Cancelado",            color: "bg-red-100 text-red-800",       icon: "❌" },
+  pagamento_aprovado:  { label: "Pagamento Aprovado",      color: "bg-green-100 text-green-800",   icon: "💳" },
+  pagamento_retirada:  { label: "Pagamento na Retirada",   color: "bg-blue-100 text-blue-800",     icon: "🏪" },
+  analisando:          { label: "Analisando",              color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  com_problemas:       { label: "Com Problemas",           color: "bg-red-100 text-red-800",       icon: "⚠️" },
+  em_producao:         { label: "Em Produção",             color: "bg-purple-100 text-purple-800", icon: "⚙️" },
+  pronto_entrega:      { label: "Pronto para Entrega",     color: "bg-teal-100 text-teal-800",     icon: "🚚" },
+  pronto_retirada:     { label: "Pronto para Retirada",    color: "bg-cyan-100 text-cyan-800",     icon: "🎁" },
+  entregue:            { label: "Entregue",                color: "bg-emerald-100 text-emerald-800",icon: "✔️" },
+  cancelado:           { label: "Cancelado",               color: "bg-red-100 text-red-800",       icon: "❌" },
 };
 
 const FILTER_OPTIONS = [
-  { id: "todos",               label: "Todos" },
-  { id: "pagamento_aprovado",  label: "Pagamento Aprovado" },
-  { id: "pedido_recebido",     label: "Pedido em Andamento" },
-  { id: "arte_em_analise",     label: "Arte em Análise" },
-  { id: "aguardando_aprovacao",label: "Aguardando Aprovação" },
-  { id: "em_producao",         label: "Em Produção" },
-  { id: "impressao",           label: "Impressão" },
-  { id: "acabamento",          label: "Acabamento" },
-  { id: "pronto",              label: "Pronto" },
-  { id: "saiu_para_entrega",   label: "Saiu para Entrega" },
-  { id: "entregue",            label: "Entregue" },
-  { id: "cancelado",           label: "Cancelado" },
+  { id: "todos",              label: "Todos" },
+  { id: "pagamento_aprovado", label: "Pagamento Aprovado" },
+  { id: "pagamento_retirada", label: "Pagamento na Retirada" },
+  { id: "analisando",         label: "Analisando" },
+  { id: "com_problemas",      label: "Com Problemas" },
+  { id: "em_producao",        label: "Em Produção" },
+  { id: "pronto_entrega",     label: "Pronto para Entrega" },
+  { id: "pronto_retirada",    label: "Pronto para Retirada" },
+  { id: "entregue",           label: "Entregue" },
+  { id: "cancelado",          label: "Cancelado" },
 ];
 
 export default function AdminOrders() {
@@ -170,7 +166,7 @@ export default function AdminOrders() {
                   </thead>
                   <tbody>
                     {filtered.map((order: any) => {
-                      const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.pedido_recebido;
+                      const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.analisando;
                       return (
                         <tr key={order.id} className="border-b hover:bg-gray-50 transition">
                           <td className="px-4 py-3 font-mono font-semibold text-gray-900">{order.orderNumber}</td>

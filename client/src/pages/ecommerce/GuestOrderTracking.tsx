@@ -9,37 +9,32 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const TIMELINE_STEPS = [
-  { key: "pagamento_aprovado", label: "Pagamento Aprovado",  icon: Clock },
-  { key: "pedido_recebido",    label: "Pedido em Andamento", icon: CheckCircle2 },
-  { key: "em_producao",        label: "Em Produção",         icon: Package },
-  { key: "impressao",          label: "Impressão",           icon: Printer },
-  { key: "acabamento",         label: "Acabamento",          icon: Scissors },
-  { key: "pronto",             label: "Pronto",              icon: Box },
-  { key: "enviado",            label: "Enviado",             icon: Truck },
-  { key: "entregue",           label: "Entregue",            icon: Home },
+  { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
+  { key: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: CheckCircle2 },
+  { key: "analisando",          label: "Analisando",             icon: Package },
+  { key: "com_problemas",       label: "Com Problemas",          icon: X },
+  { key: "em_producao",         label: "Em Produção",            icon: Printer },
+  { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
+  { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },
+  { key: "entregue",            label: "Entregue",               icon: Home },
 ];
 
 function getStepIndex(status: string): number {
   const idx = TIMELINE_STEPS.findIndex((s) => s.key === status);
-  if (status === "arte_em_analise" || status === "aguardando_aprovacao") return 2;
-  if (status === "saiu_para_entrega") return 6;
   if (status === "cancelado") return -1;
   return idx >= 0 ? idx : 0;
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  pagamento_aprovado: "Pagamento Aprovado",
-  pedido_recebido: "Pedido em Andamento",
-  arte_em_analise: "Arte em Análise",
-  aguardando_aprovacao: "Aguardando Aprovação",
-  em_producao: "Em Produção",
-  impressao: "Impressão",
-  acabamento: "Acabamento",
-  pronto: "Pronto",
-  saiu_para_entrega: "Saiu para Entrega",
-  enviado: "Enviado",
-  entregue: "Entregue",
-  cancelado: "Cancelado",
+  pagamento_aprovado:  "Pagamento Aprovado",
+  pagamento_retirada:  "Pagamento na Retirada",
+  analisando:          "Analisando",
+  com_problemas:       "Com Problemas",
+  em_producao:         "Em Produção",
+  pronto_entrega:      "Pronto para Entrega",
+  pronto_retirada:     "Pronto para Retirada",
+  entregue:            "Entregue",
+  cancelado:           "Cancelado",
 };
 
 function formatCurrency(value: number | string) {

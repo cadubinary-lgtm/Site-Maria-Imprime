@@ -7,20 +7,18 @@ import { Link } from "wouter";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-const STATUSES = ["pagamento_aprovado", "pedido_recebido", "arte_em_analise", "aguardando_aprovacao", "em_producao", "impressao", "acabamento", "pronto", "saiu_para_entrega", "entregue", "cancelado"];
+const STATUSES = ["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pagamento_aprovado:   { label: "Pagamento Aprovado",   color: "bg-green-50 border-green-200" },
-  pedido_recebido:      { label: "Pedido em Andamento",  color: "bg-blue-50 border-blue-200" },
-  arte_em_analise:      { label: "Arte em Análise",      color: "bg-orange-50 border-orange-200" },
-  aguardando_aprovacao: { label: "Aguardando Aprovação", color: "bg-amber-50 border-amber-200" },
-  em_producao:          { label: "Em Produção",          color: "bg-purple-50 border-purple-200" },
-  impressao:            { label: "Impressão",            color: "bg-indigo-50 border-indigo-200" },
-  acabamento:           { label: "Acabamento",           color: "bg-violet-50 border-violet-200" },
-  pronto:               { label: "Pronto",               color: "bg-teal-50 border-teal-200" },
-  saiu_para_entrega:    { label: "Saiu para Entrega",    color: "bg-cyan-50 border-cyan-200" },
-  entregue:             { label: "Entregue",             color: "bg-emerald-50 border-emerald-200" },
-  cancelado:            { label: "Cancelado",            color: "bg-red-50 border-red-200" },
+  pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-50 border-green-200" },
+  pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-50 border-blue-200" },
+  analisando:          { label: "Analisando",             color: "bg-orange-50 border-orange-200" },
+  com_problemas:       { label: "Com Problemas",          color: "bg-red-50 border-red-200" },
+  em_producao:         { label: "Em Produção",            color: "bg-purple-50 border-purple-200" },
+  pronto_entrega:      { label: "Pronto para Entrega",    color: "bg-teal-50 border-teal-200" },
+  pronto_retirada:     { label: "Pronto para Retirada",   color: "bg-cyan-50 border-cyan-200" },
+  entregue:            { label: "Entregue",               color: "bg-emerald-50 border-emerald-200" },
+  cancelado:           { label: "Cancelado",              color: "bg-red-50 border-red-200" },
 };
 
 export default function ProductionDashboard() {
@@ -31,7 +29,7 @@ export default function ProductionDashboard() {
     try {
       await updateStatusMutation.mutateAsync({
         orderId,
-        newStatus: newStatus as "pedido_recebido" | "pagamento_aprovado" | "arte_em_analise" | "aguardando_aprovacao" | "em_producao" | "impressao" | "acabamento" | "pronto" | "saiu_para_entrega" | "entregue" | "cancelado",
+        newStatus: newStatus as "pagamento_aprovado" | "pagamento_retirada" | "analisando" | "com_problemas" | "em_producao" | "pronto_entrega" | "pronto_retirada" | "entregue" | "cancelado",
       });
       
       const statusLabel = STATUS_CONFIG[newStatus as keyof typeof STATUS_CONFIG]?.label || newStatus;

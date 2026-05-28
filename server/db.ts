@@ -953,7 +953,7 @@ export async function createOrderFromCart(data: {
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
           guestToken, guestEmail, guestName
         ) VALUES (
-          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'pedido_recebido',
+          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'analisando',
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
@@ -1008,7 +1008,7 @@ export async function createOrderFromCart(data: {
     await db.execute(
       sql`
         INSERT INTO orderStatusHistory (orderId, newStatus, changedBy, notes)
-        VALUES (${orderId}, 'pedido_recebido', ${data.userId}, 'Pedido criado pelo cliente')
+        VALUES (${orderId}, 'analisando', ${data.userId}, 'Pedido criado pelo cliente')
       `
     );
   } catch (err: any) {
