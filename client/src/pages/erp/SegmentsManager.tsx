@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -127,6 +128,7 @@ export default function SegmentsManager() {
   };
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Notification */}
       {notification && (
@@ -308,5 +310,6 @@ export default function SegmentsManager() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

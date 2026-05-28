@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -123,6 +124,7 @@ export function AdminPricingRules() {
   };
 
   return (
+    <AdminLayout>
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <div>
@@ -395,5 +397,6 @@ export function AdminPricingRules() {
         </Card>
       )}
     </div>
+    </AdminLayout>
   );
 }

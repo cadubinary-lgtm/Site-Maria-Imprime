@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import React, { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ export default function AdminRulesBuilder() {
   };
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Construtor de Regras Dinâmicas</h1>
@@ -381,5 +383,6 @@ export default function AdminRulesBuilder() {
         </Card>
       </div>
     </div>
+    </AdminLayout>
   );
 }

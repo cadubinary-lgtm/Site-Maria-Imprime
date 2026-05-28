@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,7 @@ export default function ClientsManager() {
   };
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <Link href="/admin">
@@ -293,5 +295,6 @@ export default function ClientsManager() {
         </Card>
       </div>
     </div>
+    </AdminLayout>
   );
 }

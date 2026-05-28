@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 'use client';
 
 import { useState, useRef, useMemo, useEffect } from 'react';
@@ -314,6 +315,7 @@ export default function AdminPanel() {
   };
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Notification */}
       {notification && (
@@ -703,5 +705,6 @@ export default function AdminPanel() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

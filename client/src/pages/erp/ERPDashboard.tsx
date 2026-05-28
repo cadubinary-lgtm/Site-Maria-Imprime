@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export default function ERPDashboard() {
   const { data: validationCounts } = trpc.web2print.countByStatus.useQuery();
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
@@ -320,5 +322,6 @@ export default function ERPDashboard() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
