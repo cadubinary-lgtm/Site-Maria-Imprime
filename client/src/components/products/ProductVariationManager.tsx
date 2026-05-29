@@ -883,65 +883,6 @@ export function ProductVariationManager() {
                     {/* Expanded Content - Opções */}
                     {isExpanded && (
                       <div className="border-t bg-gray-50 p-4 space-y-4">
-                        {/* Editar opção existente */}
-                        {editingOptionId && (
-                          <div className="border rounded-lg p-3 bg-yellow-50 border-yellow-300">
-                            <h5 className="font-semibold text-sm mb-3">Editar Opção</h5>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                              <div>
-                                <Label className="text-xs">Nome</Label>
-                                <Input
-                                  value={editingOptionName}
-                                  onChange={(e) => setEditingOptionName(e.target.value)}
-                                  className="mt-1 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Preço (R$)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={editingOptionPrice}
-                                  onChange={(e) => setEditingOptionPrice(e.target.value)}
-                                  className="mt-1 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Tipo de Cobrança</Label>
-                                <Select
-                                  value={editingOptionCalcType}
-                                  onValueChange={setEditingOptionCalcType}
-                                >
-                                  <SelectTrigger className="mt-1 text-sm">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {CALC_TYPE_OPTIONS.map(o => (
-                                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="flex items-end gap-2">
-                                <Button
-                                  onClick={() => handleUpdateOption(vt.id)}
-                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
-                                  disabled={updateVariationOptionMutation.isPending}
-                                >
-                                  Salvar
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); setEditingOptionCalcType("unit"); }}
-                                  className="text-sm"
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
                         <div>
                           <h5 className="font-semibold text-sm mb-3">Opções ({vt.options?.length || 0})</h5>
                           {!vt.options || vt.options.length === 0 ? (
@@ -949,61 +890,129 @@ export function ProductVariationManager() {
                           ) : (
                             <div className="space-y-2">
                               {vt.options.map((option: any) => (
-                                <div
-                                  key={option.id}
-                                  className="border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-100 transition"
-                                >
-                                  <div>
-                                    <h6 className="font-medium text-sm">{option.name}</h6>
-                                    <p className="text-xs text-gray-600">
-                                      +R$ {parseFloat(option.priceModifier).toFixed(2)}
-                                      {" · "}
-                                      {CALC_TYPE_OPTIONS.find(c => c.value === (option.calculationType || "unit"))?.label ?? "Unidade"}
-                                    </p>
-                                  </div>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleMoveOption(vt.options ?? [], option.id, "up", vt.id)}
-                                      disabled={(vt.options ?? []).indexOf(option) === 0 || reorderOptionsMutation.isPending}
-                                      className="text-gray-400 hover:text-gray-700 px-1"
-                                      title="Mover para cima"
-                                    >
-                                      <ChevronUp className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleMoveOption(vt.options ?? [], option.id, "down", vt.id)}
-                                      disabled={(vt.options ?? []).indexOf(option) === (vt.options ?? []).length - 1 || reorderOptionsMutation.isPending}
-                                      className="text-gray-400 hover:text-gray-700 px-1"
-                                      title="Mover para baixo"
-                                    >
-                                      <ChevronDown className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setEditingOptionId(option.id);
-                                        setEditingOptionName(option.name);
-                                        setEditingOptionPrice(option.priceModifier);
-                                        setEditingOptionCalcType(option.calculationType || "unit");
-                                      }}
-                                      className="text-blue-500 hover:text-blue-700"
-                                    >
-                                      <Edit2 className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleDeleteOption(option.id, vt.id)}
-                                      className="text-red-500 hover:text-red-700"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
+                                <div key={option.id} className="border rounded-lg bg-white overflow-hidden">
+                                  {editingOptionId === option.id ? (
+                                    /* Edição inline */
+                                    <div className="p-3 bg-yellow-50 border-yellow-300">
+                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                        <div>
+                                          <Label className="text-xs">Nome</Label>
+                                          <Input
+                                            autoFocus
+                                            value={editingOptionName}
+                                            onChange={(e) => setEditingOptionName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') handleUpdateOption(vt.id);
+                                              if (e.key === 'Escape') { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); setEditingOptionCalcType("unit"); }
+                                            }}
+                                            className="mt-1 text-sm h-8"
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label className="text-xs">Preço (R$)</Label>
+                                          <Input
+                                            type="number"
+                                            step="0.01"
+                                            value={editingOptionPrice}
+                                            onChange={(e) => setEditingOptionPrice(e.target.value)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') handleUpdateOption(vt.id);
+                                              if (e.key === 'Escape') { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); setEditingOptionCalcType("unit"); }
+                                            }}
+                                            className="mt-1 text-sm h-8"
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label className="text-xs">Tipo de Cobrança</Label>
+                                          <Select value={editingOptionCalcType} onValueChange={setEditingOptionCalcType}>
+                                            <SelectTrigger className="mt-1 text-sm h-8">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {CALC_TYPE_OPTIONS.map(o => (
+                                                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div className="flex items-end gap-1">
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleUpdateOption(vt.id)}
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 h-8 text-xs"
+                                            disabled={updateVariationOptionMutation.isPending}
+                                          >
+                                            Salvar
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); setEditingOptionCalcType("unit"); }}
+                                            className="h-8 px-2"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* Exibição normal */
+                                    <div className="p-3 flex justify-between items-center hover:bg-gray-50 transition">
+                                      <div>
+                                        <h6 className="font-medium text-sm">{option.name}</h6>
+                                        <p className="text-xs text-gray-600">
+                                          +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                                          {" · "}
+                                          {CALC_TYPE_OPTIONS.find(c => c.value === (option.calculationType || "unit"))?.label ?? "Unidade"}
+                                        </p>
+                                      </div>
+                                      <div className="flex gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleMoveOption(vt.options ?? [], option.id, "up", vt.id)}
+                                          disabled={(vt.options ?? []).indexOf(option) === 0 || reorderOptionsMutation.isPending}
+                                          className="text-gray-400 hover:text-gray-700 px-1"
+                                          title="Mover para cima"
+                                        >
+                                          <ChevronUp className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleMoveOption(vt.options ?? [], option.id, "down", vt.id)}
+                                          disabled={(vt.options ?? []).indexOf(option) === (vt.options ?? []).length - 1 || reorderOptionsMutation.isPending}
+                                          className="text-gray-400 hover:text-gray-700 px-1"
+                                          title="Mover para baixo"
+                                        >
+                                          <ChevronDown className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setEditingOptionId(option.id);
+                                            setEditingOptionName(option.name);
+                                            setEditingOptionPrice(option.priceModifier);
+                                            setEditingOptionCalcType(option.calculationType || "unit");
+                                          }}
+                                          className="text-blue-500 hover:text-blue-700"
+                                          title="Editar"
+                                        >
+                                          <Edit2 className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDeleteOption(option.id, vt.id)}
+                                          className="text-red-500 hover:text-red-700"
+                                          title="Remover"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
