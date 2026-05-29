@@ -109,8 +109,8 @@ export default function ProductDetail() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Medidas
-  const [dimWidth, setDimWidth] = useState("0");
-  const [dimHeight, setDimHeight] = useState("0");
+  const [dimWidth, setDimWidth] = useState("");
+  const [dimHeight, setDimHeight] = useState("");
 
   // Acordeão
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({ 0: true });
@@ -628,7 +628,7 @@ export default function ProductDetail() {
                       <Label className="text-xs text-gray-500 mb-1.5 block">Largura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="0"
+                        placeholder="0,00"
                         min="0"
                         value={dimWidth}
                         onChange={e => setDimWidth(e.target.value)}
@@ -639,7 +639,7 @@ export default function ProductDetail() {
                       <Label className="text-xs text-gray-500 mb-1.5 block">Altura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="0"
+                        placeholder="0,00"
                         min="0"
                         value={dimHeight}
                         onChange={e => setDimHeight(e.target.value)}
