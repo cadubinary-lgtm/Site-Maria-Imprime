@@ -12,7 +12,8 @@ import {
   ShoppingCart, FileText, MessageCircle,
   ShieldCheck, Droplets, Scissors, LayoutGrid,
   Factory, Truck, CreditCard, HeadphonesIcon,
-  Home, Clock, Tag, ThumbsUp
+  Home, Clock, Tag, ThumbsUp,
+  Store, Bike, Car, Mail, MailOpen, Lightbulb
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,13 +22,13 @@ import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 const FRETE_OPTIONS = [
-  { id: "retirada",       name: "Retirar na Loja",  description: "Retirada presencial",   price: 0,    days: "Conforme produção", icon: "🏪" },
-  { id: "motoboy",        name: "Moto Express",     description: "Entrega expressa",      price: 15,   days: "Mesmo dia*",        icon: "🛵" },
-  { id: "uber",           name: "Uber Entrega",     description: "Entrega via Uber",      price: 28,   days: "Mesmo dia*",        icon: "🚗" },
-  { id: "jadlog",         name: "Jadlog",           description: "2 a 3 dias úteis",      price: 24.9, days: "2 a 3 dias úteis",  icon: "📦" },
-  { id: "correios_sedex", name: "Correios SEDEX",   description: "1 a 2 dias úteis",      price: 18.9, days: "1 a 2 dias úteis",  icon: "📮" },
-  { id: "correios_pac",   name: "Correios PAC",     description: "3 a 5 dias úteis",      price: 12.9, days: "3 a 5 dias úteis",  icon: "📮" },
-  { id: "transportadora", name: "Transportadora",   description: "2 a 4 dias úteis",      price: 39,   days: "2 a 4 dias úteis",  icon: "🚛" },
+  { id: "retirada",       name: "Retirar na Loja",  description: "Retirada presencial",   price: 0,    days: "Conforme produção", iconName: "Store" },
+  { id: "motoboy",        name: "Moto Express",     description: "Entrega expressa",      price: 15,   days: "Mesmo dia*",        iconName: "Bike" },
+  { id: "uber",           name: "Uber Entrega",     description: "Entrega via Uber",      price: 28,   days: "Mesmo dia*",        iconName: "Car" },
+  { id: "jadlog",         name: "Jadlog",           description: "2 a 3 dias úteis",      price: 24.9, days: "2 a 3 dias úteis",  iconName: "Package" },
+  { id: "correios_sedex", name: "Correios SEDEX",   description: "1 a 2 dias úteis",      price: 18.9, days: "1 a 2 dias úteis",  iconName: "Mail" },
+  { id: "correios_pac",   name: "Correios PAC",     description: "3 a 5 dias úteis",      price: 12.9, days: "3 a 5 dias úteis",  iconName: "MailOpen" },
+  { id: "transportadora", name: "Transportadora",   description: "2 a 4 dias úteis",      price: 39,   days: "2 a 4 dias úteis",  iconName: "Truck" },
 ] as const;
 
 const PRODUCT_FEATURES = [
@@ -201,12 +202,14 @@ export default function ProductDetail() {
   }, [dimWidth, dimHeight]);
 
   const isM2 = product?.calculationType === "m2";
+  // Área mínima cobrada: sempre 1 m² (mesmo que o cliente informe menos)
+  const billedArea = useMemo(() => Math.max(area, area > 0 ? 1 : 0), [area]);
   const effectivePrice = useMemo(() => {
-    if (isM2 && area > 0 && product?.pricePerM2) {
-      return parseFloat(product.pricePerM2 as any) * area;
+    if (isM2 && billedArea > 0 && product?.pricePerM2) {
+      return parseFloat(product.pricePerM2 as any) * billedArea;
     }
     return basePrice;
-  }, [isM2, area, product, basePrice]);
+  }, [isM2, billedArea, product, basePrice]);
 
   const fretePrice = selectedFrete.price;
   const subtotal = effectivePrice * quantity;
@@ -429,8 +432,8 @@ export default function ProductDetail() {
 
             {/* Nome, badge, avaliações, descrição, features */}
             <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
-              <span className="inline-block bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
-                ⭐ Mais vendido
+              <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                <Star className="w-3 h-3 fill-orange-500" /> Mais vendido
               </span>
               <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
               <div className="flex items-center gap-1">
@@ -614,52 +617,44 @@ export default function ProductDetail() {
                 onToggle={() => toggleStep(dimStepIdx)}
               >
                 <div className="mt-3 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-3 items-start">
                     <div>
-                      <Label className="text-xs text-gray-600 mb-1.5 block font-medium">Largura (cm)</Label>
+                      <Label className="text-xs text-gray-500 mb-1.5 block">Largura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="ex: 200"
+                        placeholder="200"
                         value={dimWidth}
                         onChange={e => setDimWidth(e.target.value)}
-                        className="text-center font-semibold text-lg h-12"
+                        className="font-semibold text-base h-12 border-gray-200"
                       />
-                      {product.minWidth && product.maxWidth && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          Min: {parseFloat(product.minWidth as any) * 100}cm — Max: {parseFloat(product.maxWidth as any) * 100}cm
-                        </p>
-                      )}
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-600 mb-1.5 block font-medium">Altura (cm)</Label>
+                      <Label className="text-xs text-gray-500 mb-1.5 block">Altura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="ex: 100"
+                        placeholder="100"
                         value={dimHeight}
                         onChange={e => setDimHeight(e.target.value)}
-                        className="text-center font-semibold text-lg h-12"
+                        className="font-semibold text-base h-12 border-gray-200"
                       />
-                      {product.minHeight && product.maxHeight && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          Min: {parseFloat(product.minHeight as any) * 100}cm — Max: {parseFloat(product.maxHeight as any) * 100}cm
-                        </p>
-                      )}
                     </div>
-                  </div>
-
-                  {area > 0 && (
-                    <div className="bg-orange-50 rounded-xl p-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-gray-500">Área total</p>
-                        <p className="text-2xl font-bold text-orange-600">{area.toFixed(2)} m²</p>
-                        <p className="text-xs text-gray-500">{dimWidth} × {dimHeight} cm</p>
+                    {area > 0 && (
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-center">
+                        <p className="text-xs text-gray-500 mb-0.5">Área total</p>
+                        <p className="text-xl font-bold text-orange-500">{billedArea.toFixed(2)} m²</p>
+                        <p className="text-xs text-gray-400">{dimWidth} x {dimHeight} cm</p>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                     <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <p className="text-xs text-blue-700">A área mínima é de 0,25 m² e máxima de 100 m²</p>
+                    <p className="text-xs text-blue-700">
+                      A área mínima cobrada é de 1 m²
+                      {product.maxWidth && product.maxHeight
+                        ? ` e máxima de ${(parseFloat(product.maxWidth as any) * parseFloat(product.maxHeight as any)).toFixed(0)} m²`
+                        : " e máxima conforme configuração"}
+                    </p>
                   </div>
                 </div>
               </AccordionStep>
@@ -748,7 +743,10 @@ export default function ProductDetail() {
                         <button type="button" onClick={() => { setArtFile(null); setArtFilePreview(null); }} className="text-gray-400 hover:text-red-500">✕</button>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">💡 Dica: Use arquivos em alta resolução para melhor qualidade de impressão.</p>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                      <span>Dica: Use arquivos em alta resolução para melhor qualidade de impressão.</span>
+                    </div>
                   </>
                 )}
 
@@ -772,7 +770,10 @@ export default function ProductDetail() {
                         <span className="text-xs text-green-700">Link adicionado</span>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">💡 Dica: Use arquivos em alta resolução para melhor qualidade de impressão.</p>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                      <span>Dica: Use arquivos em alta resolução para melhor qualidade de impressão.</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -826,7 +827,15 @@ export default function ProductDetail() {
                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSel ? "border-orange-500" : "border-gray-300"}`}>
                         {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                       </div>
-                      <span className="text-lg flex-shrink-0">{opt.icon}</span>
+                      <span className="flex-shrink-0 text-gray-500">
+                {opt.iconName === "Store" && <Store className="w-4 h-4" />}
+                {opt.iconName === "Bike" && <Bike className="w-4 h-4" />}
+                {opt.iconName === "Car" && <Car className="w-4 h-4" />}
+                {opt.iconName === "Package" && <Package className="w-4 h-4" />}
+                {opt.iconName === "Mail" && <Mail className="w-4 h-4" />}
+                {opt.iconName === "MailOpen" && <MailOpen className="w-4 h-4" />}
+                {opt.iconName === "Truck" && <Truck className="w-4 h-4" />}
+              </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
                         <p className="text-xs text-gray-500">{opt.description}</p>
