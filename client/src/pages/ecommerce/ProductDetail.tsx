@@ -94,7 +94,8 @@ export default function ProductDetail() {
   const [artLink, setArtLink] = useState("");
   const [fileMode, setFileMode] = useState<"upload" | "link">("upload");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({});
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({})
+  const [selectedVariations, setSelectedVariations] = useState<Record<number, number>>({}) // variationTypeId -> optionId;
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -132,6 +133,9 @@ export default function ProductDetail() {
     productId || 0, { enabled: !!productId }
   );
   const { data: deliveryOptions = [] } = trpc.deliveryOptions.getByProduct.useQuery(
+    { productId: productId || 0 }, { enabled: !!productId }
+  );
+  const { data: variationTypes = [] } = trpc.variations.getByProduct.useQuery(
     { productId: productId || 0 }, { enabled: !!productId }
   );
   const addToCartMutation = trpc.cart.addItem.useMutation();
@@ -339,8 +343,9 @@ export default function ProductDetail() {
     );
   }
 
-  // Número de steps
-  const attrCount = visibleAttributes?.length ?? 0;
+  // Número de steps — combina variações + atributos
+  const varCount = variationTypes?.length ?? 0;
+  const attrCount = (visibleAttributes?.length ?? 0) + varCount;
   const dimStepIdx = attrCount;       // Medidas (se m²)
   const fileStepIdx = attrCount + (isM2 ? 1 : 0);
   const deliveryStepIdx = fileStepIdx + 1;
@@ -485,16 +490,74 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* ── Atributos em acordeão ── */}
+            {/* ── Variações em acordeão (sistema variationTypes) ── */}
+            {(variationTypes ?? []).map((vtype: any, idx: number) => {
+              const selOptId = selectedVariations[vtype.id];
+              return (
+                <AccordionStep
+                  key={`vtype-${vtype.id}`}
+                  number={idx + 1}
+                  title={vtype.name}
+                  isOpen={!!openSteps[idx]}
+                  onToggle={() => toggleStep(idx)}
+                >
+                  <div className="space-y-2 mt-2">
+                    {(vtype.options ?? []).map((opt: any) => {
+                      const isSel = selOptId === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedVariations(prev => ({ ...prev, [vtype.id]: opt.id }));
+                            setOpenSteps(prev => ({ ...prev, [idx]: false, [idx + 1]: true }));
+                          }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
+                            isSel
+                              ? "border-orange-500 bg-orange-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/30"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            isSel ? "border-orange-500" : "border-gray-300"
+                          }`}>
+                            {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium leading-tight ${isSel ? "text-orange-700" : "text-gray-800"}`}>
+                              {opt.name}
+                            </p>
+                            {opt.description && (
+                              <p className="text-xs text-gray-500 mt-0.5">{opt.description}</p>
+                            )}
+                          </div>
+                          {parseFloat(opt.priceModifier?.toString() ?? "0") > 0 && (
+                            <span className="text-xs font-semibold text-green-600 flex-shrink-0">
+                              +R$ {parseFloat(opt.priceModifier.toString()).toFixed(2)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                    {(vtype.options ?? []).length === 0 && (
+                      <p className="text-sm text-gray-400 italic">Nenhuma opção cadastrada para esta variação.</p>
+                    )}
+                  </div>
+                </AccordionStep>
+              );
+            })}
+
+            {/* ── Atributos em acordeão (sistema productAttributes) ── */}
             {(visibleAttributes ?? []).map((attr, idx) => {
+              const globalIdx = varCount + idx; // continua numeração após variações
               const selVal = selectedAttributes[attr.attributeId];
               return (
                 <AccordionStep
                   key={attr.attributeId}
-                  number={idx + 1}
-                  title={attr.attribute?.name ?? `Atributo ${idx + 1}`}
-                  isOpen={!!openSteps[idx]}
-                  onToggle={() => toggleStep(idx)}
+                  number={globalIdx + 1}
+                  title={attr.attribute?.name ?? `Atributo ${globalIdx + 1}`}
+                  isOpen={!!openSteps[globalIdx]}
+                  onToggle={() => toggleStep(globalIdx)}
                 >
                   <div className="space-y-2 mt-2">
                     {attr.values.map(val => {
@@ -505,7 +568,7 @@ export default function ProductDetail() {
                           type="button"
                           onClick={() => {
                             setSelectedAttributes(prev => ({ ...prev, [attr.attributeId]: { valueIds: [val.id] } }));
-                            setOpenSteps(prev => ({ ...prev, [idx]: false, [idx + 1]: true }));
+                            setOpenSteps(prev => ({ ...prev, [globalIdx]: false, [globalIdx + 1]: true }));
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                             isSel
@@ -830,6 +893,23 @@ export default function ProductDetail() {
                     <p className="text-sm font-bold text-gray-900">{product.name}</p>
                   </div>
                 </div>
+
+                {/* Variações selecionadas (sistema variationTypes) */}
+                {variationTypes && variationTypes.length > 0 && Object.keys(selectedVariations).length > 0 && (
+                  <div className="space-y-2 pb-3 border-b border-gray-100">
+                    {(variationTypes as any[]).map((vtype: any) => {
+                      const selOptId = selectedVariations[vtype.id];
+                      const selOpt = (vtype.options ?? []).find((o: any) => o.id === selOptId);
+                      if (!selOpt) return null;
+                      return (
+                        <div key={vtype.id} className="flex justify-between text-sm">
+                          <span className="text-gray-500">{vtype.name}</span>
+                          <span className="font-medium text-gray-800 text-right max-w-[150px]">{selOpt.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Atributos selecionados dinamicamente */}
                 {selectedAttrsForSummary.length > 0 && (
