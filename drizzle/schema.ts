@@ -28,7 +28,7 @@ export const products = mysqlTable("products", {
   name: varchar("name", { length: 255 }).notNull(),
   description: longtext("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  segment: mysqlEnum("segment", ["alimentacao", "beleza", "varejo", "servicos"]).notNull(),
+  segment: varchar("segment", { length: 100 }).notNull().default("geral"),
   category: varchar("category", { length: 255 }), // Categoria do produto
   subcategory: varchar("subcategory", { length: 255 }), // Subcategoria do produto
   imageUrl: text("imageUrl"), // URL da imagem armazenada em S3
