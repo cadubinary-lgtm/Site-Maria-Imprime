@@ -109,8 +109,8 @@ export default function ProductDetail() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Medidas
-  const [dimWidth, setDimWidth] = useState("");
-  const [dimHeight, setDimHeight] = useState("");
+  const [dimWidth, setDimWidth] = useState("0");
+  const [dimHeight, setDimHeight] = useState("0");
 
   // Acordeão
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({ 0: true });
@@ -181,6 +181,12 @@ export default function ProductDetail() {
   const basePrice = useMemo(() => {
     if (!product) return 0;
     let total = parseFloat(product.price);
+    // Modificadores de variações (variationTypes/variationOptions)
+    Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
+      const vtype = variationTypes.find((vt: any) => vt.id === Number(vtypeId));
+      const opt = vtype?.options?.find((o: any) => o.id === optId);
+      if (opt) total += parseFloat(opt.priceModifier?.toString() ?? "0");
+    });
     // Modificadores de atributos
     Object.entries(selectedAttributes).forEach(([attrId, sel]) => {
       const attr = productAttributes?.find(pa => pa.attributeId === Number(attrId));
@@ -192,7 +198,7 @@ export default function ProductDetail() {
     // Modificadores de prazo
     if (selectedDeliveryOption) total += deliveryTax;
     return Math.max(0, total);
-  }, [product, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax]);
+  }, [product, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax]);
 
   const area = useMemo(() => {
     const w = parseFloat(dimWidth.replace(",", "."));
@@ -622,7 +628,8 @@ export default function ProductDetail() {
                       <Label className="text-xs text-gray-500 mb-1.5 block">Largura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="200"
+                        placeholder="0"
+                        min="0"
                         value={dimWidth}
                         onChange={e => setDimWidth(e.target.value)}
                         className="font-semibold text-base h-12 border-gray-200"
@@ -632,7 +639,8 @@ export default function ProductDetail() {
                       <Label className="text-xs text-gray-500 mb-1.5 block">Altura (cm)</Label>
                       <Input
                         type="number"
-                        placeholder="100"
+                        placeholder="0"
+                        min="0"
                         value={dimHeight}
                         onChange={e => setDimHeight(e.target.value)}
                         className="font-semibold text-base h-12 border-gray-200"
@@ -649,12 +657,7 @@ export default function ProductDetail() {
 
                   <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                     <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <p className="text-xs text-blue-700">
-                      A área mínima cobrada é de 1 m²
-                      {product.maxWidth && product.maxHeight
-                        ? ` e máxima de ${(parseFloat(product.maxWidth as any) * parseFloat(product.maxHeight as any)).toFixed(0)} m²`
-                        : " e máxima conforme configuração"}
-                    </p>
+                    <p className="text-xs text-blue-700">A área mínima cobrada é de 1 m²</p>
                   </div>
                 </div>
               </AccordionStep>
