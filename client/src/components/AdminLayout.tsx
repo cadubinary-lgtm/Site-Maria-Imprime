@@ -127,7 +127,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { item: { label: "Atributos", href: "/admin/atributos", icon: <Tag className="w-4 h-4" /> } },
     { item: { label: "Regras", href: "/admin/regras", icon: <Sliders className="w-4 h-4" /> } },
     { item: { label: "Regras Dinâmicas", href: "/admin/regras-dinamicas", icon: <Zap className="w-4 h-4" /> } },
-    { item: { label: "Preços", href: "/admin/precos", icon: <TrendingUp className="w-4 h-4" /> } },
     // CRM
     { group: "CRM - CLIENTES" },
     { item: { label: "Clientes", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
@@ -141,7 +140,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Sistema
     { group: "SISTEMA" },
     { item: { label: "Usuários", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
-    { item: { label: "Configurações", href: "/admin/precos", icon: <Settings className="w-4 h-4" /> } },
     { item: { label: "Integrações", href: "/admin/vincular-atributos", icon: <Link2 className="w-4 h-4" /> } },
   ];
 
