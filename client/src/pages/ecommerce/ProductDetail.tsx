@@ -9,7 +9,10 @@ import {
   Loader2, Upload, AlertCircle, CheckCircle2,
   ChevronLeft, ChevronRight, Star, Shield,
   Package, ChevronDown, ChevronUp, Link2, Search,
-  ShoppingCart, FileText, MessageCircle
+  ShoppingCart, FileText, MessageCircle,
+  ShieldCheck, Droplets, Scissors, LayoutGrid,
+  Factory, Truck, CreditCard, HeadphonesIcon,
+  Home, Clock, Tag, ThumbsUp
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,24 +31,24 @@ const FRETE_OPTIONS = [
 ] as const;
 
 const PRODUCT_FEATURES = [
-  { color: "text-green-500",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
-  { color: "text-blue-500",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
-  { color: "text-orange-500", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
-  { color: "text-purple-500", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
+  { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
+  { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
+  { Icon: Scissors,   bg: "bg-orange-50", color: "text-orange-600", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
+  { Icon: LayoutGrid, bg: "bg-purple-50", color: "text-purple-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
 ];
 
 const COMPANY_DIFFERENTIALS = [
-  { icon: "🏭", label: "Produção própria",        desc: "Qualidade garantida" },
-  { icon: "🚚", label: "Entrega para todo Brasil", desc: "Enviamos para sua cidade" },
-  { icon: "💳", label: "Pagamento facilitado",    desc: "PIX, Boleto ou Cartão" },
-  { icon: "🤝", label: "Atendimento humanizado",  desc: "Suporte rápido via WhatsApp" },
+  { Icon: Factory,         bg: "bg-orange-50", color: "text-orange-500", label: "Produção própria",        desc: "Qualidade garantida" },
+  { Icon: Truck,           bg: "bg-orange-50", color: "text-orange-500", label: "Entrega para todo Brasil", desc: "Enviamos para sua cidade" },
+  { Icon: CreditCard,      bg: "bg-orange-50", color: "text-orange-500", label: "Pagamento facilitado",    desc: "PIX, Boleto ou Cartão" },
+  { Icon: HeadphonesIcon,  bg: "bg-orange-50", color: "text-orange-500", label: "Atendimento humanizado",  desc: "Suporte rápido via WhatsApp" },
 ];
 
 const FOOTER_BADGES = [
-  { icon: "🏠", label: "Qualidade garantida",      desc: "Impressão de alta definição" },
-  { icon: "⏱",  label: "Melhor prazo do mercado",  desc: "Produção rápida e eficiente" },
-  { icon: "🏷",  label: "Preço justo",              desc: "Melhor custo-benefício" },
-  { icon: "😊", label: "Satisfação garantida",     desc: "Ou seu dinheiro de volta" },
+  { Icon: Home,     bg: "bg-orange-50", color: "text-orange-500", label: "Qualidade garantida",      desc: "Impressão de alta definição" },
+  { Icon: Clock,    bg: "bg-orange-50", color: "text-orange-500", label: "Melhor prazo do mercado",  desc: "Produção rápida e eficiente" },
+  { Icon: Tag,      bg: "bg-orange-50", color: "text-orange-500", label: "Preço justo",              desc: "Melhor custo-benefício" },
+  { Icon: ThumbsUp, bg: "bg-orange-50", color: "text-orange-500", label: "Satisfação garantida",     desc: "Ou seu dinheiro de volta" },
 ];
 
 // ─── Accordion ──────────────────────────────────────────────────────────────
@@ -440,11 +443,11 @@ export default function ProductDetail() {
                 <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
               )}
 
-              <div className="space-y-2 pt-1">
-                {PRODUCT_FEATURES.map(({ color, label, desc }) => (
-                  <div key={label} className="flex items-start gap-2">
-                    <div className={`w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <div className={`w-2 h-2 rounded-full bg-current ${color}`} />
+              <div className="space-y-3 pt-1">
+                {PRODUCT_FEATURES.map(({ Icon, bg, color, label, desc }) => (
+                  <div key={label} className="flex items-start gap-3">
+                    <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-4 h-4 ${color}`} />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-800">{label}</p>
@@ -860,9 +863,11 @@ export default function ProductDetail() {
 
             {/* Footer badges */}
             <div className="grid grid-cols-4 gap-3">
-              {FOOTER_BADGES.map(({ icon, label, desc }) => (
+              {FOOTER_BADGES.map(({ Icon, bg, color, label, desc }) => (
                 <div key={label} className="bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm">
-                  <div className="text-2xl mb-1">{icon}</div>
+                  <div className={`w-10 h-10 ${bg} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                    <Icon className={`w-5 h-5 ${color}`} />
+                  </div>
                   <p className="text-xs font-semibold text-gray-800 leading-tight">{label}</p>
                   <p className="text-xs text-gray-500 mt-0.5 leading-tight">{desc}</p>
                 </div>
@@ -1065,9 +1070,11 @@ export default function ProductDetail() {
             <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <p className="text-sm font-bold text-gray-900 mb-3">Nossos diferenciais</p>
               <div className="space-y-3">
-                {COMPANY_DIFFERENTIALS.map(({ icon, label, desc }) => (
+                {COMPANY_DIFFERENTIALS.map(({ Icon, bg, color, label, desc }) => (
                   <div key={label} className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 text-base">{icon}</div>
+                    <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-4 h-4 ${color}`} />
+                    </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-800">{label}</p>
                       <p className="text-xs text-gray-500">{desc}</p>
