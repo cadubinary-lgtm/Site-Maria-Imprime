@@ -1953,3 +1953,28 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Estilos CSS de impressão: @page A4, print-color-adjust, classes print:hidden
 - [x] Modo Térmica 80mm preparado (preview na tela e CSS de impressão)
 - [x] TypeScript sem erros
+
+## Fase: Assinaturas OS + Reformulação Página de Produto
+
+- [ ] Adicionar campo de assinatura do cliente na OS (nome + linha de assinatura)
+- [ ] Adicionar campo de assinatura do técnico na OS (nome + linha de assinatura)
+- [ ] Atualizar schema do banco: tabela product_images (id, productId, url, fileKey, order, isMain)
+- [ ] Migrar banco de dados com nova tabela product_images
+- [ ] Adicionar procedures tRPC: product.getImages, product.addImage, product.deleteImage
+- [ ] Upload de foto principal + até 4 fotos adicionais no painel admin (criar/editar produto)
+- [ ] Reformular página de produto pública: galeria (foto principal grande + 4 miniaturas clicáveis)
+- [ ] Reformular página de produto pública: opções em acordeão numerado
+- [ ] Reformular página de produto pública: resumo lateral fixo
+- [ ] Reformular página de produto pública: badge "Mais vendido", features com ícones
+
+## Fase: Reformulação ProductDetail + Upload Fotos Admin + OS Assinaturas
+
+- [x] Upload de múltiplas fotos no admin (criar/editar produto) - componente ProductImageUploader
+- [x] Reformular ProductDetail com layout profissional (galeria foto principal + 4 miniaturas, acordeão numerado)
+- [x] Campo de arquivo com preview do arquivo selecionado (imagem ou ícone para outros tipos)
+- [x] Tabs Upload / Link da arte no campo de arquivo
+- [x] Campo CEP + cálculo de frete automático via ViaCEP
+- [x] Resumo lateral fixo com foto do produto, atributos selecionados, totais e botões de ação
+- [x] Assinaturas do cliente e técnico na OS (seção final)
+- [x] Cores identidade visual laranja/preto/cinza na OS
+- [x] Exportação PDF via print nativo (sem html2canvas/oklch)

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductVariationManager } from "@/components/ProductVariationManager";
+import { ProductImageUploader } from "@/components/products/ProductImageUploader";
 
 export default function AdminProducts() {
   // ─── Estado de criação ────────────────────────────────────────────────────
@@ -25,6 +26,8 @@ export default function AdminProducts() {
     price: "",
     segment: "",
     imageUrl: "",
+    imageKey: "",
+    galleryUrls: [] as string[],
     calculationType: "unidade",
     pricePerM2: "",
     minWidth: "",
@@ -43,6 +46,8 @@ export default function AdminProducts() {
     description: "",
     price: "",
     imageUrl: "",
+    imageKey: "",
+    galleryUrls: [] as string[],
     segmentIds: [] as number[],
     calculationType: "unidade",
     pricePerM2: "",
@@ -128,6 +133,8 @@ export default function AdminProducts() {
         price: createForm.price,
         segment: createForm.segment,
         imageUrl: createForm.imageUrl,
+        imageKey: createForm.imageKey || undefined,
+        galleryUrls: createForm.galleryUrls.length > 0 ? JSON.stringify(createForm.galleryUrls) : undefined,
         calculationType: createForm.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
         pricePerM2: createForm.calculationType === "m2" ? createForm.pricePerM2 : undefined,
         minWidth: createForm.calculationType === "m2" ? createForm.minWidth : undefined,
@@ -167,7 +174,7 @@ export default function AdminProducts() {
       toast.success("Produto criado com sucesso!");
       utils.products.getAll.invalidate();
       setCreateForm({
-        name: "", description: "", price: "", segment: "", imageUrl: "",
+        name: "", description: "", price: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
         calculationType: "unidade", pricePerM2: "", minWidth: "", maxWidth: "",
         minHeight: "", maxHeight: "", segmentIds: [],
       });
@@ -182,12 +189,18 @@ export default function AdminProducts() {
   // ─── Editar produto ───────────────────────────────────────────────────────
   const handleEdit = (product: any) => {
     setEditingId(product.id);
+    let parsedGallery: string[] = [];
+    try {
+      if (product.galleryUrls) parsedGallery = JSON.parse(product.galleryUrls);
+    } catch {}
     setEditForm((prev) => ({
       ...prev,
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
       imageUrl: product.imageUrl || "",
+      imageKey: product.imageKey || "",
+      galleryUrls: parsedGallery,
       calculationType: product.calculationType || "unidade",
       pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
       minWidth: product.minWidth ? product.minWidth.toString() : "",
@@ -220,6 +233,8 @@ export default function AdminProducts() {
         price: editForm.price,
         segment: "alimentacao",
         imageUrl: editForm.imageUrl,
+        imageKey: (editForm as any).imageKey || undefined,
+        galleryUrls: (editForm as any).galleryUrls?.length > 0 ? JSON.stringify((editForm as any).galleryUrls) : undefined,
         calculationType: (editForm as any).calculationType,
         pricePerM2: (editForm as any).calculationType === "m2" ? (editForm as any).pricePerM2 : undefined,
         minWidth: (editForm as any).calculationType === "m2" ? (editForm as any).minWidth : undefined,
@@ -449,16 +464,13 @@ export default function AdminProducts() {
                 </div>
               )}
 
-              {/* URL da imagem */}
-              <div>
-                <Label htmlFor="create-imageUrl">URL da Imagem</Label>
-                <Input
-                  id="create-imageUrl"
-                  value={createForm.imageUrl}
-                  onChange={(e) => setCreateForm({ ...createForm, imageUrl: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+              {/* Upload de Fotos */}
+              <ProductImageUploader
+                mainImageUrl={createForm.imageUrl}
+                galleryUrls={createForm.galleryUrls}
+                onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
+                onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
+              />
 
               {/* Segmentos */}
               <div>
@@ -694,10 +706,13 @@ export default function AdminProducts() {
                             />
                           </div>
 
-                          <div>
-                            <Label htmlFor="edit-imageUrl">URL da Imagem</Label>
-                            <Input id="edit-imageUrl" value={editForm.imageUrl} onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })} />
-                          </div>
+                          {/* Upload de Fotos */}
+                          <ProductImageUploader
+                            mainImageUrl={editForm.imageUrl}
+                            galleryUrls={(editForm as any).galleryUrls || []}
+                            onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
+                            onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
+                          />
 
                           <Button
                             onClick={handleSave}

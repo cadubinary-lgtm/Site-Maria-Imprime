@@ -229,6 +229,7 @@ export const appRouter = router({
         segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
+        galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
@@ -249,6 +250,7 @@ export const appRouter = router({
             segment: input.segment as any,
             imageUrl: input.imageUrl,
             imageKey: input.imageKey,
+            galleryUrls: input.galleryUrls || null,
             calculationType: (input.calculationType || "unidade") as any,
             pricePerM2: input.pricePerM2 ? input.pricePerM2 as any : null,
             minWidth: input.minWidth ? input.minWidth as any : null,
@@ -311,6 +313,7 @@ export const appRouter = router({
         segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
+        galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
@@ -329,6 +332,7 @@ export const appRouter = router({
           segment: input.segment as any,
           imageUrl: input.imageUrl,
           imageKey: input.imageKey,
+          galleryUrls: input.galleryUrls !== undefined ? input.galleryUrls : undefined,
         };
 
         // Adicionar campos de m² se fornecidos
