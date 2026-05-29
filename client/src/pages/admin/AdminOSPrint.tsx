@@ -8,6 +8,7 @@ import {
   Phone, MapPin, Package, DollarSign,
   Calendar, Truck, Image as ImageIcon, Download,
   FileDown, CheckSquare, Info, ClipboardList,
+  User, Settings,
 } from "lucide-react";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -612,6 +613,47 @@ export default function AdminOSPrint() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* ══ 7b. ASSINATURAS DO CLIENTE E TÉCNICO ════════════════════ */}
+          <div style={{ padding: "12px 16px", borderTop: "2px solid #e5e7eb", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            {/* Assinatura do Cliente */}
+            <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                <User style={{ width: "13px", height: "13px", color: "#f97316" }} />
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  ASSINATURA DO CLIENTE
+                </span>
+              </div>
+              <div style={{ fontSize: "9px", color: "#9ca3af", marginBottom: "20px" }}>
+                Confirmo que recebi o serviço conforme solicitado e estou de acordo com as condições.
+              </div>
+              <div style={{ borderTop: "1px solid #374151", paddingTop: "4px", marginTop: "8px" }}>
+                <div style={{ fontSize: "9px", color: "#9ca3af" }}>Nome: ________________________________________________</div>
+                <div style={{ fontSize: "9px", color: "#9ca3af", marginTop: "16px", borderTop: "1px solid #374151", paddingTop: "4px" }}>
+                  Assinatura &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data: ____/____/________
+                </div>
+              </div>
+            </div>
+
+            {/* Assinatura do Técnico/Responsável */}
+            <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                <Settings style={{ width: "13px", height: "13px", color: "#f97316" }} />
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  ASSINATURA DO TÉCNICO / RESPONSÁVEL
+                </span>
+              </div>
+              <div style={{ fontSize: "9px", color: "#9ca3af", marginBottom: "20px" }}>
+                Confirmo que o serviço foi executado conforme as especificações da ordem de serviço.
+              </div>
+              <div style={{ borderTop: "1px solid #374151", paddingTop: "4px", marginTop: "8px" }}>
+                <div style={{ fontSize: "9px", color: "#9ca3af" }}>Nome: ________________________________________________</div>
+                <div style={{ fontSize: "9px", color: "#9ca3af", marginTop: "16px", borderTop: "1px solid #374151", paddingTop: "4px" }}>
+                  Assinatura &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data: ____/____/________
+                </div>
+              </div>
             </div>
           </div>
 
