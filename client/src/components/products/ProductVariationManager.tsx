@@ -27,7 +27,15 @@ interface VariationOption {
   id: number;
   name: string;
   priceModifier: string | number;
+  calculationType?: string;
 }
+
+const CALC_TYPE_OPTIONS = [
+  { value: "unit", label: "Unidade" },
+  { value: "m2", label: "m² (Metro Quadrado)" },
+  { value: "linear", label: "Metro Linear" },
+  { value: "package", label: "Pacote" },
+];
 
 // Draggable item component
 function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEdit, isExpanded, onToggleExpand }: any) {
@@ -211,8 +219,10 @@ export function ProductVariationManager() {
   // Por variação global expandida: campos de nova opção separados
   const [globalOptionNames, setGlobalOptionNames] = useState<Record<number, string>>({});
   const [globalOptionPrices, setGlobalOptionPrices] = useState<Record<number, string>>({});
+  const [globalOptionCalcTypes, setGlobalOptionCalcTypes] = useState<Record<number, string>>({});
   const [editingOptionName, setEditingOptionName] = useState("");
   const [editingOptionPrice, setEditingOptionPrice] = useState("");
+  const [editingOptionCalcType, setEditingOptionCalcType] = useState("unit");
 
   // Adicionar opção a uma variação do produto (aba Gerenciar)
   const handleAddOption = async () => {
@@ -227,6 +237,7 @@ export function ProductVariationManager() {
         variationTypeId: variationId,
         name: newOptionName,
         priceModifier: (parseFloat(newOptionPrice) || 0).toString(),
+        calculationType: "unit",
       });
 
       toast.success("Opção adicionada!");
@@ -248,11 +259,13 @@ export function ProductVariationManager() {
       return;
     }
 
+    const calcType = globalOptionCalcTypes[variationId] || "unit";
     try {
       await createVariationOptionMutation.mutateAsync({
         variationTypeId: variationId,
         name,
         priceModifier: (parseFloat(price) || 0).toString(),
+        calculationType: calcType as any,
       });
 
       // Propagar a nova opção para todas as cópias vinculadas ao produto
@@ -261,6 +274,7 @@ export function ProductVariationManager() {
       toast.success("Opção adicionada e sincronizada com os produtos vinculados!");
       setGlobalOptionNames((prev) => ({ ...prev, [variationId]: "" }));
       setGlobalOptionPrices((prev) => ({ ...prev, [variationId]: "" }));
+      setGlobalOptionCalcTypes((prev) => ({ ...prev, [variationId]: "unit" }));
       // Invalidar ambas as listas para sincronizar
       await invalidateBoth();
     } catch (error) {
@@ -313,6 +327,7 @@ export function ProductVariationManager() {
         id: editingOptionId,
         name: editingOptionName,
         priceModifier: (parseFloat(editingOptionPrice) || 0).toString(),
+        calculationType: editingOptionCalcType as any,
       });
 
       // Se a opção pertence a uma variação global, propagar a atualização para todas as cópias
@@ -810,7 +825,7 @@ export function ProductVariationManager() {
                         {editingOptionId && (
                           <div className="border rounded-lg p-3 bg-yellow-50 border-yellow-300">
                             <h5 className="font-semibold text-sm mb-3">Editar Opção</h5>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                               <div>
                                 <Label className="text-xs">Nome</Label>
                                 <Input
@@ -829,6 +844,22 @@ export function ProductVariationManager() {
                                   className="mt-1 text-sm"
                                 />
                               </div>
+                              <div>
+                                <Label className="text-xs">Tipo de Cobrança</Label>
+                                <Select
+                                  value={editingOptionCalcType}
+                                  onValueChange={setEditingOptionCalcType}
+                                >
+                                  <SelectTrigger className="mt-1 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {CALC_TYPE_OPTIONS.map(o => (
+                                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                               <div className="flex items-end gap-2">
                                 <Button
                                   onClick={() => handleUpdateOption(vt.id)}
@@ -839,7 +870,7 @@ export function ProductVariationManager() {
                                 </Button>
                                 <Button
                                   variant="outline"
-                                  onClick={() => { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); }}
+                                  onClick={() => { setEditingOptionId(null); setEditingOptionName(""); setEditingOptionPrice(""); setEditingOptionCalcType("unit"); }}
                                   className="text-sm"
                                 >
                                   <X className="w-4 h-4" />
@@ -864,6 +895,8 @@ export function ProductVariationManager() {
                                     <h6 className="font-medium text-sm">{option.name}</h6>
                                     <p className="text-xs text-gray-600">
                                       +R$ {parseFloat(option.priceModifier).toFixed(2)}
+                                      {" · "}
+                                      {CALC_TYPE_OPTIONS.find(c => c.value === (option.calculationType || "unit"))?.label ?? "Unidade"}
                                     </p>
                                   </div>
                                   <div className="flex gap-2">
@@ -874,6 +907,7 @@ export function ProductVariationManager() {
                                         setEditingOptionId(option.id);
                                         setEditingOptionName(option.name);
                                         setEditingOptionPrice(option.priceModifier);
+                                        setEditingOptionCalcType(option.calculationType || "unit");
                                       }}
                                       className="text-blue-500 hover:text-blue-700"
                                     >
@@ -897,7 +931,7 @@ export function ProductVariationManager() {
                         {/* Adicionar Nova Opção — campos independentes por variação */}
                         <div className="border-t pt-4">
                           <h5 className="font-semibold text-sm mb-3">Adicionar Nova Opção</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <div>
                               <Label htmlFor={`global-option-name-${vt.id}`} className="text-xs">Nome</Label>
                               <Input
@@ -923,6 +957,24 @@ export function ProductVariationManager() {
                                 }
                                 className="mt-1 text-sm"
                               />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Tipo de Cobrança</Label>
+                              <Select
+                                value={globalOptionCalcTypes[vt.id] || "unit"}
+                                onValueChange={(val) =>
+                                  setGlobalOptionCalcTypes((prev) => ({ ...prev, [vt.id]: val }))
+                                }
+                              >
+                                <SelectTrigger className="mt-1 text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {CALC_TYPE_OPTIONS.map(o => (
+                                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div className="flex items-end">
                               <Button

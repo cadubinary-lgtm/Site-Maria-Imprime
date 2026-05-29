@@ -195,6 +195,7 @@ export const variationOptions = mysqlTable("variationOptions", {
   name: varchar("name", { length: 255 }).notNull(), // Ex: "Adesivo Brilho Premium"
   description: longtext("description"),
   priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).notNull().default("0"), // Adicional ao preço
+  calculationType: varchar("calculationType", { length: 50 }).notNull().default("unit"), // unit | m2 | linear | package
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

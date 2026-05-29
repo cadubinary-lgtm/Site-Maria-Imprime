@@ -182,10 +182,29 @@ export default function ProductDetail() {
     if (!product) return 0;
     let total = parseFloat(product.price);
     // Modificadores de variações (variationTypes/variationOptions)
+    // O cálculo depende do calculationType da opção:
+    // - unit: valor fixo por unidade (multiplicado pela quantidade no subtotal)
+    // - m2: valor por m² (multiplicado pela billedArea)
+    // - linear: valor por metro linear (largura em metros)
+    // - package: valor fixo por pacote
     Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
       const vtype = variationTypes.find((vt: any) => vt.id === Number(vtypeId));
       const opt = vtype?.options?.find((o: any) => o.id === optId);
-      if (opt) total += parseFloat(opt.priceModifier?.toString() ?? "0");
+      if (!opt) return;
+      const modifier = parseFloat(opt.priceModifier?.toString() ?? "0");
+      const calcType = opt.calculationType || "unit";
+      const w = parseFloat(dimWidth.replace(",", ".")) || 0;
+      const h = parseFloat(dimHeight.replace(",", ".")) || 0;
+      const areaM2 = Math.max(w * h, (w > 0 && h > 0) ? 1 : 0); // m² mínimo 1
+      const linearM = w / 100; // cm -> metros
+      if (calcType === "m2") {
+        total += modifier * (areaM2 > 0 ? areaM2 : 1);
+      } else if (calcType === "linear") {
+        total += modifier * (linearM > 0 ? linearM : 1);
+      } else {
+        // unit ou package: valor fixo
+        total += modifier;
+      }
     });
     // Modificadores de atributos
     Object.entries(selectedAttributes).forEach(([attrId, sel]) => {
@@ -198,7 +217,7 @@ export default function ProductDetail() {
     // Modificadores de prazo
     if (selectedDeliveryOption) total += deliveryTax;
     return Math.max(0, total);
-  }, [product, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax]);
+  }, [product, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
   const area = useMemo(() => {
     const w = parseFloat(dimWidth.replace(",", "."));

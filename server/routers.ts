@@ -480,6 +480,7 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         priceModifier: z.string().default("0"),
+        calculationType: z.enum(["unit", "m2", "linear", "package"]).default("unit"),
       }))
       .mutation(async ({ input }) => {
         return await createVariationOption({
@@ -487,6 +488,7 @@ export const appRouter = router({
           name: input.name,
           description: input.description,
           priceModifier: input.priceModifier as any,
+          calculationType: input.calculationType,
         });
       }),
     updateType: adminProcedure
@@ -521,6 +523,7 @@ export const appRouter = router({
         name: z.string().optional(),
         description: z.string().optional(),
         priceModifier: z.string().optional(),
+        calculationType: z.enum(["unit", "m2", "linear", "package"]).optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
