@@ -317,6 +317,24 @@ export function ProductVariationManager() {
     }
   };
 
+  const handleMoveVariationType = async (list: VariationType[], vtId: number, direction: "up" | "down") => {
+    const idx = list.findIndex((vt) => vt.id === vtId);
+    if (idx === -1) return;
+    if (direction === "up" && idx === 0) return;
+    if (direction === "down" && idx === list.length - 1) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    const reordered = [...list];
+    [reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]];
+    const updates = reordered.map((vt, i) => ({ id: vt.id, order: i }));
+    try {
+      await reorderVariationTypesMutation.mutateAsync({ updates });
+      await invalidateBoth();
+    } catch (error) {
+      toast.error("Erro ao reordenar variações");
+      console.error(error);
+    }
+  };
+
   const handleMoveOption = async (options: any[], optionId: number, direction: "up" | "down", globalVariationId?: number) => {
     const idx = options.findIndex((o: any) => o.id === optionId);
     if (idx === -1) return;
@@ -817,6 +835,28 @@ export function ProductVariationManager() {
                               <Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
                             </div>
                           </RadioGroup>
+                        </div>
+                        <div className="flex gap-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")}
+                            disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending}
+                            className="text-gray-400 hover:text-gray-700 px-1"
+                            title="Mover para cima"
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")}
+                            disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending}
+                            className="text-gray-400 hover:text-gray-700 px-1"
+                            title="Mover para baixo"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </Button>
                         </div>
                         <Button
                           variant="ghost"
