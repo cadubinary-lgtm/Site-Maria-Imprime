@@ -41,7 +41,6 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminPanel from "./pages/admin/AdminPanel";
 import AdminAttributesManager from "./pages/admin/AdminAttributesManager";
 import AdminProductAttributesLinker from "./pages/admin/AdminProductAttributesLinker";
-import { AdminPricingRules } from "./pages/admin/AdminPricingRules";
 import AdminRulesBuilder from "./pages/admin/AdminRulesBuilder";
 import AdminRulesManager from "./pages/admin/AdminRulesManager";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -82,10 +81,8 @@ function AdminRoutes() {
         <>
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/produtos" component={AdminProducts} />
-          <Route path="/admin/precos" component={AdminPanel} />
           <Route path="/admin/atributos" component={AdminAttributesManager} />
           <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
-          <Route path="/admin/regras" component={AdminPricingRules} />
           <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
           <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
           <Route path="/admin/pedidos/kanban" component={AdminKanban} />
