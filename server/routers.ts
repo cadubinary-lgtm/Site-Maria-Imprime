@@ -46,6 +46,7 @@ import {
   getCartItemCount,
   updateVariationOption,
   reorderVariationTypes,
+  reorderVariationOptions,
   syncGlobalVariationOptions,
   syncGlobalVariationName,
   getOrderItemVariations,
@@ -538,6 +539,16 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await reorderVariationTypes(input.updates);
+      }),
+    reorderOptions: adminProcedure
+      .input(z.object({
+        updates: z.array(z.object({
+          id: z.number(),
+          order: z.number(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        return await reorderVariationOptions(input.updates);
       }),
     linkGlobal: adminProcedure
       .input(z.object({

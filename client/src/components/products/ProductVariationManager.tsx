@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Plus, Edit2, Trash2, GripVertical } from "lucide-react";
+import { X, Plus, Edit2, Trash2, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 
@@ -197,6 +197,7 @@ export function ProductVariationManager() {
   const updateVariationOptionMutation = trpc.adminVariations.updateOption.useMutation();
   const updateVariationTypeMutation = trpc.adminVariations.updateType.useMutation();
   const reorderVariationTypesMutation = trpc.adminVariations.reorderTypes.useMutation();
+  const reorderOptionsMutation = trpc.adminVariations.reorderOptions.useMutation();
   const linkGlobalMutation = trpc.adminVariations.linkGlobal.useMutation();
   const syncGlobalOptionsMutation = trpc.adminVariations.syncGlobalOptions.useMutation();
   const syncGlobalNameMutation = trpc.adminVariations.syncGlobalName.useMutation();
@@ -312,6 +313,27 @@ export function ProductVariationManager() {
       await invalidateBoth();
     } catch (error) {
       toast.error("Erro ao remover opção");
+      console.error(error);
+    }
+  };
+
+  const handleMoveOption = async (options: any[], optionId: number, direction: "up" | "down", globalVariationId?: number) => {
+    const idx = options.findIndex((o: any) => o.id === optionId);
+    if (idx === -1) return;
+    if (direction === "up" && idx === 0) return;
+    if (direction === "down" && idx === options.length - 1) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    const reordered = [...options];
+    [reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]];
+    const updates = reordered.map((o: any, i: number) => ({ id: o.id, order: i }));
+    try {
+      await reorderOptionsMutation.mutateAsync({ updates });
+      if (globalVariationId) {
+        await syncGlobalOptionsMutation.mutateAsync({ globalVariationId });
+      }
+      await invalidateBoth();
+    } catch (error) {
+      toast.error("Erro ao reordenar opções");
       console.error(error);
     }
   };
@@ -899,7 +921,27 @@ export function ProductVariationManager() {
                                       {CALC_TYPE_OPTIONS.find(c => c.value === (option.calculationType || "unit"))?.label ?? "Unidade"}
                                     </p>
                                   </div>
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleMoveOption(vt.options ?? [], option.id, "up", vt.id)}
+                                      disabled={(vt.options ?? []).indexOf(option) === 0 || reorderOptionsMutation.isPending}
+                                      className="text-gray-400 hover:text-gray-700 px-1"
+                                      title="Mover para cima"
+                                    >
+                                      <ChevronUp className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleMoveOption(vt.options ?? [], option.id, "down", vt.id)}
+                                      disabled={(vt.options ?? []).indexOf(option) === (vt.options ?? []).length - 1 || reorderOptionsMutation.isPending}
+                                      className="text-gray-400 hover:text-gray-700 px-1"
+                                      title="Mover para baixo"
+                                    >
+                                      <ChevronDown className="w-4 h-4" />
+                                    </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"
