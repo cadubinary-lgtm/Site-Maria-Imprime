@@ -131,7 +131,7 @@ export default function ProductDetail() {
   const { data: productRules } = trpc.attributes.getProductRules.useQuery(
     productId || 0, { enabled: !!productId }
   );
-  const { data: deliveryOptions = [] } = trpc.variations.getByProduct.useQuery(
+  const { data: deliveryOptions = [] } = trpc.deliveryOptions.getByProduct.useQuery(
     { productId: productId || 0 }, { enabled: !!productId }
   );
   const addToCartMutation = trpc.cart.addItem.useMutation();
@@ -860,14 +860,17 @@ export default function ProductDetail() {
                 {/* Prazo de produção */}
                 {deliveryOptions && deliveryOptions.length > 0 && (
                   <div className="pb-3 border-b border-gray-100">
-                    <p className="text-xs text-gray-400 mb-2">Prazo de produção</p>
+                    <p className="text-xs text-gray-400 mb-1">Prazo de produção</p>
                     {deliveryOptions.map((opt: any) => (
                       <button
                         key={opt.id}
                         type="button"
                         onClick={() => {
                           setSelectedDeliveryOption(opt);
-                          setDeliveryTax(parseFloat(opt.priceModifier?.toString() ?? "0"));
+                          const extra = isM2 && area > 0
+                            ? (opt.pricePerM2 ?? 0) * area
+                            : (opt.pricePerM2 ?? 0);
+                          setDeliveryTax(extra);
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm mb-1 transition-all ${
                           selectedDeliveryOption?.id === opt.id
@@ -875,12 +878,19 @@ export default function ProductDetail() {
                             : "border-gray-200 hover:border-orange-300"
                         }`}
                       >
-                        <span className={`font-medium ${selectedDeliveryOption?.id === opt.id ? "text-orange-700" : "text-gray-800"}`}>
-                          {opt.name}
-                        </span>
-                        {parseFloat(opt.priceModifier?.toString() ?? "0") > 0 && (
-                          <span className="text-green-600 font-semibold text-xs">
-                            +R$ {parseFloat(opt.priceModifier.toString()).toFixed(2)}
+                        <div className="text-left">
+                          <span className={`font-medium block ${selectedDeliveryOption?.id === opt.id ? "text-orange-700" : "text-gray-800"}`}>
+                            {opt.name}
+                          </span>
+                          {opt.daysToDeliver > 0 && (
+                            <span className="text-xs text-gray-400">
+                              {opt.daysToDeliver === 1 ? "24 horas" : `${opt.daysToDeliver} dias úteis`}
+                            </span>
+                          )}
+                        </div>
+                        {(opt.pricePerM2 ?? 0) > 0 && (
+                          <span className="text-green-600 font-semibold text-xs flex-shrink-0">
+                            +R$ {((isM2 && area > 0 ? area : 1) * (opt.pricePerM2 ?? 0)).toFixed(2)}
                           </span>
                         )}
                       </button>
