@@ -3,7 +3,7 @@ import { InsertUser, users, products, orders, orderItems, orderStatusHistory, se
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq, sql } from 'drizzle-orm';
+import { isNull, desc, eq, sql, asc } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -381,8 +381,19 @@ export async function getVariationOptionsByType(typeId: number) {
   if (!db) return [];
   
   const result = await db.select().from(variationOptions)
-    .where(eq(variationOptions.variationTypeId, typeId));
+    .where(eq(variationOptions.variationTypeId, typeId))
+    .orderBy(asc(variationOptions.order), asc(variationOptions.id));
   return result;
+}
+
+export async function reorderVariationOptions(updates: { id: number; order: number }[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await Promise.all(
+    updates.map(({ id, order }) =>
+      db.update(variationOptions).set({ order }).where(eq(variationOptions.id, id))
+    )
+  );
 }
 
 export async function createVariationOption(data: InsertVariationOption) {

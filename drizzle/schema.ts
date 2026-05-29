@@ -196,6 +196,7 @@ export const variationOptions = mysqlTable("variationOptions", {
   description: longtext("description"),
   priceModifier: decimal("priceModifier", { precision: 10, scale: 2 }).notNull().default("0"), // Adicional ao preço
   calculationType: varchar("calculationType", { length: 50 }).notNull().default("unit"), // unit | m2 | linear | package
+  order: int("order").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
