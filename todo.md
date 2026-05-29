@@ -127,6 +127,16 @@
 - [x] Validar persistência de dados no banco
 - [x] Testar fluxo completo
 
+## Correções da Sessão Atual
+
+- [x] Layout de medidas: grid 3 colunas (Largura | Altura | card de Área) no ProductDetail
+- [x] Lógica de mínimo 1 m²: billedArea = Math.max(area, area > 0 ? 1 : 0)
+- [x] effectivePrice usa billedArea em vez de area
+- [x] Removido card de área duplicado abaixo do grid
+- [x] Aviso dinâmico: "A área mínima cobrada é de 1 m²" com máxima do produto
+- [x] Ícones Lucide profissionais substituindo emojis
+- [x] Checkpoint salvo com todas as correções
+
 ## Bugs Encontrados e Correções
 
 - [x] Bug: Edição de nome do produto volta para o nome antigo (não salva no BD) - CORRIGIDO
