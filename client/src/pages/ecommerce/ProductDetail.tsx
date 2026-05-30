@@ -230,11 +230,45 @@ export default function ProductDetail() {
   // Área mínima cobrada: sempre 1 m² (mesmo que o cliente informe menos)
   const billedArea = useMemo(() => Math.max(area, area > 0 ? 1 : 0), [area]);
   const effectivePrice = useMemo(() => {
+    if (!product) return 0;
     if (isM2 && billedArea > 0 && product?.pricePerM2) {
-      return parseFloat(product.pricePerM2 as any) * billedArea;
+      // Preço base do produto (m² * preço/m²)
+      const productBase = parseFloat(product.pricePerM2 as any) * billedArea;
+      // Modificadores de variações (calculados separadamente para não duplicar)
+      let varModifiers = 0;
+      Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
+        const vtype = (variationTypes as any[])?.find((vt: any) => vt.id === Number(vtypeId));
+        const opt = vtype?.options?.find((o: any) => o.id === optId);
+        if (!opt) return;
+        const modifier = parseFloat(opt.priceModifier?.toString() ?? "0");
+        const calcType = opt.calculationType || "unit";
+        const w = parseFloat(dimWidth.replace(",", ".")) || 0;
+        const h = parseFloat(dimHeight.replace(",", ".")) || 0;
+        const areaM2 = Math.max(w * h, (w > 0 && h > 0) ? 1 : 0);
+        const linearM = w / 100;
+        if (calcType === "m2") {
+          varModifiers += modifier * (areaM2 > 0 ? areaM2 : 1);
+        } else if (calcType === "linear") {
+          varModifiers += modifier * (linearM > 0 ? linearM : 1);
+        } else {
+          varModifiers += modifier;
+        }
+      });
+      // Modificadores de atributos
+      let attrModifiers = 0;
+      Object.entries(selectedAttributes).forEach(([attrId, sel]) => {
+        const attr = productAttributes?.find(pa => pa.attributeId === Number(attrId));
+        (sel as any).valueIds.forEach((vid: number) => {
+          const v = attr?.values.find((v: any) => v.id === vid);
+          if (v) attrModifiers += parseFloat(v.priceModifier?.toString() ?? "0");
+        });
+      });
+      // Modificadores de prazo
+      const prazoMod = selectedDeliveryOption ? deliveryTax : 0;
+      return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
     }
     return basePrice;
-  }, [isM2, billedArea, product, basePrice]);
+  }, [isM2, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
   const fretePrice = selectedFrete.price;
   const subtotal = effectivePrice * quantity;
