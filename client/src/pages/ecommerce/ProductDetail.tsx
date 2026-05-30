@@ -678,6 +678,17 @@ export default function ProductDetail() {
                     <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     <p className="text-xs text-blue-700">A área mínima cobrada é de 1 m²</p>
                   </div>
+
+                  {area > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setOpenSteps(prev => ({ ...prev, [dimStepIdx]: false, [fileStepIdx]: true }))}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Confirmar medidas
+                    </button>
+                  )}
                 </div>
               </AccordionStep>
             )}
@@ -798,6 +809,18 @@ export default function ProductDetail() {
                     </div>
                   </div>
                 )}
+
+                {/* Botão confirmar arquivo */}
+                {(artFile || artLink) && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [deliveryStepIdx]: true }))}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Confirmar arquivo
+                  </button>
+                )}
               </div>
             </AccordionStep>
 
@@ -869,6 +892,16 @@ export default function ProductDetail() {
                   );
                 })}
                 <p className="text-xs text-orange-500 mt-1">* Valores de entrega podem variar de acordo com a região.</p>
+
+                {/* Botão confirmar entrega */}
+                <button
+                  type="button"
+                  onClick={() => setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }))}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Confirmar entrega
+                </button>
               </div>
             </AccordionStep>
 
