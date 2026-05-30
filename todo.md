@@ -1991,7 +1991,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Validação de Campos Obrigatórios no ProductDetail
 
-- [ ] Calcular canAddToCart: todas variações selecionadas + todos atributos obrigatórios + medidas (se m²) + prazo selecionado + termos aceitos
-- [ ] Botão "Adicionar ao carrinho" desabilitado quando canAddToCart = false
-- [ ] Exibir lista de pendências abaixo do botão quando canAddToCart = false
-- [ ] Criar skill documentando o procedimento de validação
+- [x] Calcular canAddToCart: todas variações selecionadas + todos atributos obrigatórios + medidas (se m²) + prazo selecionado + termos aceitos
+- [x] Botão "Adicionar ao carrinho" desabilitado quando canAddToCart = false
+- [x] Exibir lista de pendências abaixo do botão quando canAddToCart = false
+- [x] Criar skill documentando o procedimento de validação

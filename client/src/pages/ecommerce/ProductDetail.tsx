@@ -13,7 +13,8 @@ import {
   ShieldCheck, Droplets, Scissors, LayoutGrid,
   Factory, Truck, CreditCard, HeadphonesIcon,
   Home, Clock, Tag, ThumbsUp,
-  Store, Bike, Car, Mail, MailOpen, Lightbulb
+  Store, Bike, Car, Mail, MailOpen, Lightbulb,
+  AlertTriangle, CheckSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1204,16 +1205,20 @@ export default function ProductDetail() {
                 
                 {/* Lista de campos pendentes */}
                 {!canAddToCart && missingFields.length > 0 && (
-                  <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                    <p className="text-xs font-semibold text-orange-700 mb-2">Campos obrigatorios pendentes:</p>
-                    <ul className="space-y-1">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                      <p className="text-sm font-bold text-amber-900">Quase pronto! Complete os campos abaixo:</p>
+                    </div>
+                    <ul className="space-y-2">
                       {missingFields.map((field, idx) => (
-                        <li key={idx} className="text-xs text-orange-600 flex items-start gap-2">
-                          <span className="text-orange-500 mt-0.5">•</span>
-                          <span>{field}</span>
+                        <li key={idx} className="text-sm text-amber-800 flex items-start gap-3 pl-1">
+                          <CheckSquare className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                          <span className="leading-snug">{field}</span>
                         </li>
                       ))}
                     </ul>
+                    <p className="text-xs text-amber-700 mt-3 pt-3 border-t border-amber-200 italic">Após preencher todos os campos, o botão será ativado automaticamente.</p>
                   </div>
                 )}
                 <Button
