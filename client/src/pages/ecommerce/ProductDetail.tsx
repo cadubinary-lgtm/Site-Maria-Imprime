@@ -379,7 +379,8 @@ export default function ProductDetail() {
   const attrCount = (visibleAttributes?.length ?? 0) + varCount;
   const dimStepIdx = attrCount;       // Medidas (se m²)
   const fileStepIdx = attrCount + (isM2 ? 1 : 0);
-  const deliveryStepIdx = fileStepIdx + 1;
+  const prazoStepIdx = fileStepIdx + 1;  // Prazo de produção
+  const deliveryStepIdx = prazoStepIdx + 1;
 
   return (
     <div className="bg-gray-50 min-h-screen pb-16">
@@ -814,7 +815,7 @@ export default function ProductDetail() {
                 {(artFile || artLink) && (
                   <button
                     type="button"
-                    onClick={() => setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [deliveryStepIdx]: true }))}
+                    onClick={() => setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }))}
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
@@ -823,6 +824,63 @@ export default function ProductDetail() {
                 )}
               </div>
             </AccordionStep>
+
+            {/* ── Prazo de Produção ── */}
+            {deliveryOptions && deliveryOptions.length > 0 && (
+              <AccordionStep
+                number={prazoStepIdx + 1}
+                title="Prazo de produção"
+                isOpen={!!openSteps[prazoStepIdx]}
+                onToggle={() => toggleStep(prazoStepIdx)}
+              >
+                <div className="mt-3 space-y-2">
+                  {deliveryOptions.map((opt: any) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDeliveryOption(opt);
+                        const extra = isM2 && area > 0
+                          ? (opt.pricePerM2 ?? 0) * billedArea
+                          : (opt.pricePerM2 ?? 0);
+                        setDeliveryTax(extra);
+                        setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all ${
+                        selectedDeliveryOption?.id === opt.id
+                          ? "border-orange-500 bg-orange-50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-orange-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          selectedDeliveryOption?.id === opt.id ? "border-orange-500" : "border-gray-300"
+                        }`}>
+                          {selectedDeliveryOption?.id === opt.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                        </div>
+                        <div className="text-left">
+                          <span className={`font-medium block ${
+                            selectedDeliveryOption?.id === opt.id ? "text-orange-700" : "text-gray-800"
+                          }`}>
+                            {opt.name}
+                          </span>
+                          {opt.daysToDeliver > 0 && (
+                            <span className="text-xs text-gray-400">
+                              {opt.daysToDeliver === 1 ? "24 horas" : `${opt.daysToDeliver} dias úteis`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {(opt.pricePerM2 ?? 0) > 0 && (
+                        <span className="text-green-600 font-semibold text-xs flex-shrink-0">
+                          +R$ {((isM2 && billedArea > 0 ? billedArea : 1) * (opt.pricePerM2 ?? 0)).toFixed(2)}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </AccordionStep>
+            )}
 
             {/* ── Opções de Entrega ── */}
             <AccordionStep
@@ -1006,44 +1064,18 @@ export default function ProductDetail() {
                   </div>
                 )}
 
-                {/* Prazo de produção */}
-                {deliveryOptions && deliveryOptions.length > 0 && (
-                  <div className="pb-3 border-b border-gray-100">
-                    <p className="text-xs text-gray-400 mb-1">Prazo de produção</p>
-                    {deliveryOptions.map((opt: any) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDeliveryOption(opt);
-                          const extra = isM2 && area > 0
-                            ? (opt.pricePerM2 ?? 0) * area
-                            : (opt.pricePerM2 ?? 0);
-                          setDeliveryTax(extra);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm mb-1 transition-all ${
-                          selectedDeliveryOption?.id === opt.id
-                            ? "border-orange-500 bg-orange-50"
-                            : "border-gray-200 hover:border-orange-300"
-                        }`}
-                      >
-                        <div className="text-left">
-                          <span className={`font-medium block ${selectedDeliveryOption?.id === opt.id ? "text-orange-700" : "text-gray-800"}`}>
-                            {opt.name}
-                          </span>
-                          {opt.daysToDeliver > 0 && (
-                            <span className="text-xs text-gray-400">
-                              {opt.daysToDeliver === 1 ? "24 horas" : `${opt.daysToDeliver} dias úteis`}
-                            </span>
-                          )}
-                        </div>
-                        {(opt.pricePerM2 ?? 0) > 0 && (
-                          <span className="text-green-600 font-semibold text-xs flex-shrink-0">
-                            +R$ {((isM2 && area > 0 ? area : 1) * (opt.pricePerM2 ?? 0)).toFixed(2)}
-                          </span>
-                        )}
-                      </button>
-                    ))}
+                {/* Prazo de produção selecionado */}
+                {selectedDeliveryOption && (
+                  <div className="flex justify-between text-sm pb-3 border-b border-gray-100">
+                    <span className="text-gray-500">Prazo de produção</span>
+                    <div className="text-right">
+                      <span className="font-medium text-gray-800 block">{selectedDeliveryOption.name}</span>
+                      {selectedDeliveryOption.daysToDeliver > 0 && (
+                        <span className="text-xs text-gray-400">
+                          {selectedDeliveryOption.daysToDeliver === 1 ? "24 horas" : `${selectedDeliveryOption.daysToDeliver} dias úteis`}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
