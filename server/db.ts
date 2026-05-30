@@ -350,9 +350,10 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
     newVariationId = newVariation[0].id;
   }
   
-  // Copy all options from the global variation
+  // Copy all options from the global variation (ordenadas por order)
   const options = await db.select().from(variationOptions)
-    .where(eq(variationOptions.variationTypeId, globalVariationId));
+    .where(eq(variationOptions.variationTypeId, globalVariationId))
+    .orderBy(asc(variationOptions.order), asc(variationOptions.id));
   
   for (const option of options) {
     await db.insert(variationOptions).values({
@@ -360,6 +361,8 @@ export async function linkGlobalVariationToProduct(globalVariationId: number, pr
       name: option.name,
       description: option.description,
       priceModifier: option.priceModifier,
+      calculationType: option.calculationType ?? "unit",
+      order: option.order ?? 0,
     });
   }
   
@@ -499,9 +502,10 @@ export async function syncGlobalVariationOptions(globalVariationId: number) {
 
   if (linkedCopies.length === 0) return { synced: 0 };
 
-  // Buscar as opções atuais da variação global
+  // Buscar as opções atuais da variação global (ordenadas por order)
   const globalOptions = await db.select().from(variationOptions)
-    .where(eq(variationOptions.variationTypeId, globalVariationId));
+    .where(eq(variationOptions.variationTypeId, globalVariationId))
+    .orderBy(asc(variationOptions.order), asc(variationOptions.id));
 
   for (const copy of linkedCopies) {
     // Remover todas as opções atuais da cópia
@@ -516,13 +520,15 @@ export async function syncGlobalVariationOptions(globalVariationId: number) {
     await db.delete(variationOptions)
       .where(eq(variationOptions.variationTypeId, copy.id));
 
-    // Recriar as opções a partir da variação global
+    // Recriar as opções a partir da variação global (mantendo calculationType e order)
     for (const option of globalOptions) {
       await db.insert(variationOptions).values({
         variationTypeId: copy.id,
         name: option.name,
         description: option.description,
         priceModifier: option.priceModifier,
+        calculationType: option.calculationType ?? "unit",
+        order: option.order ?? 0,
       });
     }
   }
