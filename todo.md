@@ -1988,3 +1988,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Assinaturas do cliente e técnico na OS (seção final)
 - [x] Cores identidade visual laranja/preto/cinza na OS
 - [x] Exportação PDF via print nativo (sem html2canvas/oklch)
+
+## Validação de Campos Obrigatórios no ProductDetail
+
+- [ ] Calcular canAddToCart: todas variações selecionadas + todos atributos obrigatórios + medidas (se m²) + prazo selecionado + termos aceitos
+- [ ] Botão "Adicionar ao carrinho" desabilitado quando canAddToCart = false
+- [ ] Exibir lista de pendências abaixo do botão quando canAddToCart = false
+- [ ] Criar skill documentando o procedimento de validação

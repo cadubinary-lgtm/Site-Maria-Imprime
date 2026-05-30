@@ -274,6 +274,40 @@ export default function ProductDetail() {
   const subtotal = effectivePrice * quantity;
   const total = subtotal + fretePrice + (selectedDeliveryOption?.priceModifier ?? 0);
 
+  // ─── Validação de campos obrigatórios ────────────────────────────────────
+  const missingFields = useMemo(() => {
+    const missing: string[] = [];
+    
+    // 1. Variações obrigatórias
+    (variationTypes ?? []).forEach(vt => {
+      if (!selectedVariations[vt.id]) missing.push(`Selecione ${vt.name}`);
+    });
+    
+    // 2. Atributos obrigatórios
+    (visibleAttributes ?? []).forEach(attr => {
+      if (attr.isRequired && !selectedAttributes[attr.attributeId]) {
+        missing.push(`Preencha ${attr.attribute?.name}`);
+      }
+    });
+    
+    // 3. Medidas (se m²)
+    if (isM2 && area === 0) missing.push("Informe as medidas (Largura e Altura)");
+    
+    // 4. Arquivo
+    if (fileMode === "upload" && !artFile) missing.push("Envie um arquivo de arte");
+    if (fileMode === "link" && !artLink) missing.push("Informe o link do arquivo");
+    
+    // 5. Prazo de produção
+    if (!selectedDeliveryOption) missing.push("Selecione o prazo de produção");
+    
+    // 6. Termos
+    if (!acceptedTerms) missing.push("Aceite os termos e condições");
+    
+    return missing;
+  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFile, artLink, selectedDeliveryOption, acceptedTerms]);
+
+  const canAddToCart = missingFields.length === 0;
+
   // ─── Atributos selecionados para resumo ──────────────────────────────────
   const selectedAttrsForSummary = useMemo(() => {
     return Object.entries(selectedAttributes)
@@ -1159,14 +1193,29 @@ export default function ProductDetail() {
               <div className="px-5 pb-5 space-y-2">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={isProcessing}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-base h-12"
+                  disabled={isProcessing || !canAddToCart}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-base h-12 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing
                     ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
                     : <><ShoppingCart className="w-4 h-4 mr-2" />Adicionar ao carrinho</>
                   }
                 </Button>
+                
+                {/* Lista de campos pendentes */}
+                {!canAddToCart && missingFields.length > 0 && (
+                  <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-xs font-semibold text-orange-700 mb-2">Campos obrigatorios pendentes:</p>
+                    <ul className="space-y-1">
+                      {missingFields.map((field, idx) => (
+                        <li key={idx} className="text-xs text-orange-600 flex items-start gap-2">
+                          <span className="text-orange-500 mt-0.5">•</span>
+                          <span>{field}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <Button
                   variant="outline"
                   onClick={handleExportBudget}
