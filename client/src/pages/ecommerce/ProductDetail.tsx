@@ -55,12 +55,12 @@ const FOOTER_BADGES = [
 
 // ─── Accordion ──────────────────────────────────────────────────────────────
 function AccordionStep({
-  number, title, isOpen, onToggle, children,
+  id, number, title, isOpen, onToggle, children,
 }: {
-  number: number; title: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode;
+  id?: string; number: number; title: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode;
 }) {
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+    <div id={id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
       <button
         type="button"
         onClick={onToggle}
@@ -277,37 +277,46 @@ export default function ProductDetail() {
 
   // ─── Validação de campos obrigatórios ────────────────────────────────────
   const missingFields = useMemo(() => {
-    const missing: string[] = [];
+    const missing: { id: string; message: string }[] = [];
     
     // 1. Variações obrigatórias
-    (variationTypes ?? []).forEach(vt => {
-      if (!selectedVariations[vt.id]) missing.push(`Selecione ${vt.name}`);
+    (variationTypes ?? []).forEach((vt, idx) => {
+      if (!selectedVariations[vt.id]) missing.push({ id: `var-${vt.id}`, message: `Selecione ${vt.name}` });
     });
     
     // 2. Atributos obrigatórios
     (visibleAttributes ?? []).forEach(attr => {
       if (attr.isRequired && !selectedAttributes[attr.attributeId]) {
-        missing.push(`Preencha ${attr.attribute?.name}`);
+        missing.push({ id: `attr-${attr.attributeId}`, message: `Preencha ${attr.attribute?.name}` });
       }
     });
     
     // 3. Medidas (se m²)
-    if (isM2 && area === 0) missing.push("Informe as medidas (Largura e Altura)");
+    if (isM2 && area === 0) missing.push({ id: "dimensions", message: "Informe as medidas (Largura e Altura)" });
     
     // 4. Arquivo
-    if (fileMode === "upload" && !artFile) missing.push("Envie um arquivo de arte");
-    if (fileMode === "link" && !artLink) missing.push("Informe o link do arquivo");
+    if (fileMode === "upload" && !artFile) missing.push({ id: "file-upload", message: "Envie um arquivo de arte" });
+    if (fileMode === "link" && !artLink) missing.push({ id: "file-link", message: "Informe o link do arquivo" });
     
     // 5. Prazo de produção
-    if (!selectedDeliveryOption) missing.push("Selecione o prazo de produção");
+    if (!selectedDeliveryOption) missing.push({ id: "prazo", message: "Selecione o prazo de produção" });
     
     // 6. Termos
-    if (!acceptedTerms) missing.push("Aceite os termos e condições");
+    if (!acceptedTerms) missing.push({ id: "terms", message: "Aceite os termos e condições" });
     
     return missing;
   }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFile, artLink, selectedDeliveryOption, acceptedTerms]);
 
   const canAddToCart = missingFields.length === 0;
+
+  // ─── Função para rolar até o campo correspondente ──────────────────────────
+  const scrollToField = (fieldId: string) => {
+    const element = document.getElementById(fieldId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.focus({ preventScroll: true });
+    }
+  };
 
   // ─── Atributos selecionados para resumo ──────────────────────────────────
   const selectedAttrsForSummary = useMemo(() => {
@@ -597,6 +606,7 @@ export default function ProductDetail() {
               return (
                 <AccordionStep
                   key={`vtype-${vtype.id}`}
+                  id={`var-${vtype.id}`}
                   number={idx + 1}
                   title={vtype.name}
                   isOpen={!!openSteps[idx]}
@@ -655,6 +665,7 @@ export default function ProductDetail() {
               return (
                 <AccordionStep
                   key={attr.attributeId}
+                  id={`attr-${attr.attributeId}`}
                   number={globalIdx + 1}
                   title={attr.attribute?.name ?? `Atributo ${globalIdx + 1}`}
                   isOpen={!!openSteps[globalIdx]}
@@ -706,6 +717,7 @@ export default function ProductDetail() {
             {/* ── Medidas (m²) ── */}
             {isM2 && (
               <AccordionStep
+                id="dimensions"
                 number={dimStepIdx + 1}
                 title="Medidas (cm)"
                 isOpen={!!openSteps[dimStepIdx]}
@@ -765,8 +777,9 @@ export default function ProductDetail() {
 
             {/* ── Enviar Arquivo ── */}
             <AccordionStep
+              id="file-upload"
               number={fileStepIdx + 1}
-              title="Enviar arquivo"
+              title="Enviar Arquivo"
               isOpen={!!openSteps[fileStepIdx]}
               onToggle={() => toggleStep(fileStepIdx)}
             >
@@ -896,12 +909,13 @@ export default function ProductDetail() {
 
             {/* ── Prazo de Produção ── */}
             {deliveryOptions && deliveryOptions.length > 0 && (
-              <AccordionStep
-                number={prazoStepIdx + 1}
-                title="Prazo de produção"
-                isOpen={!!openSteps[prazoStepIdx]}
-                onToggle={() => toggleStep(prazoStepIdx)}
-              >
+            <AccordionStep
+              id="prazo"
+              number={prazoStepIdx + 1}
+              title="Prazo de produção"
+              isOpen={!!openSteps[prazoStepIdx]}
+              onToggle={() => toggleStep(prazoStepIdx)}
+            >
                 <div className="mt-3 space-y-2">
                   {deliveryOptions.map((opt: any) => (
                     <button
@@ -1033,14 +1047,14 @@ export default function ProductDetail() {
             </AccordionStep>
 
             {/* Termos */}
-            <div className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
+            <div id="terms" className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="terms"
+                  id="terms-checkbox"
                   checked={acceptedTerms}
                   onCheckedChange={c => { setAcceptedTerms(c as boolean); if (c) setValidationError(null); }}
                 />
-                <Label htmlFor="terms" className="text-sm cursor-pointer text-gray-700">
+                <Label htmlFor="terms-checkbox" className="text-sm cursor-pointer text-gray-700">
                   Aceito os termos e condições
                 </Label>
               </div>
@@ -1211,10 +1225,10 @@ export default function ProductDetail() {
                       <p className="text-sm font-bold text-amber-900">Quase pronto! Complete os campos abaixo:</p>
                     </div>
                     <ul className="space-y-2">
-                      {missingFields.map((field, idx) => (
-                        <li key={idx} className="text-sm text-amber-800 flex items-start gap-3 pl-1">
+                      {missingFields.map((field) => (
+                        <li key={field.id} className="text-sm text-amber-800 flex items-start gap-3 pl-1 cursor-pointer hover:text-amber-900 transition-colors" onClick={() => scrollToField(field.id)}>
                           <CheckSquare className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                          <span className="leading-snug">{field}</span>
+                          <span className="leading-snug underline">{field.message}</span>
                         </li>
                       ))}
                     </ul>
