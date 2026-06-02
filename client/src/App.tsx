@@ -51,6 +51,11 @@ import AdminOSPrint from "./pages/admin/AdminOSPrint";
 import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import FileValidationManager from "./pages/admin/FileValidationManager";
+import LogisticsDashboard from "./pages/admin/LogisticsDashboard";
+import CarriersManager from "./pages/admin/CarriersManager";
+import ShippingRulesManager from "./pages/admin/ShippingRulesManager";
+import ShipmentsManager from "./pages/admin/ShipmentsManager";
+import TrackingManager from "./pages/admin/TrackingManager";
 
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
@@ -97,6 +102,11 @@ function AdminRoutes() {
           <Route path="/admin/financeiro" component={FinancialDashboard} />
           <Route path="/admin/automacao" component={AutomationDashboard} />
           <Route path="/admin/segmentos" component={SegmentsManager} />
+          <Route path="/admin/logistica" component={LogisticsDashboard} />
+          <Route path="/admin/logistica/transportadoras" component={CarriersManager} />
+          <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
+          <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
+          <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
         </>
       )}
       {user?.role === "production" && (
