@@ -1995,3 +1995,47 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Botão "Adicionar ao carrinho" desabilitado quando canAddToCart = false
 - [x] Exibir lista de pendências abaixo do botão quando canAddToCart = false
 - [x] Criar skill documentando o procedimento de validação
+
+
+## Fase 24: Módulo Completo de Logística
+
+### Schema de Banco de Dados
+- [ ] Criar tabela `carriers` (transportadoras: Correios, Jadlog, Uber Entrega, etc)
+- [ ] Criar tabela `shippingRules` (regras de frete por CEP, peso, volume)
+- [ ] Criar tabela `shipments` (expedições/envios)
+- [ ] Criar tabela `trackingEvents` (eventos de rastreamento)
+- [ ] Adicionar campos em `products`: peso, altura, largura, comprimento, allowedCarriers
+- [ ] Adicionar campos em `orders`: productionStatus, deliveryStatus, trackingNumber
+
+### Backend (tRPC Procedures)
+- [ ] Criar procedures para CRUD de transportadoras
+- [ ] Criar procedures para CRUD de regras de frete
+- [ ] Criar procedures para gerenciar expedições
+- [ ] Criar procedures para rastreamento
+- [ ] Criar procedures para atualizar status de produção/entrega
+
+### Frontend - Painel Admin
+- [ ] Adicionar menu Logística na navegação do admin
+- [ ] Criar página Dashboard de Logística (KPIs, expedições do dia)
+- [ ] Criar página Transportadoras (CRUD, configuração de APIs)
+- [ ] Criar página Regras de Frete (CRUD, cálculo automático)
+- [ ] Criar página Expedição (gerenciar envios, gerar etiquetas)
+- [ ] Criar página Rastreamento (histórico de eventos, timeline)
+
+### Produtos
+- [ ] Adicionar aba Logística em AdminProducts
+- [ ] Campos: peso (kg), altura (cm), largura (cm), comprimento (cm)
+- [ ] Seletor multi-select de transportadoras permitidas
+- [ ] Salvar e sincronizar dados logísticos
+
+### Pedidos
+- [ ] Separar status de Produção (aguardando, em produção, pronto) e Entrega (aguardando envio, enviado, entregue)
+- [ ] Integrar informações logísticas na página de detalhes do pedido
+- [ ] Exibir rastreamento em tempo real
+- [ ] Mostrar timeline de produção + entrega
+
+### APIs Externas (Preparação)
+- [ ] Estrutura para integração com Correios (endpoints, autenticação)
+- [ ] Estrutura para integração com Jadlog (endpoints, autenticação)
+- [ ] Estrutura para integração com Uber Entrega (endpoints, autenticação)
+- [ ] Criar arquivo de configuração para credenciais de APIs

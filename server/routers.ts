@@ -82,6 +82,7 @@ import { attributesRouter } from "./routers-attributes";
 import { productSegmentsRouter } from "./routers-product-segments";
 import { pricingRouter } from "./routers-pricing";
 import { pricingRulesRouter } from "./routers-pricing-rules";
+import { logisticsRouter } from "./routers-logistics";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -102,6 +103,7 @@ export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
 export const appRouter = router({
   system: systemRouter,
   customerAuth: customerAuthRouter,
+  logistics: logisticsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -1335,3 +1337,5 @@ export const appRouter = router({
   }),
 });
 export type AppRouter = typeof appRouter;
+
+
