@@ -1060,3 +1060,108 @@ export const orderArtPreviews = mysqlTable("orderArtPreviews", {
 
 export type OrderArtPreview = typeof orderArtPreviews.$inferSelect;
 export type InsertOrderArtPreview = typeof orderArtPreviews.$inferInsert;
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGÍSTICA - Transportadoras, Regras de Frete, Expedições e Rastreamento
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Carriers (Transportadoras) - Correios, Jadlog, Uber Entrega, etc
+ */
+export const carriers = mysqlTable("carriers", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(), // Ex: "Correios", "Jadlog", "Uber Entrega"
+  code: varchar("code", { length: 50 }).notNull().unique(), // Ex: "correios", "jadlog", "uber"
+  isActive: boolean("isActive").default(true).notNull(),
+  apiProvider: varchar("apiProvider", { length: 50 }), // "correios", "jadlog", "uber", "custom"
+  apiKey: text("apiKey"), // Chave de API (criptografada em produção)
+  apiUrl: text("apiUrl"), // URL base da API
+  minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
+  maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
+  baseRate: decimal("baseRate", { precision: 10, scale: 2 }), // Taxa base
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Carrier = typeof carriers.$inferSelect;
+export type InsertCarrier = typeof carriers.$inferInsert;
+
+/**
+ * Shipping Rules (Regras de Frete) - Cálculo de frete por CEP, peso, volume
+ */
+export const shippingRules = mysqlTable("shippingRules", {
+  id: int("id").autoincrement().primaryKey(),
+  carrierId: int("carrierId").notNull(),
+  name: varchar("name", { length: 100 }).notNull(), // Ex: "Frete SP", "Frete Nordeste"
+  cepFrom: varchar("cepFrom", { length: 8 }), // CEP inicial (sem hífen)
+  cepTo: varchar("cepTo", { length: 8 }), // CEP final (sem hífen)
+  minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
+  maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
+  basePrice: decimal("basePrice", { precision: 10, scale: 2 }).notNull(), // Preço base
+  pricePerKg: decimal("pricePerKg", { precision: 10, scale: 2 }), // Preço adicional por kg
+  estimatedDays: int("estimatedDays").notNull(), // Dias estimados de entrega
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ShippingRule = typeof shippingRules.$inferSelect;
+export type InsertShippingRule = typeof shippingRules.$inferInsert;
+
+/**
+ * Shipments (Expedições) - Registro de envios de pedidos
+ */
+export const shipments = mysqlTable("shipments", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  carrierId: int("carrierId").notNull(),
+  trackingNumber: varchar("trackingNumber", { length: 100 }).notNull().unique(),
+  weight: decimal("weight", { precision: 8, scale: 3 }).notNull(), // Peso em kg
+  volume: decimal("volume", { precision: 10, scale: 2 }), // Volume em cm³
+  shippingCost: decimal("shippingCost", { precision: 10, scale: 2 }).notNull(),
+  estimatedDeliveryDate: date("estimatedDeliveryDate"),
+  actualDeliveryDate: date("actualDeliveryDate"),
+  status: mysqlEnum("status", ["pending", "shipped", "in_transit", "delivered", "failed"]).default("pending").notNull(),
+  labelUrl: text("labelUrl"), // URL da etiqueta de envio
+  labelKey: varchar("labelKey", { length: 255 }), // Chave da etiqueta no S3
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Shipment = typeof shipments.$inferSelect;
+export type InsertShipment = typeof shipments.$inferInsert;
+
+/**
+ * Tracking Events (Eventos de Rastreamento) - Timeline de rastreamento
+ */
+export const trackingEvents = mysqlTable("trackingEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  shipmentId: int("shipmentId").notNull(),
+  status: varchar("status", { length: 50 }).notNull(), // Ex: "Objeto postado", "Em trânsito", "Entregue"
+  location: varchar("location", { length: 255 }), // Localização (cidade, estado)
+  description: text("description"), // Descrição do evento
+  eventTime: timestamp("eventTime").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TrackingEvent = typeof trackingEvents.$inferSelect;
+export type InsertTrackingEvent = typeof trackingEvents.$inferInsert;
+
+/**
+ * Adicionar campos de logística na tabela products
+ * (Estes campos serão adicionados via migration SQL)
+ * - weight: decimal (kg)
+ * - height: decimal (cm)
+ * - width: decimal (cm)
+ * - length: decimal (cm)
+ * - allowedCarriers: longtext (JSON array de IDs de transportadoras)
+ */
+
+/**
+ * Adicionar campos de status separados na tabela orders
+ * (Estes campos serão adicionados via migration SQL)
+ * - productionStatus: enum ("pending", "in_production", "ready", "cancelled")
+ * - deliveryStatus: enum ("pending", "shipped", "in_transit", "delivered", "failed")
+ * - trackingNumber: varchar (referência ao shipment)
+ */
