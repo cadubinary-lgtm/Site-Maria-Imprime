@@ -6,7 +6,7 @@ import {
   Settings, ChevronDown, ChevronRight, Bell, Search, LogOut,
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
-  AlertCircle, Menu, X, Printer
+  AlertCircle, Menu, X, Printer, Truck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -120,6 +120,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { item: { label: "Financeiro", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
     { item: { label: "Produção", href: "/admin/producao", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
     { item: { label: "OS - Ordens de Serviço", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
+    // Logística
+    { group: "LOGÍSTICA" },
+    {
+      item: {
+        label: "Logística",
+        icon: <Truck className="w-4 h-4" />,
+        children: [
+          { label: "Dashboard", href: "/admin/logistica" },
+          { label: "Transportadoras", href: "/admin/logistica/transportadoras" },
+          { label: "Regras de Frete", href: "/admin/logistica/regras-frete" },
+          { label: "Expedição", href: "/admin/logistica/expedicao" },
+          { label: "Rastreamento", href: "/admin/logistica/rastreamento" },
+        ],
+      },
+    },
     // Produtos
     { group: "PRODUTOS" },
     { item: { label: "Produtos", href: "/admin/produtos", icon: <Package className="w-4 h-4" /> } },
