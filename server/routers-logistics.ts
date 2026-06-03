@@ -224,4 +224,45 @@ export const logisticsRouter = router({
         return result;
       }),
   }),
+
+  // ─── Status de Pedidos ───
+  orders: router({
+    updateProductionStatus: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({
+        orderId: z.number(),
+        status: z.enum(["pending", "in_production", "quality_check", "ready_for_shipment"]),
+      }))
+      .mutation(async ({ input }) => {
+        const db = getDb() as any;
+        const { orders } = await import("../drizzle/schema");
+        const result = await db
+          .update(orders)
+          .set({ productionStatus: input.status })
+          .where(eq(orders.id, input.orderId));
+        return result;
+      }),
+
+    updateDeliveryStatus: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({
+        orderId: z.number(),
+        status: z.enum(["pending", "shipped", "in_transit", "delivered", "failed"]),
+      }))
+      .mutation(async ({ input }) => {
+        const db = getDb() as any;
+        const { orders } = await import("../drizzle/schema");
+        const result = await db
+          .update(orders)
+          .set({ deliveryStatus: input.status })
+          .where(eq(orders.id, input.orderId));
+        return result;
+      }),
+  }),
 });

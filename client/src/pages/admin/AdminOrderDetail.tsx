@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
+import { OrderLogisticsPanel } from "@/components/orders/OrderLogisticsPanel";
 
 // Ordem linear dos status para a linha do tempo
 const STATUS_STEPS = [
@@ -732,6 +733,13 @@ export default function AdminOrderDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Logística - Status de Produção e Entrega */}
+        <OrderLogisticsPanel
+          orderId={o.id}
+          productionStatus={o.productionStatus || 'pending'}
+          deliveryStatus={o.deliveryStatus || 'pending'}
+        />
 
         {/* Frete / Observações */}
         {o.notes && (
