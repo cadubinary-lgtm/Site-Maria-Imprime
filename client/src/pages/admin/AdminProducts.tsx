@@ -14,6 +14,7 @@ import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductVariationManager } from "@/components/ProductVariationManager";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
+import { ProductLogisticsTab } from "@/components/products/ProductLogisticsTab";
 
 export default function AdminProducts() {
   // ─── Estado de criação ────────────────────────────────────────────────────
@@ -713,6 +714,14 @@ export default function AdminProducts() {
                             onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
                             onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
                           />
+
+                          {/* Aba Logística */}
+                          {editingId && (
+                            <div className="border-t pt-4 mt-4">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-4">Logística</h3>
+                              <ProductLogisticsTab productId={editingId} />
+                            </div>
+                          )}
 
                           <Button
                             onClick={handleSave}
