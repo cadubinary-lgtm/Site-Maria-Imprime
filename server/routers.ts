@@ -369,67 +369,42 @@ export const appRouter = router({
     getOrderById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getOrderById(input.id)),
-    createOrder: protectedProcedure
+createOrder: protectedProcedure
       .input(z.object({
         productId: z.number(),
         quantity: z.number(),
         artFileUrl: z.string().optional(),
         artFileKey: z.string().optional(),
+        shippingMethod: z.string().optional(),
+        shippingPrice: z.number().optional(),
+        shippingEstimatedDays: z.number().optional(),
+        shippingZipCode: z.string().optional(),
+        shippingCarrierId: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const product = await getProductById(input.productId);
         if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Produto não encontrado" });
         
         const totalPrice = parseFloat(product.price.toString()) * input.quantity;
+        const shippingPrice = input.shippingPrice || 0;
+        const finalPrice = totalPrice + shippingPrice;
         const orderNumber = `ORD-${Date.now()}-${nanoid(6)}`;
         
         const result = await createOrder({
           clientId: ctx.user.id,
           orderNumber,
           status: "analisando" as any,
-          totalPrice: totalPrice.toString() as any,
+          totalPrice: finalPrice.toString() as any,
           artFileUrl: input.artFileUrl,
           artFileKey: input.artFileKey,
           paymentStatus: "pago" as any,
+          shippingMethod: input.shippingMethod,
+          shippingPrice: input.shippingPrice?.toString() as any,
+          shippingEstimatedDays: input.shippingEstimatedDays,
+          shippingZipCode: input.shippingZipCode,
+          shippingCarrierId: input.shippingCarrierId,
         });
         return result;
-      }),
-    updateStatus: protectedProcedure
-      .input(z.object({
-        orderId: z.number(),
-        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "production") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Sem permissão" });
-        }
-        const result = await updateOrderStatus(input.orderId, input.newStatus);
-        return result;
-      }),
-    deleteOrder: protectedProcedure
-      .input(z.object({ orderId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db.js");
-        const { orders: ordersTable, orderItems, orderStatusHistory } = await import("../drizzle/schema.js");
-        const { eq, and } = await import("drizzle-orm");
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        // Verificar se o pedido pertence ao cliente
-        const [order] = await db.select({ id: ordersTable.id, status: ordersTable.status })
-          .from(ordersTable)
-          .where(and(eq(ordersTable.id, input.orderId), eq(ordersTable.clientId, ctx.user.id)))
-          .limit(1);
-        if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
-        // Só permite excluir pedidos em status inicial (analisando) ou cancelados
-        const deletableStatuses = ["analisando", "pagamento_retirada", "cancelado"];
-        if (!deletableStatuses.includes(order.status as string)) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Não é possível excluir um pedido que já está em produção ou entregue" });
-        }
-        // Excluir histórico, itens e pedido
-        await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
-        await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
-        await db.delete(ordersTable).where(eq(ordersTable.id, input.orderId));
-        return { success: true };
       }),
   }),
 

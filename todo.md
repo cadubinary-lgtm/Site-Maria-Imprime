@@ -2039,3 +2039,14 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Estrutura para integração com Jadlog (endpoints, autenticação)
 - [ ] Estrutura para integração com Uber Entrega (endpoints, autenticação)
 - [ ] Criar arquivo de configuração para credenciais de APIs
+
+
+## Fase 26: Cálculo de Frete no Checkout (NOVA)
+
+- [ ] Criar procedure tRPC calculateShippingMethods para calcular frete
+- [ ] Implementar seletor de método de entrega no checkout
+- [ ] Integrar frete ao resumo do pedido
+- [ ] Salvar método, valor e prazo no banco de dados
+- [ ] Adicionar bloco Logística em AdminOrders
+- [ ] Validar fluxo completo (CEP, métodos, cálculo, salvamento)
+- [ ] Gerar relatório final com arquivos alterados
