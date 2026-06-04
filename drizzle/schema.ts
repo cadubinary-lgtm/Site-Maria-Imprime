@@ -122,6 +122,12 @@ export const orders = mysqlTable("orders", {
   guestToken: varchar("guestToken", { length: 64 }), // Token único para acompanhamento sem login
   guestEmail: varchar("guestEmail", { length: 255 }), // Email do convidado
   guestName: varchar("guestName", { length: 255 }), // Nome do convidado
+  // Logística
+  shippingMethod: varchar("shippingMethod", { length: 50 }), // pickup, moto_express, carrier_X
+  shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).default("0"), // Valor do frete
+  shippingEstimatedDays: int("shippingEstimatedDays").default(0), // Dias estimados
+  shippingZipCode: varchar("shippingZipCode", { length: 20 }), // CEP de entrega
+  shippingCarrierId: int("shippingCarrierId"), // ID da transportadora (se aplicável)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

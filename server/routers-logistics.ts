@@ -225,6 +225,153 @@ export const logisticsRouter = router({
       }),
   }),
 
+  // ─── Cálculo de Frete no Checkout ───
+  checkout: router({
+    calculateShippingMethods: publicProcedure
+      .input(z.object({
+        zipCode: z.string(),
+        cartItems: z.array(z.object({
+          productId: z.number(),
+          quantity: z.number(),
+        })),
+      }))
+      .query(async ({ input }) => {
+        const db = getDb() as any;
+        const { products } = await import("../drizzle/schema");
+        
+        // Buscar produtos do carrinho com informações logísticas
+        const cartProducts = await db.query.products.findMany({
+          where: (products: any, { inArray }: any) => 
+            inArray(products.id, input.cartItems.map((item: any) => item.productId)),
+        });
+
+        if (!cartProducts || cartProducts.length === 0) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Produtos não encontrados" });
+        }
+
+        // Calcular peso e volume totais
+        let totalWeight = 0;
+        let totalVolume = 0;
+        let allowedCarriers = new Set<number>();
+        let allowPickup = true;
+        let allowMotoExpress = true;
+
+        for (const cartItem of input.cartItems) {
+          const product = cartProducts.find((p: any) => p.id === cartItem.productId);
+          if (!product) continue;
+
+          // Somar peso (em kg)
+          const weight = product.weight ? parseFloat(String(product.weight)) : 0;
+          totalWeight += weight * cartItem.quantity;
+
+          // Somar volume (em cm³)
+          const height = product.height ? parseFloat(String(product.height)) : 0;
+          const width = product.width ? parseFloat(String(product.width)) : 0;
+          const length = product.length ? parseFloat(String(product.length)) : 0;
+          totalVolume += (height * width * length) * cartItem.quantity;
+
+          // Verificar transportadoras permitidas
+          if (product.allowedCarriers) {
+            const carriers = JSON.parse(String(product.allowedCarriers));
+            if (allowedCarriers.size === 0) {
+              carriers.forEach((c: number) => allowedCarriers.add(c));
+            } else {
+              // Interseção: apenas transportadoras permitidas em TODOS os produtos
+              const intersection = new Set<number>();
+              carriers.forEach((c: number) => {
+                if (allowedCarriers.has(c)) intersection.add(c);
+              });
+              allowedCarriers = intersection;
+            }
+          }
+
+          // Verificar se permite retirada
+          if (product.allowPickup === false) allowPickup = false;
+          if (product.allowMotoExpress === false) allowMotoExpress = false;
+        }
+
+        // Construir lista de métodos de entrega
+        const shippingMethods: any[] = [];
+
+        // 1. Retirada na Loja (sempre disponível se permitido)
+        if (allowPickup) {
+          shippingMethods.push({
+            id: "pickup",
+            name: "Retirada na Loja",
+            description: "Retire na nossa loja",
+            price: 0,
+            estimatedDays: 0,
+            estimatedHours: 0,
+            initialStatus: "awaiting_pickup",
+          });
+        }
+
+        // 2. Moto Express (se permitido e CEP válido)
+        if (allowMotoExpress) {
+          // Buscar regras de frete para Moto Express
+          const motoRules = await db.query.shippingRules.findMany({
+            where: (rules: any, { eq }: any) => eq(rules.carrierId, 0), // 0 = Moto Express
+          });
+
+          if (motoRules && motoRules.length > 0) {
+            // Calcular distância baseada no CEP (simplificado: usar primeira regra)
+            const rule = motoRules[0];
+            const price = rule.price ? parseFloat(String(rule.price)) : 10;
+            const estimatedHours = rule.estimatedDays ? parseInt(String(rule.estimatedDays)) : 2;
+
+            shippingMethods.push({
+              id: "moto_express",
+              name: "Moto Express",
+              description: `Entrega em até ${estimatedHours} horas`,
+              price: price,
+              estimatedDays: 0,
+              estimatedHours: estimatedHours,
+              initialStatus: "awaiting_pickup",
+            });
+          }
+        }
+
+        // 3. Transportadoras (se houver permitidas)
+        if (allowedCarriers.size > 0) {
+          const activeCarriers = await db.query.carriers.findMany({
+            where: (carriers: any, { inArray }: any) => 
+              inArray(carriers.id, Array.from(allowedCarriers)),
+          });
+
+          for (const carrier of activeCarriers) {
+            // Buscar regras de frete para esta transportadora
+            const carrierRules = await db.query.shippingRules.findMany({
+              where: (rules: any, { eq }: any) => eq(rules.carrierId, carrier.id),
+            });
+
+            if (carrierRules && carrierRules.length > 0) {
+              const rule = carrierRules[0];
+              const price = rule.price ? parseFloat(String(rule.price)) : 0;
+              const estimatedDays = rule.estimatedDays ? parseInt(String(rule.estimatedDays)) : 5;
+
+              shippingMethods.push({
+                id: `carrier_${carrier.id}`,
+                carrierId: carrier.id,
+                name: carrier.name,
+                description: `Entrega em até ${estimatedDays} dias úteis`,
+                price: price,
+                estimatedDays: estimatedDays,
+                estimatedHours: 0,
+                initialStatus: "awaiting_pickup",
+              });
+            }
+          }
+        }
+
+        return {
+          zipCode: input.zipCode,
+          totalWeight,
+          totalVolume,
+          shippingMethods,
+        };
+      }),
+  }),
+
   // ─── Status de Pedidos ───
   orders: router({
     updateProductionStatus: protectedProcedure
