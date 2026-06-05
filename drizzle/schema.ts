@@ -43,6 +43,13 @@ export const products = mysqlTable("products", {
   maxHeight: decimal("maxHeight", { precision: 10, scale: 2 }), // Altura máxima em metros
   isActive: boolean("isActive").default(true).notNull(),
   requiresAreaCalculation: boolean("requiresAreaCalculation").default(false).notNull(), // Para lona, adesivo, etc
+  weight: decimal("weight", { precision: 8, scale: 3 }).default("0").notNull(), // Peso em kg
+  height: decimal("height", { precision: 8, scale: 3 }).default("0").notNull(), // Altura em cm
+  width: decimal("width", { precision: 8, scale: 3 }).default("0").notNull(), // Largura em cm
+  length: decimal("length", { precision: 8, scale: 3 }).default("0").notNull(), // Comprimento em cm
+  allowPickup: boolean("allowPickup").default(true).notNull(), // Permite retirada na loja
+  allowMotoExpress: boolean("allowMotoExpress").default(true).notNull(), // Permite moto express
+  allowedCarriers: longtext("allowedCarriers").default("[]").notNull(), // JSON array de IDs de transportadoras
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
