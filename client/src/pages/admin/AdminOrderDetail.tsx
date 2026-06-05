@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
 import { OrderLogisticsPanel } from "@/components/orders/OrderLogisticsPanel";
+import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
 
 // Ordem linear dos status para a linha do tempo
 const STATUS_STEPS = [
@@ -739,6 +740,19 @@ export default function AdminOrderDetail() {
           orderId={o.id}
           productionStatus={o.productionStatus || 'pending'}
           deliveryStatus={o.deliveryStatus || 'pending'}
+        />
+
+        {/* Logística - Informações de Frete */}
+        <OrderShippingPanel
+          shippingMethod={o.shippingMethod}
+          shippingPrice={o.shippingPrice}
+          deliveryZipCode={o.deliveryZipCode}
+          deliveryStreet={o.deliveryStreet}
+          deliveryNumber={o.deliveryNumber}
+          deliveryComplement={o.deliveryComplement}
+          deliveryNeighborhood={o.deliveryNeighborhood}
+          deliveryCity={o.deliveryCity}
+          deliveryState={o.deliveryState}
         />
 
         {/* Frete / Observações */}

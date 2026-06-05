@@ -307,6 +307,15 @@ export const appRouter = router({
         await db.delete(ordersTable).where(eq(ordersTable.id, input.orderId));
         return { success: true };
       }),
+    updateOrderStatus: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await updateOrderStatus(input.orderId, input.newStatus, input.notes);
+      }),
     updateProduct: adminProcedure
       .input(z.object({
         id: z.number(),

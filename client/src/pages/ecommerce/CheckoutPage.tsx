@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import {
   ChevronRight, ChevronLeft, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
@@ -92,6 +93,24 @@ export default function CheckoutPage() {
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
   const trpcUtils = trpc.useUtils();
+
+  const handleShippingMethodSelected = (method: any, zipCodeUsed: string) => {
+    const freteOption: FreteOption = {
+      id: method.id,
+      name: method.name,
+      description: method.description,
+      price: method.price,
+      days: method.estimatedDays > 0 
+        ? `${method.estimatedDays} dia${method.estimatedDays > 1 ? 's' : ''} uteis`
+        : method.estimatedHours > 0
+        ? `ate ${method.estimatedHours}h`
+        : "Conforme producao",
+      logo: method.id === "pickup" ? "🏪" : method.id === "moto_express" ? "🛵" : "📦",
+    };
+    setSelectedFrete(freteOption);
+    setZipCode(zipCodeUsed);
+    setStep("endereco");
+  };
 
   // Pré-selecionar frete via query string (?freteId=motoboy)
   useEffect(() => {
@@ -519,50 +538,14 @@ export default function CheckoutPage() {
 
                 {/* ETAPA 3: Entrega / Frete */}
                 {step === "entrega" && (
-                  <div className="space-y-3">
-                    {isStorePickupSelected && (
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-2">
-                        <span className="text-2xl">🏪</span>
-                        <div>
-                          <p className="font-semibold text-green-800 text-sm">Retirada na Loja selecionada</p>
-                          <p className="text-xs text-green-600">Endereço de entrega não é necessário. Você retirará o pedido em nossa loja.</p>
-                        </div>
-                      </div>
-                    )}
-                    {FRETE_OPTIONS.map((option) => {
-                      const isSelected = selectedFrete?.id === option.id;
-                      return (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() => setSelectedFrete(option)}
-                          className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                            isSelected ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? "border-orange-500" : "border-gray-300"}`}>
-                            {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
-                          </div>
-                          <span className="text-2xl flex-shrink-0">{option.logo}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className={`font-semibold text-sm ${isSelected ? "text-orange-700" : "text-gray-800"}`}>{option.name}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{option.description}</p>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className={`font-bold text-sm ${isSelected ? "text-orange-600" : "text-gray-900"}`}>
-                              {option.price === 0 ? "Grátis" : formatCurrency(option.price)}
-                            </p>
-                            <p className={`text-xs mt-0.5 ${option.highlight ? "text-green-600 font-medium" : "text-gray-500"}`}>
-                              {option.days}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                    <p className="text-xs text-orange-600 mt-2">
-                      * Entregas no mesmo dia válidas para pedidos confirmados até 12h e para a região atendida.
-                    </p>
-                  </div>
+                  <ShippingMethodSelector
+                    cartItems={cartItems?.map((item: any) => ({
+                      productId: item.productId,
+                      quantity: item.quantity,
+                    })) || []}
+                    onMethodSelected={handleShippingMethodSelected}
+                    disabled={isSubmitting}
+                  />
                 )}
 
                 {/* ETAPA 4: Pagamento */}
