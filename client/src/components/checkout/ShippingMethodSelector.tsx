@@ -56,14 +56,25 @@ export function ShippingMethodSelector({
     setError(null);
 
     try {
+      console.log("[ShippingMethodSelector] Calculando frete para CEP:", zipCode);
+      console.log("[ShippingMethodSelector] CartItems:", cartItems);
+      
       const result = await calculateShippingMutation.refetch();
+      
+      console.log("[ShippingMethodSelector] Resultado da query:", result);
+      
       if (result.data?.shippingMethods) {
+        console.log("[ShippingMethodSelector] Métodos encontrados:", result.data.shippingMethods.length);
         setShippingMethods(result.data.shippingMethods);
         if (result.data.shippingMethods.length === 0) {
           setError("Nenhum método de entrega disponível para este CEP.");
         }
+      } else {
+        console.log("[ShippingMethodSelector] result.data:", result.data);
+        setError("Erro ao calcular frete.");
       }
     } catch (err: any) {
+      console.error("[ShippingMethodSelector] Erro:", err);
       setError(err.message || "Erro ao calcular frete. Tente novamente.");
     } finally {
       setIsLoading(false);

@@ -316,7 +316,7 @@ export const logisticsRouter = router({
           if (motoRules && motoRules.length > 0) {
             // Calcular distância baseada no CEP (simplificado: usar primeira regra)
             const rule = motoRules[0];
-            const price = rule.price ? parseFloat(String(rule.price)) : 10;
+            const price = rule.basePrice ? parseFloat(String(rule.basePrice)) : 10;
             const estimatedHours = rule.estimatedDays ? parseInt(String(rule.estimatedDays)) : 2;
 
             shippingMethods.push({
@@ -346,7 +346,7 @@ export const logisticsRouter = router({
 
             if (carrierRules && carrierRules.length > 0) {
               const rule = carrierRules[0];
-              const price = rule.price ? parseFloat(String(rule.price)) : 0;
+              const price = rule.basePrice ? parseFloat(String(rule.basePrice)) : 0;
               const estimatedDays = rule.estimatedDays ? parseInt(String(rule.estimatedDays)) : 5;
 
               shippingMethods.push({
