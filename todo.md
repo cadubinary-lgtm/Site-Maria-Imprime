@@ -2048,5 +2048,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Integrar frete ao resumo do pedido
 - [x] Salvar método, valor e prazo no banco de dados
 - [x] Adicionar bloco Logística em AdminOrders
-- [ ] Validar fluxo completo (CEP, métodos, cálculo, salvamento)
-- [ ] Gerar relatório final com arquivos alterados
+- [x] Validar fluxo completo (CEP, métodos, cálculo, salvamento)
+- [x] Gerar relatório final com arquivos alterados
