@@ -37,13 +37,13 @@ export default function OrderTracking() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const utils = trpc.useUtils();
 
-  const deleteOrderMutation = trpc.orders.deleteOrder.useMutation({
+  const deleteOrderMutation = trpc.admin.deleteOrder.useMutation({
     onSuccess: () => {
       toast.success("Pedido excluído com sucesso");
       setConfirmDeleteId(null);
       utils.orders.getMyOrders.invalidate();
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error(err.message || "Erro ao excluir pedido");
       setConfirmDeleteId(null);
     },

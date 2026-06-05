@@ -2043,10 +2043,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Fase 26: Cálculo de Frete no Checkout (NOVA)
 
-- [ ] Criar procedure tRPC calculateShippingMethods para calcular frete
-- [ ] Implementar seletor de método de entrega no checkout
-- [ ] Integrar frete ao resumo do pedido
-- [ ] Salvar método, valor e prazo no banco de dados
-- [ ] Adicionar bloco Logística em AdminOrders
+- [x] Criar procedure tRPC calculateShippingMethods para calcular frete
+- [x] Implementar seletor de método de entrega no checkout
+- [x] Integrar frete ao resumo do pedido
+- [x] Salvar método, valor e prazo no banco de dados
+- [x] Adicionar bloco Logística em AdminOrders
 - [ ] Validar fluxo completo (CEP, métodos, cálculo, salvamento)
 - [ ] Gerar relatório final com arquivos alterados

@@ -24,7 +24,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 
 export default function ProductionDashboard() {
   const { data: orders, isLoading, refetch } = trpc.admin.getAllOrders.useQuery();
-  const updateStatusMutation = trpc.orders.updateStatus.useMutation();
+  const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation();
 
   const handleStatusChange = async (orderId: number, newStatus: string) => {
     try {
