@@ -1091,6 +1091,11 @@ export const carriers = mysqlTable("carriers", {
   apiProvider: varchar("apiProvider", { length: 50 }), // "correios", "jadlog", "uber", "custom"
   apiKey: text("apiKey"), // Chave de API (criptografada em produção)
   apiUrl: text("apiUrl"), // URL base da API
+  // Campos específicos para Correios
+  cwsUser: varchar("cwsUser", { length: 255 }), // Usuário API CWS dos Correios
+  cwsPassword: varchar("cwsPassword", { length: 255 }), // Código de acesso API CWS dos Correios
+  contractNumber: varchar("contractNumber", { length: 255 }), // Número de Contrato dos Correios
+  postalCardNumber: varchar("postalCardNumber", { length: 255 }), // Número do Cartão de Postagem dos Correios
   minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
   maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
   baseRate: decimal("baseRate", { precision: 10, scale: 2 }), // Taxa base
