@@ -236,16 +236,20 @@ export const logisticsRouter = router({
         })),
       }))
       .query(async ({ input }) => {
+        console.log("[calculateShippingMethods] Input:", input);
         const db = getDb() as any;
         const { products } = await import("../drizzle/schema");
         
         // Buscar produtos do carrinho com informações logísticas
+        console.log("[calculateShippingMethods] Buscando produtos com IDs:", input.cartItems.map((item: any) => item.productId));
         const cartProducts = await db.query.products.findMany({
           where: (products: any, { inArray }: any) => 
             inArray(products.id, input.cartItems.map((item: any) => item.productId)),
         });
 
+        console.log("[calculateShippingMethods] Produtos encontrados:", cartProducts?.length);
         if (!cartProducts || cartProducts.length === 0) {
+          console.error("[calculateShippingMethods] ERRO: Nenhum produto encontrado");
           throw new TRPCError({ code: "NOT_FOUND", message: "Produtos não encontrados" });
         }
 
@@ -363,6 +367,12 @@ export const logisticsRouter = router({
           }
         }
 
+        console.log("[calculateShippingMethods] Retornando:", {
+          zipCode: input.zipCode,
+          totalWeight,
+          totalVolume,
+          shippingMethodsCount: shippingMethods.length,
+        });
         return {
           zipCode: input.zipCode,
           totalWeight,

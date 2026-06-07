@@ -949,6 +949,7 @@ export const cartItems = mysqlTable("cartItems", {
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
   notes: longtext("notes"), // Observações do cliente
+  shippingMethod: varchar("shippingMethod", { length: 50 }).default("retirada"), // Método de frete pré-selecionado
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

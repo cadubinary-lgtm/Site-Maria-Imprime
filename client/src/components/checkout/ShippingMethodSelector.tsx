@@ -26,27 +26,61 @@ interface ShippingMethod {
 
 interface ShippingMethodSelectorProps {
   cartItems: CartItem[];
+  preSelectedMethod?: string; // Método pré-selecionado do produto
   onMethodSelected: (method: ShippingMethod, zipCode: string) => void;
   disabled?: boolean;
 }
 
 export function ShippingMethodSelector({
   cartItems,
+  preSelectedMethod,
   onMethodSelected,
   disabled = false,
 }: ShippingMethodSelectorProps) {
   const [zipCode, setZipCode] = useState("");
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(preSelectedMethod || null);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasCalculated, setHasCalculated] = useState(false);
+
+  // Validar se carrinho tem itens
+  const hasCartItems = cartItems && cartItems.length > 0;
 
   const calculateShippingMutation = trpc.logistics.checkout.calculateShippingMethods.useQuery(
-    { zipCode, cartItems },
+    { zipCode, cartItems: cartItems || [] },
     { enabled: false }
   );
 
+  // Se método pré-selecionado é "retirada", confirmar automaticamente
+  useEffect(() => {
+    if (preSelectedMethod === "pickup" || preSelectedMethod === "retirada") {
+      // Criar objeto de método retirada
+      const pickupMethod: ShippingMethod = {
+        id: "pickup",
+        name: "Retirar na Loja",
+        description: "Retire seu pedido diretamente em nossa loja",
+        price: 0,
+        estimatedDays: 0,
+        estimatedHours: 0,
+        initialStatus: "awaiting_pickup",
+      };
+      setSelectedMethod("pickup");
+      setShippingMethods([pickupMethod]);
+      // Confirmar automaticamente
+      setTimeout(() => {
+        onMethodSelected(pickupMethod, "");
+      }, 100);
+    }
+  }, [preSelectedMethod]);
+
   const handleCalculateShipping = async () => {
+    // Validar carrinho
+    if (!hasCartItems) {
+      setError("Carrinho vazio. Adicione produtos antes de calcular o frete.");
+      return;
+    }
+
     if (!zipCode || zipCode.length < 8) {
       setError("CEP inválido. Digite 8 dígitos.");
       return;
@@ -61,20 +95,38 @@ export function ShippingMethodSelector({
       
       const result = await calculateShippingMutation.refetch();
       
-      console.log("[ShippingMethodSelector] Resultado da query:", result);
+      console.log("[ShippingMethodSelector] Resultado completo:", result);
       
-      if (result.data?.shippingMethods) {
-        console.log("[ShippingMethodSelector] Métodos encontrados:", result.data.shippingMethods.length);
-        setShippingMethods(result.data.shippingMethods);
-        if (result.data.shippingMethods.length === 0) {
+      // Verificar se há erro
+      if (result.error) {
+        console.error("[ShippingMethodSelector] Erro na query:", result.error);
+        setError(result.error.message || "Erro ao calcular frete. Tente novamente.");
+        return;
+      }
+      
+      // Verificar se há dados
+      if (result.data) {
+        const shippingData = result.data;
+        console.log("[ShippingMethodSelector] Dados de frete:", shippingData);
+        
+        if (shippingData.shippingMethods && shippingData.shippingMethods.length > 0) {
+          console.log("[ShippingMethodSelector] Métodos encontrados:", shippingData.shippingMethods.length);
+          setShippingMethods(shippingData.shippingMethods);
+          setHasCalculated(true);
+          // Pré-selecionar primeiro método se houver pré-seleção
+          if (!selectedMethod && shippingData.shippingMethods.length > 0) {
+            setSelectedMethod(shippingData.shippingMethods[0].id);
+          }
+        } else {
+          console.log("[ShippingMethodSelector] Nenhum método disponível");
           setError("Nenhum método de entrega disponível para este CEP.");
         }
       } else {
-        console.log("[ShippingMethodSelector] result.data:", result.data);
+        console.log("[ShippingMethodSelector] Nenhum dado retornado");
         setError("Erro ao calcular frete.");
       }
     } catch (err: any) {
-      console.error("[ShippingMethodSelector] Erro:", err);
+      console.error("[ShippingMethodSelector] Erro na execução:", err);
       setError(err.message || "Erro ao calcular frete. Tente novamente.");
     } finally {
       setIsLoading(false);
@@ -106,6 +158,11 @@ export function ShippingMethodSelector({
     return <Truck className="w-5 h-5" />;
   };
 
+  // Se pré-selecionado é retirada, não mostrar nada (será confirmado automaticamente)
+  if (preSelectedMethod === "pickup" || preSelectedMethod === "retirada") {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
       <Card>
@@ -116,6 +173,14 @@ export function ShippingMethodSelector({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Validação de Carrinho */}
+          {!hasCartItems && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>Seu carrinho está vazio. Adicione produtos para continuar.</AlertDescription>
+            </Alert>
+          )}
+
           {/* CEP Input */}
           <div className="space-y-2">
             <Label htmlFor="zipCode">CEP de Entrega</Label>
@@ -124,15 +189,18 @@ export function ShippingMethodSelector({
                 id="zipCode"
                 type="text"
                 placeholder="00000-000"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
-                maxLength={8}
-                disabled={disabled || isLoading}
+                value={zipCode.length > 5 ? `${zipCode.slice(0, 5)}-${zipCode.slice(5)}` : zipCode}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/\D/g, "");
+                  setZipCode(cleaned);
+                }}
+                maxLength={9}
+                disabled={disabled || isLoading || !hasCartItems}
                 className="flex-1"
               />
               <Button
                 onClick={handleCalculateShipping}
-                disabled={disabled || isLoading || zipCode.length < 8}
+                disabled={disabled || isLoading || zipCode.length < 8 || !hasCartItems}
                 variant="default"
               >
                 {isLoading ? "Calculando..." : "Calcular"}

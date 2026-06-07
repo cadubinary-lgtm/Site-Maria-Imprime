@@ -543,6 +543,7 @@ export default function CheckoutPage() {
                       productId: item.productId,
                       quantity: item.quantity,
                     })) || []}
+                    preSelectedMethod={cartItems?.[0]?.shippingMethod}
                     onMethodSelected={handleShippingMethodSelected}
                     disabled={isSubmitting}
                   />

@@ -748,6 +748,7 @@ createOrder: protectedProcedure
         priceAtCart: z.number(),
         artFileUrl: z.string().optional(),
         notes: z.string().optional(),
+        shippingMethod: z.string().optional().default("retirada"),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
