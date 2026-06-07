@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface CartItem {
   productId: number;
   quantity: number;
+  shippingMethod?: string; // Método de frete pré-selecionado
 }
 
 interface ShippingMethod {
@@ -38,7 +39,7 @@ export function ShippingMethodSelector({
   disabled = false,
 }: ShippingMethodSelectorProps) {
   const [zipCode, setZipCode] = useState("");
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(preSelectedMethod || null);
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +53,15 @@ export function ShippingMethodSelector({
     { enabled: false }
   );
 
+  // Verificar se há método pré-selecionado no primeiro item do carrinho
+  const preSelectedFromCart = cartItems?.[0]?.shippingMethod;
+
   // Se método pré-selecionado é "retirada", confirmar automaticamente
   useEffect(() => {
-    if (preSelectedMethod === "pickup" || preSelectedMethod === "retirada") {
+    // Verificar primeiro o método do carrinho, depois o prop
+    const methodToUse = preSelectedFromCart || preSelectedMethod;
+    
+    if (methodToUse === "pickup" || methodToUse === "retirada") {
       // Criar objeto de método retirada
       const pickupMethod: ShippingMethod = {
         id: "pickup",
@@ -67,12 +74,18 @@ export function ShippingMethodSelector({
       };
       setSelectedMethod("pickup");
       setShippingMethods([pickupMethod]);
+      setHasCalculated(true);
       // Confirmar automaticamente
       setTimeout(() => {
         onMethodSelected(pickupMethod, "");
       }, 100);
+    } else if (methodToUse && methodToUse !== "") {
+      // Se há outro método pré-selecionado, marcar como calculado
+      // Mas não confirmar automaticamente - deixar o usuário confirmar
+      setSelectedMethod(methodToUse);
+      setHasCalculated(true);
     }
-  }, [preSelectedMethod]);
+  }, [preSelectedFromCart, preSelectedMethod]);
 
   const handleCalculateShipping = async () => {
     // Validar carrinho
@@ -159,7 +172,8 @@ export function ShippingMethodSelector({
   };
 
   // Se pré-selecionado é retirada, não mostrar nada (será confirmado automaticamente)
-  if (preSelectedMethod === "pickup" || preSelectedMethod === "retirada") {
+  if (preSelectedFromCart === "pickup" || preSelectedFromCart === "retirada" || 
+      preSelectedMethod === "pickup" || preSelectedMethod === "retirada") {
     return null;
   }
 
