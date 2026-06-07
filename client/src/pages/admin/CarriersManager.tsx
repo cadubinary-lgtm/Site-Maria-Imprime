@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function CarriersManager() {
   const { data: carriers, isLoading, refetch } = trpc.logistics.carriers.list.useQuery();
@@ -15,7 +16,18 @@ export default function CarriersManager() {
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [newCarrier, setNewCarrier] = useState({ name: '', code: '', apiProvider: '', apiKey: '' });
+  const [carrierType, setCarrierType] = useState<'generic' | 'correios'>('generic');
+  const [newCarrier, setNewCarrier] = useState({
+    name: '',
+    code: '',
+    apiProvider: '',
+    apiKey: '',
+    // Campos específicos dos Correios
+    cwsUser: '',
+    cwsPassword: '',
+    contractNumber: '',
+    postalCardNumber: '',
+  });
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleCreate = async () => {
@@ -23,10 +35,29 @@ export default function CarriersManager() {
       setNotification({ type: 'error', message: 'Preencha os campos obrigatórios' });
       return;
     }
+
+    // Validar campos específicos dos Correios
+    if (carrierType === 'correios') {
+      if (!newCarrier.cwsUser || !newCarrier.cwsPassword || !newCarrier.contractNumber || !newCarrier.postalCardNumber) {
+        setNotification({ type: 'error', message: 'Preencha todos os campos dos Correios' });
+        return;
+      }
+    }
+
     try {
-      await createMutation.mutateAsync(newCarrier);
-      setNewCarrier({ name: '', code: '', apiProvider: '', apiKey: '' });
+      await createMutation.mutateAsync(newCarrier as any);
+      setNewCarrier({
+        name: '',
+        code: '',
+        apiProvider: '',
+        apiKey: '',
+        cwsUser: '',
+        cwsPassword: '',
+        contractNumber: '',
+        postalCardNumber: '',
+      });
       setIsCreating(false);
+      setCarrierType('generic');
       refetch();
       setNotification({ type: 'success', message: 'Transportadora criada com sucesso' });
     } catch (error: any) {
@@ -61,29 +92,123 @@ export default function CarriersManager() {
                 <Plus className="w-4 h-4 mr-2" /> Nova Transportadora
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Nova Transportadora</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Nome</label>
-                  <Input value={newCarrier.name} onChange={(e) => setNewCarrier({ ...newCarrier, name: e.target.value })} placeholder="Ex: Correios" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Código</label>
-                  <Input value={newCarrier.code} onChange={(e) => setNewCarrier({ ...newCarrier, code: e.target.value })} placeholder="Ex: CORREIOS" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Provedor API</label>
-                  <Input value={newCarrier.apiProvider} onChange={(e) => setNewCarrier({ ...newCarrier, apiProvider: e.target.value })} placeholder="Ex: correios" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">API Key</label>
-                  <Input value={newCarrier.apiKey} onChange={(e) => setNewCarrier({ ...newCarrier, apiKey: e.target.value })} placeholder="Chave da API" />
-                </div>
+                {/* Tabs para tipo de transportadora */}
+                <Tabs value={carrierType} onValueChange={(v) => setCarrierType(v as 'generic' | 'correios')}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="generic">Genérica</TabsTrigger>
+                    <TabsTrigger value="correios">Correios</TabsTrigger>
+                  </TabsList>
+
+                  {/* Campos Genéricos */}
+                  <TabsContent value="generic" className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Nome *</label>
+                      <Input
+                        value={newCarrier.name}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, name: e.target.value })}
+                        placeholder="Ex: Jadlog, Uber Entrega"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Código *</label>
+                      <Input
+                        value={newCarrier.code}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, code: e.target.value })}
+                        placeholder="Ex: JADLOG, UBER"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Provedor API</label>
+                      <Input
+                        value={newCarrier.apiProvider}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, apiProvider: e.target.value })}
+                        placeholder="Ex: jadlog, uber"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">API Key</label>
+                      <Input
+                        value={newCarrier.apiKey}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, apiKey: e.target.value })}
+                        placeholder="Chave da API"
+                        type="password"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Campos Correios */}
+                  <TabsContent value="correios" className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-blue-900">
+                        Preencha com os dados fornecidos pelos Correios em sua plataforma de integração
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium">Nome *</label>
+                      <Input
+                        value={newCarrier.name}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, name: e.target.value })}
+                        placeholder="Ex: Correios"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Código *</label>
+                      <Input
+                        value={newCarrier.code}
+                        onChange={(e) => setNewCarrier({ ...newCarrier, code: e.target.value })}
+                        placeholder="Ex: CORREIOS"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Usuário API CWS *</label>
+                        <Input
+                          value={newCarrier.cwsUser}
+                          onChange={(e) => setNewCarrier({ ...newCarrier, cwsUser: e.target.value })}
+                          placeholder="Usuário da API"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Código de Acesso API CWS *</label>
+                        <Input
+                          value={newCarrier.cwsPassword}
+                          onChange={(e) => setNewCarrier({ ...newCarrier, cwsPassword: e.target.value })}
+                          placeholder="Código de acesso"
+                          type="password"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Número de Contrato *</label>
+                        <Input
+                          value={newCarrier.contractNumber}
+                          onChange={(e) => setNewCarrier({ ...newCarrier, contractNumber: e.target.value })}
+                          placeholder="Número do contrato"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Número do Cartão de Postagem *</label>
+                        <Input
+                          value={newCarrier.postalCardNumber}
+                          onChange={(e) => setNewCarrier({ ...newCarrier, postalCardNumber: e.target.value })}
+                          placeholder="Número do cartão"
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
                 <Button onClick={handleCreate} className="w-full bg-orange-500 hover:bg-orange-600">
-                  Criar
+                  Criar Transportadora
                 </Button>
               </div>
             </DialogContent>
@@ -110,6 +235,7 @@ export default function CarriersManager() {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900">Nome</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900">Código</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900">Provedor</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900">Tipo</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-900">Ações</th>
               </tr>
             </thead>
@@ -119,6 +245,13 @@ export default function CarriersManager() {
                   <td className="px-6 py-4 text-sm text-gray-900 font-medium">{carrier.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{carrier.code}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{carrier.apiProvider || '-'}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      carrier.cwsUser ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {carrier.cwsUser ? 'Correios' : 'Genérica'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-sm flex gap-2">
                     <Button size="sm" variant="outline">
                       <Edit2 className="w-4 h-4" />
