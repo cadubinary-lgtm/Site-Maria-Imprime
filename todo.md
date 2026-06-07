@@ -2057,3 +2057,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar pré-seleção de método de frete do produto no carrinho
 - [x] Adicionar formatação de CEP com hífen nas configurações do produto
 - [x] Testar fluxo completo (retirada sem CEP, pré-seleção, formatação)
+
+## Fase 28: Correções no Fluxo de Frete (NOVA)
+
+- [x] Remover pré-seleção de frete em ProductDetail (deve ficar vazio)
+- [x] Adicionar transição suave ao clicar em variações (smooth scroll)
+- [x] Manter frete selecionado no checkout sem pedir CEP novamente
+- [x] Testar fluxo completo de seleção de frete

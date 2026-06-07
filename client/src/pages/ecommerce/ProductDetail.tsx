@@ -121,7 +121,7 @@ export default function ProductDetail() {
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
   const [cepAddress, setCepAddress] = useState<string | null>(null);
-  const [selectedFreteId, setSelectedFreteId] = useState<string>("retirada");
+  const [selectedFreteId, setSelectedFreteId] = useState<string>("");
   const selectedFrete = FRETE_OPTIONS.find(f => f.id === selectedFreteId) ?? FRETE_OPTIONS[0];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -682,6 +682,13 @@ export default function ProductDetail() {
                           onClick={() => {
                             setSelectedAttributes(prev => ({ ...prev, [attr.attributeId]: { valueIds: [val.id] } }));
                             setOpenSteps(prev => ({ ...prev, [globalIdx]: false, [globalIdx + 1]: true }));
+                            // Smooth scroll para o próximo step
+                            setTimeout(() => {
+                              const nextStep = document.getElementById(`attr-${attr.attributeId}`)?.nextElementSibling;
+                              if (nextStep) {
+                                nextStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }, 100);
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                             isSel
