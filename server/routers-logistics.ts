@@ -237,12 +237,13 @@ export const logisticsRouter = router({
       }))
       .query(async ({ input }) => {
         console.log("[calculateShippingMethods] Input:", input);
-        const db = getDb() as any;
-        const { products } = await import("../drizzle/schema");
+        const dbInstance = await getDb();
+        if (!dbInstance) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        const db = dbInstance as any;
         
         // Buscar produtos do carrinho com informações logísticas
         console.log("[calculateShippingMethods] Buscando produtos com IDs:", input.cartItems.map((item: any) => item.productId));
-        const cartProducts = await db.query.products.findMany({
+        const cartProducts = await (db as any).query.products.findMany({
           where: (products: any, { inArray }: any) => 
             inArray(products.id, input.cartItems.map((item: any) => item.productId)),
         });
@@ -250,7 +251,13 @@ export const logisticsRouter = router({
         console.log("[calculateShippingMethods] Produtos encontrados:", cartProducts?.length);
         if (!cartProducts || cartProducts.length === 0) {
           console.error("[calculateShippingMethods] ERRO: Nenhum produto encontrado");
-          throw new TRPCError({ code: "NOT_FOUND", message: "Produtos não encontrados" });
+          // Retornar lista vazia ao invés de erro
+          return {
+            zipCode: input.zipCode,
+            totalWeight: 0,
+            totalVolume: 0,
+            shippingMethods: [],
+          };
         }
 
         // Calcular peso e volume totais
@@ -313,7 +320,7 @@ export const logisticsRouter = router({
         // 2. Moto Express (se permitido e CEP válido)
         if (allowMotoExpress) {
           // Buscar regras de frete para Moto Express
-          const motoRules = await db.query.shippingRules.findMany({
+          const motoRules = await (db as any).query.shippingRules.findMany({
             where: (rules: any, { eq }: any) => eq(rules.carrierId, 0), // 0 = Moto Express
           });
 
@@ -337,14 +344,14 @@ export const logisticsRouter = router({
 
         // 3. Transportadoras (se houver permitidas)
         if (allowedCarriers.size > 0) {
-          const activeCarriers = await db.query.carriers.findMany({
+          const activeCarriers = await (db as any).query.carriers.findMany({
             where: (carriers: any, { inArray }: any) => 
               inArray(carriers.id, Array.from(allowedCarriers)),
           });
 
           for (const carrier of activeCarriers) {
             // Buscar regras de frete para esta transportadora
-            const carrierRules = await db.query.shippingRules.findMany({
+            const carrierRules = await (db as any).query.shippingRules.findMany({
               where: (rules: any, { eq }: any) => eq(rules.carrierId, carrier.id),
             });
 
@@ -372,6 +379,7 @@ export const logisticsRouter = router({
           totalWeight,
           totalVolume,
           shippingMethodsCount: shippingMethods.length,
+          shippingMethods: shippingMethods.map(m => ({ id: m.id, name: m.name, price: m.price })),
         });
         return {
           zipCode: input.zipCode,
