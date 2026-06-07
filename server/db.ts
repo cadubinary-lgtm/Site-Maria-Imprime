@@ -850,13 +850,14 @@ export async function addToCart(data: {
   priceAtCart: number;
   artFileUrl?: string;
   notes?: string;
+  shippingMethod?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.execute(
     sql`
-      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes)
-      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null})
+      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes, shippingMethod)
+      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null}, ${data.shippingMethod ?? "retirada"})
     `
   );
   return (result as any).insertId as number;

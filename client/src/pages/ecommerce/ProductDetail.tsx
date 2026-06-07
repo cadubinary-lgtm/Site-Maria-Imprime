@@ -397,6 +397,7 @@ export default function ProductDetail() {
         priceAtCart: effectivePrice,
         notes: combinedNotes,
         artFileUrl: artUrl,
+        shippingMethod: selectedFreteId,
       });
       toast.success("Adicionado ao carrinho!", {
         action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },

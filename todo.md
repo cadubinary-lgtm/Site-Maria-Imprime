@@ -2050,3 +2050,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar bloco Logística em AdminOrders
 - [x] Validar fluxo completo (CEP, métodos, cálculo, salvamento)
 - [x] Gerar relatório final com arquivos alterados
+
+## Fase 27: Melhorias no Fluxo de Frete (NOVA)
+
+- [x] Modificar ShippingMethodSelector para não pedir CEP quando retirada na loja
+- [x] Adicionar pré-seleção de método de frete do produto no carrinho
+- [x] Adicionar formatação de CEP com hífen nas configurações do produto
+- [x] Testar fluxo completo (retirada sem CEP, pré-seleção, formatação)
