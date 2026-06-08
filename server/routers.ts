@@ -1341,6 +1341,12 @@ createOrder: protectedProcedure
           correiosPassword: z.string().optional(),
           correiosContractNumber: z.string().optional(),
           correiosPostalCard: z.string().optional(),
+          senderStreet: z.string().optional(),
+          senderNumber: z.string().optional(),
+          senderComplement: z.string().optional(),
+          senderNeighborhood: z.string().optional(),
+          senderCity: z.string().optional(),
+          senderState: z.string().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -1371,6 +1377,30 @@ createOrder: protectedProcedure
         if (input.correiosPostalCard !== undefined) {
           updates.push("correiosPostalCard = ?");
           values.push(input.correiosPostalCard);
+        }
+        if (input.senderStreet !== undefined) {
+          updates.push("senderStreet = ?");
+          values.push(input.senderStreet);
+        }
+        if (input.senderNumber !== undefined) {
+          updates.push("senderNumber = ?");
+          values.push(input.senderNumber);
+        }
+        if (input.senderComplement !== undefined) {
+          updates.push("senderComplement = ?");
+          values.push(input.senderComplement);
+        }
+        if (input.senderNeighborhood !== undefined) {
+          updates.push("senderNeighborhood = ?");
+          values.push(input.senderNeighborhood);
+        }
+        if (input.senderCity !== undefined) {
+          updates.push("senderCity = ?");
+          values.push(input.senderCity);
+        }
+        if (input.senderState !== undefined) {
+          updates.push("senderState = ?");
+          values.push(input.senderState);
         }
 
         if (updates.length === 0) {
