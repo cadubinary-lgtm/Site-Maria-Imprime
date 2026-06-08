@@ -661,6 +661,19 @@ createOrder: protectedProcedure
       .mutation(async ({ input }) => {
         return await reorderDeliveryOptions(input.updates);
       }),
+    generateShippingLabel: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { generateShippingLabelPDF } = await import('./shipping-labels');
+        try {
+          const html = await generateShippingLabelPDF(input.orderId);
+          return { success: true, html };
+        } catch (error: any) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
+        }
+      }),
   }),
   cart: router({
     /**
