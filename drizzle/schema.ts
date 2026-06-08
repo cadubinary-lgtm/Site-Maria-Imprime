@@ -1184,3 +1184,26 @@ export type InsertTrackingEvent = typeof trackingEvents.$inferInsert;
  * - deliveryStatus: enum ("pending", "shipped", "in_transit", "delivered", "failed")
  * - trackingNumber: varchar (referência ao shipment)
  */
+
+
+/**
+ * Store Settings - Configurações globais da loja
+ */
+export const storeSettings = mysqlTable("storeSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  // Configurações de Origem (Correios)
+  originCEP: varchar("originCEP", { length: 10 }), // CEP de origem para cálculo de frete
+  correiosUser: varchar("correiosUser", { length: 255 }), // Usuário/CNPJ para API dos Correios
+  correiosPassword: varchar("correiosPassword", { length: 255 }), // Código de acesso CWS dos Correios
+  correiosContractNumber: varchar("correiosContractNumber", { length: 255 }), // Número do contrato
+  correiosPostalCard: varchar("correiosPostalCard", { length: 255 }), // Número do cartão de postagem
+  // Token de autenticação
+  correiosToken: text("correiosToken"), // Bearer token da API dos Correios
+  correiosTokenExpiry: timestamp("correiosTokenExpiry"), // Data de expiração do token
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StoreSettings = typeof storeSettings.$inferSelect;
+export type InsertStoreSettings = typeof storeSettings.$inferInsert;
