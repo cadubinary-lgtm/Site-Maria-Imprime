@@ -1320,6 +1320,74 @@ createOrder: protectedProcedure
         return filtered;
       }),
   }),
+
+  // Procedures para Configuração dos Correios
+  settings: router({
+    // Obter configurações atuais
+    getSettings: publicProcedure.query(async () => {
+      const db = await getDb();
+      const result = await (db as any).query(
+        `SELECT * FROM storeSettings WHERE id = 1`
+      );
+      return result && result.length > 0 ? result[0] : null;
+    }),
+
+    // Atualizar configurações (admin only)
+    updateSettings: protectedProcedure
+      .input(
+        z.object({
+          originCEP: z.string().optional(),
+          correiosUser: z.string().optional(),
+          correiosPassword: z.string().optional(),
+          correiosContractNumber: z.string().optional(),
+          correiosPostalCard: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+
+        const db = await getDb();
+        const updates: string[] = [];
+        const values: any[] = [];
+
+        if (input.originCEP !== undefined) {
+          updates.push("originCEP = ?");
+          values.push(input.originCEP);
+        }
+        if (input.correiosUser !== undefined) {
+          updates.push("correiosUser = ?");
+          values.push(input.correiosUser);
+        }
+        if (input.correiosPassword !== undefined) {
+          updates.push("correiosPassword = ?");
+          values.push(input.correiosPassword);
+        }
+        if (input.correiosContractNumber !== undefined) {
+          updates.push("correiosContractNumber = ?");
+          values.push(input.correiosContractNumber);
+        }
+        if (input.correiosPostalCard !== undefined) {
+          updates.push("correiosPostalCard = ?");
+          values.push(input.correiosPostalCard);
+        }
+
+        if (updates.length === 0) {
+          return { success: false, message: "Nenhum campo para atualizar" };
+        }
+
+        // Inserir ou atualizar
+        await (db as any).query(
+          `INSERT INTO storeSettings (id, ${updates.map((u) => u.split(" = ")[0]).join(", ")}) 
+           VALUES (1, ${values.map(() => "?").join(", ")}) 
+           ON DUPLICATE KEY UPDATE ${updates.join(", ")}`,
+          [1, ...values, ...values]
+        );
+
+        return { success: true, message: "Configurações atualizadas" };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
 

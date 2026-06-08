@@ -2064,3 +2064,20 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar transição suave ao clicar em variações (smooth scroll)
 - [x] Manter frete selecionado no checkout sem pedir CEP novamente
 - [x] Testar fluxo completo de seleção de frete
+
+
+## Fase 29: Integração Completa com API dos Correios (NOVA)
+
+- [ ] Criar tabela de configurações globais (storeSettings)
+- [ ] Adicionar campos: CEP de origem, usuário CNPJ, código CWS, cartão de postagem
+- [ ] Implementar autenticação com API dos Correios (Basic Auth)
+- [ ] Sistema de token com renovação automática (24h)
+- [ ] Persistir CEP do cliente em localStorage/session
+- [ ] Preencher CEP automaticamente no checkout
+- [ ] Algoritmo de unificação de frete (peso + volume total)
+- [ ] Cálculo de dimensões da caixa única (raiz cúbica)
+- [ ] Validar travas de segurança (mínimos e máximos)
+- [ ] Integrar cálculo final com API dos Correios
+- [ ] Exibir PAC e SEDEX no checkout
+- [ ] Criar painel admin para configurar Correios
+- [ ] Testar fluxo completo
