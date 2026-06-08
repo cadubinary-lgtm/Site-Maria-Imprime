@@ -15,6 +15,7 @@ import {
   QrCode, RefreshCw, Filter, Phone
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -91,7 +92,8 @@ export default function FinanceiroContasReceber() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -403,5 +405,6 @@ export default function FinanceiroContasReceber() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }

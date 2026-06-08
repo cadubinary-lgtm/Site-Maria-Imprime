@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { BarChart2, TrendingUp, DollarSign, ShoppingBag, RefreshCw, Printer } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
 
 function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v));
@@ -47,7 +48,8 @@ export default function FinanceiroRelatorios() {
     : 1;
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Relatórios Financeiros</h1>
@@ -225,5 +227,6 @@ export default function FinanceiroRelatorios() {
         </>
       ) : null}
     </div>
+    </AdminLayout>
   );
 }

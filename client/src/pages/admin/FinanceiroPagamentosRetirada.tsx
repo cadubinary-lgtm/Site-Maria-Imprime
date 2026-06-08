@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Package, RefreshCw, CheckCircle, Clock, Truck, User, Users } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v));
@@ -66,7 +67,8 @@ export default function FinanceiroPagamentosRetirada() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Pagamentos na Retirada</h1>
@@ -254,5 +256,6 @@ export default function FinanceiroPagamentosRetirada() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }

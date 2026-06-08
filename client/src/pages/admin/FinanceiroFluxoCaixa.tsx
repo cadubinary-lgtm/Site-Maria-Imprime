@@ -14,6 +14,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, Plus, Pencil, Trash2, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v));
@@ -101,7 +102,8 @@ export default function FinanceiroFluxoCaixa() {
   const categorias = form.tipo === "income" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Fluxo de Caixa</h1>
@@ -309,5 +311,6 @@ export default function FinanceiroFluxoCaixa() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, RefreshCw, CheckCircle } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -29,7 +30,8 @@ export default function FinanceiroContasRecebidas() {
   const { data, isLoading, refetch } = trpc.financeiro.getContasRecebidas.useQuery({ page, limit: 20, periodo });
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Contas Recebidas</h1>
@@ -129,5 +131,6 @@ export default function FinanceiroContasRecebidas() {
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }
