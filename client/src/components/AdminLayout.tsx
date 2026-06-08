@@ -43,9 +43,15 @@ function NavGroup({ label }: { label: string }) {
 
 function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   const [location] = useLocation();
-  const [open, setOpen] = useState(false);
+  // Verifica se algum filho está ativo para inicializar o grupo como aberto
+  const hasActiveChild = item.children?.some(
+    (child) => child.href && (location === child.href || location.startsWith(child.href + "?"))
+  ) ?? false;
+  const [open, setOpen] = useState(() => hasActiveChild);
   const isActive = item.href ? location === item.href : false;
   const hasChildren = item.children && item.children.length > 0;
+  // Mantém aberto quando um filho está ativo (navegação entre páginas)
+  const isGroupActive = hasChildren && hasActiveChild;
 
   if (hasChildren) {
     return (
@@ -53,7 +59,7 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         <button
           onClick={() => setOpen(!open)}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-            ${isActive ? "bg-orange-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
+            ${isGroupActive ? "bg-gray-800 text-white" : isActive ? "bg-orange-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
           `}
           style={{ paddingLeft: `${12 + depth * 12}px` }}
         >

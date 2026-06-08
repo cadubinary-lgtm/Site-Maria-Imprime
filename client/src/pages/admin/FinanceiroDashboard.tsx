@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import AdminLayout from "@/components/AdminLayout";
 import {
   DollarSign, TrendingUp, Clock, ShoppingBag, Users,
   ArrowUpRight, ArrowDownRight, BarChart2, Bell, RefreshCw,
@@ -85,7 +86,8 @@ export default function FinanceiroDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -227,5 +229,6 @@ export default function FinanceiroDashboard() {
         ))}
       </div>
     </div>
+    </AdminLayout>
   );
 }
