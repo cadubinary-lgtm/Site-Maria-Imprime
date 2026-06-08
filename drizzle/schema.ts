@@ -1096,6 +1096,23 @@ export const carriers = mysqlTable("carriers", {
   cwsPassword: varchar("cwsPassword", { length: 255 }), // Código de acesso API CWS dos Correios
   contractNumber: varchar("contractNumber", { length: 255 }), // Número de Contrato dos Correios
   postalCardNumber: varchar("postalCardNumber", { length: 255 }), // Número do Cartão de Postagem dos Correios
+  originCep: varchar("originCep", { length: 9 }), // CEP de Origem para cálculo de frete
+  // Campos específicos para Jadlog
+  jadlogCnpj: varchar("jadlogCnpj", { length: 18 }), // CNPJ/Usuário Jadlog
+  jadlogToken: text("jadlogToken"), // Token de integração Jadlog
+  jadlogContaCorrente: varchar("jadlogContaCorrente", { length: 50 }), // Conta Corrente Jadlog (correntistas)
+  jadlogCodigoFranquia: varchar("jadlogCodigoFranquia", { length: 20 }), // Código da Franquia Jadlog
+  // Campos específicos para Melhor Envio (OAuth2)
+  melhorEnvioClientId: varchar("melhorEnvioClientId", { length: 255 }), // Client ID do App Melhor Envio
+  melhorEnvioClientSecret: text("melhorEnvioClientSecret"), // Client Secret do App Melhor Envio
+  melhorEnvioAccessToken: text("melhorEnvioAccessToken"), // Access Token OAuth2
+  melhorEnvioRefreshToken: text("melhorEnvioRefreshToken"), // Refresh Token OAuth2
+  melhorEnvioRedirectUri: varchar("melhorEnvioRedirectUri", { length: 500 }), // URL de Callback OAuth2
+  melhorEnvioSandbox: boolean("melhorEnvioSandbox").default(false), // Usar ambiente sandbox
+  // Campos específicos para Frete Alternativo (motoboy/carro)
+  vehicleType: mysqlEnum("vehicleType", ["moto", "automovel"]), // Tipo de veículo
+  driverName: varchar("driverName", { length: 100 }), // Nome do entregador
+  driverPhone: varchar("driverPhone", { length: 20 }), // Telefone do entregador
   minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
   maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
   baseRate: decimal("baseRate", { precision: 10, scale: 2 }), // Taxa base
