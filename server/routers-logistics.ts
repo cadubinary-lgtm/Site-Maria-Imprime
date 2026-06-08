@@ -12,7 +12,7 @@ export const logisticsRouter = router({
   // ─── Transportadoras (Carriers) ───
   carriers: router({
     list: publicProcedure.query(async () => {
-      const db = getDb() as any;
+      const db = await getDb() as any;
       const result = await db.query.carriers.findMany({
         where: (carriers: any, { eq }: any) => eq(carriers.isActive, true),
         orderBy: (carriers: any, { asc }: any) => asc(carriers.name),
@@ -58,7 +58,7 @@ export const logisticsRouter = router({
         driverPhone: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.insert(carriers).values({
           name: input.name,
           code: input.code,
@@ -125,7 +125,7 @@ export const logisticsRouter = router({
         driverPhone: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const { id, ...fields } = input;
         const updateData: Record<string, any> = {};
         if (fields.name !== undefined) updateData.name = fields.name;
@@ -166,7 +166,7 @@ export const logisticsRouter = router({
     listByCarrier: publicProcedure
       .input(z.object({ carrierId: z.number() }))
       .query(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.query.shippingRules.findMany({
           where: (rules: any, { eq, and }: any) => and(
             eq(rules.carrierId, input.carrierId),
@@ -190,7 +190,7 @@ export const logisticsRouter = router({
         estimatedDays: z.number(),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.insert(shippingRules).values({
           carrierId: input.carrierId,
           name: input.name,
@@ -213,7 +213,7 @@ export const logisticsRouter = router({
         return next({ ctx });
       })
       .query(async () => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.query.shipments.findMany({
           orderBy: (shipments: any, { desc }: any) => desc(shipments.createdAt),
           limit: 100,
@@ -224,7 +224,7 @@ export const logisticsRouter = router({
     getByOrder: publicProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.query.shipments.findFirst({
           where: (shipments: any, { eq }: any) => eq(shipments.orderId, input.orderId),
         });
@@ -245,7 +245,7 @@ export const logisticsRouter = router({
         estimatedDeliveryDate: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.insert(shipments).values({
           orderId: input.orderId,
           carrierId: input.carrierId,
@@ -269,7 +269,7 @@ export const logisticsRouter = router({
         status: z.enum(["pending", "shipped", "in_transit", "delivered", "failed"]),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.update(shipments)
           .set({ status: input.status })
           .where(eq(shipments.id, input.id));
@@ -282,7 +282,7 @@ export const logisticsRouter = router({
     getByShipment: publicProcedure
       .input(z.object({ shipmentId: z.number() }))
       .query(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.query.trackingEvents.findMany({
           where: (events: any, { eq }: any) => eq(events.shipmentId, input.shipmentId),
           orderBy: (events: any, { desc }: any) => desc(events.eventTime),
@@ -302,7 +302,7 @@ export const logisticsRouter = router({
         description: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const result = await db.insert(trackingEvents).values({
           shipmentId: input.shipmentId,
           status: input.status,
@@ -491,7 +491,7 @@ export const logisticsRouter = router({
         status: z.enum(["pending", "in_production", "quality_check", "ready_for_shipment"]),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const { orders } = await import("../drizzle/schema");
         const result = await db
           .update(orders)
@@ -510,7 +510,7 @@ export const logisticsRouter = router({
         status: z.enum(["pending", "shipped", "in_transit", "delivered", "failed"]),
       }))
       .mutation(async ({ input }) => {
-        const db = getDb() as any;
+        const db = await getDb() as any;
         const { orders } = await import("../drizzle/schema");
         const result = await db
           .update(orders)
