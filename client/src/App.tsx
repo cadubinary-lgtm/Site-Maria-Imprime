@@ -58,6 +58,19 @@ import CorreiosSettings from "./pages/admin/CorreiosSettings";
 import ShipmentsManager from "./pages/admin/ShipmentsManager";
 import TrackingManager from "./pages/admin/TrackingManager";
 
+// ─── Gerenciador Financeiro ──────────────────────────────────────────────────
+import GerenciadorFinanceiroDashboard from "./pages/admin/GerenciadorFinanceiroDashboard";
+import ContasReceber from "./pages/admin/ContasReceber";
+import ContasRecebidas from "./pages/admin/ContasRecebidas";
+import PagamentosRetirada from "./pages/admin/PagamentosRetirada";
+import FluxoCaixa from "./pages/admin/FluxoCaixa";
+import RelatoriosFinanceiros from "./pages/admin/RelatoriosFinanceiros";
+
+// ─── Gestão Fiscal ───────────────────────────────────────────────────────────
+import GestaoFiscalDashboard from "./pages/admin/GestaoFiscalDashboard";
+import NotasFiscais from "./pages/admin/NotasFiscais";
+import ConfiguracoesFiscais from "./pages/admin/ConfiguracoesFiscais";
+
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
 import ProductionDashboard from "./pages/erp/ProductionDashboard";
@@ -109,6 +122,17 @@ function AdminRoutes() {
           <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
           <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
           <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
+          {/* Gerenciador Financeiro */}
+          <Route path="/admin/gerenciador-financeiro" component={GerenciadorFinanceiroDashboard} />
+          <Route path="/admin/gerenciador-financeiro/receber" component={ContasReceber} />
+          <Route path="/admin/gerenciador-financeiro/recebidas" component={ContasRecebidas} />
+          <Route path="/admin/gerenciador-financeiro/retirada" component={PagamentosRetirada} />
+          <Route path="/admin/gerenciador-financeiro/fluxo" component={FluxoCaixa} />
+          <Route path="/admin/gerenciador-financeiro/relatorios" component={RelatoriosFinanceiros} />
+          {/* Gestão Fiscal */}
+          <Route path="/admin/fiscal" component={GestaoFiscalDashboard} />
+          <Route path="/admin/fiscal/notas" component={NotasFiscais} />
+          <Route path="/admin/fiscal/configuracoes" component={ConfiguracoesFiscais} />
         </>
       )}
       {user?.role === "production" && (
