@@ -117,7 +117,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    { item: { label: "Financeiro (ERP)", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
+    // Financeiro (ERP) - mantido funcionando internamente, ocultado do menu principal conforme especificação
+    // { item: { label: "Financeiro (ERP)", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
     { item: { label: "Produção", href: "/admin/producao", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
     { item: { label: "OS - Ordens de Serviço", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
     // Financeiro
@@ -127,12 +128,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "Gerenciador Financeiro",
         icon: <TrendingUp className="w-4 h-4" />,
         children: [
-          { label: "Dashboard Financeiro", href: "/admin/gerenciador-financeiro" },
-          { label: "Contas a Receber", href: "/admin/gerenciador-financeiro/receber" },
-          { label: "Contas Recebidas", href: "/admin/gerenciador-financeiro/recebidas" },
-          { label: "Pagamentos na Retirada", href: "/admin/gerenciador-financeiro/retirada" },
-          { label: "Fluxo de Caixa", href: "/admin/gerenciador-financeiro/fluxo" },
-          { label: "Relatórios Financeiros", href: "/admin/gerenciador-financeiro/relatorios" },
+          { label: "Dashboard Financeiro", href: "/admin/financeiro-dashboard" },
+          { label: "Contas a Receber", href: "/admin/financeiro/receber" },
+          { label: "Contas Recebidas", href: "/admin/financeiro/recebidas" },
+          { label: "Pagamentos na Retirada", href: "/admin/financeiro/retirada" },
+          { label: "Fluxo de Caixa", href: "/admin/financeiro/fluxo" },
+          { label: "Relatórios Financeiros", href: "/admin/financeiro/relatorios" },
         ],
       },
     },
