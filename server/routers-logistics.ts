@@ -34,6 +34,28 @@ export const logisticsRouter = router({
         minWeight: z.number().optional(),
         maxWeight: z.number().optional(),
         baseRate: z.number().optional(),
+        // Correios
+        cwsUser: z.string().optional(),
+        cwsPassword: z.string().optional(),
+        contractNumber: z.string().optional(),
+        postalCardNumber: z.string().optional(),
+        originCep: z.string().optional(),
+        // Jadlog
+        jadlogCnpj: z.string().optional(),
+        jadlogToken: z.string().optional(),
+        jadlogContaCorrente: z.string().optional(),
+        jadlogCodigoFranquia: z.string().optional(),
+        // Melhor Envio
+        melhorEnvioClientId: z.string().optional(),
+        melhorEnvioClientSecret: z.string().optional(),
+        melhorEnvioAccessToken: z.string().optional(),
+        melhorEnvioRefreshToken: z.string().optional(),
+        melhorEnvioRedirectUri: z.string().optional(),
+        melhorEnvioSandbox: z.boolean().optional(),
+        // Frete Alternativo
+        vehicleType: z.enum(["moto", "automovel"]).optional(),
+        driverName: z.string().optional(),
+        driverPhone: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = getDb() as any;
@@ -46,6 +68,24 @@ export const logisticsRouter = router({
           minWeight: input.minWeight ? String(input.minWeight) : undefined,
           maxWeight: input.maxWeight ? String(input.maxWeight) : undefined,
           baseRate: input.baseRate ? String(input.baseRate) : undefined,
+          cwsUser: input.cwsUser,
+          cwsPassword: input.cwsPassword,
+          contractNumber: input.contractNumber,
+          postalCardNumber: input.postalCardNumber,
+          originCep: input.originCep,
+          jadlogCnpj: input.jadlogCnpj,
+          jadlogToken: input.jadlogToken,
+          jadlogContaCorrente: input.jadlogContaCorrente,
+          jadlogCodigoFranquia: input.jadlogCodigoFranquia,
+          melhorEnvioClientId: input.melhorEnvioClientId,
+          melhorEnvioClientSecret: input.melhorEnvioClientSecret,
+          melhorEnvioAccessToken: input.melhorEnvioAccessToken,
+          melhorEnvioRefreshToken: input.melhorEnvioRefreshToken,
+          melhorEnvioRedirectUri: input.melhorEnvioRedirectUri,
+          melhorEnvioSandbox: input.melhorEnvioSandbox,
+          vehicleType: input.vehicleType,
+          driverName: input.driverName,
+          driverPhone: input.driverPhone,
         });
         return result;
       }),
@@ -59,15 +99,64 @@ export const logisticsRouter = router({
         id: z.number(),
         name: z.string().optional(),
         isActive: z.boolean().optional(),
+        apiProvider: z.string().optional(),
+        apiKey: z.string().optional(),
+        apiUrl: z.string().optional(),
+        minWeight: z.number().optional(),
+        maxWeight: z.number().optional(),
+        baseRate: z.number().optional(),
+        cwsUser: z.string().optional(),
+        cwsPassword: z.string().optional(),
+        contractNumber: z.string().optional(),
+        postalCardNumber: z.string().optional(),
+        originCep: z.string().optional(),
+        jadlogCnpj: z.string().optional(),
+        jadlogToken: z.string().optional(),
+        jadlogContaCorrente: z.string().optional(),
+        jadlogCodigoFranquia: z.string().optional(),
+        melhorEnvioClientId: z.string().optional(),
+        melhorEnvioClientSecret: z.string().optional(),
+        melhorEnvioAccessToken: z.string().optional(),
+        melhorEnvioRefreshToken: z.string().optional(),
+        melhorEnvioRedirectUri: z.string().optional(),
+        melhorEnvioSandbox: z.boolean().optional(),
+        vehicleType: z.enum(["moto", "automovel"]).optional(),
+        driverName: z.string().optional(),
+        driverPhone: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = getDb() as any;
+        const { id, ...fields } = input;
+        const updateData: Record<string, any> = {};
+        if (fields.name !== undefined) updateData.name = fields.name;
+        if (fields.isActive !== undefined) updateData.isActive = fields.isActive;
+        if (fields.apiProvider !== undefined) updateData.apiProvider = fields.apiProvider;
+        if (fields.apiKey !== undefined) updateData.apiKey = fields.apiKey;
+        if (fields.apiUrl !== undefined) updateData.apiUrl = fields.apiUrl;
+        if (fields.minWeight !== undefined) updateData.minWeight = String(fields.minWeight);
+        if (fields.maxWeight !== undefined) updateData.maxWeight = String(fields.maxWeight);
+        if (fields.baseRate !== undefined) updateData.baseRate = String(fields.baseRate);
+        if (fields.cwsUser !== undefined) updateData.cwsUser = fields.cwsUser;
+        if (fields.cwsPassword !== undefined) updateData.cwsPassword = fields.cwsPassword;
+        if (fields.contractNumber !== undefined) updateData.contractNumber = fields.contractNumber;
+        if (fields.postalCardNumber !== undefined) updateData.postalCardNumber = fields.postalCardNumber;
+        if (fields.originCep !== undefined) updateData.originCep = fields.originCep;
+        if (fields.jadlogCnpj !== undefined) updateData.jadlogCnpj = fields.jadlogCnpj;
+        if (fields.jadlogToken !== undefined) updateData.jadlogToken = fields.jadlogToken;
+        if (fields.jadlogContaCorrente !== undefined) updateData.jadlogContaCorrente = fields.jadlogContaCorrente;
+        if (fields.jadlogCodigoFranquia !== undefined) updateData.jadlogCodigoFranquia = fields.jadlogCodigoFranquia;
+        if (fields.melhorEnvioClientId !== undefined) updateData.melhorEnvioClientId = fields.melhorEnvioClientId;
+        if (fields.melhorEnvioClientSecret !== undefined) updateData.melhorEnvioClientSecret = fields.melhorEnvioClientSecret;
+        if (fields.melhorEnvioAccessToken !== undefined) updateData.melhorEnvioAccessToken = fields.melhorEnvioAccessToken;
+        if (fields.melhorEnvioRefreshToken !== undefined) updateData.melhorEnvioRefreshToken = fields.melhorEnvioRefreshToken;
+        if (fields.melhorEnvioRedirectUri !== undefined) updateData.melhorEnvioRedirectUri = fields.melhorEnvioRedirectUri;
+        if (fields.melhorEnvioSandbox !== undefined) updateData.melhorEnvioSandbox = fields.melhorEnvioSandbox;
+        if (fields.vehicleType !== undefined) updateData.vehicleType = fields.vehicleType;
+        if (fields.driverName !== undefined) updateData.driverName = fields.driverName;
+        if (fields.driverPhone !== undefined) updateData.driverPhone = fields.driverPhone;
         const result = await db.update(carriers)
-          .set({
-            ...(input.name && { name: input.name }),
-            ...(input.isActive !== undefined && { isActive: input.isActive }),
-          })
-          .where(eq(carriers.id, input.id));
+          .set(updateData)
+          .where(eq(carriers.id, id));
         return result;
       }),
   }),
