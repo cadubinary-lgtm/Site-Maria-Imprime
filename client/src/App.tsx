@@ -54,6 +54,7 @@ import FileValidationManager from "./pages/admin/FileValidationManager";
 import LogisticsDashboard from "./pages/admin/LogisticsDashboard";
 import CarriersManager from "./pages/admin/CarriersManager";
 import ShippingRulesManager from "./pages/admin/ShippingRulesManager";
+import CorreiosSettings from "./pages/admin/CorreiosSettings";
 import ShipmentsManager from "./pages/admin/ShipmentsManager";
 import TrackingManager from "./pages/admin/TrackingManager";
 
@@ -103,6 +104,7 @@ function AdminRoutes() {
           <Route path="/admin/automacao" component={AutomationDashboard} />
           <Route path="/admin/segmentos" component={SegmentsManager} />
           <Route path="/admin/logistica" component={LogisticsDashboard} />
+          <Route path="/admin/logistica/configuracoes" component={CorreiosSettings} />
           <Route path="/admin/logistica/transportadoras" component={CarriersManager} />
           <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
           <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />

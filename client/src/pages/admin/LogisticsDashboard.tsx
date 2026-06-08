@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import AdminLayout from '@/components/AdminLayout';
-import { Loader2, Truck, Package, MapPin, Clock, AlertCircle } from 'lucide-react';
+import { Loader2, Truck, Package, MapPin, Clock, AlertCircle, Settings, Zap, FileText } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function KpiCard({ icon, iconBg, title, value, sub, subColor }: {
@@ -54,6 +54,46 @@ export default function LogisticsDashboard() {
             <h1 className="text-2xl font-bold text-gray-900">Logística</h1>
             <p className="text-sm text-gray-500">Gerenciamento de transportadoras e expedições</p>
           </div>
+        </div>
+
+        {/* Menu de Navegação */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <a href="/admin/logistica/configuracoes" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <Settings className="w-5 h-5 text-orange-600" />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Configurações</p>
+                <p className="text-xs text-gray-500">Correios & Remetente</p>
+              </div>
+            </div>
+          </a>
+          <a href="/admin/logistica/transportadoras" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <Truck className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Transportadoras</p>
+                <p className="text-xs text-gray-500">Gerenciar</p>
+              </div>
+            </div>
+          </a>
+          <a href="/admin/logistica/regras-frete" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <Zap className="w-5 h-5 text-purple-600" />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Regras de Frete</p>
+                <p className="text-xs text-gray-500">Configurar</p>
+              </div>
+            </div>
+          </a>
+          <a href="/admin/logistica/expedicao" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-green-300 hover:shadow-md transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <FileText className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Expedição</p>
+                <p className="text-xs text-gray-500">Gerenciar</p>
+              </div>
+            </div>
+          </a>
         </div>
 
         {/* KPIs */}
