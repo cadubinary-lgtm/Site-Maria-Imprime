@@ -1214,3 +1214,99 @@ export const storeSettings = mysqlTable("storeSettings", {
 
 export type StoreSettings = typeof storeSettings.$inferSelect;
 export type InsertStoreSettings = typeof storeSettings.$inferInsert;
+
+
+/**
+ * Fiscal Settings - Configurações fiscais da empresa emissora
+ * Tabela NOVA - não altera nenhuma tabela existente
+ */
+export const fiscalSettings = mysqlTable("fiscalSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  companyName: varchar("companyName", { length: 200 }),
+  tradeName: varchar("tradeName", { length: 200 }),
+  cnpj: varchar("cnpj", { length: 20 }),
+  stateRegistration: varchar("stateRegistration", { length: 50 }),
+  cityRegistration: varchar("cityRegistration", { length: 50 }),
+  address: varchar("address", { length: 300 }),
+  zipCode: varchar("zipCode", { length: 10 }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 2 }),
+  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 200 }),
+  emitMode: mysqlEnum("emitMode", ["manual", "on_payment", "on_completed"]).default("manual"),
+  documentType: mysqlEnum("documentType", ["nfse", "nfe", "both"]).default("nfse"),
+  certificateFilename: varchar("certificateFilename", { length: 200 }),
+  certificateKey: text("certificateKey"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FiscalSettings = typeof fiscalSettings.$inferSelect;
+export type InsertFiscalSettings = typeof fiscalSettings.$inferInsert;
+
+/**
+ * Fiscal Notes - Notas fiscais emitidas
+ * Tabela NOVA - não altera nenhuma tabela existente
+ */
+export const fiscalNotes = mysqlTable("fiscalNotes", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  noteNumber: varchar("noteNumber", { length: 50 }),
+  noteType: mysqlEnum("noteType", ["nfse", "nfe"]).default("nfse"),
+  status: mysqlEnum("status", ["pending", "issued", "cancelled", "voided", "error"]).default("pending"),
+  customerName: varchar("customerName", { length: 200 }),
+  customerCpf: varchar("customerCpf", { length: 14 }),
+  customerCnpj: varchar("customerCnpj", { length: 18 }),
+  customerEmail: varchar("customerEmail", { length: 200 }),
+  customerPhone: varchar("customerPhone", { length: 20 }),
+  customerAddress: text("customerAddress"),
+  totalValue: decimal("totalValue", { precision: 10, scale: 2 }),
+  shippingValue: decimal("shippingValue", { precision: 10, scale: 2 }).default("0"),
+  discountValue: decimal("discountValue", { precision: 10, scale: 2 }).default("0"),
+  paymentMethod: varchar("paymentMethod", { length: 100 }),
+  issueDate: bigint("issueDate", { mode: "number" }),
+  cancelDate: bigint("cancelDate", { mode: "number" }),
+  pdfUrl: text("pdfUrl"),
+  xmlUrl: text("xmlUrl"),
+  errorMessage: text("errorMessage"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FiscalNote = typeof fiscalNotes.$inferSelect;
+export type InsertFiscalNote = typeof fiscalNotes.$inferInsert;
+
+/**
+ * Fiscal Note Items - Itens das notas fiscais
+ * Tabela NOVA - não altera nenhuma tabela existente
+ */
+export const fiscalNoteItems = mysqlTable("fiscalNoteItems", {
+  id: int("id").autoincrement().primaryKey(),
+  fiscalNoteId: int("fiscalNoteId").notNull(),
+  productName: varchar("productName", { length: 200 }).notNull(),
+  quantity: int("quantity").notNull().default(1),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FiscalNoteItem = typeof fiscalNoteItems.$inferSelect;
+export type InsertFiscalNoteItem = typeof fiscalNoteItems.$inferInsert;
+
+/**
+ * Cash Flow Entries - Entradas manuais no fluxo de caixa
+ * Tabela NOVA - não altera nenhuma tabela existente
+ */
+export const cashFlowEntries = mysqlTable("cashFlowEntries", {
+  id: int("id").autoincrement().primaryKey(),
+  entryType: mysqlEnum("entryType", ["income", "expense"]).notNull(),
+  category: varchar("category", { length: 100 }),
+  description: varchar("description", { length: 300 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  entryDate: bigint("entryDate", { mode: "number" }).notNull(),
+  referenceId: int("referenceId"),
+  referenceType: varchar("referenceType", { length: 50 }),
+  createdBy: int("createdBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CashFlowEntry = typeof cashFlowEntries.$inferSelect;
+export type InsertCashFlowEntry = typeof cashFlowEntries.$inferInsert;

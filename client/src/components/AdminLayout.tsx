@@ -6,7 +6,7 @@ import {
   Settings, ChevronDown, ChevronRight, Bell, Search, LogOut,
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
-  AlertCircle, Menu, X, Printer, Truck
+  AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,9 +117,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    { item: { label: "Financeiro", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
+    { item: { label: "Financeiro (ERP)", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
     { item: { label: "Produção", href: "/admin/producao", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
     { item: { label: "OS - Ordens de Serviço", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
+    // Financeiro
+    { group: "FINANCEIRO" },
+    {
+      item: {
+        label: "Gerenciador Financeiro",
+        icon: <TrendingUp className="w-4 h-4" />,
+        children: [
+          { label: "Dashboard Financeiro", href: "/admin/gerenciador-financeiro" },
+          { label: "Contas a Receber", href: "/admin/gerenciador-financeiro/receber" },
+          { label: "Contas Recebidas", href: "/admin/gerenciador-financeiro/recebidas" },
+          { label: "Pagamentos na Retirada", href: "/admin/gerenciador-financeiro/retirada" },
+          { label: "Fluxo de Caixa", href: "/admin/gerenciador-financeiro/fluxo" },
+          { label: "Relatórios Financeiros", href: "/admin/gerenciador-financeiro/relatorios" },
+        ],
+      },
+    },
+    {
+      item: {
+        label: "Gestão Fiscal",
+        icon: <Receipt className="w-4 h-4" />,
+        children: [
+          { label: "Dashboard Fiscal", href: "/admin/fiscal" },
+          { label: "Notas Fiscais", href: "/admin/fiscal/notas" },
+          { label: "Configurações Fiscais", href: "/admin/fiscal/configuracoes" },
+        ],
+      },
+    },
     // Logística
     { group: "LOGÍSTICA" },
     {
@@ -128,6 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <Truck className="w-4 h-4" />,
         children: [
           { label: "Dashboard", href: "/admin/logistica" },
+          { label: "Configurações", href: "/admin/logistica/configuracoes" },
           { label: "Transportadoras", href: "/admin/logistica/transportadoras" },
           { label: "Regras de Frete", href: "/admin/logistica/regras-frete" },
           { label: "Expedição", href: "/admin/logistica/expedicao" },

@@ -2081,3 +2081,64 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Exibir PAC e SEDEX no checkout
 - [ ] Criar painel admin para configurar Correios
 - [ ] Testar fluxo completo
+
+## Fase 30: Gerenciador Financeiro e Gestão Fiscal (NOVA)
+
+### Diretrizes Obrigatórias
+- [ ] NÃO alterar tabelas existentes (orders, products, users, etc.)
+- [ ] NÃO alterar menus existentes do ERP
+- [ ] NÃO alterar regras de pedidos, produção ou entrega
+- [ ] Criar apenas novas tabelas, menus e endpoints
+
+### Banco de Dados (Novas Tabelas)
+- [ ] Criar tabela financialSettings (configurações do módulo financeiro)
+- [ ] Criar tabela fiscalNotes (notas fiscais emitidas)
+- [ ] Criar tabela fiscalSettings (configurações fiscais: empresa, certificado)
+- [ ] Criar tabela cashFlowEntries (entradas manuais de fluxo de caixa)
+
+### Backend (Novas Procedures)
+- [ ] Criar router financeiro com procedures de leitura de pedidos
+- [ ] Criar procedure getDashboardMetrics (KPIs financeiros)
+- [ ] Criar procedure getAccountsReceivable (contas a receber)
+- [ ] Criar procedure getAccountsReceived (contas recebidas)
+- [ ] Criar procedure getPickupPayments (pagamentos na retirada)
+- [ ] Criar procedure getCashFlow (fluxo de caixa)
+- [ ] Criar procedure getFinancialReports (relatórios)
+- [ ] Criar procedures CRUD para notas fiscais
+- [ ] Criar procedures para configurações fiscais
+
+### Frontend (Novas Páginas)
+- [ ] Criar FinancialDashboard com KPIs e gráficos
+- [ ] Criar AccountsReceivable (contas a receber)
+- [ ] Criar AccountsReceived (contas recebidas)
+- [ ] Criar PickupPayments (pagamentos na retirada)
+- [ ] Criar CashFlow (fluxo de caixa)
+- [ ] Criar FinancialReports (relatórios)
+- [ ] Criar FiscalManagement (gestão fiscal - listagem)
+- [ ] Criar FiscalNoteForm (formulário de emissão de nota)
+- [ ] Criar FinancialSettings (configurações: empresa, certificado, emissão)
+- [ ] Adicionar rotas no App.tsx para todas as páginas
+- [ ] Adicionar menu Gerenciador Financeiro na navegação admin
+
+
+## Módulo Gerenciador Financeiro e Gestão Fiscal (Camada Adicional)
+
+### Princípio: Extensão Independente — sem alterar sistema existente
+
+- [x] Criar tabelas próprias: fiscalNotes, fiscalSettings, cashFlowEntries, fiscalNoteItems
+- [x] Criar router gerenciadorFinanceiroRouter (server/routers-gerenciador.ts)
+- [x] Criar router gestaoFiscalRouter (server/routers-gerenciador.ts)
+- [x] Registrar routers no appRouter principal (server/routers.ts)
+- [x] Criar página GerenciadorFinanceiroDashboard.tsx
+- [x] Criar página ContasReceber.tsx
+- [x] Criar página ContasRecebidas.tsx
+- [x] Criar página PagamentosRetirada.tsx
+- [x] Criar página FluxoCaixa.tsx
+- [x] Criar página RelatoriosFinanceiros.tsx
+- [x] Criar página GestaoFiscalDashboard.tsx
+- [x] Criar página NotasFiscais.tsx
+- [x] Criar página ConfiguracoesFiscais.tsx
+- [x] Adicionar rotas no App.tsx (/admin/gerenciador-financeiro/*, /admin/fiscal/*)
+- [x] Adicionar menus no AdminLayout.tsx
+- [x] Escrever testes (server/gerenciador-fiscal.test.ts — 9 testes passando)
+- [x] Salvar checkpoint final
