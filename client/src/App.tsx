@@ -58,13 +58,21 @@ import CorreiosSettings from "./pages/admin/CorreiosSettings";
 import ShipmentsManager from "./pages/admin/ShipmentsManager";
 import TrackingManager from "./pages/admin/TrackingManager";
 
-// ─── Gerenciador Financeiro ──────────────────────────────────────────────────
+// ─── Gerenciador Financeiro (legado - mantido) ───────────────────────────────
 import GerenciadorFinanceiroDashboard from "./pages/admin/GerenciadorFinanceiroDashboard";
 import ContasReceber from "./pages/admin/ContasReceber";
 import ContasRecebidas from "./pages/admin/ContasRecebidas";
 import PagamentosRetirada from "./pages/admin/PagamentosRetirada";
 import FluxoCaixa from "./pages/admin/FluxoCaixa";
 import RelatoriosFinanceiros from "./pages/admin/RelatoriosFinanceiros";
+
+// ─── Gerenciador Financeiro NOVO (router financeiro) ─────────────────────────
+import FinanceiroDashboard from "./pages/admin/FinanceiroDashboard";
+import FinanceiroContasReceber from "./pages/admin/FinanceiroContasReceber";
+import FinanceiroContasRecebidas from "./pages/admin/FinanceiroContasRecebidas";
+import FinanceiroPagamentosRetirada from "./pages/admin/FinanceiroPagamentosRetirada";
+import FinanceiroFluxoCaixa from "./pages/admin/FinanceiroFluxoCaixa";
+import FinanceiroRelatorios from "./pages/admin/FinanceiroRelatorios";
 
 // ─── Gestão Fiscal ───────────────────────────────────────────────────────────
 import GestaoFiscalDashboard from "./pages/admin/GestaoFiscalDashboard";
@@ -122,13 +130,20 @@ function AdminRoutes() {
           <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
           <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
           <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
-          {/* Gerenciador Financeiro */}
+          {/* Gerenciador Financeiro (legado - mantido acessível) */}
           <Route path="/admin/gerenciador-financeiro" component={GerenciadorFinanceiroDashboard} />
           <Route path="/admin/gerenciador-financeiro/receber" component={ContasReceber} />
           <Route path="/admin/gerenciador-financeiro/recebidas" component={ContasRecebidas} />
           <Route path="/admin/gerenciador-financeiro/retirada" component={PagamentosRetirada} />
           <Route path="/admin/gerenciador-financeiro/fluxo" component={FluxoCaixa} />
           <Route path="/admin/gerenciador-financeiro/relatorios" component={RelatoriosFinanceiros} />
+          {/* Gerenciador Financeiro NOVO */}
+          <Route path="/admin/financeiro-dashboard" component={FinanceiroDashboard} />
+          <Route path="/admin/financeiro/receber" component={FinanceiroContasReceber} />
+          <Route path="/admin/financeiro/recebidas" component={FinanceiroContasRecebidas} />
+          <Route path="/admin/financeiro/retirada" component={FinanceiroPagamentosRetirada} />
+          <Route path="/admin/financeiro/fluxo" component={FinanceiroFluxoCaixa} />
+          <Route path="/admin/financeiro/relatorios" component={FinanceiroRelatorios} />
           {/* Gestão Fiscal */}
           <Route path="/admin/fiscal" component={GestaoFiscalDashboard} />
           <Route path="/admin/fiscal/notas" component={NotasFiscais} />

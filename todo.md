@@ -2142,3 +2142,24 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar menus no AdminLayout.tsx
 - [x] Escrever testes (server/gerenciador-fiscal.test.ts — 9 testes passando)
 - [x] Salvar checkpoint final
+
+## Gerenciador Financeiro Completo (Módulo Independente) ✅
+
+- [x] Schema: tabela `financeiro` criada (independente, sem alterar tabelas existentes)
+- [x] Schema: tabela `financeiroNotificacoes` criada
+- [x] Schema: tabela `cashFlowEntries` criada
+- [x] Backend: router `financeiroRouter` com todos os endpoints
+- [x] Backend: getDashboard, getContasReceber, getContasRecebidas, getPagamentosRetirada
+- [x] Backend: getFluxoCaixa, addEntradaManual, editEntradaManual, deleteEntradaManual
+- [x] Backend: getRelatorio, confirmarPagamento, gerarPix, atualizarStatusRetirada
+- [x] Frontend: FinanceiroDashboard.tsx (rota /admin/financeiro-dashboard)
+- [x] Frontend: FinanceiroContasReceber.tsx (rota /admin/financeiro/receber)
+- [x] Frontend: FinanceiroContasRecebidas.tsx (rota /admin/financeiro/recebidas)
+- [x] Frontend: FinanceiroPagamentosRetirada.tsx com kanban (rota /admin/financeiro/retirada)
+- [x] Frontend: FinanceiroFluxoCaixa.tsx com timeline (rota /admin/financeiro/fluxo)
+- [x] Frontend: FinanceiroRelatorios.tsx com gráficos (rota /admin/financeiro/relatorios)
+- [x] Menu: Financeiro (ERP) antigo ocultado do menu principal (mantido funcionando internamente)
+- [x] Menu: Gerenciador Financeiro adicionado na seção FINANCEIRO
+- [x] Testes: 11 testes passando (server/financeiro.test.ts)
+- [x] Isolamento: validado que tabelas orders e products não foram alteradas
+- [x] Checkpoint salvo

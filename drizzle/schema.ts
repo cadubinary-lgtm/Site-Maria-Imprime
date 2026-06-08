@@ -1310,3 +1310,65 @@ export const cashFlowEntries = mysqlTable("cashFlowEntries", {
 });
 export type CashFlowEntry = typeof cashFlowEntries.$inferSelect;
 export type InsertCashFlowEntry = typeof cashFlowEntries.$inferInsert;
+
+/**
+ * ============================================================
+ * GERENCIADOR FINANCEIRO - Tabelas próprias independentes
+ * Não altera nenhuma tabela existente do sistema
+ * ============================================================
+ */
+
+/**
+ * financeiro - Tabela central do Gerenciador Financeiro
+ * Registra todos os movimentos financeiros vinculados a pedidos
+ */
+export const financeiro = mysqlTable("financeiro", {
+  id: int("id").autoincrement().primaryKey(),
+  pedidoId: int("pedidoId"),
+  orderNumber: varchar("orderNumber", { length: 50 }),
+  cliente: varchar("cliente", { length: 255 }),
+  telefone: varchar("telefone", { length: 30 }),
+  email: varchar("email", { length: 255 }),
+  valor: decimal("valor", { precision: 10, scale: 2 }).notNull(),
+  formaPagamento: mysqlEnum("formaPagamento", [
+    "dinheiro", "pix", "cartao_credito", "cartao_debito",
+    "boleto", "transferencia", "pagar_na_retirada", "outro"
+  ]).default("outro"),
+  formaEntrega: mysqlEnum("formaEntrega", [
+    "retirada_loja", "moto_express", "transportadora", "correios", "outro"
+  ]).default("outro"),
+  status: mysqlEnum("status", [
+    "a_receber", "aguardando_producao", "pronto_retirada",
+    "pago", "retirado_cliente", "retirado_terceiros", "cancelado"
+  ]).default("a_receber").notNull(),
+  dataVencimento: bigint("dataVencimento", { mode: "number" }),
+  dataPagamento: bigint("dataPagamento", { mode: "number" }),
+  dataRetiradaPrevista: bigint("dataRetiradaPrevista", { mode: "number" }),
+  observacoes: text("observacoes"),
+  pixQrCode: text("pixQrCode"),
+  pixCopiaECola: text("pixCopiaECola"),
+  cobrancaEnviada: boolean("cobrancaEnviada").default(false),
+  dataCobranca: bigint("dataCobranca", { mode: "number" }),
+  criadoPor: int("criadoPor"),
+  criadoEm: timestamp("criadoEm").defaultNow().notNull(),
+  atualizadoEm: timestamp("atualizadoEm").defaultNow().onUpdateNow().notNull(),
+});
+export type Financeiro = typeof financeiro.$inferSelect;
+export type InsertFinanceiro = typeof financeiro.$inferInsert;
+
+/**
+ * financeiroNotificacoes - Alertas e notificações financeiras
+ */
+export const financeiroNotificacoes = mysqlTable("financeiroNotificacoes", {
+  id: int("id").autoincrement().primaryKey(),
+  financeiroId: int("financeiroId").notNull(),
+  tipo: mysqlEnum("tipo", [
+    "aguardando_pagamento", "aguardando_retirada",
+    "retirada_atrasada", "cobranca_vencida", "pagamento_pendente_7dias"
+  ]).notNull(),
+  mensagem: text("mensagem"),
+  lida: boolean("lida").default(false),
+  criadoEm: timestamp("criadoEm").defaultNow().notNull(),
+});
+export type FinanceiroNotificacao = typeof financeiroNotificacoes.$inferSelect;
+export type InsertFinanceiroNotificacao = typeof financeiroNotificacoes.$inferInsert;
