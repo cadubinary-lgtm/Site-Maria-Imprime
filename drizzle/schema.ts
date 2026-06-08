@@ -1200,6 +1200,13 @@ export const storeSettings = mysqlTable("storeSettings", {
   // Token de autenticação
   correiosToken: text("correiosToken"), // Bearer token da API dos Correios
   correiosTokenExpiry: timestamp("correiosTokenExpiry"), // Data de expiração do token
+  // Dados de Remetente (para geração de etiquetas e declarações)
+  senderStreet: varchar("senderStreet", { length: 255 }), // Rua
+  senderNumber: varchar("senderNumber", { length: 20 }), // Número
+  senderComplement: varchar("senderComplement", { length: 255 }), // Complemento
+  senderNeighborhood: varchar("senderNeighborhood", { length: 255 }), // Bairro
+  senderCity: varchar("senderCity", { length: 255 }), // Cidade
+  senderState: varchar("senderState", { length: 2 }), // Estado (UF)
   // Metadata
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
