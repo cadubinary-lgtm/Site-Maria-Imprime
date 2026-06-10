@@ -4,6 +4,12 @@ import { z } from "zod";
 import { getDb } from "./db";
 import { carriers, shippingRules, shipments, trackingEvents } from "../drizzle/schema";
 import { eq, and, asc, desc } from "drizzle-orm";
+import {
+  generateAuthorizationUrl,
+  getConnectionStatus,
+  refreshAccessToken,
+  saveTokensToCarrier,
+} from "./melhorenvio-oauth";
 
 /**
  * Logistics Router - Transportadoras, Regras de Frete, Expedições e Rastreamento
@@ -517,6 +523,114 @@ export const logisticsRouter = router({
           .set({ deliveryStatus: input.status })
           .where(eq(orders.id, input.orderId));
         return result;
+      }),
+  }),
+
+  // ─── Melhor Envio OAuth2 ───
+  melhorEnvio: router({
+    /**
+     * Gera a URL de autorização OAuth2 para redirecionar o usuário ao Melhor Envio
+     */
+    getAuthUrl: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ carrierId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb() as any;
+        const carrier = await db.query.carriers.findFirst({
+          where: eq(carriers.id, input.carrierId),
+        });
+        if (!carrier) throw new TRPCError({ code: "NOT_FOUND", message: "Transportadora não encontrada" });
+        if (!carrier.melhorEnvioClientId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Client ID não configurado. Salve a transportadora primeiro." });
+        }
+        const state = Buffer.from(JSON.stringify({ carrierId: input.carrierId })).toString('base64');
+        const redirectUri = carrier.melhorEnvioRedirectUri || `https://www.mariaimprime.com.br/api/melhorenvio/callback`;
+        const authUrl = generateAuthorizationUrl({
+          clientId: carrier.melhorEnvioClientId,
+          redirectUri,
+          sandbox: carrier.melhorEnvioSandbox ?? false,
+          state,
+        });
+        return { authUrl, redirectUri };
+      }),
+
+    /**
+     * Verifica o status da conexão com o Melhor Envio
+     */
+    getStatus: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ carrierId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb() as any;
+        const carrier = await db.query.carriers.findFirst({
+          where: eq(carriers.id, input.carrierId),
+        });
+        if (!carrier) throw new TRPCError({ code: "NOT_FOUND", message: "Transportadora não encontrada" });
+        return getConnectionStatus(carrier);
+      }),
+
+    /**
+     * Renova manualmente o Access Token usando o Refresh Token
+     */
+    refreshToken: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ carrierId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb() as any;
+        const carrier = await db.query.carriers.findFirst({
+          where: eq(carriers.id, input.carrierId),
+        });
+        if (!carrier) throw new TRPCError({ code: "NOT_FOUND", message: "Transportadora não encontrada" });
+        if (!carrier.melhorEnvioRefreshToken) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Refresh Token não disponível. Reconecte ao Melhor Envio." });
+        }
+        try {
+          const newTokens = await refreshAccessToken({
+            refreshToken: carrier.melhorEnvioRefreshToken,
+            clientId: carrier.melhorEnvioClientId ?? "",
+            clientSecret: carrier.melhorEnvioClientSecret ?? "",
+            redirectUri: carrier.melhorEnvioRedirectUri ?? "",
+            sandbox: carrier.melhorEnvioSandbox ?? false,
+          });
+          await saveTokensToCarrier(input.carrierId, newTokens);
+          return { success: true, message: "Token renovado com sucesso!" };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Erro desconhecido";
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Falha ao renovar token: ${msg}` });
+        }
+      }),
+
+    /**
+     * Desconecta o Melhor Envio removendo os tokens
+     */
+    disconnect: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ carrierId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb() as any;
+        await db
+          .update(carriers)
+          .set({
+            melhorEnvioAccessToken: null,
+            melhorEnvioRefreshToken: null,
+            melhorEnvioAccessTokenExpiresAt: null,
+            melhorEnvioRefreshTokenExpiresAt: null,
+            melhorEnvioConnectedAt: null,
+          })
+          .where(eq(carriers.id, input.carrierId));
+        return { success: true, message: "Desconectado do Melhor Envio com sucesso." };
       }),
   }),
 });

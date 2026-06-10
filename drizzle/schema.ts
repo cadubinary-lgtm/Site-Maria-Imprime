@@ -1109,6 +1109,9 @@ export const carriers = mysqlTable("carriers", {
   melhorEnvioRefreshToken: text("melhorEnvioRefreshToken"), // Refresh Token OAuth2
   melhorEnvioRedirectUri: varchar("melhorEnvioRedirectUri", { length: 500 }), // URL de Callback OAuth2
   melhorEnvioSandbox: boolean("melhorEnvioSandbox").default(false), // Usar ambiente sandbox
+  melhorEnvioAccessTokenExpiresAt: bigint("melhorEnvioAccessTokenExpiresAt", { mode: "number" }), // Timestamp expiração access token (ms)
+  melhorEnvioRefreshTokenExpiresAt: bigint("melhorEnvioRefreshTokenExpiresAt", { mode: "number" }), // Timestamp expiração refresh token (ms)
+  melhorEnvioConnectedAt: bigint("melhorEnvioConnectedAt", { mode: "number" }), // Timestamp da última conexão (ms)
   // Campos específicos para Frete Alternativo (motoboy/carro)
   vehicleType: mysqlEnum("vehicleType", ["moto", "automovel"]), // Tipo de veículo
   driverName: varchar("driverName", { length: 100 }), // Nome do entregador

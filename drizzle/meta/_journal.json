@@ -302,6 +302,13 @@
       "when": 1780960405354,
       "tag": "0042_nifty_phalanx",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1781053155329,
+      "tag": "0043_wise_solo",
+      "breakpoints": true
     }
   ]
 }
