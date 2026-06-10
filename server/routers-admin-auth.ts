@@ -6,18 +6,21 @@
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import { getDb } from "./db";
 import { adminAccounts, adminSessions, auditLogs } from "../drizzle/schema";
 import {
   loginAdmin,
   logoutAdmin,
   hashPassword,
-  logAudit,
+  logAudit as logAuditAction,
   createFirstSuperAdmin,
   ADMIN_SESSION_COOKIE,
   authenticateAdminRequest,
 } from "./admin-auth";
+// Alias para compatibilidade interna
+const logAudit = logAuditAction;
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -103,11 +106,17 @@ export const adminAuthRouter = router({
   me: publicProcedure.query(async ({ ctx }) => {
     const adminUser = await authenticateAdminRequest(ctx.req);
     if (!adminUser) return null;
+    // Buscar dados completos do banco para incluir lastLogin
+    const db = (await getDb())!;
+    const adminRow = await (db as any).query.adminAccounts.findFirst({
+      where: eq(adminAccounts.id, adminUser.adminId),
+    });
     return {
       id: adminUser.adminId,
       name: adminUser.name,
       email: adminUser.email,
       role: adminUser.role,
+      lastLogin: adminRow?.lastLogin ?? null,
     };
   }),
 
@@ -374,6 +383,99 @@ export const adminAuthRouter = router({
         offset: input.offset,
       });
       return result;
+    }),
+
+  /**
+   * Alterar própria senha (admin autenticado)
+   */
+  changePassword: adminAuthProcedure
+    .input(z.object({
+      currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+      newPassword: z.string().min(8, "Nova senha deve ter pelo menos 8 caracteres"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = await authenticateAdminRequest(ctx.req);
+      if (!adminUser) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      const db = (await getDb())!;
+      const admin = await (db as any).query.adminAccounts.findFirst({
+        where: eq(adminAccounts.id, adminUser.adminId),
+      });
+      if (!admin) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const valid = await bcrypt.compare(input.currentPassword, admin.passwordHash);
+      if (!valid) throw new TRPCError({ code: "BAD_REQUEST", message: "Senha atual incorreta." });
+
+      if (input.newPassword === input.currentPassword) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "A nova senha não pode ser igual à senha atual." });
+      }
+
+      const newHash = await bcrypt.hash(input.newPassword, 12);
+      await db.update(adminAccounts)
+        .set({ passwordHash: newHash, updatedAt: Date.now() })
+        .where(eq(adminAccounts.id, adminUser.adminId));
+
+      // Invalidar todas as outras sessões (exceto a atual)
+      const cookieHeader = ctx.req.headers.cookie || "";
+      const cookies = Object.fromEntries(
+        cookieHeader.split(";").map(c => {
+          const [k, ...v] = c.trim().split("=");
+          return [k.trim(), decodeURIComponent(v.join("="))];
+        })
+      );
+      const currentToken = cookies[ADMIN_SESSION_COOKIE];
+      if (currentToken) {
+        await db.delete(adminSessions)
+          .where(and(eq(adminSessions.adminId, adminUser.adminId), sql`token != ${currentToken}`));
+      }
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "change_password",
+        entity: "adminAccounts",
+        entityId: String(adminUser.adminId),
+      });
+
+      return { success: true };
+    }),
+
+  /**
+   * Atualizar próprio perfil (nome e e-mail)
+   */
+  updateProfile: adminAuthProcedure
+    .input(z.object({
+      name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+      email: z.string().email("E-mail inválido"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = await authenticateAdminRequest(ctx.req);
+      if (!adminUser) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      const db = (await getDb())!;
+
+      // Verificar se o e-mail já está em uso por outro admin
+      const existing = await (db as any).query.adminAccounts.findFirst({
+        where: and(eq(adminAccounts.email, input.email.toLowerCase().trim()), sql`id != ${adminUser.adminId}`),
+      });
+      if (existing) {
+        throw new TRPCError({ code: "CONFLICT", message: "Este e-mail já está em uso por outro administrador." });
+      }
+
+      await db.update(adminAccounts)
+        .set({ name: input.name, email: input.email.toLowerCase().trim(), updatedAt: Date.now() })
+        .where(eq(adminAccounts.id, adminUser.adminId));
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "update_profile",
+        entity: "adminAccounts",
+        entityId: String(adminUser.adminId),
+        after: { name: input.name, email: input.email },
+      });
+
+      return { success: true };
     }),
 
   /**

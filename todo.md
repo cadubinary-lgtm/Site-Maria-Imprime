@@ -2178,4 +2178,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar seção BACKOFFICE no sidebar do AdminLayout com links para Administradores e Auditoria
 - [x] Criar primeiro superadmin no banco (admin@mariaimprime.com.br)
 - [x] Testar login via API (retornou success:true)
-- [ ] Adicionar link "Painel Admin" no header público do site
+- [x] Adicionar link "Painel Admin" no header público do site
+- [x] Criar página /admin/perfil com alteração segura de senha e edição de perfil
+- [x] Adicionar procedures changePassword e updateProfile no router adminAuth
+- [x] Adicionar link "Meu Perfil" na seção BACKOFFICE do sidebar

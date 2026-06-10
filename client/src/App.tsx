@@ -84,6 +84,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminsManager from "./pages/admin/AdminsManager";
 import AuditLogs from "./pages/admin/AuditLogs";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
@@ -157,6 +158,8 @@ function AdminRoutes() {
           {/* Backoffice: Administradores e Auditoria */}
           <Route path="/admin/administradores" component={AdminsManager} />
           <Route path="/admin/auditoria" component={AuditLogs} />
+          {/* Perfil do Admin */}
+          <Route path="/admin/perfil" component={AdminProfile} />
         </>
       )}
       {user?.role === "production" && (
