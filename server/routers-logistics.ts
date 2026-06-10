@@ -65,34 +65,41 @@ export const logisticsRouter = router({
       }))
       .mutation(async ({ input }) => {
         const db = await getDb() as any;
-        const result = await db.insert(carriers).values({
+        // Construir apenas os campos com valores definidos e válidos
+        const values: Record<string, any> = {
           name: input.name,
           code: input.code,
-          apiProvider: input.apiProvider,
-          apiKey: input.apiKey,
-          apiUrl: input.apiUrl,
-          minWeight: input.minWeight ? String(input.minWeight) : undefined,
-          maxWeight: input.maxWeight ? String(input.maxWeight) : undefined,
-          baseRate: input.baseRate ? String(input.baseRate) : undefined,
-          cwsUser: input.cwsUser,
-          cwsPassword: input.cwsPassword,
-          contractNumber: input.contractNumber,
-          postalCardNumber: input.postalCardNumber,
-          originCep: input.originCep,
-          jadlogCnpj: input.jadlogCnpj,
-          jadlogToken: input.jadlogToken,
-          jadlogContaCorrente: input.jadlogContaCorrente,
-          jadlogCodigoFranquia: input.jadlogCodigoFranquia,
-          melhorEnvioClientId: input.melhorEnvioClientId,
-          melhorEnvioClientSecret: input.melhorEnvioClientSecret,
-          melhorEnvioAccessToken: input.melhorEnvioAccessToken,
-          melhorEnvioRefreshToken: input.melhorEnvioRefreshToken,
-          melhorEnvioRedirectUri: input.melhorEnvioRedirectUri,
-          melhorEnvioSandbox: input.melhorEnvioSandbox,
-          vehicleType: input.vehicleType,
-          driverName: input.driverName,
-          driverPhone: input.driverPhone,
-        });
+        };
+        // Campos opcionais de texto — só incluir se definidos
+        if (input.apiProvider !== undefined) values.apiProvider = input.apiProvider;
+        if (input.apiKey !== undefined) values.apiKey = input.apiKey;
+        if (input.apiUrl !== undefined) values.apiUrl = input.apiUrl;
+        // Campos numéricos armazenados como string decimal
+        if (input.minWeight !== undefined && input.minWeight !== null) values.minWeight = String(input.minWeight);
+        if (input.maxWeight !== undefined && input.maxWeight !== null) values.maxWeight = String(input.maxWeight);
+        if (input.baseRate !== undefined && input.baseRate !== null) values.baseRate = String(input.baseRate);
+        // Correios
+        if (input.cwsUser !== undefined) values.cwsUser = input.cwsUser;
+        if (input.cwsPassword !== undefined) values.cwsPassword = input.cwsPassword;
+        if (input.contractNumber !== undefined) values.contractNumber = input.contractNumber;
+        if (input.postalCardNumber !== undefined) values.postalCardNumber = input.postalCardNumber;
+        if (input.originCep !== undefined) values.originCep = input.originCep;
+        // Jadlog
+        if (input.jadlogCnpj !== undefined) values.jadlogCnpj = input.jadlogCnpj;
+        if (input.jadlogToken !== undefined) values.jadlogToken = input.jadlogToken;
+        if (input.jadlogContaCorrente !== undefined) values.jadlogContaCorrente = input.jadlogContaCorrente;
+        if (input.jadlogCodigoFranquia !== undefined) values.jadlogCodigoFranquia = input.jadlogCodigoFranquia;
+        // Melhor Envio — apenas campos de texto e boolean; NUNCA incluir campos bigint (expiresAt, connectedAt)
+        if (input.melhorEnvioClientId !== undefined) values.melhorEnvioClientId = input.melhorEnvioClientId;
+        if (input.melhorEnvioClientSecret !== undefined) values.melhorEnvioClientSecret = input.melhorEnvioClientSecret;
+        if (input.melhorEnvioRedirectUri !== undefined) values.melhorEnvioRedirectUri = input.melhorEnvioRedirectUri;
+        // boolean → tinyint(1): converter explicitamente para 0 ou 1
+        if (input.melhorEnvioSandbox !== undefined) values.melhorEnvioSandbox = input.melhorEnvioSandbox ? 1 : 0;
+        // Frete Alternativo
+        if (input.vehicleType !== undefined) values.vehicleType = input.vehicleType;
+        if (input.driverName !== undefined) values.driverName = input.driverName;
+        if (input.driverPhone !== undefined) values.driverPhone = input.driverPhone;
+        const result = await db.insert(carriers).values(values);
         return result;
       }),
 
@@ -156,7 +163,7 @@ export const logisticsRouter = router({
         if (fields.melhorEnvioAccessToken !== undefined) updateData.melhorEnvioAccessToken = fields.melhorEnvioAccessToken;
         if (fields.melhorEnvioRefreshToken !== undefined) updateData.melhorEnvioRefreshToken = fields.melhorEnvioRefreshToken;
         if (fields.melhorEnvioRedirectUri !== undefined) updateData.melhorEnvioRedirectUri = fields.melhorEnvioRedirectUri;
-        if (fields.melhorEnvioSandbox !== undefined) updateData.melhorEnvioSandbox = fields.melhorEnvioSandbox;
+        if (fields.melhorEnvioSandbox !== undefined) updateData.melhorEnvioSandbox = fields.melhorEnvioSandbox ? 1 : 0;
         if (fields.vehicleType !== undefined) updateData.vehicleType = fields.vehicleType;
         if (fields.driverName !== undefined) updateData.driverName = fields.driverName;
         if (fields.driverPhone !== undefined) updateData.driverPhone = fields.driverPhone;
