@@ -79,6 +79,12 @@ import GestaoFiscalDashboard from "./pages/admin/GestaoFiscalDashboard";
 import NotasFiscais from "./pages/admin/NotasFiscais";
 import ConfiguracoesFiscais from "./pages/admin/ConfiguracoesFiscais";
 
+// ─── Autenticação Própria Admin + Backoffice ──────────────────────────────────
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSetup from "./pages/admin/AdminSetup";
+import AdminsManager from "./pages/admin/AdminsManager";
+import AuditLogs from "./pages/admin/AuditLogs";
+
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
 import ProductionDashboard from "./pages/erp/ProductionDashboard";
@@ -148,6 +154,9 @@ function AdminRoutes() {
           <Route path="/admin/fiscal" component={GestaoFiscalDashboard} />
           <Route path="/admin/fiscal/notas" component={NotasFiscais} />
           <Route path="/admin/fiscal/configuracoes" component={ConfiguracoesFiscais} />
+          {/* Backoffice: Administradores e Auditoria */}
+          <Route path="/admin/administradores" component={AdminsManager} />
+          <Route path="/admin/auditoria" component={AuditLogs} />
         </>
       )}
       {user?.role === "production" && (
@@ -172,6 +181,16 @@ function AdminRoutes() {
  */
 function Router() {
   const [location] = useLocation();
+
+  // Rotas de login/setup admin são públicas (não precisam de auth)
+  if (location === "/admin/login" || location === "/admin/setup") {
+    return (
+      <Switch>
+        <Route path="/admin/login" component={AdminLogin} />
+        <Route path="/admin/setup" component={AdminSetup} />
+      </Switch>
+    );
+  }
 
   // Rotas admin e produção são tratadas pelo AdminRoutes
   if (location.startsWith("/admin") || location.startsWith("/producao")) {

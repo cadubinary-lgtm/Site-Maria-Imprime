@@ -85,6 +85,7 @@ import { pricingRulesRouter } from "./routers-pricing-rules";
 import { logisticsRouter } from "./routers-logistics";
 import { gerenciadorFinanceiroRouter, gestaoFiscalRouter } from "./routers-gerenciador";
 import { financeiroRouter } from "./routers-financeiro";
+import { adminAuthRouter } from "./routers-admin-auth";
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -105,6 +106,7 @@ export const productionProcedure = protectedProcedure.use(({ ctx, next }) => {
 export const appRouter = router({
   system: systemRouter,
   customerAuth: customerAuthRouter,
+  adminAuth: adminAuthRouter,
   logistics: logisticsRouter,
   gerenciadorFinanceiro: gerenciadorFinanceiroRouter,
   gestaoFiscal: gestaoFiscalRouter,
