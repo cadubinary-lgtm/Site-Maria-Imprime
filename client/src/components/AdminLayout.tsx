@@ -7,7 +7,7 @@ import {
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
   AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator,
-  ShieldCheck, ScrollText
+  ShieldCheck, ScrollText, UserCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -194,6 +194,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { item: { label: "Integrações", href: "/admin/vincular-atributos", icon: <Link2 className="w-4 h-4" /> } },
     // Backoffice
     { group: "BACKOFFICE" },
+    { item: { label: "Meu Perfil", href: "/admin/perfil", icon: <UserCircle className="w-4 h-4" /> } },
     { item: { label: "Administradores", href: "/admin/administradores", icon: <ShieldCheck className="w-4 h-4" /> } },
     { item: { label: "Logs de Auditoria", href: "/admin/auditoria", icon: <ScrollText className="w-4 h-4" /> } },
   ];
