@@ -28,13 +28,14 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (isCustomerRoute) return;
 
-  // Redirecionar apenas para rotas admin que exigem Manus OAuth
+  // Rotas admin usam autenticação PRÓPRIA (adminAuth) — nunca redirecionar para Manus OAuth
+  // O AdminProtectedRoutes já trata o redirect para /admin/login quando não autenticado
   const isAdminRoute = window.location.pathname.startsWith('/admin') ||
                        window.location.pathname.startsWith('/producao');
+  if (isAdminRoute) return;
 
-  if (!isAdminRoute) return; // Não redirecionar para rotas públicas
-
-  window.location.href = getLoginUrl();
+  // Para rotas públicas não-admin, não redirecionar
+  return;
 }
 
 queryClient.getQueryCache().subscribe(event => {

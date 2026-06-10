@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   LayoutDashboard, ShoppingCart, Package, Users, DollarSign,
   Settings, ChevronDown, ChevronRight, Bell, Search, LogOut,
@@ -96,7 +96,7 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { adminUser: user, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
