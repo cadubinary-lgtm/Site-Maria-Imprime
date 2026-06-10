@@ -32,9 +32,14 @@ export default function Header() {
   const [, navigate] = useLocation();
   const { user: manusUser, isAuthenticated: isManusAuth, logout: manusLogout } = useManusAdminAuth();
   const { adminUser, logout: adminLogout } = useAdminAuth();
-  // Admin pode estar logado via sistema próprio OU via Manus OAuth
-  const isAuthenticated = !!adminUser || isManusAuth;
-  const user = adminUser ? { name: adminUser.name, email: adminUser.email } : manusUser;
+  
+  // Detectar se está no Manus (preview) ou no site de produção
+  const isManus = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('manus.') || window.location.hostname.includes('manus.space'));
+  
+  // No Manus: usar Manus OAuth | No site: usar sistema próprio
+  const isAuthenticated = isManus ? isManusAuth : !!adminUser;
+  const user = isManus ? manusUser : (adminUser ? { name: adminUser.name, email: adminUser.email } : null);
   const { customer, isAuthenticated: isCustomerAuth, refetch: refetchCustomer } = useCustomerAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -78,10 +83,10 @@ export default function Header() {
   };
 
   const handleAdminLogout = async () => {
-    if (adminUser) {
-      await adminLogout();
-    } else {
+    if (isManus) {
       await manusLogout();
+    } else {
+      await adminLogout();
     }
     toast.success("Desconectado com sucesso");
     navigate("/");
@@ -269,12 +274,14 @@ export default function Header() {
             ) : (
               /* Visitante */
               <>
-                <Link href="/admin/login">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 text-xs border border-gray-200">
-                    <Settings className="w-3 h-3 mr-1" />
-                    Admin
-                  </Button>
-                </Link>
+                {!isManus && (
+                  <Link href="/admin/login">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 text-xs border border-gray-200">
+                      <Settings className="w-3 h-3 mr-1" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/login-cliente">
                   <Button variant="ghost" size="sm">
                     Login
