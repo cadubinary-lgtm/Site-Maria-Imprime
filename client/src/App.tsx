@@ -4,6 +4,8 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAdminAuth } from "./hooks/useAdminAuth";
+import { useAuth } from "./_core/hooks/useAuth";
+import { getLoginUrl } from "./const";
 import Header from "./components/Header";
 
 // ─── Páginas Públicas ────────────────────────────────────────────────────────
@@ -94,15 +96,17 @@ import AutomationDashboard from "./pages/erp/AutomationDashboard";
 import SegmentsManager from "./pages/erp/SegmentsManager";
 
 /**
- * AdminRoutes — usa autenticação PRÓPRIA (adminAuth) independente do Manus OAuth.
- * /admin/login e /admin/setup são rotas públicas sem nenhuma verificação de auth.
- * Todas as demais rotas /admin/* exigem sessão adminAuth válida.
+ * AdminRoutes — detecta ambiente (Manus vs site) e usa autenticação apropriada.
+ * - No Manus: usa Manus OAuth (useAuth)
+ * - No site: usa autenticação própria (useAdminAuth)
+ * - /admin/login e /admin/setup são rotas públicas (apenas no site)
  */
 function AdminRoutes() {
   const [location] = useLocation();
+  const isManus = window.location.hostname.includes('manus.computer');
 
-  // ─── Rotas públicas de admin (sem auth) ──────────────────────────────────
-  if (location === "/admin/login" || location === "/admin/setup") {
+  // ─── No site: rotas públicas de admin (sem auth) ──────────────────────────
+  if (!isManus && (location === "/admin/login" || location === "/admin/setup")) {
     return (
       <Switch>
         <Route path="/admin/login" component={AdminLogin} />
@@ -111,8 +115,88 @@ function AdminRoutes() {
     );
   }
 
-  // ─── Rotas protegidas: verificar sessão adminAuth própria ─────────────────
-  return <AdminProtectedRoutes />;
+  // ─── No Manus: usar Manus OAuth; no site: usar adminAuth próprio ──────────
+  if (isManus) {
+    return <AdminProtectedRoutesManus />;
+  } else {
+    return <AdminProtectedRoutes />;
+  }
+}
+
+/**
+ * AdminProtectedRoutesManus — verifica Manus OAuth (para o preview do Manus).
+ * Usa useAuth do Manus OAuth para autenticação.
+ */
+function AdminProtectedRoutesManus() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  // Não autenticado no Manus → redirecionar para login do Manus
+  if (!user || user.role !== "admin") {
+    window.location.href = getLoginUrl();
+    return null;
+  }
+
+  return (
+    <Switch>
+      {/* Rotas acessíveis para todos os roles admin */}
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/produtos" component={AdminProducts} />
+      <Route path="/admin/atributos" component={AdminAttributesManager} />
+      <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
+      <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
+      <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
+      <Route path="/admin/pedidos/kanban" component={AdminKanban} />
+      <Route path="/admin/pedidos" component={AdminOrders} />
+      <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
+      <Route path="/admin/os" component={AdminOS} />
+      <Route path="/admin/os/:id" component={AdminOSPrint} />
+      <Route path="/admin/clientes" component={ClientsManager} />
+      <Route path="/admin/clientes-loja" component={AdminCustomers} />
+      <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
+      <Route path="/admin/erp" component={ERPDashboard} />
+      <Route path="/admin/financeiro" component={FinancialDashboard} />
+      <Route path="/admin/automacao" component={AutomationDashboard} />
+      <Route path="/admin/segmentos" component={SegmentsManager} />
+      <Route path="/admin/logistica" component={LogisticsDashboard} />
+      <Route path="/admin/logistica/configuracoes" component={CorreiosSettings} />
+      <Route path="/admin/logistica/transportadoras" component={CarriersManager} />
+      <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
+      <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
+      <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
+      {/* Gerenciador Financeiro (legado) */}
+      <Route path="/admin/gerenciador-financeiro" component={GerenciadorFinanceiroDashboard} />
+      <Route path="/admin/gerenciador-financeiro/receber" component={ContasReceber} />
+      <Route path="/admin/gerenciador-financeiro/recebidas" component={ContasRecebidas} />
+      <Route path="/admin/gerenciador-financeiro/retirada" component={PagamentosRetirada} />
+      <Route path="/admin/gerenciador-financeiro/fluxo" component={FluxoCaixa} />
+      <Route path="/admin/gerenciador-financeiro/relatorios" component={RelatoriosFinanceiros} />
+      {/* Gerenciador Financeiro NOVO */}
+      <Route path="/admin/financeiro-dashboard" component={FinanceiroDashboard} />
+      <Route path="/admin/financeiro/receber" component={FinanceiroContasReceber} />
+      <Route path="/admin/financeiro/recebidas" component={FinanceiroContasRecebidas} />
+      <Route path="/admin/financeiro/retirada" component={FinanceiroPagamentosRetirada} />
+      <Route path="/admin/financeiro/fluxo" component={FinanceiroFluxoCaixa} />
+      <Route path="/admin/financeiro/relatorios" component={FinanceiroRelatorios} />
+      {/* Gestão Fiscal */}
+      <Route path="/admin/fiscal" component={GestaoFiscalDashboard} />
+      <Route path="/admin/fiscal/notas" component={NotasFiscais} />
+      <Route path="/admin/fiscal/configuracoes" component={ConfiguracoesFiscais} />
+      {/* Painel de Produção */}
+      <Route path="/producao" component={ProductionDashboard} />
+      {/* Backoffice */}
+      <Route path="/admin/administradores" component={AdminsManager} />
+      <Route path="/admin/auditoria" component={AuditLogs} />
+      <Route path="/admin/perfil" component={AdminProfile} />
+    </Switch>
+  );
 }
 
 /**
