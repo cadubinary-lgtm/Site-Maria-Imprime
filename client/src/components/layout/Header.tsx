@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useAdminAuth } from "@/_core/hooks/useAdminAuth";
+import { useAdminAuth as useManusAdminAuth } from "@/_core/hooks/useAdminAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,11 @@ function CartIcon() {
 
 export default function Header() {
   const [, navigate] = useLocation();
-  const { user, isAuthenticated, logout } = useAdminAuth();
+  const { user: manusUser, isAuthenticated: isManusAuth, logout: manusLogout } = useManusAdminAuth();
+  const { adminUser, logout: adminLogout } = useAdminAuth();
+  // Admin pode estar logado via sistema próprio OU via Manus OAuth
+  const isAuthenticated = !!adminUser || isManusAuth;
+  const user = adminUser ? { name: adminUser.name, email: adminUser.email } : manusUser;
   const { customer, isAuthenticated: isCustomerAuth, refetch: refetchCustomer } = useCustomerAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -73,7 +78,11 @@ export default function Header() {
   };
 
   const handleAdminLogout = async () => {
-    await logout();
+    if (adminUser) {
+      await adminLogout();
+    } else {
+      await manusLogout();
+    }
     toast.success("Desconectado com sucesso");
     navigate("/");
     setMobileMenuOpen(false);
@@ -260,6 +269,12 @@ export default function Header() {
             ) : (
               /* Visitante */
               <>
+                <Link href="/admin/login">
+                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 text-xs border border-gray-200">
+                    <Settings className="w-3 h-3 mr-1" />
+                    Admin
+                  </Button>
+                </Link>
                 <Link href="/login-cliente">
                   <Button variant="ghost" size="sm">
                     Login
