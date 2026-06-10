@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -188,6 +188,24 @@ export default function CarriersManager() {
   const [carrierType, setCarrierType] = useState<CarrierType>('correios');
   const [form, setForm] = useState<CarrierForm>(emptyForm);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [connectingId, setConnectingId] = useState<number | null>(null);
+
+  const getAuthUrlMutation = trpc.logistics.melhorEnvio.getAuthUrl.useMutation();
+  const connectionStatusQuery = trpc.logistics.melhorEnvio.getStatus.useQuery(
+    { carrierId: connectingId! },
+    { enabled: connectingId !== null, refetchInterval: 5000 }
+  );
+
+  const handleConnectMelhorEnvio = async (carrier: any) => {
+    try {
+      setConnectingId(carrier.id);
+      const result = await getAuthUrlMutation.mutateAsync({ carrierId: carrier.id });
+      window.open(result.authUrl, '_blank', 'width=600,height=700,scrollbars=yes');
+    } catch (e: any) {
+      setNotification({ type: 'error', message: e.message || 'Erro ao gerar URL de autorização' });
+      setConnectingId(null);
+    }
+  };
 
   const set = (field: keyof CarrierForm, value: any) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -357,7 +375,7 @@ export default function CarriersManager() {
                   {/* ── Melhor Envio ── */}
                   <TabsContent value="melhorenvio" className="space-y-3 pt-3">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
-                      <strong>Melhor Envio OAuth2</strong> — Crie um aplicativo em melhorenvio.com.br para obter o Client ID e Client Secret.
+                      <strong>Melhor Envio OAuth2</strong> — Preencha o Client ID e Client Secret, salve a transportadora e depois clique em <strong>"Conectar ao Melhor Envio"</strong> no card. O Access Token e Refresh Token serão obtidos automaticamente.
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -371,16 +389,12 @@ export default function CarriersManager() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">URL de Callback (Redirect URI)</label>
-                      <Input value={form.melhorEnvioRedirectUri} onChange={(e) => set('melhorEnvioRedirectUri', e.target.value)} placeholder="https://seusite.com/callback/melhorenvio" />
-                      <p className="text-xs text-gray-500 mt-1">Deve ser idêntica à registrada no painel do Melhor Envio</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Access Token (após autorização)</label>
-                      <Input value={form.melhorEnvioAccessToken} onChange={(e) => set('melhorEnvioAccessToken', e.target.value)} placeholder="Bearer token OAuth2" type="password" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Refresh Token</label>
-                      <Input value={form.melhorEnvioRefreshToken} onChange={(e) => set('melhorEnvioRefreshToken', e.target.value)} placeholder="Refresh token para renovação automática" type="password" />
+                      <Input
+                        value={form.melhorEnvioRedirectUri || 'https://www.mariaimprime.com.br/api/melhorenvio/callback'}
+                        onChange={(e) => set('melhorEnvioRedirectUri', e.target.value)}
+                        placeholder="https://www.mariaimprime.com.br/api/melhorenvio/callback"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Registre esta URL exata no painel do Melhor Envio como Redirect URI</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <input
@@ -391,6 +405,9 @@ export default function CarriersManager() {
                         className="w-4 h-4 accent-orange-500"
                       />
                       <label htmlFor="sandbox" className="text-sm">Usar ambiente Sandbox (testes)</label>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
+                      ℹ️ Após salvar, clique em <strong>"Conectar ao Melhor Envio"</strong> no card da transportadora. O sistema fará a autorização OAuth2 automaticamente e armazenará os tokens com segurança.
                     </div>
                   </TabsContent>
 
@@ -525,6 +542,40 @@ export default function CarriersManager() {
                   )}
                   {carrier.jadlogCodigoFranquia && (
                     <p className="text-xs text-gray-500 mt-2">Franquia: {carrier.jadlogCodigoFranquia}</p>
+                  )}
+
+                  {/* Botão OAuth2 Melhor Envio */}
+                  {(carrier.apiProvider === 'melhorenvio' || carrier.melhorEnvioClientId) && (
+                    <div className="mt-3 border-t border-gray-100 pt-3">
+                      {carrier.melhorEnvioAccessToken ? (
+                        <div className="flex items-center gap-2">
+                          <span className="flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+                            <CheckCircle className="w-3 h-3" /> Conectado ao Melhor Envio
+                          </span>
+                          <button
+                            onClick={() => handleConnectMelhorEnvio(carrier)}
+                            className="text-xs text-gray-400 hover:text-gray-600 underline"
+                          >Reconectar</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleConnectMelhorEnvio(carrier)}
+                          disabled={getAuthUrlMutation.isPending && connectingId === carrier.id}
+                          className="flex items-center gap-2 w-full justify-center bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-xs font-semibold rounded-lg px-4 py-2 transition-colors"
+                        >
+                          {getAuthUrlMutation.isPending && connectingId === carrier.id ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Gerando link...</>
+                          ) : (
+                            <><Globe className="w-3 h-3" /> Conectar ao Melhor Envio</>
+                          )}
+                        </button>
+                      )}
+                      {connectingId === carrier.id && !carrier.melhorEnvioAccessToken && (
+                        <p className="text-xs text-blue-600 mt-2 text-center">
+                          ⏳ Aguardando autorização na janela aberta...
+                        </p>
+                      )}
+                    </div>
                   )}
 
                   {/* Regras inline */}
