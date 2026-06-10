@@ -99,7 +99,18 @@ import SegmentsManager from "./pages/erp/SegmentsManager";
  * Isso evita que trpc.auth.me.useQuery() execute em páginas públicas.
  */
 function AdminRoutes() {
+  const [location] = useLocation();
   const { user, loading } = useAuth();
+
+  // Rotas públicas de admin — não precisam de autenticação Manus OAuth
+  if (location === "/admin/login" || location === "/admin/setup") {
+    return (
+      <Switch>
+        <Route path="/admin/login" component={AdminLogin} />
+        <Route path="/admin/setup" component={AdminSetup} />
+      </Switch>
+    );
+  }
 
   if (loading) {
     return (
