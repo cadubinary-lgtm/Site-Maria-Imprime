@@ -554,11 +554,15 @@ export const logisticsRouter = router({
           throw new TRPCError({ code: "BAD_REQUEST", message: "Client ID não configurado. Salve a transportadora primeiro." });
         }
         const state = Buffer.from(JSON.stringify({ carrierId: input.carrierId })).toString('base64');
-        const redirectUri = carrier.melhorEnvioRedirectUri || `https://www.mariaimprime.com.br/api/melhorenvio/callback`;
+        // Sempre usar a URL fixa de produção — nunca depender de req.host ou valor corrompido do banco
+        const FIXED_REDIRECT_URI = 'https://www.mariaimprime.com.br/api/melhorenvio/callback';
+        const redirectUri = (carrier.melhorEnvioRedirectUri && carrier.melhorEnvioRedirectUri.startsWith('https://www.mariaimprime.com.br'))
+          ? carrier.melhorEnvioRedirectUri
+          : FIXED_REDIRECT_URI;
         const authUrl = generateAuthorizationUrl({
           clientId: carrier.melhorEnvioClientId,
           redirectUri,
-          sandbox: carrier.melhorEnvioSandbox ?? false,
+          sandbox: false, // Sempre produção
           state,
         });
         return { authUrl, redirectUri };

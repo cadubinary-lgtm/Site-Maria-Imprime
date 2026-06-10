@@ -234,8 +234,12 @@ async function startServer() {
       }
 
       // Trocar o codigo pelo token
-      const redirectUri = carrier.melhorEnvioRedirectUri ||
-        `${req.protocol}://${req.get('host')}/api/melhorenvio/callback`;
+      // IMPORTANTE: A redirect_uri usada na troca de token DEVE ser exatamente igual
+      // à registrada no aplicativo do Melhor Envio. Nunca usar req.host (pode ser localhost).
+      const FIXED_REDIRECT_URI = 'https://www.mariaimprime.com.br/api/melhorenvio/callback';
+      const redirectUri = (carrier.melhorEnvioRedirectUri && carrier.melhorEnvioRedirectUri.startsWith('https://www.mariaimprime.com.br'))
+        ? carrier.melhorEnvioRedirectUri
+        : FIXED_REDIRECT_URI;
 
       const tokens = await exchangeCodeForTokens({
         code,
