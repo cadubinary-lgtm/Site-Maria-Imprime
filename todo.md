@@ -2163,3 +2163,19 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Testes: 11 testes passando (server/financeiro.test.ts)
 - [x] Isolamento: validado que tabelas orders e products não foram alteradas
 - [x] Checkpoint salvo
+
+## Fase SaaS: Arquitetura Profissional com Autenticação Própria
+- [x] Criar tabela adminAccounts (id, name, email, passwordHash, role, status, loginAttempts, lockedUntil, lastLogin)
+- [x] Criar tabela adminSessions (id, adminId, token, expiresAt, ipAddress, userAgent)
+- [x] Criar tabela auditLogs (id, adminId, adminName, action, entity, entityId, before, after, ipAddress, createdAt)
+- [x] Implementar serviço admin-auth.ts com bcrypt, JWT, rate limiting e bloqueio por tentativas
+- [x] Criar router tRPC adminAuth com procedures: login, logout, me, hasSuperAdmin, createFirstSuperAdmin, listAdmins, createAdmin, updateAdmin, resetAdminPassword, toggleAdminStatus, listAuditLogs
+- [x] Criar hook useAdminAuth.ts para gerenciar sessão admin no frontend
+- [x] Criar página /admin/login com formulário email/senha independente do Manus OAuth
+- [x] Criar página /admin/setup para criação do primeiro superadmin (one-time)
+- [x] Criar página /admin/administradores com CRUD completo de admins
+- [x] Criar página /admin/auditoria com histórico paginado de ações
+- [x] Adicionar seção BACKOFFICE no sidebar do AdminLayout com links para Administradores e Auditoria
+- [x] Criar primeiro superadmin no banco (admin@mariaimprime.com.br)
+- [x] Testar login via API (retornou success:true)
+- [ ] Adicionar link "Painel Admin" no header público do site

@@ -1392,3 +1392,63 @@ export const financeiroNotificacoes = mysqlTable("financeiroNotificacoes", {
 });
 export type FinanceiroNotificacao = typeof financeiroNotificacoes.$inferSelect;
 export type InsertFinanceiroNotificacao = typeof financeiroNotificacoes.$inferInsert;
+
+// ============================================================
+// ARQUITETURA SaaS — Autenticação Própria de Administradores
+// Independente do Manus OAuth. Admins fazem login em /admin/login
+// com email + senha. Roles: superadmin | admin | production
+// ============================================================
+
+/**
+ * adminAccounts — Administradores do sistema com autenticação própria
+ * Separado do Manus OAuth. Login exclusivo via /admin/login
+ */
+export const adminAccounts = mysqlTable("adminAccounts", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 150 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  role: mysqlEnum("role", ["superadmin", "admin", "production"]).default("admin").notNull(),
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  lastLogin: bigint("lastLogin", { mode: "number" }),
+  loginAttempts: int("loginAttempts").default(0).notNull(),
+  lockedUntil: bigint("lockedUntil", { mode: "number" }),
+  createdBy: int("createdBy"), // ID do adminAccount que criou
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+export type AdminAccount = typeof adminAccounts.$inferSelect;
+export type InsertAdminAccount = typeof adminAccounts.$inferInsert;
+
+/**
+ * adminSessions — Sessões JWT dos administradores
+ */
+export const adminSessions = mysqlTable("adminSessions", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId").notNull().references(() => adminAccounts.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 512 }).notNull().unique(),
+  expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  ipAddress: varchar("ipAddress", { length: 50 }),
+  userAgent: varchar("userAgent", { length: 500 }),
+});
+export type AdminSession = typeof adminSessions.$inferSelect;
+export type InsertAdminSession = typeof adminSessions.$inferInsert;
+
+/**
+ * auditLogs — Registro de auditoria de todas as ações administrativas
+ */
+export const auditLogs = mysqlTable("auditLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId"), // null = ação do sistema
+  adminName: varchar("adminName", { length: 150 }),
+  action: varchar("action", { length: 100 }).notNull(), // ex: "create_admin", "update_order"
+  entity: varchar("entity", { length: 100 }).notNull(), // ex: "adminAccounts", "orders"
+  entityId: varchar("entityId", { length: 50 }), // ID do registro afetado
+  before: text("before"), // JSON do estado anterior
+  after: text("after"),   // JSON do estado posterior
+  ipAddress: varchar("ipAddress", { length: 50 }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
