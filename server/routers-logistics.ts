@@ -13,7 +13,7 @@ import { router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
-import { logisticsSettings, carriers, shipments } from "../drizzle/schema";
+import { logisticsSettings, carriers, shipments, orders } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import {
   getMeProfile,
@@ -271,6 +271,25 @@ const shippingRouter = router({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const shipmentsRouter = router({
+  // Lista pedidos com status 'pronto_entrega' que ainda não têm expedição criada
+  listPendingOrders: adminProcedure.query(async () => {
+    const db = await requireDb();
+    // Busca IDs de pedidos que já têm expedição
+    const existingShipments = await db
+      .select({ orderId: shipments.orderId })
+      .from(shipments);
+    const existingOrderIds = existingShipments
+      .map((s: any) => s.orderId)
+      .filter((id: any): id is number => id != null);
+    // Busca pedidos prontos para entrega
+    const pendingOrders = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.status, "pronto_entrega"));
+    // Filtra os que ainda não têm expedição
+    return pendingOrders.filter((o: any) => !existingOrderIds.includes(o.id));
+  }),
+
   list: adminProcedure
     .input(
       z.object({
