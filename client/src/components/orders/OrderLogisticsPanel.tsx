@@ -24,8 +24,9 @@ export function OrderLogisticsPanel({
   const [newDeliveryStatus, setNewDeliveryStatus] = useState(deliveryStatus);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const updateProductionStatusMutation = trpc.logistics.orders.updateProductionStatus.useMutation();
-  const updateDeliveryStatusMutation = trpc.logistics.orders.updateDeliveryStatus.useMutation();
+  // Procedures de status serão reimplementadas na nova integração de logística
+  const updateProductionStatusMutation = { mutateAsync: async (_: any) => {}, isPending: false };
+  const updateDeliveryStatusMutation = { mutateAsync: async (_: any) => {}, isPending: false };
 
   const productionStatusOptions = [
     { value: 'pending', label: 'Pendente', icon: Clock, color: 'bg-yellow-100 text-yellow-700' },

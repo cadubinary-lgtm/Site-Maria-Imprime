@@ -1077,133 +1077,86 @@ export type InsertOrderArtPreview = typeof orderArtPreviews.$inferInsert;
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LOGÍSTICA - Transportadoras, Regras de Frete, Expedições e Rastreamento
+// LOGÍSTICA — Melhor Envio API v2
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Carriers (Transportadoras) - Correios, Jadlog, Uber Entrega, etc
+ * Configurações globais do Melhor Envio
+ * Armazena token Bearer, email, CEP de origem e modo sandbox
+ */
+export const logisticsSettings = mysqlTable("logisticsSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  accessToken: text("accessToken"), // Bearer token do Melhor Envio
+  email: varchar("email", { length: 320 }), // E-mail da conta Melhor Envio
+  originCep: varchar("originCep", { length: 9 }), // CEP de origem (somente dígitos)
+  // Dados do remetente (para geração de etiquetas)
+  senderName: varchar("senderName", { length: 150 }),
+  senderPhone: varchar("senderPhone", { length: 20 }),
+  senderDocument: varchar("senderDocument", { length: 20 }), // CPF ou CNPJ
+  senderAddress: varchar("senderAddress", { length: 255 }),
+  senderNumber: varchar("senderNumber", { length: 20 }),
+  senderComplement: varchar("senderComplement", { length: 100 }),
+  senderDistrict: varchar("senderDistrict", { length: 100 }),
+  senderCity: varchar("senderCity", { length: 100 }),
+  senderStateAbbr: varchar("senderStateAbbr", { length: 2 }),
+  sandbox: boolean("sandbox").default(true).notNull(), // true = sandbox, false = produção
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LogisticsSettings = typeof logisticsSettings.$inferSelect;
+export type InsertLogisticsSettings = typeof logisticsSettings.$inferInsert;
+
+/**
+ * Transportadoras do Melhor Envio
+ * Sincronizadas via GET /api/v2/me/shipment/companies
  */
 export const carriers = mysqlTable("carriers", {
   id: int("id").autoincrement().primaryKey(),
-  name: varchar("name", { length: 100 }).notNull(), // Ex: "Correios", "Jadlog", "Uber Entrega"
-  code: varchar("code", { length: 50 }).notNull().unique(), // Ex: "correios", "jadlog", "uber"
-  isActive: boolean("isActive").default(true).notNull(),
-  apiProvider: varchar("apiProvider", { length: 50 }), // "correios", "jadlog", "uber", "custom"
-  apiKey: text("apiKey"), // Chave de API (criptografada em produção)
-  apiUrl: text("apiUrl"), // URL base da API
-  // Campos específicos para Correios
-  cwsUser: varchar("cwsUser", { length: 255 }), // Usuário API CWS dos Correios
-  cwsPassword: varchar("cwsPassword", { length: 255 }), // Código de acesso API CWS dos Correios
-  contractNumber: varchar("contractNumber", { length: 255 }), // Número de Contrato dos Correios
-  postalCardNumber: varchar("postalCardNumber", { length: 255 }), // Número do Cartão de Postagem dos Correios
-  originCep: varchar("originCep", { length: 9 }), // CEP de Origem para cálculo de frete
-  // Campos específicos para Jadlog
-  jadlogCnpj: varchar("jadlogCnpj", { length: 18 }), // CNPJ/Usuário Jadlog
-  jadlogToken: text("jadlogToken"), // Token de integração Jadlog
-  jadlogContaCorrente: varchar("jadlogContaCorrente", { length: 50 }), // Conta Corrente Jadlog (correntistas)
-  jadlogCodigoFranquia: varchar("jadlogCodigoFranquia", { length: 20 }), // Código da Franquia Jadlog
-  // Campos específicos para Melhor Envio (OAuth2)
-  melhorEnvioClientId: varchar("melhorEnvioClientId", { length: 255 }), // Client ID do App Melhor Envio
-  melhorEnvioClientSecret: text("melhorEnvioClientSecret"), // Client Secret do App Melhor Envio
-  melhorEnvioAccessToken: text("melhorEnvioAccessToken"), // Access Token OAuth2
-  melhorEnvioRefreshToken: text("melhorEnvioRefreshToken"), // Refresh Token OAuth2
-  melhorEnvioRedirectUri: varchar("melhorEnvioRedirectUri", { length: 500 }), // URL de Callback OAuth2
-  melhorEnvioSandbox: boolean("melhorEnvioSandbox").default(false), // Usar ambiente sandbox
-  melhorEnvioAccessTokenExpiresAt: bigint("melhorEnvioAccessTokenExpiresAt", { mode: "number" }), // Timestamp expiração access token (ms)
-  melhorEnvioRefreshTokenExpiresAt: bigint("melhorEnvioRefreshTokenExpiresAt", { mode: "number" }), // Timestamp expiração refresh token (ms)
-  melhorEnvioConnectedAt: bigint("melhorEnvioConnectedAt", { mode: "number" }), // Timestamp da última conexão (ms)
-  // Campos específicos para Frete Alternativo (motoboy/carro)
-  vehicleType: mysqlEnum("vehicleType", ["moto", "automovel"]), // Tipo de veículo
-  driverName: varchar("driverName", { length: 100 }), // Nome do entregador
-  driverPhone: varchar("driverPhone", { length: 20 }), // Telefone do entregador
-  minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
-  maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
-  baseRate: decimal("baseRate", { precision: 10, scale: 2 }), // Taxa base
+  companyId: int("companyId").notNull().unique(), // ID da empresa no Melhor Envio
+  name: varchar("name", { length: 100 }).notNull(), // Ex: "Correios", "Jadlog"
+  code: varchar("code", { length: 50 }).notNull().unique(), // slug único
+  logoUrl: text("logoUrl"), // URL do logo
+  isActive: boolean("isActive").default(true).notNull(), // Habilitada para clientes
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type Carrier = typeof carriers.$inferSelect;
 export type InsertCarrier = typeof carriers.$inferInsert;
 
 /**
- * Shipping Rules (Regras de Frete) - Cálculo de frete por CEP, peso, volume
- */
-export const shippingRules = mysqlTable("shippingRules", {
-  id: int("id").autoincrement().primaryKey(),
-  carrierId: int("carrierId").notNull(),
-  name: varchar("name", { length: 100 }).notNull(), // Ex: "Frete SP", "Frete Nordeste"
-  cepFrom: varchar("cepFrom", { length: 8 }), // CEP inicial (sem hífen)
-  cepTo: varchar("cepTo", { length: 8 }), // CEP final (sem hífen)
-  minWeight: decimal("minWeight", { precision: 8, scale: 3 }), // Peso mínimo em kg
-  maxWeight: decimal("maxWeight", { precision: 8, scale: 3 }), // Peso máximo em kg
-  basePrice: decimal("basePrice", { precision: 10, scale: 2 }).notNull(), // Preço base
-  pricePerKg: decimal("pricePerKg", { precision: 10, scale: 2 }), // Preço adicional por kg
-  estimatedDays: int("estimatedDays").notNull(), // Dias estimados de entrega
-  isActive: boolean("isActive").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ShippingRule = typeof shippingRules.$inferSelect;
-export type InsertShippingRule = typeof shippingRules.$inferInsert;
-
-/**
- * Shipments (Expedições) - Registro de envios de pedidos
+ * Expedições — registro de envios gerados pelo Melhor Envio
  */
 export const shipments = mysqlTable("shipments", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
-  carrierId: int("carrierId").notNull(),
-  trackingNumber: varchar("trackingNumber", { length: 100 }).notNull().unique(),
-  weight: decimal("weight", { precision: 8, scale: 3 }).notNull(), // Peso em kg
-  volume: decimal("volume", { precision: 10, scale: 2 }), // Volume em cm³
-  shippingCost: decimal("shippingCost", { precision: 10, scale: 2 }).notNull(),
-  estimatedDeliveryDate: date("estimatedDeliveryDate"),
-  actualDeliveryDate: date("actualDeliveryDate"),
-  status: mysqlEnum("status", ["pending", "shipped", "in_transit", "delivered", "failed"]).default("pending").notNull(),
-  labelUrl: text("labelUrl"), // URL da etiqueta de envio
-  labelKey: varchar("labelKey", { length: 255 }), // Chave da etiqueta no S3
+  meOrderId: varchar("meOrderId", { length: 100 }), // ID do pedido no Melhor Envio
+  serviceId: int("serviceId"), // ID do serviço de frete escolhido
+  serviceName: varchar("serviceName", { length: 100 }),
+  companyName: varchar("companyName", { length: 100 }),
+  trackingCode: varchar("trackingCode", { length: 100 }),
+  labelUrl: text("labelUrl"),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  estimatedDelivery: varchar("estimatedDelivery", { length: 50 }),
+  status: mysqlEnum("status", ["pending", "cart", "paid", "posted", "delivered", "cancelled"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type Shipment = typeof shipments.$inferSelect;
 export type InsertShipment = typeof shipments.$inferInsert;
 
 /**
- * Tracking Events (Eventos de Rastreamento) - Timeline de rastreamento
+ * Eventos de rastreamento
  */
 export const trackingEvents = mysqlTable("trackingEvents", {
   id: int("id").autoincrement().primaryKey(),
   shipmentId: int("shipmentId").notNull(),
-  status: varchar("status", { length: 50 }).notNull(), // Ex: "Objeto postado", "Em trânsito", "Entregue"
-  location: varchar("location", { length: 255 }), // Localização (cidade, estado)
-  description: text("description"), // Descrição do evento
-  eventTime: timestamp("eventTime").notNull(),
+  status: varchar("status", { length: 100 }).notNull(),
+  location: varchar("location", { length: 255 }),
+  description: text("description"),
+  eventTime: bigint("eventTime", { mode: "number" }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type TrackingEvent = typeof trackingEvents.$inferSelect;
 export type InsertTrackingEvent = typeof trackingEvents.$inferInsert;
-
-/**
- * Adicionar campos de logística na tabela products
- * (Estes campos serão adicionados via migration SQL)
- * - weight: decimal (kg)
- * - height: decimal (cm)
- * - width: decimal (cm)
- * - length: decimal (cm)
- * - allowedCarriers: longtext (JSON array de IDs de transportadoras)
- */
-
-/**
- * Adicionar campos de status separados na tabela orders
- * (Estes campos serão adicionados via migration SQL)
- * - productionStatus: enum ("pending", "in_production", "ready", "cancelled")
- * - deliveryStatus: enum ("pending", "shipped", "in_transit", "delivered", "failed")
- * - trackingNumber: varchar (referência ao shipment)
- */
 
 
 /**
