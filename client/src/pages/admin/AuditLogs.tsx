@@ -1,3 +1,4 @@
+import AdminLayout from "@/components/AdminLayout";
 /**
  * Página de Logs de Auditoria
  * Exibe todas as ações administrativas registradas no sistema.
@@ -33,6 +34,7 @@ export default function AuditLogs() {
     new Date(ts).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "medium" });
 
   return (
+    <AdminLayout>
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -133,5 +135,6 @@ export default function AuditLogs() {
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }

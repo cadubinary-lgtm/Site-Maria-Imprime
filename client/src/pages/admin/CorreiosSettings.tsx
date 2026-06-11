@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
-import DashboardLayout from '@/components/DashboardLayout';
+import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -102,16 +102,16 @@ export default function CorreiosSettings() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
         </div>
-      </DashboardLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <AdminLayout>
       <div className="p-6 space-y-6 max-w-3xl">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -337,6 +337,6 @@ export default function CorreiosSettings() {
           </Alert>
         )}
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

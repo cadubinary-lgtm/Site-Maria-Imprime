@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
-import DashboardLayout from '@/components/DashboardLayout';
+import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,7 +62,7 @@ export function ShippingRulesManager() {
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   return (
-    <DashboardLayout>
+    <AdminLayout>
       <div className="p-6 space-y-6 max-w-4xl">
         {/* Header */}
         <div>
@@ -218,6 +218,6 @@ export function ShippingRulesManager() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

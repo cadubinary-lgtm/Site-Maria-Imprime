@@ -28,6 +28,7 @@ import {
   Loader2, AlertCircle, Users
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 type AdminRow = {
   id: number;
@@ -137,6 +138,7 @@ export default function AdminsManager() {
   };
 
   return (
+    <AdminLayout>
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -432,5 +434,6 @@ export default function AdminsManager() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }
