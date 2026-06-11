@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
   Loader2, Package, Truck, Tag, CreditCard, ExternalLink,
-  AlertCircle, CheckCircle, RefreshCw, Plus
+  AlertCircle, CheckCircle, RefreshCw, Plus, ClipboardList, ArrowRight
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -22,39 +22,62 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   error: { label: 'Erro', color: 'bg-red-100 text-red-700' },
 };
 
+const EMPTY_FORM = {
+  orderId: '',
+  serviceId: '',
+  serviceName: '',
+  companyName: '',
+  recipientName: '',
+  recipientDocument: '',
+  recipientEmail: '',
+  recipientPhone: '',
+  recipientAddress: '',
+  recipientNumber: '',
+  recipientComplement: '',
+  recipientDistrict: '',
+  recipientCity: '',
+  recipientStateAbbr: '',
+  recipientCep: '',
+  weight: '1',
+  height: '5',
+  width: '30',
+  length: '40',
+  insuranceValue: '0',
+};
+
 export function ShipmentsManager() {
   const { data: shipments, isLoading, refetch } = trpc.logistics.shipments.list.useQuery({ page: 1, pageSize: 50 });
+  const { data: pendingOrders, isLoading: loadingPending, refetch: refetchPending } = trpc.logistics.shipments.listPendingOrders.useQuery();
   const addToCartMutation = trpc.logistics.shipments.create.useMutation();
   const checkoutMutation = trpc.logistics.shipments.checkout.useMutation();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [addForm, setAddForm] = useState({
-    orderId: '',
-    serviceId: '',
-    serviceName: '',
-    companyName: '',
-    recipientName: '',
-    recipientDocument: '',
-    recipientEmail: '',
-    recipientPhone: '',
-    recipientAddress: '',
-    recipientNumber: '',
-    recipientComplement: '',
-    recipientDistrict: '',
-    recipientCity: '',
-    recipientStateAbbr: '',
-    recipientCep: '',
-    weight: '1',
-    height: '5',
-    width: '30',
-    length: '40',
-    insuranceValue: '0',
-  });
+  const [addForm, setAddForm] = useState(EMPTY_FORM);
 
   const { data: settings } = trpc.logistics.settings.get.useQuery();
 
   const setField = (field: keyof typeof addForm) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setAddForm(prev => ({ ...prev, [field]: e.target.value }));
+
+  // Pré-preenche o formulário com dados do pedido selecionado
+  const handleSelectOrder = (order: any) => {
+    setAddForm({
+      ...EMPTY_FORM,
+      orderId: String(order.id),
+      recipientName: order.deliveryFullName || order.guestName || '',
+      recipientPhone: order.deliveryPhone || '',
+      recipientEmail: order.guestEmail || '',
+      recipientDocument: '',
+      recipientAddress: order.deliveryStreet || '',
+      recipientNumber: order.deliveryNumber || '',
+      recipientComplement: order.deliveryComplement || '',
+      recipientDistrict: order.deliveryNeighborhood || '',
+      recipientCity: order.deliveryCity || '',
+      recipientStateAbbr: order.deliveryState || '',
+      recipientCep: (order.deliveryZipCode || order.shippingZipCode || '').replace(/\D/g, ''),
+    });
+    setShowAddDialog(true);
+  };
 
   const handleAddToCart = async () => {
     if (!addForm.orderId || !addForm.serviceId) {
@@ -89,6 +112,7 @@ export function ShipmentsManager() {
       toast.success('Adicionado ao carrinho do Melhor Envio!');
       setShowAddDialog(false);
       refetch();
+      refetchPending();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao adicionar ao carrinho');
     }
@@ -107,6 +131,11 @@ export function ShipmentsManager() {
     }
   };
 
+  const handleRefreshAll = () => {
+    refetch();
+    refetchPending();
+  };
+
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
@@ -122,15 +151,15 @@ export function ShipmentsManager() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => refetch()} size="sm">
+            <Button variant="outline" onClick={handleRefreshAll} size="sm">
               <RefreshCw className="w-4 h-4 mr-1" /> Atualizar
             </Button>
             <Button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => { setAddForm(EMPTY_FORM); setShowAddDialog(true); }}
               disabled={!settings?.hasToken}
               className="bg-orange-500 hover:bg-orange-600"
             >
-              <Plus className="w-4 h-4 mr-2" /> Nova Expedição
+              <Plus className="w-4 h-4 mr-2" /> Nova Expedição Manual
             </Button>
           </div>
         </div>
@@ -144,79 +173,146 @@ export function ShipmentsManager() {
           </Alert>
         )}
 
-        {/* Lista de expedições */}
-        {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-          </div>
-        ) : !shipments || shipments.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-              <Package className="w-12 h-12 text-muted-foreground" />
-              <div className="text-center">
-                <p className="font-medium text-lg">Nenhuma expedição cadastrada</p>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Clique em "Nova Expedição" para criar um envio e gerar uma etiqueta.
-                </p>
+        {/* ── Fila: Pedidos Prontos para Expedição ── */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ClipboardList className="w-5 h-5 text-orange-500" />
+              Fila de Expedição — Pedidos Prontos para Entrega
+            </CardTitle>
+            <CardDescription>
+              Pedidos com status "Pronto para Entrega" que ainda não tiveram a etiqueta gerada.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingPending ? (
+              <div className="flex items-center justify-center h-24">
+                <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {shipments.map((shipment: any) => {
-              const statusInfo = STATUS_LABELS[shipment.status] || { label: shipment.status, color: 'bg-gray-100 text-gray-700' };
-              return (
-                <Card key={shipment.id}>
-                  <CardContent className="flex items-center gap-4 py-4">
-                    <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center">
-                      <Truck className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Pedido #{shipment.orderId}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {shipment.companyName} — {shipment.serviceName}
+            ) : !pendingOrders || pendingOrders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
+                <CheckCircle className="w-8 h-8 text-green-500" />
+                <p className="text-sm">Nenhum pedido aguardando expedição.</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {pendingOrders.map((order: any) => (
+                  <div key={order.id} className="flex items-center gap-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">
+                        Pedido #{order.orderNumber}
+                        <span className="ml-2 text-xs text-muted-foreground">(ID: {order.id})</span>
                       </p>
-                      {shipment.meOrderId && (
-                        <p className="text-xs text-muted-foreground">ME Order: {shipment.meOrderId}</p>
-                      )}
+                      <p className="text-xs text-muted-foreground truncate">
+                        {order.deliveryFullName || order.guestName || 'Destinatário não informado'}
+                        {order.deliveryCity ? ` — ${order.deliveryCity}/${order.deliveryState}` : ''}
+                      </p>
+                      {order.shippingZipCode || order.deliveryZipCode ? (
+                        <p className="text-xs text-muted-foreground">
+                          CEP: {order.deliveryZipCode || order.shippingZipCode}
+                        </p>
+                      ) : null}
                     </div>
-                    <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-                    <div className="flex gap-2">
-                      {shipment.status === 'cart' && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleCheckout(shipment.id)}
-                          disabled={checkoutMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          {checkoutMutation.isPending
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <><CreditCard className="w-4 h-4 mr-1" /> Pagar e Emitir</>}
-                        </Button>
-                      )}
-                      {shipment.labelUrl && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(shipment.labelUrl, '_blank')}
-                        >
-                          <Tag className="w-4 h-4 mr-1" /> Etiqueta
-                          <ExternalLink className="w-3 h-3 ml-1" />
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                    <Badge className="bg-orange-100 text-orange-700 shrink-0">Pronto para Entrega</Badge>
+                    <Button
+                      size="sm"
+                      onClick={() => handleSelectOrder(order)}
+                      disabled={!settings?.hasToken}
+                      className="bg-orange-500 hover:bg-orange-600 shrink-0"
+                    >
+                      <ArrowRight className="w-4 h-4 mr-1" /> Gerar Etiqueta
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Expedições já criadas ── */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Truck className="w-5 h-5 text-orange-500" />
+            Expedições Criadas
+          </h2>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+          ) : !shipments || shipments.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+                <Package className="w-10 h-10 text-muted-foreground" />
+                <p className="text-muted-foreground text-sm text-center">
+                  Nenhuma expedição criada ainda. Use a fila acima para gerar etiquetas.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-3">
+              {shipments.map((shipment: any) => {
+                const statusInfo = STATUS_LABELS[shipment.status] || { label: shipment.status, color: 'bg-gray-100 text-gray-700' };
+                return (
+                  <Card key={shipment.id}>
+                    <CardContent className="flex items-center gap-4 py-4">
+                      <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center shrink-0">
+                        <Truck className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold">Pedido #{shipment.orderId}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {shipment.companyName} — {shipment.serviceName}
+                        </p>
+                        {shipment.meOrderId && (
+                          <p className="text-xs text-muted-foreground">ME Order: {shipment.meOrderId}</p>
+                        )}
+                        {shipment.trackingCode && (
+                          <p className="text-xs font-mono text-blue-600">Rastreio: {shipment.trackingCode}</p>
+                        )}
+                      </div>
+                      <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+                      <div className="flex gap-2 shrink-0">
+                        {shipment.status === 'cart' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleCheckout(shipment.id)}
+                            disabled={checkoutMutation.isPending}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            {checkoutMutation.isPending
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <><CreditCard className="w-4 h-4 mr-1" /> Pagar e Emitir</>}
+                          </Button>
+                        )}
+                        {shipment.labelUrl && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(shipment.labelUrl, '_blank')}
+                          >
+                            <Tag className="w-4 h-4 mr-1" /> Etiqueta
+                            <ExternalLink className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Dialog Nova Expedição */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Nova Expedição — Adicionar ao Carrinho</DialogTitle>
+              <DialogTitle>
+                {addForm.orderId
+                  ? `Gerar Etiqueta — Pedido #${addForm.orderId}`
+                  : 'Nova Expedição Manual'}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-4">
@@ -260,7 +356,7 @@ export function ShipmentsManager() {
                 </div>
                 <div className="space-y-2">
                   <Label>CEP</Label>
-                  <Input placeholder="00000-000" value={addForm.recipientCep} onChange={setField('recipientCep')} />
+                  <Input placeholder="00000000" value={addForm.recipientCep} onChange={setField('recipientCep')} />
                 </div>
                 <div className="space-y-2 col-span-2">
                   <Label>Endereço</Label>
