@@ -673,13 +673,7 @@ createOrder: protectedProcedure
         orderId: z.number(),
       }))
       .query(async ({ input }) => {
-        const { generateShippingLabelPDF } = await import('./shipping-labels');
-        try {
-          const html = await generateShippingLabelPDF(input.orderId);
-          return { success: true, html };
-        } catch (error: any) {
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
-        }
+        throw new TRPCError({ code: 'NOT_IMPLEMENTED', message: 'Módulo de logística em reimplementação.' });
       }),
   }),
   cart: router({

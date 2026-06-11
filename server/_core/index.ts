@@ -10,7 +10,6 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { storagePut, storageGetSignedUrl } from "../storage";
-import { exchangeCodeForTokens, saveTokensToCarrier } from "../melhorenvio-oauth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -199,67 +198,7 @@ async function startServer() {
     }
   });
 
-  // Melhor Envio OAuth2 Callback
-  app.get('/api/melhorenvio/callback', async (req, res) => {
-    try {
-      const { code, state, error: oauthError } = req.query as Record<string, string>;
-
-      if (oauthError) {
-        console.error('[MelhorEnvio OAuth] Erro de autorizacao:', oauthError);
-        return res.redirect(`/admin/logistica/transportadoras?melhorenvio_error=${encodeURIComponent(oauthError)}`);
-      }
-
-      if (!code || !state) {
-        return res.redirect('/admin/logistica/transportadoras?melhorenvio_error=missing_code');
-      }
-
-      // O state contem o carrierId codificado em base64
-      let carrierId: number;
-      try {
-        const decoded = JSON.parse(Buffer.from(state, 'base64').toString('utf-8'));
-        carrierId = decoded.carrierId;
-      } catch {
-        return res.redirect('/admin/logistica/transportadoras?melhorenvio_error=invalid_state');
-      }
-
-      // Buscar a transportadora no banco
-      const { getDb } = await import('../db');
-      const { carriers: carriersTable } = await import('../../drizzle/schema');
-      const { eq } = await import('drizzle-orm');
-      const db = (await getDb())!;
-      const carrier = await (db as any).query.carriers.findFirst({ where: eq(carriersTable.id, carrierId) });
-
-      if (!carrier || !carrier.melhorEnvioClientId || !carrier.melhorEnvioClientSecret) {
-        return res.redirect('/admin/logistica/transportadoras?melhorenvio_error=carrier_not_found');
-      }
-
-      // Trocar o codigo pelo token
-      // IMPORTANTE: A redirect_uri usada na troca de token DEVE ser exatamente igual
-      // à registrada no aplicativo do Melhor Envio. Nunca usar req.host (pode ser localhost).
-      const FIXED_REDIRECT_URI = 'https://www.mariaimprime.com.br/api/melhorenvio/callback';
-      const redirectUri = (carrier.melhorEnvioRedirectUri && carrier.melhorEnvioRedirectUri.startsWith('https://www.mariaimprime.com.br'))
-        ? carrier.melhorEnvioRedirectUri
-        : FIXED_REDIRECT_URI;
-
-      const tokens = await exchangeCodeForTokens({
-        code,
-        clientId: carrier.melhorEnvioClientId,
-        clientSecret: carrier.melhorEnvioClientSecret,
-        redirectUri,
-        sandbox: carrier.melhorEnvioSandbox ?? false,
-      });
-
-      // Salvar tokens no banco
-      await saveTokensToCarrier(carrierId, tokens);
-
-      console.log(`[MelhorEnvio OAuth] Carrier ${carrierId} conectado com sucesso.`);
-      return res.redirect(`/admin/logistica/transportadoras?melhorenvio_success=${carrierId}`);
-    } catch (err) {
-      console.error('[MelhorEnvio OAuth] Erro no callback:', err);
-      const msg = err instanceof Error ? err.message : 'unknown_error';
-      return res.redirect(`/admin/logistica/transportadoras?melhorenvio_error=${encodeURIComponent(msg)}`);
-    }
-  });
+    // Melhor Envio OAuth2 Callback — removido (módulo reiniciado)
 
   // tRPC API
   app.use(
