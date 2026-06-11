@@ -3,11 +3,11 @@
  *
  * Documentação: https://docs.melhorenvio.com.br/
  * Sandbox:      https://sandbox.melhorenvio.com.br
- * Produção:     https://melhorenvio.com.br
+ * Produção:     https://api.melhorenvio.com.br
  */
 
 const SANDBOX_BASE = "https://sandbox.melhorenvio.com.br";
-const PRODUCTION_BASE = "https://melhorenvio.com.br";
+const PRODUCTION_BASE = "https://api.melhorenvio.com.br";
 
 export function getMeBaseUrl(sandbox: boolean): string {
   return sandbox ? SANDBOX_BASE : PRODUCTION_BASE;
