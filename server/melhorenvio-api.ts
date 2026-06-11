@@ -7,7 +7,7 @@
  */
 
 const SANDBOX_BASE = "https://sandbox.melhorenvio.com.br";
-const PRODUCTION_BASE = "https://api.melhorenvio.com.br";
+const PRODUCTION_BASE = "https://melhorenvio.com.br"; // api.melhorenvio.com.br não resolve DNS em alguns ambientes
 
 export function getMeBaseUrl(sandbox: boolean): string {
   return sandbox ? SANDBOX_BASE : PRODUCTION_BASE;
@@ -24,16 +24,33 @@ interface MeRequestOptions {
 async function meRequest<T>(opts: MeRequestOptions): Promise<T> {
   const base = getMeBaseUrl(opts.sandbox);
   const url = `${base}${opts.path}`;
-  const res = await fetch(url, {
-    method: opts.method ?? "GET",
-    headers: {
-      Authorization: `Bearer ${opts.token}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": "GraficaPontoDigital/1.0 (contato@mariaimprime.com.br)",
-    },
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
-  });
+
+  // Timeout de 30 segundos para evitar que o proxy derrube a conexão
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: opts.method ?? "GET",
+      headers: {
+        Authorization: `Bearer ${opts.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": "GraficaPontoDigital/1.0 (contato@mariaimprime.com.br)",
+      },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err: unknown) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Tempo limite excedido ao conectar com o Melhor Envio (30s). Verifique sua conexão.");
+    }
+    throw new Error(`Falha ao conectar com o Melhor Envio: ${err instanceof Error ? err.message : String(err)}`);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!res.ok) {
     let errMsg = `Melhor Envio API error ${res.status}`;
