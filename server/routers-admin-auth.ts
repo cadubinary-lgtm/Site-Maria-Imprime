@@ -38,6 +38,35 @@ const adminAuthProcedure = publicProcedure.use(async ({ ctx, next }) => {
 });
 
 /**
+ * Procedure que aceita AMBOS os sistemas de autenticação:
+ * - Autenticação própria (adminAuth via cookie admin_session)
+ * - Manus OAuth com role admin
+ * Usado para rotas que devem funcionar em ambos os ambientes (Manus e site)
+ */
+const adminOrManusAuthProcedure = publicProcedure.use(async ({ ctx, next }) => {
+  // Tentar autenticação própria (adminAuth)
+  const adminUser = await authenticateAdminRequest(ctx.req);
+  if (adminUser) {
+    return next({ ctx: { ...ctx, adminUser, authType: "admin" } });
+  }
+
+  // Tentar autenticação Manus OAuth
+  const manusUser = (ctx as any).user;
+  if (manusUser && (manusUser.role === "admin" || manusUser.role === "superadmin")) {
+    // Criar um objeto adminUser compatível para Manus OAuth
+    const adminUserFromManus = {
+      adminId: manusUser.id,
+      name: manusUser.name || "Admin",
+      email: manusUser.email || "",
+      role: manusUser.role || "admin",
+    };
+    return next({ ctx: { ...ctx, adminUser: adminUserFromManus, authType: "manus" } });
+  }
+
+  throw new TRPCError({ code: "UNAUTHORIZED", message: "Login de administrador necessário" });
+});
+
+/**
  * Procedure que requer role superadmin
  */
 const superAdminProcedure = adminAuthProcedure.use(({ ctx, next }) => {
@@ -176,7 +205,7 @@ export const adminAuthRouter = router({
   /**
    * Listar todos os administradores (superadmin ou admin podem ver)
    */
-  listAdmins: adminAuthProcedure.query(async () => {
+  listAdmins: adminOrManusAuthProcedure.query(async () => {
     const db = (await getDb())!;
     const result = await (db as any).query.adminAccounts.findMany({
       orderBy: (t: any, { desc }: any) => desc(t.createdAt),
@@ -370,7 +399,7 @@ export const adminAuthRouter = router({
   /**
    * Listar logs de auditoria (apenas superadmin ou admin)
    */
-  listAuditLogs: adminAuthProcedure
+  listAuditLogs: adminOrManusAuthProcedure
     .input(z.object({
       limit: z.number().min(1).max(200).default(50),
       offset: z.number().min(0).default(0),
@@ -388,7 +417,7 @@ export const adminAuthRouter = router({
   /**
    * Alterar própria senha (admin autenticado)
    */
-  changePassword: adminAuthProcedure
+  changePassword: adminOrManusAuthProcedure
     .input(z.object({
       currentPassword: z.string().min(1, "Senha atual é obrigatória"),
       newPassword: z.string().min(8, "Nova senha deve ter pelo menos 8 caracteres"),
@@ -443,7 +472,7 @@ export const adminAuthRouter = router({
   /**
    * Atualizar próprio perfil (nome e e-mail)
    */
-  updateProfile: adminAuthProcedure
+  updateProfile: adminOrManusAuthProcedure
     .input(z.object({
       name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
       email: z.string().email("E-mail inválido"),
