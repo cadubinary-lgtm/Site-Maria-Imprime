@@ -53,12 +53,12 @@ import AdminOSPrint from "./pages/admin/AdminOSPrint";
 import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import FileValidationManager from "./pages/admin/FileValidationManager";
-import LogisticsDashboard from "./pages/admin/LogisticsDashboard";
-import CarriersManager from "./pages/admin/CarriersManager";
-import ShippingRulesManager from "./pages/admin/ShippingRulesManager";
+import { LogisticsDashboard } from "./pages/admin/LogisticsDashboard";
+import { CarriersManager } from "./pages/admin/CarriersManager";
+import { ShippingRulesManager } from "./pages/admin/ShippingRulesManager";
 import CorreiosSettings from "./pages/admin/CorreiosSettings";
-import ShipmentsManager from "./pages/admin/ShipmentsManager";
-import TrackingManager from "./pages/admin/TrackingManager";
+import { ShipmentsManager } from "./pages/admin/ShipmentsManager";
+import { TrackingManager } from "./pages/admin/TrackingManager";
 
 // ─── Gerenciador Financeiro (legado - mantido) ───────────────────────────────
 import GerenciadorFinanceiroDashboard from "./pages/admin/GerenciadorFinanceiroDashboard";
