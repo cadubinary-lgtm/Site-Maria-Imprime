@@ -48,10 +48,7 @@ export function ShippingMethodSelector({
   // Validar se carrinho tem itens
   const hasCartItems = cartItems && cartItems.length > 0;
 
-  const calculateShippingMutation = trpc.logistics.checkout.calculateShippingMethods.useQuery(
-    { zipCode, cartItems: cartItems || [] },
-    { enabled: false }
-  );
+  const calculateMutation = trpc.logistics.shipping.calculate.useMutation();
 
   // Verificar se há método pré-selecionado no primeiro item do carrinho
   const preSelectedFromCart = cartItems?.[0]?.shippingMethod;
@@ -106,37 +103,33 @@ export function ShippingMethodSelector({
       console.log("[ShippingMethodSelector] Calculando frete para CEP:", zipCode);
       console.log("[ShippingMethodSelector] CartItems:", cartItems);
       
-      const result = await calculateShippingMutation.refetch();
-      
-      console.log("[ShippingMethodSelector] Resultado completo:", result);
-      
-      // Verificar se há erro
-      if (result.error) {
-        console.error("[ShippingMethodSelector] Erro na query:", result.error);
-        setError(result.error.message || "Erro ao calcular frete. Tente novamente.");
+      const quotes = await calculateMutation.mutateAsync({
+        destinationCep: zipCode,
+        weight: 1,
+        height: 5,
+        width: 30,
+        length: 40,
+      });
+
+      if (!quotes || quotes.length === 0) {
+        setError("Nenhuma opção de frete disponível para este CEP.");
         return;
       }
-      
-      // Verificar se há dados
-      if (result.data) {
-        const shippingData = result.data;
-        console.log("[ShippingMethodSelector] Dados de frete:", shippingData);
-        
-        if (shippingData.shippingMethods && shippingData.shippingMethods.length > 0) {
-          console.log("[ShippingMethodSelector] Métodos encontrados:", shippingData.shippingMethods.length);
-          setShippingMethods(shippingData.shippingMethods);
-          setHasCalculated(true);
-          // Pré-selecionar primeiro método se houver pré-seleção
-          if (!selectedMethod && shippingData.shippingMethods.length > 0) {
-            setSelectedMethod(shippingData.shippingMethods[0].id);
-          }
-        } else {
-          console.log("[ShippingMethodSelector] Nenhum método disponível");
-          setError("Nenhum método de entrega disponível para este CEP.");
-        }
-      } else {
-        console.log("[ShippingMethodSelector] Nenhum dado retornado");
-        setError("Erro ao calcular frete.");
+
+      const methods: ShippingMethod[] = quotes.map((q) => ({
+        id: String(q.id),
+        name: `${q.company} — ${q.name}`,
+        description: `Entrega em ${q.deliveryDays} dia${q.deliveryDays !== 1 ? "s" : ""} úteis`,
+        price: q.price,
+        estimatedDays: q.deliveryDays,
+        estimatedHours: 0,
+        initialStatus: "awaiting_shipment",
+      }));
+
+      setShippingMethods(methods);
+      setHasCalculated(true);
+      if (!selectedMethod && methods.length > 0) {
+        setSelectedMethod(methods[0].id);
       }
     } catch (err: any) {
       console.error("[ShippingMethodSelector] Erro na execução:", err);

@@ -2182,3 +2182,19 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar página /admin/perfil com alteração segura de senha e edição de perfil
 - [x] Adicionar procedures changePassword e updateProfile no router adminAuth
 - [x] Adicionar link "Meu Perfil" na seção BACKOFFICE do sidebar
+
+## Integração Melhor Envio API v2 — Nova Implementação
+
+- [x] Criar tabela `carriers` no banco (id, name, code, companyId, logoUrl, isActive, createdAt)
+- [x] Criar tabela `logisticsSettings` no banco (id, accessToken, email, originCep, senderName, senderPhone, senderAddress, sandbox, updatedAt)
+- [x] Executar migrations SQL
+- [x] Atualizar schema Drizzle
+- [x] Criar server/melhorenvio-api.ts com cliente HTTP (calculateShipping, listCompanies, addToCart, checkout, getLabel)
+- [x] Reescrever routers-logistics.ts com procedures: getSettings, saveSettings, listCarriers, syncCarriers, toggleCarrier, calculateFreight, createShipment, checkoutShipment
+- [x] Criar tela Configurações (/admin/logistica/configuracoes) com campos token, email, CEP, toggle sandbox
+- [x] Criar tela Transportadoras (/admin/logistica/transportadoras) com listagem e toggle ativo/inativo
+- [x] Criar tela Regras de Frete (/admin/logistica/regras-frete) com calculadora de frete por CEP
+- [x] Criar tela Expedição (/admin/logistica/expedicao) com geração de etiquetas
+- [x] Criar tela Rastreamento (/admin/logistica/rastreamento) com consulta de status
+- [ ] Escrever testes vitest para o módulo
+- [ ] Salvar checkpoint e publicar
