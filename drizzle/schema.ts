@@ -1099,7 +1099,7 @@ export const logisticsSettings = mysqlTable("logisticsSettings", {
   senderDistrict: varchar("senderDistrict", { length: 100 }),
   senderCity: varchar("senderCity", { length: 100 }),
   senderStateAbbr: varchar("senderStateAbbr", { length: 2 }),
-  sandbox: boolean("sandbox").default(true).notNull(), // true = sandbox, false = produção
+  sandbox: boolean("sandbox").default(false).notNull(), // false = produção (padrão), true = sandbox
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type LogisticsSettings = typeof logisticsSettings.$inferSelect;
