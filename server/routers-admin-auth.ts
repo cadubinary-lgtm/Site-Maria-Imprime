@@ -43,7 +43,7 @@ const adminAuthProcedure = publicProcedure.use(async ({ ctx, next }) => {
  * - Manus OAuth com role admin
  * Usado para rotas que devem funcionar em ambos os ambientes (Manus e site)
  */
-const adminOrManusAuthProcedure = publicProcedure.use(async ({ ctx, next }) => {
+export const adminOrManusAuthProcedure = publicProcedure.use(async ({ ctx, next }) => {
   // Tentar autenticação própria (adminAuth)
   const adminUser = await authenticateAdminRequest(ctx.req);
   if (adminUser) {

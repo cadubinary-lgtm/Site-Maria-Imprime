@@ -210,10 +210,28 @@ export function getConnectionStatus(carrier: {
   const now = Date.now();
   const BUFFER_MS = 5 * 60 * 1000; // 5 minutos de buffer antes de expirar
 
-  if (!carrier.melhorEnvioAccessToken || !carrier.melhorEnvioRefreshToken) {
+  if (!carrier.melhorEnvioAccessToken) {
     return {
       status: "not_connected",
       message: "Não conectado ao Melhor Envio. Clique em 'Conectar ao Melhor Envio' para autorizar.",
+    };
+  }
+
+  // Personal Access Token (sem refresh token) — considerar conectado se access token existe
+  if (!carrier.melhorEnvioRefreshToken) {
+    if (carrier.melhorEnvioAccessTokenExpiresAt && now > carrier.melhorEnvioAccessTokenExpiresAt - BUFFER_MS) {
+      return {
+        status: "token_expired",
+        connectedAt: carrier.melhorEnvioConnectedAt ?? undefined,
+        accessTokenExpiresAt: carrier.melhorEnvioAccessTokenExpiresAt ?? undefined,
+        message: "Token expirado. Gere um novo Personal Access Token no painel do Melhor Envio.",
+      };
+    }
+    return {
+      status: "connected",
+      connectedAt: carrier.melhorEnvioConnectedAt ?? undefined,
+      accessTokenExpiresAt: carrier.melhorEnvioAccessTokenExpiresAt ?? undefined,
+      message: "Conectado via Personal Access Token.",
     };
   }
 

@@ -1,4 +1,5 @@
 import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
@@ -99,8 +100,15 @@ export const logisticsRouter = router({
         if (input.vehicleType !== undefined) values.vehicleType = input.vehicleType;
         if (input.driverName !== undefined) values.driverName = input.driverName;
         if (input.driverPhone !== undefined) values.driverPhone = input.driverPhone;
-        const result = await db.insert(carriers).values(values);
-        return result;
+        try {
+          const result = await db.insert(carriers).values(values);
+          return result;
+        } catch (err: any) {
+          if (err?.errno === 1062 || err?.message?.includes('Duplicate entry')) {
+            throw new TRPCError({ code: "CONFLICT", message: `Já existe uma transportadora com o código "${input.code}". Use outro código ou edite a existente.` });
+          }
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: err?.message || "Erro ao criar transportadora" });
+        }
       }),
 
     update: protectedProcedure
@@ -538,11 +546,7 @@ export const logisticsRouter = router({
     /**
      * Gera a URL de autorização OAuth2 para redirecionar o usuário ao Melhor Envio
      */
-    getAuthUrl: protectedProcedure
-      .use(({ ctx, next }) => {
-        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
-        return next({ ctx });
-      })
+    getAuthUrl: adminOrManusAuthProcedure
       .input(z.object({ carrierId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb() as any;
@@ -571,11 +575,7 @@ export const logisticsRouter = router({
     /**
      * Verifica o status da conexão com o Melhor Envio
      */
-    getStatus: protectedProcedure
-      .use(({ ctx, next }) => {
-        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
-        return next({ ctx });
-      })
+    getStatus: adminOrManusAuthProcedure
       .input(z.object({ carrierId: z.number() }))
       .query(async ({ input }) => {
         const db = await getDb() as any;
@@ -589,11 +589,7 @@ export const logisticsRouter = router({
     /**
      * Renova manualmente o Access Token usando o Refresh Token
      */
-    refreshToken: protectedProcedure
-      .use(({ ctx, next }) => {
-        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
-        return next({ ctx });
-      })
+    refreshToken: adminOrManusAuthProcedure
       .input(z.object({ carrierId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb() as any;
@@ -623,11 +619,7 @@ export const logisticsRouter = router({
     /**
      * Desconecta o Melhor Envio removendo os tokens
      */
-    disconnect: protectedProcedure
-      .use(({ ctx, next }) => {
-        if (ctx.user?.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
-        return next({ ctx });
-      })
+    disconnect: adminOrManusAuthProcedure
       .input(z.object({ carrierId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb() as any;
