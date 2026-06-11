@@ -1,8 +1,8 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import AdminLayout from "@/components/AdminLayout";
 
 export function LogisticsDashboard() {
   return (
-    <DashboardLayout>
+    <AdminLayout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard de Logística</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -14,6 +14,6 @@ export function LogisticsDashboard() {
           </p>
         </div>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

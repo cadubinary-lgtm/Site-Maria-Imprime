@@ -203,7 +203,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-56" : "w-0 overflow-hidden"}`}
+        className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
       >
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-800">
