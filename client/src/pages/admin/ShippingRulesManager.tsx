@@ -88,10 +88,13 @@ export function ShippingRulesManager() {
         width: parseFloat(width) || 30,
         length: parseFloat(length) || 40,
       });
-      setQuotes(result as QuoteResult[]);
+      // Backend retorna { quotes, cutoffTime, isPastCutoff } ou array direto (compat)
+      const rawResult = result as any;
+      const quotesArray: QuoteResult[] = Array.isArray(rawResult) ? rawResult : (rawResult.quotes ?? []);
+      setQuotes(quotesArray);
       setHasCalculated(true);
-      if (result.length === 0) toast.warning('Nenhuma opção de frete disponível para este CEP.');
-      else toast.success(`${result.length} opção(ões) de frete encontrada(s)`);
+      if (quotesArray.length === 0) toast.warning('Nenhuma opção de frete disponível para este CEP.');
+      else toast.success(`${quotesArray.length} opção(ões) de frete encontrada(s)`);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao calcular frete');
     }

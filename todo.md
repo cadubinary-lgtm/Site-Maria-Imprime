@@ -2273,3 +2273,14 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - Bairro: "Tamoios", CEP Inicial: "28900000", CEP Final: "28900999" → R$ 20,00
 - Bairro: "Centro", CEP Inicial: "28901000", CEP Final: "28901999" → R$ 12,00
 - Bairro: "Peró", CEP Inicial: "28902000", CEP Final: "28902999" → R$ 15,00
+
+## Fase 26: Horário Cut-off e Correções Visuais
+
+- [ ] Adicionar campo cutoffTime na tabela logisticsSettings no banco
+- [ ] Atualizar procedure logistics.getSettings e updateSettings para incluir cutoffTime
+- [ ] Atualizar shipping.calculate para aplicar +1 dia útil após horário cut-off nos fretes locais
+- [ ] Retornar cutoffTime no resultado do shipping.calculate para uso no frontend
+- [ ] Adicionar campo "Horário Limite de Produção (Cut-off)" na aba Configurações do LogisticsManager
+- [ ] Exibir aviso institucional dinâmico com horário cut-off na página do produto
+- [ ] Corrigir texto duplicado "EntregaEntrega Local - Carro" no resumo do carrinho/checkout
+- [ ] Esconder segunda linha de descrição quando for vazia/NULL na listagem de fretes

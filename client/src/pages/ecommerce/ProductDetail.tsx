@@ -125,6 +125,7 @@ export default function ProductDetail() {
   const [shippingQuotes, setShippingQuotes] = useState<ShippingQuote[]>([]);
   const [shippingCalculated, setShippingCalculated] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingQuote | null>(null);
+  const [cutoffTime, setCutoffTime] = useState<string>('13:00');
   const calculateShippingMutation = trpc.logistics.shipping.calculate.useMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -369,11 +370,15 @@ export default function ProductDetail() {
         width: 30,
         length: 40,
       });
-      const typedQuotes = quotes as ShippingQuote[];
-      setShippingQuotes(typedQuotes);
+      // O backend agora retorna { quotes, cutoffTime, isPastCutoff }
+      const result = quotes as any;
+      const quotesArray: ShippingQuote[] = Array.isArray(result) ? result : (result.quotes ?? []);
+      const serverCutoff: string = result.cutoffTime ?? '13:00';
+      setShippingQuotes(quotesArray);
+      setCutoffTime(serverCutoff);
       setShippingCalculated(true);
       // Pré-selecionar Retirar na Loja por padrão
-      const pickup = typedQuotes.find(q => q.fixedType === "pickup");
+      const pickup = quotesArray.find((q: ShippingQuote) => q.fixedType === "pickup");
       if (pickup) setSelectedShipping(pickup);
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
@@ -1087,7 +1092,10 @@ export default function ProductDetail() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
-                        <p className="text-xs text-gray-500">{opt.company}</p>
+                        {/* Esconder descrição se for vazia ou igual ao nome (duplicação) */}
+                        {opt.company && opt.company !== opt.name && (
+                          <p className="text-xs text-gray-500">{opt.company}</p>
+                        )}
                         {deadlineText && (
                           <p className={`text-xs font-medium mt-0.5 ${
                             totalDays === 0 ? 'text-green-600' :
@@ -1105,6 +1113,13 @@ export default function ProductDetail() {
 
                 {shippingCalculated && shippingQuotes.length === 0 && (
                   <p className="text-sm text-gray-500 text-center py-4">Nenhuma opção disponível para este CEP.</p>
+                )}
+
+                {/* Aviso institucional da gráfica */}
+                {shippingCalculated && shippingQuotes.some(q => q.fixedType === 'local') && (
+                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                    *Prazos válidos para arquivos enviados com arte aprovada até as {cutoffTime}. Pedidos de grandes formatos ou altas tiragens podem sofrer acréscimo de prazo após análise técnica.
+                  </p>
                 )}
 
                 {/* Botão confirmar entrega */}

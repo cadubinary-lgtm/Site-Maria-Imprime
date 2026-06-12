@@ -37,6 +37,7 @@ export default function CorreiosSettings() {
     senderCity: '',
     senderStateAbbr: '',
     sandbox: true,
+    cutoffTime: '13:00',
   });
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function CorreiosSettings() {
         senderCity: settings.senderCity ?? '',
         senderStateAbbr: settings.senderStateAbbr ?? '',
         sandbox: settings.sandbox ?? true,
+        cutoffTime: (settings as any).cutoffTime ?? '13:00',
       }));
     }
   }, [settings]);
@@ -83,6 +85,7 @@ export default function CorreiosSettings() {
         senderCity: form.senderCity || undefined,
         senderStateAbbr: form.senderStateAbbr || undefined,
         sandbox: form.sandbox,
+        cutoffTime: form.cutoffTime || '13:00',
       });
       toast.success('Configurações salvas com sucesso!');
       refetch();
@@ -133,6 +136,39 @@ export default function CorreiosSettings() {
             Obter Token <ExternalLink className="w-3 h-3" />
           </a>
         </div>
+
+        {/* Horário Limite de Produção (Cut-off) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <span className="text-lg">⏰</span>
+              Horário Limite de Produção (Cut-off)
+            </CardTitle>
+            <CardDescription>
+              Pedidos realizados após este horário terão +1 dia útil somado ao prazo de entrega local (Moto/Carro).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="space-y-2 flex-1 max-w-xs">
+                <Label htmlFor="cutoffTime">Horário Limite</Label>
+                <input
+                  id="cutoffTime"
+                  type="time"
+                  value={form.cutoffTime}
+                  onChange={(e) => setForm(prev => ({ ...prev, cutoffTime: e.target.value }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+              <div className="pt-6">
+                <p className="text-sm text-muted-foreground">
+                  Exemplo: se configurado para <strong>13:00</strong>, consultas feitas após esse horário exibirão
+                  prazos de entrega local com +1 dia útil automaticamente.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Ambiente */}
         <Card>

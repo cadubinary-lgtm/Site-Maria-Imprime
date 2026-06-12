@@ -1102,6 +1102,8 @@ export const logisticsSettings = mysqlTable("logisticsSettings", {
   senderCity: varchar("senderCity", { length: 100 }),
   senderStateAbbr: varchar("senderStateAbbr", { length: 2 }),
   sandbox: boolean("sandbox").default(false).notNull(), // false = produção (padrão), true = sandbox
+  // Horário limite de produção (cut-off) — pedidos após esse horário somam +1 dia útil ao frete local
+  cutoffTime: varchar("cutoffTime", { length: 5 }).default("13:00").notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type LogisticsSettings = typeof logisticsSettings.$inferSelect;
