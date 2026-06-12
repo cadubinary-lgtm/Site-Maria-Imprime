@@ -852,13 +852,15 @@ export async function addToCart(data: {
   artFileUrl?: string;
   notes?: string;
   shippingMethod?: string;
+  shippingPrice?: number;
+  shippingLabel?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.execute(
     sql`
-      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes, shippingMethod)
-      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null}, ${data.shippingMethod ?? "retirada"})
+      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes, shippingMethod, shippingPrice, shippingLabel)
+      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null}, ${data.shippingMethod ?? "retirada"}, ${data.shippingPrice ?? 0}, ${data.shippingLabel ?? null})
     `
   );
   return (result as any).insertId as number;
@@ -948,6 +950,9 @@ export async function createOrderFromCart(data: {
   deliveryZipCode: string;
   deliveryFullName: string;
   deliveryPhone: string;
+  shippingMethod?: string | null;
+  shippingPrice?: number;
+  shippingLabel?: string | null;
   cartItems: Array<{
     productId: number;
     productName: string;
@@ -970,14 +975,15 @@ export async function createOrderFromCart(data: {
           clientId, userId, customerId, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
-          guestToken, guestEmail, guestName
+          guestToken, guestEmail, guestName, shippingMethod, shippingPrice
         ) VALUES (
           ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'analisando',
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
           ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone},
-          ${data.guestToken ?? null}, ${data.guestEmail ?? null}, ${data.guestName ?? null}
+          ${data.guestToken ?? null}, ${data.guestEmail ?? null}, ${data.guestName ?? null},
+          ${data.shippingMethod ?? null}, ${data.shippingPrice ?? 0}
         )
       `
     );

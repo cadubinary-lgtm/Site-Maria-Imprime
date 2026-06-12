@@ -8,19 +8,47 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Loader2, Calculator, Truck, Clock, DollarSign, Package, AlertCircle } from 'lucide-react';
+import {
+  Loader2, Calculator, Truck, Clock, DollarSign, Package,
+  AlertCircle, Plus, Pencil, Trash2, MapPin, Store, Zap,
+} from 'lucide-react';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 
 interface QuoteResult {
-  id: number;
+  id: string | number;
   name: string;
   company: string;
   price: number;
   deliveryDays: number;
-  currency: string;
+  isFixed?: boolean;
+  fixedType?: string;
 }
 
+interface LocalRule {
+  id: number;
+  cityName: string;
+  stateAbbr: string;
+  price: string;
+  deliveryDays: number;
+  description: string | null;
+  isActive: boolean;
+}
+
+const emptyForm = {
+  cityName: '',
+  stateAbbr: '',
+  price: '',
+  deliveryDays: '1',
+  description: '',
+  isActive: true,
+};
+
 export function ShippingRulesManager() {
+  // ── Simulador ──────────────────────────────────────────────────────────────
   const [destinationCep, setDestinationCep] = useState('');
   const [weight, setWeight] = useState('1');
   const [height, setHeight] = useState('5');
@@ -32,12 +60,19 @@ export function ShippingRulesManager() {
   const calculateMutation = trpc.logistics.shipping.calculate.useMutation();
   const { data: settings } = trpc.logistics.settings.get.useQuery();
 
+  // ── Regras de Entrega Local ────────────────────────────────────────────────
+  const { data: localRules, refetch: refetchRules } = trpc.logistics.localRules.list.useQuery();
+  const createRule = trpc.logistics.localRules.create.useMutation();
+  const updateRule = trpc.logistics.localRules.update.useMutation();
+  const deleteRule = trpc.logistics.localRules.delete.useMutation();
+
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState(emptyForm);
+
   const handleCalculate = async () => {
     const cep = destinationCep.replace(/\D/g, '');
-    if (cep.length !== 8) {
-      toast.error('CEP de destino inválido. Use 8 dígitos.');
-      return;
-    }
+    if (cep.length !== 8) { toast.error('CEP de destino inválido. Use 8 dígitos.'); return; }
     try {
       const result = await calculateMutation.mutateAsync({
         destinationCep: cep,
@@ -46,63 +81,187 @@ export function ShippingRulesManager() {
         width: parseFloat(width) || 30,
         length: parseFloat(length) || 40,
       });
-      setQuotes(result);
+      setQuotes(result as QuoteResult[]);
       setHasCalculated(true);
-      if (result.length === 0) {
-        toast.warning('Nenhuma opção de frete disponível para este CEP.');
-      } else {
-        toast.success(`${result.length} opção(ões) de frete encontrada(s)`);
-      }
+      if (result.length === 0) toast.warning('Nenhuma opção de frete disponível para este CEP.');
+      else toast.success(`${result.length} opção(ões) de frete encontrada(s)`);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao calcular frete');
     }
   };
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowDialog(true);
+  };
+
+  const openEdit = (rule: LocalRule) => {
+    setEditingId(rule.id);
+    setForm({
+      cityName: rule.cityName,
+      stateAbbr: rule.stateAbbr,
+      price: rule.price,
+      deliveryDays: String(rule.deliveryDays),
+      description: rule.description ?? '',
+      isActive: rule.isActive,
+    });
+    setShowDialog(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.cityName.trim()) { toast.error('Informe o nome da cidade'); return; }
+    if (!form.stateAbbr.trim() || form.stateAbbr.length !== 2) { toast.error('Informe a UF (2 letras)'); return; }
+    const price = parseFloat(form.price);
+    if (isNaN(price) || price < 0) { toast.error('Informe um valor de frete válido'); return; }
+    try {
+      if (editingId) {
+        await updateRule.mutateAsync({
+          id: editingId,
+          cityName: form.cityName.trim(),
+          stateAbbr: form.stateAbbr.trim().toUpperCase(),
+          price,
+          deliveryDays: parseInt(form.deliveryDays) || 1,
+          description: form.description.trim() || undefined,
+          isActive: form.isActive,
+        });
+        toast.success('Regra atualizada com sucesso');
+      } else {
+        await createRule.mutateAsync({
+          cityName: form.cityName.trim(),
+          stateAbbr: form.stateAbbr.trim().toUpperCase(),
+          price,
+          deliveryDays: parseInt(form.deliveryDays) || 1,
+          description: form.description.trim() || undefined,
+          isActive: form.isActive,
+        });
+        toast.success('Regra criada com sucesso');
+      }
+      setShowDialog(false);
+      refetchRules();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao salvar regra');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Deseja excluir esta regra de entrega local?')) return;
+    try {
+      await deleteRule.mutateAsync({ id });
+      toast.success('Regra excluída');
+      refetchRules();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao excluir');
+    }
+  };
+
+  const formatCurrency = (value: number | string) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+
+  const getQuoteIcon = (q: QuoteResult) => {
+    if (q.fixedType === 'pickup') return <Store className="w-5 h-5 text-green-600" />;
+    if (q.fixedType === 'local') return <Zap className="w-5 h-5 text-orange-500" />;
+    return <Truck className="w-5 h-5 text-blue-500" />;
+  };
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6 max-w-4xl">
-        {/* Header */}
+      <div className="p-6 space-y-8 max-w-4xl">
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Calculator className="w-6 h-6 text-orange-500" />
-            Regras de Frete — Simulador
+            Regras de Frete
           </h1>
           <p className="text-muted-foreground mt-1">
-            Simule o cálculo de frete via Melhor Envio API v2 para qualquer CEP de destino.
+            Gerencie cidades com entrega local (Motoboy) e simule cotações via Melhor Envio.
           </p>
         </div>
 
-        {!settings?.hasToken && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Token do Melhor Envio não configurado. Acesse <strong>Configurações</strong> para salvar seu token antes de calcular fretes.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* ── Seção 1: Cidades com Entrega Local ──────────────────────────── */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-orange-500" />
+                Entrega Local — Cidades Próximas
+              </CardTitle>
+              <CardDescription>
+                Quando o CEP do cliente pertencer a uma cidade cadastrada, a opção "Entrega Local - Motoboy"
+                aparecerá automaticamente com o valor e prazo configurados.
+              </CardDescription>
+            </div>
+            <Button size="sm" onClick={openCreate} className="bg-orange-500 hover:bg-orange-600 shrink-0">
+              <Plus className="w-4 h-4 mr-1" /> Adicionar Cidade
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {!localRules || localRules.length === 0 ? (
+              <div className="flex flex-col items-center py-10 gap-3 text-muted-foreground">
+                <MapPin className="w-10 h-10 opacity-30" />
+                <p>Nenhuma cidade cadastrada ainda.</p>
+                <Button variant="outline" size="sm" onClick={openCreate}>
+                  <Plus className="w-4 h-4 mr-1" /> Cadastrar primeira cidade
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {localRules.map((rule) => (
+                  <div
+                    key={rule.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${rule.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
+                      <div>
+                        <p className="font-medium">
+                          {rule.cityName} — {rule.stateAbbr}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {rule.description || 'Entrega Local - Motoboy'} ·{' '}
+                          {rule.deliveryDays === 0 ? 'Mesmo dia' : `${rule.deliveryDays} dia(s) útil(eis)`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-green-600">{formatCurrency(rule.price)}</span>
+                      {!rule.isActive && <Badge variant="secondary">Inativo</Badge>}
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(rule as LocalRule)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(rule.id)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {settings?.hasToken && !settings?.originCep && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              CEP de origem não configurado. Acesse <strong>Configurações</strong> para definir o CEP de origem.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Formulário de Cálculo */}
+        {/* ── Seção 2: Simulador de Frete ─────────────────────────────────── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Parâmetros do Pacote</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Calculator className="w-4 h-4 text-orange-500" />
+              Simulador de Frete (Melhor Envio + Opções Fixas)
+            </CardTitle>
             <CardDescription>
               CEP de origem: <strong>{settings?.originCep ? settings.originCep.replace(/(\d{5})(\d{3})/, '$1-$2') : 'Não configurado'}</strong>
               {settings?.sandbox && <Badge variant="secondary" className="ml-2">Sandbox</Badge>}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!settings?.hasToken && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Token do Melhor Envio não configurado. O simulador mostrará apenas as opções fixas (Retirada e Entrega Local).
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="destCep">CEP de Destino *</Label>
               <Input
@@ -111,8 +270,7 @@ export function ShippingRulesManager() {
                 value={destinationCep}
                 onChange={(e) => {
                   const v = e.target.value.replace(/\D/g, '').slice(0, 8);
-                  const formatted = v.length > 5 ? `${v.slice(0, 5)}-${v.slice(5)}` : v;
-                  setDestinationCep(formatted);
+                  setDestinationCep(v.length > 5 ? `${v.slice(0, 5)}-${v.slice(5)}` : v);
                 }}
                 maxLength={9}
               />
@@ -121,103 +279,144 @@ export function ShippingRulesManager() {
             <Separator />
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="weight">Peso (kg)</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="height">Altura (cm)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  min="1"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="width">Largura (cm)</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  min="1"
-                  value={width}
-                  onChange={(e) => setWidth(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="length">Comprimento (cm)</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  min="1"
-                  value={length}
-                  onChange={(e) => setLength(e.target.value)}
-                />
-              </div>
+              {[
+                { id: 'weight', label: 'Peso (kg)', val: weight, set: setWeight, min: '0.1', step: '0.1' },
+                { id: 'height', label: 'Altura (cm)', val: height, set: setHeight, min: '1' },
+                { id: 'width', label: 'Largura (cm)', val: width, set: setWidth, min: '1' },
+                { id: 'length', label: 'Comprimento (cm)', val: length, set: setLength, min: '1' },
+              ].map(({ id, label, val, set, min, step }) => (
+                <div key={id} className="space-y-2">
+                  <Label htmlFor={id}>{label}</Label>
+                  <Input id={id} type="number" min={min} step={step} value={val} onChange={(e) => set(e.target.value)} />
+                </div>
+              ))}
             </div>
 
             <Button
               onClick={handleCalculate}
-              disabled={calculateMutation.isPending || !settings?.hasToken}
+              disabled={calculateMutation.isPending}
               className="w-full bg-orange-500 hover:bg-orange-600"
             >
               {calculateMutation.isPending
                 ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Calculando...</>
-                : <><Calculator className="w-4 h-4 mr-2" /> Calcular Frete</>}
+                : <><Calculator className="w-4 h-4 mr-2" /> Simular Frete</>}
             </Button>
-          </CardContent>
-        </Card>
 
-        {/* Resultados */}
-        {hasCalculated && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold">
-              {quotes.length > 0 ? `${quotes.length} opção(ões) disponível(is)` : 'Nenhuma opção disponível'}
-            </h2>
-            {quotes.length > 0 && (
-              <div className="grid gap-3">
-                {quotes.map((quote, idx) => (
-                  <Card key={`${quote.id}-${idx}`} className="hover:border-orange-300 transition-colors">
-                    <CardContent className="flex items-center gap-4 py-4">
-                      <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center">
-                        <Truck className="w-5 h-5 text-orange-500" />
+            {hasCalculated && (
+              <div className="space-y-3 pt-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {quotes.length} opção(ões) disponível(is)
+                </p>
+                {quotes.length === 0 ? (
+                  <div className="flex flex-col items-center py-8 gap-2 text-muted-foreground">
+                    <Package className="w-8 h-8 opacity-30" />
+                    <p>Nenhuma opção disponível para este CEP.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-2">
+                    {quotes.map((quote, idx) => (
+                      <div key={`${quote.id}-${idx}`} className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="w-9 h-9 bg-muted rounded-full flex items-center justify-center shrink-0">
+                          {getQuoteIcon(quote)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm">{quote.company}</p>
+                          <p className="text-xs text-muted-foreground truncate">{quote.name}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground text-xs shrink-0">
+                          <Clock className="w-3 h-3" />
+                          {quote.deliveryDays === 0 ? 'Mesmo dia' : `${quote.deliveryDays}d úteis`}
+                        </div>
+                        <div className="font-bold text-green-600 shrink-0">
+                          {quote.price === 0 ? 'Grátis' : formatCurrency(quote.price)}
+                        </div>
+                        {quote.isFixed && <Badge variant="outline" className="text-xs shrink-0">Fixo</Badge>}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold">{quote.company}</p>
-                        <p className="text-sm text-muted-foreground">{quote.name}</p>
-                      </div>
-                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                        <Clock className="w-4 h-4" />
-                        {quote.deliveryDays} dia{quote.deliveryDays !== 1 ? 's' : ''} útil{quote.deliveryDays !== 1 ? 'eis' : ''}
-                      </div>
-                      <div className="flex items-center gap-1 font-bold text-lg text-green-600">
-                        <DollarSign className="w-4 h-4" />
-                        {formatCurrency(quote.price)}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-            {quotes.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Package className="w-10 h-10 text-muted-foreground" />
-                  <p className="text-muted-foreground">Nenhuma transportadora disponível para este CEP com os parâmetros informados.</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* ── Dialog: Criar / Editar Regra ──────────────────────────────────── */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar Regra de Entrega Local' : 'Nova Regra de Entrega Local'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2 space-y-2">
+                <Label>Cidade *</Label>
+                <Input
+                  placeholder="Ex: Guarulhos"
+                  value={form.cityName}
+                  onChange={(e) => setForm({ ...form, cityName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>UF *</Label>
+                <Input
+                  placeholder="SP"
+                  maxLength={2}
+                  value={form.stateAbbr}
+                  onChange={(e) => setForm({ ...form, stateAbbr: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Valor do Frete (R$) *</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="15.00"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Prazo (dias úteis)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.deliveryDays}
+                  onChange={(e) => setForm({ ...form, deliveryDays: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição (exibida ao cliente)</Label>
+              <Input
+                placeholder="Entrega Local - Motoboy"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={form.isActive}
+                onCheckedChange={(v) => setForm({ ...form, isActive: v })}
+              />
+              <Label>Regra ativa</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>
+            <Button
+              onClick={handleSave}
+              disabled={createRule.isPending || updateRule.isPending}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              {(createRule.isPending || updateRule.isPending) ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

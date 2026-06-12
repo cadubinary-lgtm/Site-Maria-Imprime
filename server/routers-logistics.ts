@@ -9,12 +9,12 @@
  *  - logistics.tracking   → rastreamento
  */
 
-import { router, protectedProcedure } from "./_core/trpc";
+import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
-import { logisticsSettings, carriers, shipments, orders } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { logisticsSettings, carriers, shipments, orders, localDeliveryRules } from "../drizzle/schema";
+import { eq, and, like, or } from "drizzle-orm";
 import {
   getMeProfile,
   listShipmentCompanies,
@@ -212,57 +212,195 @@ const carriersRouter = router({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const shippingRouter = router({
-  calculate: adminProcedure
+  // Cálculo público de frete — acessível por clientes e visitantes
+  calculate: publicProcedure
     .input(
       z.object({
         destinationCep: z.string().regex(/^\d{8}$/, "CEP deve ter 8 dígitos"),
-        weight: z.number().positive(),
-        height: z.number().positive(),
-        width: z.number().positive(),
-        length: z.number().positive(),
+        weight: z.number().positive().default(1),
+        height: z.number().positive().default(5),
+        width: z.number().positive().default(30),
+        length: z.number().positive().default(40),
         insuranceValue: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
-      const s = await requireSettings();
+      const db = await requireDb();
 
-      if (!s.originCep) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "CEP de origem não configurado. Acesse Logística → Configurações.",
+      // 1. Opção fixa: Retirar na Loja (sempre disponível)
+      const results: Array<{
+        id: string | number;
+        name: string;
+        company: string;
+        logoUrl: string | null;
+        price: number;
+        deliveryDays: number;
+        isFixed: boolean;
+        fixedType?: string;
+      }> = [
+        {
+          id: "retirada",
+          name: "Retirar na Loja",
+          company: "Retirada Presencial",
+          logoUrl: null,
+          price: 0,
+          deliveryDays: 0,
+          isFixed: true,
+          fixedType: "pickup",
+        },
+      ];
+
+      // 2. Verificar regras de entrega local por cidade
+      // Busca o nome da cidade via ViaCEP e compara com as regras cadastradas
+      try {
+        const cepClean = input.destinationCep.replace(/\D/g, "");
+        const viaCepRes = await fetch(`https://viacep.com.br/ws/${cepClean}/json/`, {
+          signal: AbortSignal.timeout(5000),
         });
+        if (viaCepRes.ok) {
+          const cepData = await viaCepRes.json();
+          if (!cepData.erro && cepData.localidade) {
+            const cityName = cepData.localidade as string;
+            const stateAbbr = cepData.uf as string;
+            // Busca regras ativas para a cidade
+            const localRules = await db
+              .select()
+              .from(localDeliveryRules)
+              .where(
+                and(
+                  eq(localDeliveryRules.isActive, true),
+                  or(
+                    like(localDeliveryRules.cityName, cityName),
+                    like(localDeliveryRules.cityName, `%${cityName}%`)
+                  )
+                )
+              );
+            for (const rule of localRules) {
+              results.push({
+                id: `local_${rule.id}`,
+                name: rule.description || "Entrega Local - Motoboy",
+                company: "Entrega Local",
+                logoUrl: null,
+                price: parseFloat(rule.price as any),
+                deliveryDays: rule.deliveryDays,
+                isFixed: true,
+                fixedType: "local",
+              });
+            }
+          }
+        }
+      } catch (_) {
+        // Silencioso: falha no ViaCEP não bloqueia o cálculo
       }
 
-      const payload: CalculateShippingInput = {
-        from: { postal_code: s.originCep },
-        to: { postal_code: input.destinationCep },
-        package: {
-          height: input.height,
-          width: input.width,
-          length: input.length,
-          weight: input.weight,
-        },
-        options: {
-          insurance_value: input.insuranceValue ?? 0,
-          receipt: false,
-          own_hand: false,
-        },
-      };
+      // 3. Cotações do Melhor Envio (se token configurado)
+      try {
+        const s = await getSettings();
+        if (s?.accessToken && s.originCep) {
+          const payload: CalculateShippingInput = {
+            from: { postal_code: s.originCep },
+            to: { postal_code: input.destinationCep },
+            package: {
+              height: input.height,
+              width: input.width,
+              length: input.length,
+              weight: input.weight,
+            },
+            options: {
+              insurance_value: input.insuranceValue ?? 0,
+              receipt: false,
+              own_hand: false,
+            },
+          };
+          const quotes = await calculateShipping(s.accessToken, s.sandbox, payload);
+          for (const q of quotes) {
+            if (!q.error) {
+              results.push({
+                id: q.id,
+                name: q.name,
+                company: q.company.name,
+                logoUrl: q.company.picture ?? null,
+                price: parseFloat(q.custom_price || q.price),
+                deliveryDays: q.custom_delivery_time || q.delivery_time,
+                isFixed: false,
+              });
+            }
+          }
+        }
+      } catch (_) {
+        // Silencioso: falha no ME não bloqueia as opções fixas
+      }
 
-      const quotes = await calculateShipping(s.accessToken!, s.sandbox, payload);
+      return results;
+    }),
+});
 
-      return quotes
-        .filter((q) => !q.error)
-        .map((q) => ({
-          id: q.id,
-          name: q.name,
-          company: q.company.name,
-          logoUrl: q.company.picture,
-          price: parseFloat(q.custom_price || q.price),
-          deliveryDays: q.custom_delivery_time || q.delivery_time,
-          deliveryRange: q.custom_delivery_range || q.delivery_range,
-          currency: q.currency,
-        }));
+// ─────────────────────────────────────────────────────────────────────────────
+// localRules router (CRUD de regras de entrega local por cidade)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const localRulesRouter = router({
+  list: adminProcedure.query(async () => {
+    const db = await requireDb();
+    return db.select().from(localDeliveryRules).orderBy(localDeliveryRules.cityName);
+  }),
+
+  create: adminProcedure
+    .input(
+      z.object({
+        cityName: z.string().min(2),
+        stateAbbr: z.string().length(2),
+        price: z.number().min(0),
+        deliveryDays: z.number().int().min(0).default(1),
+        description: z.string().optional(),
+        isActive: z.boolean().default(true),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      const result = await db.insert(localDeliveryRules).values({
+        cityName: input.cityName,
+        stateAbbr: input.stateAbbr.toUpperCase(),
+        price: input.price.toFixed(2) as any,
+        deliveryDays: input.deliveryDays,
+        description: input.description,
+        isActive: input.isActive,
+      });
+      return { id: (result as any).insertId, success: true };
+    }),
+
+  update: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        cityName: z.string().min(2).optional(),
+        stateAbbr: z.string().length(2).optional(),
+        price: z.number().min(0).optional(),
+        deliveryDays: z.number().int().min(0).optional(),
+        description: z.string().optional(),
+        isActive: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      const { id, ...rest } = input;
+      const updateData: any = {};
+      if (rest.cityName !== undefined) updateData.cityName = rest.cityName;
+      if (rest.stateAbbr !== undefined) updateData.stateAbbr = rest.stateAbbr.toUpperCase();
+      if (rest.price !== undefined) updateData.price = rest.price.toFixed(2);
+      if (rest.deliveryDays !== undefined) updateData.deliveryDays = rest.deliveryDays;
+      if (rest.description !== undefined) updateData.description = rest.description;
+      if (rest.isActive !== undefined) updateData.isActive = rest.isActive;
+      await db.update(localDeliveryRules).set(updateData).where(eq(localDeliveryRules.id, id));
+      return { success: true };
+    }),
+
+  delete: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      await db.delete(localDeliveryRules).where(eq(localDeliveryRules.id, input.id));
+      return { success: true };
     }),
 });
 
@@ -510,4 +648,5 @@ export const logisticsRouter = router({
   shipping: shippingRouter,
   shipments: shipmentsRouter,
   tracking: trackingRouter,
+  localRules: localRulesRouter,
 });

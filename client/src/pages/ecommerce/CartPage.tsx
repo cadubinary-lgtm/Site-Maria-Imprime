@@ -34,6 +34,9 @@ interface CartItem {
   productImage: string | null;
   calculationType: string;
   unit: string;
+  shippingMethod: string | null;
+  shippingPrice: string | null;
+  shippingLabel: string | null;
 }
 
 function formatCurrency(value: number | string) {
@@ -219,19 +222,16 @@ export default function CartPage() {
   // Carrinho agora é público - não bloqueia visitantes
 
   const cartItems = (items ?? []) as CartItem[];
-  const total = cartItems.reduce(
+  const subtotalItems = cartItems.reduce(
     (sum, item) => sum + Number(item.priceAtCart) * item.quantity,
     0
   );
+  // Usar shippingPrice do primeiro item (todos os itens do mesmo pedido têm o mesmo frete)
+  const firstItem = cartItems[0];
+  const shippingPrice = firstItem ? Number(firstItem.shippingPrice ?? 0) : 0;
+  const shippingLabel = firstItem?.shippingLabel ?? null;
+  const total = subtotalItems + shippingPrice;
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Extrair freteId das notes do primeiro item para pré-selecionar no checkout
-  const extractFreteId = (): string | null => {
-    const firstItem = cartItems[0];
-    if (!firstItem?.notes) return null;
-    const match = firstItem.notes.match(/freteId:([\w_]+)/);
-    return match ? match[1] : null;
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -348,7 +348,11 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Frete</span>
-                    <span className="text-green-600">A calcular</span>
+                    {shippingPrice === 0 ? (
+                      <span className="text-green-600">{shippingLabel ?? "Retirar na Loja"} — Grátis</span>
+                    ) : (
+                      <span>{shippingLabel ?? "Frete"} — {formatCurrency(shippingPrice)}</span>
+                    )}
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
@@ -359,10 +363,7 @@ export default function CartPage() {
                   <Button
                     className="w-full bg-orange-500 hover:bg-orange-600 mt-2"
                     size="lg"
-                    onClick={() => {
-                      const freteId = extractFreteId();
-                      setLocation(freteId ? `/checkout?freteId=${freteId}` : "/checkout");
-                    }}
+                    onClick={() => setLocation("/checkout")}
                   >
                     Finalizar Pedido
                   </Button>

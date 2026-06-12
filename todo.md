@@ -2198,3 +2198,59 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar tela Rastreamento (/admin/logistica/rastreamento) com consulta de status
 - [ ] Escrever testes vitest para o módulo
 - [ ] Salvar checkpoint e publicar
+
+
+## Fase 24: Correção do Carrinho e Implementação de Frete Completo
+
+### Correções Implementadas ✅
+- [x] Adicionar colunas `shippingPrice` e `shippingLabel` à tabela `cartItems`
+- [x] Atualizar schema Drizzle para incluir novos campos de frete
+- [x] Corrigir procedure `cart.addItem` para aceitar e salvar `shippingPrice` e `shippingLabel`
+- [x] Atualizar função `addToCart` no db.ts para persistir dados de frete
+- [x] Criar tabela `localDeliveryRules` no banco de dados
+- [x] Implementar procedures tRPC para CRUD de regras de frete local (create, update, delete, list)
+- [x] Modificar `shipping.calculate` para injetar opção fixa "Retirar na Loja" (Grátis)
+- [x] Modificar `shipping.calculate` para injetar opções de "Entrega Local - Motoboy" baseado em CEP
+- [x] Refatorar ProductDetail para usar cálculo dinâmico via `shipping.calculate`
+- [x] Implementar seletor de frete com opções: Retirada, Entrega Local, Melhor Envio
+- [x] Corrigir CartPage para exibir frete correto do carrinho
+- [x] Atualizar `checkout.createOrder` para somar `shippingPrice` ao total
+- [x] Propagar dados de frete (`shippingMethod`, `shippingPrice`, `shippingLabel`) para o pedido
+- [x] Atualizar `createOrderFromCart` no db.ts para aceitar e salvar dados de frete
+- [x] Garantir que novo pedido começa com status `analisando` (padrão da gráfica)
+- [x] Criar interface admin de cadastro de cidades próximas (ShippingRulesManager)
+- [x] Implementar CRUD de regras de frete local na interface admin
+- [x] Escrever 6 testes vitest para validar fluxo completo (checkout.test.ts)
+- [x] Todos os testes passando (6/6 ✅)
+
+### Funcionalidades Entregues ✅
+1. **Opção "Retirar na Loja"**: Sempre disponível, valor R$ 0,00
+2. **Entrega Local - Motoboy**: Configurável por cidades próximas no painel admin
+3. **Integração Melhor Envio**: Continua funcionando com cálculo dinâmico
+4. **Cálculo de Frete na Página do Produto**: CEP → opções → preço atualiza
+5. **Vínculo Frete-Carrinho**: Frete selecionado salvo no carrinho
+6. **Vínculo Frete-Checkout**: Frete propagado para o pedido final
+7. **Status Inicial Correto**: Novo pedido = `analisando` (não `pagamento_aprovado`)
+8. **Interface Admin**: Cadastro de cidades próximas com preço fixo e prazo
+9. **Validação Completa**: Testes vitest cobrindo todos os cenários
+
+### Arquivos Modificados
+- `/home/ubuntu/grafica-ponto-digital/drizzle/schema.ts` - Adicionado `localDeliveryRules`
+- `/home/ubuntu/grafica-ponto-digital/server/routers-logistics.ts` - Procedures de frete local + injeção no calculate
+- `/home/ubuntu/grafica-ponto-digital/server/routers.ts` - Correção de `checkout.createOrder`
+- `/home/ubuntu/grafica-ponto-digital/server/db.ts` - Atualização de `createOrderFromCart`
+- `/home/ubuntu/grafica-ponto-digital/client/src/pages/ecommerce/ProductDetail.tsx` - Cálculo dinâmico de frete
+- `/home/ubuntu/grafica-ponto-digital/client/src/pages/ecommerce/CartPage.tsx` - Exibição correta de frete
+- `/home/ubuntu/grafica-ponto-digital/client/src/pages/admin/ShippingRulesManager.tsx` - Interface de cadastro
+- `/home/ubuntu/grafica-ponto-digital/server/checkout.test.ts` - Testes vitest (novo arquivo)
+
+### Status Final ✅
+- ✅ Botão "Adicionar ao Carrinho" funcionando sem erros
+- ✅ Frete calculado dinamicamente na página do produto
+- ✅ Opção "Retirar na Loja" sempre disponível (Grátis)
+- ✅ Regras de frete local configuráveis no admin
+- ✅ Frete propagado corretamente para o pedido
+- ✅ Total do pedido inclui frete
+- ✅ Status inicial do pedido = `analisando`
+- ✅ 6 testes vitest passando (100%)
+- ✅ Pronto para produção
