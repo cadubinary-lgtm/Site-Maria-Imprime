@@ -111,20 +111,32 @@ export function ShippingMethodSelector({
         length: 40,
       });
 
-      if (!quotes || quotes.length === 0) {
+      // Backend retorna { quotes, cutoffTime, isPastCutoff } ou array direto (compat)
+      const rawQuotes = quotes as any;
+      const quotesArray = Array.isArray(rawQuotes) ? rawQuotes : (rawQuotes.quotes ?? []);
+
+      if (!quotesArray || quotesArray.length === 0) {
         setError("Nenhuma opção de frete disponível para este CEP.");
         return;
       }
 
-      const methods: ShippingMethod[] = quotes.map((q) => ({
-        id: String(q.id),
-        name: `${q.company} — ${q.name}`,
-        description: `Entrega em ${q.deliveryDays} dia${q.deliveryDays !== 1 ? "s" : ""} úteis`,
-        price: q.price,
-        estimatedDays: q.deliveryDays,
-        estimatedHours: 0,
-        initialStatus: "awaiting_shipment",
-      }));
+      const methods: ShippingMethod[] = quotesArray.map((q: any) => {
+        // Evitar duplicação: se company === name ou company está contido no name, usar apenas name
+        const displayName = (!q.company || q.company === q.name || q.name.includes(q.company))
+          ? q.name
+          : `${q.company} — ${q.name}`;
+        return {
+          id: String(q.id),
+          name: displayName,
+          description: q.deliveryDays === 0
+            ? 'Entrega no mesmo dia'
+            : `Entrega em ${q.deliveryDays} dia${q.deliveryDays !== 1 ? 's' : ''} úteis`,
+          price: q.price,
+          estimatedDays: q.deliveryDays,
+          estimatedHours: 0,
+          initialStatus: "awaiting_shipment",
+        };
+      });
 
       setShippingMethods(methods);
       setHasCalculated(true);

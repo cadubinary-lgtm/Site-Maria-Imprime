@@ -91,6 +91,8 @@ const settingsRouter = router({
         senderCity: z.string().optional(),
         senderStateAbbr: z.string().max(2).optional(),
         sandbox: z.boolean().optional(),
+        // Horário limite de produção (cut-off) no formato HH:MM
+        cutoffTime: z.string().regex(/^\d{2}:\d{2}$/, "Formato HH:MM").optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -116,6 +118,7 @@ const settingsRouter = router({
         senderCity: input.senderCity ?? existing?.senderCity ?? null,
         senderStateAbbr: input.senderStateAbbr ?? existing?.senderStateAbbr ?? null,
         sandbox: input.sandbox ?? existing?.sandbox ?? true,
+        cutoffTime: input.cutoffTime ?? existing?.cutoffTime ?? "13:00",
       };
 
       if (existing) {
@@ -227,6 +230,17 @@ const shippingRouter = router({
     .mutation(async ({ input }) => {
       const db = await requireDb();
 
+      // Buscar configurações para obter o cut-off
+      const settings = await getSettings();
+      const cutoffTime = settings?.cutoffTime ?? "13:00";
+
+      // Verificar se o horário atual já passou do cut-off (fuso de Brasília, UTC-3)
+      const nowBrasilia = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      const [cutoffHour, cutoffMin] = cutoffTime.split(":").map(Number);
+      const isPastCutoff =
+        nowBrasilia.getHours() > cutoffHour ||
+        (nowBrasilia.getHours() === cutoffHour && nowBrasilia.getMinutes() >= cutoffMin);
+
       // 1. Opção fixa: Retirar na Loja (sempre disponível)
       const results: Array<{
         id: string | number;
@@ -265,13 +279,17 @@ const shippingRouter = router({
 
           // Verificar se o CEP do cliente está dentro da faixa
           if (cepNum >= ruleStart && cepNum <= ruleEnd) {
+            // Se passou do cut-off, soma +1 dia útil ao prazo de entrega local
+            const baseDays = rule.deliveryDays;
+            const adjustedDays = isPastCutoff ? baseDays + 1 : baseDays;
+
             results.push({
               id: `local_${rule.id}`,
               name: rule.description || `Entrega Local - ${rule.deliveryType === "moto" ? "Moto" : "Carro"}`,
               company: "Entrega Local",
               logoUrl: null,
               price: parseFloat(rule.price as any),
-              deliveryDays: rule.deliveryDays,
+              deliveryDays: adjustedDays,
               isFixed: true,
               fixedType: "local",
             });
@@ -283,10 +301,9 @@ const shippingRouter = router({
 
       // 3. Cotações do Melhor Envio (se token configurado)
       try {
-        const s = await getSettings();
-        if (s?.accessToken && s.originCep) {
+        if (settings?.accessToken && settings.originCep) {
           const payload: CalculateShippingInput = {
-            from: { postal_code: s.originCep },
+            from: { postal_code: settings.originCep },
             to: { postal_code: input.destinationCep },
             package: {
               height: input.height,
@@ -300,7 +317,7 @@ const shippingRouter = router({
               own_hand: false,
             },
           };
-          const quotes = await calculateShipping(s.accessToken, s.sandbox, payload);
+          const quotes = await calculateShipping(settings.accessToken, settings.sandbox, payload);
           for (const q of quotes) {
             if (!q.error) {
               results.push({
@@ -319,7 +336,12 @@ const shippingRouter = router({
         // Silencioso: falha no ME não bloqueia as opções fixas
       }
 
-      return results;
+      // Retorna resultados + metadados do cut-off para uso no frontend
+      return {
+        quotes: results,
+        cutoffTime,
+        isPastCutoff,
+      };
     }),
 });
 
