@@ -250,47 +250,35 @@ const shippingRouter = router({
         },
       ];
 
-      // 2. Verificar regras de entrega local por cidade
-      // Busca o nome da cidade via ViaCEP e compara com as regras cadastradas
+      // 2. Verificar regras de entrega local por faixa de CEP
+      // Busca regras onde o CEP do cliente está dentro da faixa (cepStart <= cep <= cepEnd)
       try {
         const cepClean = input.destinationCep.replace(/\D/g, "");
-        const viaCepRes = await fetch(`https://viacep.com.br/ws/${cepClean}/json/`, {
-          signal: AbortSignal.timeout(5000),
-        });
-        if (viaCepRes.ok) {
-          const cepData = await viaCepRes.json();
-          if (!cepData.erro && cepData.localidade) {
-            const cityName = cepData.localidade as string;
-            const stateAbbr = cepData.uf as string;
-            // Busca regras ativas para a cidade
-            const localRules = await db
-              .select()
-              .from(localDeliveryRules)
-              .where(
-                and(
-                  eq(localDeliveryRules.isActive, true),
-                  or(
-                    like(localDeliveryRules.cityName, cityName),
-                    like(localDeliveryRules.cityName, `%${cityName}%`)
-                  )
-                )
-              );
-            for (const rule of localRules) {
-              results.push({
-                id: `local_${rule.id}`,
-                name: rule.description || "Entrega Local - Motoboy",
-                company: "Entrega Local",
-                logoUrl: null,
-                price: parseFloat(rule.price as any),
-                deliveryDays: rule.deliveryDays,
-                isFixed: true,
-                fixedType: "local",
-              });
-            }
+        const cepNum = parseInt(cepClean, 10);
+
+        // Buscar regras ativas onde o CEP está na faixa
+        const localRules = await db.select().from(localDeliveryRules).where(eq(localDeliveryRules.isActive, true));
+
+        for (const rule of localRules) {
+          const ruleStart = parseInt(rule.cepStart, 10);
+          const ruleEnd = parseInt(rule.cepEnd, 10);
+
+          // Verificar se o CEP do cliente está dentro da faixa
+          if (cepNum >= ruleStart && cepNum <= ruleEnd) {
+            results.push({
+              id: `local_${rule.id}`,
+              name: rule.description || `Entrega Local - ${rule.deliveryType === "moto" ? "Moto" : "Carro"}`,
+              company: "Entrega Local",
+              logoUrl: null,
+              price: parseFloat(rule.price as any),
+              deliveryDays: rule.deliveryDays,
+              isFixed: true,
+              fixedType: "local",
+            });
           }
         }
       } catch (_) {
-        // Silencioso: falha no ViaCEP não bloqueia o cálculo
+        // Silencioso: falha na validação de CEP não bloqueia o cálculo
       }
 
       // 3. Cotações do Melhor Envio (se token configurado)
@@ -342,15 +330,30 @@ const shippingRouter = router({
 const localRulesRouter = router({
   list: adminProcedure.query(async () => {
     const db = await requireDb();
-    return db.select().from(localDeliveryRules).orderBy(localDeliveryRules.cityName);
+    const rules = await db.select().from(localDeliveryRules).orderBy(localDeliveryRules.neighborhood);
+    return rules.map((r) => ({
+      id: r.id,
+      neighborhood: r.neighborhood,
+      stateAbbr: r.stateAbbr,
+      cepStart: r.cepStart,
+      cepEnd: r.cepEnd,
+      deliveryType: r.deliveryType,
+      price: parseFloat(r.price as any),
+      deliveryDays: r.deliveryDays,
+      description: r.description,
+      isActive: r.isActive,
+    }));
   }),
 
   create: adminProcedure
     .input(
       z.object({
-        cityName: z.string().min(2),
-        stateAbbr: z.string().length(2),
-        price: z.number().min(0),
+        neighborhood: z.string().min(2, "Bairro deve ter pelo menos 2 caracteres"),
+        stateAbbr: z.string().length(2, "UF deve ter 2 caracteres"),
+        cepStart: z.string().regex(/^\d{8}$/, "CEP inicial deve ter 8 dígitos"),
+        cepEnd: z.string().regex(/^\d{8}$/, "CEP final deve ter 8 dígitos"),
+        deliveryType: z.enum(["moto", "carro"]),
+        price: z.number().min(0, "Preço não pode ser negativo"),
         deliveryDays: z.number().int().min(0).default(1),
         description: z.string().optional(),
         isActive: z.boolean().default(true),
@@ -358,12 +361,21 @@ const localRulesRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
+      if (input.cepStart > input.cepEnd) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "CEP Inicial deve ser menor ou igual ao CEP Final",
+        });
+      }
       const result = await db.insert(localDeliveryRules).values({
-        cityName: input.cityName,
+        neighborhood: input.neighborhood,
         stateAbbr: input.stateAbbr.toUpperCase(),
+        cepStart: input.cepStart,
+        cepEnd: input.cepEnd,
+        deliveryType: input.deliveryType,
         price: input.price.toFixed(2) as any,
         deliveryDays: input.deliveryDays,
-        description: input.description,
+        description: input.description || `Entrega Local - ${input.deliveryType === "moto" ? "Moto" : "Carro"}`,
         isActive: input.isActive,
       });
       return { id: (result as any).insertId, success: true };
@@ -373,8 +385,11 @@ const localRulesRouter = router({
     .input(
       z.object({
         id: z.number(),
-        cityName: z.string().min(2).optional(),
+        neighborhood: z.string().min(2).optional(),
         stateAbbr: z.string().length(2).optional(),
+        cepStart: z.string().regex(/^\d{8}$/).optional(),
+        cepEnd: z.string().regex(/^\d{8}$/).optional(),
+        deliveryType: z.enum(["moto", "carro"]).optional(),
         price: z.number().min(0).optional(),
         deliveryDays: z.number().int().min(0).optional(),
         description: z.string().optional(),
@@ -384,9 +399,18 @@ const localRulesRouter = router({
     .mutation(async ({ input }) => {
       const db = await requireDb();
       const { id, ...rest } = input;
+      if (rest.cepStart && rest.cepEnd && rest.cepStart > rest.cepEnd) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "CEP Inicial deve ser menor ou igual ao CEP Final",
+        });
+      }
       const updateData: any = {};
-      if (rest.cityName !== undefined) updateData.cityName = rest.cityName;
+      if (rest.neighborhood !== undefined) updateData.neighborhood = rest.neighborhood;
       if (rest.stateAbbr !== undefined) updateData.stateAbbr = rest.stateAbbr.toUpperCase();
+      if (rest.cepStart !== undefined) updateData.cepStart = rest.cepStart;
+      if (rest.cepEnd !== undefined) updateData.cepEnd = rest.cepEnd;
+      if (rest.deliveryType !== undefined) updateData.deliveryType = rest.deliveryType;
       if (rest.price !== undefined) updateData.price = rest.price.toFixed(2);
       if (rest.deliveryDays !== undefined) updateData.deliveryDays = rest.deliveryDays;
       if (rest.description !== undefined) updateData.description = rest.description;

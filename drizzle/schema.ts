@@ -1414,11 +1414,14 @@ export type InsertAuditLog = typeof auditLogs.$inferInsert;
  */
 export const localDeliveryRules = mysqlTable("localDeliveryRules", {
   id: int("id").autoincrement().primaryKey(),
-  cityName: varchar("cityName", { length: 150 }).notNull(),       // Nome da cidade
-  stateAbbr: varchar("stateAbbr", { length: 2 }).notNull(),       // UF ex: SP
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Valor do frete
-  deliveryDays: int("deliveryDays").default(1).notNull(),          // Prazo em dias úteis
-  description: varchar("description", { length: 255 }),           // Ex: "Entrega Local - Motoboy"
+  neighborhood: varchar("neighborhood", { length: 150 }).notNull(),  // Nome do bairro/regiao (ex: Tamoios, Centro, Pero)
+  stateAbbr: varchar("stateAbbr", { length: 2 }).notNull(),          // UF ex: RJ
+  cepStart: varchar("cepStart", { length: 8 }).notNull(),            // CEP inicial da faixa (ex: 28900000)
+  cepEnd: varchar("cepEnd", { length: 8 }).notNull(),                // CEP final da faixa (ex: 28900999)
+  deliveryType: mysqlEnum("deliveryType", ["moto", "carro"]).notNull(), // Tipo de entrega
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),    // Valor do frete
+  deliveryDays: int("deliveryDays").default(1).notNull(),            // Prazo em dias uteis
+  description: varchar("description", { length: 255 }),              // Ex: "Entrega Local - Moto" ou "Entrega Local - Carro"
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

@@ -2254,3 +2254,22 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - ✅ Status inicial do pedido = `analisando`
 - ✅ 6 testes vitest passando (100%)
 - ✅ Pronto para produção
+
+
+## Fase 25: Refatoração de Frete Local - De Cidade para Bairro/Faixa de CEP
+
+### Alterações Necessárias
+- [ ] Atualizar schema `localDeliveryRules`: trocar `city` por `neighborhood` (bairro)
+- [ ] Adicionar campos `cepStart` e `cepEnd` ao schema (faixa de CEP)
+- [ ] Criar migration SQL para alterar tabela
+- [ ] Atualizar procedures tRPC para validar CEP dentro da faixa
+- [ ] Refatorar ShippingRulesManager com novos campos (Bairro, CEP Inicial, CEP Final)
+- [ ] Atualizar lógica de cálculo no ProductDetail para validar faixa de CEP
+- [ ] Escrever testes vitest para validação de faixa de CEP
+- [ ] Testar fluxo completo: CEP Tamoios vs Centro em Cabo Frio
+- [ ] Criar checkpoint final
+
+### Exemplos de Uso
+- Bairro: "Tamoios", CEP Inicial: "28900000", CEP Final: "28900999" → R$ 20,00
+- Bairro: "Centro", CEP Inicial: "28901000", CEP Final: "28901999" → R$ 12,00
+- Bairro: "Peró", CEP Inicial: "28902000", CEP Final: "28902999" → R$ 15,00

@@ -9,10 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  Loader2, Calculator, Truck, Clock, DollarSign, Package,
-  AlertCircle, Plus, Pencil, Trash2, MapPin, Store, Zap,
+  Loader2, Calculator, Truck, Clock, Package,
+  AlertCircle, Plus, Pencil, Trash2, MapPin, Store, Bike, Car,
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -30,17 +31,23 @@ interface QuoteResult {
 
 interface LocalRule {
   id: number;
-  cityName: string;
+  neighborhood: string;
   stateAbbr: string;
-  price: string;
+  cepStart: string;
+  cepEnd: string;
+  deliveryType: 'moto' | 'carro';
+  price: number;
   deliveryDays: number;
   description: string | null;
   isActive: boolean;
 }
 
 const emptyForm = {
-  cityName: '',
+  neighborhood: '',
   stateAbbr: '',
+  cepStart: '',
+  cepEnd: '',
+  deliveryType: 'moto' as 'moto' | 'carro',
   price: '',
   deliveryDays: '1',
   description: '',
@@ -90,6 +97,11 @@ export function ShippingRulesManager() {
     }
   };
 
+  const formatCep = (v: string) => {
+    const digits = v.replace(/\D/g, '').slice(0, 8);
+    return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+  };
+
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
@@ -99,9 +111,12 @@ export function ShippingRulesManager() {
   const openEdit = (rule: LocalRule) => {
     setEditingId(rule.id);
     setForm({
-      cityName: rule.cityName,
+      neighborhood: rule.neighborhood,
       stateAbbr: rule.stateAbbr,
-      price: rule.price,
+      cepStart: rule.cepStart,
+      cepEnd: rule.cepEnd,
+      deliveryType: rule.deliveryType,
+      price: String(rule.price),
       deliveryDays: String(rule.deliveryDays),
       description: rule.description ?? '',
       isActive: rule.isActive,
@@ -110,16 +125,25 @@ export function ShippingRulesManager() {
   };
 
   const handleSave = async () => {
-    if (!form.cityName.trim()) { toast.error('Informe o nome da cidade'); return; }
+    if (!form.neighborhood.trim()) { toast.error('Informe o bairro/região'); return; }
     if (!form.stateAbbr.trim() || form.stateAbbr.length !== 2) { toast.error('Informe a UF (2 letras)'); return; }
+    const cepStartClean = form.cepStart.replace(/\D/g, '');
+    const cepEndClean = form.cepEnd.replace(/\D/g, '');
+    if (cepStartClean.length !== 8) { toast.error('CEP Inicial deve ter 8 dígitos'); return; }
+    if (cepEndClean.length !== 8) { toast.error('CEP Final deve ter 8 dígitos'); return; }
+    if (cepStartClean > cepEndClean) { toast.error('CEP Inicial deve ser menor ou igual ao CEP Final'); return; }
     const price = parseFloat(form.price);
     if (isNaN(price) || price < 0) { toast.error('Informe um valor de frete válido'); return; }
+
     try {
       if (editingId) {
         await updateRule.mutateAsync({
           id: editingId,
-          cityName: form.cityName.trim(),
+          neighborhood: form.neighborhood.trim(),
           stateAbbr: form.stateAbbr.trim().toUpperCase(),
+          cepStart: cepStartClean,
+          cepEnd: cepEndClean,
+          deliveryType: form.deliveryType,
           price,
           deliveryDays: parseInt(form.deliveryDays) || 1,
           description: form.description.trim() || undefined,
@@ -128,8 +152,11 @@ export function ShippingRulesManager() {
         toast.success('Regra atualizada com sucesso');
       } else {
         await createRule.mutateAsync({
-          cityName: form.cityName.trim(),
+          neighborhood: form.neighborhood.trim(),
           stateAbbr: form.stateAbbr.trim().toUpperCase(),
+          cepStart: cepStartClean,
+          cepEnd: cepEndClean,
+          deliveryType: form.deliveryType,
           price,
           deliveryDays: parseInt(form.deliveryDays) || 1,
           description: form.description.trim() || undefined,
@@ -158,11 +185,27 @@ export function ShippingRulesManager() {
   const formatCurrency = (value: number | string) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
 
+  const formatCepDisplay = (cep: string) =>
+    cep.length === 8 ? `${cep.slice(0, 5)}-${cep.slice(5)}` : cep;
+
   const getQuoteIcon = (q: QuoteResult) => {
     if (q.fixedType === 'pickup') return <Store className="w-5 h-5 text-green-600" />;
-    if (q.fixedType === 'local') return <Zap className="w-5 h-5 text-orange-500" />;
+    if (q.fixedType === 'local') {
+      const isCarro = q.name?.toLowerCase().includes('carro');
+      return isCarro
+        ? <Car className="w-5 h-5 text-blue-500" />
+        : <Bike className="w-5 h-5 text-orange-500" />;
+    }
     return <Truck className="w-5 h-5 text-blue-500" />;
   };
+
+  const getDeliveryTypeLabel = (type: 'moto' | 'carro') =>
+    type === 'moto' ? 'Moto' : 'Carro';
+
+  const getDeliveryTypeIcon = (type: 'moto' | 'carro') =>
+    type === 'moto'
+      ? <Bike className="w-4 h-4 text-orange-500" />
+      : <Car className="w-4 h-4 text-blue-500" />;
 
   return (
     <AdminLayout>
@@ -174,34 +217,39 @@ export function ShippingRulesManager() {
             Regras de Frete
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie cidades com entrega local (Motoboy) e simule cotações via Melhor Envio.
+            Gerencie bairros com entrega local (Moto ou Carro) por faixa de CEP e simule cotações via Melhor Envio.
           </p>
         </div>
 
-        {/* ── Seção 1: Cidades com Entrega Local ──────────────────────────── */}
+        {/* ── Seção 1: Bairros com Entrega Local ──────────────────────────── */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-orange-500" />
-                Entrega Local — Cidades Próximas
+                Entrega Local — Bairros e Regiões
               </CardTitle>
               <CardDescription>
-                Quando o CEP do cliente pertencer a uma cidade cadastrada, a opção "Entrega Local - Motoboy"
-                aparecerá automaticamente com o valor e prazo configurados.
+                Quando o CEP do cliente estiver dentro da faixa configurada, as opções de entrega local
+                (Moto e/ou Carro) aparecerão automaticamente com o valor e prazo configurados.
+                Você pode cadastrar a mesma faixa de CEP duas vezes — uma para Moto e outra para Carro.
               </CardDescription>
             </div>
             <Button size="sm" onClick={openCreate} className="bg-orange-500 hover:bg-orange-600 shrink-0">
-              <Plus className="w-4 h-4 mr-1" /> Adicionar Cidade
+              <Plus className="w-4 h-4 mr-1" /> Adicionar Regra
             </Button>
           </CardHeader>
           <CardContent>
             {!localRules || localRules.length === 0 ? (
               <div className="flex flex-col items-center py-10 gap-3 text-muted-foreground">
                 <MapPin className="w-10 h-10 opacity-30" />
-                <p>Nenhuma cidade cadastrada ainda.</p>
+                <p>Nenhuma regra de entrega local cadastrada ainda.</p>
+                <p className="text-xs text-center max-w-xs">
+                  Cadastre bairros como "Centro", "Tamoios" ou "Peró" com a faixa de CEP correspondente
+                  e o valor do frete para Moto e/ou Carro.
+                </p>
                 <Button variant="outline" size="sm" onClick={openCreate}>
-                  <Plus className="w-4 h-4 mr-1" /> Cadastrar primeira cidade
+                  <Plus className="w-4 h-4 mr-1" /> Cadastrar primeira regra
                 </Button>
               </div>
             ) : (
@@ -213,14 +261,23 @@ export function ShippingRulesManager() {
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${rule.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
-                      <div>
-                        <p className="font-medium">
-                          {rule.cityName} — {rule.stateAbbr}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {rule.description || 'Entrega Local - Motoboy'} ·{' '}
-                          {rule.deliveryDays === 0 ? 'Mesmo dia' : `${rule.deliveryDays} dia(s) útil(eis)`}
-                        </p>
+                      <div className="flex items-center gap-2">
+                        {getDeliveryTypeIcon(rule.deliveryType)}
+                        <div>
+                          <p className="font-medium flex items-center gap-2">
+                            {rule.neighborhood} — {rule.stateAbbr}
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${rule.deliveryType === 'moto' ? 'border-orange-400 text-orange-600' : 'border-blue-400 text-blue-600'}`}
+                            >
+                              {getDeliveryTypeLabel(rule.deliveryType)}
+                            </Badge>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            CEP: {formatCepDisplay(rule.cepStart)} até {formatCepDisplay(rule.cepEnd)} ·{' '}
+                            {rule.deliveryDays === 0 ? 'Mesmo dia' : `${rule.deliveryDays} dia(s) útil(eis)`}
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -268,10 +325,7 @@ export function ShippingRulesManager() {
                 id="destCep"
                 placeholder="00000-000"
                 value={destinationCep}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, '').slice(0, 8);
-                  setDestinationCep(v.length > 5 ? `${v.slice(0, 5)}-${v.slice(5)}` : v);
-                }}
+                onChange={(e) => setDestinationCep(formatCep(e.target.value))}
                 maxLength={9}
               />
             </div>
@@ -343,30 +397,89 @@ export function ShippingRulesManager() {
 
       {/* ── Dialog: Criar / Editar Regra ──────────────────────────────────── */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar Regra de Entrega Local' : 'Nova Regra de Entrega Local'}</DialogTitle>
+            <DialogTitle>
+              {editingId ? 'Editar Regra de Entrega Local' : 'Nova Regra de Entrega Local'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+
+            {/* Bairro + UF */}
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2 space-y-2">
-                <Label>Cidade *</Label>
+                <Label>Bairro / Região *</Label>
                 <Input
-                  placeholder="Ex: Guarulhos"
-                  value={form.cityName}
-                  onChange={(e) => setForm({ ...form, cityName: e.target.value })}
+                  placeholder="Ex: Centro, Tamoios, Peró"
+                  value={form.neighborhood}
+                  onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <Label>UF *</Label>
                 <Input
-                  placeholder="SP"
+                  placeholder="RJ"
                   maxLength={2}
                   value={form.stateAbbr}
                   onChange={(e) => setForm({ ...form, stateAbbr: e.target.value.toUpperCase() })}
                 />
               </div>
             </div>
+
+            {/* Faixa de CEP */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>CEP Inicial *</Label>
+                <Input
+                  placeholder="28900000"
+                  maxLength={9}
+                  value={form.cepStart.length > 5 ? `${form.cepStart.slice(0, 5)}-${form.cepStart.slice(5)}` : form.cepStart}
+                  onChange={(e) => setForm({ ...form, cepStart: e.target.value.replace(/\D/g, '').slice(0, 8) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CEP Final *</Label>
+                <Input
+                  placeholder="28900999"
+                  maxLength={9}
+                  value={form.cepEnd.length > 5 ? `${form.cepEnd.slice(0, 5)}-${form.cepEnd.slice(5)}` : form.cepEnd}
+                  onChange={(e) => setForm({ ...form, cepEnd: e.target.value.replace(/\D/g, '').slice(0, 8) })}
+                />
+              </div>
+            </div>
+
+            {/* Tipo de Entrega */}
+            <div className="space-y-2">
+              <Label>Tipo de Entrega *</Label>
+              <Select
+                value={form.deliveryType}
+                onValueChange={(v: 'moto' | 'carro') => setForm({ ...form, deliveryType: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo de entrega" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="moto">
+                    <span className="flex items-center gap-2">
+                      <Bike className="w-4 h-4 text-orange-500" />
+                      Entrega Local - Moto
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="carro">
+                    <span className="flex items-center gap-2">
+                      <Car className="w-4 h-4 text-blue-500" />
+                      Entrega Local - Carro
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Você pode cadastrar a mesma faixa de CEP duas vezes (uma para Moto e outra para Carro)
+                com valores diferentes.
+              </p>
+            </div>
+
+            {/* Valor + Prazo */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Valor do Frete (R$) *</Label>
@@ -389,14 +502,21 @@ export function ShippingRulesManager() {
                 />
               </div>
             </div>
+
+            {/* Descrição */}
             <div className="space-y-2">
               <Label>Descrição (exibida ao cliente)</Label>
               <Input
-                placeholder="Entrega Local - Motoboy"
+                placeholder={`Entrega Local - ${form.deliveryType === 'moto' ? 'Moto' : 'Carro'}`}
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
+              <p className="text-xs text-muted-foreground">
+                Se deixar em branco, usará "Entrega Local - {form.deliveryType === 'moto' ? 'Moto' : 'Carro'}" automaticamente.
+              </p>
             </div>
+
+            {/* Ativo */}
             <div className="flex items-center gap-3">
               <Switch
                 checked={form.isActive}
@@ -412,7 +532,9 @@ export function ShippingRulesManager() {
               disabled={createRule.isPending || updateRule.isPending}
               className="bg-orange-500 hover:bg-orange-600"
             >
-              {(createRule.isPending || updateRule.isPending) ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+              {(createRule.isPending || updateRule.isPending)
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : 'Salvar Regra'}
             </Button>
           </DialogFooter>
         </DialogContent>
