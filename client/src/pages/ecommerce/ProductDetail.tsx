@@ -13,7 +13,7 @@ import {
   ShieldCheck, Droplets, Scissors, LayoutGrid,
   Factory, Truck, CreditCard, HeadphonesIcon,
   Home, Clock, Tag, ThumbsUp,
-  Store, Bike, Car, Mail, MailOpen, Lightbulb,
+  Store, Zap, Lightbulb,
   AlertTriangle, CheckSquare
 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,16 +21,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
-// ─── Constantes ─────────────────────────────────────────────────────────────
-const FRETE_OPTIONS = [
-  { id: "retirada",       name: "Retirar na Loja",  description: "Retirada presencial",   price: 0,    days: "Conforme produção", iconName: "Store" },
-  { id: "motoboy",        name: "Moto Express",     description: "Entrega expressa",      price: 15,   days: "Mesmo dia*",        iconName: "Bike" },
-  { id: "uber",           name: "Uber Entrega",     description: "Entrega via Uber",      price: 28,   days: "Mesmo dia*",        iconName: "Car" },
-  { id: "jadlog",         name: "Jadlog",           description: "2 a 3 dias úteis",      price: 24.9, days: "2 a 3 dias úteis",  iconName: "Package" },
-  { id: "correios_sedex", name: "Correios SEDEX",   description: "1 a 2 dias úteis",      price: 18.9, days: "1 a 2 dias úteis",  iconName: "Mail" },
-  { id: "correios_pac",   name: "Correios PAC",     description: "3 a 5 dias úteis",      price: 12.9, days: "3 a 5 dias úteis",  iconName: "MailOpen" },
-  { id: "transportadora", name: "Transportadora",   description: "2 a 4 dias úteis",      price: 39,   days: "2 a 4 dias úteis",  iconName: "Truck" },
-] as const;
+// ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
+interface ShippingQuote {
+  id: string | number;
+  name: string;
+  company: string;
+  logoUrl?: string | null;
+  price: number;
+  deliveryDays: number;
+  isFixed?: boolean;
+  fixedType?: string;
+}
 
 const PRODUCT_FEATURES = [
   { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
@@ -116,13 +117,15 @@ export default function ProductDetail() {
   // Acordeão
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({ 0: true });
 
-  // Frete
+  // Frete dinâmico
   const [cep, setCep] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
   const [cepAddress, setCepAddress] = useState<string | null>(null);
-  const [selectedFreteId, setSelectedFreteId] = useState<string>("");
-  const selectedFrete = FRETE_OPTIONS.find(f => f.id === selectedFreteId) ?? FRETE_OPTIONS[0];
+  const [shippingQuotes, setShippingQuotes] = useState<ShippingQuote[]>([]);
+  const [shippingCalculated, setShippingCalculated] = useState(false);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingQuote | null>(null);
+  const calculateShippingMutation = trpc.logistics.shipping.calculate.useMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, setLocation] = useLocation();
@@ -271,7 +274,7 @@ export default function ProductDetail() {
     return basePrice;
   }, [isM2, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
-  const fretePrice = selectedFrete.price;
+  const fretePrice = selectedShipping?.price ?? 0;
   const subtotal = effectivePrice * quantity;
   const total = subtotal + fretePrice + (selectedDeliveryOption?.priceModifier ?? 0);
 
@@ -352,12 +355,27 @@ export default function ProductDetail() {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8) { setCepError("CEP deve ter 8 dígitos"); return; }
     setCepLoading(true); setCepError(null); setCepAddress(null);
+    setShippingQuotes([]); setShippingCalculated(false); setSelectedShipping(null);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
       const d = await res.json();
-      if (d.erro) setCepError("CEP não encontrado");
-      else setCepAddress(`${d.logradouro ? d.logradouro + ", " : ""}${d.bairro ? d.bairro + " — " : ""}${d.localidade}/${d.uf}`);
-    } catch { setCepError("Erro ao consultar CEP"); }
+      if (d.erro) { setCepError("CEP não encontrado"); return; }
+      setCepAddress(`${d.logradouro ? d.logradouro + ", " : ""}${d.bairro ? d.bairro + " — " : ""}${d.localidade}/${d.uf}`);
+      // Calcular fretes via backend (Retirada + Local + Melhor Envio)
+      const quotes = await calculateShippingMutation.mutateAsync({
+        destinationCep: clean,
+        weight: 1,
+        height: 5,
+        width: 30,
+        length: 40,
+      });
+      const typedQuotes = quotes as ShippingQuote[];
+      setShippingQuotes(typedQuotes);
+      setShippingCalculated(true);
+      // Pré-selecionar Retirar na Loja por padrão
+      const pickup = typedQuotes.find(q => q.fixedType === "pickup");
+      if (pickup) setSelectedShipping(pickup);
+    } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
 
@@ -388,8 +406,12 @@ export default function ProductDetail() {
         artUrl = (await r.json()).url;
       }
 
-      const freteNote = `freteId:${selectedFreteId}`;
-      const combinedNotes = [notes, freteNote].filter(Boolean).join(" | ") || undefined;
+      const shippingId = selectedShipping ? String(selectedShipping.id) : "retirada";
+      const shippingPrice = selectedShipping?.price ?? 0;
+      const shippingLabel = selectedShipping
+        ? `${selectedShipping.company} — ${selectedShipping.name}`
+        : "Retirar na Loja";
+      const combinedNotes = notes || undefined;
 
       await addToCartMutation.mutateAsync({
         productId, quantity,
@@ -397,7 +419,9 @@ export default function ProductDetail() {
         priceAtCart: effectivePrice,
         notes: combinedNotes,
         artFileUrl: artUrl,
-        shippingMethod: selectedFreteId,
+        shippingMethod: shippingId,
+        shippingPrice,
+        shippingLabel,
       });
       toast.success("Adicionado ao carrinho!", {
         action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
@@ -1005,13 +1029,30 @@ export default function ProductDetail() {
                 {cepError && <p className="text-xs text-red-500 -mt-2 mb-2">{cepError}</p>}
                 {cepAddress && <p className="text-xs text-green-600 -mt-2 mb-2 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />{cepAddress}</p>}
 
-                {FRETE_OPTIONS.map(opt => {
-                  const isSel = selectedFreteId === opt.id;
+                {/* Estado antes de calcular */}
+                {!shippingCalculated && !cepLoading && (
+                  <div className="text-center py-6 text-gray-400">
+                    <Truck className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">Digite seu CEP acima para ver as opções de entrega</p>
+                  </div>
+                )}
+
+                {/* Calculando */}
+                {(cepLoading || calculateShippingMutation.isPending) && (
+                  <div className="text-center py-6 text-gray-400">
+                    <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-orange-500" />
+                    <p className="text-sm">Calculando opções de entrega...</p>
+                  </div>
+                )}
+
+                {/* Opções calculadas */}
+                {shippingCalculated && shippingQuotes.map(opt => {
+                  const isSel = selectedShipping && String(selectedShipping.id) === String(opt.id);
                   return (
                     <button
-                      key={opt.id}
+                      key={String(opt.id)}
                       type="button"
-                      onClick={() => setSelectedFreteId(opt.id)}
+                      onClick={() => setSelectedShipping(opt)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                         isSel
                           ? "border-orange-500 bg-orange-50 shadow-sm"
@@ -1022,17 +1063,16 @@ export default function ProductDetail() {
                         {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                       </div>
                       <span className="flex-shrink-0 text-gray-500">
-                {opt.iconName === "Store" && <Store className="w-4 h-4" />}
-                {opt.iconName === "Bike" && <Bike className="w-4 h-4" />}
-                {opt.iconName === "Car" && <Car className="w-4 h-4" />}
-                {opt.iconName === "Package" && <Package className="w-4 h-4" />}
-                {opt.iconName === "Mail" && <Mail className="w-4 h-4" />}
-                {opt.iconName === "MailOpen" && <MailOpen className="w-4 h-4" />}
-                {opt.iconName === "Truck" && <Truck className="w-4 h-4" />}
-              </span>
+                        {opt.fixedType === "pickup" && <Store className="w-4 h-4 text-green-600" />}
+                        {opt.fixedType === "local" && <Zap className="w-4 h-4 text-orange-500" />}
+                        {!opt.fixedType && <Truck className="w-4 h-4" />}
+                      </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
-                        <p className="text-xs text-gray-500">{opt.description}</p>
+                        <p className="text-xs text-gray-500">{opt.company}</p>
+                        {opt.deliveryDays > 0 && (
+                          <p className="text-xs text-gray-400">{opt.deliveryDays} dia(s) útil(eis)</p>
+                        )}
                       </div>
                       <span className={`text-sm font-bold flex-shrink-0 ${isSel ? "text-orange-600" : "text-gray-700"}`}>
                         {opt.price === 0 ? <span className="text-green-600">Grátis</span> : `R$ ${opt.price.toFixed(2)}`}
@@ -1040,17 +1080,22 @@ export default function ProductDetail() {
                     </button>
                   );
                 })}
-                <p className="text-xs text-orange-500 mt-1">* Valores de entrega podem variar de acordo com a região.</p>
+
+                {shippingCalculated && shippingQuotes.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">Nenhuma opção disponível para este CEP.</p>
+                )}
 
                 {/* Botão confirmar entrega */}
-                <button
-                  type="button"
-                  onClick={() => setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }))}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Confirmar entrega
-                </button>
+                {shippingCalculated && selectedShipping && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }))}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Confirmar entrega
+                  </button>
+                )}
               </div>
             </AccordionStep>
 
@@ -1173,8 +1218,8 @@ export default function ProductDetail() {
                 {/* Entrega */}
                 <div className="flex justify-between text-sm pb-3 border-b border-gray-100">
                   <span className="text-gray-500">Entrega</span>
-                  <span className={`font-medium ${selectedFrete.price === 0 ? "text-green-600" : "text-gray-800"}`}>
-                    {selectedFrete.name} — {selectedFrete.price === 0 ? "Grátis" : `R$ ${selectedFrete.price.toFixed(2)}`}
+                  <span className={`font-medium ${fretePrice === 0 ? "text-green-600" : "text-gray-800"}`}>
+                    {selectedShipping ? selectedShipping.name : "A calcular"} — {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
                   </span>
                 </div>
 
@@ -1192,8 +1237,8 @@ export default function ProductDetail() {
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Entrega</span>
-                    <span className={`font-medium ${selectedFrete.price === 0 ? "text-green-600" : ""}`}>
-                      {selectedFrete.price === 0 ? "R$ 0,00" : `R$ ${selectedFrete.price.toFixed(2)}`}
+                    <span className={`font-medium ${fretePrice === 0 ? "text-green-600" : ""}`}>
+                      {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-gray-200">

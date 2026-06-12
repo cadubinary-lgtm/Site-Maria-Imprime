@@ -950,6 +950,8 @@ export const cartItems = mysqlTable("cartItems", {
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
   notes: longtext("notes"), // Observações do cliente
   shippingMethod: varchar("shippingMethod", { length: 50 }).default("retirada"), // Método de frete pré-selecionado
+  shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).notNull().default("0"), // Valor do frete escolhido
+  shippingLabel: varchar("shippingLabel", { length: 255 }), // Nome exibível da opção de frete
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -1405,3 +1407,21 @@ export const auditLogs = mysqlTable("auditLogs", {
 });
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+/**
+ * Local Delivery Rules — Regras de Entrega Local (Motoboy por cidade)
+ * Permite cadastrar cidades próximas com valor fixo e prazo de entrega
+ */
+export const localDeliveryRules = mysqlTable("localDeliveryRules", {
+  id: int("id").autoincrement().primaryKey(),
+  cityName: varchar("cityName", { length: 150 }).notNull(),       // Nome da cidade
+  stateAbbr: varchar("stateAbbr", { length: 2 }).notNull(),       // UF ex: SP
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Valor do frete
+  deliveryDays: int("deliveryDays").default(1).notNull(),          // Prazo em dias úteis
+  description: varchar("description", { length: 255 }),           // Ex: "Entrega Local - Motoboy"
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LocalDeliveryRule = typeof localDeliveryRules.$inferSelect;
+export type InsertLocalDeliveryRule = typeof localDeliveryRules.$inferInsert;

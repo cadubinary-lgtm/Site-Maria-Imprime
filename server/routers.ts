@@ -763,6 +763,8 @@ createOrder: protectedProcedure
         artFileUrl: z.string().optional(),
         notes: z.string().optional(),
         shippingMethod: z.string().optional().default("retirada"),
+        shippingPrice: z.number().optional().default(0),
+        shippingLabel: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
@@ -956,11 +958,13 @@ createOrder: protectedProcedure
           throw new TRPCError({ code: "BAD_REQUEST", message: "Carrinho vazio" });
         }
 
-        // 2. Calcular total
-        const totalPrice = cartItems.reduce(
+        // 2. Calcular total (incluindo frete do primeiro item)
+        const subtotal = cartItems.reduce(
           (sum: number, item: any) => sum + (parseFloat(item.priceAtCart) * item.quantity),
           0
         );
+        const shippingPrice = cartItems[0]?.shippingPrice ? parseFloat(cartItems[0].shippingPrice) : 0;
+        const totalPrice = subtotal + shippingPrice;
 
         // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -1074,6 +1078,9 @@ createOrder: protectedProcedure
           guestToken,
           guestEmail: isGuest ? (input.guestEmail ?? null) : null,
           guestName: isGuest ? (input.guestName ?? input.deliveryFullName) : null,
+          shippingMethod: cartItems[0]?.shippingMethod ?? null,
+          shippingPrice: shippingPrice,
+          shippingLabel: cartItems[0]?.shippingLabel ?? null,
           cartItems: cartItems.map((item: any) => ({
             productId: item.productId,
             productName: item.productName ?? "Produto",
@@ -1113,7 +1120,17 @@ createOrder: protectedProcedure
           }
         }
 
-        return { orderId, orderNumber, guestToken };
+        // 9. Log de diagnóstico
+        console.log("[CHECKOUT] Pedido criado:", {
+          orderNumber,
+          subtotal,
+          shippingPrice,
+          totalPrice,
+          shippingMethod: cartItems[0]?.shippingMethod,
+          shippingLabel: cartItems[0]?.shippingLabel,
+        });
+
+        return { orderId, orderNumber, guestToken, totalPrice };
       }),
 
     getOrderByNumber: publicProcedure
