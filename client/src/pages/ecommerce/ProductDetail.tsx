@@ -1048,6 +1048,24 @@ export default function ProductDetail() {
                 {/* Opções calculadas */}
                 {shippingCalculated && shippingQuotes.map(opt => {
                   const isSel = selectedShipping && String(selectedShipping.id) === String(opt.id);
+                  // Soma de prazos: produção + frete
+                  const productionDays = selectedDeliveryOption?.daysToDeliver ?? 0;
+                  const totalDays = productionDays + (opt.deliveryDays ?? 0);
+                  // Texto formatado do prazo total
+                  const isLocal = opt.fixedType === 'local';
+                  const isPickup = opt.fixedType === 'pickup';
+                  const deadlineText = (() => {
+                    if (isPickup) return null; // retirada não tem prazo de entrega
+                    if (isLocal) {
+                      if (totalDays === 0) return '🚀 Receba HOJE! (Entrega Local)';
+                      if (totalDays === 1) return '⚡ Receba amanhã! (Entrega Local)';
+                      return `Receba em ${totalDays} dias úteis (Entrega Local)`;
+                    }
+                    // Melhor Envio
+                    if (totalDays === 0) return 'Receba hoje!';
+                    if (totalDays === 1) return 'Receba amanhã!';
+                    return `Receba em ${totalDays} dias úteis`;
+                  })();
                   return (
                     <button
                       key={String(opt.id)}
@@ -1063,15 +1081,19 @@ export default function ProductDetail() {
                         {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                       </div>
                       <span className="flex-shrink-0 text-gray-500">
-                        {opt.fixedType === "pickup" && <Store className="w-4 h-4 text-green-600" />}
-                        {opt.fixedType === "local" && <Zap className="w-4 h-4 text-orange-500" />}
-                        {!opt.fixedType && <Truck className="w-4 h-4" />}
+                        {isPickup && <Store className="w-4 h-4 text-green-600" />}
+                        {isLocal && !isPickup && <Zap className="w-4 h-4 text-orange-500" />}
+                        {!isPickup && !isLocal && <Truck className="w-4 h-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
                         <p className="text-xs text-gray-500">{opt.company}</p>
-                        {opt.deliveryDays > 0 && (
-                          <p className="text-xs text-gray-400">{opt.deliveryDays} dia(s) útil(eis)</p>
+                        {deadlineText && (
+                          <p className={`text-xs font-medium mt-0.5 ${
+                            totalDays === 0 ? 'text-green-600' :
+                            totalDays === 1 ? 'text-orange-500' :
+                            'text-gray-400'
+                          }`}>{deadlineText}</p>
                         )}
                       </div>
                       <span className={`text-sm font-bold flex-shrink-0 ${isSel ? "text-orange-600" : "text-gray-700"}`}>
