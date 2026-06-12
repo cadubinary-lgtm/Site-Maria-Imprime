@@ -413,8 +413,11 @@ export default function ProductDetail() {
 
       const shippingId = selectedShipping ? String(selectedShipping.id) : "retirada";
       const shippingPrice = selectedShipping?.price ?? 0;
+      // Evitar duplicação: se o name já começa com company (ex: 'Entrega Local - Carro'), usar apenas name
       const shippingLabel = selectedShipping
-        ? `${selectedShipping.company} — ${selectedShipping.name}`
+        ? (selectedShipping.company && !selectedShipping.name.startsWith(selectedShipping.company)
+            ? `${selectedShipping.company} — ${selectedShipping.name}`
+            : selectedShipping.name)
         : "Retirar na Loja";
       const combinedNotes = notes || undefined;
 
@@ -1053,9 +1056,9 @@ export default function ProductDetail() {
                 {/* Opções calculadas */}
                 {shippingCalculated && shippingQuotes.map(opt => {
                   const isSel = selectedShipping && String(selectedShipping.id) === String(opt.id);
-                  // Soma de prazos: produção + frete
-                  const productionDays = selectedDeliveryOption?.daysToDeliver ?? 0;
-                  const totalDays = productionDays + (opt.deliveryDays ?? 0);
+                  // Soma de prazos: produção + frete (forçar Number para evitar concatenação de string)
+                  const productionDays = Number(selectedDeliveryOption?.daysToDeliver ?? 0);
+                  const totalDays = productionDays + Number(opt.deliveryDays ?? 0);
                   // Texto formatado do prazo total
                   const isLocal = opt.fixedType === 'local';
                   const isPickup = opt.fixedType === 'pickup';
@@ -1092,8 +1095,8 @@ export default function ProductDetail() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
-                        {/* Esconder descrição se for vazia ou igual ao nome (duplicação) */}
-                        {opt.company && opt.company !== opt.name && (
+                        {/* Esconder company se: vazio, igual ao name, ou é 'Entrega Local' (evita duplicação com 'Entrega Local - Carro') */}
+                        {opt.company && opt.company !== opt.name && !opt.name.startsWith(opt.company) && (
                           <p className="text-xs text-gray-500">{opt.company}</p>
                         )}
                         {deadlineText && (

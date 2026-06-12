@@ -280,7 +280,7 @@ const shippingRouter = router({
           // Verificar se o CEP do cliente está dentro da faixa
           if (cepNum >= ruleStart && cepNum <= ruleEnd) {
             // Se passou do cut-off, soma +1 dia útil ao prazo de entrega local
-            const baseDays = rule.deliveryDays;
+            const baseDays = Number(rule.deliveryDays ?? 0);
             const adjustedDays = isPastCutoff ? baseDays + 1 : baseDays;
 
             results.push({
