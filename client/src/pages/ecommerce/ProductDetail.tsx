@@ -1256,11 +1256,16 @@ export default function ProductDetail() {
                 )}
 
                 {/* Entrega */}
-                <div className="flex justify-between text-sm pb-3 border-b border-gray-100">
+                <div className="grid grid-cols-2 gap-2 text-sm pb-3 border-b border-gray-100">
                   <span className="text-gray-500">Entrega</span>
-                  <span className={`font-medium ${fretePrice === 0 ? "text-green-600" : "text-gray-800"}`}>
-                    {selectedShipping ? selectedShipping.name : "A calcular"} — {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
-                  </span>
+                  <div className="text-right">
+                    <span className={`font-medium block ${fretePrice === 0 ? "text-green-600" : "text-gray-800"}`}>
+                      {selectedShipping ? selectedShipping.name : "A calcular"}
+                    </span>
+                    <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-500"}`}>
+                      {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Totais */}
