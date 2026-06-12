@@ -350,8 +350,9 @@ const localRulesRouter = router({
       z.object({
         neighborhood: z.string().min(2, "Bairro deve ter pelo menos 2 caracteres"),
         stateAbbr: z.string().length(2, "UF deve ter 2 caracteres"),
-        cepStart: z.string().regex(/^\d{8}$/, "CEP inicial deve ter 8 dígitos"),
-        cepEnd: z.string().regex(/^\d{8}$/, "CEP final deve ter 8 dígitos"),
+        // Aceita CEP com ou sem traço — limpeza feita no handler
+        cepStart: z.string(),
+        cepEnd: z.string(),
         deliveryType: z.enum(["moto", "carro"]),
         price: z.number().min(0, "Preço não pode ser negativo"),
         deliveryDays: z.number().int().min(0).default(1),
@@ -361,7 +362,16 @@ const localRulesRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      if (input.cepStart > input.cepEnd) {
+      // Limpar CEP de qualquer caractere não-numérico (traço, ponto, espaço, etc.)
+      const cepStart = input.cepStart.replace(/\D/g, "");
+      const cepEnd = input.cepEnd.replace(/\D/g, "");
+      if (cepStart.length !== 8) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "CEP Inicial deve ter 8 dígitos" });
+      }
+      if (cepEnd.length !== 8) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "CEP Final deve ter 8 dígitos" });
+      }
+      if (cepStart > cepEnd) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "CEP Inicial deve ser menor ou igual ao CEP Final",
@@ -370,11 +380,12 @@ const localRulesRouter = router({
       const result = await db.insert(localDeliveryRules).values({
         neighborhood: input.neighborhood,
         stateAbbr: input.stateAbbr.toUpperCase(),
-        cepStart: input.cepStart,
-        cepEnd: input.cepEnd,
+        cepStart,
+        cepEnd,
         deliveryType: input.deliveryType,
         price: input.price.toFixed(2) as any,
         deliveryDays: input.deliveryDays,
+        // Texto padrão só na criação, nunca sobrescreve na edição
         description: input.description || `Entrega Local - ${input.deliveryType === "moto" ? "Moto" : "Carro"}`,
         isActive: input.isActive,
       });
@@ -387,19 +398,30 @@ const localRulesRouter = router({
         id: z.number(),
         neighborhood: z.string().min(2).optional(),
         stateAbbr: z.string().length(2).optional(),
-        cepStart: z.string().regex(/^\d{8}$/).optional(),
-        cepEnd: z.string().regex(/^\d{8}$/).optional(),
+        // Aceita CEP com ou sem traço — limpeza feita no handler
+        cepStart: z.string().optional(),
+        cepEnd: z.string().optional(),
         deliveryType: z.enum(["moto", "carro"]).optional(),
         price: z.number().min(0).optional(),
         deliveryDays: z.number().int().min(0).optional(),
-        description: z.string().optional(),
+        // Aceita string vazia para limpar o campo (nullable)
+        description: z.string().nullable().optional(),
         isActive: z.boolean().optional(),
       })
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
       const { id, ...rest } = input;
-      if (rest.cepStart && rest.cepEnd && rest.cepStart > rest.cepEnd) {
+      // Limpar CEP de qualquer caractere não-numérico (traço, ponto, etc.)
+      const cepStartClean = rest.cepStart ? rest.cepStart.replace(/\D/g, "") : undefined;
+      const cepEndClean = rest.cepEnd ? rest.cepEnd.replace(/\D/g, "") : undefined;
+      if (cepStartClean && cepStartClean.length !== 8) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "CEP Inicial deve ter 8 dígitos" });
+      }
+      if (cepEndClean && cepEndClean.length !== 8) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "CEP Final deve ter 8 dígitos" });
+      }
+      if (cepStartClean && cepEndClean && cepStartClean > cepEndClean) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "CEP Inicial deve ser menor ou igual ao CEP Final",
@@ -408,12 +430,13 @@ const localRulesRouter = router({
       const updateData: any = {};
       if (rest.neighborhood !== undefined) updateData.neighborhood = rest.neighborhood;
       if (rest.stateAbbr !== undefined) updateData.stateAbbr = rest.stateAbbr.toUpperCase();
-      if (rest.cepStart !== undefined) updateData.cepStart = rest.cepStart;
-      if (rest.cepEnd !== undefined) updateData.cepEnd = rest.cepEnd;
+      if (cepStartClean !== undefined) updateData.cepStart = cepStartClean;
+      if (cepEndClean !== undefined) updateData.cepEnd = cepEndClean;
       if (rest.deliveryType !== undefined) updateData.deliveryType = rest.deliveryType;
       if (rest.price !== undefined) updateData.price = rest.price.toFixed(2);
       if (rest.deliveryDays !== undefined) updateData.deliveryDays = rest.deliveryDays;
-      if (rest.description !== undefined) updateData.description = rest.description;
+      // description: atualiza sempre que presente (inclusive string vazia para limpar)
+      if (rest.description !== undefined) updateData.description = rest.description === "" ? null : rest.description;
       if (rest.isActive !== undefined) updateData.isActive = rest.isActive;
       await db.update(localDeliveryRules).set(updateData).where(eq(localDeliveryRules.id, id));
       return { success: true };

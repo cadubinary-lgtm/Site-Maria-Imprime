@@ -146,7 +146,8 @@ export function ShippingRulesManager() {
           deliveryType: form.deliveryType,
           price,
           deliveryDays: parseInt(form.deliveryDays) || 1,
-          description: form.description.trim() || undefined,
+          // Ao editar: envia string vazia explicitamente para limpar o campo no banco
+          description: form.description.trim(),
           isActive: form.isActive,
         });
         toast.success('Regra atualizada com sucesso');
