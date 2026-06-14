@@ -2284,3 +2284,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Exibir aviso institucional dinâmico com horário cut-off na página do produto
 - [ ] Corrigir texto duplicado "EntregaEntrega Local - Carro" no resumo do carrinho/checkout
 - [ ] Esconder segunda linha de descrição quando for vazia/NULL na listagem de fretes
+
+
+## Fase 24: Filtro de Transportadoras Ativas - COMPLETO
+- [x] Modificar procedure shipping.calculate para buscar transportadoras ativas do banco
+- [x] Implementar filtro de transportadoras ativas (isActive=true) no cálculo de frete
+- [x] Criar testes vitest para validar o filtro (7 testes)
+- [x] Validar que transportadoras inativas não aparecem no frontend
+- [x] Todos os testes passando (7/7)
