@@ -1058,7 +1058,8 @@ export default function ProductDetail() {
                   const isSel = selectedShipping && String(selectedShipping.id) === String(opt.id);
                   // Soma de prazos: produção + frete (forçar Number para evitar concatenação de string)
                   const productionDays = Number(selectedDeliveryOption?.daysToDeliver ?? 0);
-                  const totalDays = productionDays + Number(opt.deliveryDays ?? 0);
+                  const deliveryDaysNum = Number(opt.deliveryDays ?? 0);
+                  const totalDays = Math.round(productionDays + deliveryDaysNum); // Garantir que é inteiro
                   // Texto formatado do prazo total
                   const isLocal = opt.fixedType === 'local';
                   const isPickup = opt.fixedType === 'pickup';

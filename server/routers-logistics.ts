@@ -302,6 +302,17 @@ const shippingRouter = router({
       // 3. Cotações do Melhor Envio (se token configurado)
       try {
         if (settings?.accessToken && settings.originCep) {
+          // Buscar transportadoras ativas do banco de dados
+          const activeCarriers = await db
+            .select()
+            .from(carriers)
+            .where(eq(carriers.isActive, true));
+          
+          // Criar um mapa de companyId -> isActive para filtro rápido
+          const activeCarrierMap = new Map(
+            activeCarriers.map((c) => [c.companyId, true])
+          );
+
           const payload: CalculateShippingInput = {
             from: { postal_code: settings.originCep },
             to: { postal_code: input.destinationCep },
@@ -319,7 +330,8 @@ const shippingRouter = router({
           };
           const quotes = await calculateShipping(settings.accessToken, settings.sandbox, payload);
           for (const q of quotes) {
-            if (!q.error) {
+            // Filtrar apenas transportadoras ativas
+            if (!q.error && activeCarrierMap.has(q.company.id)) {
               results.push({
                 id: q.id,
                 name: q.name,

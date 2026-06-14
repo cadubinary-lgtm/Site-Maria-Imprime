@@ -148,7 +148,7 @@ export function ShippingRulesManager() {
           cepEnd: cepEndClean,
           deliveryType: form.deliveryType,
           price,
-          deliveryDays: parseInt(form.deliveryDays) || 1,
+          deliveryDays: parseInt(form.deliveryDays, 10),
           // Ao editar: envia string vazia explicitamente para limpar o campo no banco
           description: form.description.trim(),
           isActive: form.isActive,
@@ -162,7 +162,7 @@ export function ShippingRulesManager() {
           cepEnd: cepEndClean,
           deliveryType: form.deliveryType,
           price,
-          deliveryDays: parseInt(form.deliveryDays) || 1,
+          deliveryDays: parseInt(form.deliveryDays, 10),
           description: form.description.trim() || undefined,
           isActive: form.isActive,
         });
