@@ -48,6 +48,7 @@ import AdminRulesManager from "./pages/admin/AdminRulesManager";
 import AdminOrders from "./pages/admin/AdminOrders";
 import NewOrders from "./pages/admin/NewOrders";
 import AdminKanban from "./pages/admin/AdminKanban";
+import AdminProductionKanban from "./pages/admin/AdminProductionKanban";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminOS from "./pages/admin/AdminOS";
 import AdminOSPrint from "./pages/admin/AdminOSPrint";
@@ -155,6 +156,7 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
       <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
       <Route path="/admin/pedidos/kanban" component={AdminKanban} />
+      <Route path="/admin/producao/kanban" component={AdminProductionKanban} />
       <Route path="/admin/pedidos/novos" component={NewOrders} />
       <Route path="/admin/pedidos" component={AdminOrders} />
       <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
@@ -233,6 +235,7 @@ function AdminProtectedRoutes() {
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
       <Route path="/admin/regras-dinamicas" component={AdminRulesManager} />
       <Route path="/admin/pedidos/kanban" component={AdminKanban} />
+      <Route path="/admin/producao/kanban" component={AdminProductionKanban} />
       <Route path="/admin/pedidos/novos" component={NewOrders} />
       <Route path="/admin/pedidos" component={AdminOrders} />
       <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
