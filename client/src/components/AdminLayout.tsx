@@ -107,27 +107,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const inProductionCount = orders?.filter((o: any) => o.status === "em_producao").length ?? 0;
 
   const navItems: { group?: string; item?: NavItem }[] = [
-    // ERP
+    // COMERCIAL E VENDAS
     { group: "COMERCIAL E VENDAS" },
+    {
+      item: {
+        label: "Novos Pedidos",
+        icon: <ShoppingCart className="w-4 h-4" />,
+        badge: pendingCount || undefined,
+        href: "/admin/pedidos?status=analisando",
+      },
+    },
     {
       item: {
         label: "Pedidos",
         icon: <ShoppingCart className="w-4 h-4" />,
-        badge: pendingCount || undefined,
         children: [
           { label: "Todos os Pedidos", href: "/admin/pedidos" },
           { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
-          ...Object.entries(STATUS_LABELS).map(([key, label]) => ({
-            label,
-            href: `/admin/pedidos?status=${key}`,
-          })),
+          { label: "Com Problemas", href: "/admin/pedidos?status=cancelado" },
         ],
       },
     },
-    // Financeiro (ERP) - mantido funcionando internamente, ocultado do menu principal conforme especificação
-    // { item: { label: "Financeiro (ERP)", href: "/admin/financeiro", icon: <DollarSign className="w-4 h-4" /> } },
-    { item: { label: "Produção", href: "/admin/producao", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
-    { item: { label: "OS - Ordens de Serviço", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
+    // OPERAÇÃO INDUSTRIAL
+    { group: "OPERAÇÃO INDUSTRIAL" },
+    { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
+    { item: { label: "Produção Kanban", href: "/admin/pedidos/kanban", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
     // Financeiro
     { group: "FINANCEIRO" },
     {
