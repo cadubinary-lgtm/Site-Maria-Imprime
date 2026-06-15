@@ -323,6 +323,34 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await updateOrderStatus(input.orderId, input.newStatus, input.notes);
       }),
+    updatePreProductionStatus: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        preProductionStatus: z.enum(["liberado_analise", "arte_final_aprovada"]),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orders: ordersT } = await import("../drizzle/schema.js");
+        await db.update(ordersT)
+          .set({ preProductionStatus: input.preProductionStatus } as any)
+          .where(eq(ordersT.id, input.orderId));
+        return { success: true };
+      }),
+    updateProductionStatus: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        productionStatus: z.enum(["pendente", "impresso", "acabamento_finalizado"]),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orders: ordersT } = await import("../drizzle/schema.js");
+        await db.update(ordersT)
+          .set({ productionStatus: input.productionStatus } as any)
+          .where(eq(ordersT.id, input.orderId));
+        return { success: true };
+      }),
     updateProduct: adminProcedure
       .input(z.object({
         id: z.number(),

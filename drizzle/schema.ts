@@ -135,6 +135,10 @@ export const orders = mysqlTable("orders", {
   shippingEstimatedDays: int("shippingEstimatedDays").default(0), // Dias estimados
   shippingZipCode: varchar("shippingZipCode", { length: 20 }), // CEP de entrega
   shippingCarrierId: int("shippingCarrierId"), // ID da transportadora (se aplicável)
+  // Status de Pré-Impressão
+  preProductionStatus: varchar("preProductionStatus", { length: 50 }).default("liberado_analise"),
+  // Status de Produção
+  productionStatus: varchar("productionStatus", { length: 50 }).default("pendente"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
