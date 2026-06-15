@@ -114,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "Novos Pedidos",
         icon: <ShoppingCart className="w-4 h-4" />,
         badge: pendingCount || undefined,
-        href: "/admin/pedidos?status=analisando",
+        href: "/admin/pedidos/novos",
       },
     },
     {
@@ -123,7 +123,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
           { label: "Todos os Pedidos", href: "/admin/pedidos" },
-          { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
           { label: "Com Problemas", href: "/admin/pedidos?status=cancelado" },
         ],
       },
@@ -131,6 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // OPERAÇÃO INDUSTRIAL
     { group: "OPERAÇÃO INDUSTRIAL" },
     { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
+    { item: { label: "Pedidos Kanban", href: "/admin/pedidos/kanban", icon: <Truck className="w-4 h-4" /> } },
     { item: { label: "Produção Kanban", href: "/admin/pedidos/kanban", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
     // Financeiro
     { group: "FINANCEIRO" },
