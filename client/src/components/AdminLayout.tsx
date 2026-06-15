@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems: { group?: string; item?: NavItem }[] = [
     // ERP
-    { group: "ERP - OPERAÇÃO" },
+    { group: "COMERCIAL E VENDAS" },
     {
       item: {
         label: "Pedidos",
