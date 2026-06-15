@@ -128,10 +128,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // OPERAÇÃO INDUSTRIAL
-    { group: "OPERAÇÃO INDUSTRIAL" },
+    // LINHA DE PRODUÇÃO
+    { group: "LINHA DE PRODUÇÃO" },
     { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
-    { item: { label: "Produção Kanban", href: "/admin/producao/kanban", icon: <Printer className="w-4 h-4" />, badge: inProductionCount || undefined } },
+    {
+      item: {
+        label: "Pré-Impressão",
+        icon: <Layers className="w-4 h-4" />,
+        children: [
+          { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
+          { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
+        ],
+      },
+    },
+    {
+      item: {
+        label: "Status de Produção",
+        icon: <Printer className="w-4 h-4" />,
+        children: [
+          { label: "Pendente", href: "/admin/status-producao?status=pendente" },
+          { label: "Impresso", href: "/admin/status-producao?status=impresso" },
+          { label: "Acabamento Finalizado", href: "/admin/status-producao?status=acabamento_finalizado" },
+        ],
+      },
+    },
+    { item: { label: "Produção Kanban", href: "/admin/producao/kanban", icon: <Kanban className="w-4 h-4" />, badge: inProductionCount || undefined } },
     // Financeiro
     { group: "FINANCEIRO" },
     {
