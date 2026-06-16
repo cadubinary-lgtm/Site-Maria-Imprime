@@ -256,6 +256,72 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
 
+            {/* Card de Retirada na Loja */}
+            {(order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet) && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base text-orange-800">
+                    <MapPin className="w-4 h-4 text-orange-500" />
+                    Retirada na Loja
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Endereço */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 mb-0.5">Endereço</p>
+                      <p className="text-sm text-gray-600">Av. Ver. Antônio Ferreira dos Santos, 651</p>
+                      <p className="text-sm text-gray-600">Braga, Cabo Frio - RJ, 28908-200</p>
+                    </div>
+                  </div>
+                  {/* Telefone */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm">📞</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 mb-0.5">Telefone</p>
+                      <a href="tel:+5522999459596" className="text-sm text-orange-600 hover:underline">(22) 99945-9596</a>
+                    </div>
+                  </div>
+                  {/* Horários */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-800 mb-2">Horário de Funcionamento</p>
+                      <div className="space-y-1">
+                        {[
+                          { day: 'Segunda', hours: '09:00–12:00 | 13:30–18:00' },
+                          { day: 'Terça', hours: '09:00–12:00 | 13:30–18:00' },
+                          { day: 'Quarta', hours: '09:00–12:00 | 13:30–18:00' },
+                          { day: 'Quinta', hours: '09:00–12:00 | 13:30–18:00' },
+                          { day: 'Sexta', hours: '09:00–12:00 | 13:30–18:00' },
+                          { day: 'Sábado', hours: 'Fechado', closed: true },
+                          { day: 'Domingo', hours: 'Fechado', closed: true },
+                        ].map(({ day, hours, closed }) => (
+                          <div key={day} className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600 font-medium w-20">{day}</span>
+                            <span className={closed ? 'text-red-500 font-medium' : 'text-gray-700'}>{hours}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Aviso */}
+                  <div className="bg-orange-100 rounded-lg p-3">
+                    <p className="text-xs text-orange-800">
+                      <strong>Importante:</strong> Aguarde o aviso de que seu pedido está pronto antes de vir buscar. Você será notificado por e-mail ou WhatsApp.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Delivery address */}
             {order.deliveryStreet && (
               <Card>

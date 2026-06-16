@@ -182,7 +182,12 @@ export function ShippingMethodSelector({
 
           {/* ─── Opção fixa: Retirada na Loja ─── */}
           <div
-            onClick={() => !disabled && setSelectedMethod("retirada")}
+            onClick={() => {
+              if (disabled) return;
+              setSelectedMethod("retirada");
+              // Confirmar automaticamente ao selecionar retirada
+              onMethodSelected(PICKUP_METHOD, "");
+            }}
             className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
               selectedMethod === "retirada"
                 ? "border-orange-500 bg-orange-50"
