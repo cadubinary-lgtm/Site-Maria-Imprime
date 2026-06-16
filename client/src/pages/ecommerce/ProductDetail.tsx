@@ -1544,6 +1544,24 @@ export default function ProductDetail() {
                   </div>
                 )}
 
+                {/* Quantidade */}
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <span className="text-xs text-gray-400">Quantidade</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-orange-400 hover:text-orange-500 transition-colors text-sm font-bold"
+                    >−</button>
+                    <span className="text-sm font-semibold text-gray-800 w-6 text-center">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(q => q + 1)}
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-orange-400 hover:text-orange-500 transition-colors text-sm font-bold"
+                    >+</button>
+                  </div>
+                </div>
+
                 {/* Totais */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">

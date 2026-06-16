@@ -154,6 +154,7 @@ function CartItemCard({
         {/* Controles de quantidade e subtotal */}
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 mr-1">Quantidade:</span>
             <Button
               variant="outline"
               size="icon"
