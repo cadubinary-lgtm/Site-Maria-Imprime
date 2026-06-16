@@ -377,6 +377,8 @@ export default function ProductDetail() {
       setShippingQuotes(quotesArray);
       setCutoffTime(serverCutoff);
       setShippingCalculated(true);
+      // Salvar CEP no localStorage para pré-carregar no checkout
+      localStorage.setItem("checkout_cep", clean);
       // Pré-selecionar Retirar na Loja por padrão
       const pickup = quotesArray.find((q: ShippingQuote) => q.fixedType === "pickup");
       if (pickup) setSelectedShipping(pickup);
