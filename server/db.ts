@@ -1055,6 +1055,7 @@ export async function getOrdersByUser(userId: number) {
       SELECT 
         o.id, o.orderNumber, o.status, o.totalPrice, o.paymentStatus,
         o.deliveryCity, o.deliveryState, o.createdAt, o.updatedAt,
+        o.shippingMethod, o.payment_method as paymentMethod,
         COUNT(oi.id) as itemCount
       FROM orders o
       LEFT JOIN orderItems oi ON o.id = oi.orderId
