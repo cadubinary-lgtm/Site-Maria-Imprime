@@ -445,6 +445,45 @@ export default function ProductDetail() {
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
+  // Calcula dimensões e peso proporcionais à quantidade
+  const getShippingParams = (qty: number) => {
+    const baseWeight = product ? (parseFloat((product as any).weight ?? '0') || 0.5) : 0.5;
+    const baseH = product ? (parseFloat((product as any).height ?? '0') || 5) : 5;
+    const baseW = product ? (parseFloat((product as any).width ?? '0') || 30) : 30;
+    const baseL = product ? (parseFloat((product as any).length ?? '0') || 40) : 40;
+    // Peso cresce linearmente com a quantidade
+    const totalWeight = Math.max(0.1, baseWeight * qty);
+    // Dimensões: aumenta levemente (empilhamento), mas não linearmente
+    const stackFactor = Math.ceil(Math.sqrt(qty));
+    return {
+      weight: Math.round(totalWeight * 1000) / 1000,
+      height: Math.min(baseH * stackFactor, 100),
+      width: baseW,
+      length: baseL,
+    };
+  };
+
+  const doCalculateShipping = async (cleanCep: string, qty: number) => {
+    const params = getShippingParams(qty);
+    const quotes = await calculateShippingMutation.mutateAsync({
+      destinationCep: cleanCep,
+      ...params,
+    });
+    const result = quotes as any;
+    const quotesArray: ShippingQuote[] = Array.isArray(result) ? result : (result.quotes ?? []);
+    const serverCutoff: string = result.cutoffTime ?? '13:00';
+    setShippingQuotes(quotesArray);
+    setCutoffTime(serverCutoff);
+    setShippingCalculated(true);
+    // Atualizar seleção se já havia uma transportadora selecionada
+    setSelectedShipping(prev => {
+      if (!prev) return null;
+      // Tentar encontrar a mesma transportadora nas novas cotações
+      const updated = quotesArray.find(q => q.id === prev.id);
+      return updated ?? null;
+    });
+  };
+
   const handleCepSearch = async () => {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8) { setCepError("CEP deve ter 8 dígitos"); return; }
@@ -455,27 +494,23 @@ export default function ProductDetail() {
       const d = await res.json();
       if (d.erro) { setCepError("CEP não encontrado"); return; }
       setCepAddress(`${d.logradouro ? d.logradouro + ", " : ""}${d.bairro ? d.bairro + " — " : ""}${d.localidade}/${d.uf}`);
-      // Calcular fretes via backend (Retirada + Local + Melhor Envio)
-      const quotes = await calculateShippingMutation.mutateAsync({
-        destinationCep: clean,
-        weight: 1,
-        height: 5,
-        width: 30,
-        length: 40,
-      });
-      // O backend agora retorna { quotes, cutoffTime, isPastCutoff }
-      const result = quotes as any;
-      const quotesArray: ShippingQuote[] = Array.isArray(result) ? result : (result.quotes ?? []);
-      const serverCutoff: string = result.cutoffTime ?? '13:00';
-      setShippingQuotes(quotesArray);
-      setCutoffTime(serverCutoff);
-      setShippingCalculated(true);
+      await doCalculateShipping(clean, quantity);
       // Salvar CEP no localStorage para pré-carregar no checkout
       localStorage.setItem("checkout_cep", clean);
-      // Não pré-selecionar nada — deixar o cliente escolher livremente entre retirada e transportadoras
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
+
+  // Recalcular frete automaticamente quando a quantidade muda (se CEP já foi calculado)
+  const prevQuantityRef = useRef(quantity);
+  useEffect(() => {
+    if (prevQuantityRef.current === quantity) return;
+    prevQuantityRef.current = quantity;
+    const clean = cep.replace(/\D/g, "");
+    if (clean.length !== 8 || !shippingCalculated) return;
+    // Recalcular silenciosamente (sem resetar o CEP)
+    doCalculateShipping(clean, quantity).catch(() => {});
+  }, [quantity, shippingCalculated]);
 
   // ─── Add to Cart ─────────────────────────────────────────────────────────
   const handleAddToCart = async () => {
