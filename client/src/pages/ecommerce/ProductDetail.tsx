@@ -54,6 +54,22 @@ const FOOTER_BADGES = [
   { Icon: ThumbsUp, bg: "bg-orange-50", color: "text-orange-500", label: "Satisfação garantida",     desc: "Ou seu dinheiro de volta" },
 ];
 
+// ─── Utilitários de data/prazo ─────────────────────────────────────────────
+function addBusinessDays(startDate: Date, days: number): Date {
+  const result = new Date(startDate);
+  let added = 0;
+  while (added < days) {
+    result.setDate(result.getDate() + 1);
+    const dow = result.getDay();
+    if (dow !== 0 && dow !== 6) added++; // pula sáb e dom
+  }
+  return result;
+}
+
+function formatDeliveryDate(date: Date): string {
+  return date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+}
+
 // ─── Accordion ──────────────────────────────────────────────────────────────
 function AccordionStep({
   id, number, title, isOpen, onToggle, children,
@@ -278,6 +294,62 @@ export default function ProductDetail() {
   const fretePrice = selectedShipping?.price ?? 0;
   const subtotal = effectivePrice * quantity;
   const total = subtotal + fretePrice + (selectedDeliveryOption?.priceModifier ?? 0);
+
+  // ─── Previsão de Entrega ─────────────────────────────────────────────
+  const deliveryForecast = useMemo(() => {
+    if (!selectedDeliveryOption) return null;
+    const productionDays = Number(selectedDeliveryOption.daysToDeliver ?? 0);
+    const isPickup = selectedShipping?.fixedType === 'pickup' || selectedShipping?.id === 'retirada';
+
+    const today = new Date();
+    // Considera prazo de produção em horas ou dias
+    let productionDate: Date;
+    if (selectedDeliveryOption.daysToDeliver === 1) {
+      // 24 horas = 1 dia útil
+      productionDate = addBusinessDays(today, 1);
+    } else {
+      productionDate = addBusinessDays(today, productionDays);
+    }
+
+    if (isPickup) {
+      // Retirada na loja: apenas prazo de produção
+      return {
+        type: 'pickup' as const,
+        date: productionDate,
+        label: `Disponível para retirada: ${formatDeliveryDate(productionDate)}`,
+        totalDays: productionDays,
+      };
+    }
+
+    if (selectedShipping && selectedShipping.deliveryDays > 0) {
+      // Entrega via transportadora: produção + transporte
+      const shippingDays = Number(selectedShipping.deliveryDays ?? 0);
+      const finalDate = addBusinessDays(productionDate, shippingDays);
+      const totalDays = productionDays + shippingDays;
+      return {
+        type: 'shipping' as const,
+        date: finalDate,
+        label: `Previsão de entrega: ${formatDeliveryDate(finalDate)}`,
+        productionDays,
+        shippingDays,
+        totalDays,
+      };
+    }
+
+    // Selecionou transportadora mas sem deliveryDays (ex: entrega local)
+    if (selectedShipping) {
+      return {
+        type: 'shipping' as const,
+        date: productionDate,
+        label: `Disponível após produção: ${formatDeliveryDate(productionDate)}`,
+        productionDays,
+        shippingDays: 0,
+        totalDays: productionDays,
+      };
+    }
+
+    return null;
+  }, [selectedDeliveryOption, selectedShipping]);
 
   // ─── Validação de campos obrigatórios ────────────────────────────────────
   const missingFields = useMemo(() => {
@@ -1372,31 +1444,71 @@ export default function ProductDetail() {
 
                 {/* Prazo de produção selecionado */}
                 {selectedDeliveryOption && (
-                  <div className="flex justify-between gap-2 pb-3 border-b border-gray-100">
+                  <div className="flex justify-between gap-2 pb-2 border-b border-gray-100">
                     <span className="text-xs text-gray-400 flex-shrink-0">Prazo</span>
-                    <div className="text-right">
-                      <span className="text-xs font-medium text-gray-700 block">{selectedDeliveryOption.name}</span>
-                      {selectedDeliveryOption.daysToDeliver > 0 && (
-                        <span className="text-xs text-gray-400">
-                          {selectedDeliveryOption.daysToDeliver === 1 ? "24 horas" : `${selectedDeliveryOption.daysToDeliver} dias úteis`}
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-xs font-medium text-gray-700 text-right">
+                      {selectedDeliveryOption.daysToDeliver === 1 ? "24h" : `${selectedDeliveryOption.daysToDeliver}d úteis`}
+                    </span>
                   </div>
                 )}
 
                 {/* Entrega */}
-                <div className="flex justify-between gap-2 pb-3 border-b border-gray-100">
-                  <span className="text-xs text-gray-400 flex-shrink-0">Entrega</span>
-                  <div className="text-right">
-                    <span className={`text-xs font-medium block ${fretePrice === 0 ? "text-green-600" : "text-gray-700"}`}>
-                      {selectedShipping ? selectedShipping.name : "A calcular"}
-                    </span>
-                    <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-400"}`}>
-                      {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
-                    </span>
+                {selectedShipping && (
+                  <div className="flex justify-between gap-2 pb-2 border-b border-gray-100">
+                    <span className="text-xs text-gray-400 flex-shrink-0">Entrega</span>
+                    <div className="text-right">
+                      <span className={`text-xs font-medium block truncate max-w-[130px] ${fretePrice === 0 ? "text-green-600" : "text-gray-700"}`}>
+                        {selectedShipping.name}
+                      </span>
+                      <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-400"}`}>
+                        {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Previsão de Entrega */}
+                {deliveryForecast && (
+                  <div className="pb-2 border-b border-gray-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Clock className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-gray-700">Previsão de Entrega</span>
+                    </div>
+                    {deliveryForecast.type === 'pickup' ? (
+                      <div className="bg-blue-50 rounded-lg px-3 py-2 space-y-0.5">
+                        <p className="text-xs font-semibold text-blue-800">
+                          {formatDeliveryDate(deliveryForecast.date)}
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          Disponível para retirada na loja
+                        </p>
+                        {deliveryForecast.totalDays > 0 && (
+                          <p className="text-xs text-blue-500">
+                            {deliveryForecast.totalDays === 1 ? "Após 24h de produção" : `Após ${deliveryForecast.totalDays}d úteis de produção`}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-orange-50 rounded-lg px-3 py-2 space-y-0.5">
+                        <p className="text-xs font-semibold text-orange-800">
+                          {formatDeliveryDate(deliveryForecast.date)}
+                        </p>
+                        <p className="text-xs text-orange-600">
+                          {deliveryForecast.totalDays === 1
+                            ? "Receba em 1 dia útil"
+                            : `Receba em ${deliveryForecast.totalDays} dias úteis`}
+                        </p>
+                        {(deliveryForecast as any).shippingDays > 0 && (
+                          <p className="text-xs text-orange-400">
+                            {(deliveryForecast as any).productionDays === 1 ? "24h" : `${(deliveryForecast as any).productionDays}d`} produção
+                            {" + "}
+                            {(deliveryForecast as any).shippingDays}d transporte
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Totais */}
                 <div className="space-y-2">
