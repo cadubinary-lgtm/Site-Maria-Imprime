@@ -142,6 +142,7 @@ export default function ProductDetail() {
   const [shippingCalculated, setShippingCalculated] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingQuote | null>(null);
   const [cutoffTime, setCutoffTime] = useState<string>('13:00');
+  const [shippingLimitWarning, setShippingLimitWarning] = useState<string | null>(null);
   const calculateShippingMutation = trpc.logistics.shipping.calculate.useMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -463,7 +464,7 @@ export default function ProductDetail() {
     };
   };
 
-  const doCalculateShipping = async (cleanCep: string, qty: number) => {
+  const doCalculateShipping = async (cleanCep: string, qty: number, prevQuotes?: ShippingQuote[]) => {
     const params = getShippingParams(qty);
     const quotes = await calculateShippingMutation.mutateAsync({
       destinationCep: cleanCep,
@@ -472,6 +473,25 @@ export default function ProductDetail() {
     const result = quotes as any;
     const quotesArray: ShippingQuote[] = Array.isArray(result) ? result : (result.quotes ?? []);
     const serverCutoff: string = result.cutoffTime ?? '13:00';
+
+    // Detectar transportadoras que foram removidas por excesso de peso/dimensão
+    if (prevQuotes && prevQuotes.length > 0 && qty > 1) {
+      const prevNonFixed = prevQuotes.filter(q => !(q as any).isFixed);
+      const newNonFixed = quotesArray.filter(q => !(q as any).isFixed);
+      const removedCarriers = prevNonFixed.filter(pq => !newNonFixed.some(nq => nq.id === pq.id));
+      if (removedCarriers.length > 0) {
+        const names = removedCarriers.map(c => c.company ? `${c.company} — ${c.name}` : c.name).join(', ');
+        const params = getShippingParams(qty);
+        setShippingLimitWarning(
+          `⚠️ ${removedCarriers.length === 1 ? 'A transportadora' : 'As transportadoras'} ${names} ${removedCarriers.length === 1 ? 'não está disponível' : 'não estão disponíveis'} para ${qty} unidades (peso total: ${params.weight.toFixed(2)} kg). Escolha outra opção de entrega.`
+        );
+      } else {
+        setShippingLimitWarning(null);
+      }
+    } else {
+      setShippingLimitWarning(null);
+    }
+
     setShippingQuotes(quotesArray);
     setCutoffTime(serverCutoff);
     setShippingCalculated(true);
@@ -480,7 +500,11 @@ export default function ProductDetail() {
       if (!prev) return null;
       // Tentar encontrar a mesma transportadora nas novas cotações
       const updated = quotesArray.find(q => q.id === prev.id);
-      return updated ?? null;
+      if (!updated) {
+        // Transportadora selecionada foi removida por limite de peso
+        return null;
+      }
+      return updated;
     });
   };
 
@@ -503,13 +527,15 @@ export default function ProductDetail() {
 
   // Recalcular frete automaticamente quando a quantidade muda (se CEP já foi calculado)
   const prevQuantityRef = useRef(quantity);
+  const shippingQuotesRef = useRef(shippingQuotes);
+  useEffect(() => { shippingQuotesRef.current = shippingQuotes; }, [shippingQuotes]);
   useEffect(() => {
     if (prevQuantityRef.current === quantity) return;
     prevQuantityRef.current = quantity;
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8 || !shippingCalculated) return;
-    // Recalcular silenciosamente (sem resetar o CEP)
-    doCalculateShipping(clean, quantity).catch(() => {});
+    // Recalcular silenciosamente passando as cotações anteriores para detectar limites
+    doCalculateShipping(clean, quantity, shippingQuotesRef.current).catch(() => {});
   }, [quantity, shippingCalculated]);
 
   // ─── Add to Cart ─────────────────────────────────────────────────────────
@@ -1324,6 +1350,17 @@ export default function ProductDetail() {
                   <div className="text-center py-4 text-gray-400">
                     <Loader2 className="w-7 h-7 mx-auto mb-1.5 animate-spin text-orange-500" />
                     <p className="text-sm">Calculando opções de entrega...</p>
+                  </div>
+                )}
+
+                {/* Aviso de limite de peso/dimensão */}
+                {shippingLimitWarning && (
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-xl px-3 py-3 mt-1">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-amber-800 mb-0.5">Opção indisponível para esta quantidade</p>
+                      <p className="text-xs text-amber-700 leading-snug">{shippingLimitWarning.replace(/^⚠️\s*/, '')}</p>
+                    </div>
                   </div>
                 )}
 
