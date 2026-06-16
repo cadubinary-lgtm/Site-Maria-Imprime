@@ -1033,33 +1033,8 @@ export default function ProductDetail() {
               <div className="mt-3 space-y-2">
                 <p className="text-xs text-gray-500 mb-3">Escolha como deseja receber seu pedido</p>
 
-                {/* CEP */}
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    type="text"
-                    placeholder="Digite seu CEP"
-                    value={cep}
-                    onChange={e => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 8);
-                      setCep(v.length > 5 ? `${v.slice(0,5)}-${v.slice(5)}` : v);
-                      setCepError(null); setCepAddress(null);
-                    }}
-                    onKeyDown={e => e.key === "Enter" && handleCepSearch()}
-                    maxLength={9}
-                    className="flex-1"
-                  />
-                  <Button type="button" variant="outline" onClick={handleCepSearch} disabled={cepLoading} className="flex-shrink-0">
-                    {cepLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  </Button>
-                </div>
-                {cepError && <p className="text-xs text-red-500 -mt-2 mb-2">{cepError}</p>}
-                {cepAddress && <p className="text-xs text-green-600 -mt-2 mb-2 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />{cepAddress}</p>}
-
-                {/* ─── Retirada na Loja: sempre visível ─── */}
+                {/* ─── Retirada na Loja: SEMPRE FIXA NO TOPO ─── */}
                 {(() => {
-                  // Verificar se já existe na lista calculada (evitar duplicação)
-                  const pickupAlreadyInList = shippingCalculated && shippingQuotes.some(q => q.fixedType === 'pickup');
-                  if (pickupAlreadyInList) return null;
                   const isPickupSel = selectedShipping?.fixedType === 'pickup' || selectedShipping?.id === 'retirada';
                   const pickupQuote = { id: 'retirada', name: 'Retirar na Loja', company: '', price: 0, deliveryDays: 0, fixedType: 'pickup' } as any;
                   return (
@@ -1081,7 +1056,7 @@ export default function ProductDetail() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isPickupSel ? 'text-orange-700' : 'text-gray-800'}`}>Retirar na Loja</p>
-                        <p className="text-xs text-gray-500">Retirada Presencial</p>
+                        <p className="text-xs text-gray-500">Retirada Presencial — Grátis</p>
                       </div>
                       <span className="text-sm font-bold flex-shrink-0 text-green-600">Grátis</span>
                     </button>
@@ -1089,46 +1064,76 @@ export default function ProductDetail() {
                 })()}
 
                 {/* Separador */}
-                <div className="flex items-center gap-2 my-1">
+                <div className="flex items-center gap-2 my-2">
                   <div className="flex-1 h-px bg-gray-100" />
                   <span className="text-xs text-gray-400">ou calcule o frete</span>
                   <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
+                {/* CEP */}
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Digite seu CEP"
+                    value={cep}
+                    onChange={e => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 8);
+                      const formatted = v.length > 5 ? `${v.slice(0,5)}-${v.slice(5)}` : v;
+                      setCep(formatted);
+                      setCepError(null);
+                      setCepAddress(null);
+                      // Ao apagar o CEP, limpar as transportadoras
+                      if (v.length < 8) {
+                        setShippingQuotes([]);
+                        setShippingCalculated(false);
+                        // Se tinha transportadora selecionada, voltar para retirada
+                        if (selectedShipping && selectedShipping.fixedType !== 'pickup' && selectedShipping.id !== 'retirada') {
+                          setSelectedShipping(null);
+                        }
+                      }
+                    }}
+                    onKeyDown={e => e.key === "Enter" && handleCepSearch()}
+                    maxLength={9}
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="outline" onClick={handleCepSearch} disabled={cepLoading} className="flex-shrink-0">
+                    {cepLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  </Button>
+                </div>
+                {cepError && <p className="text-xs text-red-500 mt-1">{cepError}</p>}
+                {cepAddress && <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />{cepAddress}</p>}
+
                 {/* Estado antes de calcular */}
                 {!shippingCalculated && !cepLoading && (
-                  <div className="text-center py-4 text-gray-400">
-                    <Truck className="w-7 h-7 mx-auto mb-1.5 opacity-30" />
-                    <p className="text-sm">Digite seu CEP acima para ver as opções de entrega</p>
+                  <div className="text-center py-3 text-gray-400">
+                    <Truck className="w-6 h-6 mx-auto mb-1 opacity-30" />
+                    <p className="text-xs">Digite seu CEP para ver as opções de entrega</p>
                   </div>
                 )}
 
                 {/* Calculando */}
                 {(cepLoading || calculateShippingMutation.isPending) && (
-                  <div className="text-center py-6 text-gray-400">
-                    <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-orange-500" />
+                  <div className="text-center py-4 text-gray-400">
+                    <Loader2 className="w-7 h-7 mx-auto mb-1.5 animate-spin text-orange-500" />
                     <p className="text-sm">Calculando opções de entrega...</p>
                   </div>
                 )}
 
-                {/* Opções calculadas */}
-                {shippingCalculated && shippingQuotes.map(opt => {
+                {/* Opções calculadas — filtra pickup para não duplicar com o botão fixo acima */}
+                {shippingCalculated && shippingQuotes
+                  .filter(opt => opt.fixedType !== 'pickup')
+                  .map(opt => {
                   const isSel = selectedShipping && String(selectedShipping.id) === String(opt.id);
-                  // Soma de prazos: produção + frete (forçar Number para evitar concatenação de string)
                   const productionDays = Number(selectedDeliveryOption?.daysToDeliver ?? 0);
                   const deliveryDaysNum = Number(opt.deliveryDays ?? 0);
-                  const totalDays = Math.round(productionDays + deliveryDaysNum); // Garantir que é inteiro
-                  // Texto formatado do prazo total
+                  const totalDays = Math.round(productionDays + deliveryDaysNum);
                   const isLocal = opt.fixedType === 'local';
-                  const isPickup = opt.fixedType === 'pickup';
                   const deadlineText = (() => {
-                    if (isPickup) return null; // retirada não tem prazo de entrega
                     if (isLocal) {
                       if (totalDays === 0) return '🚀 Receba HOJE! (Entrega Local)';
                       if (totalDays === 1) return '⚡ Receba amanhã! (Entrega Local)';
                       return `Receba em ${totalDays} dias úteis (Entrega Local)`;
                     }
-                    // Melhor Envio
                     if (totalDays === 0) return 'Receba hoje!';
                     if (totalDays === 1) return 'Receba amanhã!';
                     return `Receba em ${totalDays} dias úteis`;
@@ -1148,13 +1153,10 @@ export default function ProductDetail() {
                         {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                       </div>
                       <span className="flex-shrink-0 text-gray-500">
-                        {isPickup && <Store className="w-4 h-4 text-green-600" />}
-                        {isLocal && !isPickup && <Zap className="w-4 h-4 text-orange-500" />}
-                        {!isPickup && !isLocal && <Truck className="w-4 h-4" />}
+                        {isLocal ? <Zap className="w-4 h-4 text-orange-500" /> : <Truck className="w-4 h-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
-                        {/* Esconder company se: vazio, igual ao name, ou é 'Entrega Local' (evita duplicação com 'Entrega Local - Carro') */}
                         {opt.company && opt.company !== opt.name && !opt.name.startsWith(opt.company) && (
                           <p className="text-xs text-gray-500">{opt.company}</p>
                         )}
@@ -1173,8 +1175,8 @@ export default function ProductDetail() {
                   );
                 })}
 
-                {shippingCalculated && shippingQuotes.length === 0 && (
-                  <p className="text-sm text-gray-500 text-center py-4">Nenhuma opção disponível para este CEP.</p>
+                {shippingCalculated && shippingQuotes.filter(q => q.fixedType !== 'pickup').length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-3">Nenhuma transportadora disponível para este CEP.</p>
                 )}
 
                 {/* Aviso institucional da gráfica */}
@@ -1184,8 +1186,8 @@ export default function ProductDetail() {
                   </p>
                 )}
 
-                {/* Botão confirmar entrega */}
-                {shippingCalculated && selectedShipping && (
+                {/* Botão confirmar entrega — aparece quando retirada está selecionada OU quando transportadora está selecionada */}
+                {selectedShipping && (
                   <button
                     type="button"
                     onClick={() => setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }))}
