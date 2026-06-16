@@ -5,21 +5,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const TIMELINE_STEPS = [
-  { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
-  { key: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: CheckCircle2 },
-  { key: "analisando",          label: "Analisando",             icon: Package },
-  { key: "com_problemas",       label: "Com Problemas",          icon: Package },
-  { key: "em_producao",         label: "Em Produção",            icon: Printer },
-  { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
-  { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },
-  { key: "entregue",            label: "Entregue",               icon: Home },
-];
+function getTimelineSteps(order: any) {
+  const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
+  const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
 
-function getStepIndex(status: string): number {
-  const idx = TIMELINE_STEPS.findIndex((s) => s.key === status);
-  if (status === "cancelado") return -1;
-  return idx >= 0 ? idx : 0;
+  // Passo 1: apenas o método de pagamento usado
+  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
+    ? { key: 'pagamento_retirada', label: 'Pagamento na Retirada', icon: CheckCircle2 }
+    : { key: 'pagamento_aprovado', label: 'Pagamento Aprovado', icon: Clock };
+
+  // Passo 2: base com ou sem "Com Problemas"
+  const base = [
+    paymentStep,
+    { key: 'analisando', label: 'Analisando', icon: Package },
+    ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com Problemas', icon: Package }] : []),
+    { key: 'em_producao', label: 'Em Produção', icon: Printer },
+  ];
+
+  // Passo 3: etapas finais por tipo de entrega
+  if (isPickup) {
+    return [
+      ...base,
+      { key: 'pronto_retirada', label: 'Pronto para Retirada', icon: Box },
+      { key: 'entregue', label: 'Retirado', icon: Home },
+    ];
+  } else {
+    return [
+      ...base,
+      { key: 'em_transporte', label: 'Em Transporte', icon: Truck },
+      { key: 'entregue', label: 'Entregue', icon: Home },
+    ];
+  }
 }
 
 export default function OrderConfirmation() {
@@ -52,7 +68,12 @@ export default function OrderConfirmation() {
     );
   }
 
-  const currentStepIndex = getStepIndex(order.status);
+  const TIMELINE_STEPS = getTimelineSteps(order);
+  const currentStepIndex = (() => {
+    if (order.status === 'cancelado') return -1;
+    const idx = TIMELINE_STEPS.findIndex((s: any) => s.key === order.status);
+    return idx >= 0 ? idx : 0;
+  })();
   const isCancelled = order.status === "cancelado";
   const trackUrl = order.guestToken
     ? `${window.location.origin}/pedido/acompanhar/${order.guestToken}`
@@ -153,7 +174,7 @@ export default function OrderConfirmation() {
             {/* Timeline Visual */}
             {!isCancelled && (
               <div className="flex items-center justify-between overflow-x-auto pb-4">
-                {TIMELINE_STEPS.map((step, i) => {
+                {TIMELINE_STEPS.map((step: any, i: number) => {
                   const Icon = step.icon;
                   const isActive = i <= currentStepIndex;
                   const isCurrent = i === currentStepIndex;
