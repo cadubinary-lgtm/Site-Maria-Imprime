@@ -400,10 +400,7 @@ export default function ProductDetail() {
       setShippingCalculated(true);
       // Salvar CEP no localStorage para pré-carregar no checkout
       localStorage.setItem("checkout_cep", clean);
-      // Pré-selecionar Retirar na Loja por padrão
-      const pickup = quotesArray.find((q: ShippingQuote) => q.fixedType === "pickup");
-      if (pickup) setSelectedShipping(pickup);
-      // Não fazer auto-avanço aqui — deixar o cliente escolher a transportadora
+      // Não pré-selecionar nada — deixar o cliente escolher livremente entre retirada e transportadoras
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
