@@ -508,8 +508,8 @@ export default function ProductDetail() {
     });
   };
 
-  const handleCepSearch = async () => {
-    const clean = cep.replace(/\D/g, "");
+  const handleCepSearch = async (cepOverride?: string) => {
+    const clean = (cepOverride ?? cep).replace(/\D/g, "");
     if (clean.length !== 8) { setCepError("CEP deve ter 8 dígitos"); return; }
     setCepLoading(true); setCepError(null); setCepAddress(null);
     setShippingQuotes([]); setShippingCalculated(false); setSelectedShipping(null);
@@ -521,6 +521,10 @@ export default function ProductDetail() {
       await doCalculateShipping(clean, quantity);
       // Salvar CEP no localStorage para pré-carregar no checkout
       localStorage.setItem("checkout_cep", clean);
+      // Auto-avanço com 1000ms após exibir as transportadoras
+      setTimeout(() => {
+        setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+      }, 1000);
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
@@ -1306,11 +1310,15 @@ export default function ProductDetail() {
                       setCep(formatted);
                       setCepError(null);
                       setCepAddress(null);
-                      // Ao apagar o CEP, limpar as transportadoras
-                      if (v.length < 8) {
+                      // Auto-busca ao completar 8 dígitos
+                      if (v.length === 8) {
+                        // Passa o CEP diretamente para evitar problema de closure
+                        setTimeout(() => handleCepSearch(v), 100);
+                      } else {
+                        // Ao apagar o CEP, limpar as transportadoras
                         setShippingQuotes([]);
                         setShippingCalculated(false);
-                        // Se tinha transportadora selecionada, voltar para retirada
+                        // Se tinha transportadora selecionada, limpar
                         if (selectedShipping && selectedShipping.fixedType !== 'pickup' && selectedShipping.id !== 'retirada') {
                           setSelectedShipping(null);
                         }
@@ -1320,9 +1328,9 @@ export default function ProductDetail() {
                     maxLength={9}
                     className="flex-1"
                   />
-                  <Button type="button" variant="outline" onClick={handleCepSearch} disabled={cepLoading} className="flex-shrink-0">
-                    {cepLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  </Button>
+                  {cepLoading && (
+                    <Loader2 className="w-4 h-4 animate-spin text-orange-500 flex-shrink-0" />
+                  )}
                 </div>
                 {cepError && (
                   <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-1">
