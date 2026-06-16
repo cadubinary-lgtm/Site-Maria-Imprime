@@ -804,6 +804,12 @@ createOrder: protectedProcedure
         shippingMethod: z.string().optional().default("retirada"),
         shippingPrice: z.number().optional().default(0),
         shippingLabel: z.string().optional(),
+        variationSnapshot: z.string().optional(),
+        prazoName: z.string().optional(),
+        prazoHours: z.number().optional(),
+        forecastDate: z.string().optional(),
+        forecastLabel: z.string().optional(),
+        cepDestino: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;

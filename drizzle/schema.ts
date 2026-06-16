@@ -956,6 +956,12 @@ export const cartItems = mysqlTable("cartItems", {
   shippingMethod: varchar("shippingMethod", { length: 50 }).default("retirada"), // Método de frete pré-selecionado
   shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).notNull().default("0"), // Valor do frete escolhido
   shippingLabel: varchar("shippingLabel", { length: 255 }), // Nome exibível da opção de frete
+  variationSnapshot: longtext("variationSnapshot"), // JSON com variações selecionadas {name, value}
+  prazoName: varchar("prazoName", { length: 100 }), // Nome do prazo de produção
+  prazoHours: int("prazoHours").default(0), // Prazo de produção em horas
+  forecastDate: varchar("forecastDate", { length: 50 }), // Data prevista de entrega/retirada
+  forecastLabel: varchar("forecastLabel", { length: 255 }), // Texto da previsão de entrega
+  cepDestino: varchar("cepDestino", { length: 10 }), // CEP de destino informado pelo cliente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

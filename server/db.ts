@@ -812,6 +812,9 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
           ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
           ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
           ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
+          ci.shippingMethod, ci.shippingPrice, ci.shippingLabel,
+          ci.variationSnapshot, ci.prazoName, ci.prazoHours,
+          ci.forecastDate, ci.forecastLabel, ci.cepDestino,
           p.name as productName, p.imageUrl as productImage,
           p.calculationType, p.unit
         FROM cartItems ci
@@ -827,6 +830,9 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
           ci.id, ci.userId, ci.sessionId, ci.productId, ci.quantity,
           ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
           ci.artFileUrl, ci.notes, ci.createdAt, ci.updatedAt,
+          ci.shippingMethod, ci.shippingPrice, ci.shippingLabel,
+          ci.variationSnapshot, ci.prazoName, ci.prazoHours,
+          ci.forecastDate, ci.forecastLabel, ci.cepDestino,
           p.name as productName, p.imageUrl as productImage,
           p.calculationType, p.unit
         FROM cartItems ci
@@ -854,13 +860,30 @@ export async function addToCart(data: {
   shippingMethod?: string;
   shippingPrice?: number;
   shippingLabel?: string;
+  variationSnapshot?: string;
+  prazoName?: string;
+  prazoHours?: number;
+  forecastDate?: string;
+  forecastLabel?: string;
+  cepDestino?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.execute(
     sql`
-      INSERT INTO cartItems (userId, sessionId, productId, quantity, selectedAttributes, customDimensions, priceAtCart, artFileUrl, notes, shippingMethod, shippingPrice, shippingLabel)
-      VALUES (${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity}, ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null}, ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null}, ${data.shippingMethod ?? "retirada"}, ${data.shippingPrice ?? 0}, ${data.shippingLabel ?? null})
+      INSERT INTO cartItems (
+        userId, sessionId, productId, quantity, selectedAttributes, customDimensions,
+        priceAtCart, artFileUrl, notes, shippingMethod, shippingPrice, shippingLabel,
+        variationSnapshot, prazoName, prazoHours, forecastDate, forecastLabel, cepDestino
+      )
+      VALUES (
+        ${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity},
+        ${data.selectedAttributes ?? null}, ${data.customDimensions ?? null},
+        ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.notes ?? null},
+        ${data.shippingMethod ?? "retirada"}, ${data.shippingPrice ?? 0}, ${data.shippingLabel ?? null},
+        ${data.variationSnapshot ?? null}, ${data.prazoName ?? null}, ${data.prazoHours ?? 0},
+        ${data.forecastDate ?? null}, ${data.forecastLabel ?? null}, ${data.cepDestino ?? null}
+      )
     `
   );
   return (result as any).insertId as number;
