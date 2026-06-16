@@ -1048,6 +1048,12 @@ export default function ProductDetail() {
                             setSelectedShipping(null);
                           } else {
                             setSelectedShipping(pickupQuote);
+                            // Limpar CEP ao selecionar retirada
+                            setCep('');
+                            setShippingQuotes([]);
+                            setShippingCalculated(false);
+                            setCepError(null);
+                            setCepAddress(null);
                             // Auto-avanço após 2000ms ao selecionar retirada
                             setTimeout(() => {
                               setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
