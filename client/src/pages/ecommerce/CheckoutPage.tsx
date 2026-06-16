@@ -95,21 +95,23 @@ export default function CheckoutPage() {
   const trpcUtils = trpc.useUtils();
 
   const handleShippingMethodSelected = (method: any, zipCodeUsed: string) => {
+    const isPickup = method.id === "retirada" || method.id === "pickup";
     const freteOption: FreteOption = {
       id: method.id,
       name: method.name,
       description: method.description,
       price: method.price,
-      days: method.estimatedDays > 0 
+      days: method.estimatedDays > 0
         ? `${method.estimatedDays} dia${method.estimatedDays > 1 ? 's' : ''} uteis`
         : method.estimatedHours > 0
         ? `ate ${method.estimatedHours}h`
         : "Conforme producao",
-      logo: method.id === "pickup" ? "🏪" : method.id === "moto_express" ? "🛵" : "📦",
+      logo: isPickup ? "🏪" : method.id === "moto_express" ? "🛵" : "📦",
     };
     setSelectedFrete(freteOption);
-    setZipCode(zipCodeUsed);
-    setStep("endereco");
+    if (!isPickup) setZipCode(zipCodeUsed);
+    // Retirada na loja: pular endereço e ir direto para pagamento
+    setStep(isPickup ? "pagamento" : "endereco");
   };
 
   // Pré-selecionar frete via query string (?freteId=motoboy)
