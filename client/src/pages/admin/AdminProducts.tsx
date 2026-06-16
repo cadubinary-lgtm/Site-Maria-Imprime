@@ -378,18 +378,21 @@ export default function AdminProducts() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="create-price">Preço Base (R$) *</Label>
-                  <Input
-                    id="create-price"
-                    type="number"
-                    step="0.01"
-                    value={createForm.price}
-                    onChange={(e) => setCreateForm({ ...createForm, price: e.target.value })}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
+                {/* Preço Base: visível apenas para Unidade e Pacote */}
+                {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
+                  <div>
+                    <Label htmlFor="create-price">Preço Base (R$) *</Label>
+                    <Input
+                      id="create-price"
+                      type="number"
+                      step="0.01"
+                      value={createForm.price}
+                      onChange={(e) => setCreateForm({ ...createForm, price: e.target.value })}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -442,12 +445,16 @@ export default function AdminProducts() {
                 </div>
               </div>
 
-              {/* Campos condicionais para m² */}
-              {createForm.calculationType === "m2" && (
+              {/* Campos condicionais para m² e metro linear */}
+              {(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && (
                 <div className="space-y-3 p-4 bg-white rounded-lg border border-orange-100">
-                  <p className="text-sm font-medium text-gray-700">Configurações de m²</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {createForm.calculationType === "metro_linear" ? "Configurações de Metro Linear" : "Configurações de m²"}
+                  </p>
                   <div>
-                    <Label htmlFor="create-pricePerM2">Preço por m² (R$)</Label>
+                    <Label htmlFor="create-pricePerM2">
+                      {createForm.calculationType === "metro_linear" ? "Preço por Metro Linear (R$)" : "Preço por m² (R$)"}
+                    </Label>
                     <Input
                       id="create-pricePerM2"
                       type="number"
@@ -744,10 +751,13 @@ export default function AdminProducts() {
                             <Label htmlFor="edit-description">Descrição</Label>
                             <Textarea id="edit-description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                           </div>
-                          <div>
-                            <Label htmlFor="edit-price">Preço (R$)</Label>
-                            <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} />
-                          </div>
+                          {/* Preço Base: visível apenas para Unidade e Pacote */}
+                          {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote" || !(editForm as any).calculationType) && (
+                            <div>
+                              <Label htmlFor="edit-price">Preço Base (R$)</Label>
+                              <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} />
+                            </div>
+                          )}
                           <div>
                             <Label htmlFor="edit-calculationType">Tipo de Cobrança</Label>
                             <Select
@@ -766,10 +776,12 @@ export default function AdminProducts() {
                             </Select>
                           </div>
 
-                          {(editForm as any).calculationType === "m2" && (
+                          {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
                             <>
                               <div>
-                                <Label htmlFor="edit-pricePerM2">Preço por m² (R$)</Label>
+                                <Label htmlFor="edit-pricePerM2">
+                                  {(editForm as any).calculationType === "metro_linear" ? "Preço por Metro Linear (R$)" : "Preço por m² (R$)"}
+                                </Label>
                                 <Input id="edit-pricePerM2" type="number" step="0.01" value={(editForm as any).pricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pricePerM2: e.target.value } as any)} />
                               </div>
                               <div className="grid grid-cols-2 gap-2">
