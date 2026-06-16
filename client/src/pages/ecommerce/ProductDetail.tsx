@@ -403,10 +403,7 @@ export default function ProductDetail() {
       // Pré-selecionar Retirar na Loja por padrão
       const pickup = quotesArray.find((q: ShippingQuote) => q.fixedType === "pickup");
       if (pickup) setSelectedShipping(pickup);
-      // Auto-avanço após 1000ms quando CEP é calculado com sucesso
-      setTimeout(() => {
-        setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-      }, 1000);
+      // Não fazer auto-avanço aqui — deixar o cliente escolher a transportadora
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
@@ -989,7 +986,10 @@ export default function ProductDetail() {
                           ? (opt.pricePerM2 ?? 0) * billedArea
                           : (opt.pricePerM2 ?? 0);
                         setDeliveryTax(extra);
-                        setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
+                        // Auto-avanço após 2000ms ao selecionar prazo
+                        setTimeout(() => {
+                          setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
+                        }, 2000);
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all ${
                         selectedDeliveryOption?.id === opt.id
@@ -1051,10 +1051,10 @@ export default function ProductDetail() {
                             setSelectedShipping(null);
                           } else {
                             setSelectedShipping(pickupQuote);
-                            // Auto-avanço após 1000ms ao selecionar retirada
+                            // Auto-avanço após 2000ms ao selecionar retirada
                             setTimeout(() => {
                               setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-                            }, 1000);
+                            }, 2000);
                           }
                         }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
@@ -1196,10 +1196,10 @@ export default function ProductDetail() {
                       type="button"
                       onClick={() => {
                         setSelectedShipping(opt);
-                        // Auto-avanço após 1000ms ao selecionar transportadora
+                        // Auto-avanço após 2000ms ao selecionar transportadora
                         setTimeout(() => {
                           setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-                        }, 1000);
+                        }, 2000);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                         isSel
