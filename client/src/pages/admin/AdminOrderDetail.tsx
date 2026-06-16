@@ -739,7 +739,8 @@ export default function AdminOrderDetail() {
         {/* Logística - Status de Produção e Entrega */}
         <OrderLogisticsPanel
           orderId={o.id}
-          productionStatus={o.productionStatus || 'pending'}
+          preProductionStatus={o.preProductionStatus || 'liberado_analise'}
+          productionStatus={o.productionStatus || 'pendente'}
           deliveryStatus={o.deliveryStatus || 'pending'}
         />
 
