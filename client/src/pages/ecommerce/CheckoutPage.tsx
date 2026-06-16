@@ -546,8 +546,12 @@ export default function CheckoutPage() {
                     cartItems={cartItems?.map((item: any) => ({
                       productId: item.productId,
                       quantity: item.quantity,
+                      shippingMethod: item.shippingMethod,
                     })) || []}
                     preSelectedMethod={cartItems?.[0]?.shippingMethod}
+                    preSelectedLabel={cartItems?.[0]?.shippingLabel}
+                    preSelectedPrice={cartItems?.[0]?.shippingPrice ? Number(cartItems[0].shippingPrice) : undefined}
+                    preSelectedCep={cartItems?.[0]?.cepDestino}
                     onMethodSelected={handleShippingMethodSelected}
                     disabled={isSubmitting}
                   />
