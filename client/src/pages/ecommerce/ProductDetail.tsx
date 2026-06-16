@@ -202,7 +202,10 @@ export default function ProductDetail() {
   // ─── Preço ───────────────────────────────────────────────────────────────
   const basePrice = useMemo(() => {
     if (!product) return 0;
-    let total = parseFloat(product.price);
+    // Para m² e metro_linear, o preço base vem de pricePerM2 (calculado em effectivePrice)
+    // Aqui só calculamos os modificadores de variações/atributos/prazo para não-m2
+    const isM2Type = product.calculationType === "m2" || product.calculationType === "metro_linear";
+    let total = isM2Type ? 0 : parseFloat(product.price);
     // Modificadores de variações (variationTypes/variationOptions)
     // O cálculo depende do calculationType da opção:
     // - unit: valor fixo por unidade (multiplicado pela quantidade no subtotal)
@@ -249,10 +252,35 @@ export default function ProductDetail() {
   }, [dimWidth, dimHeight]);
 
   const isM2 = product?.calculationType === "m2";
+  const isMetroLinear = product?.calculationType === "metro_linear";
   // Área mínima cobrada: sempre 1 m² (mesmo que o cliente informe menos)
   const billedArea = useMemo(() => Math.max(area, area > 0 ? 1 : 0), [area]);
   const effectivePrice = useMemo(() => {
     if (!product) return 0;
+    // Metro Linear: preço = pricePerM2 * largura (em metros)
+    if (isMetroLinear && product?.pricePerM2) {
+      const w = parseFloat(dimWidth.replace(",", ".")) || 0;
+      const linearM = w > 0 ? w : 1; // metros lineares (largura em cm / 100 se necessário)
+      const productBase = parseFloat(product.pricePerM2 as any) * linearM;
+      let varModifiers = 0;
+      Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
+        const vtype = (variationTypes as any[])?.find((vt: any) => vt.id === Number(vtypeId));
+        const opt = vtype?.options?.find((o: any) => o.id === optId);
+        if (!opt) return;
+        const modifier = parseFloat(opt.priceModifier?.toString() ?? "0");
+        varModifiers += modifier;
+      });
+      let attrModifiers = 0;
+      Object.entries(selectedAttributes).forEach(([attrId, sel]) => {
+        const attr = productAttributes?.find(pa => pa.attributeId === Number(attrId));
+        (sel as any).valueIds.forEach((vid: number) => {
+          const v = attr?.values.find((v: any) => v.id === vid);
+          if (v) attrModifiers += parseFloat(v.priceModifier?.toString() ?? "0");
+        });
+      });
+      const prazoMod = selectedDeliveryOption ? deliveryTax : 0;
+      return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
+    }
     if (isM2 && billedArea > 0 && product?.pricePerM2) {
       // Preço base do produto (m² * preço/m²)
       const productBase = parseFloat(product.pricePerM2 as any) * billedArea;
@@ -290,7 +318,7 @@ export default function ProductDetail() {
       return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
     }
     return basePrice;
-  }, [isM2, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
+  }, [isM2, isMetroLinear, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
   const fretePrice = selectedShipping?.price ?? 0;
   const subtotal = effectivePrice * quantity;
