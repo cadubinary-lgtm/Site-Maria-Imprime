@@ -626,21 +626,11 @@ export default function AdminProducts() {
                 {createForm.specifications.map((spec, idx) => (
                   <div key={idx} className="flex gap-2 items-center">
                     <Input
-                      placeholder="Campo (ex: Material)"
+                      placeholder="Ex: Lona 440g impermeável, costura dupla, ilhós a cada 50cm..."
                       value={spec.label}
                       onChange={(e) => {
                         const updated = [...createForm.specifications];
-                        updated[idx] = { ...updated[idx], label: e.target.value };
-                        setCreateForm((prev) => ({ ...prev, specifications: updated }));
-                      }}
-                      className="flex-1"
-                    />
-                    <Input
-                      placeholder="Valor (ex: Lona 440g)"
-                      value={spec.value}
-                      onChange={(e) => {
-                        const updated = [...createForm.specifications];
-                        updated[idx] = { ...updated[idx], value: e.target.value };
+                        updated[idx] = { ...updated[idx], label: e.target.value, value: "" };
                         setCreateForm((prev) => ({ ...prev, specifications: updated }));
                       }}
                       className="flex-1"
@@ -916,21 +906,11 @@ export default function AdminProducts() {
                             {((editForm as any).specifications || []).map((spec: any, idx: number) => (
                               <div key={idx} className="flex gap-2 items-center mb-2">
                                 <Input
-                                  placeholder="Campo (ex: Material)"
+                                  placeholder="Ex: Lona 440g impermeável, costura dupla, ilhós a cada 50cm..."
                                   value={spec.label}
                                   onChange={(e) => {
                                     const updated = [...((editForm as any).specifications || [])];
-                                    updated[idx] = { ...updated[idx], label: e.target.value };
-                                    setEditForm((prev) => ({ ...prev, specifications: updated } as any));
-                                  }}
-                                  className="flex-1"
-                                />
-                                <Input
-                                  placeholder="Valor (ex: Lona 440g)"
-                                  value={spec.value}
-                                  onChange={(e) => {
-                                    const updated = [...((editForm as any).specifications || [])];
-                                    updated[idx] = { ...updated[idx], value: e.target.value };
+                                    updated[idx] = { ...updated[idx], label: e.target.value, value: "" };
                                     setEditForm((prev) => ({ ...prev, specifications: updated } as any));
                                   }}
                                   className="flex-1"
