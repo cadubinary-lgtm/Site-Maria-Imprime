@@ -953,6 +953,8 @@ export async function createOrderFromCart(data: {
   shippingMethod?: string | null;
   shippingPrice?: number;
   shippingLabel?: string | null;
+  paymentMethod?: string | null;
+  initialStatus?: string;
   cartItems: Array<{
     productId: number;
     productName: string;
@@ -975,15 +977,16 @@ export async function createOrderFromCart(data: {
           clientId, userId, customerId, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
-          guestToken, guestEmail, guestName, shippingMethod, shippingPrice
+          guestToken, guestEmail, guestName, shippingMethod, shippingPrice, payment_method
         ) VALUES (
-          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber}, 'analisando',
+          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber},
+          ${data.initialStatus ?? 'analisando'},
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
           ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone},
           ${data.guestToken ?? null}, ${data.guestEmail ?? null}, ${data.guestName ?? null},
-          ${data.shippingMethod ?? null}, ${data.shippingPrice ?? 0}
+          ${data.shippingMethod ?? null}, ${data.shippingPrice ?? 0}, ${data.paymentMethod ?? null}
         )
       `
     );
