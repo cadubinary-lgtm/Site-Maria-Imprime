@@ -18,6 +18,8 @@ export const ORDER_STATUS: Record<string, { label: string; color: string; icon: 
   em_producao:         { label: "Em Produção",             color: "bg-purple-100 text-purple-800", icon: "⚙️" },
   pronto_entrega:      { label: "Pronto para Entrega",     color: "bg-teal-100 text-teal-800",     icon: "🚚" },
   pronto_retirada:     { label: "Pronto para Retirada",    color: "bg-cyan-100 text-cyan-800",     icon: "🎁" },
+  saiu_entrega:        { label: "Saiu para Entrega",       color: "bg-indigo-100 text-indigo-800", icon: "🚚" },
+  em_transporte:       { label: "Em Transporte",           color: "bg-sky-100 text-sky-800",       icon: "🚛" },
   entregue:            { label: "Entregue",                color: "bg-emerald-100 text-emerald-800",icon: "✔️" },
   cancelado:           { label: "Cancelado",               color: "bg-red-100 text-red-800",       icon: "❌" },
 };
@@ -30,9 +32,11 @@ const FILTER_OPTIONS = [
   { id: "com_problemas",      label: "Com Problemas" },
   { id: "em_producao",        label: "Em Produção" },
   { id: "pronto_entrega",     label: "Pronto para Entrega" },
-  { id: "pronto_retirada",    label: "Pronto para Retirada" },
-  { id: "entregue",           label: "Entregue" },
-  { id: "cancelado",          label: "Cancelado" },
+    { id: "pronto_retirada", label: "Pronto para Retirada" },
+  { id: "saiu_entrega",    label: "Saiu para Entrega" },
+  { id: "em_transporte",   label: "Em Transporte" },
+  { id: "entregue",        label: "Entregue" },
+  { id: "cancelado",       label: "Cancelado" },
 ];
 
 export default function AdminOrders() {

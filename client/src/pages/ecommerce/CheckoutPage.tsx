@@ -305,6 +305,7 @@ export default function CheckoutPage() {
         guestEmail: guestEmail.trim() || undefined,
         guestName: fullName.trim() || undefined,
         accountPassword: createAccountPassword.trim() || undefined,
+        paymentMethod: paymentMethod === "pix" ? "pix" : paymentMethod === "cartao" ? "cartao_credito" : paymentMethod === "retirada_loja" ? "pagar_na_retirada" : undefined,
       };
       console.log("[CHECKOUT-FRONTEND] payload enviado:", JSON.stringify(payload, null, 2));
 

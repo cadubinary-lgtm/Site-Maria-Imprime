@@ -211,9 +211,13 @@ export const financeiroRouter = router({
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
-      const conditions: any[] = [
+      // Contas a receber: pedidos com pagamento pendente OU pedidos com pagamento na retirada
+      const baseCondition = or(
         eq(orders.paymentStatus, "pendente"),
-      ];
+        eq(orders.paymentMethod, "pagar_na_retirada")
+      );
+
+      const conditions: any[] = [baseCondition!];
 
       if (input.startDate) conditions.push(gte(orders.createdAt, new Date(input.startDate)));
       if (input.endDate) conditions.push(lte(orders.createdAt, new Date(input.endDate)));
@@ -230,8 +234,11 @@ export const financeiroRouter = router({
         .where(and(...conditions))
         .orderBy(desc(orders.createdAt));
 
-      // Filtrar fora cancelados
-      const filtered = allOrders.filter(o => o.status !== "cancelado");
+      // Filtrar fora cancelados e já pagos (exceto pagamento_retirada pendente)
+      const filtered = allOrders.filter(o =>
+        o.status !== "cancelado" &&
+        !(o.paymentStatus === "pago" && o.paymentMethod !== "pagar_na_retirada")
+      );
       const total = filtered.length;
       const offset = (input.page - 1) * input.limit;
       const paginated = filtered.slice(offset, offset + input.limit);

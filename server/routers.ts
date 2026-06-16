@@ -317,7 +317,7 @@ export const appRouter = router({
     updateOrderStatus: adminProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
+        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -944,6 +944,8 @@ createOrder: protectedProcedure
         // Criação opcional de conta
         createAccount: z.boolean().optional(),
         accountPassword: z.string().min(6).optional(),
+        // Método de pagamento
+        paymentMethod: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
@@ -1109,6 +1111,16 @@ createOrder: protectedProcedure
           shippingMethod: cartItems[0]?.shippingMethod ?? null,
           shippingPrice: shippingPrice,
           shippingLabel: cartItems[0]?.shippingLabel ?? null,
+          paymentMethod: input.paymentMethod ?? null,
+          // Status inicial baseado no método de pagamento:
+          // - PIX / cartão = pagamento_aprovado (já pago)
+          // - retirada = pagamento_retirada (pagar na retirada)
+          // - outros = analisando
+          initialStatus: input.paymentMethod === "pagar_na_retirada"
+            ? "pagamento_retirada"
+            : (input.paymentMethod === "pix" || input.paymentMethod === "cartao_credito")
+              ? "pagamento_aprovado"
+              : "analisando",
           cartItems: cartItems.map((item: any) => ({
             productId: item.productId,
             productName: item.productName ?? "Produto",
@@ -1262,7 +1274,7 @@ createOrder: protectedProcedure
     updateOrderStatus: adminProcedure
       .input(z.object({
         orderId: z.number(),
-        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"]),
+        newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]),
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {

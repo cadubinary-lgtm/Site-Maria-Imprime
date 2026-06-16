@@ -31,6 +31,8 @@ const STATUS_STEPS = [
   { key: "em_producao" },
   { key: "pronto_entrega" },
   { key: "pronto_retirada" },
+  { key: "saiu_entrega" },
+  { key: "em_transporte" },
   { key: "entregue" },
 ];
 
@@ -77,7 +79,7 @@ export default function AdminOrderDetail() {
   const [, setLocation] = useLocation();
   const orderId = params?.id ? parseInt(params.id) : null;
 
-  const [newStatus, setNewStatus] = useState("");
+  const [newStatus, setNewStatus] = useState<string>("");
   const [statusNotes, setStatusNotes] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -212,6 +214,10 @@ export default function AdminOrderDetail() {
   const sc = ORDER_STATUS[o.status] ?? ORDER_STATUS.analisando;
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === o.status);
   const isCancelled = o.status === "cancelado";
+  // Pré-selecionar o status atual se ainda não foi alterado
+  if (newStatus === "" && o.status) {
+    setNewStatus(o.status);
+  }
   const files = orderFiles as any[];
   const previews = artPreviews as any[];
 
