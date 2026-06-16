@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Search, ChevronRight, Package, X, Loader2, Trash2, Clock, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 
 // Novos pedidos = pedidos que acabaram de chegar e precisam de atenção
-// Inclui: pagamento_aprovado, pagamento_retirada, analisando
-const NEW_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada", "analisando"];
+// Inclui: pagamento_aprovado, pagamento_retirada
+// Ao clicar em "Abrir", o status muda para "analisando" e o pedido sai desta lista
+const NEW_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "bg-green-100 text-green-800 border-green-200",   icon: "💳" },
@@ -43,7 +44,25 @@ function formatDate(d: any) {
 export default function NewOrders() {
   const [search, setSearch] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [openingId, setOpeningId] = useState<number | null>(null);
   const utils = trpc.useUtils();
+  const [, navigate] = useLocation();
+
+  const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation({
+    onSuccess: (_data, variables) => {
+      utils.checkout.getAllOrders.invalidate();
+      navigate(`/admin/pedidos/${variables.orderId}`);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erro ao atualizar status do pedido");
+      setOpeningId(null);
+    },
+  });
+
+  const handleOpen = (orderId: number) => {
+    setOpeningId(orderId);
+    updateStatusMutation.mutate({ orderId, newStatus: "analisando" });
+  };
 
   // Busca todos os pedidos (adminProcedure retorna todos com orderBy desc)
   const { data: allOrders, isLoading, refetch } = trpc.checkout.getAllOrders.useQuery(undefined, {
@@ -196,12 +215,18 @@ export default function NewOrders() {
 
                       {/* Actions */}
                       <div className="flex flex-col gap-2 shrink-0">
-                        <Link href={`/admin/pedidos/${order.id}`}>
-                          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white gap-1 w-full">
-                            Abrir
-                            <ChevronRight className="w-4 h-4" />
-                          </Button>
-                        </Link>
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600 text-white gap-1 w-full"
+                          onClick={() => handleOpen(order.id)}
+                          disabled={openingId === order.id}
+                        >
+                          {openingId === order.id ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Abrindo...</>
+                          ) : (
+                            <>Abrir <ChevronRight className="w-4 h-4" /></>
+                          )}
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
