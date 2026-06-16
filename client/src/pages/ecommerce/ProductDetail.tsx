@@ -827,7 +827,7 @@ export default function ProductDetail() {
                         const specs = product.specifications ? JSON.parse(product.specifications) : [];
                         if (specs.length > 0) {
                           return specs.map((spec: { label: string; value: string }, i: number) => (
-                            <p key={i}><span className="font-medium">{spec.label}:</span> {spec.value}</p>
+                            <p key={i} className="flex items-start gap-1"><span className="text-orange-500 mt-0.5">•</span> {spec.label}</p>
                           ));
                         }
                       } catch {}
