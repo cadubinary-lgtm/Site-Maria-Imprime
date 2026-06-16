@@ -338,6 +338,23 @@ export default function ProductDetail() {
       .filter(Boolean) as { name: string; value: string; priceModifier: number }[];
   }, [selectedAttributes, productAttributes]);
 
+  // ─── Auto-avanço: Medidas ──────────────────────────────────────────────
+  const prevDimRef = useRef({ width: "", height: "" });
+  useEffect(() => {
+    const prev = prevDimRef.current;
+    const w = dimWidth.trim();
+    const h = dimHeight.trim();
+    const wasEmpty = !prev.width || !prev.height;
+    const nowFilled = w !== "" && h !== "" && parseFloat(w.replace(",", ".")) > 0 && parseFloat(h.replace(",", ".")) > 0;
+    if (wasEmpty && nowFilled) {
+      // Avança automaticamente para o step de arquivo
+      setTimeout(() => {
+        setOpenSteps(prev => ({ ...prev, [dimStepIdx]: false, [fileStepIdx]: true }));
+      }, 400);
+    }
+    prevDimRef.current = { width: w, height: h };
+  }, [dimWidth, dimHeight]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── Arquivo ─────────────────────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -349,6 +366,10 @@ export default function ProductDetail() {
       r.onload = ev => setArtFilePreview(ev.target?.result as string);
       r.readAsDataURL(file);
     } else setArtFilePreview(null);
+    // Avança automaticamente para o próximo step após selecionar arquivo
+    setTimeout(() => {
+      setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
+    }, 500);
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
@@ -804,14 +825,10 @@ export default function ProductDetail() {
                   </div>
 
                   {area > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setOpenSteps(prev => ({ ...prev, [dimStepIdx]: false, [fileStepIdx]: true }))}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      Confirmar medidas
-                    </button>
+                    <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <p className="text-xs text-green-700">Medidas confirmadas — avançando automaticamente...</p>
+                    </div>
                   )}
                 </div>
               </AccordionStep>
@@ -859,20 +876,20 @@ export default function ProductDetail() {
                 {fileMode === "upload" && (
                   <>
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all"
+                      className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                      <p className="text-sm text-gray-600 font-medium">Arraste seu arquivo aqui ou clique para selecionar</p>
-                      <p className="text-xs text-gray-400 mt-1">Formatos aceitos: PDF, PNG, JPG, TIFF, AI, CDR</p>
-                      <p className="text-xs text-gray-400">Tamanho máximo: 100MB</p>
-                      <button
-                        type="button"
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition"
-                      >
-                        <FileText className="w-4 h-4" />
-                        Selecionar arquivo
-                      </button>
+                      <div className="flex items-center justify-center gap-3">
+                        <Upload className="w-6 h-6 text-gray-400 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-sm text-gray-600 font-medium">Clique para selecionar ou arraste aqui</p>
+                          <p className="text-xs text-gray-400">PDF, PNG, JPG, TIFF, AI, CDR — máx 100MB</p>
+                        </div>
+                        <span className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition flex-shrink-0">
+                          <FileText className="w-3.5 h-3.5" />
+                          Selecionar
+                        </span>
+                      </div>
                     </div>
                     <input
                       ref={fileInputRef}
@@ -910,16 +927,25 @@ export default function ProductDetail() {
 
                 {fileMode === "link" && (
                   <div className="space-y-3">
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-gray-700 mb-3">Cole o link da sua arte</p>
-                      <Input
-                        type="url"
-                        placeholder="https://exemplo.com/sua-arte.pdf"
-                        value={artLink}
-                        onChange={e => setArtLink(e.target.value)}
-                        className="text-sm"
-                      />
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-4">
+                      <div className="flex items-center gap-3">
+                        <Link2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <Input
+                          type="url"
+                          placeholder="https://drive.google.com/sua-arte.pdf"
+                          value={artLink}
+                          onChange={e => {
+                            setArtLink(e.target.value);
+                            // Avança automaticamente quando o link parece válido
+                            if (e.target.value.startsWith("http")) {
+                              setTimeout(() => {
+                                setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
+                              }, 800);
+                            }
+                          }}
+                          className="text-sm flex-1"
+                        />
+                      </div>
                     </div>
                     <p className="text-xs text-gray-500">Aceitamos links do Google Drive, Dropbox, OneDrive, WeTransfer, Canva, ChatGPT e outros.</p>
                     {artLink && (
@@ -935,17 +961,7 @@ export default function ProductDetail() {
                   </div>
                 )}
 
-                {/* Botão confirmar arquivo */}
-                {(artFile || artLink) && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }))}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Confirmar arquivo
-                  </button>
-                )}
+
               </div>
             </AccordionStep>
 
@@ -1242,15 +1258,15 @@ export default function ProductDetail() {
 
                 {/* Variações selecionadas (sistema variationTypes) */}
                 {variationTypes && variationTypes.length > 0 && Object.keys(selectedVariations).length > 0 && (
-                  <div className="space-y-2 pb-3 border-b border-gray-100">
+                  <div className="space-y-1.5 pb-3 border-b border-gray-100">
                     {(variationTypes as any[]).map((vtype: any) => {
                       const selOptId = selectedVariations[vtype.id];
                       const selOpt = (vtype.options ?? []).find((o: any) => o.id === selOptId);
                       if (!selOpt) return null;
                       return (
-                        <div key={vtype.id} className="flex justify-between text-sm">
-                          <span className="text-gray-500">{vtype.name}</span>
-                          <span className="font-medium text-gray-800 text-right max-w-[150px]">{selOpt.name}</span>
+                        <div key={vtype.id} className="flex justify-between gap-2">
+                          <span className="text-xs text-gray-400 flex-shrink-0">{vtype.name}</span>
+                          <span className="text-xs font-medium text-gray-700 text-right truncate max-w-[120px]">{selOpt.name}</span>
                         </div>
                       );
                     })}
@@ -1259,11 +1275,11 @@ export default function ProductDetail() {
 
                 {/* Atributos selecionados dinamicamente */}
                 {selectedAttrsForSummary.length > 0 && (
-                  <div className="space-y-2 pb-3 border-b border-gray-100">
+                  <div className="space-y-1.5 pb-3 border-b border-gray-100">
                     {selectedAttrsForSummary.map((a, i) => (
-                      <div key={i} className="flex justify-between text-sm">
-                        <span className="text-gray-500">{a.name}</span>
-                        <span className="font-medium text-gray-800 text-right max-w-[150px]">{a.value}</span>
+                      <div key={i} className="flex justify-between gap-2">
+                        <span className="text-xs text-gray-400 flex-shrink-0">{a.name}</span>
+                        <span className="text-xs font-medium text-gray-700 text-right truncate max-w-[120px]">{a.value}</span>
                       </div>
                     ))}
                   </div>
@@ -1272,23 +1288,23 @@ export default function ProductDetail() {
                 {/* Medidas */}
                 {isM2 && area > 0 && (
                   <div className="pb-3 border-b border-gray-100 space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Medidas</span>
-                      <span className="font-medium text-gray-800">{dimWidth} × {dimHeight} cm</span>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-xs text-gray-400">Medidas</span>
+                      <span className="text-xs font-medium text-gray-700">{dimWidth} × {dimHeight} cm</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Área total</span>
-                      <span className="font-medium text-gray-800">{area.toFixed(2)} m²</span>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-xs text-gray-400">Área total</span>
+                      <span className="text-xs font-medium text-gray-700">{area.toFixed(2)} m²</span>
                     </div>
                   </div>
                 )}
 
                 {/* Prazo de produção selecionado */}
                 {selectedDeliveryOption && (
-                  <div className="flex justify-between text-sm pb-3 border-b border-gray-100">
-                    <span className="text-gray-500">Prazo de produção</span>
+                  <div className="flex justify-between gap-2 pb-3 border-b border-gray-100">
+                    <span className="text-xs text-gray-400 flex-shrink-0">Prazo</span>
                     <div className="text-right">
-                      <span className="font-medium text-gray-800 block">{selectedDeliveryOption.name}</span>
+                      <span className="text-xs font-medium text-gray-700 block">{selectedDeliveryOption.name}</span>
                       {selectedDeliveryOption.daysToDeliver > 0 && (
                         <span className="text-xs text-gray-400">
                           {selectedDeliveryOption.daysToDeliver === 1 ? "24 horas" : `${selectedDeliveryOption.daysToDeliver} dias úteis`}
@@ -1299,13 +1315,13 @@ export default function ProductDetail() {
                 )}
 
                 {/* Entrega */}
-                <div className="grid grid-cols-2 gap-2 text-sm pb-3 border-b border-gray-100">
-                  <span className="text-gray-500">Entrega</span>
+                <div className="flex justify-between gap-2 pb-3 border-b border-gray-100">
+                  <span className="text-xs text-gray-400 flex-shrink-0">Entrega</span>
                   <div className="text-right">
-                    <span className={`font-medium block ${fretePrice === 0 ? "text-green-600" : "text-gray-800"}`}>
+                    <span className={`text-xs font-medium block ${fretePrice === 0 ? "text-green-600" : "text-gray-700"}`}>
                       {selectedShipping ? selectedShipping.name : "A calcular"}
                     </span>
-                    <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-500"}`}>
+                    <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-400"}`}>
                       {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
                     </span>
                   </div>
