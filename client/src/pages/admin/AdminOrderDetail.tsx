@@ -23,18 +23,28 @@ import { OrderShippingPanel } from '@/components/orders/OrderShippingPanel';
 import { ShippingLabelViewer } from '@/components/orders/ShippingLabelViewer';
 
 // Ordem linear dos status para a linha do tempo
-const STATUS_STEPS = [
-  { key: "pagamento_aprovado" },
-  { key: "pagamento_retirada" },
-  { key: "analisando" },
-  { key: "com_problemas" },
-  { key: "em_producao" },
-  { key: "pronto_entrega" },
-  { key: "pronto_retirada" },
-  { key: "saiu_entrega" },
-  { key: "em_transporte" },
-  { key: "entregue" },
-];
+function getAdminStatusSteps(order: any) {
+  const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
+  const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
+
+  // Apenas o método de pagamento usado
+  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
+    ? { key: 'pagamento_retirada' }
+    : { key: 'pagamento_aprovado' };
+
+  const base = [
+    paymentStep,
+    { key: 'analisando' },
+    ...(!isInProduction ? [{ key: 'com_problemas' }] : []),
+    { key: 'em_producao' },
+  ];
+
+  if (isPickup) {
+    return [...base, { key: 'pronto_retirada' }, { key: 'entregue' }];
+  } else {
+    return [...base, { key: 'saiu_entrega' }, { key: 'em_transporte' }, { key: 'entregue' }];
+  }
+}
 
 const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
   value,
@@ -212,7 +222,8 @@ export default function AdminOrderDetail() {
 
   const o = order as any;
   const sc = ORDER_STATUS[o.status] ?? ORDER_STATUS.analisando;
-  const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === o.status);
+  const STATUS_STEPS = getAdminStatusSteps(o);
+  const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === o.status);
   const isCancelled = o.status === "cancelado";
   // Pré-selecionar o status atual se ainda não foi alterado
   if (newStatus === "" && o.status) {
@@ -296,7 +307,7 @@ export default function AdminOrderDetail() {
                   }}
                 />
                 <div className="relative flex justify-between">
-                  {STATUS_STEPS.map((step, i) => {
+                  {STATUS_STEPS.map((step: any, i: number) => {
                     const cfg = ORDER_STATUS[step.key];
                     const isPast = i < currentStepIndex;
                     const isCurrent = i === currentStepIndex;
