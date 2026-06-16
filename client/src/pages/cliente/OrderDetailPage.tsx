@@ -11,17 +11,40 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// All 9 status steps in order
-const STATUS_STEPS = [
-  { key: "pagamento_aprovado",  label: "Pagamento\nAprovado",      emoji: "💳" },
-  { key: "pagamento_retirada",  label: "Pagamento\nna Retirada",   emoji: "🏪" },
-  { key: "analisando",          label: "Analisando",               emoji: "🔍" },
-  { key: "com_problemas",       label: "Com\nProblemas",           emoji: "⚠️" },
-  { key: "em_producao",         label: "Em\nProdução",             emoji: "🏭" },
-  { key: "pronto_entrega",      label: "Pronto p/\nEntrega",       emoji: "🚚" },
-  { key: "pronto_retirada",     label: "Pronto p/\nRetirada",      emoji: "🎁" },
-  { key: "entregue",            label: "Entregue",                 emoji: "✅" },
-];
+// Status steps dinâmicos por tipo de entrega e pagamento
+function getStatusSteps(order: any) {
+  const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
+  const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
+
+  // Passo 1: definir o status de pagamento correto (apenas o que foi usado)
+  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
+    ? { key: 'pagamento_retirada', label: 'Pagamento\nna Retirada', emoji: '🏪' }
+    : { key: 'pagamento_aprovado', label: 'Pagamento\nAprovado', emoji: '💳' };
+
+  // Passo 2: montar fluxo base
+  const base = [
+    paymentStep,
+    { key: 'analisando', label: 'Analisando', emoji: '🔍' },
+    // "Com Problemas" só aparece se ainda não entrou em produção
+    ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com\nProblemas', emoji: '⚠️' }] : []),
+    { key: 'em_producao', label: 'Em\nProdução', emoji: '🏭' },
+  ];
+
+  // Passo 3: adicionar etapas finais conforme tipo de entrega
+  if (isPickup) {
+    return [
+      ...base,
+      { key: 'pronto_retirada', label: 'Pronto p/\nRetirada', emoji: '🎁' },
+      { key: 'entregue', label: 'Retirado', emoji: '✅' },
+    ];
+  } else {
+    return [
+      ...base,
+      { key: 'em_transporte', label: 'Em\nTransporte', emoji: '🚛' },
+      { key: 'entregue', label: 'Entregue', emoji: '✅' },
+    ];
+  }
+}
 
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado:  "Pagamento Aprovado",
@@ -95,7 +118,8 @@ export default function OrderDetailPage() {
   const order = (data as any)?.order ?? data as any;
   const items = (data as any)?.items ?? [];
   const isCancelled = order.status === "cancelado";
-  const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
+  const STATUS_STEPS = getStatusSteps(order);
+  const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === order.status);
   const progressPercent = currentStepIndex >= 0
     ? (currentStepIndex / (STATUS_STEPS.length - 1)) * 100
     : 0;
