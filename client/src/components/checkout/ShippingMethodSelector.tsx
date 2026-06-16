@@ -28,6 +28,9 @@ interface ShippingMethod {
 interface ShippingMethodSelectorProps {
   cartItems: CartItem[];
   preSelectedMethod?: string;
+  preSelectedLabel?: string;
+  preSelectedPrice?: number;
+  preSelectedCep?: string;
   onMethodSelected: (method: ShippingMethod, zipCode: string) => void;
   disabled?: boolean;
 }
@@ -45,40 +48,63 @@ const PICKUP_METHOD: ShippingMethod = {
 export function ShippingMethodSelector({
   cartItems,
   preSelectedMethod,
+  preSelectedLabel,
+  preSelectedPrice,
+  preSelectedCep,
   onMethodSelected,
   disabled = false,
 }: ShippingMethodSelectorProps) {
-  // Pré-carregar CEP do localStorage (salvo na página do produto)
+  // Pré-carregar CEP: primeiro do carrinho, depois do localStorage
   const savedCep = typeof window !== "undefined" ? localStorage.getItem("checkout_cep") ?? "" : "";
-  const [zipCode, setZipCode] = useState(savedCep);
+  const initialCep = (preSelectedCep?.replace(/\D/g, "") || savedCep).slice(0, 8);
+  const [zipCode, setZipCode] = useState(initialCep);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [deliveryMethods, setDeliveryMethods] = useState<ShippingMethod[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasCalculated, setHasCalculated] = useState(false);
+  const [autoConfirmed, setAutoConfirmed] = useState(false);
 
   const hasCartItems = cartItems && cartItems.length > 0;
   const calculateMutation = trpc.logistics.shipping.calculate.useMutation();
 
-  // Se há CEP salvo, calcular automaticamente ao montar
-  useEffect(() => {
-    if (savedCep && savedCep.length === 8 && hasCartItems) {
-      handleCalculateShipping(savedCep);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Verificar se o item do carrinho já tem método pré-selecionado
+  // Auto-confirmar se o cliente já selecionou entrega na configuração do produto
   const preSelectedFromCart = cartItems?.[0]?.shippingMethod;
   useEffect(() => {
     const methodToUse = preSelectedFromCart || preSelectedMethod;
+    if (!methodToUse || autoConfirmed) return;
+
+    // Retirada na loja
     if (methodToUse === "pickup" || methodToUse === "retirada") {
       setSelectedMethod("retirada");
-      // Confirmar automaticamente como retirada
-      setTimeout(() => {
-        onMethodSelected(PICKUP_METHOD, "");
-      }, 100);
+      setAutoConfirmed(true);
+      setTimeout(() => onMethodSelected(PICKUP_METHOD, ""), 100);
+      return;
     }
-  }, [preSelectedFromCart, preSelectedMethod]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Transportadora já selecionada — recriar o objeto e confirmar automaticamente
+    if (preSelectedLabel && preSelectedPrice !== undefined) {
+      const reconstructed: ShippingMethod = {
+        id: methodToUse,
+        name: preSelectedLabel,
+        description: "",
+        price: preSelectedPrice,
+        estimatedDays: 0,
+        estimatedHours: 0,
+        initialStatus: "awaiting_shipment",
+      };
+      setSelectedMethod(methodToUse);
+      setAutoConfirmed(true);
+      setTimeout(() => onMethodSelected(reconstructed, initialCep), 100);
+    }
+  }, [preSelectedFromCart, preSelectedMethod, preSelectedLabel, preSelectedPrice]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Se há CEP do carrinho ou do localStorage, calcular automaticamente ao montar
+  useEffect(() => {
+    if (initialCep && initialCep.length === 8 && hasCartItems) {
+      handleCalculateShipping(initialCep);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCalculateShipping = async (cepOverride?: string) => {
     const cepToUse = (cepOverride ?? zipCode).replace(/\D/g, "");
@@ -180,6 +206,27 @@ export function ShippingMethodSelector({
             </Alert>
           )}
 
+          {/* Banner de seleção pré-confirmada do produto */}
+          {autoConfirmed && selectedMethod && (
+            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-green-800">
+                  {selectedMethod === "retirada" ? "Retirar na Loja" : preSelectedLabel ?? "Entrega selecionada"}
+                </p>
+                <p className="text-xs text-green-600">Seleção da configuração do produto — você pode alterar abaixo</p>
+              </div>
+              {preSelectedPrice !== undefined && preSelectedPrice > 0 && (
+                <span className="text-sm font-bold text-green-800">{formatPrice(preSelectedPrice)}</span>
+              )}
+              {(preSelectedPrice === 0 || selectedMethod === "retirada") && (
+                <span className="text-sm font-bold text-green-600">Grátis</span>
+              )}
+            </div>
+          )}
+
           {/* ─── Opção fixa: Retirada na Loja ─── */}
           <div
             onClick={() => {
@@ -265,7 +312,12 @@ export function ShippingMethodSelector({
               <RadioGroup
                 value={selectedMethod ?? ""}
                 onValueChange={(v) => {
-                  if (v !== "retirada") setSelectedMethod(v);
+                  if (v !== "retirada") {
+                    setSelectedMethod(v);
+                    // Ao trocar transportadora, confirmar imediatamente
+                    const method = deliveryMethods.find((m) => m.id === v);
+                    if (method) onMethodSelected(method, zipCode.replace(/\D/g, ""));
+                  }
                 }}
               >
                 {deliveryMethods.map((method) => (
