@@ -252,6 +252,7 @@ export const appRouter = router({
         logisticsHeight: z.number().optional(),
         logisticsLength: z.number().optional(),
         allowedCarrierIds: z.array(z.number()).optional(),
+        specifications: z.string().optional(), // JSON array de { label, value }
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -278,6 +279,7 @@ export const appRouter = router({
             height: input.logisticsHeight ?? null,
             length: input.logisticsLength ?? null,
             allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : null,
+            specifications: input.specifications || null,
             isActive: true,
           } as any);
           
@@ -378,6 +380,7 @@ export const appRouter = router({
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
+        specifications: z.string().optional(), // JSON array de { label, value }
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -400,6 +403,7 @@ export const appRouter = router({
         if (input.maxWidth) updateData.maxWidth = parseFloat(input.maxWidth);
         if (input.minHeight) updateData.minHeight = parseFloat(input.minHeight);
         if (input.maxHeight) updateData.maxHeight = parseFloat(input.maxHeight);
+        if (input.specifications !== undefined) updateData.specifications = input.specifications || null;
         
         const result = await db.update(products)
           .set(updateData)

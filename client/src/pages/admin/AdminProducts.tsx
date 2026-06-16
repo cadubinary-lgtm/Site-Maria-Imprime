@@ -44,6 +44,7 @@ export default function AdminProducts() {
     minHeight: "",
     maxHeight: "",
     segmentIds: [] as number[],
+    specifications: [] as { label: string; value: string }[],
   });
 
   // ─── Estado de edição ─────────────────────────────────────────────────────
@@ -64,6 +65,7 @@ export default function AdminProducts() {
     maxWidth: "",
     minHeight: "",
     maxHeight: "",
+    specifications: [] as { label: string; value: string }[],
   });
 
   // ─── Queries & Mutations ──────────────────────────────────────────────────
@@ -156,6 +158,7 @@ export default function AdminProducts() {
         logisticsHeight: createLogistics.height ? parseFloat(createLogistics.height) : undefined,
         logisticsLength: createLogistics.length ? parseFloat(createLogistics.length) : undefined,
         allowedCarrierIds: createLogistics.allowedCarrierIds.length > 0 ? createLogistics.allowedCarrierIds : undefined,
+        specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
       });
 
       const newProductId = (result as any)?.id;
@@ -191,7 +194,7 @@ export default function AdminProducts() {
       setCreateForm({
         name: "", description: "", price: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
         calculationType: "unidade", pricePerM2: "", minWidth: "", maxWidth: "",
-        minHeight: "", maxHeight: "", segmentIds: [],
+        minHeight: "", maxHeight: "", segmentIds: [], specifications: [],
       });
       setCreateDeliveryOptions([]);
       setCreateLogistics({ weight: "", width: "", height: "", length: "", allowedCarrierIds: [] });
@@ -223,6 +226,9 @@ export default function AdminProducts() {
       maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
       minHeight: product.minHeight ? product.minHeight.toString() : "",
       maxHeight: product.maxHeight ? product.maxHeight.toString() : "",
+      specifications: (() => {
+        try { return product.specifications ? JSON.parse(product.specifications) : []; } catch { return []; }
+      })(),
     }));
   };
 
@@ -257,6 +263,7 @@ export default function AdminProducts() {
         maxWidth: (editForm as any).calculationType === "m2" ? (editForm as any).maxWidth : undefined,
         minHeight: (editForm as any).calculationType === "m2" ? (editForm as any).minHeight : undefined,
         maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
+        specifications: (editForm as any).specifications?.length > 0 ? JSON.stringify((editForm as any).specifications) : undefined,
       });
       await updateSegmentsMutation.mutateAsync({ productId: editingId, segmentIds: editForm.segmentIds });
       toast.success("Produto atualizado com sucesso!");
@@ -600,6 +607,57 @@ export default function AdminProducts() {
                 </div>
               </div>
 
+              {/* ─── Especificações Técnicas ──────────────────────────────── */}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">Especificações Técnicas</h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCreateForm((prev) => ({ ...prev, specifications: [...prev.specifications, { label: "", value: "" }] }))}
+                  >
+                    + Adicionar
+                  </Button>
+                </div>
+                {createForm.specifications.length === 0 && (
+                  <p className="text-sm text-gray-400">Nenhuma especificação adicionada. Clique em "+ Adicionar" para incluir.</p>
+                )}
+                {createForm.specifications.map((spec, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Campo (ex: Material)"
+                      value={spec.label}
+                      onChange={(e) => {
+                        const updated = [...createForm.specifications];
+                        updated[idx] = { ...updated[idx], label: e.target.value };
+                        setCreateForm((prev) => ({ ...prev, specifications: updated }));
+                      }}
+                      className="flex-1"
+                    />
+                    <Input
+                      placeholder="Valor (ex: Lona 440g)"
+                      value={spec.value}
+                      onChange={(e) => {
+                        const updated = [...createForm.specifications];
+                        updated[idx] = { ...updated[idx], value: e.target.value };
+                        setCreateForm((prev) => ({ ...prev, specifications: updated }));
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 px-2"
+                      onClick={() => setCreateForm((prev) => ({ ...prev, specifications: prev.specifications.filter((_, i) => i !== idx) }))}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <Button
                   type="submit"
@@ -838,6 +896,57 @@ export default function AdminProducts() {
                               <ProductLogisticsTab productId={editingId} />
                             </div>
                           )}
+
+                          {/* Especificações Técnicas */}
+                          <div className="border-t pt-4 mt-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <h3 className="text-lg font-semibold text-gray-900">Especificações Técnicas</h3>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditForm((prev) => ({ ...prev, specifications: [...((prev as any).specifications || []), { label: "", value: "" }] } as any))}
+                              >
+                                + Adicionar
+                              </Button>
+                            </div>
+                            {((editForm as any).specifications || []).length === 0 && (
+                              <p className="text-sm text-gray-400">Nenhuma especificação adicionada. Clique em "+ Adicionar" para incluir.</p>
+                            )}
+                            {((editForm as any).specifications || []).map((spec: any, idx: number) => (
+                              <div key={idx} className="flex gap-2 items-center mb-2">
+                                <Input
+                                  placeholder="Campo (ex: Material)"
+                                  value={spec.label}
+                                  onChange={(e) => {
+                                    const updated = [...((editForm as any).specifications || [])];
+                                    updated[idx] = { ...updated[idx], label: e.target.value };
+                                    setEditForm((prev) => ({ ...prev, specifications: updated } as any));
+                                  }}
+                                  className="flex-1"
+                                />
+                                <Input
+                                  placeholder="Valor (ex: Lona 440g)"
+                                  value={spec.value}
+                                  onChange={(e) => {
+                                    const updated = [...((editForm as any).specifications || [])];
+                                    updated[idx] = { ...updated[idx], value: e.target.value };
+                                    setEditForm((prev) => ({ ...prev, specifications: updated } as any));
+                                  }}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-500 hover:text-red-700 px-2"
+                                  onClick={() => setEditForm((prev) => ({ ...prev, specifications: ((prev as any).specifications || []).filter((_: any, i: number) => i !== idx) } as any))}
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
 
                           <Button
                             onClick={handleSave}

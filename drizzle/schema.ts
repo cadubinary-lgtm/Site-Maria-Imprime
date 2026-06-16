@@ -50,6 +50,7 @@ export const products = mysqlTable("products", {
   allowPickup: boolean("allowPickup").default(true).notNull(), // Permite retirada na loja
   allowMotoExpress: boolean("allowMotoExpress").default(true).notNull(), // Permite moto express
   allowedCarriers: longtext("allowedCarriers").default("[]").notNull(), // JSON array de IDs de transportadoras
+  specifications: longtext("specifications"), // JSON array de { label, value } para especificações técnicas
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

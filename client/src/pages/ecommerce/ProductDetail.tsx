@@ -821,9 +821,25 @@ export default function ProductDetail() {
                     <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
                   </summary>
                   <div className="mt-2 space-y-1 text-xs text-gray-600">
-                    <p><span className="font-medium">Cálculo:</span> {product.calculationType === "m2" ? "Por m²" : product.calculationType === "metro_linear" ? "Metro linear" : product.calculationType === "pacote" ? "Pacote" : "Unidade"}</p>
-                    {product.unit && <p><span className="font-medium">Unidade:</span> {product.unit}</p>}
-                    {product.category && <p><span className="font-medium">Categoria:</span> {product.category}</p>}
+                    {/* Especificações cadastradas pelo admin */}
+                    {(() => {
+                      try {
+                        const specs = product.specifications ? JSON.parse(product.specifications) : [];
+                        if (specs.length > 0) {
+                          return specs.map((spec: { label: string; value: string }, i: number) => (
+                            <p key={i}><span className="font-medium">{spec.label}:</span> {spec.value}</p>
+                          ));
+                        }
+                      } catch {}
+                      // Fallback: exibir dados padrão do produto
+                      return (
+                        <>
+                          <p><span className="font-medium">Cálculo:</span> {product.calculationType === "m2" ? "Por m²" : product.calculationType === "metro_linear" ? "Metro linear" : product.calculationType === "pacote" ? "Pacote" : "Unidade"}</p>
+                          {product.unit && <p><span className="font-medium">Unidade:</span> {product.unit}</p>}
+                          {product.category && <p><span className="font-medium">Categoria:</span> {product.category}</p>}
+                        </>
+                      );
+                    })()}
                   </div>
                 </details>
               </div>
