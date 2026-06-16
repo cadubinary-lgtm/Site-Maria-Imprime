@@ -983,9 +983,15 @@ export default function ProductDetail() {
                           ? (opt.pricePerM2 ?? 0) * billedArea
                           : (opt.pricePerM2 ?? 0);
                         setDeliveryTax(extra);
-                        // Auto-avanço após 2000ms ao selecionar prazo
+                        // Auto-avanço após 2000ms ao selecionar prazo (verificar se ainda está selecionado)
                         setTimeout(() => {
-                          setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
+                          // Verificar se o prazo ainda está selecionado antes de avançar
+                          setSelectedDeliveryOption((current: any) => {
+                            if (current?.id === opt.id) {
+                              setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
+                            }
+                            return current;
+                          });
                         }, 2000);
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all ${
@@ -1054,9 +1060,15 @@ export default function ProductDetail() {
                             setShippingCalculated(false);
                             setCepError(null);
                             setCepAddress(null);
-                            // Auto-avanço após 2000ms ao selecionar retirada
+                            // Auto-avanço após 2000ms ao selecionar retirada (verificar se ainda está selecionada)
                             setTimeout(() => {
-                              setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                              // Verificar se retirada ainda está selecionada antes de avançar
+                              setSelectedShipping(current => {
+                                if (current?.id === 'retirada' || current?.fixedType === 'pickup') {
+                                  setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                                }
+                                return current;
+                              });
                             }, 2000);
                           }
                         }}
@@ -1199,9 +1211,15 @@ export default function ProductDetail() {
                       type="button"
                       onClick={() => {
                         setSelectedShipping(opt);
-                        // Auto-avanço após 2000ms ao selecionar transportadora
+                        // Auto-avanço após 2000ms ao selecionar transportadora (verificar se ainda está selecionada)
                         setTimeout(() => {
-                          setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                          // Verificar se a transportadora ainda está selecionada antes de avançar
+                          setSelectedShipping(current => {
+                            if (current?.id === opt.id) {
+                              setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                            }
+                            return current;
+                          });
                         }, 2000);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
