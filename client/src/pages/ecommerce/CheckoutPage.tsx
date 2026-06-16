@@ -815,20 +815,64 @@ export default function CheckoutPage() {
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-3 text-sm">Itens do Pedido</h3>
                       <div className="space-y-2">
-                        {cartItems.map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                            {item.productImage && (
-                              <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-cover rounded" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm text-gray-900 truncate">{item.productName}</p>
-                              <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                        {cartItems.map((item: any) => {
+                          let variations: Array<{name: string; value: string}> = [];
+                          try { if (item.variationSnapshot) variations = JSON.parse(item.variationSnapshot); } catch {}
+                          let attrs: Record<string, string> = {};
+                          try { if (item.selectedAttributes) attrs = JSON.parse(item.selectedAttributes); } catch {}
+                          return (
+                          <div key={item.id} className="p-3 border rounded-lg space-y-1.5">
+                            <div className="flex items-start gap-3">
+                              {item.productImage && (
+                                <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-cover rounded flex-shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-gray-900 truncate">{item.productName}</p>
+                                <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                              </div>
+                              <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                                {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
+                              </p>
                             </div>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
-                            </p>
+                            {/* Variações */}
+                            {variations.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {variations.map((v: any, i: number) => (
+                                  <span key={i} className="text-xs bg-orange-50 text-orange-700 border border-orange-200 rounded px-1.5 py-0.5">{v.name}: {v.value}</span>
+                                ))}
+                              </div>
+                            )}
+                            {/* Atributos */}
+                            {Object.keys(attrs).length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {Object.entries(attrs).map(([k, v]: [string, any]) => (
+                                  <span key={k} className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{k}: {v}</span>
+                                ))}
+                              </div>
+                            )}
+                            {/* Medidas */}
+                            {item.customDimensions && (
+                              <p className="text-xs text-gray-500">📏 Medidas: {item.customDimensions}</p>
+                            )}
+                            {/* Arquivo */}
+                            {item.artFileUrl && (
+                              <p className="text-xs text-green-700">🖼️ Arquivo enviado</p>
+                            )}
+                            {/* Prazo */}
+                            {item.prazoName && (
+                              <p className="text-xs text-gray-500">⏱ Prazo: {item.prazoName}</p>
+                            )}
+                            {/* Previsão */}
+                            {item.forecastLabel && (
+                              <p className="text-xs font-medium text-orange-600">📦 {item.forecastLabel}</p>
+                            )}
+                            {/* Entrega */}
+                            {item.shippingLabel && (
+                              <p className="text-xs text-gray-500">🚚 {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}</p>
+                            )}
                           </div>
-                        ))}
+                        );
+                        })}
                       </div>
                     </div>
                   </div>

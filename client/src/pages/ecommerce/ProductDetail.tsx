@@ -514,15 +514,49 @@ export default function ProductDetail() {
         : "Retirar na Loja";
       const combinedNotes = notes || undefined;
 
+      // Snapshot de variações selecionadas
+      const variationSnapshotJson = variationTypes && Object.keys(selectedVariations).length > 0
+        ? JSON.stringify((variationTypes as any[]).map((vt: any) => {
+            const optId = selectedVariations[vt.id];
+            const opt = (vt.options ?? []).find((o: any) => o.id === optId);
+            return opt ? { name: vt.name, value: opt.name } : null;
+          }).filter(Boolean))
+        : undefined;
+
+      // Prazo de produção
+      const prazoName = selectedDeliveryOption?.name;
+      const prazoHours = selectedDeliveryOption
+        ? (selectedDeliveryOption.daysToDeliver === 1 ? 24 : (selectedDeliveryOption.daysToDeliver ?? 0) * 24)
+        : 0;
+
+      // Previsão de entrega
+      const forecastDate = deliveryForecast ? deliveryForecast.date.toLocaleDateString('pt-BR') : undefined;
+      const forecastLabel = deliveryForecast ? deliveryForecast.label : undefined;
+
+      // CEP de destino
+      const cepDestinoVal = cep.replace(/\D/g, '').length === 8 ? cep : undefined;
+
+      // Dimensões customizadas
+      const customDimensions = isM2 && dimWidth && dimHeight
+        ? `${dimWidth}x${dimHeight}`
+        : undefined;
+
       await addToCartMutation.mutateAsync({
         productId, quantity,
         selectedAttributes: attrsJson,
+        customDimensions,
         priceAtCart: effectivePrice,
         notes: combinedNotes,
         artFileUrl: artUrl,
         shippingMethod: shippingId,
         shippingPrice,
         shippingLabel,
+        variationSnapshot: variationSnapshotJson,
+        prazoName,
+        prazoHours,
+        forecastDate,
+        forecastLabel,
+        cepDestino: cepDestinoVal,
       });
       toast.success("Adicionado ao carrinho!", {
         action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },

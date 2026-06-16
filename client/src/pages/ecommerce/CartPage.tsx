@@ -37,6 +37,12 @@ interface CartItem {
   shippingMethod: string | null;
   shippingPrice: string | null;
   shippingLabel: string | null;
+  variationSnapshot: string | null;
+  prazoName: string | null;
+  prazoHours: number | null;
+  forecastDate: string | null;
+  forecastLabel: string | null;
+  cepDestino: string | null;
 }
 
 function formatCurrency(value: number | string) {
@@ -55,6 +61,11 @@ function parseAttributes(json: string | null): Record<string, string> {
   }
 }
 
+function parseVariations(json: string | null): Array<{name: string; value: string}> {
+  if (!json) return [];
+  try { return JSON.parse(json); } catch { return []; }
+}
+
 function CartItemCard({
   item,
   onUpdateQuantity,
@@ -67,6 +78,7 @@ function CartItemCard({
   isUpdating: boolean;
 }) {
   const attrs = parseAttributes(item.selectedAttributes);
+  const variations = parseVariations(item.variationSnapshot);
   const subtotal = Number(item.priceAtCart) * item.quantity;
 
   return (
@@ -95,6 +107,17 @@ function CartItemCard({
           <p className="text-sm text-gray-500 mt-0.5">
             Medidas: {item.customDimensions}
           </p>
+        )}
+
+        {/* Variações selecionadas */}
+        {variations.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {variations.map((v, i) => (
+              <Badge key={i} variant="outline" className="text-xs border-orange-200 text-orange-700">
+                {v.name}: {v.value}
+              </Badge>
+            ))}
+          </div>
         )}
 
         {/* Atributos selecionados */}
@@ -128,6 +151,27 @@ function CartItemCard({
             )}
           </div>
         )}
+        {/* Prazo de produção */}
+        {item.prazoName && (
+          <p className="text-xs text-gray-500 mt-1">
+            ⏱ Prazo: {item.prazoName}
+          </p>
+        )}
+
+        {/* Previsão de entrega */}
+        {item.forecastLabel && (
+          <p className="text-xs font-medium text-orange-600 mt-0.5">
+            📦 {item.forecastLabel}
+          </p>
+        )}
+
+        {/* Entrega */}
+        {item.shippingLabel && (
+          <p className="text-xs text-gray-500 mt-0.5">
+            🚚 {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}
+          </p>
+        )}
+
         {/* Preço unitário */}
         <p className="text-sm text-gray-500 mt-1">
           {formatCurrency(item.priceAtCart)} / {item.unit}
