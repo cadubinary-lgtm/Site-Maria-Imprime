@@ -7,30 +7,49 @@ import { Loader2, ArrowLeft, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-// ─── Status operacionais (9 etapas) ─────────────────────────────────────────
+// ─── Status operacionais ─────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-100 text-green-800",   icon: "💳" },
-  pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-100 text-blue-800",     icon: "🏪" },
-  analisando:          { label: "Analisando",             color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  pagamento_retirada:  { label: "Aguardando Retirada",    color: "bg-blue-100 text-blue-800",     icon: "🏪" },
+  analisando:          { label: "Em Análise",             color: "bg-orange-100 text-orange-800", icon: "🔍" },
   com_problemas:       { label: "Com Problemas",          color: "bg-red-100 text-red-800",       icon: "⚠️" },
   em_producao:         { label: "Em Produção",            color: "bg-purple-100 text-purple-800", icon: "⚙️" },
-  pronto_entrega:      { label: "Pronto para Entrega",    color: "bg-teal-100 text-teal-800",     icon: "🚚" },
+  pronto_entrega:      { label: "Pronto para Envio",      color: "bg-teal-100 text-teal-800",     icon: "📦" },
   pronto_retirada:     { label: "Pronto para Retirada",   color: "bg-cyan-100 text-cyan-800",     icon: "🎁" },
-  entregue:            { label: "Entregue",               color: "bg-emerald-100 text-emerald-800",icon: "✔️" },
+  saiu_entrega:        { label: "Saiu para Entrega",      color: "bg-indigo-100 text-indigo-800", icon: "🚚" },
+  em_transporte:       { label: "Em Transporte",          color: "bg-violet-100 text-violet-800", icon: "🚛" },
+  entregue:            { label: "Entregue",               color: "bg-emerald-100 text-emerald-800",icon: "✅" },
+  retirado:            { label: "Retirado",               color: "bg-emerald-100 text-emerald-800",icon: "✅" },
   cancelado:           { label: "Cancelado",              color: "bg-red-100 text-red-800",       icon: "❌" },
 };
 
-// Ordem linear de progresso (excluindo cancelado)
-const PROGRESS_STEPS = [
-  "pagamento_aprovado",
-  "pagamento_retirada",
-  "analisando",
-  "com_problemas",
-  "em_producao",
-  "pronto_entrega",
-  "pronto_retirada",
-  "entregue",
+// Fluxo para entrega em casa (PIX / Cartão)
+const STEPS_ENTREGA = [
+  { key: "pagamento_aprovado", label: "Pagamento",   icon: "💳" },
+  { key: "analisando",         label: "Análise",     icon: "🔍" },
+  { key: "em_producao",        label: "Produção",    icon: "⚙️" },
+  { key: "pronto_entrega",     label: "Pronto",      icon: "📦" },
+  { key: "saiu_entrega",       label: "Saiu",        icon: "🚚" },
+  { key: "em_transporte",      label: "Transporte",  icon: "🚛" },
+  { key: "entregue",           label: "Entregue",    icon: "✅" },
 ];
+
+// Fluxo para retirada na loja (Pagar na Retirada)
+const STEPS_RETIRADA = [
+  { key: "pagamento_retirada", label: "Aguardando",  icon: "🏪" },
+  { key: "analisando",         label: "Análise",     icon: "🔍" },
+  { key: "em_producao",        label: "Produção",    icon: "⚙️" },
+  { key: "pronto_retirada",    label: "Pronto",      icon: "🎁" },
+  { key: "entregue",           label: "Retirado",    icon: "✅" },
+];
+
+function getProgressSteps(order: any) {
+  const isPickup = order.shippingMethod === "pickup" ||
+                   order.shippingMethod === "retirada" ||
+                   order.paymentMethod === "pagar_na_retirada" ||
+                   order.status === "pagamento_retirada";
+  return isPickup ? STEPS_RETIRADA : STEPS_ENTREGA;
+}
 
 export default function OrderTracking() {
   const { data: orders, isLoading, refetch } = trpc.orders.getMyOrders.useQuery();
@@ -87,7 +106,8 @@ export default function OrderTracking() {
             {orders.map((order) => {
               const status = order.status as string;
               const sc = STATUS_CONFIG[status] ?? STATUS_CONFIG.analisando;
-              const currentIdx = PROGRESS_STEPS.indexOf(status);
+              const progressSteps = getProgressSteps(order);
+              const currentIdx = progressSteps.findIndex((s: { key: string }) => s.key === status);
               const isCanceled = status === "cancelado";
 
               return (
@@ -136,19 +156,18 @@ export default function OrderTracking() {
                             className="absolute top-5 left-0 h-0.5 bg-indigo-500 transition-all duration-500"
                             style={{
                               width: currentIdx >= 0
-                                ? `${(currentIdx / (PROGRESS_STEPS.length - 1)) * 100}%`
+                                ? `${(currentIdx / (progressSteps.length - 1)) * 100}%`
                                 : "0%",
                             }}
                           />
 
                           {/* Etapas */}
                           <div className="relative flex justify-between">
-                            {PROGRESS_STEPS.map((step, idx) => {
+                            {progressSteps.map((step: { key: string; label: string; icon: string }, idx: number) => {
                               const isCompleted = currentIdx >= idx;
                               const isCurrent = currentIdx === idx;
-                              const stepCfg = STATUS_CONFIG[step];
                               return (
-                                <div key={step} className="flex flex-col items-center" style={{ width: `${100 / PROGRESS_STEPS.length}%` }}>
+                                <div key={step.key} className="flex flex-col items-center" style={{ width: `${100 / progressSteps.length}%` }}>
                                   <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center text-lg border-2 transition-all
                                       ${isCompleted
@@ -157,10 +176,10 @@ export default function OrderTracking() {
                                       ${isCurrent ? "ring-2 ring-indigo-300 ring-offset-2" : ""}
                                     `}
                                   >
-                                    {isCompleted ? "✓" : stepCfg.icon}
+                                    {isCompleted ? "✓" : step.icon}
                                   </div>
                                   <p className="text-xs text-center text-gray-500 mt-2 leading-tight hidden md:block">
-                                    {stepCfg.label}
+                                    {step.label}
                                   </p>
                                 </div>
                               );
