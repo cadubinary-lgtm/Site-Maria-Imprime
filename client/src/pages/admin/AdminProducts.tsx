@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Edit2, Trash2, Plus, Search, X, ChevronUp } from "lucide-react";
+import { Loader2, Edit2, Trash2, Plus, Search, X, ChevronUp, Package } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
@@ -21,6 +22,13 @@ export default function AdminProducts() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showVariations, setShowVariations] = useState(false);
   const [createDeliveryOptions, setCreateDeliveryOptions] = useState<DeliveryOptionData[]>([]);
+  const [createLogistics, setCreateLogistics] = useState({
+    weight: "",
+    width: "",
+    height: "",
+    length: "",
+    allowedCarrierIds: [] as number[],
+  });
   const [createForm, setCreateForm] = useState({
     name: "",
     description: "",
@@ -65,6 +73,7 @@ export default function AdminProducts() {
     { enabled: !!editingId }
   );
   const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
 
   const SEGMENTS = useMemo(() => {
     if (!segmentsData || segmentsData.length === 0) return [];
@@ -142,6 +151,11 @@ export default function AdminProducts() {
         maxWidth: createForm.calculationType === "m2" ? createForm.maxWidth : undefined,
         minHeight: createForm.calculationType === "m2" ? createForm.minHeight : undefined,
         maxHeight: createForm.calculationType === "m2" ? createForm.maxHeight : undefined,
+        weight: createLogistics.weight ? parseFloat(createLogistics.weight) : undefined,
+        logisticsWidth: createLogistics.width ? parseFloat(createLogistics.width) : undefined,
+        logisticsHeight: createLogistics.height ? parseFloat(createLogistics.height) : undefined,
+        logisticsLength: createLogistics.length ? parseFloat(createLogistics.length) : undefined,
+        allowedCarrierIds: createLogistics.allowedCarrierIds.length > 0 ? createLogistics.allowedCarrierIds : undefined,
       });
 
       const newProductId = (result as any)?.id;
@@ -180,6 +194,7 @@ export default function AdminProducts() {
         minHeight: "", maxHeight: "", segmentIds: [],
       });
       setCreateDeliveryOptions([]);
+      setCreateLogistics({ weight: "", width: "", height: "", length: "", allowedCarrierIds: [] });
       setShowCreateForm(false);
     } catch (error) {
       toast.error("Erro ao criar produto");
@@ -488,6 +503,95 @@ export default function AdminProducts() {
                 calculationType={createForm.calculationType}
                 onChange={setCreateDeliveryOptions}
               />
+
+              {/* Logística */}
+              <div className="border-t pt-4 mt-2 space-y-4">
+                <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <Package className="w-4 h-4 text-orange-500" />
+                  Logística
+                </h3>
+
+                {/* Dimensões e Peso */}
+                <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Dimensões e Peso da Embalagem</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="create-weight">Peso (kg)</Label>
+                      <Input
+                        id="create-weight"
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 0.5"
+                        value={createLogistics.weight}
+                        onChange={(e) => setCreateLogistics((prev) => ({ ...prev, weight: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="create-log-width">Largura (cm)</Label>
+                      <Input
+                        id="create-log-width"
+                        type="number"
+                        step="0.1"
+                        placeholder="Ex: 20"
+                        value={createLogistics.width}
+                        onChange={(e) => setCreateLogistics((prev) => ({ ...prev, width: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="create-log-height">Altura (cm)</Label>
+                      <Input
+                        id="create-log-height"
+                        type="number"
+                        step="0.1"
+                        placeholder="Ex: 30"
+                        value={createLogistics.height}
+                        onChange={(e) => setCreateLogistics((prev) => ({ ...prev, height: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="create-log-length">Comprimento (cm)</Label>
+                      <Input
+                        id="create-log-length"
+                        type="number"
+                        step="0.1"
+                        placeholder="Ex: 10"
+                        value={createLogistics.length}
+                        onChange={(e) => setCreateLogistics((prev) => ({ ...prev, length: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transportadoras Permitidas */}
+                <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Transportadoras Permitidas</p>
+                  {carriersData && (carriersData as any[]).length > 0 ? (
+                    <div className="space-y-2">
+                      {(carriersData as any[]).map((carrier: any) => (
+                        <div key={carrier.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`create-carrier-${carrier.id}`}
+                            checked={createLogistics.allowedCarrierIds.includes(carrier.id)}
+                            onCheckedChange={(checked) => {
+                              setCreateLogistics((prev) => ({
+                                ...prev,
+                                allowedCarrierIds: checked
+                                  ? [...prev.allowedCarrierIds, carrier.id]
+                                  : prev.allowedCarrierIds.filter((id) => id !== carrier.id),
+                              }));
+                            }}
+                          />
+                          <Label htmlFor={`create-carrier-${carrier.id}`} className="font-normal cursor-pointer">
+                            {carrier.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">Nenhuma transportadora cadastrada</p>
+                  )}
+                </div>
+              </div>
 
               <div className="flex gap-3 pt-2">
                 <Button

@@ -246,6 +246,12 @@ export const appRouter = router({
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
+        // Logística
+        weight: z.number().optional(),
+        logisticsWidth: z.number().optional(),
+        logisticsHeight: z.number().optional(),
+        logisticsLength: z.number().optional(),
+        allowedCarrierIds: z.array(z.number()).optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -267,6 +273,11 @@ export const appRouter = router({
             maxWidth: input.maxWidth ? input.maxWidth as any : null,
             minHeight: input.minHeight ? input.minHeight as any : null,
             maxHeight: input.maxHeight ? input.maxHeight as any : null,
+            weight: input.weight ?? null,
+            width: input.logisticsWidth ?? null,
+            height: input.logisticsHeight ?? null,
+            length: input.logisticsLength ?? null,
+            allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : null,
             isActive: true,
           } as any);
           
