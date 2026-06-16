@@ -1039,10 +1039,50 @@ export default function ProductDetail() {
                 {cepError && <p className="text-xs text-red-500 -mt-2 mb-2">{cepError}</p>}
                 {cepAddress && <p className="text-xs text-green-600 -mt-2 mb-2 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />{cepAddress}</p>}
 
+                {/* ─── Retirada na Loja: sempre visível ─── */}
+                {(() => {
+                  // Verificar se já existe na lista calculada (evitar duplicação)
+                  const pickupAlreadyInList = shippingCalculated && shippingQuotes.some(q => q.fixedType === 'pickup');
+                  if (pickupAlreadyInList) return null;
+                  const isPickupSel = selectedShipping?.fixedType === 'pickup' || selectedShipping?.id === 'retirada';
+                  const pickupQuote = { id: 'retirada', name: 'Retirar na Loja', company: '', price: 0, deliveryDays: 0, fixedType: 'pickup' } as any;
+                  return (
+                    <button
+                      key="pickup-fixed"
+                      type="button"
+                      onClick={() => setSelectedShipping(pickupQuote)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
+                        isPickupSel
+                          ? 'border-orange-500 bg-orange-50 shadow-sm'
+                          : 'border-gray-200 bg-white hover:border-orange-300'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isPickupSel ? 'border-orange-500' : 'border-gray-300'}`}>
+                        {isPickupSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                      </div>
+                      <span className="flex-shrink-0">
+                        <Store className="w-4 h-4 text-green-600" />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium ${isPickupSel ? 'text-orange-700' : 'text-gray-800'}`}>Retirar na Loja</p>
+                        <p className="text-xs text-gray-500">Retirada Presencial</p>
+                      </div>
+                      <span className="text-sm font-bold flex-shrink-0 text-green-600">Grátis</span>
+                    </button>
+                  );
+                })()}
+
+                {/* Separador */}
+                <div className="flex items-center gap-2 my-1">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-xs text-gray-400">ou calcule o frete</span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+
                 {/* Estado antes de calcular */}
                 {!shippingCalculated && !cepLoading && (
-                  <div className="text-center py-6 text-gray-400">
-                    <Truck className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <div className="text-center py-4 text-gray-400">
+                    <Truck className="w-7 h-7 mx-auto mb-1.5 opacity-30" />
                     <p className="text-sm">Digite seu CEP acima para ver as opções de entrega</p>
                   </div>
                 )}
