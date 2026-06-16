@@ -403,6 +403,10 @@ export default function ProductDetail() {
       // Pré-selecionar Retirar na Loja por padrão
       const pickup = quotesArray.find((q: ShippingQuote) => q.fixedType === "pickup");
       if (pickup) setSelectedShipping(pickup);
+      // Auto-avanço após 1000ms quando CEP é calculado com sucesso
+      setTimeout(() => {
+        setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+      }, 1000);
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
@@ -1042,7 +1046,17 @@ export default function ProductDetail() {
                       <button
                         key="pickup-fixed"
                         type="button"
-                        onClick={() => setSelectedShipping(pickupQuote)}
+                        onClick={() => {
+                          if (isPickupSel) {
+                            setSelectedShipping(null);
+                          } else {
+                            setSelectedShipping(pickupQuote);
+                            // Auto-avanço após 1000ms ao selecionar retirada
+                            setTimeout(() => {
+                              setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                            }, 1000);
+                          }
+                        }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                           isPickupSel
                             ? 'border-orange-500 bg-orange-50 shadow-sm'
@@ -1180,7 +1194,13 @@ export default function ProductDetail() {
                     <button
                       key={String(opt.id)}
                       type="button"
-                      onClick={() => setSelectedShipping(opt)}
+                      onClick={() => {
+                        setSelectedShipping(opt);
+                        // Auto-avanço após 1000ms ao selecionar transportadora
+                        setTimeout(() => {
+                          setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
+                        }, 1000);
+                      }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                         isSel
                           ? "border-orange-500 bg-orange-50 shadow-sm"
@@ -1224,17 +1244,7 @@ export default function ProductDetail() {
                   </p>
                 )}
 
-                {/* Botão confirmar entrega — aparece quando retirada está selecionada OU quando transportadora está selecionada */}
-                {selectedShipping && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }))}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all mt-2"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Confirmar entrega
-                  </button>
-                )}
+
               </div>
             </AccordionStep>
 
