@@ -109,68 +109,42 @@ function CartItemCard({
           </p>
         )}
 
-        {/* Variações selecionadas */}
-        {variations.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
+        {/* Variações e atributos selecionados */}
+        {(variations.length > 0 || Object.keys(attrs).length > 0) && (
+          <div className="mt-1 space-y-0.5">
             {variations.map((v, i) => (
-              <Badge key={i} variant="outline" className="text-xs border-orange-200 text-orange-700">
-                {v.name}: {v.value}
-              </Badge>
+              <p key={i} className="text-xs text-gray-800">{v.name}: {v.value}</p>
             ))}
-          </div>
-        )}
-
-        {/* Atributos selecionados */}
-        {Object.keys(attrs).length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
             {Object.entries(attrs).map(([key, value]) => (
-              <Badge key={key} variant="secondary" className="text-xs">
-                {key}: {value}
-              </Badge>
+              <p key={key} className="text-xs text-gray-800">{key}: {value}</p>
             ))}
           </div>
         )}
 
         {/* Arquivo de arte */}
         {item.artFileUrl && (
-          <div className="flex items-center gap-1.5 mt-1">
+          <div className="mt-1">
             {item.artFileUrl.startsWith('http') && !item.artFileUrl.includes('manus-storage') ? (
-              <>
-                <LinkIcon className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                <a href={item.artFileUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline truncate max-w-[200px]">
-                  {item.artFileUrl}
-                </a>
-              </>
+              <p className="text-xs text-gray-800">Arte: <a href={item.artFileUrl} target="_blank" rel="noreferrer" className="underline truncate">{item.artFileUrl}</a></p>
             ) : (
-              <>
-                <FileImage className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                <span className="text-xs text-green-700 font-medium">
-                  {item.artFileUrl.split('/').pop()?.replace(/^\d+-/, '') ?? 'Arquivo enviado'}
-                </span>
-              </>
+              <p className="text-xs text-gray-800">Arte: {item.artFileUrl.split('/').pop()?.replace(/^\d+-/, '') ?? 'Arquivo enviado'}</p>
             )}
           </div>
         )}
-        {/* Prazo de produção */}
-        {item.prazoName && (
-          <p className="text-xs text-gray-500 mt-1">
-            ⏱ Prazo: {item.prazoName}
-          </p>
-        )}
-
-        {/* Previsão de entrega */}
-        {item.forecastLabel && (
-          <p className="text-xs font-medium text-orange-600 mt-0.5">
-            📦 {item.forecastLabel}
-          </p>
-        )}
-
-        {/* Entrega */}
-        {item.shippingLabel && (
-          <p className="text-xs text-gray-500 mt-0.5">
-            🚚 {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}
-          </p>
-        )}
+        {/* Prazo, previsão e entrega */}
+        <div className="mt-1 space-y-0.5">
+          {item.prazoName && (
+            <p className="text-xs text-gray-800">Prazo: {item.prazoName}</p>
+          )}
+          {item.forecastLabel && (
+            <p className="text-xs text-gray-800">{item.forecastLabel}</p>
+          )}
+          {item.shippingLabel && (
+            <p className="text-xs text-gray-800">
+              Entrega: {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}
+            </p>
+          )}
+        </div>
 
         {/* Preço unitário */}
         <p className="text-sm text-gray-500 mt-1">
