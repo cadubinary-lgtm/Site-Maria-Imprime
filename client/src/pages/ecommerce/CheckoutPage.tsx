@@ -150,15 +150,6 @@ export default function CheckoutPage() {
 
   const isStorePickupSelected = selectedFrete?.id === "retirada" || selectedFrete?.id === "pickup";
 
-  // Quando o cliente seleciona retirada na loja, pré-selecionar automaticamente "retirada_loja"
-  // e quando seleciona entrega em casa, limpar seleção de retirada
-  useEffect(() => {
-    if (isStorePickupSelected && paymentMethod !== "retirada_loja") {
-      setPaymentMethod("retirada_loja");
-    } else if (!isStorePickupSelected && paymentMethod === "retirada_loja") {
-      setPaymentMethod(null);
-    }
-  }, [isStorePickupSelected]);
   // Retirada na loja: ocultar Endereço da barra. Outras entregas: mostrar Endereço.
   // Antes de selecionar frete (selectedFrete null): mostrar todos os steps
   const visibleSteps = isStorePickupSelected
@@ -563,67 +554,70 @@ export default function CheckoutPage() {
                 {/* ETAPA 4: Pagamento */}
                 {step === "pagamento" && (
                   <div className="space-y-4">
-                    {/* Seleção do método — dinâmica conforme tipo de entrega */}
-                    {isStorePickupSelected ? (
-                      /* Retirada na loja: apenas pagamento na retirada */
-                      <div className="bg-orange-50 rounded-xl p-5 space-y-3 border border-orange-200">
-                        <div className="flex items-center gap-2">
-                          <Store className="w-5 h-5 text-orange-500" />
-                          <p className="font-semibold text-gray-800">Pagamento na Retirada</p>
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium ml-auto">Selecionado</span>
+                    {/* Seleção do método — todas as opções sempre disponíveis */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* PIX */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("pix")}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          paymentMethod === "pix" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "pix" ? "bg-orange-100" : "bg-gray-100"}`}>
+                          <QrCode className={`w-6 h-6 ${paymentMethod === "pix" ? "text-orange-600" : "text-gray-500"}`} />
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Você pagou na retirada do pedido em nossa loja. Aceitamos dinheiro, cartão de débito/crédito e PIX presencial.
-                        </p>
-                        <div className="bg-white rounded-lg p-3 border border-orange-100">
-                          <p className="text-xs text-orange-700 font-medium">Importante:</p>
-                          <p className="text-xs text-gray-500 mt-1">Aguarde o aviso de que seu pedido está pronto antes de vir buscar. Você será notificado por e-mail ou WhatsApp.</p>
+                        <div className="text-center">
+                          <p className={`font-semibold text-sm ${paymentMethod === "pix" ? "text-orange-700" : "text-gray-800"}`}>PIX</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Aprovação imediata</p>
                         </div>
-                      </div>
-                    ) : (
-                      /* Entrega em casa: PIX e Cartão */
-                      <div className="grid grid-cols-2 gap-3">
-                        {/* PIX */}
-                        <button
-                          type="button"
-                          onClick={() => setPaymentMethod("pix")}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            paymentMethod === "pix" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
-                          }`}
-                        >
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "pix" ? "bg-orange-100" : "bg-gray-100"}`}>
-                            <QrCode className={`w-6 h-6 ${paymentMethod === "pix" ? "text-orange-600" : "text-gray-500"}`} />
-                          </div>
-                          <div className="text-center">
-                            <p className={`font-semibold text-sm ${paymentMethod === "pix" ? "text-orange-700" : "text-gray-800"}`}>PIX</p>
-                            <p className="text-xs text-gray-500 mt-0.5">Aprovação imediata</p>
-                          </div>
-                          {paymentMethod === "pix" && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
-                          )}
-                        </button>
+                        {paymentMethod === "pix" && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
+                        )}
+                      </button>
 
-                        {/* Cartão */}
+                      {/* Pagamento na Retirada — apenas para clientes com permissão */}
+                      {customerProfile?.allowStorePickup && (
                         <button
                           type="button"
-                          onClick={() => setPaymentMethod("cartao")}
+                          onClick={() => setPaymentMethod("retirada_loja")}
                           className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            paymentMethod === "cartao" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                            paymentMethod === "retirada_loja" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
                           }`}
                         >
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "cartao" ? "bg-orange-100" : "bg-gray-100"}`}>
-                            <CreditCard className={`w-6 h-6 ${paymentMethod === "cartao" ? "text-orange-600" : "text-gray-500"}`} />
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "retirada_loja" ? "bg-orange-100" : "bg-gray-100"}`}>
+                            <Store className={`w-6 h-6 ${paymentMethod === "retirada_loja" ? "text-orange-600" : "text-gray-500"}`} />
                           </div>
                           <div className="text-center">
-                            <p className={`font-semibold text-sm ${paymentMethod === "cartao" ? "text-orange-700" : "text-gray-800"}`}>Cartão</p>
-                            <p className="text-xs text-gray-500 mt-0.5">Crédito ou débito</p>
+                            <p className={`font-semibold text-sm ${paymentMethod === "retirada_loja" ? "text-orange-700" : "text-gray-800"}`}>Pagar na Retirada</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Pague ao retirar</p>
                           </div>
-                          {paymentMethod === "cartao" && (
+                          {paymentMethod === "retirada_loja" && (
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
                           )}
                         </button>
-                      </div>
-                    )}
+                      )}
+
+                      {/* Cartão */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("cartao")}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          paymentMethod === "cartao" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "cartao" ? "bg-orange-100" : "bg-gray-100"}`}>
+                          <CreditCard className={`w-6 h-6 ${paymentMethod === "cartao" ? "text-orange-600" : "text-gray-500"}`} />
+                        </div>
+                        <div className="text-center">
+                          <p className={`font-semibold text-sm ${paymentMethod === "cartao" ? "text-orange-700" : "text-gray-800"}`}>Cartão</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Crédito ou débito</p>
+                        </div>
+                        {paymentMethod === "cartao" && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selecionado</span>
+                        )}
+                      </button>
+                    </div>
 
                     {/* PIX: QR Code simulado */}
                     {paymentMethod === "pix" && (
