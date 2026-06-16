@@ -521,10 +521,6 @@ export default function ProductDetail() {
       await doCalculateShipping(clean, quantity);
       // Salvar CEP no localStorage para pré-carregar no checkout
       localStorage.setItem("checkout_cep", clean);
-      // Auto-avanço com 1000ms após exibir as transportadoras
-      setTimeout(() => {
-        setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-      }, 1000);
     } catch { setCepError("Erro ao calcular frete. Tente novamente."); }
     finally { setCepLoading(false); }
   };
