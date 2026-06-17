@@ -381,6 +381,12 @@ export const appRouter = router({
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
         specifications: z.string().optional(), // JSON array de { label, value }
+        // Campos de logística
+        weight: z.number().optional(),
+        logisticsWidth: z.number().optional(),
+        logisticsHeight: z.number().optional(),
+        logisticsLength: z.number().optional(),
+        allowedCarrierIds: z.array(z.number()).optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -404,6 +410,12 @@ export const appRouter = router({
         if (input.minHeight) updateData.minHeight = parseFloat(input.minHeight);
         if (input.maxHeight) updateData.maxHeight = parseFloat(input.maxHeight);
         if (input.specifications !== undefined) updateData.specifications = input.specifications || null;
+        // Campos de logística
+        if (input.weight !== undefined) updateData.weight = input.weight;
+        if (input.logisticsWidth !== undefined) updateData.width = input.logisticsWidth;
+        if (input.logisticsHeight !== undefined) updateData.height = input.logisticsHeight;
+        if (input.logisticsLength !== undefined) updateData.length = input.logisticsLength;
+        if (input.allowedCarrierIds !== undefined) updateData.allowedCarriers = JSON.stringify(input.allowedCarrierIds);
         
         const result = await db.update(products)
           .set(updateData)

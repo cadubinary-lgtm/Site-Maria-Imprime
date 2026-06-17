@@ -43,10 +43,15 @@ export function ProductLogisticsTab({ productId }: ProductLogisticsTabProps) {
     try {
       await updateProductMutation.mutateAsync({
         id: productId,
+        // Campos obrigatórios do router (preservar valores atuais)
+        name: (product as any)?.name ?? '',
+        price: (product as any)?.price?.toString() ?? '0',
+        segment: (product as any)?.segment ?? '',
+        // Campos de logística
         weight: weight ? parseFloat(weight) : undefined,
-        width: width ? parseFloat(width) : undefined,
-        height: height ? parseFloat(height) : undefined,
-        length: length ? parseFloat(length) : undefined,
+        logisticsWidth: width ? parseFloat(width) : undefined,
+        logisticsHeight: height ? parseFloat(height) : undefined,
+        logisticsLength: length ? parseFloat(length) : undefined,
         allowedCarrierIds: selectedCarriers,
       } as any);
       toast.success('Informações logísticas salvas com sucesso!');

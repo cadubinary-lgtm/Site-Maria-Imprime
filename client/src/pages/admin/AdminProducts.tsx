@@ -125,7 +125,9 @@ export default function AdminProducts() {
     e.preventDefault();
 
     if (!createForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
-    if (!createForm.price || parseFloat(createForm.price) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
+    if (createForm.calculationType !== "m2" && createForm.calculationType !== "metro_linear") {
+      if (!createForm.price || parseFloat(createForm.price) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
+    }
     if (!createForm.calculationType) { toast.error("Tipo de cobrança é obrigatório"); return; }
 
     if (createForm.calculationType === "m2") {
@@ -235,7 +237,9 @@ export default function AdminProducts() {
   const handleSave = async () => {
     if (!editingId) return;
     if (!editForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
-    if (!editForm.price || parseFloat(editForm.price as any) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
+    if ((editForm as any).calculationType !== "m2" && (editForm as any).calculationType !== "metro_linear") {
+      if (!editForm.price || parseFloat(editForm.price as any) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
+    }
 
     if ((editForm as any).calculationType === "m2") {
       if (!(editForm as any).pricePerM2 || parseFloat((editForm as any).pricePerM2) <= 0) { toast.error("Preço por m² é obrigatório"); return; }
