@@ -885,7 +885,72 @@ createOrder: protectedProcedure
             } catch (_) {}
           }
         }
-        await updateCartItemQuantity(input.id, userId, input.quantity, sessionId);
+        // Recalcular frete se o item tem CEP e método de entrega por transportadora
+        let newShippingPrice: number | null = null;
+        try {
+          const db = await getDb();
+          if (db) {
+            const { sql: drizzleSql } = await import("drizzle-orm");
+            // Buscar o item do carrinho para obter cepDestino, shippingMethod e dados do produto
+            let cartRow: any = null;
+            if (userId) {
+              const rows = await db.execute(
+                drizzleSql`SELECT ci.cepDestino, ci.shippingMethod, ci.shippingPrice,
+                  p.weight, p.height, p.width, p.length
+                  FROM cartItems ci JOIN products p ON ci.productId = p.id
+                  WHERE ci.id = ${input.id} AND ci.userId = ${userId} LIMIT 1`
+              ) as any;
+              cartRow = (rows[0] ?? [])[0] ?? null;
+            } else if (sessionId) {
+              const rows = await db.execute(
+                drizzleSql`SELECT ci.cepDestino, ci.shippingMethod, ci.shippingPrice,
+                  p.weight, p.height, p.width, p.length
+                  FROM cartItems ci JOIN products p ON ci.productId = p.id
+                  WHERE ci.id = ${input.id} AND ci.sessionId = ${sessionId} LIMIT 1`
+              ) as any;
+              cartRow = (rows[0] ?? [])[0] ?? null;
+            }
+            if (cartRow && cartRow.cepDestino && cartRow.shippingMethod && cartRow.shippingMethod !== "retirada" && !String(cartRow.shippingMethod).startsWith("local_")) {
+              // Recalcular frete via Melhor Envio
+              const { calculateShipping: calcME } = await import("./melhorenvio-api");
+              const { logisticsSettings, carriers } = await import("../drizzle/schema");
+              const { eq: eqOp } = await import("drizzle-orm");
+              const settingsRows = await db.select().from(logisticsSettings).limit(1);
+              const settings = settingsRows[0] ?? null;
+              if (settings?.accessToken && settings.originCep) {
+                const baseWeight = parseFloat(cartRow.weight ?? '0') || 0.5;
+                const baseH = parseFloat(cartRow.height ?? '0') || 5;
+                const baseW = parseFloat(cartRow.width ?? '0') || 30;
+                const baseL = parseFloat(cartRow.length ?? '0') || 40;
+                const qty = input.quantity;
+                const totalWeight = Math.max(0.1, baseWeight * qty);
+                const stackFactor = Math.ceil(Math.sqrt(qty));
+                const payload = {
+                  from: { postal_code: settings.originCep },
+                  to: { postal_code: cartRow.cepDestino },
+                  package: {
+                    height: Math.min(baseH * stackFactor, 100),
+                    width: baseW,
+                    length: baseL,
+                    weight: Math.round(totalWeight * 1000) / 1000,
+                  },
+                  options: { insurance_value: 0, receipt: false, own_hand: false },
+                };
+                const activeCarriers = await db.select().from(carriers).where(eqOp(carriers.isActive, true));
+                const activeCarrierMap = new Map(activeCarriers.map((c: any) => [c.companyId, true]));
+                const quotes = await calcME(settings.accessToken, settings.sandbox, payload);
+                const targetMethod = String(cartRow.shippingMethod);
+                const matched = quotes.find((q: any) => !q.error && activeCarrierMap.has(q.company.id) && String(q.id) === targetMethod);
+                if (matched) {
+                  newShippingPrice = parseFloat((matched as any).custom_price || (matched as any).price);
+                }
+              }
+            }
+          }
+        } catch (_) {
+          // Silencioso: falha no recálculo não bloqueia a atualização de quantidade
+        }
+        await updateCartItemQuantity(input.id, userId, input.quantity, sessionId, newShippingPrice);
         return { success: true };
       }),
 
