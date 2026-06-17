@@ -889,17 +889,36 @@ export async function addToCart(data: {
   return (result as any).insertId as number;
 }
 
-export async function updateCartItemQuantity(id: number, userId: number | null, quantity: number, sessionId?: string | null) {
+export async function updateCartItemQuantity(
+  id: number,
+  userId: number | null,
+  quantity: number,
+  sessionId?: string | null,
+  shippingPrice?: number | null,
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  const hasShipping = shippingPrice !== undefined && shippingPrice !== null;
   if (userId) {
-    await db.execute(
-      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
-    );
+    if (hasShipping) {
+      await db.execute(
+        sql`UPDATE cartItems SET quantity = ${quantity}, shippingPrice = ${shippingPrice}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
+      );
+    } else {
+      await db.execute(
+        sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND userId = ${userId}`
+      );
+    }
   } else if (sessionId) {
-    await db.execute(
-      sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND sessionId = ${sessionId}`
-    );
+    if (hasShipping) {
+      await db.execute(
+        sql`UPDATE cartItems SET quantity = ${quantity}, shippingPrice = ${shippingPrice}, updatedAt = NOW() WHERE id = ${id} AND sessionId = ${sessionId}`
+      );
+    } else {
+      await db.execute(
+        sql`UPDATE cartItems SET quantity = ${quantity}, updatedAt = NOW() WHERE id = ${id} AND sessionId = ${sessionId}`
+      );
+    }
   }
 }
 

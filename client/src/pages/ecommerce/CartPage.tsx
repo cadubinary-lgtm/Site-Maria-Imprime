@@ -363,7 +363,7 @@ export default function CartPage() {
                 <CardContent className="space-y-3">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal ({itemCount} {itemCount === 1 ? "item" : "itens"})</span>
-                    <span>{formatCurrency(total)}</span>
+                    <span>{formatCurrency(subtotalItems)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Frete</span>
