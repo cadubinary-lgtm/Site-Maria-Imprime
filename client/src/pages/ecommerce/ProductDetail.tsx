@@ -1005,15 +1005,15 @@ export default function ProductDetail() {
               <AccordionStep
                 id="dimensions"
                 number={dimStepIdx + 1}
-                title="Medidas (cm)"
+                title="Medidas (metros)"
                 isOpen={!!openSteps[dimStepIdx]}
                 onToggle={() => toggleStep(dimStepIdx)}
-                summary={area > 0 ? `${dimWidth}×${dimHeight} cm — ${billedArea.toFixed(2)} m²` : undefined}
+                summary={area > 0 ? `${dimWidth}×${dimHeight} m — ${billedArea.toFixed(2)} m²` : undefined}
               >
                 <div className="mt-3 space-y-4">
                   <div className="grid grid-cols-3 gap-3 items-start">
                     <div>
-                      <Label className="text-xs text-gray-500 mb-1.5 block">Largura (cm)</Label>
+                      <Label className="text-xs text-gray-500 mb-1.5 block">Largura (metros)</Label>
                       <Input
                         type="number"
                         placeholder="0,00"
@@ -1024,7 +1024,7 @@ export default function ProductDetail() {
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500 mb-1.5 block">Altura (cm)</Label>
+                      <Label className="text-xs text-gray-500 mb-1.5 block">Altura (metros)</Label>
                       <Input
                         type="number"
                         placeholder="0,00"
@@ -1038,7 +1038,7 @@ export default function ProductDetail() {
                       <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-center">
                         <p className="text-xs text-gray-500 mb-0.5">Área total</p>
                         <p className="text-xl font-bold text-orange-500">{billedArea.toFixed(2)} m²</p>
-                        <p className="text-xs text-gray-400">{dimWidth} x {dimHeight} cm</p>
+                        <p className="text-xs text-gray-400">{dimWidth} x {dimHeight} m</p>
                       </div>
                     )}
                   </div>
@@ -1609,7 +1609,7 @@ export default function ProductDetail() {
                   <div className="pb-3 border-b border-gray-100 space-y-1">
                     <div className="flex justify-between gap-2">
                       <span className="text-xs text-gray-400">Medidas</span>
-                      <span className="text-xs font-medium text-gray-700">{dimWidth} × {dimHeight} cm</span>
+                      <span className="text-xs font-medium text-gray-700">{dimWidth} × {dimHeight} m</span>
                     </div>
                     <div className="flex justify-between gap-2">
                       <span className="text-xs text-gray-400">Área total</span>
