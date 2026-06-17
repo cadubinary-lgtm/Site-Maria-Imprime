@@ -72,10 +72,11 @@ function formatDeliveryDate(date: Date): string {
 
 // ─── Accordion ──────────────────────────────────────────────────────────────
 function AccordionStep({
-  id, number, title, isOpen, onToggle, children,
+  id, number, title, isOpen, onToggle, children, summary,
 }: {
-  id?: string; number: number; title: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode;
+  id?: string; number: number; title: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode; summary?: string;
 }) {
+  const isCompleted = !isOpen && !!summary;
   return (
     <div id={id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
       <button
@@ -83,10 +84,17 @@ function AccordionStep({
         onClick={onToggle}
         className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
       >
-        <div className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+        <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
+          isCompleted ? 'bg-gray-200 text-gray-500' : 'bg-orange-500 text-white'
+        }`}>
           {number}
         </div>
-        <span className="flex-1 font-semibold text-gray-800 text-sm">{title}</span>
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          <span className="font-semibold text-gray-800 text-sm whitespace-nowrap">{title}</span>
+          {isCompleted && summary && (
+            <span className="text-xs text-gray-500 truncate">— {summary}</span>
+          )}
+        </div>
         {isOpen
           ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
           : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
@@ -868,6 +876,7 @@ export default function ProductDetail() {
             {/* ── Variações em acordeão (sistema variationTypes) ── */}
             {(variationTypes ?? []).map((vtype: any, idx: number) => {
               const selOptId = selectedVariations[vtype.id];
+              const selOptName = vtype.options?.find((o: any) => o.id === selOptId)?.name;
               return (
                 <AccordionStep
                   key={`vtype-${vtype.id}`}
@@ -876,6 +885,7 @@ export default function ProductDetail() {
                   title={vtype.name}
                   isOpen={!!openSteps[idx]}
                   onToggle={() => toggleStep(idx)}
+                  summary={selOptName}
                 >
                   <div className="space-y-2 mt-2">
                     {(vtype.options ?? []).map((opt: any) => {
@@ -927,6 +937,9 @@ export default function ProductDetail() {
             {(visibleAttributes ?? []).map((attr, idx) => {
               const globalIdx = varCount + idx; // continua numeração após variações
               const selVal = selectedAttributes[attr.attributeId];
+              const selAttrName = selVal?.valueIds[0]
+                ? attr.values.find(v => v.id === selVal.valueIds[0])?.value
+                : selVal?.customValue;
               return (
                 <AccordionStep
                   key={attr.attributeId}
@@ -935,6 +948,7 @@ export default function ProductDetail() {
                   title={attr.attribute?.name ?? `Atributo ${globalIdx + 1}`}
                   isOpen={!!openSteps[globalIdx]}
                   onToggle={() => toggleStep(globalIdx)}
+                  summary={selAttrName}
                 >
                   <div className="space-y-2 mt-2">
                     {attr.values.map(val => {
@@ -994,6 +1008,7 @@ export default function ProductDetail() {
                 title="Medidas (cm)"
                 isOpen={!!openSteps[dimStepIdx]}
                 onToggle={() => toggleStep(dimStepIdx)}
+                summary={area > 0 ? `${dimWidth}×${dimHeight} cm — ${billedArea.toFixed(2)} m²` : undefined}
               >
                 <div className="mt-3 space-y-4">
                   <div className="grid grid-cols-3 gap-3 items-start">
@@ -1050,6 +1065,7 @@ export default function ProductDetail() {
               title="Enviar Arquivo"
               isOpen={!!openSteps[fileStepIdx]}
               onToggle={() => toggleStep(fileStepIdx)}
+              summary={artFile ? artFile.name : (artLink ? 'Link enviado' : undefined)}
             >
               <div className="mt-3 space-y-3">
                 {/* Tabs */}
@@ -1182,6 +1198,7 @@ export default function ProductDetail() {
               title="Prazo de produção"
               isOpen={!!openSteps[prazoStepIdx]}
               onToggle={() => toggleStep(prazoStepIdx)}
+              summary={selectedDeliveryOption ? selectedDeliveryOption.name : undefined}
             >
                 <div className="mt-3 space-y-2">
                   {deliveryOptions.map((opt: any) => (
@@ -1247,6 +1264,11 @@ export default function ProductDetail() {
               title="Opções de Entrega"
               isOpen={!!openSteps[deliveryStepIdx]}
               onToggle={() => toggleStep(deliveryStepIdx)}
+              summary={selectedShipping
+                ? (selectedShipping.fixedType === 'pickup' || selectedShipping.id === 'retirada'
+                    ? 'Retirada na Loja'
+                    : `${selectedShipping.company} — R$ ${selectedShipping.price.toFixed(2)}`)
+                : undefined}
             >
               <div className="mt-3 space-y-2">
                 <p className="text-xs text-gray-500 mb-3">Escolha como deseja receber seu pedido</p>
