@@ -259,11 +259,15 @@ export const appRouter = router({
         if (!db) throw new Error("Database not available");
         
         try {
+          // Para m2 e metro_linear, o preco base nao e obrigatorio — usar 0 como fallback
+          const effectivePrice = (input.price && input.price !== '' && !isNaN(Number(input.price)))
+            ? input.price
+            : '0';
           // Inserir produto
           const result = await db.insert(products).values({
             name: input.name,
             description: input.description,
-            price: input.price as any,
+            price: effectivePrice as any,
             segment: input.segment as any,
             imageUrl: input.imageUrl,
             imageKey: input.imageKey,
@@ -278,7 +282,7 @@ export const appRouter = router({
             width: input.logisticsWidth ?? null,
             height: input.logisticsHeight ?? null,
             length: input.logisticsLength ?? null,
-            allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : null,
+            allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : '[]',
             specifications: input.specifications || null,
             isActive: true,
           } as any);
