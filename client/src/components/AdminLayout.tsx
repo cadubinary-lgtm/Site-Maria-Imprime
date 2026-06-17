@@ -7,7 +7,7 @@ import {
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
   AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator,
-  ShieldCheck, ScrollText, UserCircle
+  ShieldCheck, ScrollText, UserCircle, Plus
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -199,6 +199,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Produtos
     { group: "PRODUTOS" },
     { item: { label: "Produtos", href: "/admin/produtos", icon: <Package className="w-4 h-4" /> } },
+    { item: { label: "Novo Produto", href: "/admin/novo-produto", icon: <Plus className="w-4 h-4" /> } },
+    { item: { label: "Gerenciar Variações", href: "/admin/variacoes", icon: <Settings className="w-4 h-4" /> } },
     { item: { label: "Segmentos", href: "/admin/segmentos", icon: <Layers className="w-4 h-4" /> } },
     { item: { label: "Atributos", href: "/admin/atributos", icon: <Tag className="w-4 h-4" /> } },
     { item: { label: "Regras", href: "/admin/regras", icon: <Sliders className="w-4 h-4" /> } },

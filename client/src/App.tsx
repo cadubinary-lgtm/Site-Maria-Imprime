@@ -40,6 +40,8 @@ import OrderTracking from "./pages/cliente/OrderTracking";
 // ─── Páginas Administrativas ─────────────────────────────────────────────────
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminNewProduct from "./pages/admin/AdminNewProduct";
+import AdminVariations from "./pages/admin/AdminVariations";
 import AdminPanel from "./pages/admin/AdminPanel";
 import AdminAttributesManager from "./pages/admin/AdminAttributesManager";
 import AdminProductAttributesLinker from "./pages/admin/AdminProductAttributesLinker";
@@ -153,6 +155,8 @@ function AdminProtectedRoutesManus() {
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos" component={AdminProducts} />
+      <Route path="/admin/novo-produto" component={AdminNewProduct} />
+      <Route path="/admin/variacoes" component={AdminVariations} />
       <Route path="/admin/atributos" component={AdminAttributesManager} />
       <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
@@ -234,6 +238,8 @@ function AdminProtectedRoutes() {
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos" component={AdminProducts} />
+      <Route path="/admin/novo-produto" component={AdminNewProduct} />
+      <Route path="/admin/variacoes" component={AdminVariations} />
       <Route path="/admin/atributos" component={AdminAttributesManager} />
       <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
