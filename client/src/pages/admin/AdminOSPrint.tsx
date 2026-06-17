@@ -247,8 +247,13 @@ export default function AdminOSPrint() {
                   ENTREGA / RETIRADA
                 </div>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "#111827" }}>
-                  {isStorePickup ? "Retirada na Loja" : (o.deliveryMethod ?? "A definir")}
+                  {isStorePickup ? "Retirada na Loja" : (o.shippingLabel ?? o.deliveryMethod ?? "A definir")}
                 </div>
+                {o.shippingEstimatedDays && !isStorePickup && (
+                  <div style={{ fontSize: "9px", color: "#6b7280", marginTop: "2px" }}>
+                    Prazo: {o.shippingEstimatedDays} dias úteis
+                  </div>
+                )}
               </div>
             </div>
             {/* Status */}
@@ -360,18 +365,21 @@ export default function AdminOSPrint() {
               </div>
               {o.paymentMethod && (
                 <div style={{ fontSize: "11px", color: "#78350f" }}>
-                  Pagamento: {
+                  <strong>Pagamento:</strong> {
                     o.paymentMethod === "pix" ? "PIX" :
-                    o.paymentMethod === "cartao" ? "Cartão" :
+                    o.paymentMethod === "cartao" ? "Cartão de Crédito" :
+                    o.paymentMethod === "cartao_credito" ? "Cartão de Crédito" :
                     o.paymentMethod === "dinheiro" ? "Dinheiro" :
                     o.paymentMethod === "boleto" ? "Boleto" :
-                    o.paymentMethod === "retirada" ? "Pagamento na Retirada da Loja" :
+                    o.paymentMethod === "pagar_na_retirada" ? "Pagamento na Retirada da Loja" :
                     o.paymentMethod
                   }
                 </div>
               )}
               {o.notes && (
-                <div style={{ fontSize: "11px", color: "#78350f", marginTop: o.paymentMethod ? "2px" : "0" }}>{o.notes}</div>
+                <div style={{ fontSize: "11px", color: "#78350f", marginTop: o.paymentMethod ? "6px" : "0" }}>
+                  <strong>Observações:</strong> {o.notes}
+                </div>
               )}
             </div>
           )}
@@ -538,10 +546,11 @@ export default function AdminOSPrint() {
                 </div>
               ) : (
                 <div style={{ fontSize: "11px", color: "#374151", lineHeight: 1.6 }}>
-                  {o.deliveryStreet && <div>{o.deliveryStreet}, {o.deliveryNumber}{o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}</div>}
+                  {o.deliveryStreet && <div><strong>Endereço:</strong> {o.deliveryStreet}, {o.deliveryNumber}{o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}</div>}
                   {o.deliveryNeighborhood && <div>{o.deliveryNeighborhood} · {o.deliveryCity} - {o.deliveryState}</div>}
                   {o.deliveryZipCode && <div style={{ color: "#6b7280" }}>CEP: {o.deliveryZipCode}</div>}
-                  {o.deliveryMethod && <div style={{ color: "#c2410c", fontWeight: 600 }}>{o.deliveryMethod}</div>}
+                  {(o.shippingLabel || o.deliveryMethod) && <div style={{ color: "#c2410c", fontWeight: 600, marginTop: "4px" }}><strong>Transportadora:</strong> {o.shippingLabel || o.deliveryMethod}</div>}
+                  {o.shippingEstimatedDays && <div style={{ color: "#6b7280", marginTop: "2px" }}><strong>Prazo:</strong> {o.shippingEstimatedDays} dias úteis</div>}
                 </div>
               )}
             </div>
