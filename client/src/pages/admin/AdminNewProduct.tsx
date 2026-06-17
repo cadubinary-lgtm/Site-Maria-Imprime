@@ -176,63 +176,19 @@ export default function AdminNewProduct() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create-name">Nome do Produto *</Label>
-                  <Input
-                    id="create-name"
-                    value={createForm.name}
-                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                    placeholder="Ex: Adesivo Brilho"
-                    required
-                  />
-                </div>
-                {/* Preço Base: visível apenas para Unidade e Pacote */}
-                {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
-                  <div>
-                    <Label htmlFor="create-price">Preço Base (R$) *</Label>
-                    <Input
-                      id="create-price"
-                      type="number"
-                      step="0.01"
-                      value={createForm.price}
-                      onChange={(e) => setCreateForm({ ...createForm, price: e.target.value })}
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-                )}
-              </div>
+              {/* Linha 1: Nome do Produto (largura total) */}
               <div>
-                <Label htmlFor="create-description">Descrição</Label>
-                <Textarea
-                  id="create-description"
-                  value={createForm.description}
-                  onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                  placeholder="Descreva o produto"
-                  rows={3}
+                <Label htmlFor="create-name">Nome do Produto *</Label>
+                <Input
+                  id="create-name"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  placeholder="Ex: Adesivo Brilho"
+                  required
                 />
               </div>
+              {/* Linha 2: Tipo de Cobrança + Preço Base lado a lado */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create-segment">Segmento</Label>
-                  <Select
-                    value={createForm.segment}
-                    onValueChange={(value) => setCreateForm({ ...createForm, segment: value })}
-                    disabled={segmentsLoading}
-                  >
-                    <SelectTrigger id="create-segment">
-                      <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SEGMENTS.map((seg) => (
-                        <SelectItem key={seg.id} value={seg.id}>
-                          {seg.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div>
                   <Label htmlFor="create-calculationType">Tipo de Cobrança *</Label>
                   <Select
@@ -250,6 +206,52 @@ export default function AdminNewProduct() {
                     </SelectContent>
                   </Select>
                 </div>
+                {/* Preço Base: visível apenas para Unidade e Pacote */}
+                {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
+                  <div>
+                    <Label htmlFor="create-price">Preço Base (R$) *</Label>
+                    <Input
+                      id="create-price"
+                      type="number"
+                      step="0.01"
+                      value={createForm.price}
+                      onChange={(e) => setCreateForm({ ...createForm, price: e.target.value })}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+              {/* Linha 3: Descrição */}
+              <div>
+                <Label htmlFor="create-description">Descrição</Label>
+                <Textarea
+                  id="create-description"
+                  value={createForm.description}
+                  onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                  placeholder="Descreva o produto"
+                  rows={3}
+                />
+              </div>
+              {/* Linha 4: Segmento */}
+              <div>
+                <Label htmlFor="create-segment">Segmento</Label>
+                <Select
+                  value={createForm.segment}
+                  onValueChange={(value) => setCreateForm({ ...createForm, segment: value })}
+                  disabled={segmentsLoading}
+                >
+                  <SelectTrigger id="create-segment">
+                    <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SEGMENTS.map((seg) => (
+                      <SelectItem key={seg.id} value={seg.id}>
+                        {seg.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               {/* Campos condicionais para m² e metro linear */}
               {(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && (
