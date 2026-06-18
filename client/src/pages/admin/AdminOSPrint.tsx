@@ -491,25 +491,34 @@ export default function AdminOSPrint() {
                       {/* Especificações */}
                       <td style={{ padding: "8px 10px", verticalAlign: "middle" }}>
                         <div style={{ fontSize: "10px", color: "#374151", lineHeight: 1.5 }}>
-                          {item.selectedAttributes ? (
-                            item.selectedAttributes.split(" | ").map((attr: string, idx: number) => {
-                              // Tenta separar rótulo e valor (ex: "Tipo de Impressão: Solvente")
-                              const parts = attr.split(": ");
-                              if (parts.length === 2) {
+                          {item.selectedAttributes ? (() => {
+                            try {
+                              // Tenta parsear como JSON (formato: {"Tipo de Impressão":"Solvente"})
+                              const attrs = JSON.parse(item.selectedAttributes);
+                              return Object.entries(attrs).map(([key, value], idx) => (
+                                <div key={idx} style={{ marginBottom: "3px" }}>
+                                  <strong>{key}:</strong> {String(value)}
+                                </div>
+                              ));
+                            } catch {
+                              // Se não for JSON válido, tenta split por " | "
+                              return item.selectedAttributes.split(" | ").map((attr: string, idx: number) => {
+                                const parts = attr.split(": ");
+                                if (parts.length === 2) {
+                                  return (
+                                    <div key={idx} style={{ marginBottom: "3px" }}>
+                                      <strong>{parts[0]}:</strong> {parts[1]}
+                                    </div>
+                                  );
+                                }
                                 return (
                                   <div key={idx} style={{ marginBottom: "3px" }}>
-                                    <strong>{parts[0]}:</strong> {parts[1]}
+                                    {attr}
                                   </div>
                                 );
-                              }
-                              // Se não tiver rótulo, exibe como está
-                              return (
-                                <div key={idx} style={{ marginBottom: "3px" }}>
-                                  {attr}
-                                </div>
-                              );
-                            })
-                          ) : (
+                              });
+                            }
+                          })() : (
                             "-"
                           )}
                         </div>
