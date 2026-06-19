@@ -158,6 +158,8 @@ export const orderItems = mysqlTable("orderItems", {
   quantity: int("quantity").notNull(),
   priceAtOrder: decimal("priceAtOrder", { precision: 10, scale: 2 }).notNull(),
   selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
+  variationSnapshot: longtext("variationSnapshot"), // JSON array [{name, value}] snapshot das variações
+  customDimensions: varchar("customDimensions", { length: 100 }), // Ex: "1x2" (largura x altura em metros)
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   notes: longtext("notes"), // Observações do cliente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
