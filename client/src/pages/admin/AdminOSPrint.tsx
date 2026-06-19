@@ -738,12 +738,10 @@ export default function AdminOSPrint() {
                 <div style={{ fontSize: "7px", fontWeight: 700, color: "#374151", textTransform: "uppercase", marginBottom: "1px" }}>
                   {field.label}
                 </div>
-                <div style={{ fontSize: "7px", color: "#9ca3af", marginBottom: "8px" }}>{field.sub}</div>
-                <div style={{ borderTop: `1px solid ${border}`, paddingTop: "4px" }}>
-                  <div style={{ fontSize: "7px", color: "#9ca3af" }}>Assinatura: ________________________</div>
-                  <div style={{ fontSize: "7px", color: "#9ca3af", marginTop: "3px" }}>
-                    Data: ____/____/________ &nbsp; Hora: ________
-                  </div>
+                <div style={{ fontSize: "7px", color: "#9ca3af", marginBottom: "4px" }}>{field.sub}</div>
+                <div style={{ fontSize: "7px", color: "#9ca3af" }}>Assinatura: ________________________</div>
+                <div style={{ fontSize: "7px", color: "#9ca3af", marginTop: "3px" }}>
+                  Data: ____/____/________ &nbsp; Hora: ________
                 </div>
               </div>
             ))}
