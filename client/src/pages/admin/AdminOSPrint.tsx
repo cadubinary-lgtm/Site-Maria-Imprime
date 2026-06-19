@@ -588,13 +588,13 @@ export default function AdminOSPrint() {
                   );
                 })}
 
-                {/* TOTAL GERAL */}
+                {/* VALOR TOTAL DO PEDIDO (apenas itens, sem frete) */}
                 <tr style={{ borderTop: `2px solid ${border}`, backgroundColor: "#f9fafb" }}>
                   <td colSpan={6} style={{ padding: "6px 8px", textAlign: "right", fontSize: "9px", fontWeight: 700, color: "#374151" }}>
-                    TOTAL GERAL
+                    VALOR TOTAL DO PEDIDO
                   </td>
                   <td style={{ padding: "6px 8px", textAlign: "right", fontSize: "12px", fontWeight: 900, color: orange }}>
-                    {fmt(total)}
+                    {fmt(subtotal)}
                   </td>
                 </tr>
               </tbody>
@@ -644,7 +644,7 @@ export default function AdminOSPrint() {
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
-                <span>Subtotal</span><span>{fmt(subtotal)}</span>
+                <span>Valor Total do Pedido</span><span>{fmt(subtotal)}</span>
               </div>
               {deliveryPrice > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
