@@ -255,147 +255,154 @@ export default function AdminOSPrint() {
           margin: "0 auto", boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
         }}>
 
-          {/* ══ 1. CABEÇALHO: Logo | ORDEM DE SERVIÇO | QR Code ══════════════ */}
+          {/* ══ 1. CABEÇALHO: 3 colunas com divisores verticais ═════════════════════ */}
           <div style={{ display: "flex", borderBottom: `1px solid ${border}` }}>
 
-            {/* Coluna esquerda: Logo + dados da empresa */}
-            <div style={{ width: "200px", flexShrink: 0, padding: "14px 16px", borderRight: `1px solid ${border}` }}>
-              {/* Logo */}
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+            {/* COL 1: Logo + contatos da empresa */}
+            <div style={{
+              width: "210px", flexShrink: 0,
+              padding: "12px 14px 12px 14px",
+              borderRight: `1px solid ${border}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                 <div style={{
-                  width: "40px", height: "40px", backgroundColor: orange,
+                  width: "38px", height: "38px", backgroundColor: orange,
                   borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <FileText style={{ width: "20px", height: "20px", color: "#fff" }} />
+                  <FileText style={{ width: "19px", height: "19px", color: "#fff" }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: "16px", fontWeight: 900, color: "#111827", lineHeight: 1.1 }}>Gráfica</div>
-                  <div style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", lineHeight: 1.2 }}>Ponto Digital</div>
+                  <div style={{ fontSize: "15px", fontWeight: 900, color: "#111827", lineHeight: 1.1 }}>Gráfica</div>
+                  <div style={{ fontSize: "10px", fontWeight: 600, color: "#6b7280" }}>Ponto Digital</div>
                 </div>
               </div>
-              {/* Contatos */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "9.5px", color: "#374151" }}>
-                  <Phone style={{ width: "10px", height: "10px", color: orange, flexShrink: 0 }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
+                  <Phone style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
                   (22) 99945-9596
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "9.5px", color: "#374151" }}>
-                  <svg style={{ width: "10px", height: "10px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
                     <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                   contato@graficapontodigital.com.br
                 </div>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", fontSize: "9.5px", color: "#374151" }}>
-                  <MapPin style={{ width: "10px", height: "10px", color: orange, flexShrink: 0, marginTop: "1px" }} />
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9px", color: "#374151" }}>
+                  <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
                   <span>Rua das Impressões, 123<br />Campos dos Goytacazes - RJ</span>
                 </div>
               </div>
             </div>
 
-            {/* Coluna central: ícone + ORDEM DE SERVIÇO + número + data */}
-            <div style={{ flex: 1, padding: "14px 20px", borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", justifyContent: "center", gap: "10px" }}>
-              {/* Título */}
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* COL 2: Ícone laranja + ORDEM DE SERVIÇO + número em borda + emissão */}
+            <div style={{
+              flex: 1,
+              padding: "12px 18px",
+              borderRight: `1px solid ${border}`,
+              display: "flex", flexDirection: "column", justifyContent: "center", gap: "8px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{
-                  width: "40px", height: "40px", backgroundColor: orange,
+                  width: "36px", height: "36px", backgroundColor: orange,
                   borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <FileText style={{ width: "20px", height: "20px", color: "#fff" }} />
+                  <FileText style={{ width: "18px", height: "18px", color: "#fff" }} />
                 </div>
-                <h1 style={{ fontSize: "22px", fontWeight: 900, color: "#111827", margin: 0, letterSpacing: "1px", textTransform: "uppercase" }}>
+                <h1 style={{ fontSize: "20px", fontWeight: 900, color: "#111827", margin: 0, letterSpacing: "1.5px" }}>
                   ORDEM DE SERVIÇO
                 </h1>
               </div>
-              {/* Número + Emissão na mesma linha */}
-              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                {/* Número em borda laranja */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{
                   border: `2px solid ${orange}`, borderRadius: "5px",
-                  padding: "4px 14px", display: "inline-flex", alignItems: "center",
+                  padding: "3px 12px", display: "inline-flex", alignItems: "center",
                 }}>
-                  <span style={{ fontSize: "12px", fontWeight: 900, color: orange, letterSpacing: "0.5px" }}>{o.orderNumber}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
                 </div>
-                {/* Emissão com ícone de calendário */}
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <div style={{
-                    width: "22px", height: "22px", border: `1.5px solid ${border}`,
-                    borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                    backgroundColor: "#f9fafb",
+                    width: "20px", height: "20px", border: `1.5px solid ${border}`,
+                    borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center",
+                    backgroundColor: "#f9fafb", flexShrink: 0,
                   }}>
-                    <Calendar style={{ width: "11px", height: "11px", color: "#6b7280" }} />
+                    <Calendar style={{ width: "10px", height: "10px", color: "#9ca3af" }} />
                   </div>
                   <div>
                     <div style={{ fontSize: "7px", fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px" }}>EMISSÃO</div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#374151" }}>{fmtDate(o.createdAt)}</div>
+                    <div style={{ fontSize: "9.5px", fontWeight: 700, color: "#374151" }}>{fmtDate(o.createdAt)}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Coluna direita: QR Code grande + RASTREAMENTO */}
-            <div style={{ width: "160px", flexShrink: 0, padding: "14px 16px", display: "flex", flexDirection: "row", alignItems: "center", gap: "12px" }}>
-              {/* QR Code grande */}
+            {/* COL 3: QR Code à esquerda + texto RASTREAMENTO à direita */}
+            <div style={{
+              width: "170px", flexShrink: 0,
+              padding: "12px 14px",
+              display: "flex", flexDirection: "row", alignItems: "center", gap: "10px",
+            }}>
               <div style={{ flexShrink: 0 }}>
-                <QRCodeSVG value={trackingUrl} size={72} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} />
+                <QRCodeSVG value={trackingUrl} size={68} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} />
               </div>
-              {/* Texto à direita do QR */}
               <div>
-                <div style={{ fontSize: "8px", fontWeight: 800, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "5px" }}>RASTREAMENTO</div>
-                <div style={{ fontSize: "8.5px", color: "#374151", lineHeight: 1.5 }}>
+                <div style={{ fontSize: "7.5px", fontWeight: 800, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" }}>RASTREAMENTO</div>
+                <div style={{ fontSize: "8px", color: "#374151", lineHeight: 1.5 }}>
                   Escaneie o QR Code<br />para acompanhar<br />este pedido
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ══ 2. DADOS DO CLIENTE ═══════════════════════════════════════════ */}
-          {/* ══ 2+3. DADOS DO CLIENTE | NÚMERO DO PEDIDO (faixa única 2 colunas) ═════════════ */}
-          <div style={{ display: "flex", borderBottom: `2px solid ${border}` }}>
+          {/* ══ 2. FAIXA: DADOS DO CLIENTE (esq) | NÚMERO DO PEDIDO (dir) ══════════════ */}
+          <div style={{ display: "flex", borderBottom: `1px solid ${border}`, backgroundColor: "#fff" }}>
 
-            {/* Coluna esquerda: Dados do Cliente */}
-            <div style={{ flex: 1, padding: "10px 16px", borderRight: `1px solid ${border}` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                <svg style={{ width: "11px", height: "11px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
+            {/* Esquerda: DADOS DO CLIENTE com dados reais do pedido */}
+            <div style={{ flex: 1, padding: "9px 14px", borderRight: `1px solid ${border}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
+                <svg style={{ width: "10px", height: "10px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
                   <circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" />
                 </svg>
-                <span style={{ fontSize: "8px", fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                <span style={{ fontSize: "7.5px", fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                   DADOS DO CLIENTE
                 </span>
               </div>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#111827", marginBottom: "3px" }}>{clientName}</div>
               {clientPhone && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9.5px", color: "#374151", marginBottom: "2px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
                   <Phone style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
                   {clientPhone}
                 </div>
               )}
               {clientEmail && (
-                <div style={{ fontSize: "9.5px", color: "#374151", marginBottom: "2px" }}>{clientEmail}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                  {clientEmail}
+                </div>
               )}
               {!isStorePickup && s(o.deliveryStreet) && (
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9.5px", color: "#374151", marginTop: "2px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9px", color: "#374151" }}>
                   <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
                   <span>
-                    {o.deliveryStreet}{o.deliveryNumber ? `, ${o.deliveryNumber}` : ""}
+                    {o.deliveryStreet}{o.deliveryNumber ? ` ${o.deliveryNumber}` : ""}
                     {o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}
-                    {o.deliveryNeighborhood ? `, ${o.deliveryNeighborhood}` : ""}
+                    {o.deliveryNeighborhood ? `  ${o.deliveryNeighborhood}` : ""}
                     {o.deliveryCity ? ` · ${o.deliveryCity}` : ""}
                     {o.deliveryState ? ` - ${o.deliveryState}` : ""}
-                    {o.deliveryZipCode ? ` · CEP: ${o.deliveryZipCode}` : ""}
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Coluna direita: Número do Pedido */}
-            <div style={{ width: "220px", flexShrink: 0, padding: "10px 16px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <div style={{ fontSize: "8px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "3px" }}>
+            {/* Direita: NÚMERO DO PEDIDO em destaque */}
+            <div style={{ width: "240px", flexShrink: 0, padding: "9px 14px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <div style={{ fontSize: "7.5px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "2px" }}>
                 NÚMERO DO PEDIDO
               </div>
-              <div style={{ fontSize: "16px", fontWeight: 900, color: "#111827", marginBottom: "3px", letterSpacing: "0.3px" }}>
+              <div style={{ fontSize: "15px", fontWeight: 900, color: "#111827", marginBottom: "2px", letterSpacing: "0.2px" }}>
                 {o.orderNumber}
               </div>
-              <div style={{ fontSize: "9px", color: "#6b7280" }}>Emitida em: {fmtDate(o.createdAt)}</div>
+              <div style={{ fontSize: "8.5px", color: "#6b7280" }}>Emitida em: {fmtDate(o.createdAt)}</div>
             </div>
           </div>
 
