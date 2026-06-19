@@ -1229,6 +1229,8 @@ createOrder: protectedProcedure
             quantity: item.quantity,
             priceAtCart: parseFloat(item.priceAtCart),
             selectedAttributes: item.selectedAttributes ?? undefined,
+            variationSnapshot: item.variationSnapshot ?? undefined,
+            customDimensions: item.customDimensions ?? undefined,
             artFileUrl: item.artFileUrl ?? undefined,
             notes: item.notes ?? undefined,
           })),

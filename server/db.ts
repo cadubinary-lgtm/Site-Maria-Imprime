@@ -1003,6 +1003,8 @@ export async function createOrderFromCart(data: {
     quantity: number;
     priceAtCart: number;
     selectedAttributes?: string;
+    variationSnapshot?: string;
+    customDimensions?: string;
     artFileUrl?: string;
     notes?: string;
   }>;
@@ -1060,9 +1062,9 @@ export async function createOrderFromCart(data: {
     try {
       await db.execute(
         sql`
-          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, artFileUrl, notes)
+          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, notes)
           VALUES (${orderId}, ${item.productId}, ${item.productName}, ${item.quantity}, ${item.priceAtCart},
-            ${item.selectedAttributes ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
+            ${item.selectedAttributes ?? null}, ${item.variationSnapshot ?? null}, ${item.customDimensions ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
         `
       );
     } catch (err: any) {
