@@ -65,6 +65,8 @@ export default function AdminOSPrint() {
     { orderId: orderId! },
     { enabled: !!orderId }
   );
+  
+
   const { data: orderFiles = [] } = trpc.checkout.getOrderFiles.useQuery(
     { orderId: orderId!, },
     { enabled: !!orderId }
@@ -491,10 +493,25 @@ export default function AdminOSPrint() {
                       {/* Especificações */}
                       <td style={{ padding: "8px 10px", verticalAlign: "middle" }}>
                         <div style={{ fontSize: "10px", color: "#374151", lineHeight: 1.5 }}>
-                          {item.selectedAttributes ? (() => {
+                          {(() => {
+                            // Tenta usar variationSnapshot primeiro (mais confiável)
+                            const dataToUse = item.variationSnapshot || item.selectedAttributes;
+                            if (!dataToUse) return "-";
+                            
                             try {
-                              // Tenta parsear como JSON (formato: {"Tipo de Impressão":"Solvente"})
-                              const attrs = JSON.parse(item.selectedAttributes);
+                              // Tenta parsear como JSON
+                              const attrs = JSON.parse(dataToUse);
+                              
+                              // Se for array (variationSnapshot), mapear para formato {name: value}
+                              if (Array.isArray(attrs)) {
+                                return attrs.map((itm: any, idx: number) => (
+                                  <div key={idx} style={{ marginBottom: "3px" }}>
+                                    <strong>{itm.name}:</strong> {itm.value}
+                                  </div>
+                                ));
+                              }
+                              
+                              // Se for objeto (selectedAttributes), mapear as chaves
                               return Object.entries(attrs).map(([key, value], idx) => (
                                 <div key={idx} style={{ marginBottom: "3px" }}>
                                   <strong>{key}:</strong> {String(value)}
@@ -502,7 +519,7 @@ export default function AdminOSPrint() {
                               ));
                             } catch {
                               // Se não for JSON válido, tenta split por " | "
-                              return item.selectedAttributes.split(" | ").map((attr: string, idx: number) => {
+                              return dataToUse.split(" | ").map((attr: string, idx: number) => {
                                 const parts = attr.split(": ");
                                 if (parts.length === 2) {
                                   return (
@@ -518,9 +535,7 @@ export default function AdminOSPrint() {
                                 );
                               });
                             }
-                          })() : (
-                            "-"
-                          )}
+                          })()}
                         </div>
                       </td>
 
