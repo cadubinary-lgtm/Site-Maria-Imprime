@@ -607,30 +607,42 @@ export default function AdminOSPrint() {
             {/* Entrega */}
             <div style={{ padding: "8px 12px", borderRight: `1px solid ${border}` }}>
               <div style={{ fontSize: "9px", color: "#374151", lineHeight: 1.7 }}>
-                {freteLabel && (
-                  <div>
-                    <strong>ENTREGA:</strong> {freteLabel}
-                    {deliveryPrice > 0 ? ` (${fmt(deliveryPrice)})` : ""}
-                    {paymentLabel ? ` | Pagamento: ${paymentLabel}` : ""}
+
+                {/* Tipo de entrega */}
+                <div style={{ marginBottom: "4px" }}>
+                  <strong style={{ fontSize: "9px", color: "#111827" }}>Tipo de entrega:</strong>{" "}
+                  <span>{freteLabel || (isStorePickup ? "Retirar na Loja" : "Não informado")}</span>
+                </div>
+
+                {/* Endereço completo — apenas se não for retirada */}
+                {!isStorePickup && s(o.deliveryStreet) && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "4px" }}>
+                    <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
+                    <div>
+                      <div>
+                        {o.deliveryStreet}{o.deliveryNumber ? `, ${o.deliveryNumber}` : ""}
+                        {o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}
+                      </div>
+                      <div>
+                        {o.deliveryNeighborhood ? `${o.deliveryNeighborhood} · ` : ""}
+                        {o.deliveryCity ? `${o.deliveryCity}` : ""}
+                        {o.deliveryState ? ` - ${o.deliveryState}` : ""}
+                      </div>
+                      {o.deliveryZipCode && <div>CEP: {o.deliveryZipCode}</div>}
+                    </div>
                   </div>
                 )}
-                {!isStorePickup && s(o.deliveryStreet) && (
-                  <>
-                    <div style={{ marginTop: "3px" }}>
-                      <MapPin style={{ width: "9px", height: "9px", display: "inline", marginRight: "3px", color: orange }} />
-                      <strong>Endereço:</strong> {o.deliveryStreet}{o.deliveryNumber ? `, ${o.deliveryNumber}` : ""}
-                      {o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}
-                    </div>
-                    <div>
-                      {o.deliveryNeighborhood ? `${o.deliveryNeighborhood} · ` : ""}
-                      {o.deliveryCity ? `${o.deliveryCity}` : ""}
-                      {o.deliveryState ? ` - ${o.deliveryState}` : ""}
-                    </div>
-                    {o.deliveryZipCode && <div>CEP: {o.deliveryZipCode}</div>}
-                  </>
+
+                {/* Retirada na loja — sem endereço */}
+                {isStorePickup && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#6b7280" }}>
+                    <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                    <span>Retirar na Loja</span>
+                  </div>
                 )}
+
                 {o.shippingEstimatedDays > 0 && !isStorePickup && (
-                  <div style={{ color: "#6b7280" }}>Prazo: {o.shippingEstimatedDays} dias úteis</div>
+                  <div style={{ color: "#6b7280", marginTop: "2px" }}>Prazo: {o.shippingEstimatedDays} dias úteis</div>
                 )}
               </div>
             </div>
