@@ -335,18 +335,18 @@ export default function AdminOSPrint() {
               </div>
             </div>
 
-            {/* COL 3: QR Code à esquerda + texto RASTREAMENTO à direita */}
+            {/* COL 3: QR Code menor + texto RASTREAMENTO */}
             <div style={{
-              width: "170px", flexShrink: 0,
-              padding: "12px 14px",
-              display: "flex", flexDirection: "row", alignItems: "center", gap: "10px",
+              width: "150px", flexShrink: 0,
+              padding: "10px 12px",
+              display: "flex", flexDirection: "row", alignItems: "center", gap: "8px",
             }}>
               <div style={{ flexShrink: 0 }}>
-                <QRCodeSVG value={trackingUrl} size={68} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} />
+                <QRCodeSVG value={trackingUrl} size={54} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} />
               </div>
               <div>
-                <div style={{ fontSize: "7.5px", fontWeight: 800, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" }}>RASTREAMENTO</div>
-                <div style={{ fontSize: "8px", color: "#374151", lineHeight: 1.5 }}>
+                <div style={{ fontSize: "7px", fontWeight: 800, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "3px" }}>RASTREAMENTO</div>
+                <div style={{ fontSize: "7px", color: "#374151", lineHeight: 1.4 }}>
                   Escaneie o QR Code<br />para acompanhar<br />este pedido
                 </div>
               </div>
@@ -366,6 +366,12 @@ export default function AdminOSPrint() {
                   DADOS DO CLIENTE
                 </span>
               </div>
+              {/* Nome completo do cliente */}
+              {clientName && (
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "#111827", marginBottom: "3px" }}>
+                  {clientName}
+                </div>
+              )}
               {clientPhone && (
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
                   <Phone style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
