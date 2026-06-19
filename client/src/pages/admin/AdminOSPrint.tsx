@@ -368,7 +368,10 @@ export default function AdminOSPrint() {
               </div>
               {/* Nome completo do cliente */}
               {clientName && (
-                <div style={{ fontSize: "10px", fontWeight: 700, color: "#111827", marginBottom: "3px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
+                    <circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" />
+                  </svg>
                   {clientName}
                 </div>
               )}
