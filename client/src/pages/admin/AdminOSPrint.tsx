@@ -403,16 +403,42 @@ export default function AdminOSPrint() {
               )}
             </div>
 
-            {/* Direita: NÚMERO DO PEDIDO em destaque */}
-            <div style={{ width: "240px", flexShrink: 0, padding: "9px 14px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <div style={{ fontSize: "7.5px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "2px" }}>
-                NÚMERO DO PEDIDO
-              </div>
-              <div style={{ fontSize: "15px", fontWeight: 900, color: "#111827", marginBottom: "2px", letterSpacing: "0.2px" }}>
-                {o.orderNumber}
-              </div>
-              <div style={{ fontSize: "8.5px", color: "#6b7280" }}>Emitida em: {fmtDate(o.createdAt)}</div>
-            </div>
+            {/* Direita: PRAZO DE ENTREGA */}
+            {(() => {
+              const deadline = o.deliveryDeadline ? Number(o.deliveryDeadline) : null;
+              const isUrgent = deadline
+                ? new Date(deadline).toDateString() === new Date().toDateString()
+                : false;
+              return (
+                <div style={{ width: "240px", flexShrink: 0, padding: "9px 14px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
+                    <Calendar style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                    <span style={{ fontSize: "7.5px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                      PRAZO DE ENTREGA
+                    </span>
+                  </div>
+                  {deadline ? (
+                    <>
+                      <div style={{ fontSize: "13px", fontWeight: 900, color: "#111827", marginBottom: "1px", letterSpacing: "0.2px" }}>
+                        {fmtDate(deadline)}
+                      </div>
+                      {isUrgent && (
+                        <div style={{
+                          fontSize: "11px", fontWeight: 900, color: "#dc2626",
+                          letterSpacing: "1px", marginTop: "2px",
+                        }}>
+                          ⚠️ URGENTE
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ fontSize: "10px", color: "#9ca3af", fontStyle: "italic" }}>
+                      Não definido
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* ══ 4. TABELA DE PRODUTOS (cresce livremente) ════════════════════ */}

@@ -1461,6 +1461,24 @@ createOrder: protectedProcedure
         await db.delete(orderArtPreviews).where(eq(orderArtPreviews.id, input.previewId));
         return { success: true };
       }),
+
+    // ── Prazo de entrega ────────────────────────────────────────────────────────────────────────────────────
+    setDeliveryDeadline: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        // timestamp em ms (UTC) ou null para remover
+        deadlineTs: z.number().nullable(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orders: ordersTable } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        await db.update(ordersTable)
+          .set({ deliveryDeadline: input.deadlineTs } as any)
+          .where(eq(ordersTable.id, input.orderId));
+        return { success: true };
+      }),
     getMyOrdersFiltered: protectedProcedure
       .input(z.object({
         status: z.string().optional(),
