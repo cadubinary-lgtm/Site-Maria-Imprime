@@ -740,7 +740,7 @@ export default function AdminOSPrint() {
                 </div>
                 <div style={{ fontSize: "7px", color: "#9ca3af", marginBottom: "4px" }}>{field.sub}</div>
                 <div style={{ fontSize: "7px", color: "#9ca3af" }}>Assinatura: ________________________</div>
-                <div style={{ fontSize: "7px", color: "#9ca3af", marginTop: "3px" }}>
+                <div style={{ fontSize: "7px", color: "#9ca3af", marginTop: "14px" }}>
                   Data: ____/____/________ &nbsp; Hora: ________
                 </div>
               </div>
@@ -760,11 +760,12 @@ export default function AdminOSPrint() {
                 Confirmo que recebi o serviço conforme solicitado e estou de acordo com as condições.
               </div>
               <div style={{ fontSize: "7px", color: "#9ca3af" }}>Nome: ________________________________________________</div>
-              <div style={{ marginTop: "10px", borderTop: `1px solid #374151`, paddingTop: "3px" }}>
+              <div style={{ marginTop: "10px" }}>
                 <div style={{ fontSize: "7px", color: "#9ca3af", display: "flex", justifyContent: "space-between" }}>
-                  <span>Assinatura</span>
+                  <span>Assinatura: ________________________________________________</span>
                   <span>Data: ____/____/________</span>
                 </div>
+                <div style={{ borderTop: `1px solid ${border}`, marginTop: "2px" }} />
               </div>
             </div>
             <div style={{ padding: "8px 12px" }}>
@@ -778,11 +779,12 @@ export default function AdminOSPrint() {
                 Confirmo que o serviço foi executado conforme as especificações da ordem de serviço.
               </div>
               <div style={{ fontSize: "7px", color: "#9ca3af" }}>Nome: ________________________________________________</div>
-              <div style={{ marginTop: "10px", borderTop: `1px solid #374151`, paddingTop: "3px" }}>
+              <div style={{ marginTop: "10px" }}>
                 <div style={{ fontSize: "7px", color: "#9ca3af", display: "flex", justifyContent: "space-between" }}>
-                  <span>Assinatura</span>
+                  <span>Assinatura: ________________________________________________</span>
                   <span>Data: ____/____/________</span>
                 </div>
+                <div style={{ borderTop: `1px solid ${border}`, marginTop: "2px" }} />
               </div>
             </div>
           </div>
