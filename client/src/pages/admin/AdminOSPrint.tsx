@@ -283,7 +283,7 @@ export default function AdminOSPrint() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
-                  <Phone style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                   (22) 99945-9596
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
@@ -293,7 +293,7 @@ export default function AdminOSPrint() {
                   contato@graficapontodigital.com.br
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9px", color: "#374151" }}>
-                  <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0, marginTop: "1px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                   <span>Rua das Impressões, 123<br />Campos dos Goytacazes - RJ</span>
                 </div>
               </div>
@@ -325,13 +325,13 @@ export default function AdminOSPrint() {
                   <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <div style={{
-                    width: "20px", height: "20px", border: `1.5px solid ${border}`,
-                    borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center",
-                    backgroundColor: "#f9fafb", flexShrink: 0,
-                  }}>
-                    <Calendar style={{ width: "10px", height: "10px", color: "#9ca3af" }} />
-                  </div>
+                <div style={{
+                  width: "20px", height: "20px", border: `1.5px solid ${border}`,
+                  borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center",
+                  backgroundColor: "#f9fafb", flexShrink: 0,
+                }}>
+                  <svg style={{ width: "10px", height: "10px" }} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                </div>
                   <div>
                     <div style={{ fontSize: "7px", fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px" }}>EMISSÃO</div>
                     <div style={{ fontSize: "9.5px", fontWeight: 700, color: "#374151" }}>{fmtDate(o.createdAt)}</div>
@@ -382,7 +382,7 @@ export default function AdminOSPrint() {
               )}
               {clientPhone && (
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginBottom: "2px" }}>
-                  <Phone style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                   {clientPhone}
                 </div>
               )}
@@ -396,7 +396,7 @@ export default function AdminOSPrint() {
               )}
               {!isStorePickup && s(o.deliveryStreet) && (
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9px", color: "#374151" }}>
-                  <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
+                  <svg style={{ width: "9px", height: "9px", flexShrink: 0, marginTop: "1px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                   <span>
                     {o.deliveryStreet}{o.deliveryNumber ? ` ${o.deliveryNumber}` : ""}
                     {o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}
@@ -417,7 +417,7 @@ export default function AdminOSPrint() {
               return (
                 <div style={{ width: "240px", flexShrink: 0, padding: "9px 14px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
-                    <Calendar style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                    <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                     <span style={{ fontSize: "7.5px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                       PRAZO DE ENTREGA
                     </span>
@@ -453,7 +453,7 @@ export default function AdminOSPrint() {
               display: "flex", alignItems: "center", gap: "7px",
               padding: "6px 12px", backgroundColor: "#f9fafb", borderBottom: `1px solid ${border}`,
             }}>
-              <Package style={{ width: "12px", height: "12px", color: orange }} />
+              <svg style={{ width: "12px", height: "12px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
               <span style={{ fontSize: "8px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                 PRODUTOS / SERVIÇOS
               </span>
@@ -622,7 +622,7 @@ export default function AdminOSPrint() {
                 {/* Endereço completo — apenas se não for retirada */}
                 {!isStorePickup && s(o.deliveryStreet) && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "4px" }}>
-                    <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0, marginTop: "1px" }} />
+                    <svg style={{ width: "9px", height: "9px", flexShrink: 0, marginTop: "1px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                     <div>
                       <div>
                         {o.deliveryStreet}{o.deliveryNumber ? `, ${o.deliveryNumber}` : ""}
@@ -641,7 +641,7 @@ export default function AdminOSPrint() {
                 {/* Retirada na loja — sem endereço */}
                 {isStorePickup && (
                   <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#6b7280" }}>
-                    <MapPin style={{ width: "9px", height: "9px", color: orange, flexShrink: 0 }} />
+                    <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                     <span>Retirar na Loja</span>
                   </div>
                 )}
@@ -655,7 +655,7 @@ export default function AdminOSPrint() {
             {/* Resumo Financeiro */}
             <div style={{ padding: "8px 12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
-                <DollarSign style={{ width: "11px", height: "11px", color: orange }} />
+                <svg style={{ width: "11px", height: "11px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><circle cx="12" cy="12" r="8" /><path d="M12 6v12M9 9h6a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-6a2 2 0 0 0-2-2v-2a2 2 0 0 0 2-2z" /></svg>
                 <span style={{ fontSize: "8px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   RESUMO FINANCEIRO
                 </span>
@@ -687,7 +687,7 @@ export default function AdminOSPrint() {
           {/* ══ 6. CONTROLE DE PRODUÇÃO ═══════════════════════════════════════ */}
           <div style={{ padding: "8px 12px", borderBottom: `1px solid ${border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "7px" }}>
-              <CheckSquare style={{ width: "11px", height: "11px", color: orange }} />
+              <svg style={{ width: "11px", height: "11px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><polyline points="9 11 12 14 22 4" /><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" /></svg>
               <span style={{ fontSize: "8px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                 CONTROLE DE PRODUÇÃO
               </span>
@@ -751,7 +751,7 @@ export default function AdminOSPrint() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${border}` }}>
             <div style={{ padding: "8px 12px", borderRight: `1px solid ${border}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
-                <User style={{ width: "10px", height: "10px", color: orange }} />
+                <svg style={{ width: "10px", height: "10px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 <span style={{ fontSize: "7px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   ASSINATURA DO CLIENTE
                 </span>
@@ -770,7 +770,7 @@ export default function AdminOSPrint() {
             </div>
             <div style={{ padding: "8px 12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
-                <Settings style={{ width: "10px", height: "10px", color: orange }} />
+                <svg style={{ width: "10px", height: "10px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
                 <span style={{ fontSize: "7px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   ASSINATURA DO TÉCNICO / RESPONSÁVEL
                 </span>
@@ -793,7 +793,7 @@ export default function AdminOSPrint() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `2px solid ${border}` }}>
             <div style={{ padding: "8px 12px", borderRight: `1px solid ${border}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
-                <Info style={{ width: "10px", height: "10px", color: orange }} />
+                <svg style={{ width: "10px", height: "10px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                 <span style={{ fontSize: "7px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   INFORMAÇÕES IMPORTANTES
                 </span>
@@ -807,7 +807,7 @@ export default function AdminOSPrint() {
             </div>
             <div style={{ padding: "8px 12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
-                <ClipboardList style={{ width: "10px", height: "10px", color: orange }} />
+                <svg style={{ width: "10px", height: "10px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><rect x="3" y="5" width="18" height="16" rx="2" /><line x1="7" y1="15" x2="17" y2="15" /><line x1="7" y1="11" x2="17" y2="11" /><line x1="10" y1="7" x2="14" y2="7" /></svg>
                 <span style={{ fontSize: "7px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   NOTAS INTERNAS
                 </span>
@@ -845,12 +845,22 @@ export default function AdminOSPrint() {
 
       {/* ════ CSS DE IMPRESSÃO ════════════════════════════════════════════════ */}
       <style>{`
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        svg {
+          overflow: visible !important;
+        }
         @media print {
           .no-print { display: none !important; }
           body {
             margin: 0 !important;
             padding: 0 !important;
             background: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           .print-wrapper {
             background: #fff !important;
@@ -861,6 +871,14 @@ export default function AdminOSPrint() {
             box-shadow: none !important;
             width: 210mm !important;
             margin: 0 !important;
+          }
+          svg {
+            overflow: visible !important;
+            shape-rendering: geometricPrecision !important;
+          }
+          svg path, svg circle, svg rect, svg polyline, svg line, svg polygon {
+            stroke: inherit !important;
+            fill: inherit !important;
           }
           tr { page-break-inside: avoid; }
           .page-break { page-break-before: always; }
