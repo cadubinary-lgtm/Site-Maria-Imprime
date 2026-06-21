@@ -586,22 +586,14 @@ export default function AdminOSPrint() {
                       </td>
 
                       {/* Total */}
-                      <td style={{ padding: "6px 8px", textAlign: "right", verticalAlign: "middle", fontSize: "9px", fontWeight: 700, color: "#111827" }}>
+                      <td style={{ padding: "6px 8px", textAlign: "right", verticalAlign: "middle", fontSize: "9px", fontWeight: 700, color: "#111827", display: "none" }}>
                         {fmt(lineTotal)}
                       </td>
                     </tr>
                   );
                 })}
 
-                {/* VALOR TOTAL DO PEDIDO (apenas itens, sem frete) */}
-                <tr style={{ borderTop: `2px solid ${border}`, backgroundColor: "#f9fafb" }}>
-                  <td colSpan={6} style={{ padding: "6px 8px", textAlign: "right", fontSize: "9px", fontWeight: 700, color: "#374151" }}>
-                    VALOR TOTAL DO PEDIDO
-                  </td>
-                  <td style={{ padding: "6px 8px", textAlign: "right", fontSize: "12px", fontWeight: 900, color: orange }}>
-                    {fmt(subtotal)}
-                  </td>
-                </tr>
+                {/* VALOR TOTAL DO PEDIDO removido - agora aparece apenas no Resumo Financeiro */}
               </tbody>
             </table>
           </div>
