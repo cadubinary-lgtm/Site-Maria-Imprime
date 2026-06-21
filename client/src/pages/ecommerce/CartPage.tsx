@@ -177,7 +177,7 @@ function CartItemCard({
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-orange-600">
+            <span className="font-semibold text-orange-600" style={{ display: "none" }}>
               {formatCurrency(subtotal)}
             </span>
             <Button
