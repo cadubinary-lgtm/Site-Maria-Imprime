@@ -2,6 +2,7 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { CategoriesCarousel } from "@/components/home/CategoriesCarousel";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { DifferentialsSection } from "@/components/home/DifferentialsSection";
+import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { PrePrintChecklist } from "@/components/home/PrePrintChecklist";
 import { Testimonials } from "@/components/home/Testimonials";
@@ -22,6 +23,9 @@ export default function Home() {
 
       {/* Differentials Section */}
       <DifferentialsSection />
+
+      {/* Why Choose Us */}
+      <WhyChooseUs />
 
       {/* How It Works */}
       <HowItWorks />
