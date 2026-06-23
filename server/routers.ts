@@ -172,6 +172,7 @@ export const appRouter = router({
 
   // Segments - Público e Admin
   segments: router({
+    list: publicProcedure.query(() => getAllSegments()),
     getAll: publicProcedure.query(() => getAllSegments()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
@@ -189,6 +190,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         name: z.string(),
+        slug: z.string().optional(),
         icon: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
