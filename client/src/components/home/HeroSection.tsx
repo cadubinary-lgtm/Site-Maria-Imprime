@@ -23,20 +23,21 @@ export function HeroSection() {
       />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "480px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "520px" }}>
 
           {/* ── LEFT COLUMN ── */}
-          <div className="py-14 lg:py-20">
+          <div className="py-16 lg:py-24 lg:w-[55%]">
 
             {/* Título principal — 2 linhas, fonte enorme, quase preta */}
             <h1
-              className="font-black leading-none mb-6 text-gray-900"
+              className="font-black leading-tight mb-6 text-gray-900"
               style={{
-                fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
-                letterSpacing: "-0.02em",
-                lineHeight: "1.1",
+                fontSize: "clamp(2.5rem, 4.5vw, 3.5rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: "1.2",
                 fontFamily: "'Corbel', 'Arial Black', 'Nunito', sans-serif",
                 fontWeight: 900,
+                maxWidth: "520px",
               }}
             >
               Precisou imprimir?<br />
@@ -47,7 +48,7 @@ export function HeroSection() {
             {/* Subtítulo */}
             <p
               className="text-gray-600 mb-8 leading-relaxed"
-              style={{ fontSize: "1rem", maxWidth: "420px", fontWeight: 300 }}
+              style={{ fontSize: "1.05rem", maxWidth: "420px", fontWeight: 300 }}
             >
               Aqui você encontra tudo o que precisa para divulgar,
               vender e crescer.
@@ -140,17 +141,16 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
-          <div className="hidden lg:flex justify-end items-end h-full relative">
+          {/* ── RIGHT COLUMN — mascote grande e impactante ── */}
+          <div className="hidden lg:flex justify-end items-end h-full relative lg:w-[45%]">
             <img
               src="/manus-storage/mascote-final_2be4f609.webp"
               alt="Maria Imprime - Mascote"
-              className="select-none object-contain"
+              className="select-none object-contain w-full"
               style={{
-                height: "460px",
-                width: "auto",
-                maxWidth: "500px",
-                marginBottom: "-2px",
+                maxWidth: "480px",
+                height: "auto",
+                marginBottom: "-4px",
               }}
               draggable={false}
             />
