@@ -22,11 +22,11 @@ export function HeroSection() {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10" style={{paddingLeft: '74px', paddingRight: '82px'}}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "480px" }}>
 
           {/* ── LEFT COLUMN ── */}
-          <div className="py-14 lg:py-20">
+          <div className="py-14 lg:py-20" style={{paddingBottom: '79px', paddingLeft: '28px', paddingRight: '15px', paddingTop: '81px'}}>
 
             {/* Título principal — 2 linhas, fonte enorme, quase preta */}
             <h1
@@ -141,7 +141,7 @@ export function HeroSection() {
           </div>
 
           {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
-          <div className="hidden lg:flex justify-end items-end h-full relative">
+          <div className="hidden lg:flex justify-end items-end h-full relative" style={{paddingRight: '60px'}}>
             <img
               src="/manus-storage/mascote-maria-v2_e85aa588.png"
               alt="Maria Imprime - Mascote"
