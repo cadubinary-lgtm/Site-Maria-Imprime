@@ -35,7 +35,8 @@ export function HeroSection() {
                 fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
                 letterSpacing: "-0.02em",
                 lineHeight: "1.1",
-                fontFamily: "'Nunito', 'Inter', sans-serif",
+                fontFamily: "'Corbel', 'Arial Black', 'Nunito', sans-serif",
+                fontWeight: 900,
               }}
             >
               Precisou imprimir?<br />
