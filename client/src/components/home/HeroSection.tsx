@@ -139,21 +139,20 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN — mascote grande, sem caixa, sem fundo ── */}
+          {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
           <div className="hidden lg:flex justify-end items-end h-full relative">
-            {/* Placeholder para mascote PNG — sem borda, sem fundo, alinhada à direita */}
-            <div
-              className="flex flex-col items-center justify-end"
-              style={{ minHeight: "420px", paddingBottom: "0" }}
-            >
-              <div className="text-9xl" style={{ lineHeight: 1 }}>👩</div>
-              <p
-                className="text-center px-4 mt-2"
-                style={{ color: "#e91e63", fontSize: "0.7rem", fontStyle: "italic", opacity: 0.7 }}
-              >
-                Espaço para mascote PNG com fundo transparente
-              </p>
-            </div>
+            <img
+              src="/manus-storage/mascote-transparente_af83d755.png"
+              alt="Maria Imprime - Mascote"
+              className="select-none object-contain"
+              style={{
+                height: "460px",
+                width: "auto",
+                maxWidth: "500px",
+                marginBottom: "-2px",
+              }}
+              draggable={false}
+            />
           </div>
 
         </div>
