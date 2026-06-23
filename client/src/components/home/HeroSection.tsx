@@ -147,10 +147,10 @@ export function HeroSection() {
               alt="Maria Imprime - Mascote"
               className="select-none object-contain"
               style={{
-                height: "520px",
+                height: "380px",
                 width: "auto",
-                maxWidth: "600px",
-                marginBottom: "-20px",
+                maxWidth: "420px",
+                marginBottom: "0px",
               }}
               draggable={false}
             />
