@@ -106,20 +106,19 @@ export default function Header() {
     (searchResults?.materials.length || 0);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm no-print">
-      <div className="max-w-7xl mx-auto px-4 py-4">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm no-print">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
-          {/* Logo */}
+          {/* Logo - Minimalista */}
           <div
             onClick={handleLogoClick}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"
           >
-            <img
-              src="/manus-storage/logo-ponto-digital_8ede665b.webp"
-              alt="Gráfica Ponto Digital"
-              className="h-12 w-auto"
-            />
+            <div className="flex items-center gap-1">
+              <div className="text-pink-600 font-bold text-lg">m</div>
+              <div className="text-gray-900 font-bold text-lg">maria imprime</div>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -214,28 +213,16 @@ export default function Header() {
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 <Link href="/admin">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Painel Admin
-                  </Button>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition" title="Painel Admin">
+                    <Settings className="w-5 h-5 text-gray-600" />
+                  </button>
                 </Link>
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4" />
-                  <span className="text-gray-700" translate="no">{user.name || user.email}</span>
-                </div>
-                <Button
+                <button
                   onClick={handleAdminLogout}
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition" title="Sair"
                 >
-                  <LogOut className="w-4 h-4 mr-1" />
-                  Sair
-                </Button>
+                  <LogOut className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
             ) : isCustomerAuth && customer ? (
               /* Cliente logado via email/senha */
@@ -301,11 +288,8 @@ export default function Header() {
         <div className="md:hidden flex items-center justify-between">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <img
-                src="/manus-storage/logo-ponto-digital_8ede665b.webp"
-                alt="Gráfica Ponto Digital"
-                className="h-10 w-auto"
-              />
+              <div className="text-pink-600 font-bold text-base">m</div>
+              <div className="text-gray-900 font-bold text-sm">maria imprime</div>
             </div>
           </Link>
 

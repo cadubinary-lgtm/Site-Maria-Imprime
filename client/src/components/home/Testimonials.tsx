@@ -36,28 +36,28 @@ export function Testimonials() {
   return (
     <section className="bg-white py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold mb-4 text-center text-gray-900">Quem já pediu, aprovou! ❤️</h2>
+        <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Quem já pediu, aprovou! ❤️</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {TESTIMONIALS.map((testimonial, idx) => (
-            <Card key={idx} className="border-0 shadow-sm hover:shadow-lg transition-shadow">
+            <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-all bg-white">
               <CardContent className="pt-6">
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
 
                 {/* Text */}
-                <p className="text-gray-700 text-sm mb-4 italic leading-relaxed">"{testimonial.text}"</p>
+                <p className="text-gray-700 text-xs mb-4 italic leading-relaxed font-light">"{testimonial.text}"</p>
 
                 {/* Author */}
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl">{testimonial.avatar}</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl">{testimonial.avatar}</div>
                   <div>
-                    <p className="font-bold text-gray-900 text-sm">{testimonial.name}</p>
-                    <p className="text-xs text-gray-600">{testimonial.profession}</p>
+                    <p className="font-semibold text-gray-900 text-xs">{testimonial.name}</p>
+                    <p className="text-xs text-gray-600 font-light">{testimonial.profession}</p>
                   </div>
                 </div>
               </CardContent>
