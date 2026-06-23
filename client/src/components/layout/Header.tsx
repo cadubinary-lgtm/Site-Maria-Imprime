@@ -110,15 +110,16 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
-          {/* Logo - Minimalista */}
+          {/* Logo Oficial */}
           <div
             onClick={handleLogoClick}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"
+            className="flex items-center cursor-pointer hover:opacity-80 transition flex-shrink-0"
           >
-            <div className="flex items-center gap-1">
-              <div className="text-pink-600 font-bold text-lg">m</div>
-              <div className="text-gray-900 font-bold text-lg">maria imprime</div>
-            </div>
+            <img
+              src="/manus-storage/logo-maria-imprime_acc5585b.webp"
+              alt="Maria Imprime - Sua Gráfica Online"
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Search Bar */}
@@ -287,9 +288,12 @@ export default function Header() {
         {/* Mobile Layout */}
         <div className="md:hidden flex items-center justify-between">
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="text-pink-600 font-bold text-base">m</div>
-              <div className="text-gray-900 font-bold text-sm">maria imprime</div>
+            <div className="flex items-center cursor-pointer">
+              <img
+                src="/manus-storage/logo-maria-imprime_acc5585b.webp"
+                alt="Maria Imprime - Sua Gráfica Online"
+                className="h-8 w-auto"
+              />
             </div>
           </Link>
 
