@@ -5,35 +5,66 @@ export function HeroSection() {
 
   return (
     <section
-      className="w-full bg-pink-50 pt-12 pb-0 overflow-hidden"
+      className="w-full relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #fff8fa 0%, #fce4ec 60%, #fff5f8 100%)",
+        background: "linear-gradient(135deg, #ffffff 0%, #fce4ec 50%, #fce4ec 70%, #fff0f5 100%)",
+        minHeight: "480px",
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+      {/* Blob decorativo rosa no canto direito — igual ao modelo */}
+      <div
+        className="absolute right-0 top-0 bottom-0 pointer-events-none"
+        style={{
+          width: "55%",
+          background:
+            "radial-gradient(ellipse at 80% 50%, #f8bbd0 0%, #fce4ec 40%, transparent 70%)",
+          opacity: 0.6,
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "480px" }}>
+
           {/* ── LEFT COLUMN ── */}
-          <div className="py-12 lg:py-16">
-            {/* Title */}
+          <div className="py-14 lg:py-20">
+
+            {/* Título principal — 2 linhas, fonte enorme, quase preta */}
             <h1
-              className="text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight tracking-tight text-gray-900 mb-6"
-              style={{ fontFamily: "'Nunito', 'Inter', sans-serif" }}
+              className="font-black leading-none mb-6 text-gray-900"
+              style={{
+                fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+                letterSpacing: "-0.02em",
+                lineHeight: "1.1",
+                fontFamily: "'Nunito', 'Inter', sans-serif",
+              }}
             >
-              Precisou imprimir?
-              <br />
-              <span className="text-pink-600">Pede pra Maria.</span>
+              Precisou imprimir?<br />
+              Pede pra{" "}
+              <span style={{ color: "#e91e63" }}>Maria.</span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-base lg:text-lg text-gray-600 mb-8 leading-relaxed font-light max-w-md">
-              Aqui você encontra tudo o que precisa para divulgar, vender e crescer.
+            {/* Subtítulo */}
+            <p
+              className="text-gray-600 mb-8 leading-relaxed"
+              style={{ fontSize: "1rem", maxWidth: "420px", fontWeight: 300 }}
+            >
+              Aqui você encontra tudo o que precisa para divulgar,
+              vender e crescer.
             </p>
 
-            {/* Search bar — rounded-full, shadow sutil */}
-            <div className="relative max-w-md mb-10">
-              <div className="flex items-center bg-white rounded-full shadow-md border border-gray-100 px-5 py-3 gap-3">
+            {/* Search bar — branca, larga, borda cinza clara */}
+            <div className="mb-10" style={{ maxWidth: "480px" }}>
+              <div
+                className="flex items-center bg-white gap-3 px-5 py-3.5"
+                style={{
+                  borderRadius: "50px",
+                  border: "1.5px solid #e0e0e0",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              >
                 <svg
-                  className="w-5 h-5 text-gray-400 flex-shrink-0"
+                  className="flex-shrink-0 text-gray-400"
+                  style={{ width: "18px", height: "18px" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -50,28 +81,55 @@ export function HeroSection() {
                   placeholder="Buscar produtos, materiais ou serviços..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm placeholder-gray-400"
+                  className="flex-1 bg-transparent outline-none text-gray-600 text-sm placeholder-gray-400"
                 />
               </div>
             </div>
 
-            {/* ── 4 PILARES — single row, flex ── */}
+            {/* ── 4 PILARES — ícones específicos, linha única ── */}
             <div className="flex flex-row items-start gap-6">
               {[
-                { label: "RÁPIDA", desc: "Ágil e eficiente" },
-                { label: "ATENÇÃO", desc: "Cada detalhe" },
-                { label: "CONFIÁVEL", desc: "Pode contar" },
-                { label: "SIMPLES", desc: "Do seu jeito" },
+                {
+                  label: "RÁPIDA",
+                  desc: "Ágil como você precisa",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "ATENCIOSA",
+                  desc: "Cuida de cada detalhe",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "CONFIÁVEL",
+                  desc: "Pode contar sempre",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "SIMPLES",
+                  desc: "Fácil, do seu jeito",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+                    </svg>
+                  ),
+                },
               ].map((pilar, idx) => (
-                <div key={idx} className="flex items-start gap-1.5">
-                  {/* Coração rosa-magenta discreto */}
-                  <svg
-                    className="w-3.5 h-3.5 text-pink-600 flex-shrink-0 mt-0.5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="flex-shrink-0 mt-0.5">{pilar.icon}</div>
                   <div>
                     <p className="font-bold text-gray-900 text-xs leading-tight whitespace-nowrap">{pilar.label}</p>
                     <p className="text-gray-500 text-xs leading-tight font-light whitespace-nowrap">{pilar.desc}</p>
@@ -81,26 +139,23 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN — mascote sem caixa, sem borda, sem sombra ── */}
-          <div className="hidden lg:flex justify-center items-end relative">
-            {/* Blob decorativo suave atrás da mascote */}
+          {/* ── RIGHT COLUMN — mascote grande, sem caixa, sem fundo ── */}
+          <div className="hidden lg:flex justify-end items-end h-full relative">
+            {/* Placeholder para mascote PNG — sem borda, sem fundo, alinhada à direita */}
             <div
-              className="absolute inset-0 rounded-full opacity-30 blur-3xl"
-              style={{
-                background: "radial-gradient(ellipse at center, #f9a8d4 0%, transparent 70%)",
-                transform: "scale(1.2)",
-              }}
-            />
-            {/* Placeholder para mascote PNG — sem borda, sem fundo rígido */}
-            <div className="relative z-10 flex flex-col items-center justify-end w-full max-w-sm pb-0">
-              <div className="flex flex-col items-center justify-center min-h-80 w-full">
-                <div className="text-8xl mb-2">👩</div>
-                <p className="text-pink-400 text-xs font-light italic text-center px-4">
-                  Espaço para mascote PNG com fundo transparente
-                </p>
-              </div>
+              className="flex flex-col items-center justify-end"
+              style={{ minHeight: "420px", paddingBottom: "0" }}
+            >
+              <div className="text-9xl" style={{ lineHeight: 1 }}>👩</div>
+              <p
+                className="text-center px-4 mt-2"
+                style={{ color: "#e91e63", fontSize: "0.7rem", fontStyle: "italic", opacity: 0.7 }}
+              >
+                Espaço para mascote PNG com fundo transparente
+              </p>
             </div>
           </div>
+
         </div>
       </div>
     </section>
