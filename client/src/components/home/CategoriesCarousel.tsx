@@ -31,7 +31,7 @@ export function CategoriesCarousel() {
           <div
             id="categories-container"
             className="flex gap-4 overflow-x-auto pb-2 scroll-smooth flex-1 px-28"
-            style={{ scrollbarWidth: "none", height: '74px', marginBottom: '-7px', marginLeft: '51px', marginRight: '13px', marginTop: '-12px', width: '1189px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', paddingBottom: '5px', paddingLeft: '10px', paddingRight: '86px', paddingTop: '9px', height: '74px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', paddingRight: '86px', width: '1189px' }}
+            style={{ scrollbarWidth: "none", height: '74px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', width: '1189px', paddingBottom: '5px', paddingLeft: '10px', paddingRight: '86px', paddingTop: '9px' }}
           >
             {segments.map((segment: any) => (
               <Link key={segment.id} href={`/produtos?segment=${segment.slug}`}>
