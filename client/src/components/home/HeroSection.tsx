@@ -143,7 +143,7 @@ export function HeroSection() {
           {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
           <div className="hidden lg:flex justify-end items-end h-full relative">
             <img
-              src="/manus-storage/mascote-full_457bfb3b.png"
+              src="/manus-storage/mascote-final_2be4f609.webp"
               alt="Maria Imprime - Mascote"
               className="select-none object-contain"
               style={{
