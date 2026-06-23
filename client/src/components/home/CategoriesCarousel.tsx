@@ -58,7 +58,7 @@ export function CategoriesCarousel() {
           {segments.length > 4 && (
             <button
               onClick={() => handleScroll("left")}
-              className="absolute left-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10"
+              className="absolute left-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:-translate-x-2"
               aria-label="Anterior"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -69,7 +69,7 @@ export function CategoriesCarousel() {
           {segments.length > 4 && (
             <button
               onClick={() => handleScroll("right")}
-              className="absolute right-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10"
+              className="absolute right-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:translate-x-2"
               aria-label="Próximo"
             >
               <ChevronRight className="w-5 h-5" />
