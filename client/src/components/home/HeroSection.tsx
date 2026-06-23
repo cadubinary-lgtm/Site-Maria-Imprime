@@ -1,102 +1,163 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 
 export function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [, navigate] = useLocation();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/produtos?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   return (
-    <section className="relative w-full bg-gradient-to-r from-white via-white to-pink-100/40 py-20 px-6 lg:px-24 flex flex-col lg:flex-row items-stretch justify-between min-h-[550px] overflow-hidden">
-
-      {/* Blob decorativo rosa no canto direito */}
+    <section
+      className="w-full relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #ffffff 0%, #fce4ec 50%, #fce4ec 70%, #fff0f5 100%)",
+        minHeight: "480px",
+      }}
+    >
+      {/* Blob decorativo rosa no canto direito — igual ao modelo */}
       <div
         className="absolute right-0 top-0 bottom-0 pointer-events-none"
         style={{
-          width: "50%",
-          background: "radial-gradient(ellipse at 85% 50%, #f8bbd0 0%, #fce4ec 40%, transparent 70%)",
-          opacity: 0.5,
+          width: "55%",
+          background:
+            "radial-gradient(ellipse at 80% 50%, #f8bbd0 0%, #fce4ec 40%, transparent 70%)",
+          opacity: 0.6,
         }}
       />
 
-      {/* LADO ESQUERDO: TEXTOS E BUSCA */}
-      <div className="w-full lg:w-[50%] flex flex-col justify-center z-10 pr-4">
-        <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] text-left"
-          style={{ fontFamily: "'Corbel', 'Arial Black', 'Nunito', sans-serif" }}
-        >
-          Precisou imprimir?<br />
-          Pede pra <span className="text-[#E91E63]">Maria.</span>
-        </h1>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "480px" }}>
 
-        <p className="text-sm lg:text-base text-slate-500 mt-6 max-w-sm leading-relaxed text-left">
-          Aqui você encontra tudo o que precisa para divulgar, vender e crescer.
-        </p>
+          {/* ── LEFT COLUMN ── */}
+          <div className="py-14 lg:py-20">
 
-        {/* BARRA DE BUSCA */}
-        <form onSubmit={handleSearch} className="relative mt-8 max-w-md w-full">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar produtos, materiais ou serviços..."
-            className="w-full pl-12 pr-4 py-4 rounded-full border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E91E63]/20 bg-white text-sm"
-          />
-        </form>
+            {/* Título principal — 2 linhas, fonte enorme, quase preta */}
+            <h1
+              className="font-black leading-none mb-6 text-gray-900"
+              style={{
+                fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+                letterSpacing: "-0.02em",
+                lineHeight: "1.1",
+                fontFamily: "'Corbel', 'Arial Black', 'Nunito', sans-serif",
+                fontWeight: 900,
+              }}
+            >
+              Precisou imprimir?<br />
+              Pede pra{" "}
+              <span style={{ color: "#e91e63" }}>Maria.</span>
+            </h1>
 
-        {/* 4 PILARES */}
-        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-4 mt-12 w-full border-t border-slate-100 pt-6">
-          <div className="flex items-center gap-2 min-w-[100px]">
-            <span className="text-[#E91E63] text-lg">⏱️</span>
-            <div className="flex flex-col">
-              <span className="font-bold text-[11px] text-slate-900 uppercase tracking-wider">Rápida</span>
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">Ágil como você precisa</span>
+            {/* Subtítulo */}
+            <p
+              className="text-gray-600 mb-8 leading-relaxed"
+              style={{ fontSize: "1rem", maxWidth: "420px", fontWeight: 300 }}
+            >
+              Aqui você encontra tudo o que precisa para divulgar,
+              vender e crescer.
+            </p>
+
+            {/* Search bar — branca, larga, borda cinza clara */}
+            <div className="mb-10" style={{ maxWidth: "480px" }}>
+              <div
+                className="flex items-center bg-white gap-3 px-5 py-3.5"
+                style={{
+                  borderRadius: "50px",
+                  border: "1.5px solid #e0e0e0",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              >
+                <svg
+                  className="flex-shrink-0 text-gray-400"
+                  style={{ width: "18px", height: "18px" }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar produtos, materiais ou serviços..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent outline-none text-gray-600 text-sm placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* ── 4 PILARES — ícones específicos, linha única ── */}
+            <div className="flex flex-row items-start gap-6">
+              {[
+                {
+                  label: "RÁPIDA",
+                  desc: "Ágil como você precisa",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "ATENCIOSA",
+                  desc: "Cuida de cada detalhe",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "CONFIÁVEL",
+                  desc: "Pode contar sempre",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "SIMPLES",
+                  desc: "Fácil, do seu jeito",
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+                    </svg>
+                  ),
+                },
+              ].map((pilar, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="flex-shrink-0 mt-0.5">{pilar.icon}</div>
+                  <div>
+                    <p className="font-bold text-gray-900 text-xs leading-tight whitespace-nowrap">{pilar.label}</p>
+                    <p className="text-gray-500 text-xs leading-tight font-light whitespace-nowrap">{pilar.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex items-center gap-2 min-w-[100px]">
-            <span className="text-[#E91E63] text-lg">❤️</span>
-            <div className="flex flex-col">
-              <span className="font-bold text-[11px] text-slate-900 uppercase tracking-wider">Atenciosa</span>
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">Cuida de cada detalhe</span>
-            </div>
+
+          {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
+          <div className="hidden lg:flex justify-end items-end h-full relative">
+            <img
+              src="/manus-storage/mascote-full_457bfb3b.png"
+              alt="Maria Imprime - Mascote"
+              className="select-none object-contain"
+              style={{
+                height: "460px",
+                width: "auto",
+                maxWidth: "500px",
+                marginBottom: "-2px",
+              }}
+              draggable={false}
+            />
           </div>
-          <div className="flex items-center gap-2 min-w-[100px]">
-            <span className="text-[#E91E63] text-lg">🛡️</span>
-            <div className="flex flex-col">
-              <span className="font-bold text-[11px] text-slate-900 uppercase tracking-wider">Confiável</span>
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">Pode contar sempre</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 min-w-[100px]">
-            <span className="text-[#E91E63] text-lg">😊</span>
-            <div className="flex flex-col">
-              <span className="font-bold text-[11px] text-slate-900 uppercase tracking-wider">Simples</span>
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">Fácil, do seu jeito</span>
-            </div>
-          </div>
+
         </div>
       </div>
-
-      {/* LADO DIREITO: MASCOTE GRANDE E ALINHADA */}
-      <div className="w-full lg:w-[50%] flex items-end justify-center lg:justify-end mt-10 lg:mt-0 relative z-10">
-        <img
-          src="/manus-storage/mascote-final_2be4f609.webp"
-          alt="Mascote Maria"
-          className="w-full max-w-[380px] lg:max-w-[440px] h-auto object-contain bg-transparent lg:absolute lg:bottom-0 lg:right-0"
-          draggable={false}
-        />
-      </div>
-
     </section>
   );
 }
