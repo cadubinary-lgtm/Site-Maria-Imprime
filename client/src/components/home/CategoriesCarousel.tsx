@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
 export function CategoriesCarousel() {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [isHoveringLeft, setIsHoveringLeft] = useState(false);
+  const [isHoveringRight, setIsHoveringRight] = useState(false);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { data: segments = [] } = trpc.segments.list.useQuery();
 
   const handleScroll = (direction: "left" | "right") => {
@@ -20,6 +23,37 @@ export function CategoriesCarousel() {
     container.scrollTo({ left: newPosition, behavior: "smooth" });
     setScrollPosition(newPosition);
   };
+
+  // Auto-scroll when hovering over arrows
+  useEffect(() => {
+    if (isHoveringLeft || isHoveringRight) {
+      scrollIntervalRef.current = setInterval(() => {
+        const container = document.getElementById("categories-container");
+        if (!container) return;
+
+        const scrollAmount = 5; // Smaller increment for smooth continuous scroll
+        const direction = isHoveringLeft ? "left" : "right";
+        const newPosition =
+          direction === "left"
+            ? Math.max(0, scrollPosition - scrollAmount)
+            : scrollPosition + scrollAmount;
+
+        container.scrollTo({ left: newPosition, behavior: "smooth" });
+        setScrollPosition(newPosition);
+      }, 50); // Update every 50ms for smooth animation
+    } else {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+      }
+    };
+  }, [isHoveringLeft, isHoveringRight, scrollPosition]);
 
   return (
     <section className="bg-white py-12 px-6 lg:px-8">
@@ -57,6 +91,8 @@ export function CategoriesCarousel() {
           {/* Left arrow button - positioned absolutely */}
           {segments.length > 4 && (
             <button
+              onMouseEnter={() => setIsHoveringLeft(true)}
+              onMouseLeave={() => setIsHoveringLeft(false)}
               onClick={() => handleScroll("left")}
               className="absolute left-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:-translate-x-2"
               aria-label="Anterior"
@@ -68,6 +104,8 @@ export function CategoriesCarousel() {
           {/* Right arrow button - positioned absolutely */}
           {segments.length > 4 && (
             <button
+              onMouseEnter={() => setIsHoveringRight(true)}
+              onMouseLeave={() => setIsHoveringRight(false)}
               onClick={() => handleScroll("right")}
               className="absolute right-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:translate-x-2"
               aria-label="Próximo"
