@@ -1,106 +1,80 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import type { ReactElement } from "react";
-
-// SVG icons — outline, traço fino, branco
-const ICONS: Record<string, ReactElement> = {
-  cartao: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <rect x="2" y="5" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2 10h20" />
-    </svg>
-  ),
-  panfletos: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  ),
-  adesivos: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ),
-  banners: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h18v12H3zM8 21h8M12 15v6" />
-    </svg>
-  ),
-  fachadas: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 22V12h6v10" />
-    </svg>
-  ),
-  etiquetas: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M3 3h8l10 10a2 2 0 010 2.828l-5.172 5.172a2 2 0 01-2.828 0L3 11V3z" />
-    </svg>
-  ),
-  embalagens: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </svg>
-  ),
-  mais: (
-    <svg className="w-7 h-7" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  ),
-};
-
-const CATEGORIES = [
-  { name: "Cartão de Visita", key: "cartao" },
-  { name: "Panfletos", key: "panfletos" },
-  { name: "Adesivos", key: "adesivos" },
-  { name: "Banners", key: "banners" },
-  { name: "Fachadas", key: "fachadas" },
-  { name: "Etiquetas", key: "etiquetas" },
-  { name: "Embalagens", key: "embalagens" },
-  { name: "Mais", key: "mais" },
-];
+import { trpc } from "@/lib/trpc";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 export function CategoriesCarousel() {
-  return (
-    <section className="bg-white py-10 px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <p className="text-sm font-semibold text-gray-700 mb-6">Acesso rápido</p>
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const { data: segments = [] } = trpc.segments.list.useQuery();
 
-        <div className="relative flex items-center gap-1">
+  const handleScroll = (direction: "left" | "right") => {
+    const container = document.getElementById("categories-container");
+    if (!container) return;
+
+    const scrollAmount = 300;
+    const newPosition =
+      direction === "left"
+        ? Math.max(0, scrollPosition - scrollAmount)
+        : scrollPosition + scrollAmount;
+
+    container.scrollTo({ left: newPosition, behavior: "smooth" });
+    setScrollPosition(newPosition);
+  };
+
+  return (
+    <section className="bg-white py-12 px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-sm font-semibold text-gray-700 mb-6">Acesso rápido</h2>
+
+        <div className="relative flex items-center">
           {/* Scroll container */}
           <div
-            id="categories-scroll"
-            className="flex gap-6 overflow-x-auto pb-2 scroll-smooth flex-1"
-            style={{ scrollbarWidth: "none" }}
+            id="categories-container"
+            className="flex gap-4 overflow-x-auto pb-2 scroll-smooth flex-1 px-28"
+            style={{ scrollbarWidth: "none", height: '74px', marginBottom: '-7px', marginLeft: '51px', marginRight: '13px', marginTop: '-12px', width: '1189px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', paddingBottom: '5px', paddingLeft: '10px', paddingRight: '86px', paddingTop: '9px', height: '74px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', paddingRight: '86px', width: '1189px' }}
           >
-            {CATEGORIES.map((category) => (
-              <Link key={category.key} href={`/catalogo?category=${category.key}`}>
-                <div className="flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer group">
-                  {/* Círculo maior, rosa suave, ícone outline branco */}
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-hover:shadow-md"
-                    style={{ background: "linear-gradient(135deg, #e91e63 0%, #f06292 100%)" }}
-                  >
-                    {ICONS[category.key]}
+            {segments.map((segment: any) => (
+              <Link key={segment.id} href={`/produtos?segment=${segment.slug}`}>
+                <div className="flex-shrink-0 group cursor-pointer">
+                  {/* Card retangular com bordas redondas */}
+                  <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl px-6 py-2 h-14 flex items-center gap-4 hover:shadow-lg transition-all duration-300 min-w-max">
+                    {segment.icon && (
+                      <img
+                        src={segment.icon}
+                        alt={segment.name}
+                        className="w-10 h-10 flex-shrink-0"
+                      />
+                    )}
+                    <span className="text-base font-semibold text-gray-900 group-hover:text-pink-600 transition-colors whitespace-nowrap">
+                      {segment.name}
+                    </span>
                   </div>
-                  <p className="text-center text-xs font-medium text-gray-800 group-hover:text-pink-600 transition-colors w-20 leading-tight">
-                    {category.name}
-                  </p>
                 </div>
               </Link>
             ))}
           </div>
 
-          {/* Arrow button */}
-          <button
-            onClick={() => {
-              const el = document.getElementById("categories-scroll");
-              if (el) el.scrollBy({ left: 320, behavior: "smooth" });
-            }}
-            className="flex-shrink-0 ml-2 w-10 h-10 rounded-full border-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white flex items-center justify-center transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          {/* Left arrow button - positioned absolutely */}
+          {segments.length > 4 && (
+            <button
+              onClick={() => handleScroll("left")}
+              className="absolute left-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10"
+              aria-label="Anterior"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+
+          {/* Right arrow button - positioned absolutely */}
+          {segments.length > 4 && (
+            <button
+              onClick={() => handleScroll("right")}
+              className="absolute right-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10"
+              aria-label="Próximo"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
     </section>
