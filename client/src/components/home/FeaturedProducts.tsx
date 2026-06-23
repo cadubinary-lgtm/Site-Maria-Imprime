@@ -11,7 +11,7 @@ export function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <section className="bg-gray-50 py-20 px-4">
+      <section className="bg-white py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-pink-600" />
@@ -25,14 +25,15 @@ export function FeaturedProducts() {
   const featured = products?.slice(0, 7) || [];
 
   return (
-    <section className="bg-gray-50 py-20 px-4">
+    <section className="bg-white py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold mb-4 text-center text-gray-900">Produtos mais procurados</h2>
+        <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Produtos mais procurados</h2>
+        <p className="text-center text-gray-600 text-sm mb-12">Confira os favoritos dos nossos clientes</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {featured.map((product: any, idx: number) => (
             <Link key={product.id} href={`/produto/${product.id}`}>
-              <Card className="cursor-pointer hover:shadow-xl transition-all h-full group overflow-hidden">
+              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm">
                 {/* Badge */}
                 {BADGES[idx] && (
                   <div className="bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full inline-block m-3">
@@ -41,9 +42,9 @@ export function FeaturedProducts() {
                 )}
 
                 <CardContent className="pt-6">
-                  {/* Product icon/image placeholder */}
-                  <div className="bg-gradient-to-br from-pink-100 to-pink-50 rounded-lg p-8 mb-4 flex items-center justify-center min-h-40 group-hover:scale-105 transition-transform">
-                    <div className="text-5xl">
+                  {/* Product icon/image placeholder - minimalista */}
+                  <div className="bg-gradient-to-br from-pink-50 to-white rounded-2xl p-6 mb-4 flex items-center justify-center min-h-32 group-hover:scale-105 transition-transform border border-pink-100">
+                    <div className="text-4xl">
                       {product.segment === "varejo" && "📦"}
                       {product.segment === "servicos" && "🔧"}
                       {product.segment === "alimentacao" && "🍔"}
@@ -52,11 +53,11 @@ export function FeaturedProducts() {
                     </div>
                   </div>
 
-                  <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 text-lg">{product.name}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">{product.description}</p>
-                  <p className="text-2xl font-bold text-pink-600 mb-4">R$ {parseFloat(product.price).toFixed(2)}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">{product.name}</h3>
+                  <p className="text-xs text-gray-600 line-clamp-2 mb-4 font-light">{product.description}</p>
+                  <p className="text-xl font-bold text-pink-600 mb-4">R$ {parseFloat(product.price).toFixed(2)}</p>
 
-                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full font-semibold">
+                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full font-semibold text-sm h-9 transition-all shadow-sm hover:shadow-md">
                     Ver opções
                   </Button>
                 </CardContent>
@@ -67,7 +68,7 @@ export function FeaturedProducts() {
 
         <div className="text-center">
           <Link href="/catalogo">
-            <Button size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-50 rounded-full px-8">
+            <Button size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-50 rounded-full px-8 font-semibold">
               Ver todos os produtos →
             </Button>
           </Link>
