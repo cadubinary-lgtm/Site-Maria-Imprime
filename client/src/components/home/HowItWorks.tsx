@@ -6,7 +6,7 @@ export function HowItWorks() {
           <img 
             src="/manus-storage/1_a19b3733.webp" 
             alt="Como funciona" 
-            className="w-full max-w-6xl h-auto"
+            className="w-full max-w-7xl h-auto"
           />
         </div>
       </div>
