@@ -45,7 +45,7 @@ export function FAQSupport() {
 
             {/* CTA Button */}
             <a
-              href="https://wa.me/22999459596"
+              href="https://wa.me/5522999459596"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 w-fit"
