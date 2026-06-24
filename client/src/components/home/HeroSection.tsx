@@ -93,8 +93,9 @@ export function HeroSection() {
                 {
                   label: "RÁPIDA",
                   desc: "Ágil como você precisa",
+                  number: "1",
                   icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
                     </svg>
@@ -103,8 +104,9 @@ export function HeroSection() {
                 {
                   label: "ATENCIOSA",
                   desc: "Cuida de cada detalhe",
+                  number: "2",
                   icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                     </svg>
                   ),
@@ -112,8 +114,9 @@ export function HeroSection() {
                 {
                   label: "CONFIÁVEL",
                   desc: "Pode contar sempre",
+                  number: "3",
                   icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   ),
@@ -121,16 +124,22 @@ export function HeroSection() {
                 {
                   label: "SIMPLES",
                   desc: "Fácil, do seu jeito",
+                  number: "4",
                   icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
                     </svg>
                   ),
                 },
               ].map((pilar, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className="flex-shrink-0 mt-0.5">{pilar.icon}</div>
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="flex-shrink-0 relative">
+                    {pilar.icon}
+                    <span className="absolute -bottom-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {pilar.number}
+                    </span>
+                  </div>
                   <div>
                     <p className="font-bold text-gray-900 text-xs leading-tight whitespace-nowrap">{pilar.label}</p>
                     <p className="text-gray-500 text-xs leading-tight font-light whitespace-nowrap">{pilar.desc}</p>
