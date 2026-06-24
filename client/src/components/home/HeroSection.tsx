@@ -134,12 +134,7 @@ export function HeroSection() {
                 },
               ].map((pilar, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="flex-shrink-0 relative">
-                    {pilar.icon}
-                    <span className="absolute -bottom-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {pilar.number}
-                    </span>
-                  </div>
+                  <div className="flex-shrink-0">{pilar.icon}</div>
                   <div>
                     <p className="font-bold text-gray-900 text-xs leading-tight whitespace-nowrap">{pilar.label}</p>
                     <p className="text-gray-500 text-xs leading-tight font-light whitespace-nowrap">{pilar.desc}</p>
