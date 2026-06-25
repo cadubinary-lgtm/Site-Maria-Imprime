@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function SegmentsManager() {
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -35,6 +35,7 @@ export default function SegmentsManager() {
     slug: '',
   });
   const [newSegmentIconFile, setNewSegmentIconFile] = useState<File | null>(null);
+  const [reorderingId, setReorderingId] = useState<number | null>(null);
 
   // Fetch all segments
   const { data: segments, isLoading, refetch } = trpc.segments.getAll.useQuery();
@@ -81,6 +82,18 @@ export default function SegmentsManager() {
     },
     onError: (error) => {
       showNotification('error', error.message || 'Erro ao deletar segmento');
+    },
+  });
+
+  // Reorder segment mutation
+  const reorderSegmentMutation = trpc.segments.reorder.useMutation({
+    onSuccess: () => {
+      refetch();
+      setReorderingId(null);
+    },
+    onError: (error) => {
+      showNotification('error', error.message || 'Erro ao reordenar segmento');
+      setReorderingId(null);
     },
   });
 
@@ -184,12 +197,19 @@ export default function SegmentsManager() {
     }
   };
 
+  const handleMoveSegment = async (segmentId: number, direction: 'up' | 'down') => {
+    setReorderingId(segmentId);
+    await reorderSegmentMutation.mutateAsync({ id: segmentId, direction });
+  };
+
+  const segmentList = segments || [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Notification */}
       {notification && (
         <div
-          className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 ${
+          className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 z-50 shadow-lg ${
             notification.type === 'success'
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
@@ -208,7 +228,7 @@ export default function SegmentsManager() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Gerenciador de Segmentos</h1>
-            <p className="text-gray-600">Crie e edite os segmentos de negócio</p>
+            <p className="text-gray-600">Crie, edite e reordene os segmentos de negócio</p>
           </div>
           <Dialog open={isCreating} onOpenChange={setIsCreating}>
             <DialogTrigger asChild>
@@ -297,6 +317,7 @@ export default function SegmentsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-16 text-center">Ordem</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Ícone</TableHead>
                   <TableHead>Slug</TableHead>
@@ -304,8 +325,43 @@ export default function SegmentsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(segments || []).map((segment) => (
+                {segmentList.map((segment, index) => (
                   <TableRow key={segment.id}>
+                    {/* Coluna de reordenação */}
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 hover:bg-gray-100 disabled:opacity-30"
+                          onClick={() => handleMoveSegment(segment.id, 'up')}
+                          disabled={index === 0 || reorderingId === segment.id || reorderSegmentMutation.isPending}
+                          title="Mover para cima"
+                        >
+                          {reorderingId === segment.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <ChevronUp className="w-4 h-4" />
+                          )}
+                        </Button>
+                        <span className="text-xs text-gray-400 font-mono">{index + 1}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 hover:bg-gray-100 disabled:opacity-30"
+                          onClick={() => handleMoveSegment(segment.id, 'down')}
+                          disabled={index === segmentList.length - 1 || reorderingId === segment.id || reorderSegmentMutation.isPending}
+                          title="Mover para baixo"
+                        >
+                          {reorderingId === segment.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+
                     <TableCell className="font-medium">
                       {editingId === segment.id ? (
                         <Input
