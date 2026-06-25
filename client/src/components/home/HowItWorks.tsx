@@ -73,7 +73,7 @@ export function HowItWorks() {
 
           {/* Linha 2 — Bonequinhas + setas (alinhadas pela base) */}
           <div
-            className="flex items-end justify-center"
+            className="flex items-end justify-center -mt-2"
             style={{ height: `${IMG_AREA_H}px` }}
           >
             {steps.map((step, i) => (
