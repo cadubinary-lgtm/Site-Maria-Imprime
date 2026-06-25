@@ -127,6 +127,26 @@ async function startServer() {
     }
   });
 
+  // Bulk reorder endpoint para segmentos — atualiza posições em lote
+  app.post('/api/reorder-segments', express.json(), async (req, res) => {
+    try {
+      const { order } = req.body as { order: { id: number; position: number }[] };
+      if (!Array.isArray(order)) return res.status(400).json({ error: 'order deve ser um array' });
+      const { getDb } = await import('../db');
+      const { segments } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      const db = await getDb();
+      if (!db) return res.status(500).json({ error: 'Banco de dados indisponível' });
+      for (const item of order) {
+        await db.update(segments).set({ position: item.position }).where(eq(segments.id, item.id));
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Reorder segments error:', error);
+      res.status(500).json({ error: 'Falha ao reordenar segmentos' });
+    }
+  });
+
   // Upload endpoint para prévia de arte (admin) — aceita imagens
   app.post('/api/upload-art-preview', upload.single('file'), async (req, res) => {
     try {
