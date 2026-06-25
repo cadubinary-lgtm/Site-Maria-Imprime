@@ -1,6 +1,6 @@
-const MASCOTE   = "/manus-storage/mascote7_d611c267.png";
-const FUNDO     = "/manus-storage/fundorosa_5b29da2b.webp";
-const CHECK     = "/manus-storage/certo_54c281fc.png";
+const MASCOTE = "/manus-storage/mascote7v2_02cfb9a3.webp";
+const FUNDO   = "/manus-storage/fundorosa2_7ec48199.webp";
+const CHECK   = "/manus-storage/certo_54c281fc.png";
 
 const checks = [
   "Resolução mínima de 150 DPI",
@@ -11,68 +11,102 @@ const checks = [
   "Formato e tamanho conferidos",
 ];
 
+const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
+
 export function PrePrintChecklist() {
   return (
     <section className="w-full py-10 px-4 lg:px-8 bg-white">
       <div className="max-w-6xl mx-auto">
-        {/* Card com fundo rosa */}
-        <div
-          className="relative rounded-3xl overflow-hidden flex flex-col lg:flex-row items-center"
-          style={{
-            backgroundImage: `url(${FUNDO})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundColor: "#fdf0f5",
-            minHeight: "320px",
-          }}
-        >
-          {/* Mascote — esquerda */}
-          <div className="flex-shrink-0 flex items-end justify-center lg:justify-start px-6 pt-6 lg:pt-0" style={{ minWidth: "220px" }}>
+        {/*
+          O container externo tem overflow-visible para a cabeça da mascote
+          ultrapassar o topo do card rosa.
+          O card rosa tem position: relative e overflow: visible.
+          A mascote fica em position: absolute, alinhada pela base do card,
+          com top negativo para a cabeça sair por cima.
+        */}
+        <div className="relative" style={{ paddingTop: "60px" }}>
+          {/* Card rosa */}
+          <div
+            className="relative rounded-3xl overflow-visible flex flex-col lg:flex-row items-stretch"
+            style={{
+              backgroundImage: `url(${FUNDO})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundColor: "#fdf0f5",
+              minHeight: "260px",
+            }}
+          >
+            {/* Espaço reservado para a mascote no lado esquerdo */}
+            <div className="hidden lg:block flex-shrink-0" style={{ width: "240px" }} />
+
+            {/* Conteúdo — centro/direita */}
+            <div className="flex-1 px-6 lg:px-10 py-8 lg:py-10">
+              {/* Título */}
+              <h2
+                className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"
+                style={{ fontFamily: FONT }}
+              >
+                Antes de imprimir,{" "}
+                <span style={{ color: "#e91e63" }}>nós verificamos!</span>
+              </h2>
+
+              {/* Subtítulo */}
+              <p
+                className="text-gray-600 text-sm lg:text-base mb-6"
+                style={{ fontFamily: FONT }}
+              >
+                Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
+              </p>
+
+              {/* Grid de checks */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {checks.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <img
+                      src={CHECK}
+                      alt="✓"
+                      className="w-7 h-7 flex-shrink-0 object-contain"
+                    />
+                    <span
+                      className="text-gray-800 text-sm lg:text-base font-medium"
+                      style={{ fontFamily: FONT }}
+                    >
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mascote — posicionada absolutamente, base alinhada ao fundo do card,
+                cabeça ultrapassando o topo */}
             <img
               src={MASCOTE}
               alt="Maria verificando arquivo"
-              className="h-64 lg:h-72 w-auto object-contain object-bottom drop-shadow-lg"
+              className="hidden lg:block absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
+              style={{
+                width: "260px",
+                bottom: 0,
+                left: "0px",
+                /* A imagem tem ~60% corpo + 40% cabeça.
+                   Deixamos a cabeça (≈ 40% de 260px ≈ 104px) sair por cima.
+                   Como o paddingTop do container é 60px, usamos top negativo de 60px. */
+                top: "-60px",
+                height: "auto",
+                maxHeight: "none",
+              }}
               draggable={false}
             />
           </div>
 
-          {/* Conteúdo — centro/direita */}
-          <div className="flex-1 px-6 lg:px-10 py-8 lg:py-10">
-            {/* Título */}
-            <h2
-              className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"
-              style={{ fontFamily: "'Bahnschrift', 'Segoe UI', sans-serif" }}
-            >
-              Antes de imprimir,{" "}
-              <span style={{ color: "#e91e63" }}>nós verificamos!</span>
-            </h2>
-
-            {/* Subtítulo */}
-            <p
-              className="text-gray-600 text-sm lg:text-base mb-6"
-              style={{ fontFamily: "'Bahnschrift', 'Segoe UI', sans-serif" }}
-            >
-              Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
-            </p>
-
-            {/* Grid de checks */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {checks.map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <img
-                    src={CHECK}
-                    alt="✓"
-                    className="w-7 h-7 flex-shrink-0 object-contain"
-                  />
-                  <span
-                    className="text-gray-800 text-sm lg:text-base font-medium"
-                    style={{ fontFamily: "'Bahnschrift', 'Segoe UI', sans-serif" }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
+          {/* Versão mobile da mascote — abaixo do card */}
+          <div className="flex justify-center mt-4 lg:hidden">
+            <img
+              src={MASCOTE}
+              alt="Maria verificando arquivo"
+              className="h-48 w-auto object-contain drop-shadow-lg"
+              draggable={false}
+            />
           </div>
         </div>
       </div>
