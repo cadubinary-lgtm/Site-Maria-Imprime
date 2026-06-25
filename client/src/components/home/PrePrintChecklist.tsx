@@ -40,7 +40,7 @@ export function PrePrintChecklist() {
             <div className="hidden lg:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
-            <div className="flex-1 px-6 lg:px-10 py-8 lg:py-10">
+            <div className="flex-1 px-6 lg:pl-16 lg:pr-10 py-8 lg:py-10">
               {/* Título */}
               <h2
                 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"
