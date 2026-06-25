@@ -61,7 +61,6 @@ export function HeroSection() {
               letterSpacing: "-0.02em",
               color: "#111827",
               marginBottom: "20px",
-              fontFamily: "'Nunito', 'Poppins', 'Arial Black', sans-serif",
             }}
           >
             Precisou imprimir?<br />
@@ -77,7 +76,6 @@ export function HeroSection() {
               color: "#4B5563",
               lineHeight: 1.6,
               marginBottom: "28px",
-              fontFamily: "'Nunito', 'Poppins', sans-serif",
             }}
           >
             Aqui você encontra tudo o que precisa<br />
@@ -123,7 +121,6 @@ export function HeroSection() {
                   outline: "none",
                   fontSize: "0.95rem",
                   color: "#374151",
-                  fontFamily: "'Nunito', 'Poppins', sans-serif",
                 }}
               />
             </div>
@@ -166,7 +163,6 @@ export function HeroSection() {
                       fontSize: "0.85rem",
                       color: "#111827",
                       lineHeight: 1.2,
-                      fontFamily: "'Nunito', 'Poppins', sans-serif",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -178,7 +174,6 @@ export function HeroSection() {
                       fontSize: "0.78rem",
                       color: "#6B7280",
                       lineHeight: 1.3,
-                      fontFamily: "'Nunito', 'Poppins', sans-serif",
                       whiteSpace: "nowrap",
                     }}
                   >
