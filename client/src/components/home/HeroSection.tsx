@@ -1,41 +1,55 @@
 import { useState } from "react";
 
+// Ícones enviados pelo usuário
+const ICON_RAPIDA = "/manus-storage/icone6_2b9ca331.png";       // cronômetro
+const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";    // coração
+const ICON_CONFIAVEL = "/manus-storage/icone8_ed12432c.png";    // escudo check
+const ICON_SIMPLES = "/manus-storage/icone9_18e190d5.png";      // smile
+const FUNDO_ROSA = "/manus-storage/fundorosahome_45d5872d.webp"; // fundo rosa blob
+const MASCOTE = "/manus-storage/mascote-maria-v2_e85aa588.png";
+
+const pilares = [
+  { icon: ICON_RAPIDA,    label: "RÁPIDA",     desc: "Ágil como você precisa" },
+  { icon: ICON_ATENCIOSA, label: "ATENCIOSA",  desc: "Cuida de cada detalhe" },
+  { icon: ICON_CONFIAVEL, label: "CONFIÁVEL",  desc: "Pode contar sempre" },
+  { icon: ICON_SIMPLES,   label: "SIMPLES",    desc: "Fácil, do seu jeito" },
+];
+
 export function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <section
       className="w-full relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #ffffff 0%, #fce4ec 50%, #fce4ec 70%, #fff0f5 100%)",
-        minHeight: "480px",
-      }}
+      style={{ minHeight: "480px", backgroundColor: "#ffffff" }}
     >
-      {/* Blob decorativo rosa no canto direito — igual ao modelo */}
-      <div
-        className="absolute right-0 top-0 bottom-0 pointer-events-none"
-        style={{
-          width: "55%",
-          background:
-            "radial-gradient(ellipse at 80% 50%, #f8bbd0 0%, #fce4ec 40%, transparent 70%)",
-          opacity: 0.6,
-        }}
+      {/* Fundo rosa blob — imagem do usuário, cobre a metade direita */}
+      <img
+        src={FUNDO_ROSA}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+        style={{ opacity: 1 }}
+        draggable={false}
       />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10" style={{paddingLeft: '74px', paddingRight: '82px'}}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center" style={{ minHeight: "480px" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-16 relative z-10">
+        <div
+          className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center"
+          style={{ minHeight: "480px" }}
+        >
 
-          {/* ── LEFT COLUMN ── */}
-          <div className="py-14 lg:py-20" style={{paddingBottom: '79px', paddingLeft: '28px', paddingRight: '15px', paddingTop: '81px'}}>
+          {/* ── COLUNA ESQUERDA ── */}
+          <div className="py-14 lg:py-20">
 
-            {/* Título principal — 2 linhas, fonte enorme, quase preta */}
+            {/* Título principal — tipografia bold preta + "Maria." rosa */}
             <h1
-              className="font-black leading-none mb-6 text-gray-900"
+              className="font-black leading-none mb-5 text-gray-900"
               style={{
-                fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+                fontSize: "clamp(2.4rem, 4.8vw, 4.2rem)",
                 letterSpacing: "-0.02em",
                 lineHeight: "1.1",
-                fontFamily: "'Corbel', 'Arial Black', 'Nunito', sans-serif",
+                fontFamily: "'Nunito', 'Poppins', 'Arial Black', sans-serif",
                 fontWeight: 900,
               }}
             >
@@ -47,20 +61,25 @@ export function HeroSection() {
             {/* Subtítulo */}
             <p
               className="text-gray-600 mb-8 leading-relaxed"
-              style={{ fontSize: "1rem", maxWidth: "420px", fontWeight: 300 }}
+              style={{
+                fontSize: "1.05rem",
+                maxWidth: "420px",
+                fontWeight: 400,
+                fontFamily: "'Nunito', 'Poppins', sans-serif",
+              }}
             >
-              Aqui você encontra tudo o que precisa para divulgar,
+              Aqui você encontra tudo o que precisa para divulgar,<br />
               vender e crescer.
             </p>
 
-            {/* Search bar — branca, larga, borda cinza clara */}
+            {/* Barra de busca */}
             <div className="mb-10" style={{ maxWidth: "480px" }}>
               <div
                 className="flex items-center bg-white gap-3 px-5 py-3.5"
                 style={{
                   borderRadius: "50px",
                   border: "1.5px solid #e0e0e0",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
                 }}
               >
                 <svg
@@ -78,8 +97,8 @@ export function HeroSection() {
                   />
                 </svg>
                 <input
-                  type="text"
-                  placeholder="Buscar produtos, materiais ou serviços..."
+                  type="search"
+                  placeholder="Buscar produtos, materiais ou serviços…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 bg-transparent outline-none text-gray-600 text-sm placeholder-gray-400"
@@ -87,78 +106,47 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* ── 4 PILARES — ícones específicos, linha única ── */}
-            <div className="flex flex-row items-start gap-6">
-              {[
-                {
-                  label: "RÁPIDA",
-                  desc: "Ágil como você precisa",
-                  number: "1",
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-                    </svg>
-                  ),
-                },
-                {
-                  label: "ATENCIOSA",
-                  desc: "Cuida de cada detalhe",
-                  number: "2",
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  ),
-                },
-                {
-                  label: "CONFIÁVEL",
-                  desc: "Pode contar sempre",
-                  number: "3",
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  ),
-                },
-                {
-                  label: "SIMPLES",
-                  desc: "Fácil, do seu jeito",
-                  number: "4",
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="#e91e63" strokeWidth={1.5} viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
-                    </svg>
-                  ),
-                },
-              ].map((pilar, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-1">{pilar.icon}</div>
+            {/* 4 Pilares com ícones reais */}
+            <div className="flex flex-row items-start gap-4" style={{ flexWrap: 'nowrap' }}>
+              {pilares.map((pilar, idx) => (
+                <div key={idx} className="flex items-start gap-2.5">
+                  <img
+                    src={pilar.icon}
+                    alt={pilar.label}
+                    className="flex-shrink-0 mt-0.5"
+                    style={{ width: "32px", height: "32px", objectFit: "contain" }}
+                  />
                   <div>
-                    <p className="font-bold text-gray-900 text-sm leading-tight whitespace-nowrap">{pilar.label}</p>
-                    <p className="text-gray-500 text-xs leading-tight font-light whitespace-nowrap">{pilar.desc}</p>
+                    <p
+                      className="font-bold text-gray-900 text-sm leading-tight whitespace-nowrap"
+                      style={{ fontFamily: "'Nunito', 'Poppins', sans-serif", fontWeight: 800 }}
+                    >
+                      {pilar.label}
+                    </p>
+                    <p
+                      className="text-gray-500 text-xs leading-tight whitespace-nowrap"
+                      style={{ fontFamily: "'Nunito', 'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      {pilar.desc}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
+
           </div>
 
-          {/* ── RIGHT COLUMN — mascote com fundo transparente ── */}
-          <div className="hidden lg:flex justify-end items-end h-full relative" style={{paddingRight: '60px'}}>
+          {/* ── COLUNA DIREITA — mascote ── */}
+          <div className="hidden lg:flex justify-end items-end h-full relative">
             <img
-              src="/manus-storage/mascote-maria-v2_e85aa588.png"
+              src={MASCOTE}
               alt="Maria Imprime - Mascote"
               className="select-none object-contain"
               style={{
-                height: '528px',
-                width: '500px',
-                maxWidth: '500px',
-                marginBottom: '0px',
-                marginLeft: '31px',
-                marginRight: '10px',
-                marginTop: '9px',
-                paddingLeft: '7px',
+                height: "520px",
+                width: "auto",
+                maxWidth: "500px",
+                marginBottom: "0px",
               }}
               draggable={false}
             />
