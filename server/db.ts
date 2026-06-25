@@ -136,7 +136,7 @@ export async function getAllSegments() {
   const db = await getDb();
   if (!db) return [];
 
-  const result = await db.select().from(segments).limit(100);
+  const result = await db.select().from(segments).orderBy(asc(segments.position)).limit(100);
   return result;
 }
 
@@ -200,6 +200,31 @@ export async function deleteSegment(id: number) {
     .where(eq(segments.id, id));
   
   return toDelete[0] || { id };
+}
+
+export async function reorderSegment(id: number, direction: 'up' | 'down') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Buscar todos os segmentos ordenados por position
+  const allSegments = await db.select().from(segments).orderBy(asc(segments.position)).limit(100);
+  
+  const currentIndex = allSegments.findIndex(s => s.id === id);
+  if (currentIndex === -1) throw new Error("Segmento não encontrado");
+  
+  const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+  if (swapIndex < 0 || swapIndex >= allSegments.length) {
+    return { success: false, message: 'Já está na posição limite' };
+  }
+  
+  const current = allSegments[currentIndex];
+  const swap = allSegments[swapIndex];
+  
+  // Trocar as posições
+  await db.update(segments).set({ position: swap.position }).where(eq(segments.id, current.id));
+  await db.update(segments).set({ position: current.position }).where(eq(segments.id, swap.id));
+  
+  return { success: true };
 }
 
 // Categories queries

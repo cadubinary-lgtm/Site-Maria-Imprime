@@ -58,6 +58,7 @@ import {
   createSegment,
   updateSegment,
   deleteSegment,
+  reorderSegment,
   getDeliveryOptionsByProduct,
   createDeliveryOption,
   updateDeliveryOption,
@@ -200,6 +201,14 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return deleteSegment(input.id);
+      }),
+    reorder: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        direction: z.enum(['up', 'down']),
+      }))
+      .mutation(async ({ input }) => {
+        return reorderSegment(input.id, input.direction);
       }),
   }),
 

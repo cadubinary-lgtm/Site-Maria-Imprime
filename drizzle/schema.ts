@@ -66,6 +66,7 @@ export const segments = mysqlTable("segments", {
   name: varchar("name", { length: 255 }).notNull(),
   icon: varchar("icon", { length: 500 }), // URL do ícone PNG armazenado em S3
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  position: int("position").notNull().default(0), // Ordem de exibição
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
