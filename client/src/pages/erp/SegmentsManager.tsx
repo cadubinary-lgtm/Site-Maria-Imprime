@@ -23,6 +23,7 @@ import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Plus, Trash2 } from 
 export default function SegmentsManager() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [editingSlug, setEditingSlug] = useState('');
   const [editingIcon, setEditingIcon] = useState('');
   const [editingIconFile, setEditingIconFile] = useState<File | null>(null);
   const [uploadingIcon, setUploadingIcon] = useState(false);
@@ -44,6 +45,7 @@ export default function SegmentsManager() {
       showNotification('success', 'Segmento atualizado com sucesso!');
       setEditingId(null);
       setEditingName('');
+      setEditingSlug('');
       setEditingIcon('');
       setEditingIconFile(null);
       refetch();
@@ -131,6 +133,7 @@ export default function SegmentsManager() {
     await updateSegmentMutation.mutateAsync({
       id: Number(segmentId),
       name: editingName,
+      slug: editingSlug,
       icon: iconUrl,
     });
   };
@@ -138,6 +141,7 @@ export default function SegmentsManager() {
   const handleEditClick = (segment: any) => {
     setEditingId(segment.id);
     setEditingName(segment.name);
+    setEditingSlug(segment.slug);
     setEditingIcon(segment.icon || '');
     setEditingIconFile(null);
   };
@@ -145,6 +149,7 @@ export default function SegmentsManager() {
   const handleCancel = () => {
     setEditingId(null);
     setEditingName('');
+    setEditingSlug('');
     setEditingIcon('');
     setEditingIconFile(null);
   };
@@ -344,7 +349,15 @@ export default function SegmentsManager() {
                       )}
                     </TableCell>
                     <TableCell className="text-gray-600 text-sm">
-                      {segment.slug}
+                      {editingId === segment.id ? (
+                        <Input
+                          value={editingSlug}
+                          onChange={(e) => setEditingSlug(e.target.value)}
+                          className="w-full"
+                        />
+                      ) : (
+                        segment.slug
+                      )}
                     </TableCell>
                     <TableCell>
                       {editingId === segment.id ? (
