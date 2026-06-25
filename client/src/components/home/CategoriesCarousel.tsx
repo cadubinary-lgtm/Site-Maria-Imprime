@@ -73,7 +73,7 @@ export function CategoriesCarousel() {
           <div
             id="categories-container"
             className="flex gap-4 overflow-x-auto pb-2 scroll-smooth flex-1 px-28"
-            style={{ scrollbarWidth: "none", height: '74px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', width: '1189px', paddingBottom: '0px', paddingLeft: '33px', paddingRight: '84px', paddingTop: '10px' }}
+            style={{ scrollbarWidth: "none", height: '59px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', width: '1189px', paddingBottom: '0px', paddingLeft: '0px', paddingRight: '0px', paddingTop: '2px', borderRadius: '14px' }}
           >
             {(segments as any[]).map((segment) => (
               <button
