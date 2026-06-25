@@ -64,7 +64,7 @@ export type InsertProduct = typeof products.$inferInsert;
 export const segments = mysqlTable("segments", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  icon: text("icon"), // URL do ícone PNG armazenado em S3
+  icon: varchar("icon", { length: 500 }), // URL do ícone PNG armazenado em S3
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
