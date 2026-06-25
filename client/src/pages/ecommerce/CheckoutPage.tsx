@@ -147,7 +147,9 @@ export default function CheckoutPage() {
     0
   ) ?? 0;
 
-  const fretePrice = selectedFrete?.price ?? 0;
+  // Usa frete selecionado na etapa Entrega, ou frete já salvo no carrinho (selecionado na página do produto)
+  const cartShippingPrice = cartItems?.[0]?.shippingPrice != null ? Number(cartItems[0].shippingPrice) : 0;
+  const fretePrice = selectedFrete != null ? selectedFrete.price : cartShippingPrice;
   const totalPrice = subtotal + fretePrice;
 
   const isStorePickupSelected = selectedFrete?.id === "retirada" || selectedFrete?.id === "pickup";
@@ -945,25 +947,33 @@ export default function CheckoutPage() {
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
 
-                {/* Frete */}
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    Frete {selectedFrete ? `(${selectedFrete.name})` : ""}
-                  </span>
-                  {selectedFrete ? (
-                    <span className={selectedFrete.price === 0 ? "text-green-600 font-medium" : ""}>
-                      {selectedFrete.price === 0 ? "Grátis" : formatCurrency(selectedFrete.price)}
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setStep("entrega")}
-                      className="text-orange-500 text-xs underline hover:text-orange-600"
-                    >
-                      Selecionar frete
-                    </button>
-                  )}
-                </div>
+                {/* Frete — usa selectedFrete (etapa Entrega) ou frete já salvo no carrinho */}
+                {(() => {
+                  const cartShippingLabel = cartItems?.[0]?.shippingLabel ?? null;
+                  const cartShippingPrice = cartItems?.[0]?.shippingPrice != null ? Number(cartItems[0].shippingPrice) : null;
+                  const effectiveName = selectedFrete?.name ?? cartShippingLabel;
+                  const effectivePrice = selectedFrete != null ? selectedFrete.price : cartShippingPrice;
+                  return (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        Frete {effectiveName ? `(${effectiveName})` : ""}
+                      </span>
+                      {effectivePrice != null ? (
+                        <span className={effectivePrice === 0 ? "text-green-600 font-medium" : ""}>
+                          {effectivePrice === 0 ? "Grátis" : formatCurrency(effectivePrice)}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setStep("entrega")}
+                          className="text-orange-500 text-xs underline hover:text-orange-600"
+                        >
+                          Selecionar frete
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Forma de pagamento */}
                 {paymentMethod && (
