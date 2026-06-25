@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -8,7 +8,10 @@ export function CategoriesCarousel() {
   const [isHoveringLeft, setIsHoveringLeft] = useState(false);
   const [isHoveringRight, setIsHoveringRight] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { data: segments = [] } = trpc.segments.list.useQuery();
+  const [, navigate] = useLocation();
+
+  // Usar o novo sistema de segmentos (many-to-many) com ID numérico
+  const { data: segments = [] } = trpc.productSegments.getAllSegments.useQuery();
 
   const handleScroll = (direction: "left" | "right") => {
     const container = document.getElementById("categories-container");
@@ -31,7 +34,7 @@ export function CategoriesCarousel() {
         const container = document.getElementById("categories-container");
         if (!container) return;
 
-        const scrollAmount = 5; // Smaller increment for smooth continuous scroll
+        const scrollAmount = 5;
         const direction = isHoveringLeft ? "left" : "right";
         const newPosition =
           direction === "left"
@@ -40,7 +43,7 @@ export function CategoriesCarousel() {
 
         container.scrollTo({ left: newPosition, behavior: "smooth" });
         setScrollPosition(newPosition);
-      }, 50); // Update every 50ms for smooth animation
+      }, 50);
     } else {
       if (scrollIntervalRef.current) {
         clearInterval(scrollIntervalRef.current);
@@ -55,6 +58,11 @@ export function CategoriesCarousel() {
     };
   }, [isHoveringLeft, isHoveringRight, scrollPosition]);
 
+  const handleSegmentClick = (segment: any) => {
+    // Navegar para o catálogo com o segmento pré-selecionado via ID numérico
+    navigate(`/catalogo?segmentId=${segment.id}`);
+  };
+
   return (
     <section className="bg-white py-12 px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -67,29 +75,31 @@ export function CategoriesCarousel() {
             className="flex gap-4 overflow-x-auto pb-2 scroll-smooth flex-1 px-28"
             style={{ scrollbarWidth: "none", height: '74px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', width: '1189px', paddingBottom: '0px', paddingLeft: '33px', paddingRight: '84px', paddingTop: '10px' }}
           >
-            {segments.map((segment: any) => (
-              <Link key={segment.id} href={`/produtos?segment=${segment.slug}`}>
-                <div className="flex-shrink-0 group cursor-pointer">
-                  {/* Card retangular com bordas redondas */}
-                  <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl px-6 py-2 h-14 flex items-center gap-4 hover:shadow-lg transition-all duration-300 min-w-max">
-                    {segment.icon && (
-                      <img
-                        src={segment.icon}
-                        alt={segment.name}
-                        className="w-10 h-10 flex-shrink-0"
-                      />
-                    )}
-                    <span className="text-base font-semibold text-gray-900 group-hover:text-pink-600 transition-colors whitespace-nowrap">
-                      {segment.name}
-                    </span>
-                  </div>
+            {(segments as any[]).map((segment) => (
+              <button
+                key={segment.id}
+                onClick={() => handleSegmentClick(segment)}
+                className="flex-shrink-0 group cursor-pointer"
+              >
+                {/* Card retangular com bordas redondas */}
+                <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl px-6 py-2 h-14 flex items-center gap-4 hover:shadow-lg transition-all duration-300 min-w-max hover:bg-gradient-to-br hover:from-pink-100 hover:to-pink-200">
+                  {segment.icon && (
+                    <img
+                      src={segment.icon}
+                      alt={segment.name}
+                      className="w-10 h-10 flex-shrink-0"
+                    />
+                  )}
+                  <span className="text-base font-semibold text-gray-900 group-hover:text-pink-600 transition-colors whitespace-nowrap">
+                    {segment.name}
+                  </span>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
 
           {/* Left arrow button - positioned absolutely */}
-          {segments.length > 4 && (
+          {(segments as any[]).length > 4 && (
             <button
               onMouseEnter={() => setIsHoveringLeft(true)}
               onMouseLeave={() => setIsHoveringLeft(false)}
@@ -102,7 +112,7 @@ export function CategoriesCarousel() {
           )}
 
           {/* Right arrow button - positioned absolutely */}
-          {segments.length > 4 && (
+          {(segments as any[]).length > 4 && (
             <button
               onMouseEnter={() => setIsHoveringRight(true)}
               onMouseLeave={() => setIsHoveringRight(false)}

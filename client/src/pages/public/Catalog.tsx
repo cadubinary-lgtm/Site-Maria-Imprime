@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,13 @@ import { Slider } from "@/components/ui/slider";
 const ITEMS_PER_PAGE = 12;
 
 export default function Catalog() {
+  // Ler segmentId da URL (ex: /catalogo?segmentId=3)
+  const urlSegmentId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("segmentId");
+    return id ? parseInt(id, 10) : null;
+  }, []);
+
   // Carregar segmentos dinamicamente
   const { data: segmentsData, isLoading: segmentsLoading } = trpc.productSegments.getAllSegments.useQuery();
 
@@ -18,26 +25,36 @@ export default function Catalog() {
   const segments = useMemo(() => {
     if (!segmentsData || segmentsData.length === 0) return [];
     return segmentsData.map((seg: any) => ({
-      id: seg.id, // Usar ID numérico em vez de slug
-      label: `${seg.icon || "📦"} ${seg.name}`,
+      id: seg.id,
+      label: seg.name,
+      icon: seg.icon,
     }));
   }, [segmentsData]);
 
-  // Definir primeiro segmento como padrão
-  const defaultSegment = useMemo(() => {
-    return segments.length > 0 ? segments[0].id : 1;
-  }, [segments]);
-
-  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  // Definir segmento inicial: URL param > primeiro segmento disponível
+  const [selectedSegment, setSelectedSegment] = useState<number | null>(urlSegmentId);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchTerm, setSearchTerm] = useState("");
   const [cartCount, setCartCount] = useState(0);
 
-  // Usar segmento padrão se nenhum foi selecionado
-  const activeSegment = selectedSegment || defaultSegment;
+  // Quando os segmentos carregarem, se não há seleção, usar o primeiro
+  useEffect(() => {
+    if (segments.length > 0 && selectedSegment === null) {
+      setSelectedSegment(segments[0].id);
+    }
+  }, [segments, selectedSegment]);
 
-  // Carregar produtos do segmento ativo (usando novo sistema)
+  // Segmento ativo (nunca null após carregamento)
+  const activeSegment = selectedSegment ?? (segments.length > 0 ? segments[0].id : null);
+
+  // Nome do segmento ativo para exibição no título
+  const activeSegmentName = useMemo(() => {
+    if (!activeSegment || segments.length === 0) return null;
+    return segments.find((s) => s.id === activeSegment)?.label ?? null;
+  }, [activeSegment, segments]);
+
+  // Carregar produtos do segmento ativo (usando novo sistema many-to-many)
   const { data: products, isLoading } = trpc.productSegments.getProductsBySegment.useQuery(
     activeSegment as number,
     { enabled: !!activeSegment }
@@ -46,11 +63,11 @@ export default function Catalog() {
   // Filtrar produtos por preço e termo de busca
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-    
     return products.filter((p) => {
       const price = parseFloat(p.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
       return matchesPrice && matchesSearch && p.isActive;
     });
@@ -62,14 +79,22 @@ export default function Catalog() {
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleAddToCart = (productName: string) => {
-    setCartCount(c => c + 1);
-    // Toast feedback would go here
+    setCartCount((c) => c + 1);
+  };
+
+  const handleSegmentChange = (segId: number) => {
+    setSelectedSegment(segId);
+    setCurrentPage(1);
+    // Atualizar URL sem recarregar a página
+    const url = new URL(window.location.href);
+    url.searchParams.set("segmentId", String(segId));
+    window.history.replaceState({}, "", url.toString());
   };
 
   if (segmentsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
       </div>
     );
   }
@@ -77,17 +102,26 @@ export default function Catalog() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header com Carrinho */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Catálogo de Produtos</h1>
-          <div className="flex items-center gap-2 bg-orange-100 px-4 py-2 rounded-lg">
-            <ShoppingCart className="w-5 h-5 text-orange-500" />
-            <span className="font-semibold text-orange-600">{cartCount} itens</span>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {activeSegmentName ? activeSegmentName : "Catálogo de Produtos"}
+            </h1>
+            {activeSegmentName && (
+              <p className="text-gray-500 text-sm mt-1">
+                Produtos disponíveis em <span className="font-semibold text-pink-600">{activeSegmentName}</span>
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 bg-pink-50 px-4 py-2 rounded-lg border border-pink-100">
+            <ShoppingCart className="w-5 h-5 text-pink-500" />
+            <span className="font-semibold text-pink-600">{cartCount} itens</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar com Filtros - Coluna Esquerda */}
+          {/* Sidebar com Filtros */}
           <div className="lg:col-span-1">
             <Card className="border-gray-200 sticky top-4">
               <CardContent className="p-6 space-y-6">
@@ -99,21 +133,20 @@ export default function Catalog() {
                       <p className="text-sm text-gray-500">Nenhum segmento disponível</p>
                     ) : (
                       segments.map((seg) => (
-                        <Button
+                        <button
                           key={seg.id}
-                          variant={activeSegment === seg.id ? "default" : "outline"}
-                          className={`w-full justify-start ${
+                          onClick={() => handleSegmentChange(seg.id)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${
                             activeSegment === seg.id
-                              ? "bg-orange-500 hover:bg-orange-600 text-white"
-                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                              ? "bg-pink-600 text-white shadow-sm"
+                              : "bg-gray-50 text-gray-700 hover:bg-pink-50 hover:text-pink-700 border border-gray-200"
                           }`}
-                          onClick={() => {
-                            setSelectedSegment(seg.id);
-                            setCurrentPage(1);
-                          }}
                         >
-                          {seg.label}
-                        </Button>
+                          {seg.icon && (
+                            <img src={seg.icon} alt={seg.label} className="w-5 h-5 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{seg.label}</span>
+                        </button>
                       ))
                     )}
                   </div>
@@ -154,21 +187,21 @@ export default function Catalog() {
                   </div>
                 </div>
 
-                {/* Informações */}
-                <div className="bg-blue-50 p-3 rounded text-sm text-blue-700 border border-blue-200">
+                {/* Contagem */}
+                <div className="bg-pink-50 p-3 rounded-lg text-sm text-pink-700 border border-pink-100">
                   <p>
-                    <strong>{filteredProducts.length}</strong> produtos encontrados
+                    <strong>{filteredProducts.length}</strong> produto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Grid de Produtos - Coluna Central e Direita */}
+          {/* Grid de Produtos */}
           <div className="lg:col-span-3">
             {isLoading ? (
               <div className="flex justify-center items-center h-96">
-                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
               </div>
             ) : paginatedProducts.length === 0 ? (
               <Card className="border-gray-200">
@@ -194,7 +227,7 @@ export default function Catalog() {
                     <Card key={product.id} className="hover:shadow-lg transition border-gray-200 overflow-hidden">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem */}
-                        <div className="relative h-40 bg-gray-200 overflow-hidden">
+                        <div className="relative h-40 bg-gray-100 overflow-hidden">
                           {product.imageUrl ? (
                             <img
                               src={product.imageUrl}
@@ -202,16 +235,17 @@ export default function Catalog() {
                               className="w-full h-full object-cover hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                              <span className="text-gray-500">Sem imagem</span>
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                              <span className="text-gray-400 text-sm">Sem imagem</span>
                             </div>
                           )}
                         </div>
                       </Link>
 
                       <CardContent className="p-4">
-                        {/* Info */}
-                        <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-2">{product.name}</h3>
+                        <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-2">
+                          {product.name}
+                        </h3>
                         {product.category && (
                           <p className="text-xs text-gray-500 mb-2">
                             {product.category}
@@ -223,7 +257,7 @@ export default function Catalog() {
                         </p>
 
                         {/* Tipo de Cálculo */}
-                        <div className="mb-3 p-2 bg-gray-100 rounded text-xs text-gray-700">
+                        <div className="mb-3 p-2 bg-gray-50 rounded text-xs text-gray-600 border border-gray-100">
                           <span className="font-semibold">Unidade:</span>{" "}
                           {product.calculationType === "m2"
                             ? "m²"
@@ -236,7 +270,7 @@ export default function Catalog() {
 
                         {/* Preço e Botões */}
                         <div className="flex items-center justify-between mb-4">
-                          <span className="text-xl font-bold text-orange-500">
+                          <span className="text-xl font-bold text-pink-600">
                             R$ {parseFloat(product.price).toFixed(2)}
                           </span>
                         </div>
@@ -244,7 +278,7 @@ export default function Catalog() {
                         {/* Botões */}
                         <div className="flex gap-2">
                           <Link href={`/produto/${product.id}`} className="flex-1">
-                            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+                            <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
                               Ver Detalhes
                             </Button>
                           </Link>
@@ -252,7 +286,7 @@ export default function Catalog() {
                             variant="outline"
                             size="icon"
                             onClick={() => handleAddToCart(product.name)}
-                            className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                            className="border-pink-500 text-pink-500 hover:bg-pink-50"
                           >
                             <ShoppingCart className="w-4 h-4" />
                           </Button>
@@ -280,7 +314,7 @@ export default function Catalog() {
                           variant={currentPage === i + 1 ? "default" : "outline"}
                           size="sm"
                           onClick={() => setCurrentPage(i + 1)}
-                          className={currentPage === i + 1 ? "bg-orange-500 hover:bg-orange-600" : ""}
+                          className={currentPage === i + 1 ? "bg-pink-600 hover:bg-pink-700" : ""}
                         >
                           {i + 1}
                         </Button>
