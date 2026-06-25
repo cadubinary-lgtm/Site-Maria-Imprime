@@ -13,7 +13,7 @@ const steps = [
     mascote: "/manus-storage/mascote2_c744e916.webp",
     title: "Envie seu arquivo",
     description: "Faça o upload da arte pronta para impressão",
-    scale: "scale-125",
+    scale: "scale-150",
   },
   {
     number: "/manus-storage/NUMERO3_31247e8f.webp",
@@ -27,7 +27,7 @@ const steps = [
     mascote: "/manus-storage/mascote4_914dbb3a.webp",
     title: "Arquivo aprovado para produção",
     description: "Se estiver tudo certo iniciamos a impressão",
-    scale: "scale-125",
+    scale: "scale-150",
   },
   {
     number: "/manus-storage/NUMERO5_74d09d11.webp",
