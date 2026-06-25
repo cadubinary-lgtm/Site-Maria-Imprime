@@ -59,16 +59,16 @@ export function HowItWorks() {
         {/* Layout desktop: 3 linhas em grid (números / imagens+setas / textos) */}
         <div className="hidden lg:block">
           {/* Linha 1 — Números */}
-          <div className="grid grid-cols-6 mb-2">
-            {steps.map((step, i) => (
-              <div key={i} className="flex justify-center">
-                <img
-                  src={step.number}
-                  alt={`Passo ${i + 1}`}
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
-            ))}
+          <div           className="grid grid-cols-6 mb-0">
+          {steps.map((step, i) => (
+            <div key={i} className="flex justify-center">
+              <img
+                src={step.number}
+                alt={`Passo ${i + 1}`}
+                className="w-7 h-7 object-contain"
+              />
+            </div>
+          ))}
           </div>
 
           {/* Linha 2 — Bonequinhas + setas (alinhadas pela base) */}
