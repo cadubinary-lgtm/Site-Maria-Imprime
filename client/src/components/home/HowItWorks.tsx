@@ -6,42 +6,36 @@ const steps = [
     mascote: "/manus-storage/mascote1_dead24a9.webp",
     title: "Escolha seu produto",
     description: "Encontre a opção ideal para seu projeto",
-    isLandscape: false,
   },
   {
     number: "/manus-storage/NUMERO2_14456832.webp",
     mascote: "/manus-storage/mascote2_c744e916.webp",
     title: "Envie seu arquivo",
     description: "Faça o upload da arte pronta para impressão",
-    isLandscape: true, // 1536x1024 - precisa de ajuste
   },
   {
     number: "/manus-storage/NUMERO3_31247e8f.webp",
     mascote: "/manus-storage/mascote3_21810538.webp",
     title: "Conferência técnica",
     description: "Nossa equipe verifica medidas, resolução e possíveis inconsistências",
-    isLandscape: false,
   },
   {
     number: "/manus-storage/NUMERO4_588a745d.webp",
     mascote: "/manus-storage/mascote4_914dbb3a.webp",
     title: "Arquivo aprovado para produção",
     description: "Se estiver tudo certo iniciamos a impressão",
-    isLandscape: true, // 1536x1024 - precisa de ajuste
   },
   {
     number: "/manus-storage/NUMERO5_74d09d11.webp",
     mascote: "/manus-storage/mascote5_de716367.webp",
     title: "Produção com carinho",
     description: "Seu material entra na fila de produção",
-    isLandscape: false,
   },
   {
     number: "/manus-storage/NUMERO6_b8a209c7.webp",
     mascote: "/manus-storage/mascote6_715d14ab.webp",
     title: "Pedido enviado / Pronto para retirada",
     description: "Você acompanha o pedido online",
-    isLandscape: false,
   },
 ];
 
@@ -59,7 +53,7 @@ export function HowItWorks() {
           <div className="w-16 h-1 bg-[#FF0066] mx-auto rounded-full" />
         </div>
 
-        {/* Linha de passos com setas entre eles */}
+        {/* Linha de passos */}
         <div className="flex flex-wrap justify-center gap-0">
           {steps.map((step, index) => (
             <div key={index} className="flex items-start">
@@ -72,23 +66,16 @@ export function HowItWorks() {
                   className="w-10 h-10 mb-1 object-contain"
                 />
 
-                {/* Bonequinha */}
-                <div className={`flex items-center justify-center overflow-hidden ${
-                  step.isLandscape 
-                    ? "w-[120px] h-[120px] sm:w-[136px] sm:h-[136px] lg:w-[148px] lg:h-[148px]"
-                    : "w-[120px] h-[120px] sm:w-[136px] sm:h-[136px] lg:w-[148px] lg:h-[148px]"
-                }`}>
+                {/* Bonequinha — tamanho fixo uniforme + zoom no hover */}
+                <div className="w-[120px] h-[120px] sm:w-[136px] sm:h-[136px] lg:w-[148px] lg:h-[148px] flex items-end justify-center overflow-hidden">
                   <img
                     src={step.mascote}
                     alt={step.title}
-                    className={`
+                    className="
+                      w-full h-full object-contain
                       transition-transform duration-300 ease-out
                       group-hover:scale-110
-                      ${step.isLandscape 
-                        ? "w-full h-full object-cover scale-[1.55]" 
-                        : "w-full h-full object-contain"
-                      }
-                    `}
+                    "
                   />
                 </div>
 
