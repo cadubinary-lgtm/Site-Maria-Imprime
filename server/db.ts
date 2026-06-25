@@ -168,12 +168,15 @@ export async function createSegment(name: string, icon: string, slug: string) {
   return created[0] || { name, icon, slug };
 }
 
-export async function updateSegment(id: number, name: string, icon: string) {
+export async function updateSegment(id: number, name: string, icon: string, slug?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  const updateData: Record<string, unknown> = { name, icon };
+  if (slug) updateData.slug = slug;
+
   await db.update(segments)
-    .set({ name, icon })
+    .set(updateData as any)
     .where(eq(segments.id, id));
   
   // Retornar o segmento atualizado
@@ -181,7 +184,7 @@ export async function updateSegment(id: number, name: string, icon: string) {
     .where(eq(segments.id, id))
     .limit(1);
   
-  return updated[0] || { id, name, icon };
+  return updated[0] || { id, name, icon, slug };
 }
 
 export async function deleteSegment(id: number) {

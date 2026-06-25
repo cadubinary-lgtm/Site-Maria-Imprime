@@ -194,7 +194,7 @@ export const appRouter = router({
         icon: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return updateSegment(input.id, input.name, input.icon || '');
+        return updateSegment(input.id, input.name, input.icon || '', input.slug);
       }),
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
