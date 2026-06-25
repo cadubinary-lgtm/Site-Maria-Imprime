@@ -7,6 +7,8 @@ const ICON_SIMPLES   = "/manus-storage/icone9_18e190d5.png";
 const FUNDO_ROSA     = "/manus-storage/fundorosahome_45d5872d.webp";
 const MASCOTE        = "/manus-storage/mascote-maria-v2_e85aa588.png";
 
+const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
+
 const pilares = [
   { icon: ICON_RAPIDA,    label: "RÁPIDA",    desc: "Ágil como você precisa" },
   { icon: ICON_ATENCIOSA, label: "ATENCIOSA", desc: "Cuida de cada detalhe" },
@@ -20,9 +22,9 @@ export function HeroSection() {
   return (
     <section
       className="w-full relative overflow-hidden"
-      style={{ minHeight: "520px", backgroundColor: "#ffffff" }}
+      style={{ minHeight: "520px", backgroundColor: "#ffffff", fontFamily: FONT }}
     >
-      {/* Fundo rosa blob — cobre a metade direita exatamente como na referência */}
+      {/* Fundo rosa blob */}
       <img
         src={FUNDO_ROSA}
         alt=""
@@ -61,6 +63,7 @@ export function HeroSection() {
               letterSpacing: "-0.02em",
               color: "#111827",
               marginBottom: "20px",
+              fontFamily: FONT,
             }}
           >
             Precisou imprimir?<br />
@@ -76,6 +79,7 @@ export function HeroSection() {
               color: "#4B5563",
               lineHeight: 1.6,
               marginBottom: "28px",
+              fontFamily: FONT,
             }}
           >
             Aqui você encontra tudo o que precisa<br />
@@ -121,6 +125,7 @@ export function HeroSection() {
                   outline: "none",
                   fontSize: "0.95rem",
                   color: "#374151",
+                  fontFamily: FONT,
                 }}
               />
             </div>
@@ -164,6 +169,7 @@ export function HeroSection() {
                       color: "#111827",
                       lineHeight: 1.2,
                       whiteSpace: "nowrap",
+                      fontFamily: FONT,
                     }}
                   >
                     {pilar.label}
@@ -175,6 +181,7 @@ export function HeroSection() {
                       color: "#6B7280",
                       lineHeight: 1.3,
                       whiteSpace: "nowrap",
+                      fontFamily: FONT,
                     }}
                   >
                     {pilar.desc}
