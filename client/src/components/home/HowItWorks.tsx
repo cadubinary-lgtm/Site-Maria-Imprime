@@ -53,31 +53,36 @@ export function HowItWorks() {
           <div className="w-10 h-1 bg-[#FF0066] mx-auto rounded-full" />
         </div>
 
-        {/* Linha de passos */}
-        <div className="flex flex-wrap lg:flex-nowrap items-end justify-center gap-0">
+        {/* Linha de passos — alinhados pela base das imagens */}
+        <div className="flex flex-wrap lg:flex-nowrap justify-center gap-0">
           {steps.map((step, index) => (
             <div key={index} className="flex items-end">
+
               {/* Card do passo */}
               <div className="flex flex-col items-center text-center w-[130px] sm:w-[150px] lg:w-[160px] group">
-                {/* Número rosa */}
+
+                {/* Número rosa — fixo no topo do card */}
                 <img
                   src={step.number}
                   alt={`Passo ${index + 1}`}
-                  className="w-10 h-10 mb-2 object-contain"
+                  className="w-10 h-10 mb-2 object-contain flex-shrink-0"
                 />
 
-                {/* Bonequinha — sem overflow hidden, tamanho natural */}
-                <img
-                  src={step.mascote}
-                  alt={step.title}
-                  className="
-                    w-[120px] sm:w-[136px] lg:w-[150px]
-                    h-auto
-                    object-contain
-                    transition-transform duration-300 ease-out
-                    group-hover:scale-105
-                  "
-                />
+                {/* Área da bonequinha com altura fixa — alinha pela base */}
+                <div className="flex items-end justify-center w-full" style={{ height: "180px" }}>
+                  <img
+                    src={step.mascote}
+                    alt={step.title}
+                    className="
+                      w-[120px] sm:w-[136px] lg:w-[150px]
+                      h-auto
+                      max-h-[180px]
+                      object-contain object-bottom
+                      transition-transform duration-300 ease-out
+                      group-hover:scale-105
+                    "
+                  />
+                </div>
 
                 {/* Texto */}
                 <div className="mt-3 px-1">
@@ -90,13 +95,13 @@ export function HowItWorks() {
                 </div>
               </div>
 
-              {/* Seta entre os passos */}
+              {/* Seta entre os passos — alinhada no meio da área das imagens */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:flex items-center mb-16 mx-[-6px]">
+                <div className="hidden lg:flex items-end justify-center mx-[-4px]" style={{ height: "calc(180px + 3rem)" }}>
                   <img
                     src={ARROW_URL}
                     alt="próximo passo"
-                    className="w-10 h-10 object-contain opacity-90"
+                    className="w-9 h-9 object-contain opacity-90 mb-[90px]"
                   />
                 </div>
               )}
