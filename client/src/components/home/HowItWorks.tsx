@@ -46,7 +46,7 @@ const IMG_AREA_H = 200;
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-16 px-4 lg:px-8">
+    <section className="bg-white py-16 px-4 lg:px-8" style={{minHeight: '573px'}}>
       <div className="max-w-6xl mx-auto">
         {/* Título */}
         <div className="text-center mb-8">
