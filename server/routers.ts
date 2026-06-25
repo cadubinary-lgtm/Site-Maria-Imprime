@@ -1261,18 +1261,64 @@ createOrder: protectedProcedure
         }
 
         // 8. Enviar e-mail de confirmação
-        const emailTo = input.guestEmail ?? (isGuest ? null : null);
+        // Buscar e-mail do cliente em todos os cenários:
+        // a) convidado sem conta → input.guestEmail
+        // b) cliente com conta própria (customerAccount) → buscar no banco
+        // c) cliente Manus OAuth (userId) → buscar no banco de users
+        let emailTo: string | null = input.guestEmail ?? null;
+        let emailFirstName = (input.guestName ?? input.deliveryFullName).split(" ")[0] ?? "Cliente";
+
+        if (!emailTo && finalCustomerId) {
+          try {
+            const { customerAccounts: caTable } = await import("../drizzle/schema");
+            const { eq: eqEmail } = await import("drizzle-orm");
+            const dbEmail = await (await import("./db")).getDb();
+            if (dbEmail) {
+              const [ca] = await dbEmail
+                .select({ email: caTable.email, firstName: caTable.firstName })
+                .from(caTable)
+                .where(eqEmail(caTable.id, finalCustomerId))
+                .limit(1);
+              if (ca?.email) {
+                emailTo = ca.email;
+                emailFirstName = ca.firstName || emailFirstName;
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (!emailTo && userId) {
+          try {
+            const { users } = await import("../drizzle/schema");
+            const { eq: eqEmail } = await import("drizzle-orm");
+            const dbEmail = await (await import("./db")).getDb();
+            if (dbEmail) {
+              const [u] = await dbEmail
+                .select({ email: users.email, name: users.name })
+                .from(users)
+                .where(eqEmail(users.id, userId))
+                .limit(1);
+              if (u?.email) {
+                emailTo = u.email;
+                emailFirstName = (u.name || emailFirstName).split(" ")[0];
+              }
+            }
+          } catch (_) {}
+        }
+
         if (emailTo) {
           try {
             const { sendOrderConfirmationWithLink } = await import("./emailService");
-            const firstName = (input.guestName ?? input.deliveryFullName).split(" ")[0] ?? "Cliente";
             const trackUrl = guestToken
               ? `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/acompanhar/${guestToken}`
-              : `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/${orderNumber}`;
-            await sendOrderConfirmationWithLink(emailTo, firstName, orderNumber, totalPrice.toFixed(2), trackUrl);
+              : `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/minha-conta/pedidos/${orderNumber}`;
+            const result = await sendOrderConfirmationWithLink(emailTo, emailFirstName, orderNumber, totalPrice.toFixed(2), trackUrl);
+            console.log(`[CHECKOUT] E-mail de confirmação enviado para ${emailTo}:`, result);
           } catch (e) {
             console.error("[CHECKOUT] Erro ao enviar e-mail de confirmação:", e);
           }
+        } else {
+          console.warn("[CHECKOUT] Nenhum e-mail encontrado para envio de confirmação. OrderNumber:", orderNumber);
         }
 
         // 9. Log de diagnóstico
