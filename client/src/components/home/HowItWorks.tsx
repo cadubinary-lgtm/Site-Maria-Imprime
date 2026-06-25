@@ -53,24 +53,32 @@ export function HowItWorks() {
           <div className="w-16 h-1 bg-[#FF0066] mx-auto rounded-full" />
         </div>
 
-        {/* Linha de passos com setas entre eles */}
+        {/* Linha de passos */}
         <div className="flex flex-wrap justify-center gap-0">
           {steps.map((step, index) => (
             <div key={index} className="flex items-start">
               {/* Card do passo */}
-              <div className="flex flex-col items-center text-center w-[130px] sm:w-[150px] lg:w-[160px]">
+              <div className="flex flex-col items-center text-center w-[130px] sm:w-[150px] lg:w-[160px] group">
                 {/* Número */}
                 <img
                   src={step.number}
                   alt={`Passo ${index + 1}`}
                   className="w-10 h-10 mb-1 object-contain"
                 />
-                {/* Bonequinha */}
-                <img
-                  src={step.mascote}
-                  alt={step.title}
-                  className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 object-contain"
-                />
+
+                {/* Bonequinha — tamanho fixo uniforme + zoom no hover */}
+                <div className="w-[120px] h-[120px] sm:w-[136px] sm:h-[136px] lg:w-[148px] lg:h-[148px] flex items-end justify-center overflow-hidden">
+                  <img
+                    src={step.mascote}
+                    alt={step.title}
+                    className="
+                      w-full h-full object-contain
+                      transition-transform duration-300 ease-out
+                      group-hover:scale-110
+                    "
+                  />
+                </div>
+
                 {/* Texto */}
                 <div className="mt-2 px-1">
                   <p className="font-bold text-gray-800 text-sm leading-tight mb-1">
