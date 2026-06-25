@@ -1,13 +1,114 @@
+import { Link } from "wouter";
+
+const steps = [
+  {
+    number: "/manus-storage/NUMERO1_785a9e70.webp",
+    mascote: "/manus-storage/mascote1_dead24a9.webp",
+    title: "Escolha seu produto",
+    description: "Encontre a opção ideal para seu projeto",
+  },
+  {
+    number: "/manus-storage/NUMERO2_14456832.webp",
+    mascote: "/manus-storage/mascote2_c744e916.webp",
+    title: "Envie seu arquivo",
+    description: "Faça o upload da arte pronta para impressão",
+  },
+  {
+    number: "/manus-storage/NUMERO3_31247e8f.webp",
+    mascote: "/manus-storage/mascote3_21810538.webp",
+    title: "Conferência técnica",
+    description: "Nossa equipe verifica medidas, resolução e possíveis inconsistências",
+  },
+  {
+    number: "/manus-storage/NUMERO4_588a745d.webp",
+    mascote: "/manus-storage/mascote4_914dbb3a.webp",
+    title: "Arquivo aprovado para produção",
+    description: "Se estiver tudo certo iniciamos a impressão",
+  },
+  {
+    number: "/manus-storage/NUMERO5_74d09d11.webp",
+    mascote: "/manus-storage/mascote5_de716367.webp",
+    title: "Produção com carinho",
+    description: "Seu material entra na fila de produção",
+  },
+  {
+    number: "/manus-storage/NUMERO6_b8a209c7.webp",
+    mascote: "/manus-storage/mascote6_715d14ab.webp",
+    title: "Pedido enviado / Pronto para retirada",
+    description: "Você acompanha o pedido online",
+  },
+];
+
+const ARROW_URL = "/manus-storage/SETA_e3737895.webp";
+
 export function HowItWorks() {
   return (
-    <section className="bg-white py-8 px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-center">
-          <img 
-            src="/manus-storage/1_a19b3733.webp" 
-            alt="Como funciona" 
-            className="w-full max-w-7xl h-auto"
-          />
+    <section className="bg-white py-16 px-4 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Título */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
+            Como funciona
+          </h2>
+          <div className="w-16 h-1 bg-[#FF0066] mx-auto rounded-full" />
+        </div>
+
+        {/* Linha de passos com setas entre eles */}
+        <div className="flex flex-wrap justify-center gap-0">
+          {steps.map((step, index) => (
+            <div key={index} className="flex items-start">
+              {/* Card do passo */}
+              <div className="flex flex-col items-center text-center w-[130px] sm:w-[150px] lg:w-[160px]">
+                {/* Número */}
+                <img
+                  src={step.number}
+                  alt={`Passo ${index + 1}`}
+                  className="w-10 h-10 mb-1 object-contain"
+                />
+                {/* Bonequinha */}
+                <img
+                  src={step.mascote}
+                  alt={step.title}
+                  className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 object-contain"
+                />
+                {/* Texto */}
+                <div className="mt-2 px-1">
+                  <p className="font-bold text-gray-800 text-sm leading-tight mb-1">
+                    {step.title}
+                  </p>
+                  <p className="text-gray-500 text-xs leading-snug">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Seta entre os passos (apenas desktop) */}
+              {index < steps.length - 1 && (
+                <div className="hidden lg:flex items-center mt-12 mx-[-4px]">
+                  <img
+                    src={ARROW_URL}
+                    alt="próximo passo"
+                    className="w-10 h-10 object-contain opacity-80"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Botão CTA */}
+        <div className="flex justify-center mt-14">
+          <Link href="/catalogo">
+            <button className="
+              bg-[#FF0066] text-white font-bold text-base px-10 py-4 rounded-full
+              shadow-lg shadow-pink-200
+              transition-all duration-200
+              hover:bg-[#e0005a] hover:shadow-xl hover:shadow-pink-300 hover:-translate-y-0.5
+              active:scale-95
+            ">
+              Fazer meu pedido agora
+            </button>
+          </Link>
         </div>
       </div>
     </section>
