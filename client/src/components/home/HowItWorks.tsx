@@ -49,7 +49,7 @@ export function HowItWorks() {
     <section className="bg-white py-16 px-4 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Título */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
             Como funciona
           </h2>
@@ -59,22 +59,23 @@ export function HowItWorks() {
         {/* Layout desktop: 3 linhas em grid (números / imagens+setas / textos) */}
         <div className="hidden lg:block">
           {/* Linha 1 — Números */}
-          <div           className="grid grid-cols-6 mb-0">
-          {steps.map((step, i) => (
-            <div key={i} className="flex justify-center">
-              <img
-                src={step.number}
-                alt={`Passo ${i + 1}`}
-                className="w-7 h-7 object-contain"
-              />
-            </div>
-          ))}
+          <div className="grid grid-cols-6 mb-0">
+            {steps.map((step, i) => (
+              <div key={i} className="flex justify-center">
+                <img
+                  src={step.number}
+                  alt={`Passo ${i + 1}`}
+                  className="w-7 h-7 object-contain"
+                  style={{ paddingTop: '5px' }}
+                />
+              </div>
+            ))}
           </div>
 
           {/* Linha 2 — Bonequinhas + setas (alinhadas pela base) */}
           <div
-            className="flex items-end justify-center -mt-2"
-            style={{ height: `${IMG_AREA_H}px` }}
+            className="flex items-end justify-center"
+            style={{ height: `${IMG_AREA_H}px`, marginTop: '-11px' }}
           >
             {steps.map((step, i) => (
               <div key={i} className="flex items-end flex-1">
@@ -87,13 +88,17 @@ export function HowItWorks() {
                   />
                 </div>
 
-                {/* Seta — centralizada verticalmente na área das imagens */}
+                {/* Seta — posicionada entre número e bonequinha */}
                 {i < steps.length - 1 && (
-                  <div className="flex items-center justify-center w-8 flex-shrink-0 mb-8">
+                  <div
+                    className="flex items-center justify-center flex-shrink-0"
+                    style={{ width: '32px', marginBottom: '82px' }}
+                  >
                     <img
                       src={ARROW_URL}
                       alt="→"
-                      className="w-8 h-8 object-contain opacity-90"
+                      className="object-contain opacity-90"
+                      style={{ width: '32px', height: '31px' }}
                     />
                   </div>
                 )}
