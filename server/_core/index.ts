@@ -108,6 +108,25 @@ async function startServer() {
     }
   });
 
+  // Upload endpoint para ícones de segmentos — aceita PNG e WebP
+  app.post('/api/upload-segment-icon', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
+      const { originalname, buffer, mimetype } = req.file;
+      const allowedMimeTypes = ['image/png', 'image/webp'];
+      if (!allowedMimeTypes.includes(mimetype)) {
+        return res.status(400).json({ error: 'Apenas formatos PNG e WebP são aceitos' });
+      }
+      const timestamp = Date.now();
+      const filename = `segment-icons/${timestamp}-${originalname}`;
+      const { url, key } = await storagePut(filename, buffer, mimetype);
+      res.json({ url, key });
+    } catch (error) {
+      console.error('Segment icon upload error:', error);
+      res.status(500).json({ error: 'Falha ao fazer upload do ícone' });
+    }
+  });
+
   // Upload endpoint para prévia de arte (admin) — aceita imagens
   app.post('/api/upload-art-preview', upload.single('file'), async (req, res) => {
     try {

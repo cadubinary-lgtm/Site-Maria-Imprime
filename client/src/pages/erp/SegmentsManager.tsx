@@ -1,4 +1,3 @@
-import AdminLayout from "@/components/AdminLayout";
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,8 @@ export default function SegmentsManager() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editingIcon, setEditingIcon] = useState('');
+  const [editingIconFile, setEditingIconFile] = useState<File | null>(null);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [newSegmentForm, setNewSegmentForm] = useState({
@@ -32,6 +33,7 @@ export default function SegmentsManager() {
     icon: '',
     slug: '',
   });
+  const [newSegmentIconFile, setNewSegmentIconFile] = useState<File | null>(null);
 
   // Fetch all segments
   const { data: segments, isLoading, refetch } = trpc.segments.getAll.useQuery();
@@ -43,6 +45,7 @@ export default function SegmentsManager() {
       setEditingId(null);
       setEditingName('');
       setEditingIcon('');
+      setEditingIconFile(null);
       refetch();
     },
     onError: (error) => {
@@ -60,6 +63,7 @@ export default function SegmentsManager() {
         icon: '',
         slug: '',
       });
+      setNewSegmentIconFile(null);
       refetch();
     },
     onError: (error) => {
@@ -83,16 +87,51 @@ export default function SegmentsManager() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const handleIconUpload = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const response = await fetch('/api/upload-segment-icon', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        showNotification('error', error.error || 'Erro ao fazer upload do ícone');
+        return null;
+      }
+      
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      showNotification('error', 'Erro ao fazer upload do ícone');
+      return null;
+    }
+  };
+
   const handleSaveSegment = async (segmentId: number | string) => {
     if (!editingName) {
       showNotification('error', 'Nome do segmento é obrigatório');
       return;
     }
 
+    let iconUrl = editingIcon;
+    
+    if (editingIconFile) {
+      setUploadingIcon(true);
+      const uploadedUrl = await handleIconUpload(editingIconFile);
+      setUploadingIcon(false);
+      
+      if (!uploadedUrl) return;
+      iconUrl = uploadedUrl;
+    }
+
     await updateSegmentMutation.mutateAsync({
       id: Number(segmentId),
       name: editingName,
-      icon: editingIcon,
+      icon: iconUrl,
     });
   };
 
@@ -100,12 +139,14 @@ export default function SegmentsManager() {
     setEditingId(segment.id);
     setEditingName(segment.name);
     setEditingIcon(segment.icon || '');
+    setEditingIconFile(null);
   };
 
   const handleCancel = () => {
     setEditingId(null);
     setEditingName('');
     setEditingIcon('');
+    setEditingIconFile(null);
   };
 
   const handleCreateSegment = async () => {
@@ -114,9 +155,20 @@ export default function SegmentsManager() {
       return;
     }
 
+    let iconUrl = newSegmentForm.icon;
+    
+    if (newSegmentIconFile) {
+      setUploadingIcon(true);
+      const uploadedUrl = await handleIconUpload(newSegmentIconFile);
+      setUploadingIcon(false);
+      
+      if (!uploadedUrl) return;
+      iconUrl = uploadedUrl;
+    }
+
     await createSegmentMutation.mutateAsync({
       name: newSegmentForm.name,
-      icon: newSegmentForm.icon || undefined,
+      icon: iconUrl || undefined,
       slug: newSegmentForm.slug,
     });
   };
@@ -128,7 +180,6 @@ export default function SegmentsManager() {
   };
 
   return (
-    <AdminLayout>
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Notification */}
       {notification && (
@@ -172,24 +223,35 @@ export default function SegmentsManager() {
                   <Input
                     value={newSegmentForm.name}
                     onChange={(e) => setNewSegmentForm({ ...newSegmentForm, name: e.target.value })}
-                    placeholder="Ex: Alimentação"
+                    placeholder="Ex: Adesivos"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Ícone/Emoji</label>
-                  <Input
-                    value={newSegmentForm.icon}
-                    onChange={(e) => setNewSegmentForm({ ...newSegmentForm, icon: e.target.value })}
-                    placeholder="Ex: 🍔"
-                    maxLength={2}
-                  />
+                  <label className="block text-sm font-medium mb-1">Ícone (PNG ou WebP)</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/png,image/webp"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setNewSegmentIconFile(e.target.files[0]);
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    {newSegmentIconFile && (
+                      <span className="text-sm text-green-600 flex items-center">
+                        ✓ {newSegmentIconFile.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Slug *</label>
                   <Input
                     value={newSegmentForm.slug}
                     onChange={(e) => setNewSegmentForm({ ...newSegmentForm, slug: e.target.value })}
-                    placeholder="Ex: alimentacao"
+                    placeholder="Ex: adesivos"
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
@@ -202,13 +264,13 @@ export default function SegmentsManager() {
                   </Button>
                   <Button
                     onClick={handleCreateSegment}
-                    disabled={createSegmentMutation.isPending}
+                    disabled={createSegmentMutation.isPending || uploadingIcon}
                     className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
                   >
-                    {createSegmentMutation.isPending ? (
+                    {createSegmentMutation.isPending || uploadingIcon ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Criando...
+                        {uploadingIcon ? 'Enviando ícone...' : 'Criando...'}
                       </>
                     ) : (
                       'Criar'
@@ -252,14 +314,33 @@ export default function SegmentsManager() {
                     </TableCell>
                     <TableCell>
                       {editingId === segment.id ? (
-                        <Input
-                          value={editingIcon}
-                          onChange={(e) => setEditingIcon(e.target.value)}
-                          className="w-20"
-                          maxLength={2}
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            type="file"
+                            accept="image/png,image/webp"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setEditingIconFile(e.target.files[0]);
+                              }
+                            }}
+                            className="flex-1 h-8"
+                          />
+                          {(editingIconFile || editingIcon) && (
+                            <img
+                              src={editingIconFile ? URL.createObjectURL(editingIconFile) : editingIcon}
+                              alt="preview"
+                              className="w-8 h-8 object-contain"
+                            />
+                          )}
+                        </div>
+                      ) : segment.icon ? (
+                        <img
+                          src={segment.icon}
+                          alt={segment.name}
+                          className="w-8 h-8 object-contain"
                         />
                       ) : (
-                        <span className="text-2xl">{segment.icon || '-'}</span>
+                        <span>-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-gray-600 text-sm">
@@ -271,9 +352,14 @@ export default function SegmentsManager() {
                           <Button
                             size="sm"
                             onClick={() => handleSaveSegment(segment.id)}
+                            disabled={uploadingIcon}
                             className="bg-green-600 hover:bg-green-700"
                           >
-                            <Save className="w-4 h-4" />
+                            {uploadingIcon ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Save className="w-4 h-4" />
+                            )}
                           </Button>
                           <Button
                             size="sm"
@@ -310,6 +396,5 @@ export default function SegmentsManager() {
         </div>
       </div>
     </div>
-    </AdminLayout>
   );
 }
