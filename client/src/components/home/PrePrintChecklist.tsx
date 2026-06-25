@@ -24,7 +24,7 @@ export function PrePrintChecklist() {
           A mascote fica em position: absolute, alinhada pela base do card,
           com top negativo para a cabeça sair por cima.
         */}
-        <div className="relative" style={{ paddingTop: "60px" }}>
+        <div className="relative" style={{ paddingTop: "80px" }}>
           {/* Card rosa */}
           <div
             className="relative rounded-3xl overflow-visible flex flex-col lg:flex-row items-stretch"
@@ -33,11 +33,11 @@ export function PrePrintChecklist() {
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundColor: "#fdf0f5",
-              minHeight: "260px",
+              minHeight: "300px",
             }}
           >
             {/* Espaço reservado para a mascote no lado esquerdo */}
-            <div className="hidden lg:block flex-shrink-0" style={{ width: "240px" }} />
+            <div className="hidden lg:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
             <div className="flex-1 px-6 lg:px-10 py-8 lg:py-10">
@@ -85,15 +85,14 @@ export function PrePrintChecklist() {
               alt="Maria verificando arquivo"
               className="hidden lg:block absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
               style={{
-                width: "260px",
+                width: "auto",
                 bottom: 0,
                 left: "0px",
-                /* A imagem tem ~60% corpo + 40% cabeça.
-                   Deixamos a cabeça (≈ 40% de 260px ≈ 104px) sair por cima.
-                   Como o paddingTop do container é 60px, usamos top negativo de 60px. */
-                top: "-60px",
-                height: "auto",
+                top: "-80px",
+                height: "calc(100% + 80px)",
                 maxHeight: "none",
+                objectFit: "contain",
+                objectPosition: "bottom",
               }}
               draggable={false}
             />
