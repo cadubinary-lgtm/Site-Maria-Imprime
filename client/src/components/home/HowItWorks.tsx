@@ -6,36 +6,42 @@ const steps = [
     mascote: "/manus-storage/mascote1_dead24a9.webp",
     title: "Escolha seu produto",
     description: "Encontre a opção ideal para seu projeto",
+    scale: "",
   },
   {
     number: "/manus-storage/NUMERO2_14456832.webp",
     mascote: "/manus-storage/mascote2_c744e916.webp",
     title: "Envie seu arquivo",
     description: "Faça o upload da arte pronta para impressão",
+    scale: "scale-125",
   },
   {
     number: "/manus-storage/NUMERO3_31247e8f.webp",
     mascote: "/manus-storage/mascote3_21810538.webp",
     title: "Conferência técnica",
     description: "Nossa equipe verifica medidas, resolução e possíveis inconsistências",
+    scale: "",
   },
   {
     number: "/manus-storage/NUMERO4_588a745d.webp",
     mascote: "/manus-storage/mascote4_914dbb3a.webp",
     title: "Arquivo aprovado para produção",
     description: "Se estiver tudo certo iniciamos a impressão",
+    scale: "scale-125",
   },
   {
     number: "/manus-storage/NUMERO5_74d09d11.webp",
     mascote: "/manus-storage/mascote5_de716367.webp",
     title: "Produção com carinho",
     description: "Seu material entra na fila de produção",
+    scale: "",
   },
   {
     number: "/manus-storage/NUMERO6_b8a209c7.webp",
     mascote: "/manus-storage/mascote6_715d14ab.webp",
     title: "Pedido enviado / Pronto para retirada",
     description: "Você acompanha o pedido online",
+    scale: "",
   },
 ];
 
@@ -71,11 +77,12 @@ export function HowItWorks() {
                   <img
                     src={step.mascote}
                     alt={step.title}
-                    className="
+                    className={`
                       w-full h-full object-contain
                       transition-transform duration-300 ease-out
                       group-hover:scale-110
-                    "
+                      ${step.scale}
+                    `}
                   />
                 </div>
 
