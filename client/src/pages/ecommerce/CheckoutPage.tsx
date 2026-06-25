@@ -838,41 +838,41 @@ export default function CheckoutPage() {
                                 {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
                               </p>
                             </div>
-                            {/* Variações */}
+                            {/* Variações — texto simples igual ao carrinho */}
                             {variations.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
+                              <div className="space-y-0.5">
                                 {variations.map((v: any, i: number) => (
-                                  <span key={i} className="text-xs bg-orange-50 text-orange-700 border border-orange-200 rounded px-1.5 py-0.5">{v.name}: {v.value}</span>
+                                  <p key={i} className="text-xs text-gray-600">{v.name}: {v.value}</p>
                                 ))}
                               </div>
                             )}
-                            {/* Atributos */}
+                            {/* Atributos — texto simples igual ao carrinho */}
                             {Object.keys(attrs).length > 0 && (
-                              <div className="flex flex-wrap gap-1">
+                              <div className="space-y-0.5">
                                 {Object.entries(attrs).map(([k, v]: [string, any]) => (
-                                  <span key={k} className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{k}: {v}</span>
+                                  <p key={k} className="text-xs text-gray-600">{k}: {v}</p>
                                 ))}
                               </div>
                             )}
                             {/* Medidas */}
                             {item.customDimensions && (
-                              <p className="text-xs text-gray-500">📏 Medidas: {item.customDimensions}</p>
+                              <p className="text-xs text-gray-600">Medidas: {item.customDimensions}</p>
                             )}
                             {/* Arquivo */}
                             {item.artFileUrl && (
-                              <p className="text-xs text-green-700">🖼️ Arquivo enviado</p>
+                              <p className="text-xs text-gray-600">Arte: {item.artFileUrl.split('/').pop()}</p>
                             )}
                             {/* Prazo */}
                             {item.prazoName && (
-                              <p className="text-xs text-gray-500">⏱ Prazo: {item.prazoName}</p>
+                              <p className="text-xs text-gray-600">Prazo: {item.prazoName}</p>
                             )}
                             {/* Previsão */}
                             {item.forecastLabel && (
-                              <p className="text-xs font-medium text-orange-600">📦 {item.forecastLabel}</p>
+                              <p className="text-xs text-gray-600">Previsão de entrega: {item.forecastLabel}</p>
                             )}
                             {/* Entrega */}
                             {item.shippingLabel && (
-                              <p className="text-xs text-gray-500">🚚 {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}</p>
+                              <p className="text-xs text-gray-600">Entrega: {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}</p>
                             )}
                           </div>
                         );
