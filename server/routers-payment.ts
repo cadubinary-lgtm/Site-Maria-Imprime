@@ -55,10 +55,12 @@ export const paymentRouter = router({
   }),
 
   // ── PIX ──────────────────────────────────────────────────────────────────
-  createPixPayment: protectedProcedure
+  createPixPayment: publicProcedure
     .input(z.object({
       orderId: z.number(),
       payerCpf: z.string().optional(),
+      payerEmail: z.string().email().optional(), // dados do formulário (guest)
+      payerName: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const db = await requireDb();
@@ -71,8 +73,8 @@ export const paymentRouter = router({
         orderId: order.id,
         orderNumber: order.orderNumber,
         amount: Number(order.totalPrice),
-        payerEmail: ctx.user.email || "cliente@graficapontodigital.com.br",
-        payerName: ctx.user.name || "Cliente",
+        payerEmail: (ctx as any)?.user?.email || input.payerEmail || "cliente@mariaimprime.com.br",
+        payerName: (ctx as any)?.user?.name || input.payerName || "Cliente",
         payerCpf: input.payerCpf,
         accessToken,
       });
@@ -93,7 +95,7 @@ export const paymentRouter = router({
     }),
 
   // ── Credit Card ───────────────────────────────────────────────────────────
-  createCardPayment: protectedProcedure
+  createCardPayment: publicProcedure
     .input(z.object({
       orderId: z.number(),
       token: z.string(),
@@ -101,6 +103,8 @@ export const paymentRouter = router({
       paymentMethodId: z.string(),
       issuerId: z.string().optional(),
       payerCpf: z.string().optional(),
+      payerEmail: z.string().email().optional(), // dados do formulário (guest)
+      payerName: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const db = await requireDb();
@@ -117,8 +121,8 @@ export const paymentRouter = router({
         installments: input.installments,
         paymentMethodId: input.paymentMethodId,
         issuerId: input.issuerId,
-        payerEmail: ctx.user.email || "cliente@graficapontodigital.com.br",
-        payerName: ctx.user.name || "Cliente",
+        payerEmail: (ctx as any)?.user?.email || input.payerEmail || "cliente@mariaimprime.com.br",
+        payerName: (ctx as any)?.user?.name || input.payerName || "Cliente",
         payerCpf: input.payerCpf,
         accessToken,
       });
@@ -146,7 +150,8 @@ export const paymentRouter = router({
     }),
 
   // ── Poll PIX status ───────────────────────────────────────────────────────
-  getPixStatus: protectedProcedure
+  // PÚBLICA: o cliente precisa verificar o status mesmo sem sessão
+  getPixStatus: publicProcedure
     .input(z.object({ paymentId: z.string() }))
     .query(async ({ input }) => {
       const accessToken = await getMPAccessToken();
