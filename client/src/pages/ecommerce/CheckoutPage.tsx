@@ -381,6 +381,9 @@ export default function CheckoutPage() {
           const pixResult = await createPixMutation.mutateAsync({
             orderId,
             payerCpf: payerCpf.replace(/\D/g, "") || undefined,
+            // Dados do formulário para checkout como visitante (guest)
+            payerEmail: customerProfile?.email || guestEmail.trim() || undefined,
+            payerName: fullName.trim() || undefined,
           });
           setPixData({
             qrCode: pixResult.qrCode || "",
@@ -421,6 +424,9 @@ export default function CheckoutPage() {
             paymentMethodId: tokenData.paymentMethodId,
             issuerId: tokenData.issuerId || undefined,
             payerCpf: payerCpf.replace(/\D/g, "") || undefined,
+            // Dados do formulário para checkout como visitante (guest)
+            payerEmail: customerProfile?.email || guestEmail.trim() || undefined,
+            payerName: fullName.trim() || undefined,
           });
           if (cardResult.status === "approved") {
             toast.success("Pagamento aprovado! Redirecionando...");
