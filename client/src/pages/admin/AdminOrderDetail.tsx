@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
-  Download, FileImage, Upload, Trash2, Eye, Archive, ImagePlus, X, Printer, FileText, Plus,
+  Download, FileImage, Upload, Trash2, Eye, Archive, ImagePlus, X, Printer, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -94,12 +94,7 @@ export default function AdminOrderDetail() {
   const [statusNotes, setStatusNotes] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Add item state
-  const [showAddItem, setShowAddItem] = useState(false);
-  const [newItemName, setNewItemName] = useState("");
-  const [newItemQty, setNewItemQty] = useState(1);
-  const [newItemPrice, setNewItemPrice] = useState(0);
-  const [newItemAttrs, setNewItemAttrs] = useState("");
+
 
   // Art preview state
   const [previewNotes, setPreviewNotes] = useState("");
@@ -137,26 +132,7 @@ export default function AdminOrderDetail() {
     },
   });
 
-  const addItemMutation = trpc.checkout.addOrderItem.useMutation({
-    onSuccess: () => {
-      utils.checkout.getOrderById.invalidate({ id: orderId! });
-      toast.success("Item adicionado com sucesso!");
-      setShowAddItem(false);
-      setNewItemName("");
-      setNewItemQty(1);
-      setNewItemPrice(0);
-      setNewItemAttrs("");
-    },
-    onError: (err) => toast.error(err.message || "Erro ao adicionar item"),
-  });
 
-  const deleteItemMutation = trpc.checkout.deleteOrderItem.useMutation({
-    onSuccess: () => {
-      utils.checkout.getOrderById.invalidate({ id: orderId! });
-      toast.success("Item removido");
-    },
-    onError: (err) => toast.error(err.message || "Erro ao remover item"),
-  });
 
   const savePreviewMutation = trpc.checkout.saveArtPreview.useMutation({
     onSuccess: () => {
@@ -722,89 +698,12 @@ export default function AdminOrderDetail() {
 
         {/* Produtos */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <Package className="w-5 h-5" /> Produtos do Pedido
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAddItem(!showAddItem)}
-              className="gap-1 text-blue-600 border-blue-200 hover:bg-blue-50"
-            >
-              <Plus className="w-3 h-3" />
-              Adicionar Item
-            </Button>
           </CardHeader>
           <CardContent>
-            {/* Formulário de adicionar item */}
-            {showAddItem && (
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-3">
-                <p className="text-sm font-semibold text-blue-800">Adicionar item ao pedido</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <label className="text-xs text-gray-600 mb-1 block">Nome do produto *</label>
-                    <Input
-                      placeholder="Ex: Lona 2x1m"
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      className="bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-600 mb-1 block">Quantidade *</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={newItemQty}
-                      onChange={(e) => setNewItemQty(parseInt(e.target.value) || 1)}
-                      className="bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-600 mb-1 block">Preço unitário (R$) *</label>
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={newItemPrice}
-                      onChange={(e) => setNewItemPrice(parseFloat(e.target.value) || 0)}
-                      className="bg-white"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-xs text-gray-600 mb-1 block">Atributos / Especificações (opcional)</label>
-                    <Input
-                      placeholder="Ex: 2x1m, Lona 440g, Ilhós"
-                      value={newItemAttrs}
-                      onChange={(e) => setNewItemAttrs(e.target.value)}
-                      className="bg-white"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="ghost" size="sm" onClick={() => setShowAddItem(false)}>Cancelar</Button>
-                  <Button
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                    disabled={!newItemName || newItemPrice <= 0 || addItemMutation.isPending}
-                    onClick={() => {
-                      if (!orderId || !newItemName) return;
-                      addItemMutation.mutate({
-                        orderId,
-                        productName: newItemName,
-                        quantity: newItemQty,
-                        priceAtOrder: newItemPrice,
-                        selectedAttributes: newItemAttrs || undefined,
-                      });
-                    }}
-                  >
-                    {addItemMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                    Salvar Item
-                  </Button>
-                </div>
-              </div>
-            )}
 
             {o.items && o.items.length > 0 ? (
               <div className="space-y-4">
@@ -816,35 +715,14 @@ export default function AdminOrderDetail() {
                       {item.selectedAttributes && (
                         <p className="text-xs text-gray-500 mt-1">Atributos: {item.selectedAttributes}</p>
                       )}
-                      {item.artFileUrl && (
-                        <button
-                          onClick={() => downloadFile(item.artFileUrl, fileNameFromUrl(item.artFileUrl))}
-                          className="text-xs text-blue-600 hover:underline mt-1 flex items-center gap-1"
-                        >
-                          <Download className="w-3 h-3" />
-                          Baixar arquivo enviado
-                        </button>
-                      )}
+
                     </div>
                     <div className="text-right flex flex-col items-end gap-1">
                       <p className="font-semibold text-gray-900">{fmt(parseFloat(item.priceAtOrder))}</p>
                       <p className="text-xs text-gray-500">
                         {fmt(parseFloat(item.priceAtOrder) * item.quantity)} total
                       </p>
-                      {item.id && (
-                        <button
-                          onClick={() => {
-                            if (confirm(`Remover "${item.productName}" do pedido?`)) {
-                              deleteItemMutation.mutate({ itemId: item.id });
-                            }
-                          }}
-                          className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1"
-                          disabled={deleteItemMutation.isPending}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Remover
-                        </button>
-                      )}
+
                     </div>
                   </div>
                 ))}
@@ -853,7 +731,7 @@ export default function AdminOrderDetail() {
               <div className="text-center py-6 text-gray-400">
                 <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
                 <p className="text-sm">Nenhum produto neste pedido</p>
-                <p className="text-xs mt-1">Use o botão "Adicionar Item" acima para reconciliar</p>
+                <p className="text-xs mt-1">Os itens são gerados automaticamente pelo motor de cálculo no checkout</p>
               </div>
             )}
           </CardContent>
