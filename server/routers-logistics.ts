@@ -13,7 +13,7 @@ import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
-import { logisticsSettings, carriers, shipments, orders, localDeliveryRules } from "../drizzle/schema";
+import { logisticsSettings, carriers, shipments, orders, localDeliveryRules, customerAccounts } from "../drizzle/schema";
 import { eq, and, like, or } from "drizzle-orm";
 import {
   getMeProfile,
@@ -500,13 +500,50 @@ const shipmentsRouter = router({
     const existingOrderIds = existingShipments
       .map((s: any) => s.orderId)
       .filter((id: any): id is number => id != null);
-    // Busca pedidos prontos para entrega
+    // Busca pedidos prontos para entrega com dados do cliente (LEFT JOIN)
     const pendingOrders = await db
-      .select()
+      .select({
+        // Todos os campos do pedido
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        status: orders.status,
+        totalPrice: orders.totalPrice,
+        guestEmail: orders.guestEmail,
+        guestName: orders.guestName,
+        deliveryFullName: orders.deliveryFullName,
+        deliveryPhone: orders.deliveryPhone,
+        deliveryStreet: orders.deliveryStreet,
+        deliveryNumber: orders.deliveryNumber,
+        deliveryComplement: orders.deliveryComplement,
+        deliveryNeighborhood: orders.deliveryNeighborhood,
+        deliveryCity: orders.deliveryCity,
+        deliveryState: orders.deliveryState,
+        deliveryZipCode: orders.deliveryZipCode,
+        shippingZipCode: orders.shippingZipCode,
+        shippingLabel: orders.shippingLabel,
+        shippingPrice: orders.shippingPrice,
+        customerId: orders.customerId,
+        createdAt: orders.createdAt,
+        // Dados do cliente com conta (JOIN)
+        customerEmail: customerAccounts.email,
+        customerCpfCnpj: customerAccounts.cpfCnpj,
+        customerPhone: customerAccounts.phone,
+      })
       .from(orders)
+      .leftJoin(customerAccounts, eq(orders.customerId, customerAccounts.id))
       .where(eq(orders.status, "pronto_entrega"));
-    // Filtra os que ainda não têm expedição
-    return pendingOrders.filter((o: any) => !existingOrderIds.includes(o.id));
+    // Filtra os que ainda não têm expedição e retorna com dados consolidados
+    return pendingOrders
+      .filter((o: any) => !existingOrderIds.includes(o.id))
+      .map((o: any) => ({
+        ...o,
+        // E-mail: prioriza cliente com conta, depois convidado
+        resolvedEmail: o.customerEmail || o.guestEmail || '',
+        // CPF/CNPJ: só disponível para clientes com conta
+        resolvedDocument: o.customerCpfCnpj || '',
+        // Telefone: prioriza deliveryPhone, depois customerPhone
+        resolvedPhone: o.deliveryPhone || o.customerPhone || '',
+      }));
   }),
 
   list: adminProcedure

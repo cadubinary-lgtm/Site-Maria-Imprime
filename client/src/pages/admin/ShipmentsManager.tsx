@@ -64,13 +64,22 @@ export function ShipmentsManager() {
 
   // Pré-preenche o formulário com dados do pedido selecionado
   const handleSelectOrder = (order: any) => {
+    // Valor declarado = total do pedido (sem frete), mínimo R$ 1,00
+    const declaredValue = Math.max(
+      parseFloat(order.totalPrice || '0') - parseFloat(order.shippingPrice || '0'),
+      1
+    ).toFixed(2);
     setAddForm({
       ...EMPTY_FORM,
       orderId: String(order.id),
+      // Dados do destinatário
       recipientName: order.deliveryFullName || order.guestName || '',
-      recipientPhone: order.deliveryPhone || '',
-      recipientEmail: order.guestEmail || '',
-      recipientDocument: '',
+      recipientPhone: order.resolvedPhone || order.deliveryPhone || '',
+      // E-mail: usa o campo resolvido (cliente com conta > convidado)
+      recipientEmail: order.resolvedEmail || '',
+      // CPF/CNPJ: usa o campo resolvido (só disponível para clientes com conta)
+      recipientDocument: order.resolvedDocument || '',
+      // Endereço
       recipientAddress: order.deliveryStreet || '',
       recipientNumber: order.deliveryNumber || '',
       recipientComplement: order.deliveryComplement || '',
@@ -78,6 +87,8 @@ export function ShipmentsManager() {
       recipientCity: order.deliveryCity || '',
       recipientStateAbbr: order.deliveryState || '',
       recipientCep: (order.deliveryZipCode || order.shippingZipCode || '').replace(/\D/g, ''),
+      // Valor declarado automático = valor dos produtos do pedido
+      insuranceValue: declaredValue,
     });
     setShowAddDialog(true);
   };
@@ -362,12 +373,29 @@ export function ShipmentsManager() {
                   <Input placeholder="João Silva" value={addForm.recipientName} onChange={setField('recipientName')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>CPF / CNPJ</Label>
-                  <Input placeholder="000.000.000-00" value={addForm.recipientDocument} onChange={setField('recipientDocument')} />
+                  <Label>CPF / CNPJ <span className="text-red-500">*</span></Label>
+                  <Input
+                    placeholder="000.000.000-00"
+                    value={addForm.recipientDocument}
+                    onChange={setField('recipientDocument')}
+                    className={!addForm.recipientDocument ? 'border-orange-400 bg-orange-50' : ''}
+                  />
+                  {!addForm.recipientDocument && (
+                    <p className="text-xs text-orange-600">⚠️ CPF/CNPJ não encontrado. Preencha manualmente para evitar rejeição pela transportadora.</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label>E-mail</Label>
-                  <Input type="email" placeholder="joao@email.com" value={addForm.recipientEmail} onChange={setField('recipientEmail')} />
+                  <Label>E-mail <span className="text-red-500">*</span></Label>
+                  <Input
+                    type="email"
+                    placeholder="cliente@email.com"
+                    value={addForm.recipientEmail}
+                    onChange={setField('recipientEmail')}
+                    className={!addForm.recipientEmail ? 'border-orange-400 bg-orange-50' : ''}
+                  />
+                  {!addForm.recipientEmail && (
+                    <p className="text-xs text-orange-600">⚠️ E-mail não encontrado. Preencha manualmente.</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Telefone</Label>
@@ -424,8 +452,9 @@ export function ShipmentsManager() {
                   <Input type="number" min="1" value={addForm.length} onChange={setField('length')} />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label>Valor Declarado (R$)</Label>
-                  <Input type="number" min="0" step="0.01" value={addForm.insuranceValue} onChange={setField('insuranceValue')} />
+                  <Label>Valor Declarado (R$) <span className="text-xs text-gray-500">(pré-preenchido com o valor dos produtos)</span></Label>
+                  <Input type="number" min="1" step="0.01" value={addForm.insuranceValue} onChange={setField('insuranceValue')} />
+                  <p className="text-xs text-gray-500">Usado como base para seguro obrigatório da transportadora.</p>
                 </div>
               </div>
             </div>
