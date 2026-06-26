@@ -3,11 +3,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ *  DESIGN TOKENS — Identidade Visual Oficial (baseada na Home)
+ *
+ *  Cor primária: Rosa Magenta (#E91E63)  → usa pink-* do Tailwind
+ *  Cor de destaque: Laranja (#FF6B35)    → mantida como accent
+ *  Neutros: cinzas padrão do Tailwind
+ *
+ *  ESTRATÉGIA: orange-* é remapeado para os valores de pink-*
+ *  para que todos os componentes que usam orange-* herdem
+ *  automaticamente a cor oficial da marca sem editar cada arquivo.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
 @theme inline {
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Cores semânticas do shadcn/ui */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -40,80 +57,123 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /*
+   * ─────────────────────────────────────────────────────────────────
+   *  REMAPEAMENTO: orange-* → pink-* (Rosa Magenta oficial da marca)
+   *
+   *  Todos os componentes que usam bg-orange-*, text-orange-*,
+   *  border-orange-*, hover:bg-orange-* etc. passarão a exibir
+   *  automaticamente as cores rosa magenta da Home.
+   * ─────────────────────────────────────────────────────────────────
+   */
+
+  /* Rosa Magenta — escala completa mapeada sobre orange-* */
+  --color-orange-50:  oklch(0.97 0.02 334);   /* #FFF0F5 — fundo suave */
+  --color-orange-100: oklch(0.94 0.04 334);   /* #FFD6E7 — hover leve */
+  --color-orange-200: oklch(0.88 0.08 334);   /* #FFB3CC — borda suave */
+  --color-orange-300: oklch(0.80 0.13 334);   /* #FF80AB — destaque claro */
+  --color-orange-400: oklch(0.72 0.19 334);   /* #F06292 — rosa médio */
+  --color-orange-500: oklch(0.62 0.25 334);   /* #E91E63 — COR PRINCIPAL */
+  --color-orange-600: oklch(0.54 0.26 334);   /* #C2185B — hover escuro */
+  --color-orange-700: oklch(0.46 0.24 334);   /* #AD1457 — ativo */
+  --color-orange-800: oklch(0.38 0.20 334);   /* #880E4F — muito escuro */
+  --color-orange-900: oklch(0.30 0.16 334);   /* #560027 — sombra */
+  --color-orange-950: oklch(0.22 0.12 334);   /* #3D0018 — ultra escuro */
 }
 
 :root {
-  /* Rosa Magenta #E91E63 em OKLCH */
-  --primary: oklch(0.56 0.27 334);
+  /* ── Cor primária: Rosa Magenta #E91E63 em OKLCH ── */
+  --primary:            oklch(0.62 0.25 334);
   --primary-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.56 0.27 334);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --chart-1: oklch(0.56 0.27 334);
+
+  /* ── Radius base ── */
+  --radius: 0.65rem;
+
+  /* ── Backgrounds ── */
+  --background:         oklch(0.99 0 0);
+  --foreground:         oklch(0.15 0.01 0);
+
+  /* ── Card ── */
+  --card:               oklch(1 0 0);
+  --card-foreground:    oklch(0.15 0.01 0);
+
+  /* ── Popover ── */
+  --popover:            oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 0);
+
+  /* ── Secondary (rosa magenta) ── */
+  --secondary:            oklch(0.62 0.25 334);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  /* ── Muted ── */
+  --muted:            oklch(0.96 0.001 0);
+  --muted-foreground: oklch(0.5 0.01 0);
+
+  /* ── Accent (rosa magenta) ── */
+  --accent:            oklch(0.62 0.25 334);
+  --accent-foreground: oklch(0.98 0 0);
+
+  /* ── Destructive ── */
+  --destructive:            oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* ── Border / Input / Ring ── */
+  --border: oklch(0.92 0.001 0);
+  --input:  oklch(0.97 0.001 0);
+  --ring:   oklch(0.62 0.25 334);
+
+  /* ── Charts ── */
+  --chart-1: oklch(0.62 0.25 334);
   --chart-2: oklch(0.55 0.25 240);
   --chart-3: oklch(0.45 0.25 240);
-  --chart-4: oklch(0.35 0.2 240);
+  --chart-4: oklch(0.35 0.2  240);
   --chart-5: oklch(0.25 0.15 240);
-  --radius: 0.65rem;
-  /* Predominância de branco */
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.2 0.01 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.01 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.01 0);
-  --secondary: oklch(0.56 0.27 334);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.95 0.001 0);
-  --muted-foreground: oklch(0.5 0.01 0);
-  /* Rosa Magenta como cor de destaque */
-  --accent: oklch(0.56 0.27 334);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.93 0.001 0);
-  --input: oklch(0.97 0.001 0);
-  --ring: oklch(0.56 0.27 334);
-  --sidebar: oklch(0.99 0 0);
-  --sidebar-foreground: oklch(0.2 0.01 0);
-  --sidebar-accent: oklch(0.56 0.27 334);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.93 0.001 0);
-  --sidebar-ring: oklch(0.56 0.27 334);
+
+  /* ── Sidebar ── */
+  --sidebar:                      oklch(0.99 0 0);
+  --sidebar-foreground:           oklch(0.15 0.01 0);
+  --sidebar-primary:              oklch(0.62 0.25 334);
+  --sidebar-primary-foreground:   oklch(0.98 0 0);
+  --sidebar-accent:               oklch(0.62 0.25 334);
+  --sidebar-accent-foreground:    oklch(0.98 0 0);
+  --sidebar-border:               oklch(0.92 0.001 0);
+  --sidebar-ring:                 oklch(0.62 0.25 334);
 }
 
 .dark {
-  --primary: oklch(0.65 0.3 30);
+  --primary:            oklch(0.72 0.27 334);
   --primary-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.65 0.3 30);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --background: oklch(0.08 0.001 0);
-  --foreground: oklch(0.98 0.001 0);
-  --card: oklch(0.15 0.001 0);
-  --card-foreground: oklch(0.98 0.001 0);
-  --popover: oklch(0.08 0.001 0);
+  --background:         oklch(0.08 0.001 0);
+  --foreground:         oklch(0.98 0.001 0);
+  --card:               oklch(0.15 0.001 0);
+  --card-foreground:    oklch(0.98 0.001 0);
+  --popover:            oklch(0.08 0.001 0);
   --popover-foreground: oklch(0.98 0.001 0);
-  --secondary: oklch(0.65 0.3 30);
+  --secondary:          oklch(0.72 0.27 334);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.25 0.001 0);
-  --muted-foreground: oklch(0.7 0.005 65);
-  --accent: oklch(0.65 0.3 30);
-  --accent-foreground: oklch(0.08 0.001 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --muted:              oklch(0.25 0.001 0);
+  --muted-foreground:   oklch(0.7 0.005 65);
+  --accent:             oklch(0.72 0.27 334);
+  --accent-foreground:  oklch(0.08 0.001 0);
+  --destructive:        oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.3 30);
-  --chart-1: oklch(0.65 0.3 30);
-  --chart-2: oklch(0.55 0.25 240);
-  --chart-3: oklch(0.45 0.25 240);
-  --chart-4: oklch(0.35 0.2 240);
-  --chart-5: oklch(0.25 0.15 240);
-  --sidebar: oklch(0.15 0.001 0);
+  --border:             oklch(1 0 0 / 10%);
+  --input:              oklch(1 0 0 / 15%);
+  --ring:               oklch(0.72 0.27 334);
+  --chart-1:            oklch(0.72 0.27 334);
+  --chart-2:            oklch(0.55 0.25 240);
+  --chart-3:            oklch(0.45 0.25 240);
+  --chart-4:            oklch(0.35 0.2  240);
+  --chart-5:            oklch(0.25 0.15 240);
+  --sidebar:            oklch(0.15 0.001 0);
   --sidebar-foreground: oklch(0.98 0.001 0);
-  --sidebar-accent: oklch(0.65 0.3 30);
+  --sidebar-primary:    oklch(0.72 0.27 334);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent:     oklch(0.72 0.27 334);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.65 0.3 30);
+  --sidebar-border:     oklch(1 0 0 / 10%);
+  --sidebar-ring:       oklch(0.72 0.27 334);
 }
 
 @layer base {
@@ -122,6 +182,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Bahnschrift', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

@@ -18,7 +18,7 @@ import {
 const fmt = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-const COLORS = ["#f97316", "#3b82f6", "#22c55e", "#ef4444", "#a855f7"];
+const COLORS = ["#E91E63", "#3b82f6", "#22c55e", "#ef4444", "#a855f7"];
 
 export default function GerenciadorFinanceiroDashboard() {
   const [period, setPeriod] = useState<"today" | "week" | "month">("month");
@@ -195,15 +195,15 @@ export default function GerenciadorFinanceiroDashboard() {
                   <AreaChart data={cashFlow.cashFlowData}>
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#E91E63" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#E91E63" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                     <Tooltip formatter={(v: any) => fmt(v)} />
-                    <Area type="monotone" dataKey="income" stroke="#f97316" fill="url(#colorIncome)" name="Receita" />
+                    <Area type="monotone" dataKey="income" stroke="#E91E63" fill="url(#colorIncome)" name="Receita" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
