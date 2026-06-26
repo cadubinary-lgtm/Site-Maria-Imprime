@@ -661,19 +661,48 @@ const shipmentsRouter = router({
       const checkoutResult = await checkoutShipment(s.accessToken!, s.sandbox, [
         shipment.meOrderId,
       ]);
-      let labelUrl: string | null = null;
-      try {
-        const printResult = await printLabel(s.accessToken!, s.sandbox, [shipment.meOrderId]);
-        labelUrl = printResult.url;
-      } catch {}
+
+      // Captura o trackingCode retornado pelo checkout
+      const paidOrder = checkoutResult.purchase?.orders?.find(
+        (o: any) => o.id === shipment.meOrderId
+      );
+      const trackingCode = paidOrder?.tracking ?? paidOrder?.self_tracking ?? null;
+
+      // Tenta capturar a URL da etiqueta com até 3 tentativas (a ME pode demorar alguns segundos para gerar)
+      let labelUrl: string | null = paidOrder?.print_url ?? null;
+      if (!labelUrl) {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            if (attempt > 1) {
+              // Aguarda 2s entre tentativas
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            const printResult = await printLabel(s.accessToken!, s.sandbox, [shipment.meOrderId]);
+            if (printResult.url) {
+              labelUrl = printResult.url;
+              break;
+            }
+          } catch {
+            // Continua tentando
+          }
+        }
+      }
+
       await db
         .update(shipments)
-        .set({ status: "paid", labelUrl })
+        .set({
+          status: "paid",
+          labelUrl,
+          ...(trackingCode ? { trackingCode } : {}),
+        })
         .where(eq(shipments.id, input.shipmentId));
+
       return {
         success: true,
         labelUrl,
+        trackingCode,
         purchaseId: checkoutResult.purchase?.id,
+        meStatus: checkoutResult.purchase?.status,
       };
     }),
 
