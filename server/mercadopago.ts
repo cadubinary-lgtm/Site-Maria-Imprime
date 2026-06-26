@@ -59,6 +59,21 @@ function sanitizeEmail(email: string): string {
   return emailRegex.test(trimmed) ? trimmed : "pagador@mariaimprime.com.br";
 }
 
+/**
+ * Garante que o e-mail do pagador nunca seja igual ao da conta vendedora.
+ * Erro 2034 "Invalid users involved" ocorre quando payer.email == seller.email.
+ */
+function ensurePayerEmailDiffersFromSeller(payerEmail: string): string {
+  // E-mail da conta vendedora — nunca pode ser usado como pagador
+  const SELLER_EMAIL = (process.env.MP_SELLER_EMAIL || "grafica.digitalonline@gmail.com").toLowerCase().trim();
+  const normalized = payerEmail.toLowerCase().trim();
+  if (normalized === SELLER_EMAIL || normalized === "") {
+    // Usa um e-mail neutro que não pertence à conta MP
+    return "cliente@mariaimprime.com.br";
+  }
+  return normalized;
+}
+
 // ─── PIX Payment ────────────────────────────────────────────────────────────
 
 export interface PixPaymentInput {
@@ -87,7 +102,8 @@ export async function createPixPayment(
   const payment = new Payment(client);
 
   // ── Higienização absoluta do payer ──────────────────────────────────────
-  const cleanEmail = sanitizeEmail(input.payerEmail);
+  const rawEmail = sanitizeEmail(input.payerEmail);
+  const cleanEmail = ensurePayerEmailDiffersFromSeller(rawEmail);
   const cleanFirstName = extractFirstName(input.payerName);
   const cleanLastName = extractLastName(input.payerName);
   const cleanCpf = cleanDocument(input.payerCpf);
@@ -148,6 +164,10 @@ export async function createPixPayment(
       const causes = Array.isArray(error.cause)
         ? error.cause.map((c: any) => `${c.code}: ${c.description}`).join("; ")
         : String(error.cause);
+      // Erro 2034: payer.email igual ao da conta vendedora
+      if (causes.includes("2034")) {
+        throw new Error("Mercado Pago: o e-mail do pagador não pode ser o mesmo da conta da gráfica. Faça login com outro e-mail.");
+      }
       throw new Error(`Mercado Pago: ${causes}`);
     }
     throw error;
@@ -185,7 +205,8 @@ export async function createCardPayment(
   const payment = new Payment(client);
 
   // ── Higienização absoluta do payer ──────────────────────────────────────
-  const cleanEmail = sanitizeEmail(input.payerEmail);
+  const rawEmail = sanitizeEmail(input.payerEmail);
+  const cleanEmail = ensurePayerEmailDiffersFromSeller(rawEmail);
   const cleanFirstName = extractFirstName(input.payerName);
   const cleanLastName = extractLastName(input.payerName);
   const cleanCpf = cleanDocument(input.payerCpf);
