@@ -15,6 +15,7 @@ import {
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
   Download, FileImage, Upload, Trash2, Eye, Archive, ImagePlus, X, Printer, FileText,
+  Ruler, Layers, Weight, StickyNote,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -707,25 +708,156 @@ export default function AdminOrderDetail() {
 
             {o.items && o.items.length > 0 ? (
               <div className="space-y-4">
-                {o.items.map((item: any, i: number) => (
-                  <div key={i} className="flex justify-between items-start border-b pb-4 last:border-0">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{item.productName}</p>
-                      <p className="text-sm text-gray-600">Qtd: {item.quantity}</p>
-                      {item.selectedAttributes && (
-                        <p className="text-xs text-gray-500 mt-1">Atributos: {item.selectedAttributes}</p>
-                      )}
+                {o.items.map((item: any, i: number) => {
+                  // Parsear variationSnapshot: [{name, value}]
+                  let variations: {name: string; value: string}[] = [];
+                  if (item.variationSnapshot) {
+                    try { variations = JSON.parse(item.variationSnapshot); } catch {}
+                  }
+                  // Parsear selectedAttributes (pode ser JSON ou string)
+                  let attrObj: Record<string, any> = {};
+                  if (item.selectedAttributes) {
+                    try { attrObj = JSON.parse(item.selectedAttributes); } catch {}
+                  }
+                  // Extrair peso dos atributos ou variações
+                  const pesoAttr = attrObj?.peso ?? attrObj?.weight ?? attrObj?.weightKg;
+                  const pesoVariation = variations.find(v =>
+                    v.name?.toLowerCase().includes('peso') ||
+                    v.name?.toLowerCase().includes('weight')
+                  );
+                  const pesoDisplay = pesoAttr
+                    ? `${pesoAttr} kg`
+                    : pesoVariation
+                    ? pesoVariation.value
+                    : null;
+                  // Dimensões
+                  const dims = item.customDimensions; // ex: "1x2"
+                  let largura: string | null = null;
+                  let altura: string | null = null;
+                  if (dims && dims.includes('x')) {
+                    const parts = dims.split('x');
+                    largura = parts[0]?.trim();
+                    altura = parts[1]?.trim();
+                  }
+                  // Separar variações de acabamento das demais
+                  const acabamentos = variations.filter(v =>
+                    v.name?.toLowerCase().includes('acabamento') ||
+                    v.name?.toLowerCase().includes('material') ||
+                    v.name?.toLowerCase().includes('laminação') ||
+                    v.name?.toLowerCase().includes('verniz') ||
+                    v.name?.toLowerCase().includes('papel') ||
+                    v.name?.toLowerCase().includes('gramatura')
+                  );
+                  const outrasVariacoes = variations.filter(v => !acabamentos.includes(v));
 
-                    </div>
-                    <div className="text-right flex flex-col items-end gap-1">
-                      <p className="font-semibold text-gray-900">{fmt(parseFloat(item.priceAtOrder))}</p>
-                      <p className="text-xs text-gray-500">
-                        {fmt(parseFloat(item.priceAtOrder) * item.quantity)} total
-                      </p>
+                  return (
+                    <div key={i} className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+                      {/* Cabeçalho do item */}
+                      <div className="flex justify-between items-start px-4 py-3 bg-white border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-pink-100 flex items-center justify-center flex-shrink-0">
+                            <Package className="w-4 h-4 text-pink-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">{item.productName || 'Produto'}</p>
+                            <p className="text-xs text-gray-500">Qtd: <span className="font-medium text-gray-700">{item.quantity}</span></p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900">{fmt(parseFloat(item.priceAtOrder))}</p>
+                          <p className="text-xs text-gray-500">
+                            Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}
+                          </p>
+                        </div>
+                      </div>
 
+                      {/* Detalhes técnicos */}
+                      <div className="px-4 py-3 grid grid-cols-2 gap-2">
+                        {/* Dimensões */}
+                        {dims && (
+                          <div className="flex items-start gap-2 col-span-2 sm:col-span-1">
+                            <Ruler className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Dimensões</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {largura && altura
+                                  ? `${largura} m × ${altura} m`
+                                  : dims}
+                              </p>
+                              {largura && altura && (
+                                <p className="text-xs text-gray-400">
+                                  {(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Peso */}
+                        {pesoDisplay && (
+                          <div className="flex items-start gap-2">
+                            <Weight className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Peso</p>
+                              <p className="text-sm font-semibold text-gray-800">{pesoDisplay}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Acabamentos */}
+                        {acabamentos.length > 0 && (
+                          <div className="flex items-start gap-2 col-span-2">
+                            <Layers className="w-3.5 h-3.5 text-purple-500 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Acabamentos / Material</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {acabamentos.map((v, vi) => (
+                                  <span
+                                    key={vi}
+                                    className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-800 rounded-full px-2.5 py-0.5 font-medium"
+                                  >
+                                    <span className="text-purple-400 text-[10px]">{v.name}:</span> {v.value}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Outras variações */}
+                        {outrasVariacoes.length > 0 && (
+                          <div className="flex items-start gap-2 col-span-2">
+                            <Layers className="w-3.5 h-3.5 text-teal-500 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Especificações</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {outrasVariacoes.map((v, vi) => (
+                                  <span
+                                    key={vi}
+                                    className="inline-flex items-center gap-1 text-xs bg-teal-50 text-teal-800 rounded-full px-2.5 py-0.5 font-medium border border-teal-200"
+                                  >
+                                    <span className="text-teal-400 text-[10px]">{v.name}:</span> {v.value}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Notas do cliente */}
+                        {item.notes && (
+                          <div className="flex items-start gap-2 col-span-2">
+                            <StickyNote className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Observações</p>
+                              <p className="text-sm text-gray-700 italic">{item.notes}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-6 text-gray-400">
