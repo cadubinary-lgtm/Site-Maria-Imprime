@@ -755,8 +755,8 @@ export default function AdminOrderDetail() {
                       {/* Cabeçalho do item */}
                       <div className="flex justify-between items-start px-4 py-3 bg-white border-b border-gray-100">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-pink-100 flex items-center justify-center flex-shrink-0">
-                            <Package className="w-4 h-4 text-pink-600" />
+                          <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <Package className="w-4 h-4 text-gray-500" />
                           </div>
                           <div>
                             <p className="font-semibold text-gray-900 text-sm">{item.productName || 'Produto'}</p>
