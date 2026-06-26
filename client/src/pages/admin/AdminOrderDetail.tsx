@@ -810,14 +810,12 @@ export default function AdminOrderDetail() {
                             <Layers className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Acabamentos / Material</p>
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-col gap-1.5">
                                 {acabamentos.map((v, vi) => (
-                                  <span
-                                    key={vi}
-                                    className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-900 rounded-full px-2.5 py-0.5 font-medium border border-gray-200"
-                                  >
-                                    <span className="text-gray-400 text-[10px]">{v.name}:</span> {v.value}
-                                  </span>
+                                  <div key={vi} className="flex flex-col">
+                                    <span className="text-[10px] text-gray-400 font-medium">{v.name}:</span>
+                                    <span className="text-sm text-gray-900 font-medium">{v.value}</span>
+                                  </div>
                                 ))}
                               </div>
                             </div>
@@ -830,14 +828,12 @@ export default function AdminOrderDetail() {
                             <Layers className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Especificações</p>
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-col gap-1.5">
                                 {outrasVariacoes.map((v, vi) => (
-                                  <span
-                                    key={vi}
-                                    className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-900 rounded-full px-2.5 py-0.5 font-medium border border-gray-200"
-                                  >
-                                    <span className="text-gray-400 text-[10px]">{v.name}:</span> {v.value}
-                                  </span>
+                                  <div key={vi} className="flex flex-col">
+                                    <span className="text-[10px] text-gray-400 font-medium">{v.name}:</span>
+                                    <span className="text-sm text-gray-900 font-medium">{v.value}</span>
+                                  </div>
                                 ))}
                               </div>
                             </div>
