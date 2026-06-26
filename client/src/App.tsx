@@ -63,6 +63,7 @@ import { LogisticsDashboard } from "./pages/admin/LogisticsDashboard";
 import { CarriersManager } from "./pages/admin/CarriersManager";
 import { ShippingRulesManager } from "./pages/admin/ShippingRulesManager";
 import CorreiosSettings from "./pages/admin/CorreiosSettings";
+import MercadoPagoSettings from "./pages/admin/MercadoPagoSettings";
 import { ShipmentsManager } from "./pages/admin/ShipmentsManager";
 import { TrackingManager } from "./pages/admin/TrackingManager";
 
@@ -183,6 +184,8 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
       <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
       <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
+      {/* Mercado Pago */}
+      <Route path="/admin/pagamentos/mercadopago" component={MercadoPagoSettings} />
       {/* Gerenciador Financeiro (legado) */}
       <Route path="/admin/gerenciador-financeiro" component={GerenciadorFinanceiroDashboard} />
       <Route path="/admin/gerenciador-financeiro/receber" component={ContasReceber} />
@@ -266,6 +269,8 @@ function AdminProtectedRoutes() {
       <Route path="/admin/logistica/regras-frete" component={ShippingRulesManager} />
       <Route path="/admin/logistica/expedicao" component={ShipmentsManager} />
       <Route path="/admin/logistica/rastreamento" component={TrackingManager} />
+      {/* Mercado Pago */}
+      <Route path="/admin/pagamentos/mercadopago" component={MercadoPagoSettings} />
       {/* Gerenciador Financeiro (legado) */}
       <Route path="/admin/gerenciador-financeiro" component={GerenciadorFinanceiroDashboard} />
       <Route path="/admin/gerenciador-financeiro/receber" component={ContasReceber} />

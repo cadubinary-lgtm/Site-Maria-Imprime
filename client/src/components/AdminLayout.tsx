@@ -7,7 +7,7 @@ import {
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
   AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator,
-  ShieldCheck, ScrollText, UserCircle, Plus
+  ShieldCheck, ScrollText, UserCircle, Plus, CreditCard
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -194,6 +194,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { label: "Expedição", href: "/admin/logistica/expedicao" },
           { label: "Rastreamento", href: "/admin/logistica/rastreamento" },
         ],
+      },
+    },
+    // Pagamentos
+    { group: "PAGAMENTOS" },
+    {
+      item: {
+        label: "Mercado Pago",
+        icon: <CreditCard className="w-4 h-4" />,
+        href: "/admin/pagamentos/mercadopago",
       },
     },
     // Produtos

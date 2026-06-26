@@ -11,7 +11,7 @@ import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSele
 import {
   ChevronRight, ChevronLeft, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
-  QrCode, Copy, Check, Store,
+  QrCode, Copy, Check, Store, AlertCircle, RefreshCw,
 } from "lucide-react";
 
 type Step = "dados" | "endereco" | "entrega" | "pagamento" | "revisao";
@@ -58,6 +58,17 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
 
+  // Mercado Pago — estado do pagamento real
+  const [mpOrderId, setMpOrderId] = useState<number | null>(null);
+  const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64: string; paymentId: string; expiresAt?: number } | null>(null);
+  const [pixStatus, setPixStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [pixPolling, setPixPolling] = useState(false);
+  const [cardToken, setCardToken] = useState("");
+  const [cardPaymentMethodId, setCardPaymentMethodId] = useState("");
+  const [cardIssuerId, setCardIssuerId] = useState("");
+  const [mpError, setMpError] = useState<string | null>(null);
+  const [payerCpf, setPayerCpf] = useState("");
+
   // Dados do cliente
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -92,6 +103,13 @@ export default function CheckoutPage() {
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
+  const createPixMutation = trpc.payment.createPixPayment.useMutation();
+  const createCardMutation = trpc.payment.createCardPayment.useMutation();
+  const { data: mpPublicKeyData } = trpc.payment.getPublicKey.useQuery();
+  const pixStatusQuery = trpc.payment.getPixStatus.useQuery(
+    { paymentId: pixData?.paymentId ?? "" },
+    { enabled: !!pixData?.paymentId && pixPolling, refetchInterval: 5000 }
+  );
   const trpcUtils = trpc.useUtils();
 
   const handleShippingMethodSelected = (method: any, zipCodeUsed: string) => {
@@ -266,30 +284,61 @@ export default function CheckoutPage() {
   };
 
   const handleCopyPix = () => {
-    navigator.clipboard.writeText(SIMULATED_PIX_KEY).then(() => {
+    const code = pixData?.qrCode || "";
+    navigator.clipboard.writeText(code).then(() => {
       setPixCopied(true);
       setTimeout(() => setPixCopied(false), 3000);
     });
   };
 
+  // Polling: detectar aprovação do PIX
+  useEffect(() => {
+    if (!pixStatusQuery.data) return;
+    const st = pixStatusQuery.data.status;
+    if (st === "approved") {
+      setPixStatus("approved");
+      setPixPolling(false);
+      toast.success("Pagamento PIX aprovado! Redirecionando...");
+      setTimeout(() => {
+        if (mpOrderId) setLocation(`/confirmacao/${mpOrderId}`);
+      }, 2000);
+    } else if (st === "rejected" || st === "cancelled") {
+      setPixStatus("rejected");
+      setPixPolling(false);
+    }
+  }, [pixStatusQuery.data]);
+
+  // Tokenizar cartão via MP.js SDK
+  const tokenizeCard = async (publicKey: string): Promise<{ token: string; paymentMethodId: string; issuerId: string } | null> => {
+    try {
+      const mp = new (window as any).MercadoPago(publicKey, { locale: "pt-BR" });
+      const cardData = {
+        cardNumber: cardNumber.replace(/\s/g, ""),
+        cardholderName: cardName,
+        cardExpirationMonth: cardExpiry.split("/")[0],
+        cardExpirationYear: `20${cardExpiry.split("/")[1]}`,
+        securityCode: cardCvv,
+        identificationType: "CPF",
+        identificationNumber: payerCpf.replace(/\D/g, ""),
+      };
+      const result = await mp.createCardToken(cardData);
+      return { token: result.id, paymentMethodId: result.payment_method_id, issuerId: result.issuer_id || "" };
+    } catch (err: any) {
+      console.error("[MP] Tokenize error:", err);
+      return null;
+    }
+  };
+
   const handleFinalize = async () => {
     if (!cartItems || cartItems.length === 0) { toast.error("Seu carrinho está vazio"); return; }
     setIsSubmitting(true);
-
-    console.log("\n========== [CHECKOUT-FRONTEND] DIAGNÓSTICO ==========");
-    console.log("[CHECKOUT-FRONTEND] cartItems:", JSON.stringify(cartItems, null, 2));
-    console.log("[CHECKOUT-FRONTEND] subtotal:", subtotal);
-    console.log("[CHECKOUT-FRONTEND] fretePrice:", fretePrice);
-    console.log("[CHECKOUT-FRONTEND] totalPrice:", totalPrice);
-    console.log("[CHECKOUT-FRONTEND] paymentMethod:", paymentMethod);
-    console.log("[CHECKOUT-FRONTEND] selectedFrete:", selectedFrete);
+    setMpError(null);
 
     try {
-      // Frete e pagamento têm campos próprios no banco — não misturar nas notes
+      // 1. Criar o pedido
       const payload = {
         deliveryFullName: fullName,
         deliveryPhone: phone,
-        // Endereço só enviado quando não é retirada na loja
         ...(isStorePickupSelected ? {} : {
           deliveryStreet: street,
           deliveryNumber: number,
@@ -306,19 +355,85 @@ export default function CheckoutPage() {
         accountPassword: createAccountPassword.trim() || undefined,
         paymentMethod: paymentMethod === "pix" ? "pix" : paymentMethod === "cartao" ? "cartao_credito" : paymentMethod === "retirada_loja" ? "pagar_na_retirada" : undefined,
       };
-      console.log("[CHECKOUT-FRONTEND] payload enviado:", JSON.stringify(payload, null, 2));
 
-      const result = await createOrderMutation.mutateAsync(payload);
-      console.log("[CHECKOUT-FRONTEND] ✅ SUCESSO:", result);
-      toast.success(`Pedido ${result.orderNumber} criado com sucesso!`);
-      setLocation(`/confirmacao/${result.orderNumber}`);
+      const orderResult = await createOrderMutation.mutateAsync(payload);
+      const orderId = orderResult.orderId;
+      setMpOrderId(orderId);
+
+      // 2. Processar pagamento via Mercado Pago
+      if (paymentMethod === "pix") {
+        // Verificar se há chave MP configurada
+        const hasMP = !!(mpPublicKeyData?.publicKey);
+        if (!hasMP) {
+          // Sem integração MP — redirecionar normalmente
+          toast.success(`Pedido ${orderResult.orderNumber} criado! Aguardando pagamento PIX.`);
+          setLocation(`/confirmacao/${orderResult.orderNumber}`);
+          return;
+        }
+        try {
+          const pixResult = await createPixMutation.mutateAsync({
+            orderId,
+            payerCpf: payerCpf.replace(/\D/g, "") || undefined,
+          });
+          setPixData({
+            qrCode: pixResult.qrCode || "",
+            qrCodeBase64: pixResult.qrCodeBase64 || "",
+            paymentId: pixResult.paymentId,
+            expiresAt: pixResult.expiresAt ? Number(pixResult.expiresAt) : undefined,
+          });
+          setPixPolling(true);
+          setStep("pix_aguardando" as any);
+        } catch (pixErr: any) {
+          console.error("[MP PIX] Error:", pixErr);
+          // PIX falhou — redirecionar mesmo assim (pedido foi criado)
+          toast.warning("Pedido criado, mas houve um problema ao gerar o PIX. Entre em contato.");
+          setLocation(`/confirmacao/${orderResult.orderNumber}`);
+        }
+      } else if (paymentMethod === "cartao") {
+        const publicKey = mpPublicKeyData?.publicKey;
+        if (!publicKey) {
+          toast.success(`Pedido ${orderResult.orderNumber} criado! Processando pagamento...`);
+          setLocation(`/confirmacao/${orderResult.orderNumber}`);
+          return;
+        }
+        // Tokenizar o cartão
+        const tokenData = await tokenizeCard(publicKey);
+        if (!tokenData) {
+          setMpError("Não foi possível processar os dados do cartão. Verifique as informações e tente novamente.");
+          setIsSubmitting(false);
+          return;
+        }
+        try {
+          const cardResult = await createCardMutation.mutateAsync({
+            orderId,
+            token: tokenData.token,
+            installments: parseInt(cardInstallments),
+            paymentMethodId: tokenData.paymentMethodId,
+            issuerId: tokenData.issuerId || undefined,
+            payerCpf: payerCpf.replace(/\D/g, "") || undefined,
+          });
+          if (cardResult.status === "approved") {
+            toast.success("Pagamento aprovado! Redirecionando...");
+          } else {
+            toast.info("Pedido criado. Pagamento em análise.");
+          }
+          setLocation(`/confirmacao/${orderResult.orderNumber}`);
+        } catch (cardErr: any) {
+          const msg = cardErr?.message || "Erro ao processar cartão";
+          setMpError(msg);
+          toast.error(msg);
+          // Redirecionar mesmo assim — pedido foi criado
+          setTimeout(() => setLocation(`/confirmacao/${orderResult.orderNumber}`), 3000);
+        }
+      } else {
+        // Retirada na loja — sem pagamento online
+        toast.success(`Pedido ${orderResult.orderNumber} criado com sucesso!`);
+        setLocation(`/confirmacao/${orderResult.orderNumber}`);
+      }
     } catch (err: any) {
-      console.error("[CHECKOUT-FRONTEND] ❌ ERRO:", err);
       const errMsg = err?.message ?? err?.data?.message ?? "Erro ao finalizar pedido";
-      // Se e-mail já cadastrado, redirecionar para login
       if (errMsg.includes("já possui uma conta") || err?.data?.httpStatus === 409) {
         toast.error(errMsg, { duration: 6000 });
-        // Voltar para step de dados para o cliente ver o e-mail
         setStep("dados");
       } else {
         toast.error(errMsg);
@@ -332,6 +447,93 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  // Tela de aguardo do PIX após criar o pedido
+  if (pixData && (step as string) === "pix_aguardando") {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+            {/* Status */}
+            {pixStatus === "approved" ? (
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                </div>
+                <h2 className="text-xl font-bold text-green-700">Pagamento Aprovado!</h2>
+                <p className="text-sm text-gray-500">Seu pedido foi confirmado. Redirecionando...</p>
+              </div>
+            ) : pixStatus === "rejected" ? (
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8 text-red-500" />
+                </div>
+                <h2 className="text-xl font-bold text-red-700">Pagamento não aprovado</h2>
+                <p className="text-sm text-gray-500">O PIX foi recusado ou expirou. Tente novamente.</p>
+                <Button onClick={() => setLocation("/checkout")} className="bg-orange-500 hover:bg-orange-600">
+                  Tentar novamente
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <QrCode className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Pague via PIX</h2>
+                  <p className="text-sm text-gray-500">Escaneie o QR Code ou copie o código abaixo</p>
+                </div>
+
+                {/* QR Code real */}
+                <div className="flex justify-center">
+                  {pixData.qrCodeBase64 ? (
+                    <img
+                      src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                      alt="QR Code PIX"
+                      className="w-48 h-48 border-2 border-gray-200 rounded-xl"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Código Copia e Cola */}
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 text-center font-medium uppercase tracking-wide">Código Copia e Cola</p>
+                  <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 flex-1 truncate font-mono">{pixData.qrCode.slice(0, 50)}...</p>
+                    <button
+                      type="button"
+                      onClick={handleCopyPix}
+                      className="flex items-center gap-1 text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex-shrink-0"
+                    >
+                      {pixCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {pixCopied ? "Copiado!" : "Copiar"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Polling status */}
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Aguardando pagamento...</span>
+                </div>
+
+                {/* Expiração */}
+                {pixData.expiresAt && (
+                  <p className="text-xs text-center text-gray-400">
+                    Válido até: {new Date(pixData.expiresAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -621,56 +823,40 @@ export default function CheckoutPage() {
                       </button>
                     </div>
 
-                    {/* PIX: QR Code simulado */}
+                    {/* CPF do pagador — obrigatório para MP */}
+                    {(paymentMethod === "pix" || paymentMethod === "cartao") && (
+                      <div className="space-y-2">
+                        <Label htmlFor="payerCpf">CPF do Titular *</Label>
+                        <Input
+                          id="payerCpf"
+                          placeholder="000.000.000-00"
+                          value={payerCpf}
+                          onChange={(e) => {
+                            const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+                            setPayerCpf(d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").replace(/(\d{3})(\d{3})(\d{3})/, "$1.$2.$3").replace(/(\d{3})(\d{3})/, "$1.$2"));
+                          }}
+                          maxLength={14}
+                        />
+                        <p className="text-xs text-gray-500">Necessário para processar o pagamento</p>
+                      </div>
+                    )}
+
+                    {/* PIX: informativo antes de confirmar */}
                     {paymentMethod === "pix" && (
-                      <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-5 space-y-3">
                         <div className="flex items-center gap-2">
-                          <QrCode className="w-5 h-5 text-orange-500" />
-                          <p className="font-semibold text-gray-800">Pagamento via PIX</p>
+                          <QrCode className="w-5 h-5 text-green-600" />
+                          <p className="font-semibold text-green-800">Pagamento via PIX</p>
                         </div>
-
-                        {/* QR Code simulado */}
-                        <div className="flex justify-center">
-                          <div className="w-40 h-40 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center">
-                            <div className="grid grid-cols-7 gap-0.5 p-2">
-                              {Array.from({ length: 49 }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-4 h-4 rounded-sm ${
-                                    [0,1,2,3,4,5,6,7,13,14,20,21,27,28,34,35,41,42,43,44,45,46,47,48,8,15,22,29,36,9,16,23,30,37,11,18,25,32,39,10,17,24,31,38,12,19,26,33,40].includes(i)
-                                      ? "bg-gray-900" : "bg-white"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <p className="text-xs text-gray-500 text-center">Ou copie o código PIX abaixo:</p>
-                          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-3">
-                            <p className="text-xs text-gray-600 flex-1 truncate font-mono">{SIMULATED_PIX_KEY.slice(0, 40)}...</p>
-                            <button
-                              type="button"
-                              onClick={handleCopyPix}
-                              className="flex items-center gap-1 text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex-shrink-0"
-                            >
-                              {pixCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                              {pixCopied ? "Copiado!" : "Copiar"}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <p className="text-xs text-blue-700 font-medium">ℹ️ Ambiente de teste</p>
-                          <p className="text-xs text-blue-600 mt-0.5">
-                            Este é um QR Code simulado. A integração real com Mercado Pago será ativada em breve.
-                          </p>
+                        <p className="text-sm text-green-700">Após confirmar o pedido, você receberá um QR Code e o código Copia e Cola para efetuar o pagamento. O pedido é confirmado automaticamente após a aprovação.</p>
+                        <div className="flex items-center gap-2 text-xs text-green-600">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Aprovação em segundos — sem redirecionamento</span>
                         </div>
                       </div>
                     )}
 
-                    {/* Cartão: formulário */}
+                    {/* Cartão: formulário real */}
                     {paymentMethod === "cartao" && (
                       <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
                         <div className="flex items-center gap-2">
@@ -735,11 +921,16 @@ export default function CheckoutPage() {
                           </select>
                         </div>
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <p className="text-xs text-blue-700 font-medium">ℹ️ Ambiente de teste</p>
-                          <p className="text-xs text-blue-600 mt-0.5">
-                            Processamento simulado. A integração real com Mercado Pago será ativada em breve.
-                          </p>
+                        {mpError && (
+                          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-red-700">{mpError}</p>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                          <span>Dados protegidos via tokenização Mercado Pago — não armazenamos seu cartão</span>
                         </div>
                       </div>
                     )}

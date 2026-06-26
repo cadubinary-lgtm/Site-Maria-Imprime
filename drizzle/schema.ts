@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean, date, bigint } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, longtext, boolean, date, bigint, tinyint } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -1201,6 +1201,13 @@ export const storeSettings = mysqlTable("storeSettings", {
   senderNeighborhood: varchar("senderNeighborhood", { length: 255 }), // Bairro
   senderCity: varchar("senderCity", { length: 255 }), // Cidade
   senderState: varchar("senderState", { length: 2 }), // Estado (UF)
+  // Mercado Pago
+  mercadopagoAccessToken: text("mercadopagoAccessToken"),
+  mercadopagoPublicKey: varchar("mercadopagoPublicKey", { length: 255 }),
+  mercadopagoWebhookSecret: varchar("mercadopagoWebhookSecret", { length: 255 }),
+  mercadopagoSandbox: tinyint("mercadopagoSandbox").default(1).notNull(),
+  mercadopagoPixEnabled: tinyint("mercadopagoPixEnabled").default(1).notNull(),
+  mercadopagoCardEnabled: tinyint("mercadopagoCardEnabled").default(1).notNull(),
   // Metadata
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -1447,3 +1454,24 @@ export const localDeliveryRules = mysqlTable("localDeliveryRules", {
 });
 export type LocalDeliveryRule = typeof localDeliveryRules.$inferSelect;
 export type InsertLocalDeliveryRule = typeof localDeliveryRules.$inferInsert;
+
+/**
+ * Order Payments — Registros de pagamento via Mercado Pago
+ */
+export const orderPayments = mysqlTable("orderPayments", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  paymentId: varchar("paymentId", { length: 100 }).notNull(),
+  method: mysqlEnum("method", ["pix", "credit_card", "boleto", "other"]).notNull().default("pix"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  qrCode: text("qrCode"),
+  qrCodeBase64: text("qrCodeBase64"),
+  installments: int("installments").default(1),
+  lastFourDigits: varchar("lastFourDigits", { length: 4 }),
+  expiresAt: varchar("expiresAt", { length: 50 }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }),
+});
+export type OrderPayment = typeof orderPayments.$inferSelect;
+export type InsertOrderPayment = typeof orderPayments.$inferInsert;
