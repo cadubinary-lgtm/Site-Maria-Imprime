@@ -285,13 +285,7 @@ export default function CheckoutPage() {
     console.log("[CHECKOUT-FRONTEND] selectedFrete:", selectedFrete);
 
     try {
-      const paymentLabel = paymentMethod === "pix" ? "PIX" : paymentMethod === "cartao" ? `Cartão (${cardInstallments}x)` : paymentMethod === "retirada_loja" ? "Pagamento na Retirada da Loja" : "";
-      const notesWithInfo = [
-        notes,
-        selectedFrete ? `Frete: ${selectedFrete.name} (${formatCurrency(selectedFrete.price)})` : "",
-        paymentLabel ? `Pagamento: ${paymentLabel}` : "",
-      ].filter(Boolean).join(" | ");
-
+      // Frete e pagamento têm campos próprios no banco — não misturar nas notes
       const payload = {
         deliveryFullName: fullName,
         deliveryPhone: phone,
@@ -306,7 +300,7 @@ export default function CheckoutPage() {
           deliveryZipCode: zipCode.replace(/\D/g, ""),
         }),
         freteId: selectedFrete?.id,
-        notes: notesWithInfo || undefined,
+        notes: notes || undefined,
         guestEmail: guestEmail.trim() || undefined,
         guestName: fullName.trim() || undefined,
         accountPassword: createAccountPassword.trim() || undefined,

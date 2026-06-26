@@ -397,6 +397,24 @@ export default function OrderDetailPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-4">
+            {/* Entrega Selecionada */}
+            {order.shippingLabel && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Entrega Selecionada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-medium text-gray-900">{order.shippingLabel}</p>
+                  {order.shippingPrice && (
+                    <p className="text-sm text-gray-600 mt-1">{formatCurrency(order.shippingPrice)}</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Financial summary */}
             <Card>
               <CardHeader className="pb-2">
@@ -405,11 +423,11 @@ export default function OrderDetailPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal ({(items ?? []).length} {(items ?? []).length === 1 ? "item" : "itens"})</span>
-                  <span>{formatCurrency(order.totalPrice)}</span>
+                  <span>{formatCurrency((order.totalPrice ?? 0) - (order.shippingPrice ?? 0))}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Frete</span>
-                  <span className="text-gray-400 text-xs">A combinar</span>
+                  <span>{order.shippingPrice ? formatCurrency(order.shippingPrice) : "Grátis"}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-bold">

@@ -134,6 +134,7 @@ export const orders = mysqlTable("orders", {
   // Logística
   shippingMethod: varchar("shippingMethod", { length: 50 }), // pickup, moto_express, carrier_X
   shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).default("0"), // Valor do frete
+  shippingLabel: varchar("shippingLabel", { length: 255 }), // Nome exibível da opção de frete (ex: Correios — SEDEX)
   shippingEstimatedDays: int("shippingEstimatedDays").default(0), // Dias estimados
   shippingZipCode: varchar("shippingZipCode", { length: 20 }), // CEP de entrega
   shippingCarrierId: int("shippingCarrierId"), // ID da transportadora (se aplicável)
