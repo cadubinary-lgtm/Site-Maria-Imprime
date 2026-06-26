@@ -628,6 +628,14 @@ export const customerAuthRouter = router({
         firstName: z.string().min(2).optional(),
         lastName: z.string().min(2).optional(),
         phone: z.string().optional(),
+        cpfCnpj: z.string().optional(),
+        addressZipCode: z.string().optional(),
+        addressStreet: z.string().optional(),
+        addressNumber: z.string().optional(),
+        addressComplement: z.string().optional(),
+        addressNeighborhood: z.string().optional(),
+        addressCity: z.string().optional(),
+        addressState: z.string().max(2).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -652,6 +660,14 @@ export const customerAuthRouter = router({
           ...(input.firstName && { firstName: input.firstName }),
           ...(input.lastName && { lastName: input.lastName }),
           ...(input.phone !== undefined && { phone: input.phone }),
+          ...(input.cpfCnpj !== undefined && { cpfCnpj: input.cpfCnpj?.trim() || null }),
+          ...(input.addressZipCode !== undefined && { addressZipCode: input.addressZipCode?.replace(/\D/g, '') || null }),
+          ...(input.addressStreet !== undefined && { addressStreet: input.addressStreet?.trim() || null }),
+          ...(input.addressNumber !== undefined && { addressNumber: input.addressNumber?.trim() || null }),
+          ...(input.addressComplement !== undefined && { addressComplement: input.addressComplement?.trim() || null }),
+          ...(input.addressNeighborhood !== undefined && { addressNeighborhood: input.addressNeighborhood?.trim() || null }),
+          ...(input.addressCity !== undefined && { addressCity: input.addressCity?.trim() || null }),
+          ...(input.addressState !== undefined && { addressState: input.addressState?.toUpperCase() || null }),
           updatedAt: now,
         })
         .where(eq(customerAccounts.id, session.customerId));
