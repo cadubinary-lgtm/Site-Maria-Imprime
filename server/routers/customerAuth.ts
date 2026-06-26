@@ -961,6 +961,88 @@ export const customerAuthRouter = router({
     }),
 
   /**
+   * Buscar dados completos de um cliente (admin)
+   */
+  adminGetCustomerDetail: publicProcedure
+    .input(z.object({ customerId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const user = ctx.user;
+      if (!user || user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
+      }
+      const db = await requireDb();
+      const [customer] = await db
+        .select({
+          id: customerAccounts.id,
+          firstName: customerAccounts.firstName,
+          lastName: customerAccounts.lastName,
+          email: customerAccounts.email,
+          phone: customerAccounts.phone,
+          cpfCnpj: customerAccounts.cpfCnpj,
+          emailVerified: customerAccounts.emailVerified,
+          status: customerAccounts.status,
+          lastLogin: customerAccounts.lastLogin,
+          createdAt: customerAccounts.createdAt,
+          updatedAt: customerAccounts.updatedAt,
+          loginAttempts: customerAccounts.loginAttempts,
+          lockedUntil: customerAccounts.lockedUntil,
+          allowStorePickup: customerAccounts.allowStorePickup,
+          addressZipCode: customerAccounts.addressZipCode,
+          addressStreet: customerAccounts.addressStreet,
+          addressNumber: customerAccounts.addressNumber,
+          addressComplement: customerAccounts.addressComplement,
+          addressNeighborhood: customerAccounts.addressNeighborhood,
+          addressCity: customerAccounts.addressCity,
+          addressState: customerAccounts.addressState,
+        })
+        .from(customerAccounts)
+        .where(eq(customerAccounts.id, input.customerId))
+        .limit(1);
+      if (!customer) throw new TRPCError({ code: "NOT_FOUND", message: "Cliente não encontrado." });
+      // Buscar últimos 20 pedidos do cliente
+      const { sql: sqlFn } = await import("drizzle-orm");
+      const ordersRows = await db.execute(
+        sqlFn`
+          SELECT id, orderNumber, status, totalAmount, createdAt, shippingLabel, shippingPrice, paymentMethod
+          FROM orders
+          WHERE customerId = ${input.customerId}
+          ORDER BY createdAt DESC
+          LIMIT 20
+        `
+      ) as any;
+      const orders = (ordersRows[0] ?? []) as any[];
+      return { customer, orders };
+    }),
+
+  /**
+   * Redefinir senha de cliente (admin)
+   */
+  adminSetCustomerPassword: publicProcedure
+    .input(
+      z.object({
+        customerId: z.number(),
+        newPassword: z
+          .string()
+          .min(8, "Senha deve ter ao menos 8 caracteres")
+          .regex(/[A-Z]/, "Senha deve conter ao menos uma letra maiúscula")
+          .regex(/[0-9]/, "Senha deve conter ao menos um número"),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.user;
+      if (!user || user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
+      }
+      const db = await requireDb();
+      const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
+      await db
+        .update(customerAccounts)
+        .set({ passwordHash, updatedAt: Date.now() })
+        .where(eq(customerAccounts.id, input.customerId));
+      return { success: true };
+    }),
+
+  /**
    * Verificar se e-mail já está cadastrado (para validação no checkout)
    */
   checkEmailExists: publicProcedure
