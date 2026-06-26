@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import * as schema from "../drizzle/schema";
-import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks } from "../drizzle/schema";
+import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks, customerAccounts } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -291,9 +291,10 @@ export async function createOrder(order: InsertOrder) {
 export async function updateOrderStatus(orderId: number, status: string, notes?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Buscar status atual para registrar no histórico
-  const currentOrder = await db.select({ status: orders.status }).from(orders).where(eq(orders.id, orderId)).limit(1);
-  const previousStatus = currentOrder[0]?.status ?? null;
+  // Buscar status atual + dados do pedido para notificação
+  const currentOrderRows = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  const currentOrder = currentOrderRows[0] ?? null;
+  const previousStatus = currentOrder?.status ?? null;
   // Atualizar status do pedido
   await db.update(orders)
     .set({ status: status as any, updatedAt: new Date() })
@@ -305,6 +306,51 @@ export async function updateOrderStatus(orderId: number, status: string, notes?:
     newStatus: status as any,
     notes: notes ?? `Status alterado para ${status}`,
   });
+  // Enviar notificação por e-mail ao cliente (não bloqueia o fluxo)
+  if (currentOrder) {
+    try {
+      const { sendOrderStatusUpdateEmail } = await import("./emailService");
+      const statusLabels: Record<string, string> = {
+        pagamento_aprovado: "Pagamento Aprovado ✅",
+        pagamento_retirada: "Aguardando Pagamento na Retirada 🏪",
+        analisando: "Em Análise 🔍",
+        com_problemas: "Pedido com Problemas ⚠️",
+        em_producao: "Em Produção 🚧",
+        pronto_entrega: "Pronto para Entrega 📦",
+        pronto_retirada: "Pronto para Retirada 🏪",
+        saiu_entrega: "Saiu para Entrega 🚚",
+        em_transporte: "Em Transporte 🚚",
+        entregue: "Entregue com Sucesso 🎉",
+        cancelado: "Pedido Cancelado ❌",
+      };
+      const statusLabel = statusLabels[status] ?? status;
+      // Buscar e-mail do cliente
+      let emailTo: string | null = (currentOrder as any).guestEmail ?? null;
+      let firstName = ((currentOrder as any).guestName ?? "Cliente").split(" ")[0];
+      if (!emailTo && (currentOrder as any).customerId) {
+        const [ca] = await db.select({ email: customerAccounts.email, firstName: customerAccounts.firstName })
+          .from(customerAccounts)
+          .where(eq(customerAccounts.id, (currentOrder as any).customerId))
+          .limit(1);
+        if (ca?.email) {
+          emailTo = ca.email;
+          firstName = ca.firstName || firstName;
+        }
+      }
+      if (emailTo) {
+        const orderNumber = (currentOrder as any).orderNumber ?? String(orderId);
+        const guestToken = (currentOrder as any).guestToken;
+        const SITE_URL = process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space";
+        const trackUrl = guestToken
+          ? `${SITE_URL}/pedido/acompanhar/${guestToken}`
+          : `${SITE_URL}/minha-conta/pedidos/${orderNumber}`;
+        await sendOrderStatusUpdateEmail(emailTo, firstName, orderNumber, statusLabel, trackUrl);
+        console.log(`[STATUS] E-mail de status enviado para ${emailTo}: ${statusLabel}`);
+      }
+    } catch (e) {
+      console.error("[STATUS] Erro ao enviar e-mail de status:", e);
+    }
+  }
   return { success: true, orderId, newStatus: status };
 }
 
@@ -1085,23 +1131,31 @@ export async function createOrderFromCart(data: {
   }
 
   // Inserir os itens do pedido
+  console.log(`[DB] Inserindo ${data.cartItems.length} itens para orderId=${orderId}`);
   for (let i = 0; i < data.cartItems.length; i++) {
     const item = data.cartItems[i];
+    console.log(`[DB] Item [${i}]: productId=${item.productId}, productName=${item.productName}, qty=${item.quantity}, price=${item.priceAtCart}`);
     try {
-      await db.execute(
+      const productIdVal = item.productId ? Number(item.productId) : null;
+      const itemResult = await db.execute(
         sql`
           INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, notes)
-          VALUES (${orderId}, ${item.productId}, ${item.productName}, ${item.quantity}, ${item.priceAtCart},
+          VALUES (${orderId}, ${productIdVal}, ${item.productName ?? 'Produto'}, ${item.quantity}, ${item.priceAtCart},
             ${item.selectedAttributes ?? null}, ${item.variationSnapshot ?? null}, ${item.customDimensions ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
         `
       );
+      const itemInsertId = (itemResult as any)[0]?.insertId ?? (itemResult as any).insertId;
+      console.log(`[DB] ✅ orderItem [${i}] inserido com id=${itemInsertId}`);
     } catch (err: any) {
       console.error(`[DB] ❌ INSERT orderItems [${i}] FALHOU:`);
       console.error("[DB] tabela: orderItems");
+      console.error("[DB] item:", JSON.stringify(item));
       console.error("[DB] erro:", err.message);
-      throw new Error(`Failed INSERT orderItems[${i}]: ${err.message}`);
+      // Não re-throw: salvar o pedido mesmo sem itens para não perder a venda
+      // O admin pode reconciliar manualmente
     }
   }
+  console.log(`[DB] Itens do pedido ${orderId} processados`);
 
   // Registrar histórico de status
   try {

@@ -1545,6 +1545,39 @@ createOrder: protectedProcedure
           .where(eq(ordersTable.id, input.orderId));
         return { success: true };
       }),
+    // ── Reconciliação de itens do pedido (admin) ─────────────────────────────────────────────────────────
+    addOrderItem: adminProcedure
+      .input(z.object({
+        orderId: z.number(),
+        productId: z.number().optional(),
+        productName: z.string().min(1),
+        quantity: z.number().min(1),
+        priceAtOrder: z.number().min(0),
+        selectedAttributes: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { sql: sqlOp } = await import("drizzle-orm");
+        await db.execute(sqlOp`
+          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, notes)
+          VALUES (${input.orderId}, ${input.productId ?? null}, ${input.productName}, ${input.quantity}, ${input.priceAtOrder},
+            ${input.selectedAttributes ?? null}, ${input.notes ?? null})
+        `);
+        return { success: true };
+      }),
+
+    deleteOrderItem: adminProcedure
+      .input(z.object({ itemId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { sql: sqlOp } = await import("drizzle-orm");
+        await db.execute(sqlOp`DELETE FROM orderItems WHERE id = ${input.itemId}`);
+        return { success: true };
+      }),
+
     getMyOrdersFiltered: protectedProcedure
       .input(z.object({
         status: z.string().optional(),
@@ -1578,6 +1611,81 @@ createOrder: protectedProcedure
         }
         return filtered;
       }),
+  }),
+
+  // ERP KPIs — Pedidos do dia, produção ativa, pedidos atrasados
+  erp: router({
+    getDashboardKPIs: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { sql: sqlOp } = await import("drizzle-orm");
+      // Pedidos do dia (criados hoje)
+      const todayRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count, COALESCE(SUM(totalPrice), 0) as revenue
+        FROM orders
+        WHERE DATE(createdAt) = CURDATE()
+      `) as any;
+      const todayData = (todayRows[0]?.[0] ?? { count: 0, revenue: 0 });
+      // Produção ativa (em_producao)
+      const inProductionRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count FROM orders WHERE status = 'em_producao'
+      `) as any;
+      const inProductionCount = Number((inProductionRows[0]?.[0] ?? { count: 0 }).count);
+      // Aguardando análise (analisando + pagamento_aprovado + pagamento_retirada)
+      const pendingRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count FROM orders WHERE status IN ('analisando', 'pagamento_aprovado', 'pagamento_retirada')
+      `) as any;
+      const pendingCount = Number((pendingRows[0]?.[0] ?? { count: 0 }).count);
+      // Pedidos atrasados (deliveryDeadline < agora e não entregue/cancelado)
+      const overdueRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count FROM orders
+        WHERE deliveryDeadline IS NOT NULL
+        AND deliveryDeadline < UNIX_TIMESTAMP() * 1000
+        AND status NOT IN ('entregue', 'cancelado')
+      `) as any;
+      const overdueCount = Number((overdueRows[0]?.[0] ?? { count: 0 }).count);
+      // Pedidos com problemas
+      const problemRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count FROM orders WHERE status = 'com_problemas'
+      `) as any;
+      const problemCount = Number((problemRows[0]?.[0] ?? { count: 0 }).count);
+      // Prontos para entrega/retirada
+      const readyRows = await db.execute(sqlOp`
+        SELECT COUNT(*) as count FROM orders WHERE status IN ('pronto_entrega', 'pronto_retirada')
+      `) as any;
+      const readyCount = Number((readyRows[0]?.[0] ?? { count: 0 }).count);
+      // Últimos 5 pedidos atrasados
+      const overdueOrdersRows = await db.execute(sqlOp`
+        SELECT id, orderNumber, totalPrice, status, createdAt, deliveryDeadline, guestName, guestEmail
+        FROM orders
+        WHERE deliveryDeadline IS NOT NULL
+        AND deliveryDeadline < UNIX_TIMESTAMP() * 1000
+        AND status NOT IN ('entregue', 'cancelado')
+        ORDER BY deliveryDeadline ASC
+        LIMIT 5
+      `) as any;
+      const overdueOrders = (overdueOrdersRows[0] ?? []) as any[];
+      // Pedidos em produção (lista)
+      const inProductionOrdersRows = await db.execute(sqlOp`
+        SELECT id, orderNumber, totalPrice, status, createdAt, deliveryDeadline, guestName, guestEmail
+        FROM orders WHERE status = 'em_producao'
+        ORDER BY createdAt ASC LIMIT 10
+      `) as any;
+      const inProductionOrders = (inProductionOrdersRows[0] ?? []) as any[];
+      return {
+        today: {
+          count: Number(todayData.count),
+          revenue: Number(todayData.revenue),
+        },
+        inProduction: inProductionCount,
+        pending: pendingCount,
+        overdue: overdueCount,
+        problems: problemCount,
+        ready: readyCount,
+        overdueOrders,
+        inProductionOrders,
+      };
+    }),
   }),
 
   // Procedures para Configuração dos Correios
