@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   LogOut,
@@ -22,6 +22,8 @@ import {
   Edit2,
   Save,
   X,
+  MapPin,
+  Search,
 } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -48,11 +50,32 @@ const STATUS_COLORS: Record<string, string> = {
   cancelado:           "bg-red-100 text-red-700",
 };
 
+const EMPTY_FORM = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  cpfCnpj: "",
+  addressZipCode: "",
+  addressStreet: "",
+  addressNumber: "",
+  addressComplement: "",
+  addressNeighborhood: "",
+  addressCity: "",
+  addressState: "",
+};
+
 export default function MyAccountPage() {
   const { customer, isAuthenticated, isLoading, refetch } = useCustomerAuth();
   const [, navigate] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", phone: "" });
+  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [cepLoading, setCepLoading] = useState(false);
+
+  // Buscar perfil completo (inclui endereço)
+  const { data: profile, refetch: refetchProfile } = trpc.customerAuth.getProfile.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
 
   const { data: ordersData, isLoading: ordersLoading } = trpc.customerAuth.getMyOrders.useQuery(
     { status: "all", search: "", orderBy: "newest" },
@@ -64,6 +87,7 @@ export default function MyAccountPage() {
       toast.success("Perfil atualizado com sucesso!");
       setIsEditing(false);
       refetch();
+      refetchProfile();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -81,15 +105,83 @@ export default function MyAccountPage() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
+  // Preencher form com dados do perfil completo
   useEffect(() => {
-    if (customer) {
+    if (profile) {
       setEditForm({
-        firstName: customer.firstName,
-        lastName: customer.lastName,
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        phone: profile.phone || "",
+        cpfCnpj: profile.cpfCnpj || "",
+        addressZipCode: profile.addressZipCode || "",
+        addressStreet: profile.addressStreet || "",
+        addressNumber: profile.addressNumber || "",
+        addressComplement: profile.addressComplement || "",
+        addressNeighborhood: profile.addressNeighborhood || "",
+        addressCity: profile.addressCity || "",
+        addressState: profile.addressState || "",
+      });
+    } else if (customer) {
+      setEditForm((p) => ({
+        ...p,
+        firstName: customer.firstName || "",
+        lastName: customer.lastName || "",
         phone: customer.phone || "",
+        cpfCnpj: customer.cpfCnpj || "",
+      }));
+    }
+  }, [profile, customer]);
+
+  // Busca automática de CEP via ViaCEP
+  const handleCepBlur = async () => {
+    const cep = editForm.addressZipCode.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setEditForm((p) => ({
+          ...p,
+          addressStreet: data.logradouro || p.addressStreet,
+          addressNeighborhood: data.bairro || p.addressNeighborhood,
+          addressCity: data.localidade || p.addressCity,
+          addressState: data.uf || p.addressState,
+        }));
+      }
+    } catch {
+      // silencioso
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const setField = (field: keyof typeof EMPTY_FORM) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEditForm((p) => ({ ...p, [field]: e.target.value }));
+
+  const handleSave = () => {
+    updateProfile.mutate(editForm);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    if (profile) {
+      setEditForm({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        phone: profile.phone || "",
+        cpfCnpj: profile.cpfCnpj || "",
+        addressZipCode: profile.addressZipCode || "",
+        addressStreet: profile.addressStreet || "",
+        addressNumber: profile.addressNumber || "",
+        addressComplement: profile.addressComplement || "",
+        addressNeighborhood: profile.addressNeighborhood || "",
+        addressCity: profile.addressCity || "",
+        addressState: profile.addressState || "",
       });
     }
-  }, [customer]);
+  };
 
   if (isLoading) {
     return (
@@ -102,6 +194,7 @@ export default function MyAccountPage() {
   if (!isAuthenticated || !customer) return null;
 
   const orders = ordersData || [];
+  const displayProfile = profile || customer;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -251,7 +344,7 @@ export default function MyAccountPage() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        onClick={() => updateProfile.mutate(editForm)}
+                        onClick={handleSave}
                         disabled={updateProfile.isPending}
                         className="bg-orange-500 hover:bg-orange-600"
                       >
@@ -262,93 +355,180 @@ export default function MyAccountPage() {
                         )}
                         <span className="ml-1">Salvar</span>
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setIsEditing(false);
-                          setEditForm({
-                            firstName: customer.firstName,
-                            lastName: customer.lastName,
-                            phone: customer.phone || "",
-                          });
-                        }}
-                      >
+                      <Button variant="outline" size="sm" onClick={handleCancel}>
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label>Nome</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editForm.firstName}
-                        onChange={(e) => setEditForm((p) => ({ ...p, firstName: e.target.value }))}
-                        placeholder="Nome"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium py-2">{customer.firstName}</p>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Sobrenome</Label>
-                    {isEditing ? (
-                      <Input
-                        value={editForm.lastName}
-                        onChange={(e) => setEditForm((p) => ({ ...p, lastName: e.target.value }))}
-                        placeholder="Sobrenome"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium py-2">{customer.lastName}</p>
-                    )}
+              <CardContent className="space-y-6">
+
+                {/* ── Dados Pessoais ── */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4 text-orange-500" />
+                    Dados Pessoais
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label>Nome <span className="text-red-500">*</span></Label>
+                      {isEditing ? (
+                        <Input value={editForm.firstName} onChange={setField("firstName")} placeholder="João" />
+                      ) : (
+                        <p className="text-gray-900 font-medium py-2">{displayProfile.firstName}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Sobrenome <span className="text-red-500">*</span></Label>
+                      {isEditing ? (
+                        <Input value={editForm.lastName} onChange={setField("lastName")} placeholder="Silva" />
+                      ) : (
+                        <p className="text-gray-900 font-medium py-2">{displayProfile.lastName}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label>Email</Label>
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-900 font-medium py-2">{customer.email}</p>
+                        {customer.emailVerified ? (
+                          <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                            <CheckCircle className="w-3 h-3" />
+                            Verificado
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
+                            <AlertCircle className="w-3 h-3" />
+                            Não verificado
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label>Telefone / WhatsApp</Label>
+                      {isEditing ? (
+                        <Input value={editForm.phone} onChange={setField("phone")} placeholder="(11) 99999-9999" />
+                      ) : (
+                        <p className="text-gray-900 font-medium py-2">
+                          {(displayProfile as any).phone || <span className="text-gray-400 italic">Não informado</span>}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
+                      <Label>CPF / CNPJ</Label>
+                      {isEditing ? (
+                        <Input value={editForm.cpfCnpj} onChange={setField("cpfCnpj")} placeholder="000.000.000-00" />
+                      ) : (
+                        <p className="text-gray-900 font-medium py-2">
+                          {(profile?.cpfCnpj) || <span className="text-gray-400 italic">Não informado</span>}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Email</Label>
-                  <div className="flex items-center gap-2">
-                    <p className="text-gray-900 font-medium py-2">{customer.email}</p>
-                    {customer.emailVerified ? (
-                      <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                        <CheckCircle className="w-3 h-3" />
-                        Verificado
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
-                        <AlertCircle className="w-3 h-3" />
-                        Não verificado
+                <Separator />
+
+                {/* ── Endereço de Entrega ── */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-orange-500" />
+                    Endereço de Entrega
+                    {!isEditing && (
+                      <span className="text-xs text-gray-400 font-normal ml-1">
+                        (será preenchido automaticamente no checkout)
                       </span>
                     )}
-                  </div>
-                </div>
+                  </h3>
 
-                <div className="space-y-1">
-                  <Label>Telefone / WhatsApp</Label>
                   {isEditing ? (
-                    <Input
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
-                      placeholder="(11) 99999-9999"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* CEP com busca automática */}
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>CEP</Label>
+                        <div className="relative">
+                          <Input
+                            value={editForm.addressZipCode}
+                            onChange={setField("addressZipCode")}
+                            onBlur={handleCepBlur}
+                            placeholder="00000-000"
+                            maxLength={9}
+                          />
+                          {cepLoading && (
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-pulse text-orange-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400">Digite o CEP para preencher o endereço automaticamente</p>
+                      </div>
+
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Rua / Avenida</Label>
+                        <Input value={editForm.addressStreet} onChange={setField("addressStreet")} placeholder="Nome da rua" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label>Número</Label>
+                        <Input value={editForm.addressNumber} onChange={setField("addressNumber")} placeholder="123" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label>Complemento</Label>
+                        <Input value={editForm.addressComplement} onChange={setField("addressComplement")} placeholder="Apto, sala, bloco..." />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label>Bairro</Label>
+                        <Input value={editForm.addressNeighborhood} onChange={setField("addressNeighborhood")} placeholder="Bairro" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label>Cidade</Label>
+                        <Input value={editForm.addressCity} onChange={setField("addressCity")} placeholder="Cidade" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label>UF</Label>
+                        <Input
+                          value={editForm.addressState}
+                          onChange={setField("addressState")}
+                          placeholder="SP"
+                          maxLength={2}
+                          className="uppercase"
+                        />
+                      </div>
+                    </div>
                   ) : (
-                    <p className="text-gray-900 font-medium py-2">
-                      {customer.phone || <span className="text-gray-400 italic">Não informado</span>}
-                    </p>
+                    <div className="text-gray-900">
+                      {profile?.addressStreet ? (
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            {profile.addressStreet}{profile.addressNumber ? `, ${profile.addressNumber}` : ""}
+                            {profile.addressComplement ? ` — ${profile.addressComplement}` : ""}
+                          </p>
+                          {profile.addressNeighborhood && (
+                            <p className="text-gray-600">{profile.addressNeighborhood}</p>
+                          )}
+                          <p className="text-gray-600">
+                            {profile.addressCity}{profile.addressState ? ` — ${profile.addressState}` : ""}
+                          </p>
+                          {profile.addressZipCode && (
+                            <p className="text-gray-500 text-sm">CEP: {profile.addressZipCode}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400 italic py-2">Endereço não cadastrado. Clique em Editar para adicionar.</p>
+                      )}
+                    </div>
                   )}
                 </div>
 
-                {customer.cpfCnpj && (
-                  <div className="space-y-1">
-                    <Label>CPF / CNPJ</Label>
-                    <p className="text-gray-900 font-medium py-2">{customer.cpfCnpj}</p>
-                  </div>
-                )}
+                <Separator />
 
-                <div className="pt-4 border-t">
+                {/* ── Rodapé ── */}
+                <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-500">
                     Membro desde{" "}
                     <span className="font-medium">
@@ -358,13 +538,11 @@ export default function MyAccountPage() {
                       })}
                     </span>
                   </p>
-                </div>
-
-                <div className="pt-2 border-t">
                   <Button asChild variant="outline" size="sm">
                     <Link href="/recuperar-senha">Alterar Senha</Link>
                   </Button>
                 </div>
+
               </CardContent>
             </Card>
           </TabsContent>
