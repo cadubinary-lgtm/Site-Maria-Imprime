@@ -155,8 +155,9 @@
   --foreground:         oklch(0.15 0.01 0);
 
   /* ── Card ── */
-  --card:               oklch(1 0 0);
+  --card:               oklch(1 0 0);   /* branco puro — sem cor */
   --card-foreground:    oklch(0.15 0.01 0);
+  --card-border:        oklch(0.92 0.001 0); /* borda sutil neutra */
 
   /* ── Popover ── */
   --popover:            oklch(1 0 0);
@@ -258,6 +259,41 @@
 }
 
 @layer components {
+  /*
+   * ─── CARDS GLOBAIS — Estilo limpo, sem cor de fundo ───────────────
+   * Todos os cards do sistema seguem este padrão:
+   * fundo branco, borda sutil, sombra mínima, sem gradientes ou cores.
+   * ──────────────────────────────────────────────────────────────────
+   */
+  [data-slot="card"],
+  .card-clean {
+    background-color: white;
+    border: 1px solid oklch(0.92 0.001 0);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Sub-cards e seções internas dos cards de detalhe */
+  .rounded-xl.border.border-gray-200.bg-gray-50,
+  .rounded-xl.border.border-gray-200.overflow-hidden {
+    background-color: white !important;
+    border-color: oklch(0.92 0.001 0) !important;
+  }
+
+  /* Linhas internas dos cards de detalhe */
+  .rounded-xl.border.border-gray-200 .bg-white,
+  .rounded-xl.border.border-gray-200.overflow-hidden .bg-white {
+    background-color: white !important;
+  }
+
+  /* Badges coloridos nos cards — mantém cor mas sem fundo saturado */
+  .rounded-xl.border.border-gray-200 .bg-purple-100 {
+    background-color: oklch(0.97 0.01 300) !important;
+  }
+  .rounded-xl.border.border-gray-200 .bg-teal-50 {
+    background-color: oklch(0.98 0.01 180) !important;
+  }
+
   .container {
     width: 100%;
     margin-left: auto;
