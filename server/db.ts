@@ -1049,7 +1049,7 @@ export async function createOrderFromCart(data: {
           clientId, userId, customerId, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
-          guestToken, guestEmail, guestName, shippingMethod, shippingPrice, payment_method
+          guestToken, guestEmail, guestName, shippingMethod, shippingPrice, shippingLabel, payment_method
         ) VALUES (
           ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.orderNumber},
           ${data.initialStatus ?? 'analisando'},
@@ -1058,7 +1058,7 @@ export async function createOrderFromCart(data: {
           ${data.deliveryNeighborhood}, ${data.deliveryCity}, ${data.deliveryState},
           ${data.deliveryZipCode}, ${data.deliveryFullName}, ${data.deliveryPhone},
           ${data.guestToken ?? null}, ${data.guestEmail ?? null}, ${data.guestName ?? null},
-          ${data.shippingMethod ?? null}, ${data.shippingPrice ?? 0}, ${data.paymentMethod ?? null}
+          ${data.shippingMethod ?? null}, ${data.shippingPrice ?? 0}, ${data.shippingLabel ?? null}, ${data.paymentMethod ?? null}
         )
       `
     );
