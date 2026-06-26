@@ -146,7 +146,7 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                 key={value.id}
                 className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 transform hover:scale-105 active:scale-95 ${
                   internalSelected.includes(value.id)
-                    ? "ring-2 ring-blue-500 bg-blue-50 shadow-md"
+                    ? "ring-2 ring-orange-500 bg-orange-50 shadow-md"
                     : "hover:ring-1 hover:ring-gray-300 shadow-sm"
                 } ${
                   isDisabled ? "opacity-50 cursor-not-allowed" : ""
@@ -162,7 +162,7 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                 )}
                 <p className="text-xs sm:text-sm font-medium">{value.value}</p>
                 {value.priceModifier !== 0 && (
-                  <p className="text-xs text-blue-600 font-medium">+R$ {Math.abs(value.priceModifier).toFixed(2)}</p>
+                  <p className="text-xs text-orange-600 font-medium">+R$ {Math.abs(value.priceModifier).toFixed(2)}</p>
                 )}
               </Card>
             ))}
@@ -191,7 +191,7 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                   key={value.id}
                   className={`flex items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                     internalSelected.includes(value.id)
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-orange-500 bg-orange-50"
                       : "border-gray-200 hover:border-gray-300 bg-white"
                   } ${
                     isDisabled ? "opacity-50 cursor-not-allowed" : ""
@@ -209,7 +209,7 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                   >
                     <span className="text-sm sm:text-base">{value.value}</span>
                     {value.priceModifier !== 0 && (
-                      <span className="ml-2 text-xs sm:text-sm font-medium text-blue-600">
+                      <span className="ml-2 text-xs sm:text-sm font-medium text-orange-600">
                         +R$ {Math.abs(value.priceModifier).toFixed(2)}
                       </span>
                     )}
@@ -237,11 +237,11 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                 key={value.id}
                 className={`flex items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                   internalSelected.includes(value.id)
-                    ? "border-blue-500 bg-blue-50"
+? "border-orange-500 bg-orange-50"
                     : "border-gray-200 hover:border-gray-300 bg-white"
                 } ${
-                  isDisabled ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                    isDisabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 <Checkbox
                   id={`check-${value.id}`}
@@ -261,7 +261,7 @@ export const DynamicAttributeRenderer: React.FC<DynamicAttributeRendererProps> =
                 >
                   <span className="text-sm sm:text-base">{value.value}</span>
                   {value.priceModifier !== 0 && (
-                    <span className="ml-2 text-xs sm:text-sm font-medium text-blue-600">
+                    <span className="ml-2 text-xs sm:text-sm font-medium text-orange-600">
                       +R$ {Math.abs(value.priceModifier).toFixed(2)}
                     </span>
                   )}

@@ -260,8 +260,8 @@ export default function UniversalProductRenderer({
             )}
 
             {/* Prazo de Entrega */}
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-sm text-blue-900">
+            <div className="bg-orange-50 p-3 rounded-lg">
+              <p className="text-sm text-orange-900">
                 📅 Prazo de Entrega: <strong>{totalDeadline} dias úteis</strong>
               </p>
             </div>
