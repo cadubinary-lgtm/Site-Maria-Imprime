@@ -60,9 +60,11 @@ export default function CheckoutPage() {
 
   // Mercado Pago — estado do pagamento real
   const [mpOrderId, setMpOrderId] = useState<number | null>(null);
+  const [mpOrderNumber, setMpOrderNumber] = useState<string | null>(null); // para redirect correto
   const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64: string; paymentId: string; expiresAt?: number } | null>(null);
-  const [pixStatus, setPixStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [pixStatus, setPixStatus] = useState<"pending" | "approved" | "rejected" | "error">("pending");
   const [pixPolling, setPixPolling] = useState(false);
+  const [pixErrorMsg, setPixErrorMsg] = useState<string | null>(null); // erro ao gerar QR Code
   const [cardToken, setCardToken] = useState("");
   const [cardPaymentMethodId, setCardPaymentMethodId] = useState("");
   const [cardIssuerId, setCardIssuerId] = useState("");
@@ -300,13 +302,15 @@ export default function CheckoutPage() {
       setPixPolling(false);
       toast.success("Pagamento PIX aprovado! Redirecionando...");
       setTimeout(() => {
-        if (mpOrderId) setLocation(`/confirmacao/${mpOrderId}`);
+        // Usar orderNumber (string) para a rota /confirmacao/:orderNumber
+        if (mpOrderNumber) setLocation(`/confirmacao/${mpOrderNumber}`);
+        else if (mpOrderId) setLocation(`/confirmacao/${mpOrderId}`);
       }, 2000);
     } else if (st === "rejected" || st === "cancelled") {
       setPixStatus("rejected");
       setPixPolling(false);
     }
-  }, [pixStatusQuery.data]);
+  }, [pixStatusQuery.data, mpOrderNumber, mpOrderId]);
 
   // Tokenizar cartão via MP.js SDK
   const tokenizeCard = async (publicKey: string): Promise<{ token: string; paymentMethodId: string; issuerId: string } | null> => {
@@ -359,6 +363,7 @@ export default function CheckoutPage() {
       const orderResult = await createOrderMutation.mutateAsync(payload);
       const orderId = orderResult.orderId;
       setMpOrderId(orderId);
+      setMpOrderNumber(orderResult.orderNumber); // salvar orderNumber para redirect correto
 
       // 2. Processar pagamento via Mercado Pago
       if (paymentMethod === "pix") {
@@ -370,6 +375,8 @@ export default function CheckoutPage() {
           setLocation(`/confirmacao/${orderResult.orderNumber}`);
           return;
         }
+        // Mostrar tela de aguardo ANTES de chamar a API (evita flash)
+        setStep("pix_aguardando" as any);
         try {
           const pixResult = await createPixMutation.mutateAsync({
             orderId,
@@ -382,12 +389,15 @@ export default function CheckoutPage() {
             expiresAt: pixResult.expiresAt ? Number(pixResult.expiresAt) : undefined,
           });
           setPixPolling(true);
-          setStep("pix_aguardando" as any);
+          // NÃO redirecionar aqui — manter na tela de aguardo até aprovação via polling
         } catch (pixErr: any) {
           console.error("[MP PIX] Error:", pixErr);
-          // PIX falhou — redirecionar mesmo assim (pedido foi criado)
-          toast.warning("Pedido criado, mas houve um problema ao gerar o PIX. Entre em contato.");
-          setLocation(`/confirmacao/${orderResult.orderNumber}`);
+          // PIX falhou — mostrar erro NA TELA (não redirecionar)
+          // O cliente pode tentar novamente ou ir para confirmação manualmente
+          const errMsg = (pixErr as any)?.message || "Erro ao gerar QR Code PIX";
+          setPixErrorMsg(errMsg);
+          setPixStatus("error");
+          // NÃO chamar setLocation — manter o cliente na tela de aguardo com mensagem de erro
         }
       } else if (paymentMethod === "cartao") {
         const publicKey = mpPublicKeyData?.publicKey;
@@ -451,33 +461,81 @@ export default function CheckoutPage() {
     );
   }
 
-  // Tela de aguardo do PIX após criar o pedido
-  if (pixData && (step as string) === "pix_aguardando") {
+  // Tela de aguardo do PIX — exibida assim que o cliente confirma o pedido PIX
+  // Permanece visível até: aprovação (polling), rejeição, erro ou expiração
+  if ((step as string) === "pix_aguardando") {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-md mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
-            {/* Status */}
-            {pixStatus === "approved" ? (
+
+            {/* Estado: Aprovado */}
+            {pixStatus === "approved" && (
               <div className="flex flex-col items-center gap-3 text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
                 </div>
                 <h2 className="text-xl font-bold text-green-700">Pagamento Aprovado!</h2>
                 <p className="text-sm text-gray-500">Seu pedido foi confirmado. Redirecionando...</p>
+                <Loader2 className="w-5 h-5 animate-spin text-green-500" />
               </div>
-            ) : pixStatus === "rejected" ? (
+            )}
+
+            {/* Estado: Rejeitado */}
+            {pixStatus === "rejected" && (
               <div className="flex flex-col items-center gap-3 text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
                   <AlertCircle className="w-8 h-8 text-red-500" />
                 </div>
                 <h2 className="text-xl font-bold text-red-700">Pagamento não aprovado</h2>
                 <p className="text-sm text-gray-500">O PIX foi recusado ou expirou. Tente novamente.</p>
-                <Button onClick={() => setLocation("/checkout")} className="bg-orange-500 hover:bg-orange-600">
-                  Tentar novamente
-                </Button>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setLocation("/checkout")}>
+                    Tentar novamente
+                  </Button>
+                  {mpOrderNumber && (
+                    <Button onClick={() => setLocation(`/confirmacao/${mpOrderNumber}`)} className="bg-orange-500 hover:bg-orange-600">
+                      Ver pedido
+                    </Button>
+                  )}
+                </div>
               </div>
-            ) : (
+            )}
+
+            {/* Estado: Erro ao gerar QR Code */}
+            {pixStatus === "error" && (
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8 text-yellow-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">Problema ao gerar PIX</h2>
+                <p className="text-sm text-gray-500">
+                  {pixErrorMsg || "Não foi possível gerar o QR Code. Seu pedido foi criado — entre em contato para pagar."}
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setLocation("/checkout")}>
+                    Tentar novamente
+                  </Button>
+                  {mpOrderNumber && (
+                    <Button onClick={() => setLocation(`/confirmacao/${mpOrderNumber}`)} className="bg-orange-500 hover:bg-orange-600">
+                      Ver pedido
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Estado: Carregando QR Code (pedido criado, aguardando resposta da API MP) */}
+            {pixStatus === "pending" && !pixData && (
+              <div className="flex flex-col items-center gap-4 text-center py-4">
+                <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
+                <h2 className="text-lg font-semibold text-gray-800">Gerando QR Code PIX...</h2>
+                <p className="text-sm text-gray-500">Aguarde, estamos preparando seu código de pagamento.</p>
+              </div>
+            )}
+
+            {/* Estado: QR Code disponível — aguardando pagamento */}
+            {pixStatus === "pending" && pixData && (
               <>
                 <div className="flex flex-col items-center gap-2 text-center">
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -485,6 +543,9 @@ export default function CheckoutPage() {
                   </div>
                   <h2 className="text-xl font-bold text-gray-900">Pague via PIX</h2>
                   <p className="text-sm text-gray-500">Escaneie o QR Code ou copie o código abaixo</p>
+                  {mpOrderNumber && (
+                    <p className="text-xs text-gray-400">Pedido {mpOrderNumber}</p>
+                  )}
                 </div>
 
                 {/* QR Code real */}
@@ -521,7 +582,7 @@ export default function CheckoutPage() {
                 {/* Polling status */}
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Aguardando pagamento...</span>
+                  <span>Aguardando confirmação do pagamento...</span>
                 </div>
 
                 {/* Expiração */}
@@ -530,8 +591,22 @@ export default function CheckoutPage() {
                     Válido até: {new Date(pixData.expiresAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 )}
+
+                {/* Link para ver pedido enquanto aguarda */}
+                {mpOrderNumber && (
+                  <p className="text-xs text-center text-gray-400">
+                    <button
+                      type="button"
+                      onClick={() => setLocation(`/confirmacao/${mpOrderNumber}`)}
+                      className="underline hover:text-gray-600"
+                    >
+                      Pagar depois — ver meu pedido
+                    </button>
+                  </p>
+                )}
               </>
             )}
+
           </div>
         </div>
       </div>
