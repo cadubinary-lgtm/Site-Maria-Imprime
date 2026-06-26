@@ -776,16 +776,16 @@ export default function AdminOrderDetail() {
                         {/* Dimensões */}
                         {dims && (
                           <div className="flex items-start gap-2 col-span-2 sm:col-span-1">
-                            <Ruler className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
+                            <Ruler className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Dimensões</p>
-                              <p className="text-sm font-semibold text-gray-800">
+                              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Dimensões</p>
+                              <p className="text-sm font-semibold text-gray-900">
                                 {largura && altura
                                   ? `${largura} m × ${altura} m`
                                   : dims}
                               </p>
                               {largura && altura && (
-                                <p className="text-xs text-gray-400">
+                                <p className="text-xs text-gray-500">
                                   {(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²
                                 </p>
                               )}
@@ -796,10 +796,10 @@ export default function AdminOrderDetail() {
                         {/* Peso */}
                         {pesoDisplay && (
                           <div className="flex items-start gap-2">
-                            <Weight className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <Weight className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Peso</p>
-                              <p className="text-sm font-semibold text-gray-800">{pesoDisplay}</p>
+                              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Peso</p>
+                              <p className="text-sm font-semibold text-gray-900">{pesoDisplay}</p>
                             </div>
                           </div>
                         )}
@@ -807,16 +807,16 @@ export default function AdminOrderDetail() {
                         {/* Acabamentos */}
                         {acabamentos.length > 0 && (
                           <div className="flex items-start gap-2 col-span-2">
-                            <Layers className="w-3.5 h-3.5 text-purple-500 mt-0.5 flex-shrink-0" />
+                            <Layers className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Acabamentos / Material</p>
+                              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Acabamentos / Material</p>
                               <div className="flex flex-wrap gap-1.5">
                                 {acabamentos.map((v, vi) => (
                                   <span
                                     key={vi}
-                                    className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-800 rounded-full px-2.5 py-0.5 font-medium"
+                                    className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-900 rounded-full px-2.5 py-0.5 font-medium border border-gray-200"
                                   >
-                                    <span className="text-purple-400 text-[10px]">{v.name}:</span> {v.value}
+                                    <span className="text-gray-400 text-[10px]">{v.name}:</span> {v.value}
                                   </span>
                                 ))}
                               </div>
@@ -827,16 +827,16 @@ export default function AdminOrderDetail() {
                         {/* Outras variações */}
                         {outrasVariacoes.length > 0 && (
                           <div className="flex items-start gap-2 col-span-2">
-                            <Layers className="w-3.5 h-3.5 text-teal-500 mt-0.5 flex-shrink-0" />
+                            <Layers className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Especificações</p>
+                              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Especificações</p>
                               <div className="flex flex-wrap gap-1.5">
                                 {outrasVariacoes.map((v, vi) => (
                                   <span
                                     key={vi}
-                                    className="inline-flex items-center gap-1 text-xs bg-teal-50 text-teal-800 rounded-full px-2.5 py-0.5 font-medium border border-teal-200"
+                                    className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-900 rounded-full px-2.5 py-0.5 font-medium border border-gray-200"
                                   >
-                                    <span className="text-teal-400 text-[10px]">{v.name}:</span> {v.value}
+                                    <span className="text-gray-400 text-[10px]">{v.name}:</span> {v.value}
                                   </span>
                                 ))}
                               </div>
@@ -847,10 +847,10 @@ export default function AdminOrderDetail() {
                         {/* Notas do cliente */}
                         {item.notes && (
                           <div className="flex items-start gap-2 col-span-2">
-                            <StickyNote className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                            <StickyNote className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div>
-                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Observações</p>
-                              <p className="text-sm text-gray-700 italic">{item.notes}</p>
+                              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Observações</p>
+                              <p className="text-sm text-gray-900 italic">{item.notes}</p>
                             </div>
                           </div>
                         )}
