@@ -126,7 +126,7 @@ export async function createPixPayment(
         : {}),
     },
     external_reference: String(input.orderId),
-    notification_url: `${process.env.APP_BASE_URL || ""}/api/payments/mercadopago/webhook`,
+    notification_url: "https://mariaimprime.com.br/api/payments/mercadopago/webhook",
   };
 
   console.log("[MP PIX] Enviando payload:", JSON.stringify(body, null, 2));
@@ -232,7 +232,7 @@ export async function createCardPayment(
         : {}),
     },
     external_reference: String(input.orderId),
-    notification_url: `${process.env.APP_BASE_URL || ""}/api/payments/mercadopago/webhook`,
+    notification_url: "https://mariaimprime.com.br/api/payments/mercadopago/webhook",
   };
 
   console.log("[MP CARD] Enviando payload:", JSON.stringify({ ...body, token: "***" }, null, 2));
