@@ -7,7 +7,7 @@
  * - try/catch com log detalhado da resposta da API em caso de erro
  * - Recriação do client quando o token muda (resetMPClient)
  */
-import MercadoPagoConfig, { Payment } from "mercadopago";
+import { MercadoPagoConfig, Payment } from "mercadopago";
 
 // Lazy-initialized client — credentials come from DB settings or env
 let _client: MercadoPagoConfig | null = null;
