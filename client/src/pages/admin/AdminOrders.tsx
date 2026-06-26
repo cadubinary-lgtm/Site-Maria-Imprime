@@ -15,7 +15,7 @@ export const ORDER_STATUS: Record<string, { label: string; color: string; icon: 
   pagamento_retirada:  { label: "Pagamento na Retirada",   color: "bg-blue-100 text-blue-800",     icon: "🏪" },
   analisando:          { label: "Analisando",              color: "bg-orange-100 text-orange-800", icon: "🔍" },
   com_problemas:       { label: "Com Problemas",           color: "bg-red-100 text-red-800",       icon: "⚠️" },
-  em_producao:         { label: "Em Produção",             color: "bg-purple-100 text-purple-800", icon: "⚙️" },
+  em_producao:         { label: "Em Produção",             color: "bg-orange-100 text-orange-800", icon: "⚙️" },
   pronto_entrega:      { label: "Pronto para Entrega",     color: "bg-teal-100 text-teal-800",     icon: "🚚" },
   pronto_retirada:     { label: "Pronto para Retirada",    color: "bg-cyan-100 text-cyan-800",     icon: "🎁" },
   saiu_entrega:        { label: "Saiu para Entrega",       color: "bg-indigo-100 text-indigo-800", icon: "🚚" },

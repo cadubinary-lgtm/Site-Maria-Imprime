@@ -18,7 +18,7 @@ import {
 const fmt = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-const COLORS = ["#E91E63", "#3b82f6", "#22c55e", "#ef4444", "#a855f7"];
+const COLORS = ["#E6005C", "#3b82f6", "#22c55e", "#ef4444", "#a855f7"];
 
 export default function GerenciadorFinanceiroDashboard() {
   const [period, setPeriod] = useState<"today" | "week" | "month">("month");
@@ -76,9 +76,9 @@ export default function GerenciadorFinanceiroDashboard() {
       title: "Pagamentos na Retirada",
       value: fmt(metrics?.pickupRevenue ?? 0),
       icon: <Store className="w-5 h-5" />,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
-      border: "border-purple-200",
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+      border: "border-orange-200",
       sub: `${metrics?.pickupOrders ?? 0} pedidos retirada`,
       href: "/admin/gerenciador-financeiro/retirada",
     },
@@ -195,15 +195,15 @@ export default function GerenciadorFinanceiroDashboard() {
                   <AreaChart data={cashFlow.cashFlowData}>
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#E91E63" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#E91E63" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#E6005C" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#E6005C" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                     <Tooltip formatter={(v: any) => fmt(v)} />
-                    <Area type="monotone" dataKey="income" stroke="#E91E63" fill="url(#colorIncome)" name="Receita" />
+                    <Area type="monotone" dataKey="income" stroke="#E6005C" fill="url(#colorIncome)" name="Receita" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
@@ -249,7 +249,7 @@ export default function GerenciadorFinanceiroDashboard() {
           {[
             { label: "Contas a Receber", href: "/admin/gerenciador-financeiro/receber", icon: <Clock className="w-4 h-4" />, color: "text-orange-600" },
             { label: "Contas Recebidas", href: "/admin/gerenciador-financeiro/recebidas", icon: <CheckCircle className="w-4 h-4" />, color: "text-green-600" },
-            { label: "Pagamentos Retirada", href: "/admin/gerenciador-financeiro/retirada", icon: <Store className="w-4 h-4" />, color: "text-purple-600" },
+            { label: "Pagamentos Retirada", href: "/admin/gerenciador-financeiro/retirada", icon: <Store className="w-4 h-4" />, color: "text-orange-600" },
             { label: "Fluxo de Caixa", href: "/admin/gerenciador-financeiro/fluxo", icon: <TrendingUp className="w-4 h-4" />, color: "text-blue-600" },
             { label: "Relatórios", href: "/admin/gerenciador-financeiro/relatorios", icon: <BarChart3 className="w-4 h-4" />, color: "text-gray-600" },
             { label: "Gestão Fiscal", href: "/admin/fiscal", icon: <DollarSign className="w-4 h-4" />, color: "text-indigo-600" },

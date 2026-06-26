@@ -68,7 +68,7 @@ export function HeroSection() {
           >
             Precisou imprimir?<br />
             Pede pra{" "}
-            <span style={{ color: "#e91e63" }}>Maria.</span>
+            <span style={{ color: "#E6005C" }}>Maria.</span>
           </h1>
 
           {/* Subtítulo */}

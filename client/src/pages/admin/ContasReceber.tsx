@@ -19,7 +19,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pagamento_retirada: { label: "Pag. Retirada", color: "bg-blue-100 text-blue-700" },
   analisando: { label: "Analisando", color: "bg-orange-100 text-orange-700" },
   com_problemas: { label: "Com Problemas", color: "bg-red-100 text-red-700" },
-  em_producao: { label: "Em Produção", color: "bg-purple-100 text-purple-700" },
+  em_producao: { label: "Em Produção", color: "bg-orange-100 text-orange-700" },
   pronto_entrega: { label: "Pronto p/ Entrega", color: "bg-teal-100 text-teal-700" },
   pronto_retirada: { label: "Pronto p/ Retirada", color: "bg-cyan-100 text-cyan-700" },
   entregue: { label: "Entregue", color: "bg-emerald-100 text-emerald-700" },

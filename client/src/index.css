@@ -5,15 +5,18 @@
 
 /*
  * ═══════════════════════════════════════════════════════════════════
- *  DESIGN TOKENS — Identidade Visual Oficial (baseada na Home)
+ *  DESIGN TOKENS — Identidade Visual Oficial
  *
- *  Cor primária: Rosa Magenta (#E91E63)  → usa pink-* do Tailwind
- *  Cor de destaque: Laranja (#FF6B35)    → mantida como accent
- *  Neutros: cinzas padrão do Tailwind
+ *  Rosa Magenta Oficial: #E6005C
+ *  OKLCH: oklch(0.591 0.236 10.2)
  *
- *  ESTRATÉGIA: orange-* é remapeado para os valores de pink-*
- *  para que todos os componentes que usam orange-* herdem
- *  automaticamente a cor oficial da marca sem editar cada arquivo.
+ *  Registrado como 'brand-pink' — fonte única de verdade para
+ *  toda a paleta de cor primária do site.
+ *
+ *  ESTRATÉGIA DE REMAPEAMENTO:
+ *  - orange-* → brand-pink (componentes legados que usavam laranja)
+ *  - pink-*   → brand-pink (componentes que usavam pink genérico)
+ *  Ambas as escalas agora apontam para o Rosa Magenta oficial.
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -24,67 +27,124 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Cores semânticas do shadcn/ui */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
+  /* Cores semânticas shadcn/ui */
+  --color-background:              var(--background);
+  --color-foreground:              var(--foreground);
+  --color-card:                    var(--card);
+  --color-card-foreground:         var(--card-foreground);
+  --color-popover:                 var(--popover);
+  --color-popover-foreground:      var(--popover-foreground);
+  --color-primary:                 var(--primary);
+  --color-primary-foreground:      var(--primary-foreground);
+  --color-secondary:               var(--secondary);
+  --color-secondary-foreground:    var(--secondary-foreground);
+  --color-muted:                   var(--muted);
+  --color-muted-foreground:        var(--muted-foreground);
+  --color-accent:                  var(--accent);
+  --color-accent-foreground:       var(--accent-foreground);
+  --color-destructive:             var(--destructive);
+  --color-destructive-foreground:  var(--destructive-foreground);
+  --color-border:                  var(--border);
+  --color-input:                   var(--input);
+  --color-ring:                    var(--ring);
+  --color-chart-1:                 var(--chart-1);
+  --color-chart-2:                 var(--chart-2);
+  --color-chart-3:                 var(--chart-3);
+  --color-chart-4:                 var(--chart-4);
+  --color-chart-5:                 var(--chart-5);
+  --color-sidebar:                 var(--sidebar);
+  --color-sidebar-foreground:      var(--sidebar-foreground);
+  --color-sidebar-primary:         var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent:          var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border:          var(--sidebar-border);
+  --color-sidebar-ring:            var(--sidebar-ring);
 
-  /*
-   * ─────────────────────────────────────────────────────────────────
-   *  REMAPEAMENTO: orange-* → pink-* (Rosa Magenta oficial da marca)
-   *
-   *  Todos os componentes que usam bg-orange-*, text-orange-*,
-   *  border-orange-*, hover:bg-orange-* etc. passarão a exibir
-   *  automaticamente as cores rosa magenta da Home.
-   * ─────────────────────────────────────────────────────────────────
-   */
+  /* ─────────────────────────────────────────────────────────────────
+   *  BRAND-PINK — Escala oficial baseada em #E6005C
+   *  Disponível como bg-brand-pink-*, text-brand-pink-*, etc.
+   * ───────────────────────────────────────────────────────────────── */
+  --color-brand-pink-50:  oklch(0.97 0.02 10.2);
+  --color-brand-pink-100: oklch(0.94 0.05 10.2);
+  --color-brand-pink-200: oklch(0.88 0.10 10.2);
+  --color-brand-pink-300: oklch(0.80 0.15 10.2);
+  --color-brand-pink-400: oklch(0.72 0.20 10.2);
+  --color-brand-pink-500: oklch(0.65 0.23 10.2);
+  --color-brand-pink-600: oklch(0.591 0.236 10.2); /* #E6005C — COR OFICIAL */
+  --color-brand-pink-700: oklch(0.50 0.22 10.2);
+  --color-brand-pink-800: oklch(0.40 0.18 10.2);
+  --color-brand-pink-900: oklch(0.30 0.14 10.2);
+  --color-brand-pink-950: oklch(0.20 0.10 10.2);
 
-  /* Rosa Magenta — escala completa mapeada sobre orange-* */
-  --color-orange-50:  oklch(0.97 0.02 334);   /* #FFF0F5 — fundo suave */
-  --color-orange-100: oklch(0.94 0.04 334);   /* #FFD6E7 — hover leve */
-  --color-orange-200: oklch(0.88 0.08 334);   /* #FFB3CC — borda suave */
-  --color-orange-300: oklch(0.80 0.13 334);   /* #FF80AB — destaque claro */
-  --color-orange-400: oklch(0.72 0.19 334);   /* #F06292 — rosa médio */
-  --color-orange-500: oklch(0.62 0.25 334);   /* #E91E63 — COR PRINCIPAL */
-  --color-orange-600: oklch(0.54 0.26 334);   /* #C2185B — hover escuro */
-  --color-orange-700: oklch(0.46 0.24 334);   /* #AD1457 — ativo */
-  --color-orange-800: oklch(0.38 0.20 334);   /* #880E4F — muito escuro */
-  --color-orange-900: oklch(0.30 0.16 334);   /* #560027 — sombra */
-  --color-orange-950: oklch(0.22 0.12 334);   /* #3D0018 — ultra escuro */
+  /* ─────────────────────────────────────────────────────────────────
+   *  REMAPEAMENTO: orange-* → brand-pink
+   *  Todos os bg-orange-*, text-orange-*, border-orange-* etc.
+   *  passam a usar o Rosa Magenta oficial automaticamente.
+   * ───────────────────────────────────────────────────────────────── */
+  --color-orange-50:  oklch(0.97 0.02 10.2);
+  --color-orange-100: oklch(0.94 0.05 10.2);
+  --color-orange-200: oklch(0.88 0.10 10.2);
+  --color-orange-300: oklch(0.80 0.15 10.2);
+  --color-orange-400: oklch(0.72 0.20 10.2);
+  --color-orange-500: oklch(0.65 0.23 10.2);
+  --color-orange-600: oklch(0.591 0.236 10.2);
+  --color-orange-700: oklch(0.50 0.22 10.2);
+  --color-orange-800: oklch(0.40 0.18 10.2);
+  --color-orange-900: oklch(0.30 0.14 10.2);
+  --color-orange-950: oklch(0.20 0.10 10.2);
+
+  /* ─────────────────────────────────────────────────────────────────
+   *  REMAPEAMENTO: pink-* → brand-pink
+   *  Todos os bg-pink-*, text-pink-*, border-pink-* etc.
+   *  passam a usar o Rosa Magenta oficial automaticamente.
+   * ───────────────────────────────────────────────────────────────── */
+  --color-pink-50:  oklch(0.97 0.02 10.2);
+  --color-pink-100: oklch(0.94 0.05 10.2);
+  --color-pink-200: oklch(0.88 0.10 10.2);
+  --color-pink-300: oklch(0.80 0.15 10.2);
+  --color-pink-400: oklch(0.72 0.20 10.2);
+  --color-pink-500: oklch(0.65 0.23 10.2);
+  --color-pink-600: oklch(0.591 0.236 10.2);
+  --color-pink-700: oklch(0.50 0.22 10.2);
+  --color-pink-800: oklch(0.40 0.18 10.2);
+  --color-pink-900: oklch(0.30 0.14 10.2);
+  --color-pink-950: oklch(0.20 0.10 10.2);
+
+  /* ─────────────────────────────────────────────────────────────────
+   *  REMAPEAMENTO: rose-* → brand-pink
+   * ───────────────────────────────────────────────────────────────── */
+  --color-rose-50:  oklch(0.97 0.02 10.2);
+  --color-rose-100: oklch(0.94 0.05 10.2);
+  --color-rose-200: oklch(0.88 0.10 10.2);
+  --color-rose-300: oklch(0.80 0.15 10.2);
+  --color-rose-400: oklch(0.72 0.20 10.2);
+  --color-rose-500: oklch(0.65 0.23 10.2);
+  --color-rose-600: oklch(0.591 0.236 10.2);
+  --color-rose-700: oklch(0.50 0.22 10.2);
+  --color-rose-800: oklch(0.40 0.18 10.2);
+  --color-rose-900: oklch(0.30 0.14 10.2);
+  --color-rose-950: oklch(0.20 0.10 10.2);
+
+  /* ─────────────────────────────────────────────────────────────────
+   *  REMAPEAMENTO: fuchsia-* → brand-pink
+   * ───────────────────────────────────────────────────────────────── */
+  --color-fuchsia-50:  oklch(0.97 0.02 10.2);
+  --color-fuchsia-100: oklch(0.94 0.05 10.2);
+  --color-fuchsia-200: oklch(0.88 0.10 10.2);
+  --color-fuchsia-300: oklch(0.80 0.15 10.2);
+  --color-fuchsia-400: oklch(0.72 0.20 10.2);
+  --color-fuchsia-500: oklch(0.65 0.23 10.2);
+  --color-fuchsia-600: oklch(0.591 0.236 10.2);
+  --color-fuchsia-700: oklch(0.50 0.22 10.2);
+  --color-fuchsia-800: oklch(0.40 0.18 10.2);
+  --color-fuchsia-900: oklch(0.30 0.14 10.2);
+  --color-fuchsia-950: oklch(0.20 0.10 10.2);
 }
 
 :root {
-  /* ── Cor primária: Rosa Magenta #E91E63 em OKLCH ── */
-  --primary:            oklch(0.62 0.25 334);
+  /* ── Cor primária: Rosa Magenta Oficial #E6005C ── */
+  --primary:            oklch(0.591 0.236 10.2);
   --primary-foreground: oklch(0.98 0 0);
 
   /* ── Radius base ── */
@@ -102,16 +162,16 @@
   --popover:            oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 0);
 
-  /* ── Secondary (rosa magenta) ── */
-  --secondary:            oklch(0.62 0.25 334);
+  /* ── Secondary ── */
+  --secondary:            oklch(0.591 0.236 10.2);
   --secondary-foreground: oklch(0.98 0 0);
 
   /* ── Muted ── */
   --muted:            oklch(0.96 0.001 0);
   --muted-foreground: oklch(0.5 0.01 0);
 
-  /* ── Accent (rosa magenta) ── */
-  --accent:            oklch(0.62 0.25 334);
+  /* ── Accent ── */
+  --accent:            oklch(0.591 0.236 10.2);
   --accent-foreground: oklch(0.98 0 0);
 
   /* ── Destructive ── */
@@ -121,28 +181,28 @@
   /* ── Border / Input / Ring ── */
   --border: oklch(0.92 0.001 0);
   --input:  oklch(0.97 0.001 0);
-  --ring:   oklch(0.62 0.25 334);
+  --ring:   oklch(0.591 0.236 10.2);
 
   /* ── Charts ── */
-  --chart-1: oklch(0.62 0.25 334);
+  --chart-1: oklch(0.591 0.236 10.2);
   --chart-2: oklch(0.55 0.25 240);
   --chart-3: oklch(0.45 0.25 240);
-  --chart-4: oklch(0.35 0.2  240);
+  --chart-4: oklch(0.35 0.20 240);
   --chart-5: oklch(0.25 0.15 240);
 
   /* ── Sidebar ── */
-  --sidebar:                      oklch(0.99 0 0);
-  --sidebar-foreground:           oklch(0.15 0.01 0);
-  --sidebar-primary:              oklch(0.62 0.25 334);
-  --sidebar-primary-foreground:   oklch(0.98 0 0);
-  --sidebar-accent:               oklch(0.62 0.25 334);
-  --sidebar-accent-foreground:    oklch(0.98 0 0);
-  --sidebar-border:               oklch(0.92 0.001 0);
-  --sidebar-ring:                 oklch(0.62 0.25 334);
+  --sidebar:                    oklch(0.99 0 0);
+  --sidebar-foreground:         oklch(0.15 0.01 0);
+  --sidebar-primary:            oklch(0.591 0.236 10.2);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent:             oklch(0.591 0.236 10.2);
+  --sidebar-accent-foreground:  oklch(0.98 0 0);
+  --sidebar-border:             oklch(0.92 0.001 0);
+  --sidebar-ring:               oklch(0.591 0.236 10.2);
 }
 
 .dark {
-  --primary:            oklch(0.72 0.27 334);
+  --primary:            oklch(0.68 0.24 10.2);
   --primary-foreground: oklch(0.98 0 0);
   --background:         oklch(0.08 0.001 0);
   --foreground:         oklch(0.98 0.001 0);
@@ -150,30 +210,30 @@
   --card-foreground:    oklch(0.98 0.001 0);
   --popover:            oklch(0.08 0.001 0);
   --popover-foreground: oklch(0.98 0.001 0);
-  --secondary:          oklch(0.72 0.27 334);
+  --secondary:          oklch(0.68 0.24 10.2);
   --secondary-foreground: oklch(0.98 0 0);
   --muted:              oklch(0.25 0.001 0);
   --muted-foreground:   oklch(0.7 0.005 65);
-  --accent:             oklch(0.72 0.27 334);
+  --accent:             oklch(0.68 0.24 10.2);
   --accent-foreground:  oklch(0.08 0.001 0);
   --destructive:        oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
   --border:             oklch(1 0 0 / 10%);
   --input:              oklch(1 0 0 / 15%);
-  --ring:               oklch(0.72 0.27 334);
-  --chart-1:            oklch(0.72 0.27 334);
+  --ring:               oklch(0.68 0.24 10.2);
+  --chart-1:            oklch(0.68 0.24 10.2);
   --chart-2:            oklch(0.55 0.25 240);
   --chart-3:            oklch(0.45 0.25 240);
-  --chart-4:            oklch(0.35 0.2  240);
+  --chart-4:            oklch(0.35 0.20 240);
   --chart-5:            oklch(0.25 0.15 240);
   --sidebar:            oklch(0.15 0.001 0);
   --sidebar-foreground: oklch(0.98 0.001 0);
-  --sidebar-primary:    oklch(0.72 0.27 334);
+  --sidebar-primary:    oklch(0.68 0.24 10.2);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent:     oklch(0.72 0.27 334);
+  --sidebar-accent:     oklch(0.68 0.24 10.2);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border:     oklch(1 0 0 / 10%);
-  --sidebar-ring:       oklch(0.72 0.27 334);
+  --sidebar-ring:       oklch(0.68 0.24 10.2);
 }
 
 @layer base {

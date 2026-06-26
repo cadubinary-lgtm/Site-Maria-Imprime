@@ -11,7 +11,7 @@ const KANBAN_COLUMNS = [
   { id: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: "🏪", bg: "bg-blue-50",    border: "border-blue-200",    badge: "bg-blue-100 text-blue-800",    header: "bg-blue-500" },
   { id: "analisando",          label: "Analisando",             icon: "🔍", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800", header: "bg-orange-500" },
   { id: "com_problemas",       label: "Com Problemas",          icon: "⚠️", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
-  { id: "em_producao",         label: "Em Produção",            icon: "⚙️", bg: "bg-purple-50",  border: "border-purple-200",  badge: "bg-purple-100 text-purple-800", header: "bg-purple-500" },
+  { id: "em_producao",         label: "Em Produção",            icon: "⚙️", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800", header: "bg-orange-500" },
   { id: "pronto_entrega",      label: "Pronto para Entrega",    icon: "🚚", bg: "bg-teal-50",    border: "border-teal-200",    badge: "bg-teal-100 text-teal-800",    header: "bg-teal-500" },
   { id: "pronto_retirada",     label: "Pronto para Retirada",   icon: "🎁", bg: "bg-cyan-50",    border: "border-cyan-200",    badge: "bg-cyan-100 text-cyan-800",    header: "bg-cyan-500" },
   { id: "entregue",            label: "Entregue",               icon: "✔️", bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-800",header: "bg-emerald-500" },

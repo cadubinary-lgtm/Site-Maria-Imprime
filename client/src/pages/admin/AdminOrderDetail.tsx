@@ -472,7 +472,7 @@ export default function AdminOrderDetail() {
                       AI: 'bg-orange-100 text-orange-700',
                       PSD: 'bg-blue-100 text-blue-700',
                       CDR: 'bg-green-100 text-green-700',
-                      EPS: 'bg-purple-100 text-purple-700',
+                      EPS: 'bg-orange-100 text-orange-700',
                       SVG: 'bg-teal-100 text-teal-700',
                       JPG: 'bg-yellow-100 text-yellow-700',
                       JPEG: 'bg-yellow-100 text-yellow-700',
@@ -554,19 +554,19 @@ export default function AdminOrderDetail() {
         </Card>
 
         {/* ── Prévia da Arte (Admin → Cliente) ── */}
-        <Card className="border-purple-200">
+        <Card className="border-orange-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              <ImagePlus className="w-5 h-5 text-purple-600" />
+              <ImagePlus className="w-5 h-5 text-orange-600" />
               Prévia da Arte para o Cliente
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
 
             {/* Upload de nova prévia */}
-            <div className="bg-purple-50 rounded-xl border border-purple-200 p-4 space-y-3">
-              <p className="text-sm font-semibold text-purple-800">Enviar nova prévia</p>
-              <p className="text-xs text-purple-600">
+            <div className="bg-orange-50 rounded-xl border border-orange-200 p-4 space-y-3">
+              <p className="text-sm font-semibold text-orange-800">Enviar nova prévia</p>
+              <p className="text-xs text-orange-600">
                 A imagem ficará visível para o cliente na página de acompanhamento do pedido.
               </p>
               <Textarea
@@ -587,7 +587,7 @@ export default function AdminOrderDetail() {
                 <Button
                   onClick={() => previewFileRef.current?.click()}
                   disabled={isUploadingPreview}
-                  className="bg-purple-600 hover:bg-purple-700 gap-2"
+                  className="bg-orange-600 hover:bg-orange-700 gap-2"
                 >
                   {isUploadingPreview ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

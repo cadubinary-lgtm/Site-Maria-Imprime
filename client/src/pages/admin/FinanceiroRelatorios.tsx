@@ -21,7 +21,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 
 const PAYMENT_COLORS: Record<string, string> = {
   pix: "bg-green-500", cartao_credito: "bg-blue-500", cartao_debito: "bg-indigo-500",
-  dinheiro: "bg-yellow-500", boleto: "bg-orange-500", transferencia: "bg-purple-500",
+  dinheiro: "bg-yellow-500", boleto: "bg-orange-500", transferencia: "bg-orange-500",
   pagar_na_retirada: "bg-teal-500", outro: "bg-gray-500",
 };
 
@@ -106,7 +106,7 @@ export default function FinanceiroRelatorios() {
             {[
               { label: "Receita Bruta", value: formatCurrency(data.receitaBruta), icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
               { label: "Receita Líquida", value: formatCurrency(data.receitaLiquida), icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
-              { label: "Ticket Médio", value: formatCurrency(data.ticketMedio), icon: BarChart2, color: "text-purple-600", bg: "bg-purple-50" },
+              { label: "Ticket Médio", value: formatCurrency(data.ticketMedio), icon: BarChart2, color: "text-orange-600", bg: "bg-orange-50" },
               { label: "Pedidos Pagos", value: String(data.pedidosPagos), icon: ShoppingBag, color: "text-orange-600", bg: "bg-orange-50", suffix: "pedidos" },
             ].map(m => (
               <Card key={m.label} className="border-0 shadow-sm">

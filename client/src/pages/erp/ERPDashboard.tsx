@@ -78,7 +78,7 @@ export default function ERPDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-purple-500">
+          <Card className="border-l-4 border-l-orange-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
@@ -86,7 +86,7 @@ export default function ERPDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">
+              <div className="text-3xl font-bold text-orange-600">
                 R$ {parseFloat(String(averageTicket?.averageTicket || "0")).toFixed(0)}
               </div>
               <p className="text-xs text-gray-500 mt-1">Últimos 30 dias</p>
@@ -158,7 +158,7 @@ export default function ERPDashboard() {
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-purple-600" />
+                  <FileCheck className="w-5 h-5 text-orange-600" />
                   Web2Print
                 </CardTitle>
                 <CardDescription>Validação de arquivos</CardDescription>
@@ -310,7 +310,7 @@ export default function ERPDashboard() {
                 </div>
                 <div className="flex justify-between items-center p-2">
                   <span className="text-sm">SMS</span>
-                  <Badge className="bg-purple-100 text-purple-800">{automationTypes?.sms || 0}</Badge>
+                  <Badge className="bg-orange-100 text-orange-800">{automationTypes?.sms || 0}</Badge>
                 </div>
                 <div className="flex justify-between items-center p-2">
                   <span className="text-sm">Notificações</span>

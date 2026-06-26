@@ -37,7 +37,7 @@ const PRODUCT_FEATURES = [
   { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
   { Icon: Scissors,   bg: "bg-orange-50", color: "text-orange-600", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
-  { Icon: LayoutGrid, bg: "bg-purple-50", color: "text-purple-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
+  { Icon: LayoutGrid, bg: "bg-orange-50", color: "text-orange-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
 ];
 
 const COMPANY_DIFFERENTIALS = [

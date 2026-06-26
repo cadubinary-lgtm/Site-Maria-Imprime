@@ -43,7 +43,7 @@ type AdminRow = {
 const roleLabels: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   superadmin: { label: "Superadmin", icon: <ShieldCheck className="h-3 w-3" />, color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
   admin: { label: "Admin", icon: <Shield className="h-3 w-3" />, color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  production: { label: "Produção", icon: <Wrench className="h-3 w-3" />, color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
+  production: { label: "Produção", icon: <Wrench className="h-3 w-3" />, color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
 };
 
 export default function AdminsManager() {

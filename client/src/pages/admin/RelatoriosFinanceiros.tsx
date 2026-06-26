@@ -17,7 +17,7 @@ const fmt = (v: number) =>
 const fmtDate = (d: any) =>
   d ? new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "-";
 
-const COLORS = ["#E91E63", "#3b82f6", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#f59e0b"];
+const COLORS = ["#E6005C", "#3b82f6", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#f59e0b"];
 
 export default function RelatoriosFinanceiros() {
   const [reportType, setReportType] = useState<"revenue" | "orders" | "payment_methods">("revenue");
@@ -170,7 +170,7 @@ export default function RelatoriosFinanceiros() {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: any) => fmt(v)} />
-                  <Bar dataKey="value" name="Receita" fill="#E91E63" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="value" name="Receita" fill="#E6005C" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
