@@ -16,7 +16,7 @@ import {
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "text-green-700",   bg: "bg-green-100",   dot: "#22c55e" },
   pagamento_retirada: { label: "Pagamento Retirada",  color: "text-blue-700",    bg: "bg-blue-100",    dot: "#3b82f6" },
-  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#f97316" },
+  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E91E63" },
   com_problemas:      { label: "Com Problemas",       color: "text-red-700",     bg: "bg-red-100",     dot: "#ef4444" },
   em_producao:        { label: "Em Produção",         color: "text-purple-700",  bg: "bg-purple-100",  dot: "#a855f7" },
   pronto_entrega:     { label: "Pronto p/ Entrega",   color: "text-teal-700",    bg: "bg-teal-100",    dot: "#14b8a6" },
@@ -176,15 +176,15 @@ export default function AdminDashboard() {
                 <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#E91E63" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#E91E63" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: any) => [fmt(v), "Faturamento"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-                  <Area type="monotone" dataKey="value" stroke="#f97316" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ fill: "#f97316", r: 4 }} activeDot={{ r: 6 }} />
+                  <Area type="monotone" dataKey="value" stroke="#E91E63" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ fill: "#E91E63", r: 4 }} activeDot={{ r: 6 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
