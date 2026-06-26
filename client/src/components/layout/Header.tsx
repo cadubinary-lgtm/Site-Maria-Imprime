@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle, Package } from "lucide-react";
 import { toast } from "sonner";
-import { useTheme } from "@/hooks/useTheme";
 
 function CartIcon() {
   const { data: count } = trpc.cart.getCount.useQuery(undefined, {
@@ -106,24 +105,9 @@ export default function Header() {
     (searchResults?.categories.length || 0) +
     (searchResults?.materials.length || 0);
 
-  const theme = useTheme();
-
   return (
-    <header 
-      className="sticky top-0 z-50 no-print"
-      style={{
-        backgroundColor: theme.colors.background.primary,
-        borderBottom: `1px solid ${theme.colors.border.light}`,
-        boxShadow: theme.colors.shadow.sm,
-      }}
-    >
-      <div 
-        style={{
-          maxWidth: theme.containerMaxWidth.xl,
-          margin: "0 auto",
-          padding: `${theme.spacing.md} ${theme.containerPadding.desktop}`,
-        }}
-      >
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm no-print">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo Oficial */}
@@ -150,50 +134,22 @@ export default function Header() {
                 value={searchQuery}
                 onChange={handleSearch}
                 onFocus={() => searchQuery && setShowResults(true)}
-                style={{
-                  paddingLeft: "40px",
-                  paddingRight: theme.spacing.lg,
-                  borderRadius: theme.borderRadius.lg,
-                  border: `1.5px solid ${theme.colors.border.light}`,
-                  fontSize: theme.typography.fontSize.sm,
-                  fontFamily: theme.typography.fontFamily.primary,
-                }}
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
             {/* Search Results Dropdown */}
             {showResults && searchQuery && (
-              <div 
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  right: 0,
-                  marginTop: theme.spacing.md,
-                  backgroundColor: theme.colors.background.primary,
-                  border: `1px solid ${theme.colors.border.light}`,
-                  borderRadius: theme.borderRadius.lg,
-                  boxShadow: theme.colors.shadow.lg,
-                  maxHeight: "24rem",
-                  overflowY: "auto",
-                  zIndex: 50,
-                }}
-              >
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
                 {isSearching ? (
-                  <div style={{ padding: theme.spacing.lg, textAlign: "center", color: theme.colors.neutral.textLight }}>Buscando...</div>
+                  <div className="p-4 text-center text-gray-500">Buscando...</div>
                 ) : totalResults === 0 ? (
-                  <div style={{ padding: theme.spacing.lg, textAlign: "center", color: theme.colors.neutral.textLight }}>Nenhum resultado encontrado</div>
+                  <div className="p-4 text-center text-gray-500">Nenhum resultado encontrado</div>
                 ) : (
                   <div className="divide-y">
                     {searchResults?.products && searchResults.products.length > 0 && (
                       <div>
-                        <div style={{
-                          padding: `${theme.spacing.md} ${theme.spacing.lg}`,
-                          backgroundColor: theme.colors.background.secondary,
-                          fontWeight: theme.typography.fontWeight.semibold,
-                          fontSize: theme.typography.fontSize.sm,
-                          color: theme.colors.neutral.textDarker,
-                        }}>
+                        <div className="px-4 py-2 bg-gray-50 font-semibold text-sm text-gray-700">
                           Produtos ({searchResults.products.length})
                         </div>
                         {searchResults.products.map((product) => (
