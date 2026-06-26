@@ -239,6 +239,57 @@ async function startServer() {
 
     // Melhor Envio OAuth2 Callback — removido (módulo reiniciado)
 
+  // ── Mercado Pago Webhook IPN ──────────────────────────────────────────────────
+  app.post('/api/payments/mercadopago/webhook', async (req, res) => {
+    try {
+      const { type, data } = req.body || {};
+      console.log('[MP Webhook] Received:', type, data);
+
+      if ((type === 'payment' || type === 'payment.updated') && data?.id) {
+        const { getDb } = await import('../db.js');
+        const { orders: ordersT, orderPayments: orderPaymentsT, storeSettings: storeSettingsT } = await import('../../drizzle/schema.js');
+        const { eq: eqOp } = await import('drizzle-orm');
+        const { updateOrderStatus } = await import('../db.js');
+
+        const db = await getDb();
+        if (!db) { res.sendStatus(200); return; }
+
+        // Get access token from DB or env
+        let accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN || '';
+        try {
+          const settingsRows = await db.select().from(storeSettingsT).limit(1);
+          if (settingsRows[0]?.mercadopagoAccessToken) accessToken = settingsRows[0].mercadopagoAccessToken;
+        } catch { /* ignore */ }
+
+        if (!accessToken) { res.sendStatus(200); return; }
+
+        const MercadoPagoConfig = (await import('mercadopago')).default;
+        const { Payment } = await import('mercadopago');
+        const client = new MercadoPagoConfig({ accessToken });
+        const paymentApi = new Payment(client);
+        const payment = await paymentApi.get({ id: String(data.id) });
+
+        // Update payment record
+        try {
+          await db.update(orderPaymentsT)
+            .set({ status: payment.status || 'unknown', updatedAt: Date.now() })
+            .where(eqOp(orderPaymentsT.paymentId, String(data.id)));
+        } catch { /* ignore if not found */ }
+
+        if (payment.status === 'approved' && payment.external_reference) {
+          const orderId = Number(payment.external_reference);
+          await updateOrderStatus(orderId, 'pagamento_aprovado', 'Pagamento aprovado via Mercado Pago (webhook)');
+          console.log(`[MP Webhook] Pedido ${orderId} aprovado`);
+        }
+      }
+
+      res.sendStatus(200);
+    } catch (err) {
+      console.error('[MP Webhook] Erro:', err);
+      res.sendStatus(200); // Always 200 to avoid MP retries
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
