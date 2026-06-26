@@ -15,11 +15,14 @@ import {
   AlertCircle, CheckCircle, RefreshCw, Plus, ClipboardList, ArrowRight
 } from 'lucide-react';
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendente', color: 'bg-yellow-100 text-yellow-700' },
-  cart: { label: 'No Carrinho', color: 'bg-blue-100 text-blue-700' },
-  paid: { label: 'Pago / Etiqueta Emitida', color: 'bg-green-100 text-green-700' },
-  error: { label: 'Erro', color: 'bg-red-100 text-red-700' },
+const STATUS_LABELS: Record<string, { label: string; color: string; icon?: string }> = {
+  pending:   { label: 'Pendente',                      color: 'bg-yellow-100 text-yellow-700' },
+  cart:      { label: 'No Carrinho ME',                color: 'bg-blue-100 text-blue-700' },
+  paid:      { label: 'Emitido / Pronto para Postagem', color: 'bg-green-100 text-green-700' },
+  posted:    { label: 'Postado',                       color: 'bg-teal-100 text-teal-700' },
+  delivered: { label: 'Entregue',                      color: 'bg-emerald-100 text-emerald-700' },
+  cancelled: { label: 'Cancelado',                     color: 'bg-red-100 text-red-700' },
+  error:     { label: 'Erro',                          color: 'bg-red-100 text-red-700' },
 };
 
 const EMPTY_FORM = {
@@ -121,13 +124,19 @@ export function ShipmentsManager() {
   const handleCheckout = async (shipmentId: number) => {
     try {
       const result = await checkoutMutation.mutateAsync({ shipmentId });
-      toast.success('Etiqueta emitida com sucesso!');
       if (result.labelUrl) {
+        toast.success('✅ Etiqueta emitida! Abrindo PDF em nova aba...');
         window.open(result.labelUrl, '_blank');
+      } else {
+        toast.success('Pagamento aprovado! A etiqueta será gerada em instantes. Clique em "Imprimir Etiqueta" para baixar.');
+      }
+      if (result.trackingCode) {
+        toast.info(`Código de rastreio: ${result.trackingCode}`);
       }
       refetch();
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao emitir etiqueta');
+      const msg = err.message || 'Erro ao emitir etiqueta';
+      toast.error(msg);
     }
   };
 
@@ -278,21 +287,31 @@ export function ShipmentsManager() {
                             size="sm"
                             onClick={() => handleCheckout(shipment.id)}
                             disabled={checkoutMutation.isPending}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-green-600 hover:bg-green-700 font-semibold"
                           >
                             {checkoutMutation.isPending
-                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processando...</>
                               : <><CreditCard className="w-4 h-4 mr-1" /> Pagar e Emitir</>}
                           </Button>
                         )}
                         {shipment.labelUrl && (
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => window.open(shipment.labelUrl, '_blank')}
+                            onClick={() => window.open(shipment.labelUrl!, '_blank')}
+                            className="bg-orange-500 hover:bg-orange-600 font-semibold"
                           >
-                            <Tag className="w-4 h-4 mr-1" /> Etiqueta
+                            <Tag className="w-4 h-4 mr-1" /> Imprimir Etiqueta
                             <ExternalLink className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                        {shipment.status === 'paid' && !shipment.labelUrl && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => refetch()}
+                            title="A etiqueta pode levar alguns segundos para ficar disponível"
+                          >
+                            <RefreshCw className="w-4 h-4 mr-1" /> Buscar Etiqueta
                           </Button>
                         )}
                       </div>
