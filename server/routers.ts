@@ -1379,9 +1379,18 @@ createOrder: protectedProcedure
         getOrderById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
-        // Admin pode ver qualquer pedido
+        // Admin pode ver qualquer pedido — retorna pedido + itens
         if (ctx.user.role === "admin") {
-          return await getOrderById(input.id);
+          const db = await getDb();
+          if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+          const order = await getOrderById(input.id);
+          if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+          const { sql: sqlOp } = await import("drizzle-orm");
+          const itemRows = await db.execute(
+            sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.id}`
+          ) as any;
+          const items = (itemRows[0] ?? []) as any[];
+          return { ...order, items };
         }
         const result = await getOrderDetailByUser(input.id, ctx.user.id);
         if (!result) {
