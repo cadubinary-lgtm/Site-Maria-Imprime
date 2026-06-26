@@ -143,14 +143,18 @@ export function templateOrderConfirmation(firstName: string, orderNumber: string
   `);
 }
 
-export function templateOrderStatusUpdate(firstName: string, orderNumber: string, newStatus: string): string {
+export function templateOrderStatusUpdate(firstName: string, orderNumber: string, newStatus: string, trackUrl?: string): string {
+  const url = trackUrl ?? `${SITE_URL}/confirmacao/${orderNumber}`;
   return baseTemplate("Status do pedido atualizado", `
-    ${h1("Status do pedido atualizado 📦")}
+    ${h1("Status do pedido atualizado \ud83d\udce6")}
     ${p(`Olá, <strong>${firstName}</strong>! Seu pedido <strong>#${orderNumber}</strong> teve o status atualizado.`)}
     <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:8px;padding:16px;margin:16px 0;">
       <p style="color:#1e40af;font-size:15px;margin:0;"><strong>Novo status:</strong> ${newStatus}</p>
     </div>
-    <div style="text-align:center;">${btn("Ver detalhes do pedido", `${SITE_URL}/confirmacao/${orderNumber}`)}</div>
+    ${p("Acompanhe seu pedido em tempo real. Não é necessário fazer login:")}
+    <div style="text-align:center;">${btn("Acompanhar meu pedido", url)}</div>
+    ${divider()}
+    ${p("Dúvidas? Entre em contato pelo WhatsApp ou pelo nosso site.")}
   `);
 }
 
@@ -225,6 +229,6 @@ export async function sendOrderConfirmationWithLink(to: string, firstName: strin
   return send(to, `Pedido #${orderNumber} confirmado — Gráfica Ponto Digital`, templateOrderConfirmationWithLink(firstName, orderNumber, total, trackUrl));
 }
 
-export async function sendOrderStatusUpdateEmail(to: string, firstName: string, orderNumber: string, newStatus: string): Promise<SendResult> {
-  return send(to, `Pedido #${orderNumber} atualizado — Gráfica Ponto Digital`, templateOrderStatusUpdate(firstName, orderNumber, newStatus));
+export async function sendOrderStatusUpdateEmail(to: string, firstName: string, orderNumber: string, newStatus: string, trackUrl?: string): Promise<SendResult> {
+  return send(to, `Pedido #${orderNumber} atualizado — Gráfica Ponto Digital`, templateOrderStatusUpdate(firstName, orderNumber, newStatus, trackUrl));
 }

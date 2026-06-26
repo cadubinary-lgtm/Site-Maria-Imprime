@@ -157,7 +157,7 @@ export type InsertOrder = typeof orders.$inferInsert;
 export const orderItems = mysqlTable("orderItems", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
-  productId: int("productId").notNull(),
+  productId: int("productId"),  // nullable: produtos personalizados podem não ter productId
   productName: varchar("productName", { length: 255 }), // Nome do produto no momento da compra
   quantity: int("quantity").notNull(),
   priceAtOrder: decimal("priceAtOrder", { precision: 10, scale: 2 }).notNull(),

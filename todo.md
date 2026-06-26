@@ -2292,3 +2292,18 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar testes vitest para validar o filtro (7 testes)
 - [x] Validar que transportadoras inativas não aparecem no frontend
 - [x] Todos os testes passando (7/7)
+
+## Sessão Jun/26 - Correção de orderItems + Dashboard ERP
+
+- [x] Bug CRÍTICO: productId NOT NULL em orderItems causava falha silenciosa no INSERT → corrigido para nullable via ALTER TABLE
+- [x] Logs detalhados adicionados no createOrderFromCart para rastrear inserção de itens
+- [x] Ferramenta de reconciliação admin: botão "Adicionar Item" na tela de detalhes do pedido
+- [x] Ferramenta de reconciliação admin: botão "Remover Item" em cada item do pedido
+- [x] Procedures checkout.addOrderItem e checkout.deleteOrderItem implementadas
+- [x] Dashboard ERP aprimorado com KPIs: pedidos do dia, em produção, aguardando, prontos, atrasados, com problemas
+- [x] Lista de pedidos em produção com link direto para detalhes
+- [x] Lista de pedidos atrasados com alerta visual vermelho
+- [x] Auto-refresh do dashboard a cada 60 segundos
+- [x] Notificações por e-mail de status do pedido agora incluem link de rastreamento personalizado (guestToken ou conta)
+- [x] Template de e-mail de status atualizado com botão "Acompanhar meu pedido"
+- [x] Procedure erp.getDashboardKPIs criada com queries SQL otimizadas
