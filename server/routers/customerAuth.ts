@@ -1003,7 +1003,7 @@ export const customerAuthRouter = router({
       const { sql: sqlFn } = await import("drizzle-orm");
       const ordersRows = await db.execute(
         sqlFn`
-          SELECT id, orderNumber, status, totalAmount, createdAt, shippingLabel, shippingPrice, paymentMethod
+          SELECT id, orderNumber, status, totalPrice, createdAt, shippingLabel, shippingPrice, payment_method AS paymentMethod
           FROM orders
           WHERE customerId = ${input.customerId}
           ORDER BY createdAt DESC

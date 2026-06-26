@@ -332,7 +332,7 @@ function CustomerDetailModal({
                           {ORDER_STATUS_LABELS[order.status] || order.status}
                         </span>
                         <span className="font-semibold text-gray-900">
-                          R$ {Number(order.totalAmount || 0).toFixed(2).replace(".", ",")}
+                          R$ {Number(order.totalPrice || 0).toFixed(2).replace(".", ",")}
                         </span>
                       </div>
                     </div>
