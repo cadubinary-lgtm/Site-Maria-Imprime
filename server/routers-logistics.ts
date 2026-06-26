@@ -13,7 +13,7 @@ import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
-import { logisticsSettings, carriers, shipments, orders, localDeliveryRules, customerAccounts } from "../drizzle/schema";
+import { logisticsSettings, carriers, shipments, orders, localDeliveryRules, customerAccounts, orderItems } from "../drizzle/schema";
 import { eq, and, like, or } from "drizzle-orm";
 import {
   getMeProfile,
@@ -583,9 +583,10 @@ const shipmentsRouter = router({
         recipientCity: z.string(),
         recipientStateAbbr: z.string().max(2),
         recipientCep: z.string().regex(/^\d{8}$/),
+        // products é opcional: se vier vazio ou ausente, buscamos automaticamente da tabela orderItems
         products: z.array(
           z.object({ name: z.string(), quantity: z.number(), unitaryValue: z.number() })
-        ),
+        ).optional(),
         weight: z.number(),
         height: z.number(),
         width: z.number(),
@@ -602,6 +603,53 @@ const shipmentsRouter = router({
           code: "PRECONDITION_FAILED",
           message: "Dados do remetente incompletos. Configure em Logística → Configurações.",
         });
+      }
+
+      // ── Resolução automática de produtos ─────────────────────────────────────
+      // Se o frontend não enviou produtos (ou enviou array vazio), buscamos
+      // automaticamente os itens do pedido na tabela orderItems.
+      let resolvedProducts: Array<{ name: string; quantity: number; unitary_value: number }>;
+
+      const inputProducts = input.products ?? [];
+      if (inputProducts.length > 0) {
+        // Frontend forneceu produtos explicitamente
+        resolvedProducts = inputProducts.map((p) => ({
+          name: p.name,
+          quantity: p.quantity,
+          unitary_value: p.unitaryValue,
+        }));
+      } else {
+        // Buscar itens do pedido diretamente da tabela orderItems
+        const dbItems = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, input.orderId));
+
+        if (dbItems.length > 0) {
+          resolvedProducts = dbItems.map((item) => ({
+            name: item.productName || "Material Gráfico",
+            quantity: item.quantity,
+            unitary_value: Number(item.priceAtOrder),
+          }));
+        } else {
+          // Fallback: se não há itens no banco, usa o total do pedido como produto único
+          const orderRows = await db
+            .select({ totalPrice: orders.totalPrice, orderNumber: orders.orderNumber })
+            .from(orders)
+            .where(eq(orders.id, input.orderId))
+            .limit(1);
+          const orderRow = orderRows[0];
+          resolvedProducts = [{
+            name: `Pedido #${orderRow?.orderNumber ?? input.orderId}`,
+            quantity: 1,
+            unitary_value: Number(orderRow?.totalPrice ?? 0),
+          }];
+        }
+      }
+
+      // Garantir que sempre há ao menos 1 produto (exigência da API do Melhor Envio)
+      if (resolvedProducts.length === 0) {
+        resolvedProducts = [{ name: "Material Gráfico", quantity: 1, unitary_value: 0.01 }];
       }
 
       const cartItem: MeCartItem = {
@@ -635,11 +683,7 @@ const shipmentsRouter = router({
           postal_code: input.recipientCep,
           state_abbr: input.recipientStateAbbr,
         },
-        products: input.products.map((p) => ({
-          name: p.name,
-          quantity: p.quantity,
-          unitary_value: p.unitaryValue,
-        })),
+        products: resolvedProducts,
         volumes: [
           {
             height: input.height,

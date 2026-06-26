@@ -116,7 +116,7 @@ export function ShipmentsManager() {
         recipientCity: addForm.recipientCity,
         recipientStateAbbr: addForm.recipientStateAbbr,
         recipientCep: addForm.recipientCep.replace(/\D/g, ''),
-        products: [],
+        // products omitido: o backend busca automaticamente da tabela orderItems
         weight: parseFloat(addForm.weight),
         height: parseFloat(addForm.height),
         width: parseFloat(addForm.width),
