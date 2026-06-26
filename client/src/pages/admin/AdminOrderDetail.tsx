@@ -871,19 +871,81 @@ export default function AdminOrderDetail() {
 
         {/* Resumo Financeiro */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5" /> Resumo Financeiro
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Total do Pedido</span>
-              <span className="font-bold text-lg text-indigo-600">{fmt(parseFloat(o.totalPrice))}</span>
-            </div>
-            <div className="flex justify-between text-sm border-t pt-3">
-              <span className="text-gray-600">Status de Pagamento</span>
-              <Badge variant="outline">{o.paymentStatus || "Pendente"}</Badge>
+          <CardContent>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+              {/* Linha: Subtotal dos produtos */}
+              {o.items && o.items.length > 0 && (() => {
+                const subtotal = o.items.reduce((acc: number, item: any) =>
+                  acc + parseFloat(item.priceAtOrder) * item.quantity, 0
+                );
+                return (
+                  <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-3.5 h-3.5 text-pink-500" />
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Subtotal Produtos</p>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-800">{fmt(subtotal)}</p>
+                  </div>
+                );
+              })()}
+
+              {/* Linha: Frete */}
+              {o.shippingPrice && parseFloat(o.shippingPrice) > 0 && (
+                <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-3.5 h-3.5 text-blue-500" />
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Frete</p>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">{fmt(parseFloat(o.shippingPrice))}</p>
+                </div>
+              )}
+
+              {/* Linha: Total */}
+              <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-3.5 h-3.5 text-green-600" />
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total do Pedido</p>
+                </div>
+                <p className="text-base font-bold text-indigo-600">{fmt(parseFloat(o.totalPrice))}</p>
+              </div>
+
+              {/* Linha: Status de Pagamento */}
+              <div className="px-4 py-3 grid grid-cols-2 gap-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pagamento</p>
+                    <span className={`inline-block mt-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      o.paymentStatus === 'pago'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : o.paymentStatus === 'cancelado'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {o.paymentStatus === 'pago' ? 'Pago' :
+                       o.paymentStatus === 'cancelado' ? 'Cancelado' :
+                       o.paymentStatus === 'reembolsado' ? 'Reembolsado' :
+                       'Pendente'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Método de pagamento se disponível */}
+                {o.paymentMethod && (
+                  <div className="flex items-start gap-2">
+                    <DollarSign className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Método</p>
+                      <p className="text-sm font-semibold text-gray-800 capitalize">{o.paymentMethod}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
