@@ -115,7 +115,7 @@ export function ProductConfigurationCards({
               key={attr.id}
               className={`cursor-pointer transition-all ${
                 isExpanded
-                  ? "border-blue-500 bg-blue-50"
+                  ? "border-orange-500 bg-orange-50"
                   : isSelected
                     ? "border-green-500 bg-green-50"
                     : "border-gray-200"
