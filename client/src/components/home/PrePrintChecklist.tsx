@@ -47,7 +47,7 @@ export function PrePrintChecklist() {
                 style={{ fontFamily: FONT }}
               >
                 Antes de imprimir,{" "}
-                <span style={{ color: "#e91e63" }}>nós verificamos!</span>
+                <span style={{ color: "#E6005C" }}>nós verificamos!</span>
               </h2>
 
               {/* Subtítulo */}

@@ -181,10 +181,10 @@ export default function GuestOrderTracking() {
 
         {/* ── Prévia da Arte (enviada pela gráfica) ── */}
         {previews.length > 0 && (
-          <Card className="mb-6 border-2 border-purple-200 shadow-sm">
+          <Card className="mb-6 border-2 border-orange-200 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-lg text-purple-800">
-                <ZoomIn className="w-5 h-5 text-purple-600" />
+              <CardTitle className="flex items-center gap-2 text-lg text-orange-800">
+                <ZoomIn className="w-5 h-5 text-orange-600" />
                 Prévia da Arte
               </CardTitle>
             </CardHeader>
@@ -196,7 +196,7 @@ export default function GuestOrderTracking() {
                 {previews.map((p: any) => (
                   <div
                     key={p.id}
-                    className="relative group rounded-xl overflow-hidden border border-purple-100 cursor-pointer hover:shadow-md transition-shadow"
+                    className="relative group rounded-xl overflow-hidden border border-orange-100 cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => setLightboxUrl(p.imageUrl)}
                   >
                     <img
@@ -207,16 +207,16 @@ export default function GuestOrderTracking() {
                     {/* Overlay de zoom */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                       <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
-                        <ZoomIn className="w-5 h-5 text-purple-700" />
+                        <ZoomIn className="w-5 h-5 text-orange-700" />
                       </div>
                     </div>
                     {/* Data e observação */}
-                    <div className="px-2 py-1.5 bg-white border-t border-purple-100">
+                    <div className="px-2 py-1.5 bg-white border-t border-orange-100">
                       <p className="text-xs text-gray-500">
                         {new Date(p.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                       {p.notes && (
-                        <p className="text-xs text-purple-700 font-medium truncate">{p.notes}</p>
+                        <p className="text-xs text-orange-700 font-medium truncate">{p.notes}</p>
                       )}
                     </div>
                   </div>

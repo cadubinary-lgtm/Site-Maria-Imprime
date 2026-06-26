@@ -15,7 +15,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-50 border-blue-200" },
   analisando:          { label: "Analisando",             color: "bg-orange-50 border-orange-200" },
   com_problemas:       { label: "Com Problemas",          color: "bg-red-50 border-red-200" },
-  em_producao:         { label: "Em Produção",            color: "bg-purple-50 border-purple-200" },
+  em_producao:         { label: "Em Produção",            color: "bg-orange-50 border-orange-200" },
   pronto_entrega:      { label: "Pronto para Entrega",    color: "bg-teal-50 border-teal-200" },
   pronto_retirada:     { label: "Pronto para Retirada",   color: "bg-cyan-50 border-cyan-200" },
   entregue:            { label: "Entregue",               color: "bg-emerald-50 border-emerald-200" },

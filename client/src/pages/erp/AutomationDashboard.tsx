@@ -204,7 +204,7 @@ export default function AutomationDashboard() {
               {loadingTypeCounts ? (
                 <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <div className="text-2xl font-bold text-purple-600">{typeCounts?.sms || 0}</div>
+                <div className="text-2xl font-bold text-orange-600">{typeCounts?.sms || 0}</div>
               )}
             </CardContent>
           </Card>
@@ -269,7 +269,7 @@ export default function AutomationDashboard() {
                 <Button
                   onClick={handleSendSms}
                   disabled={sendSmsMutation.isPending}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-orange-600 hover:bg-orange-700"
                 >
                   <Phone className="w-4 h-4 mr-2" />
                   Enviar SMS

@@ -16,9 +16,9 @@ import {
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "text-green-700",   bg: "bg-green-100",   dot: "#22c55e" },
   pagamento_retirada: { label: "Pagamento Retirada",  color: "text-blue-700",    bg: "bg-blue-100",    dot: "#3b82f6" },
-  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E91E63" },
+  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
   com_problemas:      { label: "Com Problemas",       color: "text-red-700",     bg: "bg-red-100",     dot: "#ef4444" },
-  em_producao:        { label: "Em Produção",         color: "text-purple-700",  bg: "bg-purple-100",  dot: "#a855f7" },
+  em_producao:        { label: "Em Produção",         color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
   pronto_entrega:     { label: "Pronto p/ Entrega",   color: "text-teal-700",    bg: "bg-teal-100",    dot: "#14b8a6" },
   pronto_retirada:    { label: "Pronto p/ Retirada",  color: "text-cyan-700",    bg: "bg-cyan-100",    dot: "#06b6d4" },
   entregue:           { label: "Entregue",            color: "text-emerald-700", bg: "bg-emerald-100", dot: "#10b981" },
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
   const kanbanCols = [
     { key: "analisando",        label: "Arte",     color: "bg-orange-100 text-orange-700" },
     { key: "pagamento_aprovado",label: "Aprovado", color: "bg-green-100 text-green-700" },
-    { key: "em_producao",       label: "Produção", color: "bg-purple-100 text-purple-700" },
+    { key: "em_producao",       label: "Produção", color: "bg-orange-100 text-orange-700" },
     { key: "pronto_entrega",    label: "Entrega",  color: "bg-teal-100 text-teal-700" },
     { key: "entregue",          label: "Entregue", color: "bg-emerald-100 text-emerald-700" },
     { key: "com_problemas",     label: "Problema", color: "bg-red-100 text-red-700" },
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           <KpiCard icon={<ShoppingCart className="w-5 h-5 text-blue-600" />}   iconBg="bg-blue-100"   title="Pedidos Hoje"      value={todayOrders.length}  sub={`${allOrders.length} total`}                                               href="/admin/pedidos" />
           <KpiCard icon={<DollarSign className="w-5 h-5 text-green-600" />}   iconBg="bg-green-100"  title="Faturamento Hoje"  value={fmt(todayRevenue)}   sub={`Total: ${fmt(allOrders.reduce((a,o)=>a+parseFloat(o.totalPrice?.toString()??"0"),0))}`} subColor="text-green-600" href="/admin/financeiro" />
-          <KpiCard icon={<Printer className="w-5 h-5 text-purple-600" />}     iconBg="bg-purple-100" title="Em Produção"       value={inProduction}        sub="Ver produção →"                                                             href="/admin/pedidos/kanban" />
+          <KpiCard icon={<Printer className="w-5 h-5 text-orange-600" />}     iconBg="bg-orange-100" title="Em Produção"       value={inProduction}        sub="Ver produção →"                                                             href="/admin/pedidos/kanban" />
           <KpiCard icon={<Package className="w-5 h-5 text-teal-600" />}       iconBg="bg-teal-100"   title="Prontos p/ Envio"  value={readyToShip}         sub="Ver expedição →"                                                            href="/admin/pedidos" />
           <KpiCard icon={<AlertTriangle className="w-5 h-5 text-red-600" />}  iconBg="bg-red-100"    title="Com Problemas"     value={withProblems}        sub={withProblems > 0 ? "Atenção necessária" : "Tudo ok"} subColor={withProblems > 0 ? "text-red-600" : "text-green-600"} href="/admin/pedidos" />
         </div>
@@ -176,15 +176,15 @@ export default function AdminDashboard() {
                 <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#E91E63" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#E91E63" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#E6005C" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#E6005C" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: any) => [fmt(v), "Faturamento"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-                  <Area type="monotone" dataKey="value" stroke="#E91E63" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ fill: "#E91E63", r: 4 }} activeDot={{ r: 6 }} />
+                  <Area type="monotone" dataKey="value" stroke="#E6005C" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ fill: "#E6005C", r: 4 }} activeDot={{ r: 6 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -329,7 +329,7 @@ export default function AdminDashboard() {
                 {[
                   { label: "Pedidos",    icon: <ShoppingCart className="w-5 h-5" />, href: "/admin/pedidos",        color: "text-orange-500 bg-orange-50" },
                   { label: "Produtos",   icon: <Package className="w-5 h-5" />,      href: "/admin/produtos",       color: "text-blue-500 bg-blue-50" },
-                  { label: "Clientes",   icon: <Users className="w-5 h-5" />,        href: "/admin/clientes",       color: "text-purple-500 bg-purple-50" },
+                  { label: "Clientes",   icon: <Users className="w-5 h-5" />,        href: "/admin/clientes",       color: "text-orange-500 bg-orange-50" },
                   { label: "Kanban",     icon: <BarChart3 className="w-5 h-5" />,    href: "/admin/pedidos/kanban", color: "text-teal-500 bg-teal-50" },
                   { label: "Financeiro", icon: <DollarSign className="w-5 h-5" />,   href: "/admin/financeiro",     color: "text-green-500 bg-green-50" },
                   { label: "Relatórios", icon: <FileText className="w-5 h-5" />,     href: "/admin/erp",            color: "text-gray-500 bg-gray-50" },

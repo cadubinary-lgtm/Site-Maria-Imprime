@@ -56,8 +56,8 @@ export default function FinanceiroDashboard() {
       title: "Aguardando Retirada",
       value: String(data?.aguardandoRetirada ?? 0),
       icon: Package,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-orange-600",
+      bg: "bg-orange-50",
       suffix: "pedidos",
     },
     {
@@ -208,7 +208,7 @@ export default function FinanceiroDashboard() {
         {[
           { href: "/admin/gerenciador-financeiro/receber", label: "Contas a Receber", icon: Clock, color: "text-orange-600", bg: "bg-orange-50", desc: "Pedidos aguardando pagamento" },
           { href: "/admin/gerenciador-financeiro/recebidas", label: "Contas Recebidas", icon: TrendingUp, color: "text-green-600", bg: "bg-green-50", desc: "Pagamentos confirmados" },
-          { href: "/admin/gerenciador-financeiro/retirada", label: "Pagamentos na Retirada", icon: Package, color: "text-purple-600", bg: "bg-purple-50", desc: "Pedidos para retirar na loja" },
+          { href: "/admin/gerenciador-financeiro/retirada", label: "Pagamentos na Retirada", icon: Package, color: "text-orange-600", bg: "bg-orange-50", desc: "Pedidos para retirar na loja" },
           { href: "/admin/gerenciador-financeiro/fluxo", label: "Fluxo de Caixa", icon: DollarSign, color: "text-blue-600", bg: "bg-blue-50", desc: "Entradas e saídas" },
           { href: "/admin/gerenciador-financeiro/relatorios", label: "Relatórios", icon: BarChart2, color: "text-teal-600", bg: "bg-teal-50", desc: "Relatórios financeiros" },
         ].map((link) => (

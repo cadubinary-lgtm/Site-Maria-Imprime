@@ -18,7 +18,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pagamento_retirada: { label: "Pag. Retirada", color: "bg-blue-100 text-blue-700" },
   analisando: { label: "Analisando", color: "bg-orange-100 text-orange-700" },
   com_problemas: { label: "Com Problemas", color: "bg-red-100 text-red-700" },
-  em_producao: { label: "Em Produção", color: "bg-purple-100 text-purple-700" },
+  em_producao: { label: "Em Produção", color: "bg-orange-100 text-orange-700" },
   pronto_entrega: { label: "Pronto p/ Entrega", color: "bg-teal-100 text-teal-700" },
   pronto_retirada: { label: "Pronto p/ Retirada", color: "bg-cyan-100 text-cyan-700" },
   entregue: { label: "Entregue", color: "bg-emerald-100 text-emerald-700" },
@@ -72,11 +72,11 @@ export default function PagamentosRetirada() {
 
         {/* Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border border-purple-200 bg-purple-50">
+          <Card className="border border-orange-200 bg-orange-50">
             <CardContent className="p-4">
-              <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Total Retirada (Mês)</p>
-              <p className="text-2xl font-bold text-purple-700 mt-1">{fmt(totalValue)}</p>
-              <p className="text-xs text-purple-500 mt-1">{total} pedidos</p>
+              <p className="text-xs font-medium text-orange-600 uppercase tracking-wide">Total Retirada (Mês)</p>
+              <p className="text-2xl font-bold text-orange-700 mt-1">{fmt(totalValue)}</p>
+              <p className="text-xs text-orange-500 mt-1">{total} pedidos</p>
             </CardContent>
           </Card>
           <Card className="border border-green-200 bg-green-50">
@@ -106,8 +106,8 @@ export default function PagamentosRetirada() {
                   onClick={() => { setStatusFilter(s); setPage(1); }}
                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                     statusFilter === s
-                      ? "bg-purple-500 text-white border-purple-500"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
                   }`}
                 >
                   {s === "" ? "Todos" : STATUS_LABELS[s]?.label ?? s}
@@ -121,14 +121,14 @@ export default function PagamentosRetirada() {
         <Card className="border border-gray-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Store className="w-4 h-4 text-purple-500" />
+              <Store className="w-4 h-4 text-orange-500" />
               Pedidos para Retirada
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-8 text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full mx-auto" />
+                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto" />
               </div>
             ) : orders.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
@@ -167,7 +167,7 @@ export default function PagamentosRetirada() {
                           <td className="px-4 py-3">
                             <Badge className={`text-xs ${paymentCfg.color}`}>{paymentCfg.label}</Badge>
                           </td>
-                          <td className="px-4 py-3 text-right font-semibold text-purple-600">
+                          <td className="px-4 py-3 text-right font-semibold text-orange-600">
                             {fmt(order.totalPrice || "0")}
                           </td>
                           <td className="px-4 py-3 text-center">

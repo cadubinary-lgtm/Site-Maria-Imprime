@@ -34,7 +34,7 @@ const roleInfo: Record<string, { label: string; icon: React.ReactNode; color: st
   production: {
     label: "Produção",
     icon: <Wrench className="h-4 w-4" />,
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   },
 };
 

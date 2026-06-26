@@ -129,7 +129,7 @@ const PRODUCTION_STEPS = [
   { icon: <IconCheckGreen />, label: "Concluído" },
 ];
 
-const orange = "#E91E63"; // Rosa Magenta — cor oficial da marca
+const orange = "#E6005C"; // Rosa Magenta — cor oficial da marca
 const dark = "#1f2937";
 const border = "#d1d5db";
 
