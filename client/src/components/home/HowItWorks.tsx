@@ -61,12 +61,12 @@ export function HowItWorks() {
               <div key={i} className="flex items-end flex-1">
                 {/* Wrapper relativo para sobrepor bolinha na cabeça */}
                 <div className="flex-1 flex justify-center items-end group relative">
-                  {/* Bolinha numérica — posicionada sobre o topo da imagem */}
+                  {/* Bolinha numérica — posicionada acima da cabeça com pequeno espaço */}
                   <img
                     src={step.number}
                     alt={`Passo ${i + 1}`}
                     className="absolute w-7 h-7 object-contain z-10"
-                    style={{ top: 0, left: "50%", transform: "translateX(-50%)" }}
+                    style={{ top: "-12px", left: "50%", transform: "translateX(-50%)" }}
                   />
                   {/* Mascote */}
                   <img
@@ -114,12 +114,12 @@ export function HowItWorks() {
           {steps.map((step, i) => (
             <div key={i} className="flex flex-col items-center text-center group">
               <div className="relative flex justify-center">
-                {/* Bolinha sobre a cabeça da mascote */}
+                {/* Bolinha acima da cabeça da mascote com pequeno espaço */}
                 <img
                   src={step.number}
                   alt={`Passo ${i + 1}`}
                   className="absolute w-8 h-8 object-contain z-10"
-                  style={{ top: 0, left: "50%", transform: "translateX(-50%)" }}
+                  style={{ top: "-10px", left: "50%", transform: "translateX(-50%)" }}
                 />
                 <img
                   src={step.mascote}
