@@ -66,7 +66,7 @@ export function HowItWorks() {
                     src={step.number}
                     alt={`Passo ${i + 1}`}
                     className="absolute w-7 h-7 object-contain z-10"
-                    style={{ top: "-28px", left: "50%", transform: "translateX(-50%)" }}
+                    style={{ top: "-40px", left: "50%", transform: "translateX(-50%)" }}
                   />
                   {/* Mascote */}
                   <img
@@ -119,7 +119,7 @@ export function HowItWorks() {
                   src={step.number}
                   alt={`Passo ${i + 1}`}
                   className="absolute w-8 h-8 object-contain z-10"
-                  style={{ top: "-22px", left: "50%", transform: "translateX(-50%)" }}
+                  style={{ top: "-32px", left: "50%", transform: "translateX(-50%)" }}
                 />
                 <img
                   src={step.mascote}
