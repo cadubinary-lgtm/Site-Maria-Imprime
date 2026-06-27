@@ -50,15 +50,22 @@ function formatCurrency(value: number) {
 }
 
 // ── Componente: Timer decrescente do PIX ────────────────────────────────────
-function PixCountdown({ expiresAt }: { expiresAt: number }) {
+function PixCountdown({ expiresAt, onExpired }: { expiresAt: number; onExpired?: () => void }) {
   const [timeLeft, setTimeLeft] = useState(() => Math.max(0, Math.floor((expiresAt - Date.now()) / 1000)));
+  const notifiedRef = useState(false);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
     const interval = setInterval(() => {
       setTimeLeft(prev => {
         const next = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-        if (next <= 0) clearInterval(interval);
+        if (next <= 0) {
+          clearInterval(interval);
+          if (!notifiedRef[0]) {
+            notifiedRef[1](true);
+            onExpired?.();
+          }
+        }
         return next;
       });
     }, 1000);
@@ -69,7 +76,7 @@ function PixCountdown({ expiresAt }: { expiresAt: number }) {
   const ss = String(timeLeft % 60).padStart(2, "0");
 
   if (timeLeft <= 0) {
-    return <p className="text-xs text-center text-red-500 font-medium">QR Code expirado. Gere um novo.</p>;
+    return <p className="text-xs text-center text-red-500 font-medium">QR Code expirado.</p>;
   }
   return (
     <p className="text-xs text-center text-gray-400">
@@ -91,6 +98,7 @@ export default function CheckoutPage() {
   const [mpOrderId, setMpOrderId] = useState<number | null>(null);
   const [mpOrderNumber, setMpOrderNumber] = useState<string | null>(null); // para redirect correto
   const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64: string; paymentId: string; expiresAt?: number } | null>(null);
+  const [pixExpired, setPixExpired] = useState(false); // true quando o timer chega a zero
   const [pixStatus, setPixStatus] = useState<"pending" | "approved" | "rejected" | "error">("pending");
   const [pixPolling, setPixPolling] = useState(false);
   const [pixErrorMsg, setPixErrorMsg] = useState<string | null>(null); // erro ao gerar QR Code
@@ -320,6 +328,38 @@ export default function CheckoutPage() {
       setPixCopied(true);
       setTimeout(() => setPixCopied(false), 3000);
     });
+  };
+
+  // Gerar novo QR Code quando o timer expirar
+  const handleRegeneratePix = async () => {
+    if (!mpOrderId) return;
+    setPixExpired(false);
+    setPixData(null);
+    setPixErrorMsg(null);
+    setPixStatus("pending");
+    try {
+      const pixResult = await createPixMutation.mutateAsync({
+        orderId: mpOrderId,
+        payerCpf: payerCpf.replace(/\D/g, "") || undefined,
+        payerEmail: customerProfile?.email || guestEmail.trim() || undefined,
+        payerName: fullName.trim() || undefined,
+      });
+      setPixData({
+        qrCode: pixResult.qrCode || "",
+        qrCodeBase64: pixResult.qrCodeBase64 || "",
+        paymentId: pixResult.paymentId,
+        expiresAt: pixResult.expiresAt
+          ? (isNaN(Date.parse(String(pixResult.expiresAt))) ? Date.now() + 30*60*1000 : Date.parse(String(pixResult.expiresAt)))
+          : Date.now() + 30*60*1000,
+      });
+      setPixPolling(true);
+      toast.success("Novo QR Code gerado com sucesso!");
+    } catch (err: any) {
+      const errMsg = err?.message || "Erro ao gerar novo QR Code PIX";
+      setPixErrorMsg(errMsg);
+      setPixStatus("error");
+      toast.error(errMsg);
+    }
   };
 
   // Polling: detectar aprovação do PIX
@@ -622,7 +662,32 @@ export default function CheckoutPage() {
 
                 {/* Timer decrescente */}
                 {pixData.expiresAt && (
-                  <PixCountdown expiresAt={pixData.expiresAt} />
+                  <PixCountdown
+                    expiresAt={pixData.expiresAt}
+                    onExpired={() => {
+                      setPixExpired(true);
+                      setPixPolling(false);
+                    }}
+                  />
+                )}
+
+                {/* Botão de regenerar QR Code — visível apenas após expiração */}
+                {pixExpired && (
+                  <div className="flex flex-col items-center gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={handleRegeneratePix}
+                      disabled={createPixMutation.isPending}
+                      className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-md"
+                    >
+                      {createPixMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</>
+                      ) : (
+                        <><RefreshCw className="w-4 h-4" /> Gerar novo QR Code</>
+                      )}
+                    </button>
+                    <p className="text-xs text-gray-400">O QR Code anterior expirou. Clique para gerar um novo.</p>
+                  </div>
                 )}
 
                 {/* Link para ver pedido enquanto aguarda */}
