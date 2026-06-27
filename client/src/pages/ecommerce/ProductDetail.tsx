@@ -85,8 +85,10 @@ function AccordionStep({
         className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
       >
         <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
-          isCompleted ? 'bg-gray-200 text-gray-500' : 'bg-orange-500 text-white'
-        }`}>
+          isCompleted ? 'bg-gray-200 text-gray-500' : 'text-white'
+        }`}
+          style={{ backgroundColor: isCompleted ? undefined : '#7DCCD8' }}
+        >
           {number}
         </div>
         <div className="flex-1 min-w-0 flex items-center gap-1.5">
