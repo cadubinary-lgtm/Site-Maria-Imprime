@@ -49,6 +49,35 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+// ── Componente: Timer decrescente do PIX ────────────────────────────────────
+function PixCountdown({ expiresAt }: { expiresAt: number }) {
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, Math.floor((expiresAt - Date.now()) / 1000)));
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        const next = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+        if (next <= 0) clearInterval(interval);
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const ss = String(timeLeft % 60).padStart(2, "0");
+
+  if (timeLeft <= 0) {
+    return <p className="text-xs text-center text-red-500 font-medium">QR Code expirado. Gere um novo.</p>;
+  }
+  return (
+    <p className="text-xs text-center text-gray-400">
+      Expira em: <span className="font-mono font-semibold text-gray-600">{mm}:{ss}</span>
+    </p>
+  );
+}
+
 // PIX simulado
 const SIMULATED_PIX_KEY = "00020126580014BR.GOV.BCB.PIX0136grafica-ponto-digital@pix.com.br5204000053039865802BR5925Grafica Ponto Digital6009SAO PAULO62070503***6304ABCD";
 
@@ -389,7 +418,7 @@ export default function CheckoutPage() {
             qrCode: pixResult.qrCode || "",
             qrCodeBase64: pixResult.qrCodeBase64 || "",
             paymentId: pixResult.paymentId,
-            expiresAt: pixResult.expiresAt ? Number(pixResult.expiresAt) : undefined,
+            expiresAt: pixResult.expiresAt ? (isNaN(Date.parse(String(pixResult.expiresAt))) ? Date.now() + 30*60*1000 : Date.parse(String(pixResult.expiresAt))) : Date.now() + 30*60*1000,
           });
           setPixPolling(true);
           // NÃO redirecionar aqui — manter na tela de aguardo até aprovação via polling
@@ -591,11 +620,9 @@ export default function CheckoutPage() {
                   <span>Aguardando confirmação do pagamento...</span>
                 </div>
 
-                {/* Expiração */}
+                {/* Timer decrescente */}
                 {pixData.expiresAt && (
-                  <p className="text-xs text-center text-gray-400">
-                    Válido até: {new Date(pixData.expiresAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  <PixCountdown expiresAt={pixData.expiresAt} />
                 )}
 
                 {/* Link para ver pedido enquanto aguarda */}
