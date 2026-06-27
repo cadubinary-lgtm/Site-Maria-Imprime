@@ -232,3 +232,70 @@ export async function sendOrderConfirmationWithLink(to: string, firstName: strin
 export async function sendOrderStatusUpdateEmail(to: string, firstName: string, orderNumber: string, newStatus: string, trackUrl?: string): Promise<SendResult> {
   return send(to, `Pedido #${orderNumber} atualizado — Gráfica Ponto Digital`, templateOrderStatusUpdate(firstName, orderNumber, newStatus, trackUrl));
 }
+
+// ── Template: Pagamento PIX Confirmado (identidade visual rosa) ────────────────────────────────────────
+
+export function templatePixPaymentConfirmed(
+  firstName: string,
+  orderNumber: string,
+  total: string,
+  trackUrl: string
+): string {
+  return baseTemplate("Pagamento PIX confirmado!", `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="display:inline-block;background:#f0fdf4;border:3px solid #22c55e;border-radius:50%;width:72px;height:72px;line-height:72px;font-size:36px;text-align:center;">&#x2705;</div>
+    </div>
+    <h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 8px;text-align:center;">Pagamento PIX confirmado! &#x1F389;</h1>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">
+      Olá, <strong>${firstName}</strong>! Seu pagamento via <strong>PIX</strong> foi <strong style="color:#22c55e;">aprovado com sucesso</strong>.
+      Seu pedido já está na fila de produção!
+    </p>
+    <div style="background:#fdf2f8;border:2px solid #ec4899;border-radius:12px;padding:20px;margin:20px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding:6px 0;">
+            <span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Número do Pedido</span><br/>
+            <span style="color:#1a1a2e;font-size:20px;font-weight:800;">#${orderNumber}</span>
+          </td>
+          <td style="padding:6px 0;text-align:right;">
+            <span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Total Pago</span><br/>
+            <span style="color:#ec4899;font-size:22px;font-weight:800;">R$ ${total}</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding-top:14px;border-top:1px solid #fbcfe8;">
+            <span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Status</span><br/>
+            <span style="color:#166534;font-size:15px;font-weight:700;">&#x2705; Pagamento Aprovado — Entrando em Produção</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">
+      Acompanhe o status do seu pedido em tempo real. Você será notificado por e-mail a cada atualização:
+    </p>
+    <div style="text-align:center;">
+      <a href="${trackUrl}" style="display:inline-block;background:#ec4899;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;margin:16px 0;box-shadow:0 4px 14px rgba(236,72,153,0.35);">
+        &#x1F50D; Acompanhar Pedido
+      </a>
+    </div>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:12px 0;">
+      Dúvidas? Fale conosco pelo WhatsApp:
+      <a href="https://wa.me/5522999459596" style="color:#ec4899;font-weight:600;">(22) 99945-9596</a>
+    </p>
+  `);
+}
+
+export async function sendPixPaymentConfirmedEmail(
+  to: string,
+  firstName: string,
+  orderNumber: string,
+  total: string,
+  trackUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  return send(
+    to,
+    `✅ Pagamento PIX confirmado — Pedido #${orderNumber}`,
+    templatePixPaymentConfirmed(firstName, orderNumber, total, trackUrl)
+  );
+}
