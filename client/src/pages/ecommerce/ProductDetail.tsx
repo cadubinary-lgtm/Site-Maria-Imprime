@@ -1224,7 +1224,7 @@ export default function ProductDetail() {
                           });
                         }, 2000);
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all duration-800 ${
                         selectedDeliveryOption?.id === opt.id
                           ? "border-orange-500 bg-orange-50 shadow-sm"
                           : "border-gray-200 bg-white hover:border-orange-300"
@@ -1307,7 +1307,7 @@ export default function ProductDetail() {
                             }, 2000);
                           }
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-800 ${
                           isPickupSel
                             ? 'border-orange-500 bg-orange-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-orange-300'
