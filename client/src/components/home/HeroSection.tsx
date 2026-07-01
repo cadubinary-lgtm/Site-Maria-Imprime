@@ -36,22 +36,22 @@ export function HeroSection() {
 
       {/* Container principal */}
       <div
-        className="relative z-10 flex items-center"
+        className="relative z-10 flex flex-col lg:flex-row items-center"
         style={{
           maxWidth: "1280px",
           margin: "0 auto",
-          minHeight: "520px",
-          padding: "0 48px",
+          minHeight: "auto",
+          padding: "clamp(1rem, 5vw, 3rem)",
         }}
       >
         {/* ── COLUNA ESQUERDA ── */}
         <div
           style={{
-            flex: "0 0 50%",
-            maxWidth: "50%",
-            paddingTop: "56px",
-            paddingBottom: "56px",
-            paddingRight: "32px",
+            flex: "1 1 100%",
+            maxWidth: "100%",
+            paddingTop: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingBottom: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingRight: "clamp(0, 5vw, 2rem)",
           }}
         >
           {/* Título principal */}
@@ -87,7 +87,7 @@ export function HeroSection() {
           </p>
 
           {/* Barra de busca */}
-          <div style={{ maxWidth: "560px", marginBottom: "36px" }}>
+          <div style={{ maxWidth: "100%", marginBottom: "clamp(1.5rem, 4vw, 2.25rem)" }}>
             <div
               style={{
                 display: "flex",
@@ -137,8 +137,8 @@ export function HeroSection() {
               display: "flex",
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: "36px",
-              flexWrap: "nowrap",
+              gap: "clamp(1rem, 3vw, 2.25rem)",
+              flexWrap: "wrap",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -194,22 +194,23 @@ export function HeroSection() {
 
         {/* ── COLUNA DIREITA — mascote ── */}
         <div
-          className="hidden lg:flex"
+          className="hidden lg:flex w-full lg:w-1/2"
           style={{
-            flex: "0 0 50%",
+            flex: "1 1 50%",
             maxWidth: "50%",
             justifyContent: "center",
             alignItems: "flex-end",
-            height: "520px",
+            height: "auto",
+            minHeight: "clamp(250px, 50vh, 520px)",
           }}
         >
           <img
             src={MASCOTE}
             alt="Maria Imprime - Mascote"
             style={{
-              height: "500px",
+              height: "clamp(250px, 50vh, 500px)",
               width: "auto",
-              maxWidth: "480px",
+              maxWidth: "100%",
               objectFit: "contain",
               objectPosition: "bottom",
             }}
