@@ -208,11 +208,15 @@ export function HeroSection() {
             src={MASCOTE}
             alt="Maria Imprime - Mascote"
             style={{
-              height: "clamp(250px, 50vh, 500px)",
-              width: "auto",
+              height: '537px',
+              width: '423px',
               maxWidth: "100%",
               objectFit: "contain",
               objectPosition: "bottom",
+              marginBottom: '-45px',
+              marginLeft: '1px',
+              marginRight: '2px',
+              marginTop: '2px',
             }}
             draggable={false}
           />
