@@ -4,7 +4,7 @@ const ICON_RAPIDA    = "/manus-storage/icone6_2b9ca331.png";
 const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";
 const ICON_CONFIAVEL = "/manus-storage/icone8_ed12432c.png";
 const ICON_SIMPLES   = "/manus-storage/icone9_18e190d5.png";
-const FUNDO_ROSA     = "/manus-storage/fundorosahome_45d5872d.webp";
+const FUNDO_ROSA     = "/manus-storage/fundorosahome_7ceb1bc0.webp";
 const MASCOTE        = "/manus-storage/mascote-maria-v2_e85aa588.png";
 
 const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
