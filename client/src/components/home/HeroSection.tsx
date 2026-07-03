@@ -30,7 +30,7 @@ export function HeroSection() {
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full pointer-events-none select-none"
-        style={{ objectFit: "contain", objectPosition: "center bottom", backgroundSize: "60% auto" }}
+        style={{ objectFit: "cover", objectPosition: "right center" }}
         draggable={false}
       />
 
