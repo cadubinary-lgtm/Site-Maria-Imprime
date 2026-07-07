@@ -65,10 +65,10 @@ export function HeroSection() {
               marginBottom: "clamp(0.75rem, 2vw, 1.25rem)",
               fontFamily: FONT,
             }}
-            className="lg:text-left text-center"
+            className="lg:text-left text-left"
           >
             Precisou imprimir?<br />
-            Pede pra{" "}
+            Pedi pra{" "}
             <span style={{ color: "#E6005C" }}>Maria.</span>
           </h1>
 
@@ -82,7 +82,7 @@ export function HeroSection() {
               marginBottom: "clamp(1rem, 3vw, 1.75rem)",
               fontFamily: FONT,
             }}
-            className="lg:text-left text-center"
+            className="lg:text-left text-left"
           >
             Aqui você encontra tudo o que precisa<br />
             para divulgar, vender e crescer.
@@ -139,12 +139,9 @@ export function HeroSection() {
               display: "flex",
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: "clamp(0.5rem, 2vw, 2.25rem)",
-              flexWrap: "nowrap",
+              gap: "clamp(1rem, 3vw, 2.25rem)",
+              flexWrap: "wrap",
               width: "100%",
-              overflowX: "auto",
-              paddingBottom: "0.5rem",
-              scrollBehavior: "smooth",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -154,16 +151,16 @@ export function HeroSection() {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "10px",
-                  minWidth: "clamp(80px, 22vw, 200px)",
-                  flexShrink: 0,
+                  flex: "1 1 auto",
+                  minWidth: "clamp(80px, 20vw, 150px)",
                 }}
               >
                 <img
                   src={pilar.icon}
                   alt={pilar.label}
                   style={{
-                    width: "clamp(24px, 5vw, 36px)",
-                    height: "clamp(24px, 5vw, 36px)",
+                    width: "36px",
+                    height: "36px",
                     objectFit: "contain",
                     flexShrink: 0,
                     marginTop: "2px",
@@ -173,7 +170,7 @@ export function HeroSection() {
                   <p
                     style={{
                       fontWeight: 800,
-                      fontSize: "clamp(0.75rem, 2vw, 0.85rem)",
+                      fontSize: "0.85rem",
                       color: "#111827",
                       lineHeight: 1.2,
                       fontFamily: FONT,
@@ -185,7 +182,7 @@ export function HeroSection() {
                   <p
                     style={{
                       fontWeight: 400,
-                      fontSize: "clamp(0.7rem, 1.5vw, 0.78rem)",
+                      fontSize: "0.78rem",
                       color: "#6B7280",
                       lineHeight: 1.3,
                       fontFamily: FONT,
@@ -202,53 +199,24 @@ export function HeroSection() {
 
         {/* ── COLUNA DIREITA — mascote ── */}
         <div
-          className="w-full lg:w-1/2 flex lg:hidden justify-center mt-4"
+          className="w-full lg:w-1/2 flex justify-center items-end"
           style={{
-            flex: "1 1 100%",
+            flex: "1 1 50%",
             maxWidth: "100%",
-            justifyContent: "center",
-            alignItems: "center",
             height: "auto",
-            minHeight: "auto",
+            minHeight: "clamp(200px, 50vh, 520px)",
+            display: "flex",
           }}
         >
           <img
             src={MASCOTE}
             alt="Maria Imprime - Mascote"
             style={{
-              height: "clamp(150px, 40vw, 300px)",
+              height: "clamp(200px, 50vh, 537px)",
               width: "auto",
               maxWidth: "100%",
               objectFit: "contain",
-              objectPosition: "center",
-            }}
-            draggable={false}
-          />
-        </div>
-        <div
-          className="hidden lg:flex w-full lg:w-1/2"
-          style={{
-            flex: "1 1 50%",
-            maxWidth: "50%",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            height: "auto",
-            minHeight: "clamp(250px, 50vh, 520px)",
-          }}
-        >
-          <img
-            src={MASCOTE}
-            alt="Maria Imprime - Mascote"
-            style={{
-              height: '537px',
-              width: '423px',
-              maxWidth: "100%",
-              objectFit: "contain",
-              objectPosition: "bottom",
-              marginBottom: '-45px',
-              marginLeft: '1px',
-              marginRight: '2px',
-              marginTop: '2px',
+              objectPosition: "bottom center",
             }}
             draggable={false}
           />
