@@ -140,8 +140,11 @@ export function HeroSection() {
               flexDirection: "row",
               alignItems: "flex-start",
               gap: "clamp(0.5rem, 2vw, 2.25rem)",
-              flexWrap: "wrap",
+              flexWrap: "nowrap",
               width: "100%",
+              overflowX: "auto",
+              paddingBottom: "0.5rem",
+              scrollBehavior: "smooth",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -151,6 +154,8 @@ export function HeroSection() {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "10px",
+                  minWidth: "clamp(80px, 22vw, 200px)",
+                  flexShrink: 0,
                 }}
               >
                 <img
@@ -196,6 +201,30 @@ export function HeroSection() {
         </div>
 
         {/* ── COLUNA DIREITA — mascote ── */}
+        <div
+          className="w-full lg:w-1/2 flex lg:hidden justify-center mt-4"
+          style={{
+            flex: "1 1 100%",
+            maxWidth: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "auto",
+            minHeight: "auto",
+          }}
+        >
+          <img
+            src={MASCOTE}
+            alt="Maria Imprime - Mascote"
+            style={{
+              height: "clamp(150px, 40vw, 300px)",
+              width: "auto",
+              maxWidth: "100%",
+              objectFit: "contain",
+              objectPosition: "center",
+            }}
+            draggable={false}
+          />
+        </div>
         <div
           className="hidden lg:flex w-full lg:w-1/2"
           style={{
