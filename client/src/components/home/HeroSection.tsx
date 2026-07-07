@@ -22,7 +22,7 @@ export function HeroSection() {
   return (
     <section
       className="w-full relative overflow-hidden"
-      style={{ minHeight: "auto", backgroundColor: "#ffffff", fontFamily: FONT }}
+      style={{ minHeight: "520px", backgroundColor: "#ffffff", fontFamily: FONT }}
     >
       {/* Fundo rosa blob */}
       <img
@@ -36,7 +36,7 @@ export function HeroSection() {
 
       {/* Container principal */}
       <div
-        className="relative z-10 flex flex-col items-center"
+        className="relative z-10 flex flex-col lg:flex-row items-center"
         style={{
           maxWidth: "1280px",
           margin: "0 auto",
@@ -44,27 +44,26 @@ export function HeroSection() {
           padding: "clamp(1rem, 5vw, 3rem)",
         }}
       >
-        {/* ── CONTEÚDO PRINCIPAL ── */}
+        {/* ── COLUNA ESQUERDA ── */}
         <div
           style={{
             flex: "1 1 100%",
             maxWidth: "100%",
-            paddingTop: "clamp(1rem, 3vw, 2rem)",
-            paddingBottom: "clamp(1rem, 3vw, 2rem)",
-            width: "100%",
+            paddingTop: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingBottom: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingRight: "clamp(0, 5vw, 2rem)",
           }}
         >
           {/* Título principal */}
           <h1
             style={{
-              fontSize: "clamp(1.75rem, 5vw, 3.8rem)",
+              fontSize: "clamp(2.6rem, 4vw, 3.8rem)",
               fontWeight: 900,
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               color: "#111827",
-              marginBottom: "clamp(0.75rem, 2vw, 1.25rem)",
+              marginBottom: "20px",
               fontFamily: FONT,
-              textAlign: "center",
             }}
           >
             Precisou imprimir?<br />
@@ -75,44 +74,20 @@ export function HeroSection() {
           {/* Subtítulo */}
           <p
             style={{
-              fontSize: "clamp(0.875rem, 3vw, 1.05rem)",
+              fontSize: "1.05rem",
               fontWeight: 400,
               color: "#4B5563",
               lineHeight: 1.6,
-              marginBottom: "clamp(1rem, 3vw, 1.75rem)",
+              marginBottom: "28px",
               fontFamily: FONT,
-              textAlign: "center",
             }}
           >
             Aqui você encontra tudo o que precisa<br />
             para divulgar, vender e crescer.
           </p>
 
-          {/* Mascote mobile */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: "clamp(1rem, 3vw, 1.5rem)",
-              minHeight: "auto",
-            }}
-          >
-            <img
-              src={MASCOTE}
-              alt="Maria Imprime - Mascote"
-              style={{
-                height: "clamp(200px, 40vw, 537px)",
-                width: "auto",
-                maxWidth: "100%",
-                objectFit: "contain",
-                objectPosition: "center",
-              }}
-              draggable={false}
-            />
-          </div>
-
           {/* Barra de busca */}
-          <div style={{ maxWidth: "100%", marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
+          <div style={{ maxWidth: "100%", marginBottom: "clamp(1.5rem, 4vw, 2.25rem)" }}>
             <div
               style={{
                 display: "flex",
@@ -121,7 +96,7 @@ export function HeroSection() {
                 borderRadius: "50px",
                 border: "1.5px solid #e5e7eb",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                padding: "clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem)",
+                padding: "12px 20px",
                 gap: "12px",
               }}
             >
@@ -140,7 +115,7 @@ export function HeroSection() {
               </svg>
               <input
                 type="search"
-                placeholder="Buscar produtos..."
+                placeholder="Buscar produtos, materiais ou serviços..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -148,7 +123,7 @@ export function HeroSection() {
                   background: "transparent",
                   border: "none",
                   outline: "none",
-                  fontSize: "clamp(0.85rem, 2vw, 0.95rem)",
+                  fontSize: "0.95rem",
                   color: "#374151",
                   fontFamily: FONT,
                 }}
@@ -156,12 +131,14 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* 4 Pilares - Grid responsivo */}
+          {/* 4 Pilares */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: "clamp(0.75rem, 2vw, 1.5rem)",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: "clamp(1rem, 3vw, 2.25rem)",
+              flexWrap: "wrap",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -169,30 +146,30 @@ export function HeroSection() {
                 key={idx}
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                  gap: "8px",
+                  alignItems: "flex-start",
+                  gap: "10px",
                 }}
               >
                 <img
                   src={pilar.icon}
                   alt={pilar.label}
                   style={{
-                    width: "clamp(28px, 6vw, 36px)",
-                    height: "clamp(28px, 6vw, 36px)",
+                    width: "36px",
+                    height: "36px",
                     objectFit: "contain",
+                    flexShrink: 0,
+                    marginTop: "2px",
                   }}
                 />
                 <div>
                   <p
                     style={{
                       fontWeight: 800,
-                      fontSize: "clamp(0.7rem, 2vw, 0.85rem)",
+                      fontSize: "0.85rem",
                       color: "#111827",
                       lineHeight: 1.2,
+                      whiteSpace: "nowrap",
                       fontFamily: FONT,
-                      margin: "0",
                     }}
                   >
                     {pilar.label}
@@ -200,11 +177,11 @@ export function HeroSection() {
                   <p
                     style={{
                       fontWeight: 400,
-                      fontSize: "clamp(0.65rem, 1.5vw, 0.78rem)",
+                      fontSize: "0.78rem",
                       color: "#6B7280",
-                      lineHeight: 1.2,
+                      lineHeight: 1.3,
+                      whiteSpace: "nowrap",
                       fontFamily: FONT,
-                      margin: "0",
                     }}
                   >
                     {pilar.desc}
@@ -215,7 +192,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* ── MASCOTE DESKTOP ── */}
+        {/* ── COLUNA DIREITA — mascote ── */}
         <div
           className="hidden lg:flex w-full lg:w-1/2"
           style={{
@@ -225,10 +202,6 @@ export function HeroSection() {
             alignItems: "flex-end",
             height: "auto",
             minHeight: "clamp(250px, 50vh, 520px)",
-            position: "absolute",
-            right: "0",
-            top: "0",
-            bottom: "0",
           }}
         >
           <img
