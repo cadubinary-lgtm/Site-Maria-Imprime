@@ -136,12 +136,12 @@ export function HeroSection() {
           {/* 4 Pilares */}
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "flex-start",
-              gap: "clamp(1rem, 3vw, 2.25rem)",
-              flexWrap: "wrap",
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "clamp(0.75rem, 2vw, 2.25rem)",
+              width: "100%",
             }}
+            className="lg:flex lg:flex-row lg:flex-wrap lg:grid-cols-none"
           >
             {pilares.map((pilar, idx) => (
               <div
@@ -167,11 +167,11 @@ export function HeroSection() {
                   <p
                     style={{
                       fontWeight: 800,
-                      fontSize: "0.85rem",
+                      fontSize: "clamp(0.75rem, 2vw, 0.85rem)",
                       color: "#111827",
                       lineHeight: 1.2,
-                      whiteSpace: "nowrap",
                       fontFamily: FONT,
+                      margin: "0",
                     }}
                   >
                     {pilar.label}
@@ -179,11 +179,11 @@ export function HeroSection() {
                   <p
                     style={{
                       fontWeight: 400,
-                      fontSize: "0.78rem",
+                      fontSize: "clamp(0.7rem, 1.5vw, 0.78rem)",
                       color: "#6B7280",
                       lineHeight: 1.3,
-                      whiteSpace: "nowrap",
                       fontFamily: FONT,
+                      margin: "0",
                     }}
                   >
                     {pilar.desc}
