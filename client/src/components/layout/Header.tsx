@@ -107,7 +107,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm no-print">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="max-w-7xl mx-auto px-4" style={{paddingTop: '30px', paddingBottom: 'clamp(0.75rem, 2vw, 1rem)'}}>
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center justify-between gap-6">
           {/* Logo Oficial */}
