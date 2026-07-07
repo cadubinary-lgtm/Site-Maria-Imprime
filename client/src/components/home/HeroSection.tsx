@@ -57,14 +57,15 @@ export function HeroSection() {
           {/* Título principal */}
           <h1
             style={{
-              fontSize: "clamp(2.6rem, 4vw, 3.8rem)",
+              fontSize: "clamp(1.75rem, 5vw, 3.8rem)",
               fontWeight: 900,
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               color: "#111827",
-              marginBottom: "20px",
+              marginBottom: "clamp(0.75rem, 2vw, 1.25rem)",
               fontFamily: FONT,
             }}
+            className="lg:text-left text-center"
           >
             Precisou imprimir?<br />
             Pede pra{" "}
@@ -74,20 +75,21 @@ export function HeroSection() {
           {/* Subtítulo */}
           <p
             style={{
-              fontSize: "1.05rem",
+              fontSize: "clamp(0.875rem, 3vw, 1.05rem)",
               fontWeight: 400,
               color: "#4B5563",
               lineHeight: 1.6,
-              marginBottom: "28px",
+              marginBottom: "clamp(1rem, 3vw, 1.75rem)",
               fontFamily: FONT,
             }}
+            className="lg:text-left text-center"
           >
             Aqui você encontra tudo o que precisa<br />
             para divulgar, vender e crescer.
           </p>
 
           {/* Barra de busca */}
-          <div style={{ maxWidth: "100%", marginBottom: "clamp(1.5rem, 4vw, 2.25rem)" }}>
+          <div style={{ maxWidth: "100%", marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
             <div
               style={{
                 display: "flex",
@@ -96,7 +98,7 @@ export function HeroSection() {
                 borderRadius: "50px",
                 border: "1.5px solid #e5e7eb",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                padding: "12px 20px",
+                padding: "clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem)",
                 gap: "12px",
               }}
             >
