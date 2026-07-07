@@ -44,7 +44,7 @@ export function HeroSection() {
           maxWidth: "1280px",
           margin: "0 auto",
           minHeight: "auto",
-          padding: "clamp(1rem, 5vw, 3rem)",
+          padding: "0",
         }}
       >
         {/* ── COLUNA ESQUERDA ── */}
