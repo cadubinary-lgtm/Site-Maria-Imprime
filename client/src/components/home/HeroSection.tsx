@@ -29,8 +29,15 @@ export function HeroSection() {
         src={FUNDO_ROSA}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full pointer-events-none select-none"
-        style={{ objectFit: "cover", objectPosition: "right center" }}
+        className="absolute inset-0 pointer-events-none select-none"
+        style={{
+          objectFit: "contain",
+          objectPosition: "right bottom",
+          width: "50%",
+          height: "100%",
+          right: "0",
+          bottom: "0",
+        }}
         draggable={false}
       />
 
