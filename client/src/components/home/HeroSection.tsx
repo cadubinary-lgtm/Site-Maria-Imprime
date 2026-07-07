@@ -136,12 +136,13 @@ export function HeroSection() {
           {/* 4 Pilares */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "clamp(0.75rem, 2vw, 2.25rem)",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: "clamp(0.5rem, 2vw, 2.25rem)",
+              flexWrap: "wrap",
               width: "100%",
             }}
-            className="lg:flex lg:flex-row lg:flex-wrap lg:grid-cols-none"
           >
             {pilares.map((pilar, idx) => (
               <div
@@ -156,8 +157,8 @@ export function HeroSection() {
                   src={pilar.icon}
                   alt={pilar.label}
                   style={{
-                    width: "36px",
-                    height: "36px",
+                    width: "clamp(24px, 5vw, 36px)",
+                    height: "clamp(24px, 5vw, 36px)",
                     objectFit: "contain",
                     flexShrink: 0,
                     marginTop: "2px",
