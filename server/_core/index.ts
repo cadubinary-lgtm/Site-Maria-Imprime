@@ -280,42 +280,6 @@ async function startServer() {
           const orderId = Number(payment.external_reference);
           await updateOrderStatus(orderId, 'pagamento_aprovado', 'Pagamento aprovado via Mercado Pago (webhook)');
           console.log(`[MP Webhook] Pedido ${orderId} aprovado`);
-
-          // Disparar e-mail de confirmação de pagamento PIX com identidade visual rosa
-          try {
-            const { orders: ordersTable, customerAccounts: custTable } = await import('../../drizzle/schema.js');
-            const orderRows = await db.select().from(ordersTable).where(eqOp(ordersTable.id, orderId)).limit(1);
-            const ord = orderRows[0];
-            if (ord) {
-              const { sendPixPaymentConfirmedEmail } = await import('../emailService.js');
-              const SITE_URL = 'https://mariaimprime.com.br';
-              const guestToken = (ord as any).guestToken;
-              const orderNumber = (ord as any).orderNumber ?? String(orderId);
-              const trackUrl = guestToken
-                ? `${SITE_URL}/pedido/acompanhar/${guestToken}`
-                : `${SITE_URL}/pedido/${orderNumber}`;
-              const totalPago = Number((ord as any).totalPrice ?? 0).toFixed(2);
-
-              // Buscar e-mail e nome do cliente
-              let emailTo: string | null = (ord as any).guestEmail ?? null;
-              let firstName = ((ord as any).guestName ?? 'Cliente').split(' ')[0];
-              if (!emailTo && (ord as any).customerId) {
-                const [ca] = await db.select({ email: custTable.email, firstName: custTable.firstName })
-                  .from(custTable)
-                  .where(eqOp(custTable.id, (ord as any).customerId))
-                  .limit(1);
-                if (ca?.email) { emailTo = ca.email; firstName = ca.firstName || firstName; }
-              }
-              if (emailTo) {
-                await sendPixPaymentConfirmedEmail(emailTo, firstName, orderNumber, totalPago, trackUrl);
-                console.log(`[MP Webhook] E-mail de confirmação PIX enviado para ${emailTo}`);
-              } else {
-                console.log('[MP Webhook] Sem e-mail do cliente para enviar confirmação PIX');
-              }
-            }
-          } catch (emailErr) {
-            console.error('[MP Webhook] Erro ao enviar e-mail de confirmação PIX:', emailErr);
-          }
         }
       }
 

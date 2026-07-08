@@ -82,9 +82,9 @@ function CartItemCard({
   const subtotal = Number(item.priceAtCart) * item.quantity;
 
   return (
-    <div className="flex gap-3 lg:gap-4 py-3 lg:py-4 flex-col sm:flex-row">
+    <div className="flex gap-4 py-4">
       {/* Imagem */}
-      <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 mx-auto sm:mx-0">
+      <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
         {item.productImage ? (
           <img
             src={item.productImage}
@@ -99,8 +99,8 @@ function CartItemCard({
       </div>
 
       {/* Detalhes */}
-      <div className="flex-1 min-w-0 text-center sm:text-left">
-        <p className="font-medium text-gray-900 line-clamp-2">{item.productName}</p>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-gray-900 truncate">{item.productName}</h3>
 
         {/* Dimensões */}
         {item.customDimensions && (
@@ -253,31 +253,31 @@ export default function CartPage() {
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 lg:py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-2">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/catalogo")}
+            className="text-gray-600"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Continuar comprando
+          </Button>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <ShoppingCart className="h-6 w-6 text-orange-500" />
             Meu Carrinho
             {itemCount > 0 && (
               <Badge className="bg-orange-500 text-white">{itemCount}</Badge>
             )}
           </h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/catalogo")}
-            className="text-gray-600 text-sm"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Continuar comprando
-          </Button>
         </div>
 
         {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {[1, 2, 3].map((i) => (
                 <Card key={i}>
@@ -319,17 +319,17 @@ export default function CartPage() {
 
         {/* Carrinho com itens */}
         {!isLoading && cartItems.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Lista de itens */}
             <div className="lg:col-span-2">
               <Card>
-                <CardHeader className="pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <CardTitle className="text-base lg:text-lg">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg">
                     {cartItems.length} {cartItems.length === 1 ? "item" : "itens"}
                   </CardTitle>
                   <Button
-                    size="sm"
                     variant="ghost"
+                    size="sm"
                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
                     onClick={() => clearCart.mutate()}
                     disabled={clearCart.isPending}

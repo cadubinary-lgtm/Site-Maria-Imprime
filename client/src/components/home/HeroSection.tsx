@@ -4,7 +4,7 @@ const ICON_RAPIDA    = "/manus-storage/icone6_2b9ca331.png";
 const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";
 const ICON_CONFIAVEL = "/manus-storage/icone8_ed12432c.png";
 const ICON_SIMPLES   = "/manus-storage/icone9_18e190d5.png";
-const FUNDO_ROSA     = "/manus-storage/fundorosahome_c5c90261.webp";
+const FUNDO_ROSA     = "/manus-storage/fundorosahome_45d5872d.webp";
 const MASCOTE        = "/manus-storage/mascote-maria-v2_e85aa588.png";
 
 const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
@@ -30,69 +30,64 @@ export function HeroSection() {
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full pointer-events-none select-none"
-        style={{
-          objectFit: "cover",
-          objectPosition: "right bottom",
-        }}
+        style={{ objectFit: "cover", objectPosition: "right center" }}
         draggable={false}
       />
 
       {/* Container principal */}
       <div
-        className="relative z-10 flex flex-col lg:flex-row items-center"
+        className="relative z-10 flex items-center"
         style={{
           maxWidth: "1280px",
           margin: "0 auto",
-          minHeight: "auto",
-          padding: "0",
+          minHeight: "520px",
+          padding: "0 48px",
         }}
       >
         {/* ── COLUNA ESQUERDA ── */}
         <div
           style={{
-            flex: "1 1 100%",
-            maxWidth: "100%",
-            paddingTop: "clamp(1.5rem, 4vw, 3.5rem)",
-            paddingBottom: "clamp(1.5rem, 4vw, 3.5rem)",
-            paddingRight: "clamp(0, 5vw, 2rem)",
+            flex: "0 0 50%",
+            maxWidth: "50%",
+            paddingTop: "56px",
+            paddingBottom: "56px",
+            paddingRight: "32px",
           }}
         >
           {/* Título principal */}
           <h1
             style={{
-              fontSize: "clamp(1.75rem, 5vw, 3.8rem)",
+              fontSize: "clamp(2.6rem, 4vw, 3.8rem)",
               fontWeight: 900,
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               color: "#111827",
-              marginBottom: "clamp(0.75rem, 2vw, 1.25rem)",
+              marginBottom: "20px",
               fontFamily: FONT,
             }}
-            className="lg:text-left text-left"
           >
             Precisou imprimir?<br />
-            Pedi pra{" "}
+            Pede pra{" "}
             <span style={{ color: "#E6005C" }}>Maria.</span>
           </h1>
 
           {/* Subtítulo */}
           <p
             style={{
-              fontSize: "clamp(0.875rem, 3vw, 1.05rem)",
+              fontSize: "1.05rem",
               fontWeight: 400,
               color: "#4B5563",
               lineHeight: 1.6,
-              marginBottom: "clamp(1rem, 3vw, 1.75rem)",
+              marginBottom: "28px",
               fontFamily: FONT,
             }}
-            className="lg:text-left text-left"
           >
             Aqui você encontra tudo o que precisa<br />
             para divulgar, vender e crescer.
           </p>
 
           {/* Barra de busca */}
-          <div style={{ maxWidth: "100%", marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
+          <div style={{ maxWidth: "560px", marginBottom: "36px" }}>
             <div
               style={{
                 display: "flex",
@@ -101,7 +96,7 @@ export function HeroSection() {
                 borderRadius: "50px",
                 border: "1.5px solid #e5e7eb",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                padding: "clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem)",
+                padding: "12px 20px",
                 gap: "12px",
               }}
             >
@@ -142,9 +137,8 @@ export function HeroSection() {
               display: "flex",
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: "clamp(1rem, 3vw, 2.25rem)",
-              flexWrap: "wrap",
-              width: "100%",
+              gap: "36px",
+              flexWrap: "nowrap",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -154,8 +148,6 @@ export function HeroSection() {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "10px",
-                  flex: "1 1 auto",
-                  minWidth: "clamp(80px, 20vw, 150px)",
                 }}
               >
                 <img
@@ -176,8 +168,8 @@ export function HeroSection() {
                       fontSize: "0.85rem",
                       color: "#111827",
                       lineHeight: 1.2,
+                      whiteSpace: "nowrap",
                       fontFamily: FONT,
-                      margin: "0",
                     }}
                   >
                     {pilar.label}
@@ -188,8 +180,8 @@ export function HeroSection() {
                       fontSize: "0.78rem",
                       color: "#6B7280",
                       lineHeight: 1.3,
+                      whiteSpace: "nowrap",
                       fontFamily: FONT,
-                      margin: "0",
                     }}
                   >
                     {pilar.desc}
@@ -202,24 +194,24 @@ export function HeroSection() {
 
         {/* ── COLUNA DIREITA — mascote ── */}
         <div
-          className="w-full lg:w-1/2 flex justify-center items-end"
+          className="hidden lg:flex"
           style={{
-            flex: "1 1 50%",
-            maxWidth: "100%",
-            height: "auto",
-            minHeight: "clamp(200px, 50vh, 520px)",
-            display: "flex",
+            flex: "0 0 50%",
+            maxWidth: "50%",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            height: "520px",
           }}
         >
           <img
             src={MASCOTE}
             alt="Maria Imprime - Mascote"
             style={{
-              height: "clamp(200px, 50vh, 537px)",
+              height: "500px",
               width: "auto",
-              maxWidth: "100%",
+              maxWidth: "480px",
               objectFit: "contain",
-              objectPosition: "bottom center",
+              objectPosition: "bottom",
             }}
             draggable={false}
           />
