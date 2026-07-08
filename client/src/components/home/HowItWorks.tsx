@@ -41,64 +41,52 @@ const steps = [
 
 const ARROW_URL = "/manus-storage/SETA_e3737895.webp";
 
-// Altura fixa da área das bonequinhas — todas alinhadas pela base
-const IMG_AREA_H = 200;
-
 export function HowItWorks() {
   return (
-    <section className="bg-white py-16 px-4 lg:px-8" style={{minHeight: '573px'}}>
+    <section className="bg-white py-8 lg:py-16 px-4 lg:px-8" style={{ minHeight: 'auto' }}>
       <div className="max-w-6xl mx-auto">
         {/* Título */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
+        <div className="text-center mb-6 lg:mb-10">
+          <h2 className="text-2xl lg:text-4xl font-bold text-gray-800 mb-3">
             Como funciona
           </h2>
           <div className="w-10 h-1 bg-[#FF0066] mx-auto rounded-full" />
         </div>
 
-        {/* Layout desktop: 3 linhas em grid (números / imagens+setas / textos) */}
+        {/* ── Desktop ── */}
         <div className="hidden lg:block">
-          {/* Linha 1 — Números */}
-          <div className="grid grid-cols-6 mb-0">
-            {steps.map((step, i) => (
-              <div key={i} className="flex justify-center">
-                <img
-                  src={step.number}
-                  alt={`Passo ${i + 1}`}
-                  className="w-7 h-7 object-contain"
-                  style={{ paddingTop: '5px' }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Linha 2 — Bonequinhas + setas (alinhadas pela base) */}
-          <div
-            className="flex items-end justify-center"
-            style={{ height: `${IMG_AREA_H}px`, marginTop: '-11px' }}
-          >
+          {/* Linha única: mascote com bolinha sobreposta + seta entre elas */}
+          <div className="flex items-end justify-center" style={{ height: "220px" }}>
             {steps.map((step, i) => (
               <div key={i} className="flex items-end flex-1">
-                {/* Bonequinha */}
-                <div className="flex-1 flex justify-center items-end group">
+                {/* Wrapper relativo para sobrepor bolinha na cabeça */}
+                <div className="flex-1 flex justify-center items-end group relative">
+                  {/* Bolinha numérica — posicionada acima da cabeça com pequeno espaço */}
+                  <img
+                    src={step.number}
+                    alt={`Passo ${i + 1}`}
+                    className="absolute w-7 h-7 object-contain z-10"
+                    style={{ top: "-40px", left: "50%", transform: "translateX(-50%)" }}
+                  />
+                  {/* Mascote */}
                   <img
                     src={step.mascote}
                     alt={step.title}
-                    className="w-[140px] h-auto max-h-[200px] object-contain object-bottom transition-transform duration-300 group-hover:scale-105"
+                    className="w-[140px] h-auto max-h-[210px] object-contain object-bottom transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
 
-                {/* Seta — posicionada entre número e bonequinha */}
+                {/* Seta entre mascotes */}
                 {i < steps.length - 1 && (
                   <div
                     className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: '32px', marginBottom: '82px' }}
+                    style={{ width: "32px", marginBottom: "82px" }}
                   >
                     <img
                       src={ARROW_URL}
                       alt="→"
                       className="object-contain opacity-90"
-                      style={{ width: '32px', height: '31px' }}
+                      style={{ width: "32px", height: "31px" }}
                     />
                   </div>
                 )}
@@ -106,7 +94,7 @@ export function HowItWorks() {
             ))}
           </div>
 
-          {/* Linha 3 — Textos */}
+          {/* Textos */}
           <div className="grid grid-cols-6 mt-4">
             {steps.map((step, i) => (
               <div key={i} className="flex flex-col items-center text-center px-2">
@@ -121,21 +109,25 @@ export function HowItWorks() {
           </div>
         </div>
 
-        {/* Layout mobile: 2 colunas em grid simples */}
-        <div className="grid grid-cols-2 gap-6 lg:hidden">
+        {/* ── Mobile ── */}
+        <div className="grid grid-cols-2 gap-3 lg:hidden">
           {steps.map((step, i) => (
-            <div key={i} className="flex flex-col items-center text-center group">
-              <img
-                src={step.number}
-                alt={`Passo ${i + 1}`}
-                className="w-9 h-9 object-contain mb-2"
-              />
-              <img
-                src={step.mascote}
-                alt={step.title}
-                className="w-[110px] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-              <p className="font-bold text-gray-800 text-sm leading-tight mt-2 mb-1">
+            <div key={i} className="flex flex-col items-center text-center group py-2">
+              <div className="relative flex justify-center" style={{ minHeight: '140px' }}>
+                {/* Bolinha acima da cabeça da mascote com pequeno espaço */}
+                <img
+                  src={step.number}
+                  alt={`Passo ${i + 1}`}
+                  className="absolute w-7 h-7 object-contain z-10"
+                  style={{ top: "-32px", left: "50%", transform: "translateX(-50%)" }}
+                />
+                <img
+                  src={step.mascote}
+                  alt={step.title}
+                  className="w-[90px] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <p className="font-bold text-gray-800 text-xs leading-tight mt-1 mb-0.5">
                 {step.title}
               </p>
               <p className="text-gray-500 text-xs leading-snug">
@@ -146,10 +138,10 @@ export function HowItWorks() {
         </div>
 
         {/* Botão CTA */}
-        <div className="flex justify-center mt-12">
+        <div className="flex justify-center mt-6 lg:mt-12">
           <Link href="/catalogo">
-            <button className="bg-[#FF0066] text-white font-bold text-base px-10 py-4 rounded-full shadow-lg shadow-pink-200 transition-all duration-200 hover:bg-[#e0005a] hover:shadow-xl hover:shadow-pink-300 hover:-translate-y-0.5 active:scale-95">
-              Fazer meu pedido agora
+            <button className="bg-[#FF0066] text-white font-bold text-sm lg:text-base px-6 lg:px-10 py-3 lg:py-4 rounded-full shadow-lg shadow-pink-200 transition-all duration-200 hover:bg-[#e0005a] hover:shadow-xl hover:shadow-pink-300 hover:-translate-y-0.5 active:scale-95">
+              Fazer meu pedido
             </button>
           </Link>
         </div>

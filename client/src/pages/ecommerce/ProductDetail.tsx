@@ -85,8 +85,10 @@ function AccordionStep({
         className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
       >
         <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
-          isCompleted ? 'bg-gray-200 text-gray-500' : 'bg-orange-500 text-white'
-        }`}>
+          isCompleted ? 'bg-gray-200 text-gray-500' : 'text-white'
+        }`}
+          style={{ backgroundColor: isCompleted ? undefined : '#7DCCD8' }}
+        >
           {number}
         </div>
         <div className="flex-1 min-w-0 flex items-center gap-1.5">
@@ -719,7 +721,7 @@ export default function ProductDetail() {
 
   return (
     <div className="bg-gray-50 min-h-screen pb-16">
-      <div className="max-w-[1280px] mx-auto px-4 py-6">
+      <div className="w-full mx-auto px-4 py-6 max-w-7xl">
 
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
@@ -730,16 +732,16 @@ export default function ProductDetail() {
           <span className="text-gray-800 font-medium">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr] lg:grid-cols-[260px_1fr_300px] gap-4 lg:gap-6 items-start">
 
           {/* ═══════════════════════════════════════════════════════════════
               COLUNA ESQUERDA — Galeria + Info
           ═══════════════════════════════════════════════════════════════ */}
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
 
             {/* Foto principal */}
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="relative" style={{ aspectRatio: "4/3" }}>
+            <div className="bg-white rounded-lg lg:rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+              <div className="relative w-full" style={{ aspectRatio: "4/3", minHeight: "clamp(200px, 50vw, 400px)" }}>
                 {galleryImages.length > 0 ? (
                   <>
                     <img
@@ -1222,7 +1224,7 @@ export default function ProductDetail() {
                           });
                         }, 2000);
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all duration-800 ${
                         selectedDeliveryOption?.id === opt.id
                           ? "border-orange-500 bg-orange-50 shadow-sm"
                           : "border-gray-200 bg-white hover:border-orange-300"
@@ -1305,7 +1307,7 @@ export default function ProductDetail() {
                             }, 2000);
                           }
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-800 ${
                           isPickupSel
                             ? 'border-orange-500 bg-orange-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-orange-300'
