@@ -50,21 +50,21 @@ export function WhyChooseUs() {
   ];
 
   return (
-    <section className="bg-white py-12 px-6 lg:px-8" style={{height: '237px'}}>
+    <section className="bg-white py-8 lg:py-12 px-4 lg:px-8" style={{height: 'auto', minHeight: 'auto'}}>
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-12">
+        <h2 className="text-xl lg:text-2xl font-bold text-center text-gray-900 mb-6 lg:mb-12">
           Por que escolher a Maria Imprime?
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
           {reasons.map((reason) => (
-            <div key={reason.id} className="flex gap-4">
+            <div key={reason.id} className="flex gap-3 lg:gap-4">
               <div className="flex-shrink-0 mt-1">{reason.icon}</div>
               <div>
-                <h3 className="text-sm font-bold text-gray-900">
+                <h3 className="text-xs lg:text-sm font-bold text-gray-900">
                   {reason.title}
                 </h3>
-                <p className="text-xs text-gray-600 mt-1">{reason.description}</p>
+                <p className="text-xs text-gray-600 mt-0.5 lg:mt-1">{reason.description}</p>
               </div>
             </div>
           ))}
