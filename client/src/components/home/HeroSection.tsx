@@ -138,11 +138,12 @@ export function HeroSection() {
 
           {/* 4 Pilares */}
           <div
+            className="pilares-row"
             style={{
               display: "flex",
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: "clamp(0.5rem, 1.5vw, 1.5rem)",
+              gap: "clamp(0.25rem, 1vw, 1.5rem)",
               flexWrap: "nowrap",
               width: "100%",
               justifyContent: "space-between",
@@ -151,42 +152,47 @@ export function HeroSection() {
             {pilares.map((pilar, idx) => (
               <div
                 key={idx}
+                className="pilar-item"
                 style={{
                   display: "flex",
-                  alignItems: "flex-start",
-                  gap: "6px",
-                  flex: "1 1 auto",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "4px",
+                  flex: "1 1 0",
                   minWidth: "0",
+                  textAlign: "center",
                 }}
               >
                 <img
                   src={pilar.icon}
                   alt={pilar.label}
+                  className="pilar-icon"
                   style={{
-                    width: "36px",
-                    height: "36px",
+                    width: "clamp(22px, 5vw, 36px)",
+                    height: "clamp(22px, 5vw, 36px)",
                     objectFit: "contain",
                     flexShrink: 0,
-                    marginTop: "2px",
                   }}
                 />
                 <div>
                   <p
                     style={{
                       fontWeight: 800,
-                      fontSize: "0.85rem",
+                      fontSize: "clamp(0.55rem, 1.8vw, 0.85rem)",
                       color: "#111827",
                       lineHeight: 1.2,
                       fontFamily: FONT,
                       margin: "0",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {pilar.label}
                   </p>
                   <p
+                    className="pilar-desc"
                     style={{
                       fontWeight: 400,
-                      fontSize: "0.78rem",
+                      fontSize: "clamp(0.5rem, 1.5vw, 0.78rem)",
                       color: "#6B7280",
                       lineHeight: 1.3,
                       fontFamily: FONT,
