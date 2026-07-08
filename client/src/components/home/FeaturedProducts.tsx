@@ -25,7 +25,7 @@ export function FeaturedProducts() {
   const featured = products?.slice(0, 7) || [];
 
   return (
-    <section className="bg-white py-20 px-4">
+    <section className="bg-white py-20 px-4" style={{paddingTop: '24px'}}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Produtos mais procurados</h2>
         <p className="text-center text-gray-600 text-sm mb-12">Confira os favoritos dos nossos clientes</p>

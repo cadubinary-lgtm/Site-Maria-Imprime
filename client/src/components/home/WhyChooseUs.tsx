@@ -50,7 +50,7 @@ export function WhyChooseUs() {
   ];
 
   return (
-    <section className="bg-white py-8 lg:py-12 px-4 lg:px-8" style={{height: 'auto', minHeight: 'auto'}}>
+    <section className="bg-white py-8 lg:py-12 px-4 lg:px-8" style={{height: 'auto', minHeight: 'auto', paddingBottom: '24px', paddingTop: '17px', marginTop: '-42px'}}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-xl lg:text-2xl font-bold text-center text-gray-900 mb-6 lg:mb-12">
           Por que escolher a Maria Imprime?

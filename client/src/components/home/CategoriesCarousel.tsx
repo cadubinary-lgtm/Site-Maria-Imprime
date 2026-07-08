@@ -92,7 +92,7 @@ export function CategoriesCarousel() {
   };
 
   return (
-    <section className="bg-white py-12 px-6 lg:px-8">
+    <section className="bg-white py-12 px-6 lg:px-8" style={{paddingBottom: '6px', paddingRight: '23px', paddingTop: '17px'}}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-sm font-semibold text-gray-700 mb-6">Acesso rápido</h2>
 

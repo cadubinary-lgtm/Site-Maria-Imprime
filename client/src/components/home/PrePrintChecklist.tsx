@@ -15,7 +15,7 @@ const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
 
 export function PrePrintChecklist() {
   return (
-    <section className="w-full py-10 px-4 lg:px-8 bg-white">
+    <section className="w-full py-10 px-4 lg:px-8 bg-white" style={{paddingTop: '0px'}}>
       <div className="max-w-6xl mx-auto">
         {/*
           O container externo tem overflow-visible para a cabeça da mascote
@@ -40,7 +40,7 @@ export function PrePrintChecklist() {
             <div className="hidden lg:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
-            <div className="flex-1 py-6 md:py-8 lg:py-10" style={{paddingLeft: 'clamp(1rem, 5vw, 165px)', paddingRight: 'clamp(1rem, 5vw, 45px)'}}>
+            <div className="flex-1 py-6 md:py-8 lg:py-10" style={{paddingLeft: 'clamp(1rem, 5vw, 165px)', paddingRight: 'clamp(1rem, 5vw, 45px)', paddingTop: '47px', paddingBottom: '10px'}}>
               {/* Título */}
               <h2
                 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"

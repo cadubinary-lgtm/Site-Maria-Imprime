@@ -34,13 +34,13 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="bg-white py-20 px-4">
+    <section className="bg-white py-20 px-4" style={{paddingTop: '39px'}}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Quem já pediu, aprovou! ❤️</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {TESTIMONIALS.map((testimonial, idx) => (
-            <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-all bg-white">
+            <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-all bg-white" style={{paddingTop: '3px'}}>
               <CardContent className="pt-6">
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
