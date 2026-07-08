@@ -40,7 +40,7 @@ export function PrePrintChecklist() {
             <div className="hidden lg:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
-            <div className="flex-1 py-8 lg:py-10" style={{paddingLeft: '165px', paddingRight: '45px'}}>
+            <div className="flex-1 py-6 md:py-8 lg:py-10" style={{paddingLeft: 'clamp(1rem, 5vw, 165px)', paddingRight: 'clamp(1rem, 5vw, 45px)'}}>
               {/* Título */}
               <h2
                 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"
@@ -59,16 +59,16 @@ export function PrePrintChecklist() {
               </p>
 
               {/* Grid de checks */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
                 {checks.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
+                  <div key={i} className="flex items-start gap-2 md:gap-3">
                     <img
                       src={CHECK}
                       alt="✓"
-                      className="w-7 h-7 flex-shrink-0 object-contain"
+                      className="w-6 h-6 md:w-7 md:h-7 flex-shrink-0 object-contain mt-0.5"
                     />
                     <span
-                      className="text-gray-800 text-sm lg:text-base font-medium"
+                      className="text-gray-800 text-xs md:text-sm lg:text-base font-medium leading-snug"
                       style={{ fontFamily: FONT }}
                     >
                       {item}
