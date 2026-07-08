@@ -142,9 +142,13 @@ export function HeroSection() {
               display: "flex",
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: "clamp(1rem, 3vw, 2.25rem)",
-              flexWrap: "wrap",
+              gap: "clamp(0.75rem, 2vw, 2.25rem)",
+              flexWrap: "nowrap",
               width: "100%",
+              overflowX: "auto",
+              scrollBehavior: "smooth",
+              paddingBottom: "8px",
+              marginBottom: "-8px",
             }}
           >
             {pilares.map((pilar, idx) => (
@@ -153,9 +157,9 @@ export function HeroSection() {
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
-                  gap: "10px",
-                  flex: "1 1 auto",
-                  minWidth: "clamp(80px, 20vw, 150px)",
+                  gap: "8px",
+                  flex: "0 0 auto",
+                  minWidth: "clamp(90px, 22vw, 160px)",
                 }}
               >
                 <img
