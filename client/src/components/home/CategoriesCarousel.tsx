@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { ChevronRight, ChevronLeft } from "lucide-react";
@@ -8,28 +8,57 @@ export function CategoriesCarousel() {
   const [isHoveringLeft, setIsHoveringLeft] = useState(false);
   const [isHoveringRight, setIsHoveringRight] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [, navigate] = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile (< 768px) sem afetar desktop
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Usar o novo sistema de segmentos (many-to-many) com ID numérico
   const { data: segments = [] } = trpc.productSegments.getAllSegments.useQuery();
 
-  const handleScroll = (direction: "left" | "right") => {
-    const container = document.getElementById("categories-container");
+  // No mobile: avança exatamente a largura de 1 item visível
+  // No desktop: mantém comportamento original (scroll de 300px)
+  const handleScroll = useCallback((direction: "left" | "right") => {
+    const container = containerRef.current || document.getElementById("categories-container") as HTMLDivElement | null;
     if (!container) return;
 
-    const scrollAmount = 300;
-    const newPosition =
-      direction === "left"
-        ? Math.max(0, scrollPosition - scrollAmount)
-        : scrollPosition + scrollAmount;
+    if (isMobile) {
+      // Calcular largura de um item para avançar 1 por vez
+      const firstItem = container.querySelector("button") as HTMLElement | null;
+      const itemWidth = firstItem
+        ? firstItem.getBoundingClientRect().width + parseFloat(getComputedStyle(container).gap || "16")
+        : container.clientWidth;
 
-    container.scrollTo({ left: newPosition, behavior: "smooth" });
-    setScrollPosition(newPosition);
-  };
+      const newPosition =
+        direction === "left"
+          ? Math.max(0, container.scrollLeft - itemWidth)
+          : container.scrollLeft + itemWidth;
 
-  // Auto-scroll when hovering over arrows
+      container.scrollTo({ left: newPosition, behavior: "smooth" });
+      setScrollPosition(newPosition);
+    } else {
+      // Comportamento desktop original — 300px
+      const scrollAmount = 300;
+      const newPosition =
+        direction === "left"
+          ? Math.max(0, scrollPosition - scrollAmount)
+          : scrollPosition + scrollAmount;
+
+      container.scrollTo({ left: newPosition, behavior: "smooth" });
+      setScrollPosition(newPosition);
+    }
+  }, [isMobile, scrollPosition]);
+
+  // Auto-scroll ao segurar o mouse nas setas (apenas desktop — hover não existe no mobile)
   useEffect(() => {
-    if (isHoveringLeft || isHoveringRight) {
+    if (!isMobile && (isHoveringLeft || isHoveringRight)) {
       scrollIntervalRef.current = setInterval(() => {
         const container = document.getElementById("categories-container");
         if (!container) return;
@@ -56,10 +85,9 @@ export function CategoriesCarousel() {
         clearInterval(scrollIntervalRef.current);
       }
     };
-  }, [isHoveringLeft, isHoveringRight, scrollPosition]);
+  }, [isHoveringLeft, isHoveringRight, scrollPosition, isMobile]);
 
   const handleSegmentClick = (segment: any) => {
-    // Navegar para o catálogo com o segmento pré-selecionado via ID numérico
     navigate(`/catalogo?segmentId=${segment.id}`);
   };
 
@@ -72,6 +100,7 @@ export function CategoriesCarousel() {
           {/* Scroll container */}
           <div
             id="categories-container"
+            ref={containerRef}
             className="flex gap-4 overflow-x-auto pb-2 scroll-smooth flex-1 px-28"
             style={{ scrollbarWidth: "none", height: '59px', marginBottom: '-7px', marginLeft: '50px', marginRight: '49px', marginTop: '-8px', width: '1189px', paddingBottom: '0px', paddingLeft: '0px', paddingRight: '0px', paddingTop: '2px', borderRadius: '14px' }}
           >
@@ -101,8 +130,8 @@ export function CategoriesCarousel() {
           {/* Left arrow button - positioned absolutely */}
           {(segments as any[]).length > 4 && (
             <button
-              onMouseEnter={() => setIsHoveringLeft(true)}
-              onMouseLeave={() => setIsHoveringLeft(false)}
+              onMouseEnter={() => !isMobile && setIsHoveringLeft(true)}
+              onMouseLeave={() => !isMobile && setIsHoveringLeft(false)}
               onClick={() => handleScroll("left")}
               className="absolute left-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:-translate-x-2"
               aria-label="Anterior"
@@ -114,8 +143,8 @@ export function CategoriesCarousel() {
           {/* Right arrow button - positioned absolutely */}
           {(segments as any[]).length > 4 && (
             <button
-              onMouseEnter={() => setIsHoveringRight(true)}
-              onMouseLeave={() => setIsHoveringRight(false)}
+              onMouseEnter={() => !isMobile && setIsHoveringRight(true)}
+              onMouseLeave={() => !isMobile && setIsHoveringRight(false)}
               onClick={() => handleScroll("right")}
               className="absolute right-0 w-10 h-10 rounded-full bg-pink-600 hover:bg-pink-700 text-white flex items-center justify-center transition-all shadow-md z-10 hover:translate-x-2"
               aria-label="Próximo"
