@@ -36,23 +36,24 @@ export function HeroSection() {
 
       {/* Container principal */}
       <div
-        className="relative z-10 flex items-center"
+        className="relative z-10 flex flex-col md:flex-row items-center md:items-center text-center md:text-left justify-center md:justify-start"
         style={{
           maxWidth: "1280px",
           margin: "0 auto",
           minHeight: "520px",
-          padding: "0 48px",
+          padding: "clamp(1rem, 5vw, 3rem) clamp(1rem, 5vw, 3rem)",
         }}
       >
         {/* ── COLUNA ESQUERDA ── */}
         <div
           style={{
-            flex: "0 0 50%",
-            maxWidth: "50%",
-            paddingTop: "56px",
-            paddingBottom: "56px",
-            paddingRight: "32px",
+            flex: "1 1 100%",
+            maxWidth: "100%",
+            paddingTop: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingBottom: "clamp(1.5rem, 4vw, 3.5rem)",
+            paddingRight: "clamp(0, 5vw, 2rem)",
           }}
+          className="md:flex-0 md:max-w-[50%]"
         >
           {/* Título principal */}
           <h1
@@ -87,7 +88,7 @@ export function HeroSection() {
           </p>
 
           {/* Barra de busca */}
-          <div style={{ maxWidth: "560px", marginBottom: "36px" }}>
+          <div style={{ maxWidth: "560px", marginBottom: "36px", marginLeft: "auto", marginRight: "auto" }} className="md:ml-0 md:mr-0">
             <div
               style={{
                 display: "flex",
