@@ -109,7 +109,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm no-print">
       <div className="max-w-7xl mx-auto px-4" style={{paddingTop: '18px', paddingBottom: '2px', paddingLeft: '1px'}}>
         {/* Desktop Layout */}
-        <div className="hidden md:flex items-center justify-between gap-6" style={{height: '73px'}}>
+        <div className="hidden md:flex items-center justify-between gap-6" style={{height: '73px', paddingLeft: '23px'}}>
           {/* Logo Oficial */}
           <div
             onClick={handleLogoClick}
@@ -118,7 +118,7 @@ export default function Header() {
             <img
               src="/manus-storage/logo-maria-imprime_acc5585b.webp"
               alt="Maria Imprime - Sua Gráfica Online"
-              className="h-10 w-auto" style={{height: '62px', width: '203px', paddingBottom: '8px'}}
+              className="h-10 w-auto" style={{height: '62px', width: '203px', paddingBottom: '4px', paddingTop: '2px'}}
             />
           </div>
 
