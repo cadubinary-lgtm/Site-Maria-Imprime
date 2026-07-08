@@ -96,7 +96,7 @@ export function CategoriesCarousel() {
       <div className="max-w-7xl mx-auto">
         <h2 className="text-sm font-semibold text-gray-700 mb-6">Acesso rápido</h2>
 
-        <div className="relative flex items-center" style={{paddingBottom: '8px', paddingLeft: '23px', paddingRight: '15px'}}>
+        <div className="relative flex items-center" style={{paddingBottom: '8px', paddingLeft: '35px', paddingRight: '15px'}}>
           {/* Scroll container */}
           <div
             id="categories-container"
