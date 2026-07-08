@@ -83,7 +83,7 @@ export function HeroSection() {
               color: "#4B5563",
               lineHeight: 1.6,
               marginBottom: "clamp(1rem, 3vw, 1.75rem)",
-              fontFamily: FONT,
+              fontFamily: FONT, paddingLeft: '24px',
             }}
             className="lg:text-left text-left"
           >
