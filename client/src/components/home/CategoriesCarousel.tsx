@@ -111,15 +111,15 @@ export function CategoriesCarousel() {
                 className="flex-shrink-0 group cursor-pointer"
               >
                 {/* Card retangular com bordas redondas */}
-                <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl px-6 py-2 h-14 flex items-center gap-4 hover:shadow-lg transition-all duration-300 min-w-max hover:bg-gradient-to-br hover:from-pink-100 hover:to-pink-200">
+                <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl px-4 py-2 h-14 flex items-center justify-center gap-3 hover:shadow-lg transition-all duration-300 hover:bg-gradient-to-br hover:from-pink-100 hover:to-pink-200" style={{ width: '160px', minWidth: '160px', maxWidth: '160px' }}>
                   {segment.icon && (
                     <img
                       src={segment.icon}
                       alt={segment.name}
-                      className="w-10 h-10 flex-shrink-0"
+                      className="w-8 h-8 flex-shrink-0"
                     />
                   )}
-                  <span className="text-base font-semibold text-gray-900 group-hover:text-pink-600 transition-colors whitespace-nowrap">
+                  <span className="text-sm font-semibold text-gray-900 group-hover:text-pink-600 transition-colors text-center leading-tight">
                     {segment.name}
                   </span>
                 </div>
