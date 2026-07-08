@@ -24,7 +24,7 @@ export function PrePrintChecklist() {
           A mascote fica em position: absolute, alinhada pela base do card,
           com top negativo para a cabeça sair por cima.
         */}
-        <div className="relative" style={{ paddingTop: "80px" }}>
+        <div className="relative" style={{ paddingTop: '19px' }}>
           {/* Card rosa */}
           <div
             className="relative rounded-3xl overflow-visible flex flex-col lg:flex-row items-stretch"

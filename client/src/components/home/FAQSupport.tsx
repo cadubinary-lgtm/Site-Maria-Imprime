@@ -24,7 +24,7 @@ export function FAQSupport() {
       <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-pink-50 -z-10" />
 
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center" style={{minHeight: '282px', marginTop: '-60px', paddingBottom: '1px', paddingLeft: '72px', paddingTop: '4px'}}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center" style={{minHeight: '282px', marginTop: '-57px', paddingBottom: '1px', paddingLeft: '72px', paddingTop: '4px', marginBottom: '-38px', marginLeft: '-25px', marginRight: '12px'}}>
           {/* ── COL 1: Mascote Maria ── */}
           <div className="flex justify-center lg:justify-start">
             <img
