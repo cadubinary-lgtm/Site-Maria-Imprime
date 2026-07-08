@@ -66,7 +66,7 @@ export function HeroSection() {
               letterSpacing: "-0.02em",
               color: "#111827",
               marginBottom: "clamp(0.75rem, 2vw, 1.25rem)",
-              fontFamily: FONT,
+              fontFamily: FONT, paddingLeft: '18px',
             }}
             className="lg:text-left text-left"
           >
