@@ -112,19 +112,21 @@ export function HowItWorks() {
         {/* ── Mobile ── */}
         <div className="grid grid-cols-2 gap-3 lg:hidden">
           {steps.map((step, i) => (
-            <div key={i} className="flex flex-col items-center text-center group py-2">
+            <div key={i} className="flex flex-col items-center text-center group pt-8 pb-2">
               <div className="relative flex justify-center" style={{ minHeight: '140px' }}>
-                {/* Bolinha acima da cabeça da mascote com pequeno espaço */}
+                {/* Bolinha posicionada dentro do container, no topo — sem sobrepor conteúdo acima */}
                 <img
                   src={step.number}
                   alt={`Passo ${i + 1}`}
                   className="absolute w-7 h-7 object-contain z-10"
-                  style={{ top: "-32px", left: "50%", transform: "translateX(-50%)" }}
+                  style={{ top: "0px", left: "50%", transform: "translateX(-50%)" }}
                 />
+                {/* Mascote com margem para não ficar atrás da bolinha */}
                 <img
                   src={step.mascote}
                   alt={step.title}
                   className="w-[90px] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  style={{ marginTop: "28px" }}
                 />
               </div>
               <p className="font-bold text-gray-800 text-xs leading-tight mt-1 mb-0.5">
