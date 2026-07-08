@@ -19,7 +19,7 @@ export function FAQSupport() {
   ];
 
   return (
-    <section className="relative py-20 px-4 lg:px-8 overflow-hidden" style={{minHeight: '386px'}}>
+    <section className="relative py-20 px-4 lg:px-8 overflow-hidden" style={{minHeight: '386px', paddingTop: '50px'}}>
       {/* Fundo com gradiente rosa suave */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-pink-50 -z-10" />
 
