@@ -286,7 +286,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Layout */}
-        <div className="md:hidden flex items-center justify-between" style={{paddingLeft: '18px'}}>
+        <div className="md:hidden flex items-center justify-between" style={{paddingLeft: '40px'}}>
           <Link href="/">
             <div className="flex items-center cursor-pointer">
               <img
