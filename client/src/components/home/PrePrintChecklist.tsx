@@ -4,10 +4,10 @@ const CHECK   = "/manus-storage/certo_54c281fc.png";
 
 const checks = [
   "Resolução mínima de 150 DPI",
-  "Arquivo em CMYK ou RGB",
-  "Sangria e margens corretas",
   "Fontes convertidas em curvas",
+  "Arquivo em CMYK ou RGB",
   "Cores e contrastes adequados",
+  "Sangria e margens corretas",
   "Formato e tamanho conferidos",
 ];
 
@@ -18,64 +18,45 @@ export function PrePrintChecklist() {
     <section className="w-full py-10 px-4 lg:px-8 bg-white" style={{paddingTop: '0px'}}>
       <div className="max-w-6xl mx-auto">
         <div className="relative" style={{ paddingTop: '19px' }}>
-          {/* Card rosa */}
+
+          {/* ── CARD ROSA ── */}
           <div
-            className="relative rounded-3xl overflow-visible flex flex-col lg:flex-row items-stretch"
+            className="relative rounded-3xl overflow-visible"
             style={{
               backgroundImage: `url(${FUNDO})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundColor: "#fdf0f5",
-              minHeight: "300px",
             }}
           >
-            {/* Espaço reservado para a mascote no lado esquerdo — apenas desktop/tablet */}
-            <div className="hidden md:block flex-shrink-0" style={{ width: "280px" }} />
 
-            {/* Conteúdo — centro/direita */}
-            <div className="flex-1 py-6 md:py-8 lg:py-10" style={{paddingLeft: 'clamp(1rem, 5vw, 165px)', paddingRight: 'clamp(1rem, 5vw, 45px)', paddingTop: '47px', paddingBottom: '10px'}}>
-              {/* Título */}
-              <h2
-                className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight"
-                style={{ fontFamily: FONT }}
-              >
-                Antes de imprimir,{" "}
-                <span style={{ color: "#E6005C" }}>nós verificamos!</span>
-              </h2>
+            {/* ══════════════════════════════════════════
+                DESKTOP / TABLET (md+) — layout original
+                Mascote absoluta à esquerda, conteúdo à direita
+            ══════════════════════════════════════════ */}
+            <div className="hidden md:flex flex-row items-stretch" style={{ minHeight: "300px" }}>
+              {/* Espaço reservado para a mascote */}
+              <div className="flex-shrink-0" style={{ width: "280px" }} />
 
-              {/* Subtítulo */}
-              <p
-                className="text-gray-600 text-sm lg:text-base mb-6"
-                style={{ fontFamily: FONT }}
-              >
-                Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
-              </p>
-
-              {/* Layout mobile: mascote à esquerda + lista à direita */}
-              <div className="flex md:block gap-3 items-start">
-                {/* Mascote mobile — ao lado da lista, apenas no mobile */}
-                <div className="flex-shrink-0 md:hidden" style={{ width: "90px" }}>
-                  <img
-                    src={MASCOTE}
-                    alt="Maria verificando arquivo"
-                    className="w-full h-auto object-contain drop-shadow-lg"
-                    draggable={false}
-                  />
-                </div>
-
-                {/* Grid de checks */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
+              {/* Conteúdo */}
+              <div className="flex-1 py-10" style={{
+                paddingLeft: 'clamp(1rem, 5vw, 165px)',
+                paddingRight: 'clamp(1rem, 5vw, 45px)',
+                paddingTop: '47px',
+                paddingBottom: '10px',
+              }}>
+                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight" style={{ fontFamily: FONT }}>
+                  Antes de imprimir,{" "}
+                  <span style={{ color: "#E6005C" }}>nós verificamos!</span>
+                </h2>
+                <p className="text-gray-600 text-sm lg:text-base mb-6" style={{ fontFamily: FONT }}>
+                  Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
+                </p>
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
                   {checks.map((item, i) => (
                     <div key={i} className="flex items-start gap-2 md:gap-3">
-                      <img
-                        src={CHECK}
-                        alt="✓"
-                        className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 object-contain mt-0.5"
-                      />
-                      <span
-                        className="text-gray-800 text-xs md:text-sm lg:text-base font-medium leading-snug"
-                        style={{ fontFamily: FONT }}
-                      >
+                      <img src={CHECK} alt="✓" className="w-7 h-7 flex-shrink-0 object-contain mt-0.5" />
+                      <span className="text-gray-800 text-sm lg:text-base font-medium leading-snug" style={{ fontFamily: FONT }}>
                         {item}
                       </span>
                     </div>
@@ -84,7 +65,7 @@ export function PrePrintChecklist() {
               </div>
             </div>
 
-            {/* Mascote desktop/tablet — posicionada absolutamente, base alinhada ao fundo do card */}
+            {/* Mascote desktop — posicionada absolutamente */}
             <img
               src={MASCOTE}
               alt="Maria verificando arquivo"
@@ -101,6 +82,49 @@ export function PrePrintChecklist() {
               }}
               draggable={false}
             />
+
+            {/* ══════════════════════════════════════════
+                MOBILE (<md) — layout da imagem enviada:
+                1. Título + subtítulo no topo
+                2. Mascote à esquerda + grid 2 colunas à direita
+            ══════════════════════════════════════════ */}
+            <div className="md:hidden px-5 pt-6 pb-6">
+              {/* Título */}
+              <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight" style={{ fontFamily: FONT }}>
+                Antes de imprimir,{" "}
+                <span style={{ color: "#E6005C" }}>nós verificamos!</span>
+              </h2>
+              {/* Subtítulo */}
+              <p className="text-gray-600 text-sm mb-5" style={{ fontFamily: FONT }}>
+                Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
+              </p>
+
+              {/* Mascote + checks lado a lado */}
+              <div className="flex items-start gap-3">
+                {/* Mascote */}
+                <div className="flex-shrink-0" style={{ width: "110px" }}>
+                  <img
+                    src={MASCOTE}
+                    alt="Maria verificando arquivo"
+                    className="w-full h-auto object-contain drop-shadow-lg"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Grid 2 colunas de checks */}
+                <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-3">
+                  {checks.map((item, i) => (
+                    <div key={i} className="flex items-start gap-1.5">
+                      <img src={CHECK} alt="✓" className="w-5 h-5 flex-shrink-0 object-contain mt-0.5" />
+                      <span className="text-gray-800 text-xs font-medium leading-snug" style={{ fontFamily: FONT }}>
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
