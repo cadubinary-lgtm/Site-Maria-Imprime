@@ -100,9 +100,9 @@ export function PrePrintChecklist() {
               </p>
 
               {/* Mascote + checks lado a lado */}
-              <div className="flex items-start gap-3">
-                {/* Mascote */}
-                <div className="flex-shrink-0" style={{ width: "110px" }}>
+              <div className="flex items-center gap-2">
+                {/* Mascote maior — ~40% da largura */}
+                <div className="flex-shrink-0" style={{ width: "42%" }}>
                   <img
                     src={MASCOTE}
                     alt="Maria verificando arquivo"
@@ -111,12 +111,12 @@ export function PrePrintChecklist() {
                   />
                 </div>
 
-                {/* Grid 2 colunas de checks */}
-                <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-3">
+                {/* Grid 2 colunas de checks — texto bem pequeno */}
+                <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-2">
                   {checks.map((item, i) => (
-                    <div key={i} className="flex items-start gap-1.5">
-                      <img src={CHECK} alt="✓" className="w-5 h-5 flex-shrink-0 object-contain mt-0.5" />
-                      <span className="text-gray-800 text-xs font-medium leading-snug" style={{ fontFamily: FONT }}>
+                    <div key={i} className="flex items-start gap-1">
+                      <img src={CHECK} alt="✓" className="w-4 h-4 flex-shrink-0 object-contain mt-0.5" />
+                      <span style={{ fontFamily: FONT, fontSize: '10px', lineHeight: '1.3', color: '#1f2937', fontWeight: 500 }}>
                         {item}
                       </span>
                     </div>
