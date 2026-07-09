@@ -115,7 +115,7 @@ export function PrePrintChecklist() {
                 <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-2">
                   {checks.map((item, i) => (
                     <div key={i} className="flex items-start gap-1">
-                      <img src={CHECK} alt="✓" className="w-4 h-4 flex-shrink-0 object-contain mt-0.5" />
+                      <img src={CHECK} alt="✓" className="flex-shrink-0 object-contain mt-0.5" style={{width: '14px', height: '14px'}} />
                       <span style={{ fontFamily: FONT, fontSize: '10px', lineHeight: '1.3', color: '#1f2937', fontWeight: 500 }}>
                         {item}
                       </span>
