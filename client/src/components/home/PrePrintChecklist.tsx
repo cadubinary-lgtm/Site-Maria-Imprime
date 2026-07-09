@@ -36,8 +36,8 @@ export function PrePrintChecklist() {
               minHeight: "300px",
             }}
           >
-            {/* Espaço reservado para a mascote no lado esquerdo */}
-            <div className="hidden lg:block flex-shrink-0" style={{ width: "280px" }} />
+            {/* Espaço reservado para a mascote no lado esquerdo — visivel no desktop e tablet, oculto no mobile */}
+            <div className="hidden md:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
             <div className="flex-1 py-6 md:py-8 lg:py-10" style={{paddingLeft: 'clamp(1rem, 5vw, 165px)', paddingRight: 'clamp(1rem, 5vw, 45px)', paddingTop: '47px', paddingBottom: '10px'}}>
@@ -79,11 +79,11 @@ export function PrePrintChecklist() {
             </div>
 
             {/* Mascote — posicionada absolutamente, base alinhada ao fundo do card,
-                cabeça ultrapassando o topo */}
+                cabeça ultrapassando o topo — visível apenas em md+ (desktop/tablet) */}
             <img
               src={MASCOTE}
               alt="Maria verificando arquivo"
-              className="absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
+              className="hidden md:block absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
               style={{
                 width: "auto",
                 bottom: 0,
@@ -96,6 +96,16 @@ export function PrePrintChecklist() {
               }}
               draggable={false}
             />
+
+            {/* Mascote mobile — abaixo do card, sem sobrepor conteúdo */}
+            <div className="flex justify-center md:hidden mt-4">
+              <img
+                src={MASCOTE}
+                alt="Maria verificando arquivo"
+                className="h-48 w-auto object-contain drop-shadow-lg"
+                draggable={false}
+              />
+            </div>
           </div>
         </div>
       </div>
