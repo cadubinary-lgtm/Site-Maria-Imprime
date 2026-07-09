@@ -83,7 +83,7 @@ export function PrePrintChecklist() {
             <img
               src={MASCOTE}
               alt="Maria verificando arquivo"
-              className="hidden lg:block absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
+              className="absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
               style={{
                 width: "auto",
                 bottom: 0,
@@ -94,16 +94,6 @@ export function PrePrintChecklist() {
                 objectFit: "contain",
                 objectPosition: "bottom",
               }}
-              draggable={false}
-            />
-          </div>
-
-          {/* Versão mobile da mascote — abaixo do card */}
-          <div className="flex justify-center mt-4 lg:hidden">
-            <img
-              src={MASCOTE}
-              alt="Maria verificando arquivo"
-              className="h-48 w-auto object-contain drop-shadow-lg"
               draggable={false}
             />
           </div>
