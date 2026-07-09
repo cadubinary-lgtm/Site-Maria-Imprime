@@ -17,13 +17,6 @@ export function PrePrintChecklist() {
   return (
     <section className="w-full py-10 px-4 lg:px-8 bg-white" style={{paddingTop: '0px'}}>
       <div className="max-w-6xl mx-auto">
-        {/*
-          O container externo tem overflow-visible para a cabeça da mascote
-          ultrapassar o topo do card rosa.
-          O card rosa tem position: relative e overflow: visible.
-          A mascote fica em position: absolute, alinhada pela base do card,
-          com top negativo para a cabeça sair por cima.
-        */}
         <div className="relative" style={{ paddingTop: '19px' }}>
           {/* Card rosa */}
           <div
@@ -36,7 +29,7 @@ export function PrePrintChecklist() {
               minHeight: "300px",
             }}
           >
-            {/* Espaço reservado para a mascote no lado esquerdo — visivel no desktop e tablet, oculto no mobile */}
+            {/* Espaço reservado para a mascote no lado esquerdo — apenas desktop/tablet */}
             <div className="hidden md:block flex-shrink-0" style={{ width: "280px" }} />
 
             {/* Conteúdo — centro/direita */}
@@ -58,28 +51,40 @@ export function PrePrintChecklist() {
                 Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
               </p>
 
-              {/* Grid de checks */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
-                {checks.map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 md:gap-3">
-                    <img
-                      src={CHECK}
-                      alt="✓"
-                      className="w-6 h-6 md:w-7 md:h-7 flex-shrink-0 object-contain mt-0.5"
-                    />
-                    <span
-                      className="text-gray-800 text-xs md:text-sm lg:text-base font-medium leading-snug"
-                      style={{ fontFamily: FONT }}
-                    >
-                      {item}
-                    </span>
-                  </div>
-                ))}
+              {/* Layout mobile: mascote à esquerda + lista à direita */}
+              <div className="flex md:block gap-3 items-start">
+                {/* Mascote mobile — ao lado da lista, apenas no mobile */}
+                <div className="flex-shrink-0 md:hidden" style={{ width: "90px" }}>
+                  <img
+                    src={MASCOTE}
+                    alt="Maria verificando arquivo"
+                    className="w-full h-auto object-contain drop-shadow-lg"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Grid de checks */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
+                  {checks.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 md:gap-3">
+                      <img
+                        src={CHECK}
+                        alt="✓"
+                        className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 object-contain mt-0.5"
+                      />
+                      <span
+                        className="text-gray-800 text-xs md:text-sm lg:text-base font-medium leading-snug"
+                        style={{ fontFamily: FONT }}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Mascote — posicionada absolutamente, base alinhada ao fundo do card,
-                cabeça ultrapassando o topo — visível apenas em md+ (desktop/tablet) */}
+            {/* Mascote desktop/tablet — posicionada absolutamente, base alinhada ao fundo do card */}
             <img
               src={MASCOTE}
               alt="Maria verificando arquivo"
@@ -96,16 +101,6 @@ export function PrePrintChecklist() {
               }}
               draggable={false}
             />
-
-            {/* Mascote mobile — abaixo do card, sem sobrepor conteúdo */}
-            <div className="flex justify-center md:hidden mt-4">
-              <img
-                src={MASCOTE}
-                alt="Maria verificando arquivo"
-                className="h-48 w-auto object-contain drop-shadow-lg"
-                draggable={false}
-              />
-            </div>
           </div>
         </div>
       </div>
