@@ -41,26 +41,26 @@ export function FeaturedProducts() {
                   </div>
                 )}
 
-                <CardContent className="pt-6">
-                  {/* Product image */}
-                  <div className="bg-gradient-to-br from-pink-50 to-white rounded-2xl p-6 mb-4 flex items-center justify-center min-h-32 group-hover:scale-105 transition-transform border border-pink-100 overflow-hidden">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover rounded-xl"
-                      />
-                    ) : (
-                      <div className="text-4xl">
-                        {product.segment === "varejo" && "📦"}
-                        {product.segment === "servicos" && "🔧"}
-                        {product.segment === "alimentacao" && "🍔"}
-                        {product.segment === "beleza" && "💄"}
-                        {!["varejo", "servicos", "alimentacao", "beleza"].includes(product.segment) && "📄"}
-                      </div>
-                    )}
-                  </div>
+                {/* Product image - preenche toda a area rosa */}
+                <div className="bg-gradient-to-br from-pink-50 to-white rounded-t-2xl overflow-hidden flex items-center justify-center min-h-40">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-4xl">
+                      {product.segment === "varejo" && "📦"}
+                      {product.segment === "servicos" && "🔧"}
+                      {product.segment === "alimentacao" && "🍔"}
+                      {product.segment === "beleza" && "💄"}
+                      {!["varejo", "servicos", "alimentacao", "beleza"].includes(product.segment) && "📄"}
+                    </div>
+                  )}
+                </div>
 
+                <CardContent className="pt-6">
                   <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">{product.name}</h3>
                   <p className="text-xs text-gray-600 line-clamp-2 mb-4 font-light">{product.description}</p>
                   <p className="text-xl font-bold text-pink-600 mb-4">R$ {parseFloat(product.price).toFixed(2)}</p>
