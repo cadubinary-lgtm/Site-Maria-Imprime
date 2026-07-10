@@ -42,7 +42,7 @@ export function FeaturedProducts() {
                 )}
 
                 {/* Product image - padronizado h-40 igual ao catalogo */}
-                <div className="relative h-40 bg-gray-100 overflow-hidden rounded-t-2xl">
+                <div className="relative h-40 bg-gray-100 overflow-hidden">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
