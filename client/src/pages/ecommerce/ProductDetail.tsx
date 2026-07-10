@@ -741,7 +741,7 @@ export default function ProductDetail() {
 
             {/* Foto principal */}
             <div className="bg-white rounded-lg lg:rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="relative w-full" style={{ aspectRatio: "4/3", minHeight: "clamp(200px, 50vw, 400px)" }}>
+              <div className="relative h-40 bg-gray-100 overflow-hidden">
                 {galleryImages.length > 0 ? (
                   <>
                     <img

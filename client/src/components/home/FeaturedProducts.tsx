@@ -41,8 +41,8 @@ export function FeaturedProducts() {
                   </div>
                 )}
 
-                {/* Product image - preenche toda a area rosa */}
-                <div className="bg-gradient-to-br from-pink-50 to-white rounded-t-2xl overflow-hidden flex items-center justify-center min-h-40">
+                {/* Product image - padronizado h-40 igual ao catalogo */}
+                <div className="relative h-40 bg-gray-100 overflow-hidden rounded-t-2xl">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
