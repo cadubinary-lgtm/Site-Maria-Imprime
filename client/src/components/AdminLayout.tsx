@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 
+const SIDEBAR_SCROLL_KEY = "admin_sidebar_scroll";
+
 interface NavItem {
   label: string;
   href?: string;
@@ -34,10 +36,9 @@ const STATUS_LABELS: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
-// Contexto para compartilhar a ref da nav e a ref do scroll salvo
+// Contexto para compartilhar a ref da nav com os NavLinks
 interface SidebarScrollCtx {
   navRef: React.RefObject<HTMLElement | null>;
-  savedScroll: React.MutableRefObject<number>;
 }
 const SidebarScrollContext = createContext<SidebarScrollCtx | null>(null);
 
@@ -53,23 +54,21 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   const [location] = useLocation();
   const ctx = useContext(SidebarScrollContext);
 
-  // Verifica se algum filho está ativo para inicializar o grupo como aberto
   const hasActiveChild = item.children?.some(
     (child) => child.href && (location === child.href || location.startsWith(child.href + "?"))
   ) ?? false;
   const [open, setOpen] = useState(() => hasActiveChild);
   const isActive = item.href ? location === item.href : false;
   const hasChildren = item.children && item.children.length > 0;
-  // Mantém aberto quando um filho está ativo (navegação entre páginas)
   const isGroupActive = hasChildren && hasActiveChild;
 
-  // Captura o scroll da sidebar ANTES da navegação acontecer
-  const handleNavClick = (e?: React.MouseEvent) => {
+  // Salva a posição do scroll no localStorage ANTES de navegar
+  const saveScrollPosition = () => {
     if (ctx?.navRef.current) {
-      ctx.savedScroll.current = ctx.navRef.current.scrollTop;
-    }
-    if (item.href === "#" && e) {
-      e.preventDefault();
+      const scrollTop = ctx.navRef.current.scrollTop;
+      try {
+        localStorage.setItem(SIDEBAR_SCROLL_KEY, String(scrollTop));
+      } catch (_) {}
     }
   };
 
@@ -78,9 +77,7 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
       <div>
         <button
           onClick={() => {
-            if (ctx?.navRef.current) {
-              ctx.savedScroll.current = ctx.navRef.current.scrollTop;
-            }
+            saveScrollPosition();
             setOpen(!open);
           }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
@@ -111,7 +108,14 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
       `}
       style={{ paddingLeft: `${12 + depth * 12}px` }}
-      onClick={(e) => handleNavClick(e)}
+      onClick={(e) => {
+        // Salva posição no localStorage antes de navegar
+        saveScrollPosition();
+        // Previne scroll para topo em links "#"
+        if (item.href === "#") {
+          e.preventDefault();
+        }
+      }}
     >
       {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
       <span className="flex-1">{item.label}</span>
@@ -127,25 +131,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navRef = useRef<HTMLElement>(null);
   const [location] = useLocation();
 
-  // Posição do scroll salva ANTES da navegação (pelo onClick do NavLink)
-  const savedNavScroll = useRef<number>(0);
-
-  // Ao mudar de rota: reseta scroll do conteúdo principal
-  // e restaura a posição salva da sidebar
+  // Ao montar o layout E ao mudar de rota: restaura posição do scroll da sidebar
   useEffect(() => {
-    // Reseta apenas o conteúdo principal
+    // Reseta scroll do conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;
     }
-    // Restaura posição da sidebar após render
-    // O valor já foi salvo pelo onClick antes da navegação
-    const timer = setTimeout(() => {
+    // Restaura posição da sidebar a partir do localStorage
+    const restore = () => {
       if (navRef.current) {
-        navRef.current.scrollTop = savedNavScroll.current;
+        try {
+          const saved = localStorage.getItem(SIDEBAR_SCROLL_KEY);
+          if (saved !== null) {
+            navRef.current.scrollTop = parseInt(saved, 10);
+          }
+        } catch (_) {}
       }
-    }, 0);
-    return () => clearTimeout(timer);
+    };
+    // Usa requestAnimationFrame para garantir que o DOM foi atualizado
+    const raf = requestAnimationFrame(() => {
+      restore();
+    });
+    return () => cancelAnimationFrame(raf);
   }, [location]);
+
+  // Também salva o scroll continuamente enquanto o usuário rola a sidebar
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const handleScroll = () => {
+      try {
+        localStorage.setItem(SIDEBAR_SCROLL_KEY, String(nav.scrollTop));
+      } catch (_) {}
+    };
+    nav.addEventListener("scroll", handleScroll, { passive: true });
+    return () => nav.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
@@ -285,7 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <SidebarScrollContext.Provider value={{ navRef, savedScroll: savedNavScroll }}>
+    <SidebarScrollContext.Provider value={{ navRef }}>
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         {/* Sidebar */}
         <aside
