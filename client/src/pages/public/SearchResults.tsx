@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package, Grid3x3, Layers } from "lucide-react";
+import { formatProductPrice } from "@/lib/productPrice";
 import { Link } from "wouter";
 
 export default function SearchResults() {
@@ -86,7 +87,7 @@ export default function SearchResults() {
                           </p>
                           <div className="flex items-center justify-between pt-4 border-t">
                             <span className="text-2xl font-bold text-orange-500">
-                              R$ {parseFloat(product.price).toFixed(2)}
+                              {formatProductPrice(product)}
                             </span>
                             <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                               Ver Detalhes

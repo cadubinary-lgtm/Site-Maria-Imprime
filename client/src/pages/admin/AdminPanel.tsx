@@ -29,6 +29,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Camera, Plus } from 'lucide-react';
+import { formatProductPrice } from '@/lib/productPrice';
 import { DeliveryOptionsManager, type DeliveryOptionData } from '@/components/products/DeliveryOptionsManager';
 
 const SEGMENT_LABELS: Record<string, string> = {
@@ -645,7 +646,7 @@ export default function AdminPanel() {
                           step="0.01"
                         />
                       ) : (
-                        `R$ ${parseFloat(product.price).toFixed(2)}`
+                        formatProductPrice(product)
                       )}
                     </TableCell>
                     <TableCell>

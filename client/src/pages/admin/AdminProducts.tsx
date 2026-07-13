@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
+import { formatProductPrice } from "@/lib/productPrice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
@@ -326,7 +327,7 @@ export default function AdminProducts() {
                     <p className="text-sm text-gray-600 mb-2">{product.description}</p>
                     <div className="flex gap-4">
                       <span className="text-sm font-semibold text-gray-900">
-                        R$ {parseFloat(product.price.toString()).toFixed(2)}
+                        {formatProductPrice(product)}
                       </span>
                     </div>
                   </div>
