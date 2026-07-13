@@ -17,6 +17,7 @@ function getTimelineSteps(order: any) {
   // Passo 2: base com ou sem "Com Problemas"
   const base = [
     paymentStep,
+    { key: 'analisando', label: 'Analisado', icon: Package },
     ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com Problemas', icon: Package }] : []),
     { key: 'em_producao', label: 'Em Produção', icon: Printer },
   ];

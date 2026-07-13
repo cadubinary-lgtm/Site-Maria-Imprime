@@ -26,6 +26,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string
 // Fluxo para entrega em casa (PIX / Cartão)
 const STEPS_ENTREGA = [
   { key: "pagamento_aprovado", label: "Pagamento",   icon: "💳" },
+  { key: "analisando",         label: "Analisado",   icon: "🔍" },
   { key: "em_producao",        label: "Produção",    icon: "⚙️" },
   { key: "pronto_entrega",     label: "Pronto",      icon: "📦" },
   { key: "saiu_entrega",       label: "Saiu",        icon: "🚚" },
@@ -36,6 +37,7 @@ const STEPS_ENTREGA = [
 // Fluxo para retirada na loja (Pagar na Retirada)
 const STEPS_RETIRADA = [
   { key: "pagamento_retirada", label: "Retirada na Loja",  icon: "🏪" },
+  { key: "analisando",         label: "Analisado",         icon: "🔍" },
   { key: "em_producao",        label: "Produção",    icon: "⚙️" },
   { key: "pronto_retirada",    label: "Pronto",      icon: "🎁" },
   { key: "entregue",           label: "Retirado",    icon: "✅" },
