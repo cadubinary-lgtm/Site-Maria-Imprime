@@ -62,6 +62,13 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   const hasChildren = item.children && item.children.length > 0;
   const isGroupActive = hasChildren && hasActiveChild;
 
+  // Mantém o dropdown aberto sempre que um filho estiver ativo
+  useEffect(() => {
+    if (hasActiveChild) {
+      setOpen(true);
+    }
+  }, [hasActiveChild, location]);
+
   // Salva a posição do scroll no localStorage ANTES de navegar
   const saveScrollPosition = () => {
     if (ctx?.navRef.current) {
