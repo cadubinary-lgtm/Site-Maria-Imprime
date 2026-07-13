@@ -87,6 +87,12 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
       `}
       style={{ paddingLeft: `${12 + depth * 12}px` }}
+      onClick={(e) => {
+        // Previne comportamento padrão de âncora (#) que faz scroll para topo
+        if (item.href === "#") {
+          e.preventDefault();
+        }
+      }}
     >
       {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
       <span className="flex-1">{item.label}</span>
@@ -331,7 +337,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto bg-gray-50" style={{ scrollBehavior: 'smooth' }}>
           {children}
         </main>
       </div>
