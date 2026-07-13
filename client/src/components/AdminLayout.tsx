@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Link, useLocation } from "wouter";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -34,6 +34,13 @@ const STATUS_LABELS: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
+// Contexto para compartilhar a ref da nav e a ref do scroll salvo
+interface SidebarScrollCtx {
+  navRef: React.RefObject<HTMLElement | null>;
+  savedScroll: React.MutableRefObject<number>;
+}
+const SidebarScrollContext = createContext<SidebarScrollCtx | null>(null);
+
 function NavGroup({ label }: { label: string }) {
   return (
     <div className="px-3 pt-5 pb-1">
@@ -44,6 +51,8 @@ function NavGroup({ label }: { label: string }) {
 
 function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   const [location] = useLocation();
+  const ctx = useContext(SidebarScrollContext);
+
   // Verifica se algum filho está ativo para inicializar o grupo como aberto
   const hasActiveChild = item.children?.some(
     (child) => child.href && (location === child.href || location.startsWith(child.href + "?"))
@@ -54,11 +63,26 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   // Mantém aberto quando um filho está ativo (navegação entre páginas)
   const isGroupActive = hasChildren && hasActiveChild;
 
+  // Captura o scroll da sidebar ANTES da navegação acontecer
+  const handleNavClick = (e?: React.MouseEvent) => {
+    if (ctx?.navRef.current) {
+      ctx.savedScroll.current = ctx.navRef.current.scrollTop;
+    }
+    if (item.href === "#" && e) {
+      e.preventDefault();
+    }
+  };
+
   if (hasChildren) {
     return (
       <div>
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            if (ctx?.navRef.current) {
+              ctx.savedScroll.current = ctx.navRef.current.scrollTop;
+            }
+            setOpen(!open);
+          }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
             ${isGroupActive ? "bg-gray-800 text-white" : isActive ? "bg-orange-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
           `}
@@ -87,12 +111,7 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
       `}
       style={{ paddingLeft: `${12 + depth * 12}px` }}
-      onClick={(e) => {
-        // Previne comportamento padrão de âncora (#) que faz scroll para topo
-        if (item.href === "#") {
-          e.preventDefault();
-        }
-      }}
+      onClick={(e) => handleNavClick(e)}
     >
       {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
       <span className="flex-1">{item.label}</span>
@@ -108,21 +127,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navRef = useRef<HTMLElement>(null);
   const [location] = useLocation();
 
-  // Salva a posição do scroll da sidebar antes de navegar
+  // Posição do scroll salva ANTES da navegação (pelo onClick do NavLink)
   const savedNavScroll = useRef<number>(0);
 
   // Ao mudar de rota: reseta scroll do conteúdo principal
-  // mas PRESERVA a posição do scroll da sidebar
+  // e restaura a posição salva da sidebar
   useEffect(() => {
-    // Salva posição atual da sidebar antes de qualquer re-render
-    if (navRef.current) {
-      savedNavScroll.current = navRef.current.scrollTop;
-    }
     // Reseta apenas o conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;
     }
     // Restaura posição da sidebar após render
+    // O valor já foi salvo pelo onClick antes da navegação
     const timer = setTimeout(() => {
       if (navRef.current) {
         navRef.current.scrollTop = savedNavScroll.current;
@@ -130,6 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }, 0);
     return () => clearTimeout(timer);
   }, [location]);
+
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
   const pendingCount = orders?.filter((o: any) =>
@@ -268,105 +285,107 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      {/* Sidebar */}
-      <aside
-        className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-800">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <Printer className="w-4 h-4 text-white" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-white font-bold text-sm leading-tight">Gráfica</p>
-            <p className="text-orange-400 text-xs font-semibold">Ponto Digital</p>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav ref={navRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-          {/* Dashboard link */}
-          <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} />
-
-          {navItems.map((entry, i) => {
-            if (entry.group) return <NavGroup key={i} label={entry.group} />;
-            if (entry.item) return <NavLink key={i} item={entry.item} />;
-            return null;
-          })}
-        </nav>
-
-        {/* Footer */}
-        <div className="border-t border-gray-800 px-3 py-3">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-              {user?.name?.[0]?.toUpperCase() ?? "A"}
+    <SidebarScrollContext.Provider value={{ navRef, savedScroll: savedNavScroll }}>
+      <div className="flex h-screen bg-gray-100 overflow-hidden">
+        {/* Sidebar */}
+        <aside
+          className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-800">
+            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Printer className="w-4 h-4 text-white" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-white text-xs font-medium truncate">{user?.name ?? "Admin"}</p>
-              <p className="text-gray-400 text-[10px]">Administrador</p>
+            <div className="min-w-0">
+              <p className="text-white font-bold text-sm leading-tight">Gráfica</p>
+              <p className="text-orange-400 text-xs font-semibold">Ponto Digital</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-2 text-gray-400 hover:text-white text-xs py-1.5 px-2 rounded hover:bg-gray-800 transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Sair
-          </button>
-        </div>
-      </aside>
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 flex-shrink-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-500 hover:text-gray-900 p-1 rounded"
-          >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Nav */}
+          <nav ref={navRef as React.RefObject<HTMLElement>} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+            {/* Dashboard link */}
+            <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} />
 
-          {/* Search */}
-          <div className="flex-1 max-w-md relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Buscar pedidos, clientes, produtos..."
-              className="pl-9 h-9 text-sm bg-gray-50 border-gray-200"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">⌘K</span>
-          </div>
+            {navItems.map((entry, i) => {
+              if (entry.group) return <NavGroup key={i} label={entry.group} />;
+              if (entry.item) return <NavLink key={i} item={entry.item} />;
+              return null;
+            })}
+          </nav>
 
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Notificações */}
-            <button className="relative text-gray-500 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100">
-              <Bell className="w-5 h-5" />
-              {pendingCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
-                  {pendingCount > 9 ? "9+" : pendingCount}
-                </span>
-              )}
-            </button>
-
-            {/* User */}
-            <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
-              <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
+          {/* Footer */}
+          <div className="border-t border-gray-800 px-3 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                 {user?.name?.[0]?.toUpperCase() ?? "A"}
               </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900 leading-tight">{user?.name ?? "Admin"}</p>
-                <p className="text-[11px] text-gray-500">Administrador</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-white text-xs font-medium truncate">{user?.name ?? "Admin"}</p>
+                <p className="text-gray-400 text-[10px]">Administrador</p>
               </div>
             </div>
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-2 text-gray-400 hover:text-white text-xs py-1.5 px-2 rounded hover:bg-gray-800 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sair
+            </button>
           </div>
-        </header>
+        </aside>
 
-        {/* Page content */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50">
-          {children}
-        </main>
+        {/* Main area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top bar */}
+          <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 flex-shrink-0">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-gray-500 hover:text-gray-900 p-1 rounded"
+            >
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Search */}
+            <div className="flex-1 max-w-md relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Buscar pedidos, clientes, produtos..."
+                className="pl-9 h-9 text-sm bg-gray-50 border-gray-200"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">⌘K</span>
+            </div>
+
+            <div className="flex items-center gap-3 ml-auto">
+              {/* Notificações */}
+              <button className="relative text-gray-500 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100">
+                <Bell className="w-5 h-5" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
+                    {pendingCount > 9 ? "9+" : pendingCount}
+                  </span>
+                )}
+              </button>
+
+              {/* User */}
+              <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
+                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                  {user?.name?.[0]?.toUpperCase() ?? "A"}
+                </div>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium text-gray-900 leading-tight">{user?.name ?? "Admin"}</p>
+                  <p className="text-[11px] text-gray-500">Administrador</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarScrollContext.Provider>
   );
 }
