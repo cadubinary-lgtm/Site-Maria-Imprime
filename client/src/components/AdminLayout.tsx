@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -104,6 +104,16 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { adminUser: user, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const mainRef = useRef<HTMLElement>(null);
+  const [location] = useLocation();
+
+  // Ao mudar de rota, rola o conteúdo principal para o topo
+  // mas NÃO move a sidebar (que tem seu próprio scroll)
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [location]);
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
   const pendingCount = orders?.filter((o: any) =>
@@ -337,7 +347,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50" style={{ scrollBehavior: 'smooth' }}>
+        <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50">
           {children}
         </main>
       </div>
