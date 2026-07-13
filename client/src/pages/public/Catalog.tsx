@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { formatProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
 
 const ITEMS_PER_PAGE = 12;
@@ -271,7 +272,7 @@ export default function Catalog() {
                         {/* Preço e Botões */}
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-xl font-bold text-pink-600">
-                            R$ {parseFloat(product.price).toFixed(2)}
+                            {formatProductPrice(product)}
                           </span>
                         </div>
 

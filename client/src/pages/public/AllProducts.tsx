@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'wouter';
 import { Loader2 } from 'lucide-react';
+import { formatProductPrice } from '@/lib/productPrice';
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +181,7 @@ export default function AllProducts() {
                     </p>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-orange-500">
-                        R$ {product.price}
+                        {formatProductPrice(product)}
                       </span>
                       <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                         Ver
