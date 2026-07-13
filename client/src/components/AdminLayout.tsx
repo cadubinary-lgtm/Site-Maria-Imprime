@@ -7,7 +7,7 @@ import {
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
   AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator,
-  ShieldCheck, ScrollText, UserCircle, Plus, CreditCard
+  ShieldCheck, ScrollText, UserCircle, Plus, CreditCard, X as XIcon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
 // Contexto para compartilhar a ref da nav com os NavLinks
 interface SidebarScrollCtx {
   navRef: React.RefObject<HTMLElement | null>;
+  searchQuery: string;
 }
 const SidebarScrollContext = createContext<SidebarScrollCtx | null>(null);
 
@@ -50,7 +51,19 @@ function NavGroup({ label }: { label: string }) {
   );
 }
 
-function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
+// Função para verificar se um item corresponde à busca (recursivamente)
+function matchesSearch(item: NavItem, query: string): boolean {
+  const lowerQuery = query.toLowerCase();
+  if (item.label.toLowerCase().includes(lowerQuery)) {
+    return true;
+  }
+  if (item.children) {
+    return item.children.some((child) => matchesSearch(child, query));
+  }
+  return false;
+}
+
+function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: number; searchQuery: string }) {
   const [location] = useLocation();
   const ctx = useContext(SidebarScrollContext);
 
@@ -69,6 +82,18 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
     }
   }, [hasActiveChild, location]);
 
+  // Abre automaticamente se há busca e o item ou seus filhos correspondem
+  useEffect(() => {
+    if (searchQuery && hasChildren && matchesSearch(item, searchQuery)) {
+      setOpen(true);
+    }
+  }, [searchQuery, hasChildren, item]);
+
+  // Se há busca e o item não corresponde, não renderiza
+  if (searchQuery && !matchesSearch(item, searchQuery)) {
+    return null;
+  }
+
   // Salva a posição do scroll no localStorage ANTES de navegar
   const saveScrollPosition = () => {
     if (ctx?.navRef.current) {
@@ -80,6 +105,16 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   };
 
   if (hasChildren) {
+    // Filtra filhos se houver busca
+    const filteredChildren = searchQuery
+      ? item.children!.filter((child) => matchesSearch(child, searchQuery))
+      : item.children!;
+
+    // Se não há filhos após filtrar, não renderiza o grupo
+    if (searchQuery && filteredChildren.length === 0) {
+      return null;
+    }
+
     return (
       <div>
         <button
@@ -99,8 +134,8 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         </button>
         {open && (
           <div className="mt-0.5">
-            {item.children!.map((child) => (
-              <NavLink key={child.label} item={child} depth={depth + 1} />
+            {filteredChildren.map((child) => (
+              <NavLink key={child.label} item={child} depth={depth + 1} searchQuery={searchQuery} />
             ))}
           </div>
         )}
@@ -116,9 +151,7 @@ function NavLink({ item, depth = 0 }: { item: NavItem; depth?: number }) {
       `}
       style={{ paddingLeft: `${12 + depth * 12}px` }}
       onClick={(e) => {
-        // Salva posição no localStorage antes de navegar
         saveScrollPosition();
-        // Previne scroll para topo em links "#"
         if (item.href === "#") {
           e.preventDefault();
         }
@@ -137,6 +170,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const mainRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [location] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Ao montar o layout E ao mudar de rota: restaura posição do scroll da sidebar
   useEffect(() => {
@@ -155,7 +189,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         } catch (_) {}
       }
     };
-    // Usa requestAnimationFrame para garantir que o DOM foi atualizado
     const raf = requestAnimationFrame(() => {
       restore();
     });
@@ -313,7 +346,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <SidebarScrollContext.Provider value={{ navRef }}>
+    <SidebarScrollContext.Provider value={{ navRef, searchQuery }}>
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         {/* Sidebar */}
         <aside
@@ -330,14 +363,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
 
+          {/* Search */}
+          <div className="px-3 py-3 border-b border-gray-800">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Buscar menu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-0.5"
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Nav */}
           <nav ref={navRef as React.RefObject<HTMLElement>} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
             {/* Dashboard link */}
-            <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} />
+            <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} searchQuery={searchQuery} />
 
             {navItems.map((entry, i) => {
-              if (entry.group) return <NavGroup key={i} label={entry.group} />;
-              if (entry.item) return <NavLink key={i} item={entry.item} />;
+              // Se há busca, não renderiza grupos vazios
+              if (entry.group) {
+                if (searchQuery) {
+                  // Verifica se há algum item no grupo que corresponde à busca
+                  const hasMatchingItems = navItems.slice(i + 1).some((e) => {
+                    if (e.group) return false; // Próximo grupo encontrado
+                    return e.item && matchesSearch(e.item, searchQuery);
+                  });
+                  if (!hasMatchingItems) return null;
+                }
+                return <NavGroup key={i} label={entry.group} />;
+              }
+              if (entry.item) return <NavLink key={i} item={entry.item} searchQuery={searchQuery} />;
               return null;
             })}
           </nav>
