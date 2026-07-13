@@ -105,14 +105,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { adminUser: user, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const mainRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const [location] = useLocation();
 
-  // Ao mudar de rota, rola o conteúdo principal para o topo
-  // mas NÃO move a sidebar (que tem seu próprio scroll)
+  // Salva a posição do scroll da sidebar antes de navegar
+  const savedNavScroll = useRef<number>(0);
+
+  // Ao mudar de rota: reseta scroll do conteúdo principal
+  // mas PRESERVA a posição do scroll da sidebar
   useEffect(() => {
+    // Salva posição atual da sidebar antes de qualquer re-render
+    if (navRef.current) {
+      savedNavScroll.current = navRef.current.scrollTop;
+    }
+    // Reseta apenas o conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;
     }
+    // Restaura posição da sidebar após render
+    const timer = setTimeout(() => {
+      if (navRef.current) {
+        navRef.current.scrollTop = savedNavScroll.current;
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [location]);
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
@@ -269,7 +285,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+        <nav ref={navRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
           {/* Dashboard link */}
           <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} />
 
