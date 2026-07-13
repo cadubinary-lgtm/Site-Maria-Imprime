@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 const STEPS_ENTREGA = [
   { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
+  { key: "analisando",          label: "Analisado",              icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
@@ -18,6 +19,7 @@ const STEPS_ENTREGA = [
 
 const STEPS_RETIRADA = [
   { key: "pagamento_retirada",  label: "Retirada na Loja",       icon: CheckCircle2 },
+  { key: "analisando",          label: "Analisado",              icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },

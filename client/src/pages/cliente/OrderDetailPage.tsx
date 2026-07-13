@@ -24,6 +24,7 @@ function getStatusSteps(order: any) {
   // Passo 2: montar fluxo base
   const base = [
     paymentStep,
+    { key: 'analisando', label: 'Analisado', emoji: '🔍' },
     // "Com Problemas" só aparece se ainda não entrou em produção
     ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com\nProblemas', emoji: '⚠️' }] : []),
     { key: 'em_producao', label: 'Em\nProdução', emoji: '🏭' },
