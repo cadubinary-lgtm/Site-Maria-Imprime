@@ -24,7 +24,6 @@ function getStatusSteps(order: any) {
   // Passo 2: montar fluxo base
   const base = [
     paymentStep,
-    { key: 'analisando', label: 'Analisando', emoji: '🔍' },
     // "Com Problemas" só aparece se ainda não entrou em produção
     ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com\nProblemas', emoji: '⚠️' }] : []),
     { key: 'em_producao', label: 'Em\nProdução', emoji: '🏭' },
@@ -49,7 +48,7 @@ function getStatusSteps(order: any) {
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
-  analisando:          "Analisando",
+  analisando:          "Analisado",
   com_problemas:       "Com Problemas",
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",

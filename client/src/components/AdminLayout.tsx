@@ -27,7 +27,7 @@ interface NavItem {
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado: "Pagamento Aprovado",
   pagamento_retirada: "Pagamento na Retirada",
-  analisando: "Analisando",
+  analisando: "Analisado",
   com_problemas: "Com Problemas",
   em_producao: "Em Produção",
   pronto_entrega: "Pronto para Entrega",
