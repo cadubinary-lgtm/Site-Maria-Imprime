@@ -17,7 +17,6 @@ function getTimelineSteps(order: any) {
   // Passo 2: base com ou sem "Com Problemas"
   const base = [
     paymentStep,
-    { key: 'analisando', label: 'Analisando', icon: Package },
     ...(!isInProduction ? [{ key: 'com_problemas', label: 'Com Problemas', icon: Package }] : []),
     { key: 'em_producao', label: 'Em Produção', icon: Printer },
   ];
@@ -82,7 +81,7 @@ export default function OrderConfirmation() {
   const STATUS_LABELS: Record<string, string> = {
     pagamento_aprovado:  "Pagamento Aprovado",
     pagamento_retirada:  "Pagamento na Retirada",
-    analisando:          "Analisando",
+    analisando:          "Analisado",
     com_problemas:       "Com Problemas",
     em_producao:         "Em Produção",
     pronto_entrega:      "Pronto para Entrega",

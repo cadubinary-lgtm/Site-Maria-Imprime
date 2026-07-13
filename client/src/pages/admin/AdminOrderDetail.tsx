@@ -36,7 +36,6 @@ function getAdminStatusSteps(order: any) {
 
   const base = [
     paymentStep,
-    { key: 'analisando' },
     ...(!isInProduction ? [{ key: 'com_problemas' }] : []),
     { key: 'em_producao' },
   ];

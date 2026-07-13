@@ -8,19 +8,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const TIMELINE_STEPS = [
+const STEPS_ENTREGA = [
   { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
-  { key: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: CheckCircle2 },
-  { key: "analisando",          label: "Analisando",             icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
-  { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },
   { key: "entregue",            label: "Entregue",               icon: Home },
 ];
 
-function getStepIndex(status: string): number {
-  const idx = TIMELINE_STEPS.findIndex((s) => s.key === status);
+const STEPS_RETIRADA = [
+  { key: "pagamento_retirada",  label: "Retirada na Loja",       icon: CheckCircle2 },
+  { key: "com_problemas",       label: "Com Problemas",          icon: X },
+  { key: "em_producao",         label: "Em Produção",            icon: Printer },
+  { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },
+  { key: "entregue",            label: "Retirado",               icon: Home },
+];
+
+function getTimelineSteps(order: any) {
+  const isPickup = order.shippingMethod === "pickup" ||
+                   order.shippingMethod === "retirada" ||
+                   order.paymentMethod === "pagar_na_retirada" ||
+                   order.status === "pagamento_retirada";
+  return isPickup ? STEPS_RETIRADA : STEPS_ENTREGA;
+}
+
+function getStepIndex(steps: typeof STEPS_ENTREGA, status: string): number {
+  const idx = steps.findIndex((s) => s.key === status);
   if (status === "cancelado") return -1;
   return idx >= 0 ? idx : 0;
 }
@@ -28,7 +41,7 @@ function getStepIndex(status: string): number {
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
-  analisando:          "Analisando",
+  analisando:          "Analisado",
   com_problemas:       "Com Problemas",
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",
@@ -81,7 +94,8 @@ export default function GuestOrderTracking() {
     );
   }
 
-  const currentStepIndex = getStepIndex(order.status);
+  const timelineSteps = getTimelineSteps(order);
+  const currentStepIndex = getStepIndex(timelineSteps, order.status);
   const isCancelled = order.status === "cancelado";
 
   return (
@@ -117,7 +131,7 @@ export default function GuestOrderTracking() {
             {/* Timeline */}
             {!isCancelled && (
               <div className="flex items-center justify-between overflow-x-auto pb-4">
-                {TIMELINE_STEPS.map((step, i) => {
+                {timelineSteps.map((step, i) => {
                   const Icon = step.icon;
                   const isActive = i <= currentStepIndex;
                   const isCurrent = i === currentStepIndex;

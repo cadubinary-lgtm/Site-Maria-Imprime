@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-100 text-green-800",   icon: "💳" },
   pagamento_retirada:  { label: "Aguardando Retirada",    color: "bg-blue-100 text-blue-800",     icon: "🏪" },
-  analisando:          { label: "Em Análise",             color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  analisando:          { label: "Analisado",             color: "bg-orange-100 text-orange-800", icon: "🔍" },
   com_problemas:       { label: "Com Problemas",          color: "bg-red-100 text-red-800",       icon: "⚠️" },
   em_producao:         { label: "Em Produção",            color: "bg-orange-100 text-orange-800", icon: "⚙️" },
   pronto_entrega:      { label: "Pronto para Envio",      color: "bg-teal-100 text-teal-800",     icon: "📦" },
@@ -26,7 +26,6 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string
 // Fluxo para entrega em casa (PIX / Cartão)
 const STEPS_ENTREGA = [
   { key: "pagamento_aprovado", label: "Pagamento",   icon: "💳" },
-  { key: "analisando",         label: "Análise",     icon: "🔍" },
   { key: "em_producao",        label: "Produção",    icon: "⚙️" },
   { key: "pronto_entrega",     label: "Pronto",      icon: "📦" },
   { key: "saiu_entrega",       label: "Saiu",        icon: "🚚" },
@@ -36,8 +35,7 @@ const STEPS_ENTREGA = [
 
 // Fluxo para retirada na loja (Pagar na Retirada)
 const STEPS_RETIRADA = [
-  { key: "pagamento_retirada", label: "Aguardando",  icon: "🏪" },
-  { key: "analisando",         label: "Análise",     icon: "🔍" },
+  { key: "pagamento_retirada", label: "Retirada na Loja",  icon: "🏪" },
   { key: "em_producao",        label: "Produção",    icon: "⚙️" },
   { key: "pronto_retirada",    label: "Pronto",      icon: "🎁" },
   { key: "entregue",           label: "Retirado",    icon: "✅" },
