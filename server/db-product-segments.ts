@@ -132,6 +132,7 @@ export async function getProductsBySegment(segmentId: number) {
         name: products.name,
         description: products.description,
         price: products.price,
+        pricePerM2: products.pricePerM2,
         imageUrl: products.imageUrl,
         category: products.category,
         subcategory: products.subcategory,
