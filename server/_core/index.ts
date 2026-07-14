@@ -101,7 +101,48 @@ async function startServer() {
       const timestamp = Date.now();
       const filename = `client-art/${timestamp}-${originalname}`;
       const { url, key } = await storagePut(filename, buffer, mimetype || 'application/octet-stream');
-      res.json({ url, key });
+
+      // Se orderItemId foi enviado, salva a URL no item, atualiza status e notifica operador
+      const orderItemId = req.body?.orderItemId ? Number(req.body.orderItemId) : null;
+      if (orderItemId && !isNaN(orderItemId)) {
+        try {
+          const { getDb } = await import('../db.js');
+          const { orderItems } = await import('../../drizzle/schema.js');
+          const { eq } = await import('drizzle-orm');
+          const db = await getDb();
+          if (db) {
+            // Busca dados do item para notificação
+            const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, orderItemId)).limit(1);
+            const item = itemRows[0];
+            // Salva URL do arquivo e reseta status de pré-impressão para "Analisando"
+            await db.update(orderItems)
+              .set({
+                artFileUrl: url,
+                preProductionStatus: 'liberado_analise',
+                requireClientResend: false,
+                correctionAction: null,
+              } as any)
+              .where(eq(orderItems.id, orderItemId));
+            // Notifica o operador
+            try {
+              const { notifyOwner } = await import('./notification.js');
+              const productName = (item as any)?.productName ?? `Item #${orderItemId}`;
+              const orderId = (item as any)?.orderId;
+              await notifyOwner({
+                title: '📨 Arte Reenviada pelo Cliente',
+                content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${orderItemId}, Pedido ID: ${orderId}). O status voltou para "Analisando". Acesse o painel para revisar.`,
+              });
+            } catch (notifyErr) {
+              console.error('Erro ao notificar operador:', notifyErr);
+            }
+          }
+        } catch (dbErr) {
+          console.error('Erro ao salvar artFileUrl no item:', dbErr);
+          // Não bloqueia a resposta — o upload já foi feito
+        }
+      }
+
+      res.json({ url, key, orderItemId });
     } catch (error) {
       console.error('Art upload error:', error);
       res.status(500).json({ error: 'Falha ao fazer upload do arquivo' });
