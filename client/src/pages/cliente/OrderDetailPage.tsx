@@ -16,6 +16,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   const utils = trpc.useUtils();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showRefusalInput, setShowRefusalInput] = useState(false);
   const [refusalNote, setRefusalNote] = useState("");
 
@@ -23,15 +24,6 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     { orderItemId: item.id },
     { enabled: !!item.id }
   );
-
-  const resendMutation = trpc.checkout.clientResendArt.useMutation({
-    onSuccess: () => {
-      toast.success("Arte reenviada! Nossa equipe irá analisar em breve.");
-      utils.checkout.getOrderByNumber.invalidate();
-      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
-    },
-    onError: () => toast.error("Erro ao reenviar arte"),
-  });
 
   const approveMutation = trpc.checkout.clientApproveProof.useMutation({
     onSuccess: () => {
@@ -53,22 +45,33 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     onError: () => toast.error("Erro ao registrar recusa"),
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) setSelectedFile(file);
+  };
+
+  const handleSendArt = async () => {
+    if (!selectedFile) return;
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", selectedFile);
       formData.append("orderItemId", String(item.id));
       const res = await fetch("/api/upload-art", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Upload falhou");
-      await resendMutation.mutateAsync({ orderItemId: item.id });
-    } catch {
-      toast.error("Erro ao enviar arquivo. Tente novamente.");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || "Upload falhou");
+      }
+      // Backend já salva artFileUrl, atualiza status e notifica operador
+      toast.success("✅ Arte reenviada com sucesso! Nossa equipe irá analisar em breve.");
+      setSelectedFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+      utils.checkout.getOrderByNumber.invalidate();
+      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao enviar arquivo. Tente novamente.");
     } finally {
       setIsUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
@@ -96,17 +99,39 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
               </div>
             )}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-700">Envie o arquivo corrigido:</p>
-              <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr,.psd" className="hidden" onChange={handleFileUpload} />
-              <Button
-                size="sm"
-                className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
-                disabled={isUploading || resendMutation.isPending}
-                onClick={() => fileRef.current?.click()}
-              >
-                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                {isUploading ? "Enviando..." : "Escolher Arquivo Corrigido"}
-              </Button>
+              <p className="text-xs font-medium text-gray-700">Selecione o arquivo corrigido e clique em Enviar:</p>
+              <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr,.psd,.tif,.tiff" className="hidden" onChange={handleFileSelect} />
+              {!selectedFile ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-orange-400 text-orange-700 hover:bg-orange-100 gap-2"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Upload className="w-4 h-4" />
+                  Escolher Arquivo Corrigido
+                </Button>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 bg-white border border-orange-200 rounded-lg px-3 py-2">
+                    <FileText className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <span className="text-xs text-gray-700 truncate flex-1">{selectedFile.name}</span>
+                    <button
+                      className="text-gray-400 hover:text-red-500 text-xs ml-1"
+                      onClick={() => { setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; }}
+                    >✕</button>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
+                    disabled={isUploading}
+                    onClick={handleSendArt}
+                  >
+                    {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {isUploading ? "Enviando..." : "Enviar Nova Arte"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
