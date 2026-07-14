@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -19,31 +18,26 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
-import { OrderShippingPanel } from '@/components/orders/OrderShippingPanel';
-import { ShippingLabelViewer } from '@/components/orders/ShippingLabelViewer';
-import AdminLayout from '@/components/AdminLayout';
+import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
+import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
+import AdminLayout from "@/components/AdminLayout";
 
-// Ordem linear dos status para a linha do tempo
+// ─── Helpers ────────────────────────────────────────────────────────────────
 function getAdminStatusSteps(order: any) {
-  const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
-  const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
-
-  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
-    ? { key: 'pagamento_retirada' }
-    : { key: 'pagamento_aprovado' };
-
+  const isPickup = order.shippingMethod === "retirada" || order.shippingMethod === "pickup" || !order.deliveryStreet;
+  const isInProduction = ["em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue"].includes(order.status);
+  const paymentStep = order.paymentMethod === "pagar_na_retirada"
+    ? { key: "pagamento_retirada" }
+    : { key: "pagamento_aprovado" };
   const base = [
     paymentStep,
-    { key: 'analisando' },
-    ...(!isInProduction ? [{ key: 'com_problemas' }] : []),
-    { key: 'em_producao' },
+    { key: "analisando" },
+    ...(!isInProduction ? [{ key: "com_problemas" }] : []),
+    { key: "em_producao" },
   ];
-
-  if (isPickup) {
-    return [...base, { key: 'pronto_retirada' }, { key: 'entregue' }];
-  } else {
-    return [...base, { key: 'saiu_entrega' }, { key: 'em_transporte' }, { key: 'entregue' }];
-  }
+  return isPickup
+    ? [...base, { key: "pronto_retirada" }, { key: "entregue" }]
+    : [...base, { key: "saiu_entrega" }, { key: "em_transporte" }, { key: "entregue" }];
 }
 
 const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
@@ -52,9 +46,9 @@ const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
 }));
 
 const PRE_PRODUCTION_OPTIONS = [
-  { value: 'liberado_analise',    label: 'Liberado para Análise', icon: Clock,       color: 'bg-yellow-100 text-yellow-700' },
-  { value: 'ajustar_arte',        label: 'Ajustar Arte',          icon: AlertCircle, color: 'bg-orange-100 text-orange-700' },
-  { value: 'arte_final_aprovada', label: 'Arte Final Aprovada',   icon: CheckCircle, color: 'bg-green-100 text-green-700' },
+  { value: "liberado_analise",    label: "Liberado para Análise", icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
+  { value: "ajustar_arte",        label: "Ajustar Arte",          icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
+  { value: "arte_final_aprovada", label: "Arte Final Aprovada",   icon: CheckCircle, color: "bg-green-100 text-green-700" },
 ];
 
 function fileNameFromUrl(url: string): string {
@@ -63,194 +57,107 @@ function fileNameFromUrl(url: string): string {
     const raw = parts[parts.length - 1] ?? "arquivo";
     const match = raw.match(/^\d+-(.+)$/);
     return match ? match[1] : raw;
-  } catch {
-    return "arquivo";
-  }
+  } catch { return "arquivo"; }
 }
 
 function downloadFile(url: string, name: string) {
-  const proxyUrl = `/api/download-file?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
   const a = document.createElement("a");
-  a.href = proxyUrl;
+  a.href = `/api/download-file?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
   a.download = name;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
 }
 
-async function downloadAllFiles(files: { artFileUrl: string; productName: string }[]) {
-  for (const f of files) {
-    const name = fileNameFromUrl(f.artFileUrl);
-    downloadFile(f.artFileUrl, name);
-    await new Promise((r) => setTimeout(r, 500));
-  }
-}
+const EXT_COLORS: Record<string, string> = {
+  PDF: "bg-red-100 text-red-700", AI: "bg-orange-100 text-orange-700",
+  PSD: "bg-blue-100 text-blue-700", CDR: "bg-green-100 text-green-700",
+  EPS: "bg-orange-100 text-orange-700", SVG: "bg-teal-100 text-teal-700",
+  JPG: "bg-yellow-100 text-yellow-700", JPEG: "bg-yellow-100 text-yellow-700",
+  PNG: "bg-indigo-100 text-indigo-700",
+};
 
-// ─── Sub-componente: Arquivos do cliente por item ───────────────────────────
-function ItemClientFiles({ itemFiles, onLightbox }: { itemFiles: any[]; onLightbox: (url: string) => void }) {
-  if (itemFiles.length === 0) {
+// ─── Coluna 2: Arquivo do item ───────────────────────────────────────────────
+function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null; onLightbox: (url: string) => void }) {
+  if (!artFileUrl) {
     return (
-      <div className="text-center py-4 text-gray-400">
-        <FileImage className="w-8 h-8 mx-auto mb-1 opacity-30" />
-        <p className="text-xs">Nenhum arquivo enviado para este item</p>
+      <div className="flex flex-col items-center justify-center h-full min-h-[100px] text-gray-300">
+        <FileImage className="w-8 h-8 mb-1.5 opacity-40" />
+        <p className="text-xs text-gray-400">Sem arquivo</p>
       </div>
     );
   }
 
-  const extColors: Record<string, string> = {
-    PDF: 'bg-red-100 text-red-700', AI: 'bg-orange-100 text-orange-700',
-    PSD: 'bg-blue-100 text-blue-700', CDR: 'bg-green-100 text-green-700',
-    EPS: 'bg-orange-100 text-orange-700', SVG: 'bg-teal-100 text-teal-700',
-    JPG: 'bg-yellow-100 text-yellow-700', JPEG: 'bg-yellow-100 text-yellow-700',
-    PNG: 'bg-indigo-100 text-indigo-700',
-  };
+  const name = fileNameFromUrl(artFileUrl);
+  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name);
+  const isPdf = /\.pdf$/i.test(name);
+  const ext = (name.split(".").pop() ?? "FILE").toUpperCase();
+  const badgeColor = EXT_COLORS[ext] ?? "bg-gray-100 text-gray-700";
 
   return (
-    <div className="space-y-3">
-      {itemFiles.length > 1 && (
-        <div className="flex justify-end">
-          <Button
-            variant="outline" size="sm"
-            className="gap-2 text-blue-700 border-blue-300 hover:bg-blue-50 text-xs h-7"
-            onClick={() => downloadAllFiles(itemFiles)}
-          >
-            <Download className="w-3 h-3" />
-            Baixar todos ({itemFiles.length})
-          </Button>
+    <div className="space-y-2">
+      {/* Miniatura */}
+      {isImage ? (
+        <div
+          className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+          style={{ width: 120, height: 90 }}
+          onClick={() => onLightbox(artFileUrl)}
+        >
+          <img
+            src={artFileUrl} alt={name}
+            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+            <Eye className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+          </div>
+        </div>
+      ) : isPdf ? (
+        <div
+          className="flex flex-col items-center justify-center cursor-pointer rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
+          style={{ width: 120, height: 90 }}
+          onClick={() => onLightbox(artFileUrl)}
+        >
+          <FileImage className="w-8 h-8 text-red-500 mb-1" />
+          <p className="text-[10px] font-semibold text-red-600">Ver PDF</p>
+        </div>
+      ) : (
+        <div
+          className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50"
+          style={{ width: 120, height: 90 }}
+        >
+          <span className={`text-xs font-bold px-2 py-1 rounded ${badgeColor}`}>{ext}</span>
+          <p className="text-[10px] text-gray-500 mt-1">Arquivo</p>
         </div>
       )}
-      {itemFiles.map((f: any, i: number) => {
-        const name = fileNameFromUrl(f.artFileUrl);
-        const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name);
-        const isPdf = /\.pdf$/i.test(name);
-        const canPreview = isImage || isPdf;
-        const ext = (name.split('.').pop() ?? 'FILE').toUpperCase();
-        const badgeColor = extColors[ext] ?? 'bg-gray-100 text-gray-700';
-        return (
-          <div key={i} className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm">
-            {isImage && (
-              <div
-                className="w-full bg-gray-50 flex items-center justify-center cursor-pointer group relative overflow-hidden"
-                style={{ minHeight: 140, maxHeight: 240 }}
-                onClick={() => onLightbox(f.artFileUrl)}
-              >
-                <img
-                  src={f.artFileUrl} alt={name}
-                  className="max-w-full max-h-56 object-contain transition-transform group-hover:scale-105"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2 shadow-lg">
-                    <Eye className="w-5 h-5 text-gray-800" />
-                  </div>
-                </div>
-              </div>
-            )}
-            {isPdf && (
-              <div
-                className="w-full bg-red-50 flex flex-col items-center justify-center cursor-pointer group py-6"
-                onClick={() => onLightbox(f.artFileUrl)}
-              >
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-red-200 transition-colors">
-                  <FileImage className="w-6 h-6 text-red-600" />
-                </div>
-                <p className="text-xs font-semibold text-red-700">Visualizar PDF</p>
-              </div>
-            )}
-            <div className="flex items-center gap-3 px-3 py-2">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeColor}`}>{ext}</span>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 text-xs truncate">{name}</p>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {canPreview && (
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-gray-500 hover:text-blue-600"
-                    title="Visualizar" onClick={() => onLightbox(f.artFileUrl)}>
-                    <Eye className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-gray-500 hover:text-blue-700"
-                  title="Baixar" onClick={() => downloadFile(f.artFileUrl, name)}>
-                  <Download className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
-// ─── Sub-componente: Pré-Impressão inline (global do pedido, exibida por item) ─
-function InlinePreImpressao({
-  orderId,
-  preProductionStatus,
-}: { orderId: number; preProductionStatus: string }) {
-  const [selected, setSelected] = useState(preProductionStatus);
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.admin.updatePreProductionStatus.useMutation({
-    onSuccess: () => {
-      toast.success('Status de pré-impressão atualizado!');
-      utils.checkout.getOrderById.invalidate({ id: orderId });
-      utils.checkout.getAllOrders.invalidate();
-    },
-    onError: () => toast.error('Erro ao atualizar status de pré-impressão'),
-  });
-
-  const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-600">Status Atual:</span>
-        {current && (
-          <Badge className={`${current.color} text-xs`}>
-            <current.icon className="w-3 h-3 mr-1" />
-            {current.label}
-          </Badge>
-        )}
+      {/* Nome + botões */}
+      <div className="flex items-center gap-1.5">
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${badgeColor}`}>{ext}</span>
+        <p className="text-xs text-gray-700 truncate flex-1 max-w-[90px]" title={name}>{name}</p>
       </div>
-      <div className="flex gap-2 flex-wrap">
-        <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger className="flex-1 h-8 text-xs bg-white">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PRE_PRODUCTION_OPTIONS.map(opt => (
-              <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          size="sm"
-          className="h-8 text-xs bg-orange-500 hover:bg-orange-600 px-3"
-          disabled={mutation.isPending || selected === preProductionStatus}
-          onClick={() => mutation.mutate({ orderId, preProductionStatus: selected as any })}
-        >
-          {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Atualizar'}
+      <div className="flex gap-1">
+        {(isImage || isPdf) && (
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1 px-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+            onClick={() => onLightbox(artFileUrl)}>
+            <Eye className="w-3 h-3" /> Ver
+          </Button>
+        )}
+        <Button variant="outline" size="sm" className="h-7 text-xs gap-1 px-2 text-gray-600 hover:bg-gray-50"
+          onClick={() => downloadFile(artFileUrl, name)}>
+          <Download className="w-3 h-3" /> Baixar
         </Button>
       </div>
     </div>
   );
 }
 
-// ─── Sub-componente: Prévia da Arte inline (global do pedido, exibida por item) ─
-function InlineArtPreview({
-  orderId,
-  previews,
-  previewsLoading,
-  onLightbox,
-  onRefresh,
+// ─── Coluna 3: Prévia da Arte (global, só no primeiro item) ──────────────────
+function ArtPreviewColumn({
+  orderId, previews, previewsLoading, onLightbox, onRefresh, isFirst,
 }: {
-  orderId: number;
-  previews: any[];
-  previewsLoading: boolean;
-  onLightbox: (url: string) => void;
-  onRefresh: () => void;
+  orderId: number; previews: any[]; previewsLoading: boolean;
+  onLightbox: (url: string) => void; onRefresh: () => void; isFirst: boolean;
 }) {
   const [notes, setNotes] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -268,10 +175,7 @@ function InlineArtPreview({
   });
 
   const deletePreviewMutation = trpc.checkout.deleteArtPreview.useMutation({
-    onSuccess: () => {
-      utils.checkout.getArtPreviews.invalidate({ orderId });
-      toast.success("Prévia removida");
-    },
+    onSuccess: () => { utils.checkout.getArtPreviews.invalidate({ orderId }); toast.success("Prévia removida"); },
     onError: (err) => toast.error(err.message || "Erro ao remover prévia"),
   });
 
@@ -294,72 +198,113 @@ function InlineArtPreview({
     }
   };
 
+  if (!isFirst) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[100px] opacity-40 select-none">
+        <ImagePlus className="w-6 h-6 text-gray-400 mb-1" />
+        <p className="text-[10px] text-gray-400 text-center leading-tight">Prévia e Pré-Impressão<br />gerenciadas no 1º item</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {/* Upload */}
-      <div className="bg-orange-50 rounded-lg border border-orange-200 p-3 space-y-2">
-        <p className="text-xs font-semibold text-orange-800">Enviar nova prévia</p>
+      <div className="bg-orange-50 rounded-lg border border-orange-200 p-2.5 space-y-2">
+        <p className="text-[10px] font-semibold text-orange-800 uppercase tracking-wide">Enviar prévia</p>
         <Textarea
-          placeholder="Observação para o cliente (opcional)..."
+          placeholder="Observação (opcional)..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
-          className="bg-white text-xs"
+          className="bg-white text-xs py-1.5"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleUpload} />
-          <Button
-            size="sm"
-            className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1.5"
-            disabled={isUploading}
-            onClick={() => fileRef.current?.click()}
-          >
+          <Button size="sm" className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1 px-2.5"
+            disabled={isUploading} onClick={() => fileRef.current?.click()}>
             {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-            {isUploading ? "Enviando..." : "Selecionar Imagem"}
+            {isUploading ? "Enviando..." : "Selecionar"}
           </Button>
-          <p className="text-xs text-gray-400">JPG, PNG, WEBP · máx. 10MB</p>
+          <p className="text-[10px] text-gray-400">JPG/PNG · 10MB</p>
         </div>
       </div>
 
-      {/* Galeria */}
+      {/* Galeria de prévias */}
       {previewsLoading ? (
-        <div className="flex justify-center py-3">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-        </div>
+        <div className="flex justify-center py-2"><Loader2 className="w-4 h-4 animate-spin text-gray-400" /></div>
       ) : previews.length === 0 ? (
-        <div className="text-center py-3 text-gray-400">
-          <ImagePlus className="w-7 h-7 mx-auto mb-1 opacity-30" />
-          <p className="text-xs">Nenhuma prévia enviada ainda</p>
+        <div className="text-center py-2 text-gray-400">
+          <ImagePlus className="w-5 h-5 mx-auto mb-0.5 opacity-30" />
+          <p className="text-[10px]">Nenhuma prévia enviada</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {previews.map((p: any) => (
-            <div key={p.id} className="relative group rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-              <img
-                src={p.imageUrl} alt="Prévia"
-                className="w-full h-24 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => onLightbox(p.imageUrl)}
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100">
-                <button className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:bg-blue-50"
-                  onClick={() => onLightbox(p.imageUrl)}>
-                  <Eye className="w-3.5 h-3.5 text-blue-600" />
+            <div key={p.id} className="relative group rounded overflow-hidden border border-gray-200" style={{ width: 56, height: 56 }}>
+              <img src={p.imageUrl} alt="Prévia" className="w-full h-full object-cover cursor-pointer" onClick={() => onLightbox(p.imageUrl)} />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100">
+                <button className="w-5 h-5 bg-white rounded-full flex items-center justify-center" onClick={() => onLightbox(p.imageUrl)}>
+                  <Eye className="w-2.5 h-2.5 text-blue-600" />
                 </button>
-                <button className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:bg-red-50"
-                  onClick={() => deletePreviewMutation.mutate({ previewId: p.id })}>
-                  <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                <button className="w-5 h-5 bg-white rounded-full flex items-center justify-center" onClick={() => deletePreviewMutation.mutate({ previewId: p.id })}>
+                  <Trash2 className="w-2.5 h-2.5 text-red-500" />
                 </button>
-              </div>
-              <div className="px-2 py-1 bg-white border-t border-gray-100">
-                <p className="text-[10px] text-gray-500">
-                  {new Date(p.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                </p>
-                {p.notes && <p className="text-[10px] text-gray-700 truncate">{p.notes}</p>}
               </div>
             </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Coluna 3b: Pré-Impressão (global, só no primeiro item) ─────────────────
+function PreImpressaoColumn({ orderId, preProductionStatus, isFirst }: { orderId: number; preProductionStatus: string; isFirst: boolean }) {
+  const [selected, setSelected] = useState(preProductionStatus);
+  const utils = trpc.useUtils();
+  const mutation = trpc.admin.updatePreProductionStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Pré-impressão atualizada!");
+      utils.checkout.getOrderById.invalidate({ id: orderId });
+    },
+    onError: () => toast.error("Erro ao atualizar pré-impressão"),
+  });
+  const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
+
+  if (!isFirst) return null;
+
+  return (
+    <div className="border-t border-gray-100 pt-3 space-y-2">
+      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1">
+        <Layers className="w-3 h-3 text-orange-500" /> Pré-Impressão
+      </p>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-gray-500">Status:</span>
+        {current && (
+          <Badge className={`${current.color} text-[10px] py-0 px-1.5`}>
+            <current.icon className="w-2.5 h-2.5 mr-0.5" />
+            {current.label}
+          </Badge>
+        )}
+      </div>
+      <div className="flex gap-1.5">
+        <Select value={selected} onValueChange={setSelected}>
+          <SelectTrigger className="flex-1 h-7 text-xs bg-white">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PRE_PRODUCTION_OPTIONS.map(opt => (
+              <SelectItem key={opt.value} value={opt.value} className="text-xs">{opt.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
+          disabled={mutation.isPending || selected === preProductionStatus}
+          onClick={() => mutation.mutate({ orderId, preProductionStatus: selected as any })}>
+          {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -381,9 +326,6 @@ export default function AdminOrderDetail() {
     { id: orderId! }, { enabled: !!orderId }
   );
   const { data: history, isLoading: histLoading } = trpc.checkout.getOrderHistory.useQuery(
-    { orderId: orderId! }, { enabled: !!orderId }
-  );
-  const { data: orderFiles = [], isLoading: filesLoading } = trpc.checkout.getOrderFiles.useQuery(
     { orderId: orderId! }, { enabled: !!orderId }
   );
   const { data: artPreviews = [], isLoading: previewsLoading } = trpc.checkout.getArtPreviews.useQuery(
@@ -440,8 +382,6 @@ export default function AdminOrderDetail() {
   const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === o.status);
   const isCancelled = o.status === "cancelado";
   if (newStatus === "" && o.status) setNewStatus(o.status);
-
-  const files = orderFiles as any[];
   const previews = artPreviews as any[];
 
   return (
@@ -449,7 +389,7 @@ export default function AdminOrderDetail() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-5xl mx-auto px-4 space-y-6">
 
-          {/* Header */}
+          {/* ── Header ── */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <Button variant="ghost" onClick={() => setLocation("/admin/pedidos")}>
@@ -488,7 +428,6 @@ export default function AdminOrderDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Status atual */}
               <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
                 <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
                   <CheckCircle2 className="h-4 w-4" />
@@ -499,7 +438,6 @@ export default function AdminOrderDetail() {
                 </div>
               </div>
 
-              {/* Linha do tempo */}
               {!isCancelled && (
                 <div className="relative">
                   <div className="absolute top-5 left-5 right-5 h-1 bg-gray-200 rounded-full" />
@@ -527,7 +465,7 @@ export default function AdminOrderDetail() {
                           }`}>
                             {isPast || isCurrent ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-base opacity-40">{cfg?.icon ?? "●"}</span>}
                           </div>
-                          <span className={`text-xs text-center font-medium leading-tight ${
+                          <span className={`text-center font-medium leading-tight ${
                             isCurrent ? "text-indigo-700 font-bold" : isPast ? "text-indigo-400" : "text-gray-300"
                           }`} style={{ fontSize: "0.6rem" }}>
                             {cfg?.label ?? step.key}
@@ -539,7 +477,6 @@ export default function AdminOrderDetail() {
                 </div>
               )}
 
-              {/* Alterar Status */}
               <div className="border-t pt-4 space-y-3">
                 <p className="text-sm font-semibold text-gray-700">Alterar Status do Pedido</p>
                 <div className="flex gap-3 flex-wrap">
@@ -567,7 +504,6 @@ export default function AdminOrderDetail() {
                 />
               </div>
 
-              {/* Histórico */}
               <div className="border-t pt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-4">Histórico de Status</p>
                 {histLoading ? (
@@ -600,25 +536,21 @@ export default function AdminOrderDetail() {
             </CardContent>
           </Card>
 
-          {/* ── PRODUTOS DO PEDIDO — container principal agrupado ── */}
+          {/* ── ITENS DO PEDIDO — card por produto ── */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-gray-700" />
               <h2 className="text-lg font-bold text-gray-900">Itens do Pedido</h2>
-              {o.items && <Badge variant="secondary">{o.items.length} {o.items.length === 1 ? 'item' : 'itens'}</Badge>}
+              {o.items && <Badge variant="secondary">{o.items.length} {o.items.length === 1 ? "item" : "itens"}</Badge>}
             </div>
 
             {o.items && o.items.length > 0 ? (
               o.items.map((item: any, i: number) => {
-                // Parse variation/attributes
+                // Parse variações
                 let variations: { name: string; value: string }[] = [];
                 if (item.variationSnapshot) { try { variations = JSON.parse(item.variationSnapshot); } catch {} }
                 let attrObj: Record<string, any> = {};
                 if (item.selectedAttributes) { try { attrObj = JSON.parse(item.selectedAttributes); } catch {} }
-
-                const pesoAttr = attrObj?.peso ?? attrObj?.weight ?? attrObj?.weightKg;
-                const pesoVariation = variations.find(v => v.name?.toLowerCase().includes('peso') || v.name?.toLowerCase().includes('weight'));
-                const pesoDisplay = pesoAttr ? `${pesoAttr} kg` : pesoVariation ? pesoVariation.value : null;
 
                 const dims = item.customDimensions;
                 let largura = "", altura = "";
@@ -628,182 +560,132 @@ export default function AdminOrderDetail() {
                 }
 
                 const acabamentos = variations.filter(v =>
-                  !v.name?.toLowerCase().includes('peso') && !v.name?.toLowerCase().includes('weight') &&
-                  !v.name?.toLowerCase().includes('largura') && !v.name?.toLowerCase().includes('altura') &&
-                  !v.name?.toLowerCase().includes('dimensão') && !v.name?.toLowerCase().includes('dimensao')
+                  !["peso", "weight", "largura", "altura", "dimensão", "dimensao"].some(k => v.name?.toLowerCase().includes(k))
                 );
                 const outrasVariacoes = Object.entries(attrObj)
-                  .filter(([k]) => !['peso', 'weight', 'weightKg', 'largura', 'altura'].includes(k))
+                  .filter(([k]) => !["peso", "weight", "weightKg", "largura", "altura"].includes(k))
                   .map(([k, v]) => ({ name: k, value: String(v) }));
 
-                // Arquivos deste item (match por productName)
-                const itemFiles = filesLoading ? [] : files.filter(
-                  (f: any) => f.productName === item.productName
-                );
+                const isFirst = i === 0;
 
                 return (
-                  <Card key={i} className="border-2 border-gray-200 shadow-sm overflow-hidden">
+                  <Card key={i} className="border border-gray-200 shadow-sm overflow-hidden">
                     {/* Cabeçalho do item */}
-                    <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 px-5 py-4">
-                      <div className="flex items-start justify-between gap-4">
+                    <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 px-5 py-3.5">
+                      <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                           {item.productImage ? (
                             <img src={item.productImage} alt={item.productName}
-                              className="w-12 h-12 rounded-lg object-cover border border-gray-200 flex-shrink-0" />
+                              className="w-10 h-10 rounded-lg object-cover border border-gray-200 flex-shrink-0" />
                           ) : (
-                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                              <Package className="w-6 h-6 text-gray-400" />
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                              <Package className="w-5 h-5 text-gray-400" />
                             </div>
                           )}
                           <div>
-                            <p className="font-bold text-gray-900 text-base">{item.productName}</p>
-                            <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
+                            <p className="font-bold text-gray-900">{item.productName}</p>
+                            <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm text-gray-500">Unit.</p>
-                          <p className="font-semibold text-gray-800">{fmt(parseFloat(item.priceAtOrder))}</p>
-                          <p className="text-xs text-gray-400">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
+                          <p className="text-xs text-gray-400">Unit. {fmt(parseFloat(item.priceAtOrder))}</p>
+                          <p className="font-bold text-gray-800">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
                         </div>
                       </div>
                     </div>
 
-                    <CardContent className="p-0">
-                      {/* Grid de 3 colunas: Detalhes | Arquivos | Prévia + Pré-Impressão */}
-                      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+                    {/* Grid 3 colunas com divisores visuais */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3">
 
-                        {/* Coluna 1: Detalhes técnicos */}
-                        <div className="p-4 space-y-3">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
-                            <Ruler className="w-3.5 h-3.5" /> Especificações
-                          </p>
-                          <div className="space-y-2">
-                            {(largura || altura) && (
+                      {/* Col 1 — Especificações */}
+                      <div className="p-5 lg:border-r border-gray-100">
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                          <Ruler className="w-3 h-3" /> Especificações
+                        </p>
+                        <div className="space-y-2.5">
+                          {(largura || altura) && (
+                            <div>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Dimensões</p>
+                              <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
+                              {largura && altura && (
+                                <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
+                              )}
+                            </div>
+                          )}
+                          {acabamentos.length > 0 && (
+                            <div>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
+                                <Layers className="w-3 h-3" /> Acabamentos
+                              </p>
+                              <div className="space-y-1">
+                                {acabamentos.map((v, vi) => (
+                                  <div key={vi} className="flex gap-1">
+                                    <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
+                                    <span className="text-xs text-gray-900 font-medium">{v.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {outrasVariacoes.length > 0 && (
+                            <div>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Outras Especificações</p>
+                              <div className="space-y-1">
+                                {outrasVariacoes.map((v, vi) => (
+                                  <div key={vi} className="flex gap-1">
+                                    <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
+                                    <span className="text-xs text-gray-900 font-medium">{v.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {item.notes && (
+                            <div className="flex items-start gap-1.5">
+                              <StickyNote className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
                               <div>
-                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Dimensões</p>
-                                <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
-                                {largura && altura && (
-                                  <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
-                                )}
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Obs.</p>
+                                <p className="text-xs text-gray-900 italic">{item.notes}</p>
                               </div>
-                            )}
-                            {pesoDisplay && (
-                              <div className="flex items-center gap-1.5">
-                                <Weight className="w-3 h-3 text-gray-400" />
-                                <div>
-                                  <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Peso</p>
-                                  <p className="text-sm font-semibold text-gray-900">{pesoDisplay}</p>
-                                </div>
-                              </div>
-                            )}
-                            {acabamentos.length > 0 && (
-                              <div>
-                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
-                                  <Layers className="w-3 h-3" /> Acabamentos
-                                </p>
-                                <div className="space-y-1">
-                                  {acabamentos.map((v, vi) => (
-                                    <div key={vi}>
-                                      <span className="text-[10px] text-gray-400">{v.name}: </span>
-                                      <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            {outrasVariacoes.length > 0 && (
-                              <div>
-                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1">Outras Especificações</p>
-                                <div className="space-y-1">
-                                  {outrasVariacoes.map((v, vi) => (
-                                    <div key={vi}>
-                                      <span className="text-[10px] text-gray-400">{v.name}: </span>
-                                      <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            {item.notes && (
-                              <div className="flex items-start gap-1.5">
-                                <StickyNote className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Observações</p>
-                                  <p className="text-xs text-gray-900 italic">{item.notes}</p>
-                                </div>
-                              </div>
-                            )}
-                            {!largura && !altura && acabamentos.length === 0 && outrasVariacoes.length === 0 && !item.notes && (
-                              <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Coluna 2: Arquivos do cliente */}
-                        <div className="p-4">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-                            <FileImage className="w-3.5 h-3.5 text-blue-500" /> Arquivo do Cliente
-                          </p>
-                          {filesLoading ? (
-                            <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-gray-400" /></div>
-                          ) : (
-                            <ItemClientFiles itemFiles={itemFiles} onLightbox={setLightboxUrl} />
+                            </div>
+                          )}
+                          {!largura && !altura && acabamentos.length === 0 && outrasVariacoes.length === 0 && !item.notes && (
+                            <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
                           )}
                         </div>
-
-                        {/* Coluna 3: Prévia da Arte + Pré-Impressão */}
-                        <div className="p-4 space-y-5">
-                          {/* Prévia da Arte */}
-                          <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-                              <ImagePlus className="w-3.5 h-3.5 text-orange-500" /> Prévia da Arte
-                              {o.items.length > 1 && (
-                                <span className="text-[10px] text-orange-400 font-normal">(pedido)</span>
-                              )}
-                            </p>
-                            {/* Só renderiza o componente completo no primeiro item para evitar duplicação */}
-                            {i === 0 ? (
-                              <InlineArtPreview
-                                orderId={orderId!}
-                                previews={previews}
-                                previewsLoading={previewsLoading}
-                                onLightbox={setLightboxUrl}
-                                onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId: orderId! })}
-                              />
-                            ) : (
-                              <div className="text-center py-3 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                                <ImagePlus className="w-6 h-6 mx-auto mb-1 opacity-30" />
-                                <p className="text-xs">Prévias compartilhadas com todos os itens</p>
-                                <p className="text-[10px] text-gray-400 mt-0.5">Gerencie no primeiro item</p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Pré-Impressão */}
-                          <div className="border-t pt-4">
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-                              <Layers className="w-3.5 h-3.5 text-orange-600" /> Pré-Impressão
-                              {o.items.length > 1 && (
-                                <span className="text-[10px] text-orange-400 font-normal">(pedido)</span>
-                              )}
-                            </p>
-                            {i === 0 ? (
-                              <InlinePreImpressao
-                                orderId={orderId!}
-                                preProductionStatus={o.preProductionStatus || 'liberado_analise'}
-                              />
-                            ) : (
-                              <div className="text-center py-3 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                                <Layers className="w-6 h-6 mx-auto mb-1 opacity-30" />
-                                <p className="text-xs">Status compartilhado com todos os itens</p>
-                                <p className="text-[10px] text-gray-400 mt-0.5">Gerencie no primeiro item</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
                       </div>
-                    </CardContent>
+
+                      {/* Col 2 — Arquivo do cliente (filtrado por item via artFileUrl) */}
+                      <div className="p-5 lg:border-r border-gray-100">
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                          <FileImage className="w-3 h-3 text-blue-500" /> Arquivo do Cliente
+                        </p>
+                        <ItemFileColumn artFileUrl={item.artFileUrl} onLightbox={setLightboxUrl} />
+                      </div>
+
+                      {/* Col 3 — Prévia da Arte + Pré-Impressão (global, gerenciado no 1º item) */}
+                      <div className={`p-5 ${!isFirst ? "bg-gray-50/60" : ""}`}>
+                        <p className={`text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-3 ${isFirst ? "text-gray-400" : "text-gray-300"}`}>
+                          <ImagePlus className={`w-3 h-3 ${isFirst ? "text-orange-500" : "text-gray-300"}`} />
+                          Prévia da Arte
+                          {!isFirst && <span className="text-[9px] text-gray-300 font-normal">(global)</span>}
+                        </p>
+                        <ArtPreviewColumn
+                          orderId={orderId!}
+                          previews={previews}
+                          previewsLoading={previewsLoading}
+                          onLightbox={setLightboxUrl}
+                          onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId: orderId! })}
+                          isFirst={isFirst}
+                        />
+                        <PreImpressaoColumn
+                          orderId={orderId!}
+                          preProductionStatus={o.preProductionStatus || "liberado_analise"}
+                          isFirst={isFirst}
+                        />
+                      </div>
+
+                    </div>
                   </Card>
                 );
               })
@@ -834,7 +716,7 @@ export default function AdminOrderDetail() {
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Telefone</p>
                   <p className="font-semibold text-gray-900">{o.deliveryPhone}</p>
                 </div>
-                {(o.guestEmail || o.guestName) && (
+                {o.guestEmail && (
                   <div className="md:col-span-2">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">E-mail</p>
                     <p className="font-semibold text-gray-900">{o.guestEmail}</p>
@@ -898,11 +780,11 @@ export default function AdminOrderDetail() {
                     <div>
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pagamento</p>
                       <span className={`inline-block mt-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        o.paymentStatus === 'pago' ? 'bg-emerald-100 text-emerald-800'
-                        : o.paymentStatus === 'cancelado' ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        o.paymentStatus === "pago" ? "bg-emerald-100 text-emerald-800"
+                        : o.paymentStatus === "cancelado" ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
                       }`}>
-                        {o.paymentStatus === 'pago' ? 'Pago' : o.paymentStatus === 'cancelado' ? 'Cancelado' : o.paymentStatus === 'reembolsado' ? 'Reembolsado' : 'Pendente'}
+                        {o.paymentStatus === "pago" ? "Pago" : o.paymentStatus === "cancelado" ? "Cancelado" : o.paymentStatus === "reembolsado" ? "Reembolsado" : "Pendente"}
                       </span>
                     </div>
                   </div>
@@ -920,7 +802,7 @@ export default function AdminOrderDetail() {
             </CardContent>
           </Card>
 
-          {/* ── Status de Produção e Entrega (globais) ── */}
+          {/* ── Logística e Entrega ── */}
           <OrderShippingPanel
             shippingMethod={o.shippingMethod}
             shippingPrice={o.shippingPrice}
