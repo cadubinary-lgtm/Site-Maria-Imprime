@@ -170,6 +170,8 @@ export const orderItems = mysqlTable("orderItems", {
   requireClientResend: boolean("requireClientResend").default(false), // Operador exigiu reenvio do cliente
   sendProofForApproval: boolean("sendProofForApproval").default(false), // Operador enviou prova para aprovação
   correctionAction: varchar("correctionAction", { length: 50 }), // "resend" ou "proof" - ação liberada
+  operatorNote: longtext("operatorNote"), // Mensagem do operador para o cliente
+  clientRefusalNote: longtext("clientRefusalNote"), // Texto de recusa do cliente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

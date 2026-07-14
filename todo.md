@@ -2346,3 +2346,17 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar notificação visual no painel admin quando cliente reenviar arte
 - [x] Testar fluxo completo: operador marca opção → cliente vê botão correto → interage → status muda
 - [x] Salvar checkpoint final
+
+## Fluxo de Comunicação de Pré-Impressão Operador ↔ Cliente
+
+- [x] Adicionar coluna operatorNote em orderItems (mensagem do operador para o cliente)
+- [x] Adicionar coluna clientRefusalNote em orderItems (texto de recusa do cliente)
+- [x] Atualizar procedure saveArtCorrectionAction para salvar operatorNote e mudar status do pedido
+- [x] Botão "Enviar para o Cliente" muda status do pedido para "com_problemas" ou "aguardando_aprovacao"
+- [x] Preenchimento automático do campo observação ao marcar "Enviar Prova para Aprovação"
+- [x] Preenchimento automático limpa ao marcar "Exigir Reenvio do Cliente"
+- [x] Tela do cliente: exibir nota do operador no bloco de ação
+- [x] Tela do cliente: botão "Recusar Prova" abre campo de texto para comentário
+- [x] Procedure clientRefuseProof: salva nota de recusa e volta status para "com_problemas"
+- [x] Notificação ao operador quando cliente recusar a prova
+- [x] Salvar checkpoint final
