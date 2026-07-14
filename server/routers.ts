@@ -361,10 +361,30 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems: orderItemsT } = await import("../drizzle/schema.js");
+        const { orderItems: orderItemsT, orders: ordersT } = await import("../drizzle/schema.js");
+        // Atualiza o status de pré-impressão do item
         await db.update(orderItemsT)
           .set({ preProductionStatus: input.preProductionStatus } as any)
           .where(eq(orderItemsT.id, input.orderItemId));
+        // Se aprovado, verifica se todos os itens do pedido foram aprovados
+        // e atualiza o status do pedido para em_producao
+        if (input.preProductionStatus === "arte_final_aprovada") {
+          const [item] = await db.select({ orderId: orderItemsT.orderId })
+            .from(orderItemsT)
+            .where(eq(orderItemsT.id, input.orderItemId))
+            .limit(1);
+          if (item?.orderId) {
+            const allItems = await db.select({ preProductionStatus: orderItemsT.preProductionStatus })
+              .from(orderItemsT)
+              .where(eq(orderItemsT.orderId, item.orderId));
+            const allApproved = allItems.every((i: any) => i.preProductionStatus === "arte_final_aprovada");
+            if (allApproved) {
+              await db.update(ordersT)
+                .set({ status: "em_producao" } as any)
+                .where(eq(ordersT.id, item.orderId));
+            }
+          }
+        }
         return { success: true };
       }),
     updateProductionStatus: adminProcedure
