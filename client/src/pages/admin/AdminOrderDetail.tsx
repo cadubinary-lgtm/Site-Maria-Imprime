@@ -250,11 +250,13 @@ function ArtPreviewColumn({
   );
 }
 
-// ─── Coluna 3b: Pré-Impressão (independente por item) ───────────────────────
+const PROOF_TERM = `Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!`;
+
 function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { orderId: number; orderItemId: number; preProductionStatus: string }) {
   const [selected, setSelected] = useState(preProductionStatus);
   const [requireResend, setRequireResend] = useState(false);
   const [sendProof, setSendProof] = useState(false);
+  const [operatorNote, setOperatorNote] = useState("");
   const utils = trpc.useUtils();
 
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
@@ -268,15 +270,34 @@ function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { ord
   const correctionMutation = trpc.checkout.saveArtCorrectionAction.useMutation({
     onSuccess: (data) => {
       const msg = data.correctionAction === "resend"
-        ? "Cliente será solicitado a reenviar a arte!"
-        : "Prova enviada para aprovação do cliente!";
+        ? "📨 Cliente será notificado para reenviar a arte!"
+        : "✅ Prova enviada para aprovação do cliente!";
       toast.success(msg);
       utils.checkout.getOrderById.invalidate({ id: orderId });
+      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId });
     },
-    onError: () => toast.error("Erro ao salvar opção de correção"),
+    onError: () => toast.error("Erro ao enviar para o cliente"),
   });
 
   const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
+
+  const handleRequireResendChange = (checked: boolean) => {
+    setRequireResend(checked);
+    if (checked) {
+      setSendProof(false);
+      setOperatorNote(""); // Limpa para o operador descrever o problema
+    }
+  };
+
+  const handleSendProofChange = (checked: boolean) => {
+    setSendProof(checked);
+    if (checked) {
+      setRequireResend(false);
+      setOperatorNote(PROOF_TERM); // Preenche automaticamente com o termo
+    } else {
+      setOperatorNote("");
+    }
+  };
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
@@ -318,35 +339,57 @@ function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { ord
             <input
               type="checkbox"
               checked={requireResend}
-              onChange={(e) => { setRequireResend(e.target.checked); if (e.target.checked) setSendProof(false); }}
+              onChange={(e) => handleRequireResendChange(e.target.checked)}
               className="mt-0.5 w-3.5 h-3.5 accent-orange-500 flex-shrink-0"
             />
             <div>
               <p className="text-xs font-medium text-gray-800">Exigir Reenvio do Cliente</p>
-              <p className="text-[10px] text-gray-500">O cliente verá apenas o campo de upload</p>
+              <p className="text-[10px] text-gray-500">Descreva o problema no campo abaixo</p>
             </div>
           </label>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={sendProof}
-              onChange={(e) => { setSendProof(e.target.checked); if (e.target.checked) setRequireResend(false); }}
+              onChange={(e) => handleSendProofChange(e.target.checked)}
               className="mt-0.5 w-3.5 h-3.5 accent-blue-500 flex-shrink-0"
             />
             <div>
               <p className="text-xs font-medium text-gray-800">Enviar Prova para Aprovação</p>
-              <p className="text-[10px] text-gray-500">O cliente verá a prévia e botão de aprovar</p>
+              <p className="text-[10px] text-gray-500">Termo de responsabilidade será preenchido</p>
             </div>
           </label>
         </div>
+
+        {/* Campo de Observação */}
+        {(requireResend || sendProof) && (
+          <div className="space-y-1">
+            <p className="text-[10px] font-medium text-gray-700">
+              {requireResend ? "Descreva o problema para o cliente:" : "Mensagem para o cliente (editável):"}
+            </p>
+            <textarea
+              value={operatorNote}
+              onChange={(e) => setOperatorNote(e.target.value)}
+              placeholder={requireResend ? "Ex: A resolução da imagem está muito baixa (abaixo de 150 DPI). Por favor, envie um arquivo com maior qualidade." : ""}
+              rows={requireResend ? 3 : 5}
+              className="w-full text-xs border border-blue-200 rounded p-1.5 resize-none bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+            />
+          </div>
+        )}
+
         <Button
           size="sm"
           className="w-full h-7 text-xs bg-blue-600 hover:bg-blue-700"
           disabled={correctionMutation.isPending || (!requireResend && !sendProof)}
-          onClick={() => correctionMutation.mutate({ orderItemId, requireClientResend: requireResend, sendProofForApproval: sendProof })}
+          onClick={() => correctionMutation.mutate({
+            orderItemId,
+            requireClientResend: requireResend,
+            sendProofForApproval: sendProof,
+            operatorNote: operatorNote.trim() || undefined,
+          })}
         >
           {correctionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-          Salvar Opção
+          Enviar para o Cliente
         </Button>
       </div>
     </div>

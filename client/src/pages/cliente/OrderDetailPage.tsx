@@ -16,8 +16,10 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   const utils = trpc.useUtils();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showRefusalInput, setShowRefusalInput] = useState(false);
+  const [refusalNote, setRefusalNote] = useState("");
 
-  const { data: correctionData } = trpc.checkout.getItemCorrectionAction.useQuery(
+  const { data: correctionData, isLoading } = trpc.checkout.getItemCorrectionAction.useQuery(
     { orderItemId: item.id },
     { enabled: !!item.id }
   );
@@ -40,6 +42,17 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     onError: () => toast.error("Erro ao aprovar arte"),
   });
 
+  const refuseMutation = trpc.checkout.clientRefuseProof.useMutation({
+    onSuccess: () => {
+      toast.success("Recusa registrada. Nossa equipe irá revisar e entrar em contato.");
+      setShowRefusalInput(false);
+      setRefusalNote("");
+      utils.checkout.getOrderByNumber.invalidate();
+      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
+    },
+    onError: () => toast.error("Erro ao registrar recusa"),
+  });
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -50,7 +63,6 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
       formData.append("orderItemId", String(item.id));
       const res = await fetch("/api/upload-art", { method: "POST", body: formData });
       if (!res.ok) throw new Error("Upload falhou");
-      // Após upload, notifica o servidor que o cliente reenviou
       await resendMutation.mutateAsync({ orderItemId: item.id });
     } catch {
       toast.error("Erro ao enviar arquivo. Tente novamente.");
@@ -60,30 +72,42 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     }
   };
 
-  // Se não há ação de correção definida, não renderiza nada
-  if (!correctionData?.correctionAction) return null;
+  if (isLoading || !correctionData?.correctionAction) return null;
 
   // Opção 1: Exigir Reenvio do Cliente
   if (correctionData.correctionAction === "resend") {
     return (
-      <div className="border-t border-orange-200 bg-orange-50 p-3">
+      <div className="border border-orange-200 bg-orange-50 rounded-xl p-4 mt-3">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-            <AlertCircle className="w-4 h-4 text-orange-600" />
+          <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <AlertCircle className="w-5 h-5 text-orange-600" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-orange-800">Arte com problemas — Reenvio necessário</p>
-            <p className="text-xs text-orange-600 mt-0.5 mb-3">Nossa equipe identificou um problema com a arte deste produto. Por favor, envie um novo arquivo corrigido.</p>
-            <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr" className="hidden" onChange={handleFileUpload} />
-            <Button
-              size="sm"
-              className="bg-orange-600 hover:bg-orange-700 text-white gap-2"
-              disabled={isUploading || resendMutation.isPending}
-              onClick={() => fileRef.current?.click()}
-            >
-              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              {isUploading ? "Enviando..." : "Enviar Nova Arte"}
-            </Button>
+          <div className="flex-1 space-y-3">
+            <div>
+              <p className="text-sm font-bold text-orange-800">⚠️ Arte com problemas — Reenvio necessário</p>
+              <p className="text-xs text-orange-600 mt-0.5">
+                Nossa equipe analisou a arte deste produto e identificou um problema. Veja abaixo o que precisa ser corrigido.
+              </p>
+            </div>
+            {correctionData.operatorNote && (
+              <div className="bg-white border border-orange-200 rounded-lg p-3">
+                <p className="text-xs font-semibold text-orange-700 mb-1">📋 Problema identificado:</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{correctionData.operatorNote}</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-700">Envie o arquivo corrigido:</p>
+              <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr,.psd" className="hidden" onChange={handleFileUpload} />
+              <Button
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
+                disabled={isUploading || resendMutation.isPending}
+                onClick={() => fileRef.current?.click()}
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {isUploading ? "Enviando..." : "Escolher Arquivo Corrigido"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -93,27 +117,79 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   // Opção 2: Enviar Prova para Aprovação
   if (correctionData.correctionAction === "proof") {
     return (
-      <div className="border-t border-blue-200 bg-blue-50 p-3">
+      <div className="border border-blue-200 bg-blue-50 rounded-xl p-4 mt-3">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <FileText className="w-4 h-4 text-blue-600" />
+          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <FileText className="w-5 h-5 text-blue-600" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-blue-800">Prévia da Arte Pronta para Aprovação</p>
-            <p className="text-xs text-blue-600 mt-0.5 mb-3">Nossa equipe preparou uma versão corrigida da sua arte. Revise abaixo e aprove para iniciar a produção.</p>
-            {/* Exibir prévia se houver */}
+          <div className="flex-1 space-y-3">
+            <div>
+              <p className="text-sm font-bold text-blue-800">🎨 Prévia da Arte Pronta para Aprovação</p>
+              <p className="text-xs text-blue-600 mt-0.5">
+                Nossa equipe preparou a arte do seu produto. Revise com atenção antes de aprovar.
+              </p>
+            </div>
+            {/* Prévia da arte */}
             {item.artPreviewUrl && (
-              <img src={item.artPreviewUrl} alt="Prévia da Arte" className="w-32 h-32 object-cover rounded-lg border border-blue-200 mb-3" />
+              <div className="bg-white border border-blue-200 rounded-lg p-2 inline-block">
+                <img src={item.artPreviewUrl} alt="Prévia da Arte" className="max-w-[200px] max-h-[200px] object-contain rounded" />
+              </div>
             )}
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
-              disabled={approveMutation.isPending}
-              onClick={() => approveMutation.mutate({ orderItemId: item.id })}
-            >
-              {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />}
-              Aprovar Arte e Iniciar Produção
-            </Button>
+            {/* Termo de responsabilidade */}
+            {correctionData.operatorNote && (
+              <div className="bg-white border border-blue-200 rounded-lg p-3">
+                <p className="text-xs font-semibold text-blue-700 mb-1">📄 Termo de Responsabilidade:</p>
+                <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{correctionData.operatorNote}</p>
+              </div>
+            )}
+            {/* Botões de ação */}
+            {!showRefusalInput ? (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                  disabled={approveMutation.isPending}
+                  onClick={() => approveMutation.mutate({ orderItemId: item.id })}
+                >
+                  {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />}
+                  Aprovar Arte e Iniciar Produção
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-600 hover:bg-red-50 gap-2"
+                  onClick={() => setShowRefusalInput(true)}
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  Recusar Prova
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-red-700">Descreva o que precisa ser alterado:</p>
+                <textarea
+                  value={refusalNote}
+                  onChange={(e) => setRefusalNote(e.target.value)}
+                  placeholder="Ex: Preciso que o texto do telefone seja alterado para (11) 99999-0000 e a cor do fundo fique mais escura."
+                  rows={3}
+                  className="w-full text-sm border border-red-200 rounded-lg p-2.5 resize-none bg-white focus:outline-none focus:ring-2 focus:ring-red-300"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white gap-2"
+                    disabled={refuseMutation.isPending || !refusalNote.trim()}
+                    onClick={() => refuseMutation.mutate({ orderItemId: item.id, refusalNote: refusalNote.trim() })}
+                  >
+                    {refuseMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    Enviar Recusa
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setShowRefusalInput(false); setRefusalNote(""); }}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

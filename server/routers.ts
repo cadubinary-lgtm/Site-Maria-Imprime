@@ -1627,20 +1627,50 @@ createOrder: protectedProcedure
         orderItemId: z.number(),
         requireClientResend: z.boolean().optional(),
         sendProofForApproval: z.boolean().optional(),
+        operatorNote: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems } = await import("../drizzle/schema.js");
+        const { orderItems, orders } = await import("../drizzle/schema.js");
         const { eq } = await import("drizzle-orm");
         const correctionAction = input.requireClientResend ? "resend" : (input.sendProofForApproval ? "proof" : null);
+        
+        // Atualiza o item com a ação e a nota do operador
         await db.update(orderItems)
           .set({
             requireClientResend: input.requireClientResend ?? false,
             sendProofForApproval: input.sendProofForApproval ?? false,
             correctionAction: correctionAction,
+            operatorNote: input.operatorNote ?? null,
+            // Muda o status de pré-impressão conforme a ação
+            preProductionStatus: input.requireClientResend ? "com_problemas" : (input.sendProofForApproval ? "aguardando_aprovacao" : undefined),
           } as any)
           .where(eq(orderItems.id, input.orderItemId));
+        
+        // Busca o orderId para atualizar o status do pedido
+        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
+        const item = itemRows[0];
+        if (item?.orderId) {
+          const newOrderStatus = input.requireClientResend ? "com_problemas" : (input.sendProofForApproval ? "analisando" : null);
+          if (newOrderStatus) {
+            await db.update(orders).set({ status: newOrderStatus } as any).where(eq(orders.id, item.orderId));
+          }
+        }
+        
+        // Notifica o operador sobre o envio
+        try {
+          const { notifyOwner } = await import("./_core/notification.js");
+          const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          const actionLabel = input.requireClientResend ? "Reenvio de Arte Solicitado" : "Prova Enviada para Aprovação";
+          await notifyOwner({
+            title: `📤 ${actionLabel}`,
+            content: `Operador enviou ação "${actionLabel}" para o produto "${productName}" (Item ID: ${input.orderItemId}). O cliente será notificado.`,
+          });
+        } catch (e) {
+          console.error("Erro ao notificar:", e);
+        }
+        
         return { success: true, correctionAction };
       }),
 
@@ -1658,7 +1688,48 @@ createOrder: protectedProcedure
           requireClientResend: (item as any).requireClientResend ?? false,
           sendProofForApproval: (item as any).sendProofForApproval ?? false,
           correctionAction: (item as any).correctionAction ?? null,
+          operatorNote: (item as any).operatorNote ?? null,
+          clientRefusalNote: (item as any).clientRefusalNote ?? null,
         };
+      }),
+
+    clientRefuseProof: protectedProcedure
+      .input(z.object({ orderItemId: z.number(), refusalNote: z.string().min(1) }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems, orders } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        
+        // Salva a nota de recusa e volta o status para "com_problemas"
+        await db.update(orderItems)
+          .set({
+            clientRefusalNote: input.refusalNote,
+            preProductionStatus: "com_problemas",
+            correctionAction: null, // Limpa a ação para o operador decidir novamente
+          } as any)
+          .where(eq(orderItems.id, input.orderItemId));
+        
+        // Busca o orderId para atualizar o status do pedido
+        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
+        const item = itemRows[0];
+        if (item?.orderId) {
+          await db.update(orders).set({ status: "com_problemas" } as any).where(eq(orders.id, item.orderId));
+        }
+        
+        // Notifica o operador
+        try {
+          const { notifyOwner } = await import("./_core/notification.js");
+          const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          await notifyOwner({
+            title: "❌ Prova Recusada pelo Cliente",
+            content: `O cliente recusou a prova do produto "${productName}" (Item ID: ${input.orderItemId}). Motivo: "${input.refusalNote}". Acesse o painel para revisar.`,
+          });
+        } catch (e) {
+          console.error("Erro ao notificar:", e);
+        }
+        
+        return { success: true, message: "Prova recusada. Operador será notificado." };
       }),
 
     clientResendArt: protectedProcedure
