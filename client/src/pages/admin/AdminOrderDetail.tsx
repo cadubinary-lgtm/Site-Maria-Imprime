@@ -157,12 +157,13 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
 // para que o botão "Enviar para o Cliente" possa disparar o upload junto com a ação de correção
 function ArtPreviewColumn({
   orderId, orderItemId, previews, previewsLoading, onLightbox, onRefresh,
-  pendingFile, pendingNotes, onPendingFileChange, onPendingNotesChange,
+  pendingFile, pendingNotes, onPendingFileChange, onPendingNotesChange, selectedStatus,
 }: {
   orderId: number; orderItemId: number; previews: any[]; previewsLoading: boolean;
   onLightbox: (url: string) => void; onRefresh: () => void;
   pendingFile: File | null; pendingNotes: string;
   onPendingFileChange: (f: File | null) => void; onPendingNotesChange: (n: string) => void;
+  selectedStatus?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -211,7 +212,9 @@ function ArtPreviewColumn({
         </div>
         {pendingFile && (
           <p className="text-[10px] text-orange-600 font-medium">
-            ⚠️ Arquivo selecionado. Clique em "Enviar para o Cliente" para confirmar o envio.
+            {selectedStatus === "arte_final_aprovada"
+              ? '✅ Arquivo selecionado. Clique em "Salvar" para aprovar a arte final.'
+              : '⚠️ Arquivo selecionado. Clique em "Enviar para o Cliente" para confirmar o envio.'}
           </p>
         )}
       </div>
@@ -248,13 +251,16 @@ function ArtPreviewColumn({
 const PROOF_TERM = `Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!`;
 
 function PreImpressaoColumn({
-  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded,
+  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   pendingPreviewFile: File | null; pendingPreviewNotes: string;
   onPreviewUploaded: () => void;
+  onSelectedStatusChange?: (s: string) => void;
 }) {
   const [selected, setSelected] = useState(preProductionStatus);
+  // Notifica o pai quando o status muda (para alerta dinâmico na col de prévia)
+  const handleSelectedChange = (v: string) => { setSelected(v); onSelectedStatusChange?.(v); };
   const [requireResend, setRequireResend] = useState(false);
   const [sendProof, setSendProof] = useState(false);
   const [operatorNote, setOperatorNote] = useState("");
@@ -320,7 +326,7 @@ function PreImpressaoColumn({
         )}
       </div>
       <div className="flex gap-1.5">
-        <Select value={selected} onValueChange={setSelected}>
+        <Select value={selected} onValueChange={handleSelectedChange}>
           <SelectTrigger className="flex-1 h-7 text-xs bg-white">
             <SelectValue />
           </SelectTrigger>
@@ -331,14 +337,42 @@ function PreImpressaoColumn({
           </SelectContent>
         </Select>
         <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
-          disabled={mutation.isPending || selected === preProductionStatus}
-          onClick={() => mutation.mutate({ orderItemId, preProductionStatus: selected as any })}>
+          disabled={mutation.isPending || (selected === preProductionStatus && !pendingPreviewFile)}
+          onClick={async () => {
+            // Se há prévia pendente, faz upload antes de salvar o status
+            if (pendingPreviewFile) {
+              try {
+                const formData = new FormData();
+                formData.append("file", pendingPreviewFile);
+                const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Erro no upload da prévia"); }
+                const { url, key } = await res.json();
+                // Salva a prévia no banco via tRPC
+                await fetch("/api/trpc/checkout.saveArtPreview", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    json: { orderId, orderItemId, imageUrl: url, imageKey: key, notes: pendingPreviewNotes || undefined }
+                  }),
+                });
+                onPreviewUploaded();
+                toast.success("Prévia salva!");
+              } catch (err: any) {
+                toast.error(err?.message || "Erro ao enviar prévia");
+                return;
+              }
+            }
+            // Salva o status (só se mudou)
+            if (selected !== preProductionStatus) {
+              mutation.mutate({ orderItemId, preProductionStatus: selected as any });
+            }
+          }}>
           {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
         </Button>
       </div>
 
-      {/* Ações de Correção */}
-      <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
+      {/* Ações de Correção — ocultas quando arte está aprovada */}
+      {selected === "arte_final_aprovada" ? null : <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
         <p className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">Ação de Correção</p>
         <div className="space-y-1.5">
           <label className="flex items-start gap-2 cursor-pointer">
@@ -428,7 +462,7 @@ function PreImpressaoColumn({
           {(isSendingToClient || correctionMutation.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
           Enviar para o Cliente
         </Button>
-      </div>
+      </div>}
     </div>
   );
 }
@@ -443,6 +477,8 @@ function ItemPreviewSection({
   const utils = trpc.useUtils();
   const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
   const [pendingPreviewNotes, setPendingPreviewNotes] = useState("");
+  // Estado do status selecionado no dropdown (para mensagem dinâmica no alerta)
+  const [selectedStatus, setSelectedStatus] = useState(preProductionStatus);
 
   const { data: itemPreviews = [], isLoading: itemPreviewsLoading } =
     trpc.checkout.getArtPreviews.useQuery({ orderId, orderItemId });
@@ -470,6 +506,7 @@ function ItemPreviewSection({
         pendingNotes={pendingPreviewNotes}
         onPendingFileChange={setPendingPreviewFile}
         onPendingNotesChange={setPendingPreviewNotes}
+        selectedStatus={selectedStatus}
       />
       <PreImpressaoColumn
         orderId={orderId}
@@ -478,6 +515,7 @@ function ItemPreviewSection({
         pendingPreviewFile={pendingPreviewFile}
         pendingPreviewNotes={pendingPreviewNotes}
         onPreviewUploaded={handlePreviewUploaded}
+        onSelectedStatusChange={setSelectedStatus}
       />
     </div>
   );
