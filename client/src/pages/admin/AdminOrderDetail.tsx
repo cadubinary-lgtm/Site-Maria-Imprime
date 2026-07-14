@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
 import { OrderShippingPanel } from '@/components/orders/OrderShippingPanel';
 import { ShippingLabelViewer } from '@/components/orders/ShippingLabelViewer';
+import AdminLayout from '@/components/AdminLayout';
 
 // Ordem linear dos status para a linha do tempo
 function getAdminStatusSteps(order: any) {
@@ -442,9 +443,6 @@ export default function AdminOrderDetail() {
 
   const files = orderFiles as any[];
   const previews = artPreviews as any[];
-
-  // Importar AdminLayout dinamicamente para evitar circular
-  const AdminLayout = require("@/components/AdminLayout").default;
 
   return (
     <AdminLayout>
