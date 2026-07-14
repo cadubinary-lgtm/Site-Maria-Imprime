@@ -7,9 +7,51 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ArrowLeft, Package, MapPin, Clock,
   CheckCircle2, Circle, RefreshCw, ShoppingCart,
   FileText, AlertCircle, Upload, ThumbsUp,
+  Ruler, Layers, StickyNote, ZoomIn, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
+
+// ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
+function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url: string) => void }) {
+  const { data: previews = [] } = trpc.checkout.getArtPreviews.useQuery(
+    { orderId: item.orderId, orderItemId: item.id },
+    { enabled: !!item.id && !!item.orderId }
+  );
+  const previewList = previews as any[];
+  if (previewList.length === 0) return null;
+  const latest = previewList[previewList.length - 1];
+  return (
+    <div className="mt-3 border border-green-200 bg-green-50 rounded-xl p-3">
+      <p className="text-xs font-semibold text-green-700 mb-2 flex items-center gap-1.5">
+        <span className="text-green-500">🟢</span> Arte final aprovada para produção
+      </p>
+      <div className="flex items-start gap-3">
+        <div className="relative group cursor-pointer" onClick={() => onLightbox(latest.previewUrl)}>
+          <img
+            src={latest.previewUrl}
+            alt="Arte aprovada"
+            className="w-20 h-20 object-cover rounded-lg border border-green-200 shadow-sm"
+          />
+          <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <ZoomIn className="w-5 h-5 text-white" />
+          </div>
+        </div>
+        <div className="flex-1 space-y-1">
+          <p className="text-xs text-green-700">Clique na imagem para visualizar em tela cheia.</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs border-green-300 text-green-700 hover:bg-green-100 gap-1.5"
+            onClick={() => onLightbox(latest.previewUrl)}
+          >
+            <ZoomIn className="w-3.5 h-3.5" /> Ver Arte Aprovada
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Componente de Ação de Correção por Item ──────────────────────────────────────────────────────────────────────────────
 function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number }) {
@@ -286,6 +328,7 @@ export default function OrderDetailPage() {
   const [, params] = useRoute("/pedido/:id");
   const [, setLocation] = useLocation();
   const orderNumber = params?.id ?? "";
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const { data, isLoading, error } = trpc.checkout.getOrderByNumber.useQuery(
     { orderNumber },
@@ -454,45 +497,109 @@ export default function OrderDetailPage() {
                 {(items ?? []).length === 0 ? (
                   <p className="text-sm text-gray-500 text-center py-4">Nenhum item encontrado</p>
                 ) : (
-                  (items ?? []).map((item: any) => (
-                    <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="flex items-start gap-4 p-3 bg-gray-50">
-                        {item.productImage && (
-                          <img
-                            src={item.productImage}
-                            alt={item.productName ?? "Produto"}
-                            className="w-14 h-14 object-cover rounded-md flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-900 text-sm">{item.productName ?? "Produto"}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Quantidade: {item.quantity}</p>
-                          {item.selectedAttributes && (
-                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
-                              {(() => {
-                                try {
-                                  const attrs = JSON.parse(item.selectedAttributes);
-                                  return Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(" • ");
-                                } catch { return item.selectedAttributes; }
-                              })()}
-                            </p>
-                          )}
-                          {item.notes && (
-                            <p className="text-xs text-gray-400 mt-0.5 italic">Obs: {item.notes}</p>
-                          )}
+                  (items ?? []).map((item: any) => {
+                    // Parse variações e dimensões (igual ao admin)
+                    let variations: { name: string; value: string }[] = [];
+                    if (item.variationSnapshot) { try { variations = JSON.parse(item.variationSnapshot); } catch {} }
+                    let attrObj: Record<string, any> = {};
+                    if (item.selectedAttributes) { try { attrObj = JSON.parse(item.selectedAttributes); } catch {} }
+                    const dims = item.customDimensions;
+                    let largura = "", altura = "";
+                    if (dims) {
+                      const parts = String(dims).split(/[xX×]/);
+                      if (parts.length >= 2) { largura = parts[0].trim(); altura = parts[1].trim(); }
+                    }
+                    const acabamentos = variations.filter(v =>
+                      !["peso", "weight", "largura", "altura", "dimensão", "dimensao"].some(k => v.name?.toLowerCase().includes(k))
+                    );
+                    const outrasVariacoes = Object.entries(attrObj)
+                      .filter(([k]) => !["peso", "weight", "weightKg", "largura", "altura"].includes(k))
+                      .map(([k, v]) => ({ name: k, value: String(v) }));
+
+                    return (
+                      <div key={item.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        {/* Cabeçalho do item */}
+                        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                          <div className="flex items-center gap-3">
+                            {item.productImage ? (
+                              <img src={item.productImage} alt={item.productName ?? "Produto"}
+                                className="w-10 h-10 object-cover rounded-lg border border-gray-200 flex-shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                <Package className="w-5 h-5 text-gray-400" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-bold text-gray-900 text-sm">{item.productName ?? "Produto"}</p>
+                              <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-xs text-gray-400">Unit. {formatCurrency(item.priceAtOrder)}</p>
+                            <p className="font-bold text-gray-800 text-sm">Total: {formatCurrency(parseFloat(item.priceAtOrder) * item.quantity)}</p>
+                          </div>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-xs text-gray-500">Unitário</p>
-                          <p className="font-semibold text-gray-900 text-sm">{formatCurrency(item.priceAtOrder)}</p>
-                          <p className="text-xs text-orange-600 font-medium">
-                            {formatCurrency(parseFloat(item.priceAtOrder) * item.quantity)}
-                          </p>
+
+                        {/* Corpo: specs + prévia aprovada + ação de correção */}
+                        <div className="p-4 space-y-3">
+                          {/* Especificações técnicas */}
+                          {(largura || altura || acabamentos.length > 0 || outrasVariacoes.length > 0 || item.notes) && (
+                            <div className="bg-gray-50 rounded-lg p-3 space-y-2.5">
+                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Ruler className="w-3 h-3" /> Especificações
+                              </p>
+                              {(largura || altura) && (
+                                <div>
+                                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Dimensões</p>
+                                  <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
+                                  {largura && altura && (
+                                    <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
+                                  )}
+                                </div>
+                              )}
+                              {acabamentos.length > 0 && (
+                                <div>
+                                  <p className="text-[10px] text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
+                                    <Layers className="w-3 h-3" /> Acabamentos
+                                  </p>
+                                  <div className="space-y-0.5">
+                                    {acabamentos.map((v, vi) => (
+                                      <div key={vi} className="flex gap-1">
+                                        <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
+                                        <span className="text-xs text-gray-900 font-medium">{v.value}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {outrasVariacoes.length > 0 && (
+                                <div className="space-y-0.5">
+                                  {outrasVariacoes.map((v, vi) => (
+                                    <div key={vi} className="flex gap-1">
+                                      <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
+                                      <span className="text-xs text-gray-900 font-medium">{v.value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {item.notes && (
+                                <div className="flex items-start gap-1.5">
+                                  <StickyNote className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <p className="text-xs text-gray-700 italic">{item.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Prévia aprovada */}
+                          <ItemApprovedPreview item={item} onLightbox={setLightboxUrl} />
+
+                          {/* Ação de correção */}
+                          <ItemCorrectionAction item={item} orderId={order.id} />
                         </div>
                       </div>
-                      {/* Ação de correção por item */}
-                      <ItemCorrectionAction item={item} orderId={order.id} />
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </CardContent>
             </Card>
@@ -695,6 +802,27 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox modal */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Arte aprovada"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
