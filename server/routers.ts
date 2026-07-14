@@ -1618,10 +1618,114 @@ createOrder: protectedProcedure
           // newest (default)
           filtered.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         }
-        return filtered;
+                return filtered;
+      }),
+
+    // ── Fluxo de Correção de Artes ──────────────────────────────────────────────────────────────────────────────
+    saveArtCorrectionAction: adminProcedure
+      .input(z.object({
+        orderItemId: z.number(),
+        requireClientResend: z.boolean().optional(),
+        sendProofForApproval: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        const correctionAction = input.requireClientResend ? "resend" : (input.sendProofForApproval ? "proof" : null);
+        await db.update(orderItems)
+          .set({
+            requireClientResend: input.requireClientResend ?? false,
+            sendProofForApproval: input.sendProofForApproval ?? false,
+            correctionAction: correctionAction,
+          } as any)
+          .where(eq(orderItems.id, input.orderItemId));
+        return { success: true, correctionAction };
+      }),
+
+    getItemCorrectionAction: publicProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const { orderItems } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        const rows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
+        const item = rows[0];
+        if (!item) return null;
+        return {
+          requireClientResend: (item as any).requireClientResend ?? false,
+          sendProofForApproval: (item as any).sendProofForApproval ?? false,
+          correctionAction: (item as any).correctionAction ?? null,
+        };
+      }),
+
+    clientResendArt: protectedProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems, orders } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        
+        // Busca informações do item para a notificação
+        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
+        const item = itemRows[0];
+        
+        // Atualiza status de pré-impressão de volta para "Analisando"
+        await db.update(orderItems)
+          .set({ preProductionStatus: "liberado_analise" } as any)
+          .where(eq(orderItems.id, input.orderItemId));
+        
+        // Notifica o operador
+        try {
+          const { notifyOwner } = await import("./_core/notification.js");
+          const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          const orderId = item?.orderId;
+          await notifyOwner({
+            title: "📨 Arte Reenviada pelo Cliente",
+            content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${input.orderItemId}, Pedido ID: ${orderId}). O status voltou para “Analisando”. Acesse o painel para revisar.`,
+          });
+        } catch (e) {
+          // Notificação não bloqueia o fluxo
+          console.error("Erro ao notificar operador:", e);
+        }
+        
+        return { success: true, message: "Arte reenviada. Status retornou para Análise" };
+      }),
+
+    clientApproveProof: protectedProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+        
+        // Busca informações do item
+        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
+        const item = itemRows[0];
+        
+        await db.update(orderItems)
+          .set({ preProductionStatus: "arte_final_aprovada" } as any)
+          .where(eq(orderItems.id, input.orderItemId));
+        
+        // Notifica o operador que a prova foi aprovada
+        try {
+          const { notifyOwner } = await import("./_core/notification.js");
+          const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          await notifyOwner({
+            title: "✅ Arte Aprovada pelo Cliente",
+            content: `O cliente aprovou a prova da arte do produto "${productName}" (Item ID: ${input.orderItemId}). A produção pode ser iniciada!`,
+          });
+        } catch (e) {
+          console.error("Erro ao notificar operador:", e);
+        }
+        
+        return { success: true, message: "Arte aprovada! Produção iniciada" };
       }),
   }),
-
   // ERP KPIs — Pedidos do dia, produção ativa, pedidos atrasados
   erp: router({
     getDashboardKPIs: adminProcedure.query(async () => {
@@ -1793,6 +1897,7 @@ createOrder: protectedProcedure
 
         return { success: true, message: "Configurações atualizadas" };
       }),
+    
   }),
 });
 export type AppRouter = typeof appRouter;

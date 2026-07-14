@@ -4,12 +4,124 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Loader2, ArrowLeft, Package, MapPin, Clock,
+import { Loader2, ArrowLeft, Package, MapPin, Clock,
   CheckCircle2, Circle, RefreshCw, ShoppingCart,
-  FileText, AlertCircle,
+  FileText, AlertCircle, Upload, ThumbsUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useState, useRef } from "react";
+
+// ─── Componente de Ação de Correção por Item ──────────────────────────────────────────────────────────────────────────────
+function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number }) {
+  const utils = trpc.useUtils();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { data: correctionData } = trpc.checkout.getItemCorrectionAction.useQuery(
+    { orderItemId: item.id },
+    { enabled: !!item.id }
+  );
+
+  const resendMutation = trpc.checkout.clientResendArt.useMutation({
+    onSuccess: () => {
+      toast.success("Arte reenviada! Nossa equipe irá analisar em breve.");
+      utils.checkout.getOrderByNumber.invalidate();
+      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
+    },
+    onError: () => toast.error("Erro ao reenviar arte"),
+  });
+
+  const approveMutation = trpc.checkout.clientApproveProof.useMutation({
+    onSuccess: () => {
+      toast.success("✅ Arte aprovada! Produção iniciada.");
+      utils.checkout.getOrderByNumber.invalidate();
+      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
+    },
+    onError: () => toast.error("Erro ao aprovar arte"),
+  });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("orderItemId", String(item.id));
+      const res = await fetch("/api/upload-art", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload falhou");
+      // Após upload, notifica o servidor que o cliente reenviou
+      await resendMutation.mutateAsync({ orderItemId: item.id });
+    } catch {
+      toast.error("Erro ao enviar arquivo. Tente novamente.");
+    } finally {
+      setIsUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  // Se não há ação de correção definida, não renderiza nada
+  if (!correctionData?.correctionAction) return null;
+
+  // Opção 1: Exigir Reenvio do Cliente
+  if (correctionData.correctionAction === "resend") {
+    return (
+      <div className="border-t border-orange-200 bg-orange-50 p-3">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <AlertCircle className="w-4 h-4 text-orange-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-orange-800">Arte com problemas — Reenvio necessário</p>
+            <p className="text-xs text-orange-600 mt-0.5 mb-3">Nossa equipe identificou um problema com a arte deste produto. Por favor, envie um novo arquivo corrigido.</p>
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr" className="hidden" onChange={handleFileUpload} />
+            <Button
+              size="sm"
+              className="bg-orange-600 hover:bg-orange-700 text-white gap-2"
+              disabled={isUploading || resendMutation.isPending}
+              onClick={() => fileRef.current?.click()}
+            >
+              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {isUploading ? "Enviando..." : "Enviar Nova Arte"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Opção 2: Enviar Prova para Aprovação
+  if (correctionData.correctionAction === "proof") {
+    return (
+      <div className="border-t border-blue-200 bg-blue-50 p-3">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <FileText className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-blue-800">Prévia da Arte Pronta para Aprovação</p>
+            <p className="text-xs text-blue-600 mt-0.5 mb-3">Nossa equipe preparou uma versão corrigida da sua arte. Revise abaixo e aprove para iniciar a produção.</p>
+            {/* Exibir prévia se houver */}
+            {item.artPreviewUrl && (
+              <img src={item.artPreviewUrl} alt="Prévia da Arte" className="w-32 h-32 object-cover rounded-lg border border-blue-200 mb-3" />
+            )}
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              disabled={approveMutation.isPending}
+              onClick={() => approveMutation.mutate({ orderItemId: item.id })}
+            >
+              {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />}
+              Aprovar Arte e Iniciar Produção
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
 
 // Status steps dinâmicos por tipo de entrega e pagamento
 function getStatusSteps(order: any) {
@@ -242,38 +354,42 @@ export default function OrderDetailPage() {
                   <p className="text-sm text-gray-500 text-center py-4">Nenhum item encontrado</p>
                 ) : (
                   (items ?? []).map((item: any) => (
-                    <div key={item.id} className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg">
-                      {item.productImage && (
-                        <img
-                          src={item.productImage}
-                          alt={item.productName ?? "Produto"}
-                          className="w-14 h-14 object-cover rounded-md flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm">{item.productName ?? "Produto"}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Quantidade: {item.quantity}</p>
-                        {item.selectedAttributes && (
-                          <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
-                            {(() => {
-                              try {
-                                const attrs = JSON.parse(item.selectedAttributes);
-                                return Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(" • ");
-                              } catch { return item.selectedAttributes; }
-                            })()}
+                    <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="flex items-start gap-4 p-3 bg-gray-50">
+                        {item.productImage && (
+                          <img
+                            src={item.productImage}
+                            alt={item.productName ?? "Produto"}
+                            className="w-14 h-14 object-cover rounded-md flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 text-sm">{item.productName ?? "Produto"}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Quantidade: {item.quantity}</p>
+                          {item.selectedAttributes && (
+                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                              {(() => {
+                                try {
+                                  const attrs = JSON.parse(item.selectedAttributes);
+                                  return Object.entries(attrs).map(([k, v]) => `${k}: ${v}`).join(" • ");
+                                } catch { return item.selectedAttributes; }
+                              })()}
+                            </p>
+                          )}
+                          {item.notes && (
+                            <p className="text-xs text-gray-400 mt-0.5 italic">Obs: {item.notes}</p>
+                          )}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs text-gray-500">Unitário</p>
+                          <p className="font-semibold text-gray-900 text-sm">{formatCurrency(item.priceAtOrder)}</p>
+                          <p className="text-xs text-orange-600 font-medium">
+                            {formatCurrency(parseFloat(item.priceAtOrder) * item.quantity)}
                           </p>
-                        )}
-                        {item.notes && (
-                          <p className="text-xs text-gray-400 mt-0.5 italic">Obs: {item.notes}</p>
-                        )}
+                        </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-gray-500">Unitário</p>
-                        <p className="font-semibold text-gray-900 text-sm">{formatCurrency(item.priceAtOrder)}</p>
-                        <p className="text-xs text-orange-600 font-medium">
-                          {formatCurrency(parseFloat(item.priceAtOrder) * item.quantity)}
-                        </p>
-                      </div>
+                      {/* Ação de correção por item */}
+                      <ItemCorrectionAction item={item} orderId={order.id} />
                     </div>
                   ))
                 )}

@@ -2329,3 +2329,20 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir em labels, badges e mensagens de status
 - [x] Atualizar email de notificação de status
 - [x] Verificar que todas as ocorrências foram atualizadas
+
+## Fluxo de Correção de Artes com Opções do Operador
+
+- [x] Adicionar coluna requireClientResend em orderItems (flag de reenvio obrigatório)
+- [x] Adicionar coluna sendProofForApproval em orderItems (flag de prova para aprovação)
+- [x] Adicionar coluna correctionAction em orderItems (ação escolhida pelo operador)
+- [x] Criar tabela artCorrectionNotifications para rastrear notificações
+- [x] Criar procedure tRPC saveArtCorrectionAction para salvar decisão do operador
+- [x] Criar procedure tRPC createCorrectionNotification para notificar operador
+- [x] Criar procedure tRPC getClientArtActions para cliente saber qual ação foi liberada
+- [x] Adicionar checkboxes no AdminOrderDetail (Exigir Reenvio / Enviar Prova)
+- [x] Implementar lógica de salvamento das flags no backend
+- [x] Atualizar OrderDetailPage para renderizar botão de Reenvio ou Aprovar Prova
+- [x] Implementar automação: ao fazer upload, status volta para "Analisando"
+- [x] Criar notificação visual no painel admin quando cliente reenviar arte
+- [x] Testar fluxo completo: operador marca opção → cliente vê botão correto → interage → status muda
+- [x] Salvar checkpoint final

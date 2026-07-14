@@ -167,6 +167,9 @@ export const orderItems = mysqlTable("orderItems", {
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   notes: longtext("notes"), // Observações do cliente
   preProductionStatus: varchar("preProductionStatus", { length: 50 }).default("liberado_analise"), // Status de pré-impressão por item
+  requireClientResend: boolean("requireClientResend").default(false), // Operador exigiu reenvio do cliente
+  sendProofForApproval: boolean("sendProofForApproval").default(false), // Operador enviou prova para aprovação
+  correctionAction: varchar("correctionAction", { length: 50 }), // "resend" ou "proof" - ação liberada
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

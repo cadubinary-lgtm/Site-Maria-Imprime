@@ -253,7 +253,10 @@ function ArtPreviewColumn({
 // ─── Coluna 3b: Pré-Impressão (independente por item) ───────────────────────
 function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { orderId: number; orderItemId: number; preProductionStatus: string }) {
   const [selected, setSelected] = useState(preProductionStatus);
+  const [requireResend, setRequireResend] = useState(false);
+  const [sendProof, setSendProof] = useState(false);
   const utils = trpc.useUtils();
+
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
     onSuccess: () => {
       toast.success("Pré-impressão atualizada!");
@@ -261,6 +264,18 @@ function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { ord
     },
     onError: () => toast.error("Erro ao atualizar pré-impressão"),
   });
+
+  const correctionMutation = trpc.checkout.saveArtCorrectionAction.useMutation({
+    onSuccess: (data) => {
+      const msg = data.correctionAction === "resend"
+        ? "Cliente será solicitado a reenviar a arte!"
+        : "Prova enviada para aprovação do cliente!";
+      toast.success(msg);
+      utils.checkout.getOrderById.invalidate({ id: orderId });
+    },
+    onError: () => toast.error("Erro ao salvar opção de correção"),
+  });
+
   const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
 
   return (
@@ -292,6 +307,46 @@ function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { ord
           disabled={mutation.isPending || selected === preProductionStatus}
           onClick={() => mutation.mutate({ orderItemId, preProductionStatus: selected as any })}>
           {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
+        </Button>
+      </div>
+
+      {/* Ações de Correção */}
+      <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
+        <p className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">Ação de Correção</p>
+        <div className="space-y-1.5">
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={requireResend}
+              onChange={(e) => { setRequireResend(e.target.checked); if (e.target.checked) setSendProof(false); }}
+              className="mt-0.5 w-3.5 h-3.5 accent-orange-500 flex-shrink-0"
+            />
+            <div>
+              <p className="text-xs font-medium text-gray-800">Exigir Reenvio do Cliente</p>
+              <p className="text-[10px] text-gray-500">O cliente verá apenas o campo de upload</p>
+            </div>
+          </label>
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={sendProof}
+              onChange={(e) => { setSendProof(e.target.checked); if (e.target.checked) setRequireResend(false); }}
+              className="mt-0.5 w-3.5 h-3.5 accent-blue-500 flex-shrink-0"
+            />
+            <div>
+              <p className="text-xs font-medium text-gray-800">Enviar Prova para Aprovação</p>
+              <p className="text-[10px] text-gray-500">O cliente verá a prévia e botão de aprovar</p>
+            </div>
+          </label>
+        </div>
+        <Button
+          size="sm"
+          className="w-full h-7 text-xs bg-blue-600 hover:bg-blue-700"
+          disabled={correctionMutation.isPending || (!requireResend && !sendProof)}
+          onClick={() => correctionMutation.mutate({ orderItemId, requireClientResend: requireResend, sendProofForApproval: sendProof })}
+        >
+          {correctionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+          Salvar Opção
         </Button>
       </div>
     </div>
