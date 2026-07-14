@@ -2322,3 +2322,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir OrderLogisticsPanel para usar orderItemId
 - [x] Remover dropdown inline de pré-impressão do AdminPreImpressao (gerenciado por item na tela de detalhes)
 - [x] Zero erros TypeScript
+
+## Mudança de Status "Analisado" para "Analisando"
+
+- [x] Substituir "Analisado" por "Analisando" em 21 arquivos
+- [x] Substituir em labels, badges e mensagens de status
+- [x] Atualizar email de notificação de status
+- [x] Verificar que todas as ocorrências foram atualizadas

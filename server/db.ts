@@ -313,7 +313,7 @@ export async function updateOrderStatus(orderId: number, status: string, notes?:
       const statusLabels: Record<string, string> = {
         pagamento_aprovado: "Pagamento Aprovado ✅",
         pagamento_retirada: "Aguardando Pagamento na Retirada 🏪",
-        analisando: "Analisado 🔍",
+        analisando: "Analisando 🔍",
         com_problemas: "Pedido com Problemas ⚠️",
         em_producao: "Em Produção 🚧",
         pronto_entrega: "Pronto para Entrega 📦",

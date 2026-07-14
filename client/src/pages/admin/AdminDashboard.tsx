@@ -16,7 +16,7 @@ import {
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "text-green-700",   bg: "bg-green-100",   dot: "#22c55e" },
   pagamento_retirada: { label: "Pagamento Retirada",  color: "text-blue-700",    bg: "bg-blue-100",    dot: "#3b82f6" },
-  analisando:         { label: "Analisado",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
+  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
   com_problemas:      { label: "Com Problemas",       color: "text-red-700",     bg: "bg-red-100",     dot: "#ef4444" },
   em_producao:        { label: "Em Produção",         color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
   pronto_entrega:     { label: "Pronto p/ Entrega",   color: "text-teal-700",    bg: "bg-teal-100",    dot: "#14b8a6" },

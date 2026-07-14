@@ -13,7 +13,7 @@ import AdminLayout from "@/components/AdminLayout";
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",      color: "bg-green-100 text-green-800",   icon: "💳" },
   pagamento_retirada:  { label: "Pagamento na Retirada",   color: "bg-blue-100 text-blue-800",     icon: "🏪" },
-  analisando:          { label: "Analisado",              color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  analisando:          { label: "Analisando",              color: "bg-orange-100 text-orange-800", icon: "🔍" },
   com_problemas:       { label: "Com Problemas",           color: "bg-red-100 text-red-800",       icon: "⚠️" },
   em_producao:         { label: "Em Produção",             color: "bg-orange-100 text-orange-800", icon: "⚙️" },
   pronto_entrega:      { label: "Pronto para Entrega",     color: "bg-teal-100 text-teal-800",     icon: "🚚" },
@@ -28,7 +28,7 @@ const FILTER_OPTIONS = [
   { id: "todos",              label: "Todos" },
   { id: "pagamento_aprovado", label: "Pagamento Aprovado" },
   { id: "pagamento_retirada", label: "Pagamento na Retirada" },
-  { id: "analisando",         label: "Analisado" },
+  { id: "analisando",         label: "Analisando" },
   { id: "com_problemas",      label: "Com Problemas" },
   { id: "em_producao",        label: "Em Produção" },
   { id: "pronto_entrega",     label: "Pronto para Entrega" },

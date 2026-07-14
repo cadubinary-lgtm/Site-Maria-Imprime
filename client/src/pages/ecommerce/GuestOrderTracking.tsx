@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 const STEPS_ENTREGA = [
   { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
-  { key: "analisando",          label: "Analisado",              icon: Package },
+  { key: "analisando",          label: "Analisando",              icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
@@ -19,7 +19,7 @@ const STEPS_ENTREGA = [
 
 const STEPS_RETIRADA = [
   { key: "pagamento_retirada",  label: "Retirada na Loja",       icon: CheckCircle2 },
-  { key: "analisando",          label: "Analisado",              icon: Package },
+  { key: "analisando",          label: "Analisando",              icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_retirada",     label: "Pronto para Retirada",   icon: Box },
@@ -43,7 +43,7 @@ function getStepIndex(steps: typeof STEPS_ENTREGA, status: string): number {
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
-  analisando:          "Analisado",
+  analisando:          "Analisando",
   com_problemas:       "Com Problemas",
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",

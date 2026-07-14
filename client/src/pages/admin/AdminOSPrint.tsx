@@ -120,7 +120,7 @@ const IconCheckGreen = () => (
 
 const PRODUCTION_STEPS = [
   { icon: <IconPayment />, label: "Pagamento\nAprovado" },
-  { icon: <IconSearch />, label: "Analisado" },
+  { icon: <IconSearch />, label: "Analisando" },
   { icon: <IconAlertTriangle />, label: "Com\nProblemas" },
   { icon: <IconGear />, label: "Em Produção" },
   { icon: <IconTruckOut />, label: "Pronto p/\nEntrega" },

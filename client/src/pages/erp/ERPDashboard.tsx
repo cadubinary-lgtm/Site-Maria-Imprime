@@ -37,7 +37,7 @@ function formatDate(ts: any) {
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado: "Pagamento Aprovado",
   pagamento_retirada: "Pagar na Retirada",
-  analisando: "Analisado",
+  analisando: "Analisando",
   com_problemas: "Com Problemas",
   em_producao: "Em Produção",
   pronto_entrega: "Pronto p/ Entrega",

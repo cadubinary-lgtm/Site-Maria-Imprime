@@ -25,7 +25,7 @@ const PRODUCTION_STATUS: Record<string, { label: string; color: string }> = {
 const ORDER_STATUS_LABEL: Record<string, string> = {
   pagamento_aprovado: "Pagamento Aprovado",
   pagamento_retirada: "Pagamento Retirada",
-  analisando:         "Analisado",
+  analisando:         "Analisando",
   com_problemas:      "Com Problemas",
   em_producao:        "Em Produção",
   pronto_entrega:     "Pronto p/ Entrega",
