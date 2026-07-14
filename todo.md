@@ -2307,3 +2307,18 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Notificações por e-mail de status do pedido agora incluem link de rastreamento personalizado (guestToken ou conta)
 - [x] Template de e-mail de status atualizado com botão "Acompanhar meu pedido"
 - [x] Procedure erp.getDashboardKPIs criada com queries SQL otimizadas
+
+## Cards Independentes por Item — Prévia da Arte e Pré-Impressão
+
+- [x] Adicionar coluna preProductionStatus em orderItems no schema Drizzle
+- [x] Adicionar coluna orderItemId em orderArtPreviews no schema Drizzle
+- [x] Aplicar migração no banco de dados (ALTER TABLE)
+- [x] Atualizar procedure updatePreProductionStatus para usar orderItemId
+- [x] Atualizar procedure getArtPreviews para filtrar por orderItemId
+- [x] Atualizar procedure saveArtPreview para salvar orderItemId
+- [x] Criar subcomponente ItemPreviewSection (carrega prévias por item)
+- [x] Remover lógica isFirst que desabilitava cards seguintes
+- [x] Cada card agora gerencia sua própria prévia e pré-impressão de forma independente
+- [x] Corrigir OrderLogisticsPanel para usar orderItemId
+- [x] Remover dropdown inline de pré-impressão do AdminPreImpressao (gerenciado por item na tela de detalhes)
+- [x] Zero erros TypeScript

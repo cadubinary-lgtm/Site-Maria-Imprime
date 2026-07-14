@@ -152,12 +152,12 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
   );
 }
 
-// ─── Coluna 3: Prévia da Arte (global, só no primeiro item) ──────────────────
+// ─── Coluna 3: Prévia da Arte (independente por item) ───────────────────────
 function ArtPreviewColumn({
-  orderId, previews, previewsLoading, onLightbox, onRefresh, isFirst,
+  orderId, orderItemId, previews, previewsLoading, onLightbox, onRefresh,
 }: {
-  orderId: number; previews: any[]; previewsLoading: boolean;
-  onLightbox: (url: string) => void; onRefresh: () => void; isFirst: boolean;
+  orderId: number; orderItemId: number; previews: any[]; previewsLoading: boolean;
+  onLightbox: (url: string) => void; onRefresh: () => void;
 }) {
   const [notes, setNotes] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -166,7 +166,7 @@ function ArtPreviewColumn({
 
   const savePreviewMutation = trpc.checkout.saveArtPreview.useMutation({
     onSuccess: () => {
-      utils.checkout.getArtPreviews.invalidate({ orderId });
+      utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId });
       toast.success("Prévia enviada!");
       setNotes("");
       onRefresh();
@@ -175,7 +175,7 @@ function ArtPreviewColumn({
   });
 
   const deletePreviewMutation = trpc.checkout.deleteArtPreview.useMutation({
-    onSuccess: () => { utils.checkout.getArtPreviews.invalidate({ orderId }); toast.success("Prévia removida"); },
+    onSuccess: () => { utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId }); toast.success("Prévia removida"); },
     onError: (err) => toast.error(err.message || "Erro ao remover prévia"),
   });
 
@@ -189,7 +189,7 @@ function ArtPreviewColumn({
       const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Erro no upload"); }
       const { url, key } = await res.json();
-      await savePreviewMutation.mutateAsync({ orderId, imageUrl: url, imageKey: key, notes: notes || undefined });
+      await savePreviewMutation.mutateAsync({ orderId, orderItemId, imageUrl: url, imageKey: key, notes: notes || undefined });
     } catch (err: any) {
       toast.error(err.message || "Erro ao enviar prévia");
     } finally {
@@ -197,15 +197,6 @@ function ArtPreviewColumn({
       if (fileRef.current) fileRef.current.value = "";
     }
   };
-
-  if (!isFirst) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[100px] opacity-40 select-none">
-        <ImagePlus className="w-6 h-6 text-gray-400 mb-1" />
-        <p className="text-[10px] text-gray-400 text-center leading-tight">Prévia e Pré-Impressão<br />gerenciadas no 1º item</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-3">
@@ -259,8 +250,8 @@ function ArtPreviewColumn({
   );
 }
 
-// ─── Coluna 3b: Pré-Impressão (global, só no primeiro item) ─────────────────
-function PreImpressaoColumn({ orderId, preProductionStatus, isFirst }: { orderId: number; preProductionStatus: string; isFirst: boolean }) {
+// ─── Coluna 3b: Pré-Impressão (independente por item) ───────────────────────
+function PreImpressaoColumn({ orderId, orderItemId, preProductionStatus }: { orderId: number; orderItemId: number; preProductionStatus: string }) {
   const [selected, setSelected] = useState(preProductionStatus);
   const utils = trpc.useUtils();
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
@@ -271,8 +262,6 @@ function PreImpressaoColumn({ orderId, preProductionStatus, isFirst }: { orderId
     onError: () => toast.error("Erro ao atualizar pré-impressão"),
   });
   const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
-
-  if (!isFirst) return null;
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
@@ -301,10 +290,44 @@ function PreImpressaoColumn({ orderId, preProductionStatus, isFirst }: { orderId
         </Select>
         <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
           disabled={mutation.isPending || selected === preProductionStatus}
-          onClick={() => mutation.mutate({ orderId, preProductionStatus: selected as any })}>
+          onClick={() => mutation.mutate({ orderItemId, preProductionStatus: selected as any })}>
           {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+// ─── Wrapper por item: carrega prévias independentes e renderiza Col 3 ─────────────────
+function ItemPreviewSection({
+  orderId, orderItemId, preProductionStatus, onLightbox,
+}: {
+  orderId: number; orderItemId: number; preProductionStatus: string;
+  onLightbox: (url: string) => void;
+}) {
+  const utils = trpc.useUtils();
+  const { data: itemPreviews = [], isLoading: itemPreviewsLoading } =
+    trpc.checkout.getArtPreviews.useQuery({ orderId, orderItemId });
+  const previews = itemPreviews as any[];
+
+  return (
+    <div className="p-5">
+      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+        <ImagePlus className="w-3 h-3 text-orange-500" /> Prévia da Arte
+      </p>
+      <ArtPreviewColumn
+        orderId={orderId}
+        orderItemId={orderItemId}
+        previews={previews}
+        previewsLoading={itemPreviewsLoading}
+        onLightbox={onLightbox}
+        onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId })}
+      />
+      <PreImpressaoColumn
+        orderId={orderId}
+        orderItemId={orderItemId}
+        preProductionStatus={preProductionStatus}
+      />
     </div>
   );
 }
@@ -328,9 +351,7 @@ export default function AdminOrderDetail() {
   const { data: history, isLoading: histLoading } = trpc.checkout.getOrderHistory.useQuery(
     { orderId: orderId! }, { enabled: !!orderId }
   );
-  const { data: artPreviews = [], isLoading: previewsLoading } = trpc.checkout.getArtPreviews.useQuery(
-    { orderId: orderId! }, { enabled: !!orderId }
-  );
+  // Prévias são carregadas por item individualmente via ItemPreviewCard
 
   const updateMutation = trpc.checkout.updateOrderStatus.useMutation({
     onSuccess: () => {
@@ -382,7 +403,7 @@ export default function AdminOrderDetail() {
   const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === o.status);
   const isCancelled = o.status === "cancelado";
   if (newStatus === "" && o.status) setNewStatus(o.status);
-  const previews = artPreviews as any[];
+
 
   return (
     <AdminLayout>
@@ -566,8 +587,6 @@ export default function AdminOrderDetail() {
                   .filter(([k]) => !["peso", "weight", "weightKg", "largura", "altura"].includes(k))
                   .map(([k, v]) => ({ name: k, value: String(v) }));
 
-                const isFirst = i === 0;
-
                 return (
                   <Card key={i} className="border border-gray-200 shadow-sm overflow-hidden">
                     {/* Cabeçalho do item */}
@@ -663,27 +682,13 @@ export default function AdminOrderDetail() {
                         <ItemFileColumn artFileUrl={item.artFileUrl} onLightbox={setLightboxUrl} />
                       </div>
 
-                      {/* Col 3 — Prévia da Arte + Pré-Impressão (global, gerenciado no 1º item) */}
-                      <div className={`p-5 ${!isFirst ? "bg-gray-50/60" : ""}`}>
-                        <p className={`text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-3 ${isFirst ? "text-gray-400" : "text-gray-300"}`}>
-                          <ImagePlus className={`w-3 h-3 ${isFirst ? "text-orange-500" : "text-gray-300"}`} />
-                          Prévia da Arte
-                          {!isFirst && <span className="text-[9px] text-gray-300 font-normal">(global)</span>}
-                        </p>
-                        <ArtPreviewColumn
-                          orderId={orderId!}
-                          previews={previews}
-                          previewsLoading={previewsLoading}
-                          onLightbox={setLightboxUrl}
-                          onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId: orderId! })}
-                          isFirst={isFirst}
-                        />
-                        <PreImpressaoColumn
-                          orderId={orderId!}
-                          preProductionStatus={o.preProductionStatus || "liberado_analise"}
-                          isFirst={isFirst}
-                        />
-                      </div>
+                      {/* Col 3 — Prévia da Arte + Pré-Impressão (independente por item) */}
+                      <ItemPreviewSection
+                        orderId={orderId!}
+                        orderItemId={item.id}
+                        preProductionStatus={item.preProductionStatus || "liberado_analise"}
+                        onLightbox={setLightboxUrl}
+                      />
 
                     </div>
                   </Card>

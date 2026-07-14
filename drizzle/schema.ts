@@ -166,6 +166,7 @@ export const orderItems = mysqlTable("orderItems", {
   customDimensions: varchar("customDimensions", { length: 100 }), // Ex: "1x2" (largura x altura em metros)
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   notes: longtext("notes"), // Observações do cliente
+  preProductionStatus: varchar("preProductionStatus", { length: 50 }).default("liberado_analise"), // Status de pré-impressão por item
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -1083,6 +1084,7 @@ export type InsertCustomerSession = typeof customerSessions.$inferInsert;
 export const orderArtPreviews = mysqlTable("orderArtPreviews", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
+  orderItemId: int("orderItemId"),        // ID do item do pedido (para prévias por item)
   imageUrl: text("imageUrl").notNull(),   // URL no S3
   imageKey: varchar("imageKey", { length: 255 }).notNull(), // Chave no S3
   uploadedBy: int("uploadedBy"),          // ID do admin que fez o upload
