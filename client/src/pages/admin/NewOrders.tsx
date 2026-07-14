@@ -17,7 +17,7 @@ const NEW_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "bg-green-100 text-green-800 border-green-200",   icon: "💳" },
   pagamento_retirada: { label: "Pagar na Retirada",  color: "bg-blue-100 text-blue-800 border-blue-200",     icon: "🏪" },
-  analisando:         { label: "Analisado",          color: "bg-orange-100 text-orange-800 border-orange-200", icon: "🔍" },
+  analisando:         { label: "Analisando",          color: "bg-orange-100 text-orange-800 border-orange-200", icon: "🔍" },
 };
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {

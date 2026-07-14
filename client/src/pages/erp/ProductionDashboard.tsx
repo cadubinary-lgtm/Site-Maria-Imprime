@@ -13,7 +13,7 @@ const STATUSES = ["pagamento_aprovado", "pagamento_retirada", "analisando", "com
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-50 border-green-200" },
   pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-50 border-blue-200" },
-  analisando:          { label: "Analisado",             color: "bg-orange-50 border-orange-200" },
+  analisando:          { label: "Analisando",             color: "bg-orange-50 border-orange-200" },
   com_problemas:       { label: "Com Problemas",          color: "bg-red-50 border-red-200" },
   em_producao:         { label: "Em Produção",            color: "bg-orange-50 border-orange-200" },
   pronto_entrega:      { label: "Pronto para Entrega",    color: "bg-teal-50 border-teal-200" },
