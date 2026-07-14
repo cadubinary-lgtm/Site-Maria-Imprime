@@ -355,16 +355,16 @@ export const appRouter = router({
       }),
     updatePreProductionStatus: adminProcedure
       .input(z.object({
-        orderId: z.number(),
+        orderItemId: z.number(),
         preProductionStatus: z.enum(["liberado_analise", "arte_final_aprovada"]),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orders: ordersT } = await import("../drizzle/schema.js");
-        await db.update(ordersT)
+        const { orderItems: orderItemsT } = await import("../drizzle/schema.js");
+        await db.update(orderItemsT)
           .set({ preProductionStatus: input.preProductionStatus } as any)
-          .where(eq(ordersT.id, input.orderId));
+          .where(eq(orderItemsT.id, input.orderItemId));
         return { success: true };
       }),
     updateProductionStatus: adminProcedure
@@ -1476,12 +1476,17 @@ createOrder: protectedProcedure
 
     // ── Prévia de arte (admin envia imagem para o cliente ver) ──────────────
     getArtPreviews: publicProcedure
-      .input(z.object({ orderId: z.number() }))
+      .input(z.object({ orderId: z.number(), orderItemId: z.number().optional() }))
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return [];
         const { orderArtPreviews } = await import("../drizzle/schema.js");
-        const { eq, desc } = await import("drizzle-orm");
+        const { eq, and, desc } = await import("drizzle-orm");
+        if (input.orderItemId != null) {
+          return db.select().from(orderArtPreviews)
+            .where(and(eq(orderArtPreviews.orderId, input.orderId), eq(orderArtPreviews.orderItemId, input.orderItemId)))
+            .orderBy(desc(orderArtPreviews.createdAt));
+        }
         return db.select().from(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId)).orderBy(desc(orderArtPreviews.createdAt));
       }),
 
@@ -1501,6 +1506,7 @@ createOrder: protectedProcedure
     saveArtPreview: adminProcedure
       .input(z.object({
         orderId: z.number(),
+        orderItemId: z.number().optional(),
         imageUrl: z.string(),
         imageKey: z.string(),
         notes: z.string().optional(),
@@ -1511,6 +1517,7 @@ createOrder: protectedProcedure
         const { orderArtPreviews } = await import("../drizzle/schema.js");
         await db.insert(orderArtPreviews).values({
           orderId: input.orderId,
+          orderItemId: input.orderItemId ?? null,
           imageUrl: input.imageUrl,
           imageKey: input.imageKey,
           uploadedBy: ctx.user.id,

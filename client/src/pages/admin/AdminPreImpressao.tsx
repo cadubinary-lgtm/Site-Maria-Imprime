@@ -176,26 +176,7 @@ export default function AdminPreImpressao() {
                         </Badge>
                       </div>
 
-                      {/* Dropdown para alterar status */}
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={currentPreStatus}
-                          onValueChange={(val) =>
-                            updatePreProductionMutation.mutate({
-                              orderId: order.orderId ?? order.id,
-                              preProductionStatus: val as any,
-                            })
-                          }
-                        >
-                          <SelectTrigger className="h-8 text-xs w-[180px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="liberado_analise">Liberado para Análise</SelectItem>
-                            <SelectItem value="arte_final_aprovada">Arte Final Aprovada</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {/* Status de pré-impressão é gerenciado por item na tela de detalhes */}
 
                       {/* Link para detalhes */}
                       <Link href={`/admin/pedidos/${order.orderId ?? order.id}`}>

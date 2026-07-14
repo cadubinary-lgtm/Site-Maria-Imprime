@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 interface OrderLogisticsPanelProps {
   orderId: number;
+  orderItemId?: number;
   preProductionStatus?: string;
   productionStatus?: string;
   deliveryStatus?: string;
@@ -18,6 +19,7 @@ interface OrderLogisticsPanelProps {
 
 export function OrderLogisticsPanel({
   orderId,
+  orderItemId,
   preProductionStatus = 'liberado_analise',
   productionStatus = 'pendente',
   deliveryStatus = 'pending',
@@ -125,7 +127,7 @@ export function OrderLogisticsPanel({
           <Button
             onClick={() =>
               updatePreProductionMutation.mutate({
-                orderId,
+                orderItemId: orderItemId ?? 0,
                 preProductionStatus: newPreProductionStatus as any,
               })
             }
