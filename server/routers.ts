@@ -477,43 +477,12 @@ export const appRouter = router({
     getOrderById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getOrderById(input.id)),
-createOrder: protectedProcedure
-      .input(z.object({
-        productId: z.number(),
-        quantity: z.number(),
-        artFileUrl: z.string().optional(),
-        artFileKey: z.string().optional(),
-        shippingMethod: z.string().optional(),
-        shippingPrice: z.number().optional(),
-        shippingEstimatedDays: z.number().optional(),
-        shippingZipCode: z.string().optional(),
-        shippingCarrierId: z.number().optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const product = await getProductById(input.productId);
-        if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Produto não encontrado" });
-        
-        const totalPrice = parseFloat(product.price.toString()) * input.quantity;
-        const shippingPrice = input.shippingPrice || 0;
-        const finalPrice = totalPrice + shippingPrice;
-        const orderNumber = `ORD-${Date.now()}-${nanoid(6)}`;
-        
-        const result = await createOrder({
-          clientId: ctx.user.id,
-          orderNumber,
-          status: "analisando" as any,
-          totalPrice: finalPrice.toString() as any,
-          artFileUrl: input.artFileUrl,
-          artFileKey: input.artFileKey,
-          paymentStatus: "pago" as any,
-          shippingMethod: input.shippingMethod,
-          shippingPrice: input.shippingPrice?.toString() as any,
-          shippingEstimatedDays: input.shippingEstimatedDays,
-          shippingZipCode: input.shippingZipCode,
-          shippingCarrierId: input.shippingCarrierId,
-        });
-        return result;
-      }),
+    // NOTA: Procedure createOrder antiga removida.
+    // Use a procedure checkout.createOrder no router checkout para criar pedidos com status correto.
+    // A nova procedure respeita o método de pagamento para definir o status inicial:
+    // - pagamento_retirada para "Pagar na Retirada"
+    // - pagamento_aprovado para PIX/Cartão
+    // Sem transição automática para "analisando".
   }),
 
   // Variations - Procedimentos públicos para obter variações
@@ -1669,10 +1638,14 @@ createOrder: protectedProcedure
           .where(eq(orderItems.id, input.orderItemId));
         
         // Busca o orderId para atualizar o status do pedido
+        // NOTA: Removemos a transição automática para "analisando" aqui.
+        // O status do pedido agora só muda para "com_problemas" se o operador exigir reenvio.
+        // A mudança para "analisando" deve ser feita manualmente pelo operador.
         const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
         const item = itemRows[0];
         if (item?.orderId) {
-          const newOrderStatus = input.requireClientResend ? "com_problemas" : (input.sendProofForApproval ? "analisando" : null);
+          // Apenas muda para "com_problemas" se reenvio foi exigido
+          const newOrderStatus = input.requireClientResend ? "com_problemas" : null;
           if (newOrderStatus) {
             await db.update(orders).set({ status: newOrderStatus } as any).where(eq(orders.id, item.orderId));
           }
