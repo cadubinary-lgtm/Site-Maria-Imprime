@@ -27,9 +27,9 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
         <span className="text-green-500">🟢</span> Arte final aprovada para produção
       </p>
       <div className="flex items-start gap-3">
-        <div className="relative group cursor-pointer" onClick={() => onLightbox(latest.previewUrl)}>
+        <div className="relative group cursor-pointer" onClick={() => onLightbox(latest.imageUrl)}>
           <img
-            src={latest.previewUrl}
+            src={latest.imageUrl}
             alt="Arte aprovada"
             className="w-20 h-20 object-cover rounded-lg border border-green-200 shadow-sm"
           />
@@ -43,7 +43,7 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
             size="sm"
             variant="outline"
             className="h-7 text-xs border-green-300 text-green-700 hover:bg-green-100 gap-1.5"
-            onClick={() => onLightbox(latest.previewUrl)}
+            onClick={() => onLightbox(latest.imageUrl)}
           >
             <ZoomIn className="w-3.5 h-3.5" /> Ver Arte Aprovada
           </Button>
