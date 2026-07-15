@@ -547,6 +547,9 @@ export default function AdminOrderDetail() {
       utils.checkout.getOrderById.invalidate({ id: orderId! });
       utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
       utils.checkout.getAllOrders.invalidate();
+      // Invalida o admin.getAllOrders usado pelo badge da sidebar
+      // Garante atualização instantânea do contador de Novos Pedidos
+      utils.admin.getAllOrders.invalidate();
     },
   });
 
