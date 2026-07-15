@@ -11,7 +11,8 @@ import AdminLayout from "@/components/AdminLayout";
 
 // Novos pedidos = pedidos que acabaram de chegar e precisam de atenção
 // Inclui: pagamento_aprovado, pagamento_retirada
-// Ao clicar em "Abrir", o status muda para "analisando" e o pedido sai desta lista
+// Ao clicar em "Abrir", apenas navega para o pedido — NÃO muda o status automaticamente
+// O operador deve mudar o status manualmente para "Analisando" quando começar a trabalhar
 const NEW_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
@@ -44,24 +45,13 @@ function formatDate(d: any) {
 export default function NewOrders() {
   const [search, setSearch] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-  const [openingId, setOpeningId] = useState<number | null>(null);
-  const utils = trpc.useUtils();
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
 
-  const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation({
-    onSuccess: (_data, variables) => {
-      utils.checkout.getAllOrders.invalidate();
-      navigate(`/admin/pedidos/${variables.orderId}`);
-    },
-    onError: (err) => {
-      toast.error(err.message || "Erro ao atualizar status do pedido");
-      setOpeningId(null);
-    },
-  });
-
+  // handleOpen: apenas navega para o pedido sem mudar status automaticamente
+  // O operador muda o status manualmente para "Analisando" quando começar a trabalhar
   const handleOpen = (orderId: number) => {
-    setOpeningId(orderId);
-    updateStatusMutation.mutate({ orderId, newStatus: "analisando" });
+    navigate(`/admin/pedidos/${orderId}`);
   };
 
   // Busca todos os pedidos (adminProcedure retorna todos com orderBy desc)
@@ -219,13 +209,8 @@ export default function NewOrders() {
                           size="sm"
                           className="bg-orange-500 hover:bg-orange-600 text-white gap-1 w-full"
                           onClick={() => handleOpen(order.id)}
-                          disabled={openingId === order.id}
                         >
-                          {openingId === order.id ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" /> Abrindo...</>
-                          ) : (
-                            <>Abrir <ChevronRight className="w-4 h-4" /></>
-                          )}
+                          <>Abrir <ChevronRight className="w-4 h-4" /></>
                         </Button>
                         <Button
                           variant="ghost"
