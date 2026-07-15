@@ -210,8 +210,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
 
+  // Badge de Novos Pedidos: apenas status iniciais de criação
+  // Ao mudar para "analisando" ou posterior, o pedido sai desta contagem automaticamente
   const pendingCount = orders?.filter((o: any) =>
-    ["analisando", "pagamento_aprovado", "pagamento_retirada"].includes(o.status)
+    ["pagamento_aprovado", "pagamento_retirada"].includes(o.status)
   ).length ?? 0;
 
   const inProductionCount = orders?.filter((o: any) => o.status === "em_producao").length ?? 0;
