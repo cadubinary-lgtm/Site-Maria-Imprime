@@ -1801,105 +1801,186 @@ export const appRouter = router({
 
     clientRefuseProof: publicProcedure
       .input(z.object({ orderItemId: z.number(), refusalNote: z.string().min(1) }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems, orders } = await import("../drizzle/schema.js");
-        const { eq } = await import("drizzle-orm");
-        
+        const { orderItems, orders, customerSessions } = await import("../drizzle/schema.js");
+        const { eq, and, gt } = await import("drizzle-orm");
+
+        // ── Valida propriedade do pedido quando cliente está logado ──
+        const req = ctx.req as ExpressRequest;
+        const customerToken = getCookieFromReq(req, "customer_session");
+        if (customerToken) {
+          const now = Date.now();
+          const [session] = await db
+            .select({ customerId: customerSessions.customerId })
+            .from(customerSessions)
+            .where(and(eq(customerSessions.token, customerToken), gt(customerSessions.expiresAt, now)))
+            .limit(1);
+          if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada. Faça login novamente." });
+          // Verifica se o item pertence a um pedido do cliente
+          const [itemCheck] = await db
+            .select({ id: orderItems.id })
+            .from(orderItems)
+            .innerJoin(orders, eq(orderItems.orderId, orders.id))
+            .where(and(eq(orderItems.id, input.orderItemId), eq(orders.customerId, session.customerId)))
+            .limit(1);
+          if (!itemCheck) throw new TRPCError({ code: "FORBIDDEN", message: "Pedido não encontrado ou sem permissão." });
+        }
+
         // Salva a nota de recusa e volta o status para "com_problemas"
         await db.update(orderItems)
           .set({
             clientRefusalNote: input.refusalNote,
             preProductionStatus: "com_problemas",
-            correctionAction: null, // Limpa a ação para o operador decidir novamente
+            correctionAction: null,
           } as any)
           .where(eq(orderItems.id, input.orderItemId));
-        
-        // Busca o orderId para atualizar o status do pedido
-        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
-        const item = itemRows[0];
+
+        // Busca o orderId e orderNumber para notificação
+        const itemRows = await db
+          .select()
+          .from(orderItems)
+          .innerJoin(orders, eq(orderItems.orderId, orders.id))
+          .where(eq(orderItems.id, input.orderItemId))
+          .limit(1);
+        const item = (itemRows[0] as any)?.orderItems ?? (itemRows[0] as any);
+        const order = (itemRows[0] as any)?.orders;
+        const orderNumber = order?.orderNumber ?? item?.orderId ?? "";
+
         if (item?.orderId) {
           await db.update(orders).set({ status: "com_problemas" } as any).where(eq(orders.id, item.orderId));
         }
-        
-        // Notifica o operador
+
+        // Notifica o operador com número do pedido
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
           await notifyOwner({
             title: "❌ Prova Recusada pelo Cliente",
-            content: `O cliente recusou a prova do produto "${productName}" (Item ID: ${input.orderItemId}). Motivo: "${input.refusalNote}". Acesse o painel para revisar.`,
+            content: `O cliente recusou a prova do produto "${productName}" no pedido #${orderNumber}. Motivo: "${input.refusalNote}". Acesse o painel para revisar.`,
           });
         } catch (e) {
           console.error("Erro ao notificar:", e);
         }
-        
+
         return { success: true, message: "Prova recusada. Operador será notificado." };
       }),
 
     clientResendArt: publicProcedure
       .input(z.object({ orderItemId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems, orders } = await import("../drizzle/schema.js");
-        const { eq } = await import("drizzle-orm");
-        
-        // Busca informações do item para a notificação
-        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
-        const item = itemRows[0];
-        
+        const { orderItems, orders, customerSessions } = await import("../drizzle/schema.js");
+        const { eq, and, gt } = await import("drizzle-orm");
+
+        // ── Valida propriedade do pedido quando cliente está logado ──
+        const req = ctx.req as ExpressRequest;
+        const customerToken = getCookieFromReq(req, "customer_session");
+        if (customerToken) {
+          const now = Date.now();
+          const [session] = await db
+            .select({ customerId: customerSessions.customerId })
+            .from(customerSessions)
+            .where(and(eq(customerSessions.token, customerToken), gt(customerSessions.expiresAt, now)))
+            .limit(1);
+          if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada. Faça login novamente." });
+          const [itemCheck] = await db
+            .select({ id: orderItems.id })
+            .from(orderItems)
+            .innerJoin(orders, eq(orderItems.orderId, orders.id))
+            .where(and(eq(orderItems.id, input.orderItemId), eq(orders.customerId, session.customerId)))
+            .limit(1);
+          if (!itemCheck) throw new TRPCError({ code: "FORBIDDEN", message: "Pedido não encontrado ou sem permissão." });
+        }
+
+        // Busca informações do item e pedido
+        const itemRows = await db
+          .select()
+          .from(orderItems)
+          .innerJoin(orders, eq(orderItems.orderId, orders.id))
+          .where(eq(orderItems.id, input.orderItemId))
+          .limit(1);
+        const item = (itemRows[0] as any)?.orderItems ?? (itemRows[0] as any);
+        const order = (itemRows[0] as any)?.orders;
+        const orderNumber = order?.orderNumber ?? item?.orderId ?? "";
+
         // Atualiza status de pré-impressão de volta para "Analisando"
         await db.update(orderItems)
           .set({ preProductionStatus: "liberado_analise" } as any)
           .where(eq(orderItems.id, input.orderItemId));
-        
+
         // Notifica o operador
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
-          const orderId = item?.orderId;
           await notifyOwner({
             title: "📨 Arte Reenviada pelo Cliente",
-            content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${input.orderItemId}, Pedido ID: ${orderId}). O status voltou para “Analisando”. Acesse o painel para revisar.`,
+            content: `O cliente reenviou a arte do produto "${productName}" no pedido #${orderNumber}. O status voltou para "Analisando". Acesse o painel para revisar.`,
           });
         } catch (e) {
-          // Notificação não bloqueia o fluxo
           console.error("Erro ao notificar operador:", e);
         }
-        
+
         return { success: true, message: "Arte reenviada. Status retornou para Análise" };
       }),
 
     clientApproveProof: publicProcedure
       .input(z.object({ orderItemId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems } = await import("../drizzle/schema.js");
-        const { eq } = await import("drizzle-orm");
-        
-        // Busca informações do item
-        const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
-        const item = itemRows[0];
-        
+        const { orderItems, orders, customerSessions } = await import("../drizzle/schema.js");
+        const { eq, and, gt } = await import("drizzle-orm");
+
+        // ── Valida propriedade do pedido quando cliente está logado ──
+        const req = ctx.req as ExpressRequest;
+        const customerToken = getCookieFromReq(req, "customer_session");
+        if (customerToken) {
+          const now = Date.now();
+          const [session] = await db
+            .select({ customerId: customerSessions.customerId })
+            .from(customerSessions)
+            .where(and(eq(customerSessions.token, customerToken), gt(customerSessions.expiresAt, now)))
+            .limit(1);
+          if (!session) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sessão expirada. Faça login novamente." });
+          const [itemCheck] = await db
+            .select({ id: orderItems.id })
+            .from(orderItems)
+            .innerJoin(orders, eq(orderItems.orderId, orders.id))
+            .where(and(eq(orderItems.id, input.orderItemId), eq(orders.customerId, session.customerId)))
+            .limit(1);
+          if (!itemCheck) throw new TRPCError({ code: "FORBIDDEN", message: "Pedido não encontrado ou sem permissão." });
+        }
+
+        // Busca informações do item e pedido
+        const itemRows = await db
+          .select()
+          .from(orderItems)
+          .innerJoin(orders, eq(orderItems.orderId, orders.id))
+          .where(eq(orderItems.id, input.orderItemId))
+          .limit(1);
+        const item = (itemRows[0] as any)?.orderItems ?? (itemRows[0] as any);
+        const order = (itemRows[0] as any)?.orders;
+        const orderNumber = order?.orderNumber ?? item?.orderId ?? "";
+
         await db.update(orderItems)
           .set({ preProductionStatus: "arte_final_aprovada" } as any)
           .where(eq(orderItems.id, input.orderItemId));
-        
-        // Notifica o operador que a prova foi aprovada
+
+        // Notifica o operador com número do pedido
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
           await notifyOwner({
             title: "✅ Arte Aprovada pelo Cliente",
-            content: `O cliente aprovou a prova da arte do produto "${productName}" (Item ID: ${input.orderItemId}). A produção pode ser iniciada!`,
+            content: `O cliente aprovou a prova da arte do produto "${productName}" no pedido #${orderNumber}. A produção pode ser iniciada!`,
           });
         } catch (e) {
           console.error("Erro ao notificar operador:", e);
         }
-        
+
         return { success: true, message: "Arte aprovada! Produção iniciada" };
       }),
 
