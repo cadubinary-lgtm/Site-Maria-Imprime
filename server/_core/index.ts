@@ -232,35 +232,46 @@ async function startServer() {
         rar: 'application/x-rar-compressed',
       };
 
-      // Resolver a URL real do S3 a partir do caminho /manus-storage/{key}
-      let resolvedUrl = fileUrl;
+      // Resolver a chave S3 a partir do caminho /manus-storage/{key}
+      let s3Key: string | null = null;
       if (fileUrl.startsWith('/manus-storage/')) {
-        const key = fileUrl.replace('/manus-storage/', '');
-        resolvedUrl = await storageGetSignedUrl(key);
+        s3Key = fileUrl.replace('/manus-storage/', '');
       } else if (!fileUrl.startsWith('http')) {
-        resolvedUrl = await storageGetSignedUrl(fileUrl);
+        s3Key = fileUrl;
       }
 
-      // Buscar o arquivo do S3 seguindo redirects
-      const response = await fetch(resolvedUrl, {
+      // Gerar URL assinada fresca e fazer stream do arquivo
+      // Usar a URL assinada diretamente para evitar problemas de 403
+      const signedUrl = s3Key
+        ? await storageGetSignedUrl(s3Key)
+        : fileUrl;
+
+      // Fazer fetch com a URL assinada fresca
+      const response = await fetch(signedUrl, {
         redirect: 'follow',
         headers: { 'User-Agent': 'GraficaPontoDigital/1.0' },
       });
 
       if (!response.ok) {
-        console.error(`Download proxy: upstream error ${response.status} for ${fileName}`);
+        console.error(`Download proxy: upstream error ${response.status} for ${fileName} (key: ${s3Key})`);
         return res.status(502).json({ error: `Erro ao acessar arquivo: ${response.status}` });
       }
 
-      const contentType = mimeMap[ext] || response.headers.get('content-type') || 'application/octet-stream';
       const contentLength = response.headers.get('content-length');
 
-      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`);
-      res.setHeader('Content-Type', contentType);
+      // Forçar download com nome original — suporte universal Chrome/Edge/Firefox
+      // Usar filename= simples + filename*= RFC5987 para nomes com caracteres especiais
+      const escapedFileName = fileName.replace(/"/g, '\\"');
+      const encodedFileName = encodeURIComponent(fileName);
+      res.setHeader('Content-Disposition',
+        `attachment; filename="${escapedFileName}"; filename*=UTF-8''${encodedFileName}`);
+      // application/octet-stream impede o navegador de tentar abrir o arquivo
+      res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
       if (contentLength) res.setHeader('Content-Length', contentLength);
 
-      // Pipe o body da resposta diretamente para o cliente
+      // Stream do arquivo diretamente para o cliente
       if (response.body) {
         const { Readable } = await import('stream');
         const readable = Readable.fromWeb(response.body as any);
