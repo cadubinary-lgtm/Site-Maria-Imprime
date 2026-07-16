@@ -14,26 +14,76 @@ import { toast } from "sonner";
 import { useState, useRef } from "react";
 
 // ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
+// Constrói a URL absoluta da imagem a partir de uma URL relativa ou absoluta,
+// garantindo que espaços e caracteres especiais sejam corretamente codificados.
+function buildImageUrl(rawUrl: string): string {
+  if (!rawUrl) return "";
+  // Já é uma URL absoluta (http/https) — apenas encode os espaços
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+    return rawUrl.split(" ").join("%20");
+  }
+  // URL relativa: montar com origin atual + encode de espaços
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  return base + rawUrl.split(" ").join("%20");
+}
+
 function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url: string) => void }) {
-  const { data: previews = [] } = trpc.checkout.getArtPreviews.useQuery(
+  const [imgError, setImgError] = useState(false);
+
+  const { data: previews = [], isLoading } = trpc.checkout.getArtPreviews.useQuery(
     { orderId: item.orderId, orderItemId: item.id },
     { enabled: !!item.id && !!item.orderId }
   );
+
+  // Só mostrar o bloco se o item estiver com status de arte aprovada
+  const isArtApproved = item.preProductionStatus === "arte_final_aprovada";
+  if (!isArtApproved) return null;
+
+  // Aguardar o carregamento antes de decidir se há prévias
+  if (isLoading) {
+    return (
+      <div className="mt-3 border border-green-200 bg-green-50 rounded-xl p-3 flex items-center gap-2">
+        <Loader2 className="w-4 h-4 text-green-500 animate-spin" />
+        <span className="text-xs text-green-700">Carregando arte aprovada...</span>
+      </div>
+    );
+  }
+
   const previewList = previews as any[];
   if (previewList.length === 0) return null;
-  const latest = previewList[previewList.length - 1];
+
+  // A query retorna em ordem decrescente (mais recente primeiro) — usar o índice 0
+  const latest = previewList[0];
+  const imageUrl = buildImageUrl(latest.imageUrl ?? "");
+
+  const handleOpen = () => {
+    if (imageUrl) {
+      onLightbox(imageUrl);
+      setImgError(false);
+    }
+  };
+
   return (
     <div className="mt-3 border border-green-200 bg-green-50 rounded-xl p-3">
       <p className="text-xs font-semibold text-green-700 mb-2 flex items-center gap-1.5">
         <span className="text-green-500">🟢</span> Arte final aprovada para produção
       </p>
       <div className="flex items-start gap-3">
-        <div className="relative group cursor-pointer" onClick={() => onLightbox(latest.imageUrl)}>
-          <img
-            src={latest.imageUrl}
-            alt="Arte aprovada"
-            className="w-20 h-20 object-cover rounded-lg border border-green-200 shadow-sm"
-          />
+        <div className="relative group cursor-pointer" onClick={handleOpen}>
+          {imgError ? (
+            <div className="w-20 h-20 rounded-lg border border-green-200 bg-green-100 flex flex-col items-center justify-center gap-1">
+              <ZoomIn className="w-5 h-5 text-green-500" />
+              <span className="text-[9px] text-green-600 text-center leading-tight">Clique para<br/>abrir</span>
+            </div>
+          ) : (
+            <img
+              src={imageUrl}
+              alt="Arte aprovada"
+              className="w-20 h-20 object-cover rounded-lg border border-green-200 shadow-sm"
+              onError={() => setImgError(true)}
+              onLoad={() => setImgError(false)}
+            />
+          )}
           <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <ZoomIn className="w-5 h-5 text-white" />
           </div>
@@ -44,7 +94,7 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
             size="sm"
             variant="outline"
             className="h-7 text-xs border-green-300 text-green-700 hover:bg-green-100 gap-1.5"
-            onClick={() => onLightbox(latest.imageUrl)}
+            onClick={handleOpen}
           >
             <ZoomIn className="w-3.5 h-3.5" /> Ver Arte Aprovada
           </Button>
@@ -842,7 +892,7 @@ export default function OrderDetailPage() {
             <X className="w-6 h-6" />
           </button>
           <img
-            src={lightboxUrl}
+            src={lightboxUrl ?? ""}
             alt="Arte aprovada"
             className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
