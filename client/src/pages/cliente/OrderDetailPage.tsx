@@ -391,7 +391,7 @@ function EmailHistorySection({ orderId }: { orderId: number }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <EmailTimeline emails={emails} isLoading={isLoading} showProofImages={true} />
+        <EmailTimeline emails={emails} isLoading={isLoading} />
       </CardContent>
     </Card>
   );
