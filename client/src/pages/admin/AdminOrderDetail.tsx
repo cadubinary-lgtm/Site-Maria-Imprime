@@ -54,19 +54,61 @@ const PRE_PRODUCTION_OPTIONS = [
 function fileNameFromUrl(url: string): string {
   try {
     const parts = url.split("/");
-    const raw = parts[parts.length - 1] ?? "arquivo";
-    const match = raw.match(/^\d+-(.+)$/);
-    return match ? match[1] : raw;
+    const raw = decodeURIComponent(parts[parts.length - 1] ?? "arquivo");
+    // Remove prefixo de timestamp: "1784159743746-nome.cdr" → "nome.cdr"
+    const withoutTimestamp = raw.replace(/^\d{10,}-/, '');
+    // Remove hash de unicidade adicionado pelo storagePut: "nome_21ba3d1b.cdr" → "nome.cdr"
+    const withoutHash = withoutTimestamp.replace(/_[0-9a-f]{8}(\.[^.]+)$/, '$1');
+    return withoutHash || raw;
   } catch { return "arquivo"; }
 }
 
-function downloadFile(url: string, name: string) {
-  const a = document.createElement("a");
-  a.href = `/api/download-file?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+async function downloadFile(url: string, name: string) {
+  try {
+    // Detectar se o arquivo é legado (tem espaços no nome no storage)
+    // Arquivos com espaços no path do S3 retornam 403 devido a bug de assinatura do Forge
+    const storageKey = url.replace('/manus-storage/', '');
+    const hasSpacesInKey = storageKey.includes(' ');
+    
+    if (hasSpacesInKey) {
+      // Arquivo legado: tentar download mas com fallback de aviso
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        // Mostrar aviso claro ao operador
+        const msg = `⚠️ Este arquivo foi enviado com espaços no nome e não pode ser baixado automaticamente.\n\nSolução: Use o botão "Solicitar Reenvio" para pedir ao cliente que envie novamente a arte.\n\nO novo arquivo será salvo corretamente e poderá ser baixado sem problemas.`;
+        alert(msg);
+        return;
+      }
+      const blob = await resp.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+      return;
+    }
+    
+    // Arquivo novo (sem espaços): download normal via fetch + createObjectURL
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const blob = await resp.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = name; // Nome limpo sem hash
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Liberar memória após download
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+  } catch (err) {
+    console.error("[downloadFile] error:", err);
+    // Fallback: abrir em nova aba
+    window.open(url, "_blank");
+  }
 }
 
 const EXT_COLORS: Record<string, string> = {
@@ -93,6 +135,9 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
   const isPdf = /\.pdf$/i.test(name);
   const ext = (name.split(".").pop() ?? "FILE").toUpperCase();
   const badgeColor = EXT_COLORS[ext] ?? "bg-gray-100 text-gray-700";
+  // Detectar arquivo legado (espaços no nome = bug de assinatura S3)
+  const storageKey = artFileUrl.replace('/manus-storage/', '');
+  const isLegacyFile = storageKey.includes(' ');
 
   return (
     <div className="space-y-2">
@@ -143,9 +188,11 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
             <Eye className="w-3 h-3" /> Ver
           </Button>
         )}
-        <Button variant="outline" size="sm" className="h-7 text-xs gap-1 px-2 text-gray-600 hover:bg-gray-50"
+        <Button variant="outline" size="sm" 
+          className={`h-7 text-xs gap-1 px-2 ${isLegacyFile ? 'text-amber-600 border-amber-200 hover:bg-amber-50' : 'text-gray-600 hover:bg-gray-50'}`}
+          title={isLegacyFile ? 'Arquivo com espaços no nome — pode falhar. Solicite reenvio ao cliente.' : 'Baixar arquivo'}
           onClick={() => downloadFile(artFileUrl, name)}>
-          <Download className="w-3 h-3" /> Baixar
+          <Download className="w-3 h-3" /> {isLegacyFile ? 'Baixar ⚠️' : 'Baixar'}
         </Button>
       </div>
     </div>

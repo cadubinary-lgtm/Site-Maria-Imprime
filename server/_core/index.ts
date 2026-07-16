@@ -99,7 +99,14 @@ async function startServer() {
         return res.status(400).json({ error: 'Formato não suportado. Use PDF, AI, CDR, PSD, EPS, JPG ou PNG' });
       }
       const timestamp = Date.now();
-      const filename = `client-art/${timestamp}-${originalname}`;
+      // Sanitizar nome: substituir espaços e caracteres especiais por underscores
+      // Isso evita o erro 403 do S3/CloudFront para arquivos com espaços
+      const sanitizedName = originalname
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remover acentos
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // substituir caracteres especiais por _
+        .replace(/_+/g, '_') // colapsar múltiplos _ em um
+        .replace(/^_|_$/g, ''); // remover _ no início/fim
+      const filename = `client-art/${timestamp}-${sanitizedName || 'arquivo'}`;
       const { url, key } = await storagePut(filename, buffer, mimetype || 'application/octet-stream');
 
       // Se orderItemId foi enviado, salva a URL no item, atualiza status e notifica operador
