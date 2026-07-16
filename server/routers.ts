@@ -2007,6 +2007,98 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await getEmailHistoryByOrderItem(input.orderItemId);
       }),
+
+    /**
+     * Retorna o estado agregado das artes de uma lista de pedidos.
+     * Usado pelo Kanban para exibir tags visuais (⏳/⚠️/❌) nos cards.
+     * artState:
+     *   "waiting"  → operador enviou prova/correção, cliente ainda não respondeu
+     *   "approved" → todos os itens aprovados pelo cliente
+     *   "refused"  → pelo menos um item recusado pelo cliente
+     *   "none"     → sem movimentação de arte
+     */
+    getOrdersArtStatus: publicProcedure
+      .input(z.object({ orderIds: z.array(z.number()) }))
+      .query(async ({ input }) => {
+        if (!input.orderIds.length) return {};
+        const db = await getDb();
+        if (!db) return {};
+        const { orderItems } = await import("../drizzle/schema.js");
+        const { inArray: inArr } = await import("drizzle-orm");
+
+        const rows = await db
+          .select({
+            orderId: orderItems.orderId,
+            preProductionStatus: orderItems.preProductionStatus,
+            correctionAction: orderItems.correctionAction,
+            clientRefusalNote: orderItems.clientRefusalNote,
+          })
+          .from(orderItems)
+          .where(inArr(orderItems.orderId, input.orderIds));
+
+        // Agregar por pedido
+        const result: Record<number, "waiting" | "approved" | "refused" | "none"> = {};
+        for (const orderId of input.orderIds) {
+          const items = rows.filter(r => r.orderId === orderId);
+          if (!items.length) { result[orderId] = "none"; continue; }
+
+          const hasRefused = items.some(i =>
+            (i.preProductionStatus === "com_problemas" && i.clientRefusalNote)
+          );
+          const allApproved = items.every(i => i.preProductionStatus === "arte_final_aprovada");
+          const hasWaiting = items.some(i =>
+            i.correctionAction === "resend" ||
+            i.correctionAction === "proof" ||
+            i.preProductionStatus === "aguardando_aprovacao"
+          );
+
+          if (hasRefused) result[orderId] = "refused";
+          else if (allApproved) result[orderId] = "approved";
+          else if (hasWaiting) result[orderId] = "waiting";
+          else result[orderId] = "none";
+        }
+        return result;
+      }),
+
+    /**
+     * Envia pedido para produção — só permitido quando todos os itens
+     * têm preProductionStatus === 'arte_final_aprovada'.
+     */
+    sendToProduction: adminProcedure
+      .input(z.object({ orderId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems, orders } = await import("../drizzle/schema.js");
+        const { eq } = await import("drizzle-orm");
+
+        // Verifica se todos os itens estão aprovados
+        const items = await db
+          .select({ preProductionStatus: orderItems.preProductionStatus })
+          .from(orderItems)
+          .where(eq(orderItems.orderId, input.orderId));
+
+        if (!items.length) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido sem itens." });
+
+        const allApproved = items.every(i => i.preProductionStatus === "arte_final_aprovada");
+        if (!allApproved) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Todos os itens precisam ter a arte aprovada pelo cliente antes de enviar para produção.",
+          });
+        }
+
+        // Limpa correctionAction de todos os itens e atualiza status do pedido
+        await db.update(orderItems)
+          .set({ correctionAction: null } as any)
+          .where(eq(orderItems.orderId, input.orderId));
+
+        await db.update(orders)
+          .set({ status: "em_producao" } as any)
+          .where(eq(orders.id, input.orderId));
+
+        return { success: true };
+      }),
   }),
   // ERP KPIs — Pedidos do dia, produção ativa, pedidos atrasados
   erp: router({

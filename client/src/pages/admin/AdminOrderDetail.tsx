@@ -14,7 +14,7 @@ import {
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
   Download, FileImage, Upload, Trash2, Eye, ImagePlus, X, Printer, FileText,
-  Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle,
+  Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle, PlayCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
@@ -590,9 +590,20 @@ export default function AdminOrderDetail() {
       utils.checkout.getOrderById.invalidate({ id: orderId! });
       utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
       utils.checkout.getAllOrders.invalidate();
-      // Invalida o admin.getAllOrders usado pelo badge da sidebar
-      // Garante atualização instantânea do contador de Novos Pedidos
       utils.admin.getAllOrders.invalidate();
+    },
+  });
+
+  const sendToProductionMutation = trpc.checkout.sendToProduction.useMutation({
+    onSuccess: () => {
+      utils.checkout.getOrderById.invalidate({ id: orderId! });
+      utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
+      utils.checkout.getAllOrders.invalidate();
+      utils.admin.getAllOrders.invalidate();
+      toast.success("Pedido enviado para produção com sucesso!");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erro ao enviar para produção");
     },
   });
 
@@ -758,6 +769,59 @@ export default function AdminOrderDetail() {
                   rows={2}
                   className="bg-white"
                 />
+
+                {/* Botão Enviar para Produção com trava — só ativo quando todos os itens estão aprovados */}
+                {o.status === "com_problemas" && (() => {
+                  const items: any[] = o.items ?? [];
+                  const allApproved = items.length > 0 && items.every(
+                    (i: any) => i.preProductionStatus === "arte_final_aprovada"
+                  );
+                  const hasPending = items.some(
+                    (i: any) => i.correctionAction === "resend" || i.correctionAction === "proof" || i.preProductionStatus === "aguardando_aprovacao"
+                  );
+                  const hasRefused = items.some(
+                    (i: any) => i.preProductionStatus === "com_problemas" && i.clientRefusalNote
+                  );
+
+                  let lockReason = "";
+                  if (!allApproved) {
+                    if (hasPending) lockReason = "Aguardando resposta do cliente";
+                    else if (hasRefused) lockReason = "Cliente recusou a arte — corrija e reenvie";
+                    else lockReason = "Todos os itens precisam ter a arte aprovada";
+                  }
+
+                  return (
+                    <div className="pt-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <Button
+                          onClick={() => orderId && sendToProductionMutation.mutate({ orderId })}
+                          disabled={!allApproved || sendToProductionMutation.isPending}
+                          className={`gap-2 ${
+                            allApproved
+                              ? "bg-green-600 hover:bg-green-700 text-white"
+                              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          {sendToProductionMutation.isPending
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <PlayCircle className="w-4 h-4" />
+                          }
+                          Enviar para Produção
+                        </Button>
+                        {!allApproved && lockReason && (
+                          <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                            🔒 {lockReason}
+                          </span>
+                        )}
+                      </div>
+                      {allApproved && (
+                        <p className="text-xs text-green-700 mt-1">
+                          ✅ Todas as artes foram aprovadas pelo cliente. Pronto para iniciar a produção.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="border-t pt-4">

@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
@@ -18,12 +18,11 @@ const KANBAN_COLUMNS = [
   { id: "cancelado",           label: "Cancelado",              icon: "❌", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
 ];
 
-// Status seguintes para avançar o pedido
+// Status seguintes para avançar o pedido (com_problemas não avança via botão genérico)
 const NEXT_STATUS: Record<string, string> = {
   pagamento_aprovado:  "analisando",
   pagamento_retirada:  "analisando",
   analisando:          "em_producao",
-  com_problemas:       "analisando",
   em_producao:         "pronto_entrega",
   pronto_entrega:      "entregue",
   pronto_retirada:     "entregue",
@@ -38,14 +37,44 @@ type Order = {
   clientId?: number;
 };
 
-function KanbanCard({ order, onAdvance, onCancel, isUpdating }: {
+type ArtState = "waiting" | "approved" | "refused" | "none";
+
+// ─── Tag visual de estado da arte ────────────────────────────────────────────
+function ArtStateTag({ state }: { state: ArtState }) {
+  if (state === "waiting") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+        ⏳ Aguardando Cliente
+      </span>
+    );
+  }
+  if (state === "approved") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
+        ⚠️ Cliente Aprovou a Arte
+      </span>
+    );
+  }
+  if (state === "refused") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
+        ❌ Cliente Recusou a Arte
+      </span>
+    );
+  }
+  return null;
+}
+
+function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   order: Order;
+  artState: ArtState;
   onAdvance: (id: number, nextStatus: string) => void;
   onCancel: (id: number) => void;
   isUpdating: boolean;
 }) {
   const col = KANBAN_COLUMNS.find(c => c.id === order.status);
   const nextStatus = NEXT_STATUS[order.status];
+  const isComProblemas = order.status === "com_problemas";
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow">
@@ -57,10 +86,14 @@ function KanbanCard({ order, onAdvance, onCancel, isUpdating }: {
         </Link>
       </div>
 
-      {/* Valor */}
-      <div className="text-xs text-gray-500">
-        R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}
-      </div>
+      {/* Valor OU tag de estado da arte (apenas na coluna Com Problemas) */}
+      {isComProblemas && artState !== "none" ? (
+        <ArtStateTag state={artState} />
+      ) : (
+        <div className="text-xs text-gray-500">
+          R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}
+        </div>
+      )}
 
       {/* Data */}
       <div className="text-xs text-gray-400">
@@ -76,7 +109,8 @@ function KanbanCard({ order, onAdvance, onCancel, isUpdating }: {
 
       {/* Ações */}
       <div className="flex gap-1 pt-1">
-        {nextStatus && (
+        {/* Na coluna com_problemas, não há botão Avançar genérico — o operador usa o detalhe do pedido */}
+        {!isComProblemas && nextStatus && (
           <button
             onClick={() => onAdvance(order.id, nextStatus)}
             disabled={isUpdating}
@@ -104,6 +138,19 @@ export default function AdminKanban() {
   const updateStatusMutation = trpc.checkout.updateOrderStatus.useMutation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set(["entregue", "cancelado"]));
+
+  const orders: Order[] = (allOrders ?? []) as Order[];
+
+  // IDs dos pedidos na coluna "Com Problemas" para buscar estado das artes
+  const comProblemasIds = useMemo(
+    () => orders.filter(o => o.status === "com_problemas").map(o => o.id),
+    [orders]
+  );
+
+  const { data: artStatusMap = {} } = trpc.checkout.getOrdersArtStatus.useQuery(
+    { orderIds: comProblemasIds },
+    { enabled: comProblemasIds.length > 0 }
+  );
 
   const handleAdvance = async (orderId: number, nextStatus: string) => {
     setUpdatingId(orderId);
@@ -148,8 +195,6 @@ export default function AdminKanban() {
       </div>
     );
   }
-
-  const orders: Order[] = (allOrders ?? []) as Order[];
 
   // Agrupar pedidos por status
   const byStatus: Record<string, Order[]> = {};
@@ -225,6 +270,7 @@ export default function AdminKanban() {
                       <KanbanCard
                         key={order.id}
                         order={order}
+                        artState={(artStatusMap as Record<number, ArtState>)[order.id] ?? "none"}
                         onAdvance={handleAdvance}
                         onCancel={handleCancel}
                         isUpdating={updatingId === order.id}
