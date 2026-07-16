@@ -69,6 +69,9 @@ import {
   getOrdersByUser,
   getOrderDetailByUser,
   getOrderStatusHistory,
+  getEmailHistory,
+  getEmailHistoryByOrderItem,
+  addEmailToHistory,
 } from "./db";
 import { inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -1717,6 +1720,23 @@ export const appRouter = router({
                 if (input.requireClientResend) {
                   const result = await sendArtResendRequestEmail(emailTo, firstName, orderNumber, productNameEmail, operatorNoteEmail, trackUrl);
                   console.log(`[EMAIL] Reenvio de arte enviado para ${emailTo}:`, result);
+                  // Registrar no histórico de e-mails
+                  try {
+                    await addEmailToHistory({
+                      orderId: item.orderId,
+                      orderItemId: input.orderItemId,
+                      recipientEmail: emailTo,
+                      recipientName: firstName,
+                      emailType: 'art_resend_request',
+                      subject: `⚠️ Reenvio de arte necessário — Pedido #${orderNumber}`,
+                      templateName: 'sendArtResendRequestEmail',
+                      operatorNote: operatorNoteEmail,
+                      status: result.success ? 'sent' : 'failed',
+                      errorMessage: result.success ? null : result.error,
+                    });
+                  } catch (e) {
+                    console.error('[EMAIL] Erro ao registrar e-mail no histórico:', e);
+                  }
                 } else if (input.sendProofForApproval) {
                   // Buscar URL da prévia mais recente do item
                   const { orderArtPreviews } = await import("../drizzle/schema.js");
@@ -1728,6 +1748,24 @@ export const appRouter = router({
                   const proofImageUrl = (previewRows[0] as any)?.imageUrl ?? null;
                   const result = await sendProofForApprovalEmail(emailTo, firstName, orderNumber, productNameEmail, operatorNoteEmail, proofImageUrl, trackUrl);
                   console.log(`[EMAIL] Prova para aprovação enviada para ${emailTo}:`, result);
+                  // Registrar no histórico de e-mails
+                  try {
+                    await addEmailToHistory({
+                      orderId: item.orderId,
+                      orderItemId: input.orderItemId,
+                      recipientEmail: emailTo,
+                      recipientName: firstName,
+                      emailType: 'proof_for_approval',
+                      subject: `Sua prova de arte está pronta — Pedido #${orderNumber}`,
+                      templateName: 'sendProofForApprovalEmail',
+                      operatorNote: operatorNoteEmail,
+                      proofImageUrl: proofImageUrl,
+                      status: result.success ? 'sent' : 'failed',
+                      errorMessage: result.success ? null : result.error,
+                    });
+                  } catch (e) {
+                    console.error('[EMAIL] Erro ao registrar e-mail no histórico:', e);
+                  }
                 }
               } else {
                 console.warn(`[EMAIL] Nenhum e-mail encontrado para o pedido ${orderNumber}`);
@@ -1863,6 +1901,21 @@ export const appRouter = router({
         }
         
         return { success: true, message: "Arte aprovada! Produção iniciada" };
+      }),
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Procedures para histórico de e-mails
+    // ─────────────────────────────────────────────────────────────────────────
+    getEmailHistory: publicProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input }) => {
+        return await getEmailHistory(input.orderId);
+      }),
+
+    getEmailHistoryByOrderItem: publicProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .query(async ({ input }) => {
+        return await getEmailHistoryByOrderItem(input.orderItemId);
       }),
   }),
   // ERP KPIs — Pedidos do dia, produção ativa, pedidos atrasados

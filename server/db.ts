@@ -1226,3 +1226,57 @@ export async function getOrderStatusHistory(orderId: number) {
   ) as any;
   return (rows[0] ?? []) as any[];
 }
+
+export async function getEmailHistory(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.execute(
+    sql`SELECT * FROM emailHistory WHERE orderId = ${orderId} ORDER BY sentAt DESC`
+  ) as any;
+  return (rows[0] ?? []) as any[];
+}
+
+export async function getEmailHistoryByOrderItem(orderItemId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.execute(
+    sql`SELECT * FROM emailHistory WHERE orderItemId = ${orderItemId} ORDER BY sentAt DESC`
+  ) as any;
+  return (rows[0] ?? []) as any[];
+}
+
+export async function addEmailToHistory(data: {
+  orderId: number;
+  orderItemId?: number | null;
+  recipientEmail: string;
+  recipientName?: string | null;
+  emailType: string;
+  subject: string;
+  templateName?: string | null;
+  operatorNote?: string | null;
+  proofImageUrl?: string | null;
+  status?: string;
+  errorMessage?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.execute(sql`
+    INSERT INTO emailHistory (
+      orderId, orderItemId, recipientEmail, recipientName, emailType, subject,
+      templateName, operatorNote, proofImageUrl, status, errorMessage
+    ) VALUES (
+      ${data.orderId},
+      ${data.orderItemId ?? null},
+      ${data.recipientEmail},
+      ${data.recipientName ?? null},
+      ${data.emailType},
+      ${data.subject},
+      ${data.templateName ?? null},
+      ${data.operatorNote ?? null},
+      ${data.proofImageUrl ?? null},
+      ${data.status ?? 'sent'},
+      ${data.errorMessage ?? null}
+    )
+  `) as any;
+  return result;
+}
