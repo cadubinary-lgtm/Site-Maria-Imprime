@@ -63,50 +63,29 @@ function fileNameFromUrl(url: string): string {
   } catch { return "arquivo"; }
 }
 
-async function downloadFile(url: string, name: string) {
+async function downloadFile(url: string, name: string, onLegacyError?: () => void) {
   try {
-    // Detectar se o arquivo é legado (tem espaços no nome no storage)
-    // Arquivos com espaços no path do S3 retornam 403 devido a bug de assinatura do Forge
-    const storageKey = url.replace('/manus-storage/', '');
-    const hasSpacesInKey = storageKey.includes(' ');
-    
-    if (hasSpacesInKey) {
-      // Arquivo legado: tentar download mas com fallback de aviso
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        // Mostrar aviso claro ao operador
-        const msg = `⚠️ Este arquivo foi enviado com espaços no nome e não pode ser baixado automaticamente.\n\nSolução: Use o botão "Solicitar Reenvio" para pedir ao cliente que envie novamente a arte.\n\nO novo arquivo será salvo corretamente e poderá ser baixado sem problemas.`;
-        alert(msg);
+    // Download via fetch + createObjectURL para forçar nome correto
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      // Se 403 em arquivo legado com espaços, acionar callback de toast
+      if (resp.status === 403 && onLegacyError) {
+        onLegacyError();
         return;
       }
-      const blob = await resp.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
-      return;
+      throw new Error(`HTTP ${resp.status}`);
     }
-    
-    // Arquivo novo (sem espaços): download normal via fetch + createObjectURL
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const blob = await resp.blob();
     const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = objectUrl;
-    a.download = name; // Nome limpo sem hash
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    // Liberar memória após download
     setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
   } catch (err) {
     console.error("[downloadFile] error:", err);
-    // Fallback: abrir em nova aba
     window.open(url, "_blank");
   }
 }
@@ -138,6 +117,23 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
   // Detectar arquivo legado (espaços no nome = bug de assinatura S3)
   const storageKey = artFileUrl.replace('/manus-storage/', '');
   const isLegacyFile = storageKey.includes(' ');
+
+  function handleDownload() {
+    downloadFile(
+      artFileUrl!,
+      name,
+      isLegacyFile
+        ? () => toast.error(
+            'Arquivo legado inacessível',
+            {
+              description:
+                'Este arquivo foi enviado com espaços no nome e está inacessível devido a uma limitação do servidor. Utilize o botão "Solicitar Reenvio de Arte" para atualizar o arquivo com o cliente.',
+              duration: 8000,
+            }
+          )
+        : undefined
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -188,11 +184,11 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
             <Eye className="w-3 h-3" /> Ver
           </Button>
         )}
-        <Button variant="outline" size="sm" 
-          className={`h-7 text-xs gap-1 px-2 ${isLegacyFile ? 'text-amber-600 border-amber-200 hover:bg-amber-50' : 'text-gray-600 hover:bg-gray-50'}`}
-          title={isLegacyFile ? 'Arquivo com espaços no nome — pode falhar. Solicite reenvio ao cliente.' : 'Baixar arquivo'}
-          onClick={() => downloadFile(artFileUrl, name)}>
-          <Download className="w-3 h-3" /> {isLegacyFile ? 'Baixar ⚠️' : 'Baixar'}
+        <Button variant="outline" size="sm"
+          className="h-7 text-xs gap-1 px-2 text-gray-600 hover:bg-gray-50"
+          title="Baixar arquivo"
+          onClick={handleDownload}>
+          <Download className="w-3 h-3" /> Baixar
         </Button>
       </div>
     </div>
