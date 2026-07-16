@@ -35,10 +35,6 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
     { enabled: !!item.id && !!item.orderId }
   );
 
-  // Só mostrar o bloco se o item estiver com status de arte aprovada
-  const isArtApproved = item.preProductionStatus === "arte_final_aprovada";
-  if (!isArtApproved) return null;
-
   // Aguardar o carregamento antes de decidir se há prévias
   if (isLoading) {
     return (
