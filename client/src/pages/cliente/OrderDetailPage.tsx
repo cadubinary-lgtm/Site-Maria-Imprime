@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmailTimeline } from "@/components/EmailTimeline";
 import { Loader2, ArrowLeft, Package, MapPin, Clock,
   CheckCircle2, Circle, RefreshCw, ShoppingCart,
   FileText, AlertCircle, Upload, ThumbsUp,
-  Ruler, Layers, StickyNote, ZoomIn, X,
+  Ruler, Layers, StickyNote, ZoomIn, X, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
@@ -322,6 +323,28 @@ function formatDate(dateStr: string | Date, includeTime = false) {
     day: "2-digit", month: "long", year: "numeric",
     ...(includeTime ? { hour: "2-digit", minute: "2-digit" } : {}),
   });
+}
+
+// ─── Email History Section ───────────────────────────────────────────────────────
+function EmailHistorySection({ orderId }: { orderId: number }) {
+  const { data: emails = [], isLoading } = trpc.checkout.getEmailHistory.useQuery(
+    { orderId },
+    { enabled: !!orderId }
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Mail className="w-4 h-4 text-orange-500" />
+          Histórico de E-mails
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <EmailTimeline emails={emails} isLoading={isLoading} showProofImages={true} />
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function OrderDetailPage() {
@@ -717,6 +740,9 @@ export default function OrderDetailPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Email History Timeline */}
+            <EmailHistorySection orderId={order.id} />
           </div>
 
           {/* Sidebar */}

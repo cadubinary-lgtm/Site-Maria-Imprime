@@ -1482,3 +1482,38 @@ export const orderPayments = mysqlTable("orderPayments", {
 });
 export type OrderPayment = typeof orderPayments.$inferSelect;
 export type InsertOrderPayment = typeof orderPayments.$inferInsert;
+
+/**
+ * Email history table - registra todos os e-mails enviados aos clientes
+ */
+export const emailHistory = mysqlTable("emailHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  orderItemId: int("orderItemId"), // Opcional: se relacionado a um item específico
+  recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
+  recipientName: varchar("recipientName", { length: 255 }),
+  emailType: mysqlEnum("emailType", [
+    "art_resend_request",      // Solicitação de reenvio de arte
+    "proof_for_approval",       // Prova enviada para aprovação
+    "order_confirmation",       // Confirmação de pedido
+    "payment_confirmation",     // Confirmação de pagamento
+    "production_started",       // Produção iniciada
+    "ready_for_pickup",         // Pronto para retirada
+    "ready_for_delivery",       // Pronto para entrega
+    "shipped",                  // Enviado
+    "delivered",                // Entregue
+    "order_cancelled",          // Pedido cancelado
+    "other"                     // Outro tipo
+  ]).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  templateName: varchar("templateName", { length: 100 }), // Nome do template usado (sendArtResendRequestEmail, etc)
+  operatorNote: text("operatorNote"), // Nota do operador que disparou o e-mail
+  proofImageUrl: text("proofImageUrl"), // URL da imagem de prova (se aplicável)
+  status: mysqlEnum("status", ["sent", "failed", "bounced"]).default("sent").notNull(),
+  errorMessage: text("errorMessage"), // Mensagem de erro se falhou
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EmailHistory = typeof emailHistory.$inferSelect;
+export type InsertEmailHistory = typeof emailHistory.$inferInsert;
