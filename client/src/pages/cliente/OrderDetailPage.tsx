@@ -120,7 +120,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
       utils.checkout.getOrderByNumber.invalidate();
       utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
     },
-    onError: () => toast.error("Erro ao aprovar arte"),
+    onError: (err) => toast.error(err?.message || "Erro ao aprovar arte. Tente novamente."),
   });
 
   const refuseMutation = trpc.checkout.clientRefuseProof.useMutation({
@@ -131,7 +131,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
       utils.checkout.getOrderByNumber.invalidate();
       utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
     },
-    onError: () => toast.error("Erro ao registrar recusa"),
+    onError: (err) => toast.error(err?.message || "Erro ao registrar recusa. Tente novamente."),
   });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

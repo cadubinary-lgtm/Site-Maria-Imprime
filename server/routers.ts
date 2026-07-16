@@ -1799,7 +1799,7 @@ export const appRouter = router({
         };
       }),
 
-    clientRefuseProof: protectedProcedure
+    clientRefuseProof: publicProcedure
       .input(z.object({ orderItemId: z.number(), refusalNote: z.string().min(1) }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -1838,9 +1838,9 @@ export const appRouter = router({
         return { success: true, message: "Prova recusada. Operador será notificado." };
       }),
 
-    clientResendArt: protectedProcedure
+    clientResendArt: publicProcedure
       .input(z.object({ orderItemId: z.number() }))
-      .mutation(async ({ input, ctx }) => {
+      .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems, orders } = await import("../drizzle/schema.js");
@@ -1872,9 +1872,9 @@ export const appRouter = router({
         return { success: true, message: "Arte reenviada. Status retornou para Análise" };
       }),
 
-    clientApproveProof: protectedProcedure
+    clientApproveProof: publicProcedure
       .input(z.object({ orderItemId: z.number() }))
-      .mutation(async ({ input, ctx }) => {
+      .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems } = await import("../drizzle/schema.js");
