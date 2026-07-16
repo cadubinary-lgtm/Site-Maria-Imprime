@@ -299,3 +299,66 @@ export async function sendPixPaymentConfirmedEmail(
     templatePixPaymentConfirmed(firstName, orderNumber, total, trackUrl)
   );
 }
+
+// ── Template: Reenvio de Arte Solicitado ─────────────────────────────────────
+export function templateArtResendRequest(
+  firstName: string,
+  orderNumber: string,
+  productName: string,
+  operatorNote: string | null,
+  trackUrl: string
+): string {
+  const noteBlock = operatorNote
+    ? `<div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;"><p style="color:#9a3412;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;">Observação do operador</p><p style="color:#7c2d12;font-size:15px;line-height:1.6;margin:0;">${operatorNote}</p></div>`
+    : "";
+  return baseTemplate("Reenvio de Arte Necessário", `
+    <div style="text-align:center;margin-bottom:20px;"><div style="display:inline-block;background:#fff7ed;border:3px solid #f97316;border-radius:50%;width:72px;height:72px;line-height:72px;font-size:36px;text-align:center;">&#x26A0;&#xFE0F;</div></div>
+    <h1 style="color:#1a1a2e;font-size:22px;font-weight:700;margin:0 0 8px;text-align:center;">Precisamos da sua arte novamente</h1>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">Olá, <strong>${firstName}</strong>! Nossa equipe analisou o arquivo enviado para o pedido <strong>#${orderNumber}</strong> e identificou um problema com a arte do produto <strong>${productName}</strong>.</p>
+    <div style="background:#fdf2f8;border:2px solid #ec4899;border-radius:12px;padding:20px;margin:20px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;"><span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Número do Pedido</span><br/><span style="color:#1a1a2e;font-size:20px;font-weight:800;">#${orderNumber}</span></td><td style="padding:6px 0;text-align:right;"><span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Produto</span><br/><span style="color:#1a1a2e;font-size:15px;font-weight:700;">${productName}</span></td></tr></table></div>
+    ${noteBlock}
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">Por favor, acesse o seu pedido e envie um novo arquivo de arte para que possamos continuar a produção:</p>
+    <div style="text-align:center;"><a href="${trackUrl}" style="display:inline-block;background:#ec4899;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;margin:16px 0;box-shadow:0 4px 14px rgba(236,72,153,0.35);">&#x1F4CE; Enviar Nova Arte</a></div>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:12px 0;">Dúvidas? Fale conosco pelo WhatsApp: <a href="https://wa.me/5522999459596" style="color:#ec4899;font-weight:600;">(22) 99945-9596</a></p>
+  `);
+}
+
+export async function sendArtResendRequestEmail(
+  to: string, firstName: string, orderNumber: string, productName: string,
+  operatorNote: string | null, trackUrl: string
+): Promise<SendResult> {
+  return send(to, `⚠️ Reenvio de arte necessário — Pedido #${orderNumber}`, templateArtResendRequest(firstName, orderNumber, productName, operatorNote, trackUrl));
+}
+
+// ── Template: Prova Enviada para Aprovação ────────────────────────────────────
+export function templateProofForApproval(
+  firstName: string, orderNumber: string, productName: string,
+  operatorNote: string | null, proofImageUrl: string | null, trackUrl: string
+): string {
+  const noteBlock = operatorNote
+    ? `<div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;"><p style="color:#14532d;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;">Mensagem do operador</p><p style="color:#166534;font-size:15px;line-height:1.6;margin:0;">${operatorNote}</p></div>`
+    : "";
+  const proofBlock = proofImageUrl
+    ? `<div style="text-align:center;margin:20px 0;"><p style="color:#475569;font-size:13px;margin:0 0 10px;">Prévia da arte aprovada:</p><img src="${proofImageUrl}" alt="Prévia da arte" style="max-width:100%;border-radius:8px;border:2px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.08);" /></div>`
+    : "";
+  return baseTemplate("Prova de Arte para Aprovação", `
+    <div style="text-align:center;margin-bottom:20px;"><div style="display:inline-block;background:#f0fdf4;border:3px solid #22c55e;border-radius:50%;width:72px;height:72px;line-height:72px;font-size:36px;text-align:center;">&#x1F3A8;</div></div>
+    <h1 style="color:#1a1a2e;font-size:22px;font-weight:700;margin:0 0 8px;text-align:center;">Sua prova de arte está pronta!</h1>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">Olá, <strong>${firstName}</strong>! Nossa equipe preparou a prova de arte do produto <strong>${productName}</strong> do pedido <strong>#${orderNumber}</strong>. Precisamos da sua aprovação para iniciar a produção.</p>
+    <div style="background:#fdf2f8;border:2px solid #ec4899;border-radius:12px;padding:20px;margin:20px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;"><span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Número do Pedido</span><br/><span style="color:#1a1a2e;font-size:20px;font-weight:800;">#${orderNumber}</span></td><td style="padding:6px 0;text-align:right;"><span style="color:#9d174d;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Produto</span><br/><span style="color:#1a1a2e;font-size:15px;font-weight:700;">${productName}</span></td></tr></table></div>
+    ${noteBlock}
+    ${proofBlock}
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">Acesse o seu pedido para <strong>aprovar ou recusar</strong> a prova. Após a aprovação, sua arte será enviada imediatamente para produção:</p>
+    <div style="text-align:center;"><a href="${trackUrl}" style="display:inline-block;background:#ec4899;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;margin:16px 0;box-shadow:0 4px 14px rgba(236,72,153,0.35);">&#x2705; Ver e Aprovar Prova</a></div>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:12px 0;">Dúvidas? Fale conosco pelo WhatsApp: <a href="https://wa.me/5522999459596" style="color:#ec4899;font-weight:600;">(22) 99945-9596</a></p>
+  `);
+}
+
+export async function sendProofForApprovalEmail(
+  to: string, firstName: string, orderNumber: string, productName: string,
+  operatorNote: string | null, proofImageUrl: string | null, trackUrl: string
+): Promise<SendResult> {
+  return send(to, `🎨 Prova de arte pronta para aprovação — Pedido #${orderNumber}`, templateProofForApproval(firstName, orderNumber, productName, operatorNote, proofImageUrl, trackUrl));
+}

@@ -1663,7 +1663,82 @@ export const appRouter = router({
         } catch (e) {
           console.error("Erro ao notificar:", e);
         }
-        
+
+        // ── Enviar e-mail ao cliente ─────────────────────────────────────────
+        try {
+          if (item?.orderId) {
+            const { orders: ordersT2, customerAccounts, users } = await import("../drizzle/schema.js");
+            const { eq: eqEmail } = await import("drizzle-orm");
+            const orderRows2 = await db.select().from(ordersT2).where(eqEmail(ordersT2.id, item.orderId)).limit(1);
+            const order2 = orderRows2[0];
+            if (order2) {
+              const orderNumber = (order2 as any).orderNumber ?? String(order2.id);
+              const productNameEmail = (item as any).productName ?? `Item #${input.orderItemId}`;
+              const operatorNoteEmail = (input.operatorNote ?? null) as string | null;
+              const SITE_URL = process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space";
+              const trackUrl = `${SITE_URL}/pedido/${orderNumber}`;
+
+              // Determinar e-mail e nome do cliente (3 caminhos em ordem de prioridade)
+              let emailTo: string | null = null;
+              let firstName = "Cliente";
+
+              // 1) Conta de cliente (customerId)
+              const customerId = (order2 as any).customerId;
+              if (customerId) {
+                const caRows = await db.select({ email: customerAccounts.email, firstName: customerAccounts.firstName })
+                  .from(customerAccounts).where(eqEmail(customerAccounts.id, customerId)).limit(1);
+                if (caRows[0]?.email) {
+                  emailTo = caRows[0].email;
+                  firstName = caRows[0].firstName || firstName;
+                }
+              }
+
+              // 2) Usuário Manus (userId)
+              if (!emailTo) {
+                const userId = (order2 as any).userId;
+                if (userId) {
+                  const uRows = await db.select({ email: users.email, name: users.name })
+                    .from(users).where(eqEmail(users.id, userId)).limit(1);
+                  if (uRows[0]?.email) {
+                    emailTo = uRows[0].email;
+                    firstName = (uRows[0].name || firstName).split(" ")[0];
+                  }
+                }
+              }
+
+              // 3) E-mail de convidado
+              if (!emailTo) {
+                emailTo = (order2 as any).guestEmail ?? null;
+                if (emailTo) firstName = ((order2 as any).guestName || firstName).split(" ")[0];
+              }
+
+              if (emailTo) {
+                const { sendArtResendRequestEmail, sendProofForApprovalEmail } = await import("./emailService.js");
+                if (input.requireClientResend) {
+                  const result = await sendArtResendRequestEmail(emailTo, firstName, orderNumber, productNameEmail, operatorNoteEmail, trackUrl);
+                  console.log(`[EMAIL] Reenvio de arte enviado para ${emailTo}:`, result);
+                } else if (input.sendProofForApproval) {
+                  // Buscar URL da prévia mais recente do item
+                  const { orderArtPreviews } = await import("../drizzle/schema.js");
+                  const { eq: eqPrev, desc: descPrev } = await import("drizzle-orm");
+                  const previewRows = await db.select().from(orderArtPreviews)
+                    .where(eqPrev((orderArtPreviews as any).orderItemId, input.orderItemId))
+                    .orderBy(descPrev((orderArtPreviews as any).createdAt))
+                    .limit(1);
+                  const proofImageUrl = (previewRows[0] as any)?.imageUrl ?? null;
+                  const result = await sendProofForApprovalEmail(emailTo, firstName, orderNumber, productNameEmail, operatorNoteEmail, proofImageUrl, trackUrl);
+                  console.log(`[EMAIL] Prova para aprovação enviada para ${emailTo}:`, result);
+                }
+              } else {
+                console.warn(`[EMAIL] Nenhum e-mail encontrado para o pedido ${orderNumber}`);
+              }
+            }
+          }
+        } catch (emailErr) {
+          console.error("[EMAIL] Erro ao enviar e-mail ao cliente:", emailErr);
+          // Não lançar erro — o e-mail é secundário, não deve bloquear a ação
+        }
+
         return { success: true, correctionAction };
       }),
 
