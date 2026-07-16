@@ -1852,13 +1852,16 @@ export const appRouter = router({
           await db.update(orders).set({ status: "com_problemas" } as any).where(eq(orders.id, item.orderId));
         }
 
-        // Notifica o operador com número do pedido
+        // Notifica o operador com número do pedido e link direto
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          const SITE_URL = process.env.VITE_SITE_URL || "https://mariaimprime.com.br";
+          const orderId = order?.id ?? item?.orderId ?? "";
+          const adminOrderUrl = `${SITE_URL}/admin/pedidos/${orderId}`;
           await notifyOwner({
             title: "❌ Prova Recusada pelo Cliente",
-            content: `O cliente recusou a prova do produto "${productName}" no pedido #${orderNumber}. Motivo: "${input.refusalNote}". Acesse o painel para revisar.`,
+            content: `O cliente recusou a prova do produto "${productName}" no pedido #${orderNumber}.\n\nMotivo: "${input.refusalNote}"\n\nAcesse o pedido diretamente: ${adminOrderUrl}`,
           });
         } catch (e) {
           console.error("Erro ao notificar:", e);
@@ -1911,13 +1914,16 @@ export const appRouter = router({
           .set({ preProductionStatus: "liberado_analise" } as any)
           .where(eq(orderItems.id, input.orderItemId));
 
-        // Notifica o operador
+        // Notifica o operador com número do pedido e link direto
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          const SITE_URL = process.env.VITE_SITE_URL || "https://mariaimprime.com.br";
+          const orderId = order?.id ?? item?.orderId ?? "";
+          const adminOrderUrl = `${SITE_URL}/admin/pedidos/${orderId}`;
           await notifyOwner({
             title: "📨 Arte Reenviada pelo Cliente",
-            content: `O cliente reenviou a arte do produto "${productName}" no pedido #${orderNumber}. O status voltou para "Analisando". Acesse o painel para revisar.`,
+            content: `O cliente reenviou a arte do produto "${productName}" no pedido #${orderNumber}. O status voltou para "Analisando".\n\nAcesse o pedido diretamente: ${adminOrderUrl}`,
           });
         } catch (e) {
           console.error("Erro ao notificar operador:", e);
@@ -1969,13 +1975,16 @@ export const appRouter = router({
           .set({ preProductionStatus: "arte_final_aprovada" } as any)
           .where(eq(orderItems.id, input.orderItemId));
 
-        // Notifica o operador com número do pedido
+        // Notifica o operador com número do pedido e link direto
         try {
           const { notifyOwner } = await import("./_core/notification.js");
           const productName = item?.productName ?? `Item #${input.orderItemId}`;
+          const SITE_URL = process.env.VITE_SITE_URL || "https://mariaimprime.com.br";
+          const orderId = order?.id ?? item?.orderId ?? "";
+          const adminOrderUrl = `${SITE_URL}/admin/pedidos/${orderId}`;
           await notifyOwner({
             title: "✅ Arte Aprovada pelo Cliente",
-            content: `O cliente aprovou a prova da arte do produto "${productName}" no pedido #${orderNumber}. A produção pode ser iniciada!`,
+            content: `O cliente aprovou a prova da arte do produto "${productName}" no pedido #${orderNumber}. A produção pode ser iniciada!\n\nAcesse o pedido diretamente: ${adminOrderUrl}`,
           });
         } catch (e) {
           console.error("Erro ao notificar operador:", e);
