@@ -770,58 +770,6 @@ export default function AdminOrderDetail() {
                   className="bg-white"
                 />
 
-                {/* Botão Enviar para Produção com trava — só ativo quando todos os itens estão aprovados */}
-                {o.status === "com_problemas" && (() => {
-                  const items: any[] = o.items ?? [];
-                  const allApproved = items.length > 0 && items.every(
-                    (i: any) => i.preProductionStatus === "arte_final_aprovada"
-                  );
-                  const hasPending = items.some(
-                    (i: any) => i.correctionAction === "resend" || i.correctionAction === "proof" || i.preProductionStatus === "aguardando_aprovacao"
-                  );
-                  const hasRefused = items.some(
-                    (i: any) => i.preProductionStatus === "com_problemas" && i.clientRefusalNote
-                  );
-
-                  let lockReason = "";
-                  if (!allApproved) {
-                    if (hasPending) lockReason = "Aguardando resposta do cliente";
-                    else if (hasRefused) lockReason = "Cliente recusou a arte — corrija e reenvie";
-                    else lockReason = "Todos os itens precisam ter a arte aprovada";
-                  }
-
-                  return (
-                    <div className="pt-2">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Button
-                          onClick={() => orderId && sendToProductionMutation.mutate({ orderId })}
-                          disabled={!allApproved || sendToProductionMutation.isPending}
-                          className={`gap-2 ${
-                            allApproved
-                              ? "bg-green-600 hover:bg-green-700 text-white"
-                              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          }`}
-                        >
-                          {sendToProductionMutation.isPending
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <PlayCircle className="w-4 h-4" />
-                          }
-                          Enviar para Produção
-                        </Button>
-                        {!allApproved && lockReason && (
-                          <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                            🔒 {lockReason}
-                          </span>
-                        )}
-                      </div>
-                      {allApproved && (
-                        <p className="text-xs text-green-700 mt-1">
-                          ✅ Todas as artes foram aprovadas pelo cliente. Pronto para iniciar a produção.
-                        </p>
-                      )}
-                    </div>
-                  );
-                })()}
               </div>
 
               <div className="border-t pt-4">
@@ -1002,6 +950,67 @@ export default function AdminOrderDetail() {
               </Card>
             )}
           </div>
+
+          {/* ── Botão Enviar para Produção — rodapé da seção de itens ── */}
+          {o.status === "com_problemas" && (() => {
+            const items: any[] = o.items ?? [];
+            const allApproved = items.length > 0 && items.every(
+              (i: any) => i.preProductionStatus === "arte_final_aprovada"
+            );
+            const hasPending = items.some(
+              (i: any) => i.correctionAction === "resend" || i.correctionAction === "proof" || i.preProductionStatus === "aguardando_aprovacao"
+            );
+            const hasRefused = items.some(
+              (i: any) => i.preProductionStatus === "com_problemas" && i.clientRefusalNote
+            );
+
+            let lockReason = "";
+            if (!allApproved) {
+              if (hasPending) lockReason = "Aguardando resposta do cliente";
+              else if (hasRefused) lockReason = "Cliente recusou a arte — corrija e reenvie";
+              else lockReason = "Todos os itens precisam ter a arte aprovada";
+            }
+
+            return (
+              <Card className={`border-2 ${
+                allApproved ? "border-green-300 bg-green-50" : "border-amber-200 bg-amber-50"
+              }`}>
+                <CardContent className="py-5">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm mb-1">
+                        {allApproved ? "✅ Artes aprovadas — pronto para produção" : "🔒 Aguardando aprovação das artes"}
+                      </p>
+                      {!allApproved && lockReason && (
+                        <p className="text-xs text-amber-700">{lockReason}</p>
+                      )}
+                      {allApproved && (
+                        <p className="text-xs text-green-700">
+                          Todos os itens foram aprovados pelo cliente. Clique para iniciar a produção.
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => orderId && sendToProductionMutation.mutate({ orderId })}
+                      disabled={!allApproved || sendToProductionMutation.isPending}
+                      size="lg"
+                      className={`gap-2 ${
+                        allApproved
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      {sendToProductionMutation.isPending
+                        ? <Loader2 className="w-5 h-5 animate-spin" />
+                        : <PlayCircle className="w-5 h-5" />
+                      }
+                      Enviar para Produção
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* ── Dados do Cliente ── */}
           <Card>
