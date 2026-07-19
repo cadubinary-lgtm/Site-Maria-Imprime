@@ -2360,3 +2360,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Procedure clientRefuseProof: salva nota de recusa e volta status para "com_problemas"
 - [x] Notificação ao operador quando cliente recusar a prova
 - [x] Salvar checkpoint final
+
+## Bloco Rosa: Ctrl+V + Alertas Dinâmicos (Sessão Atual)
+- [x] Bloco rosa: suporte a Ctrl+V (onPaste) para colar imagens da área de transferência
+- [x] Bloco rosa: manter botão de clique para seleção manual de arquivo
+- [x] Alertas dinâmicos de resolução na tela do cliente (Cenário A: arte_final_aprovada)
+- [x] Alertas dinâmicos de resolução na tela do cliente (Cenário B: ajustar_arte/reenvio)
+- [x] Alertas dinâmicos de resolução na tela do cliente (Cenário C: prova para aprovação)
