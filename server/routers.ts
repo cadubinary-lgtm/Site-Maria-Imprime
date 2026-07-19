@@ -359,7 +359,7 @@ export const appRouter = router({
     updatePreProductionStatus: adminProcedure
       .input(z.object({
         orderItemId: z.number(),
-        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "arte_final_aprovada"]),
+        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada"]),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();

@@ -47,9 +47,11 @@ const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
 
 const PRE_PRODUCTION_OPTIONS = [
   { value: "aguardando_liberacao_comercial", label: "Aguardando Liberação Comercial", icon: Clock, color: "bg-gray-100 text-gray-500" },
-  { value: "liberado_analise",    label: "Liberado para Análise", icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
-  { value: "ajustar_arte",        label: "Ajustar Arte",          icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
-  { value: "arte_final_aprovada", label: "Arte Final Aprovada",   icon: CheckCircle, color: "bg-green-100 text-green-700" },
+  { value: "liberado_analise",              label: "Liberado para Análise",          icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
+  { value: "ajustar_arte",                  label: "Ajustar Arte",                   icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
+  { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
+  { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
+  { value: "arte_final_aprovada",           label: "Arte Final Aprovada",            icon: CheckCircle, color: "bg-green-100 text-green-700" },
 ];
 
 /** Status do pedido que bloqueiam a pré-impressão */
@@ -520,6 +522,9 @@ function PreImpressaoColumn({
                 sendProofForApproval: sendProof,
                 operatorNote: operatorNote.trim() || undefined,
               });
+              // Atualiza automaticamente o status de pré-impressão com base na ação selecionada
+              const autoStatus = requireResend ? "aguardando_reenvio_arquivo" : "aguardando_aprovacao_cliente";
+              await mutation.mutateAsync({ orderItemId, preProductionStatus: autoStatus as any });
             } catch (err: any) {
               toast.error(err?.message || "Erro ao enviar para o cliente");
             } finally {
