@@ -27,6 +27,57 @@ function buildImageUrl(rawUrl: string): string {
   return base + rawUrl.split(" ").join("%20");
 }
 
+// ─── Alerta de resolução dinâmico ────────────────────────────────────────────
+// Determina qual alerta exibir abaixo da prévia com base no status de pré-impressão
+// e na ação de correção registrada pelo operador.
+function PreviewResolutionAlert({ item }: { item: any }) {
+  const { data: correctionData } = trpc.checkout.getItemCorrectionAction.useQuery(
+    { orderItemId: item.id },
+    { enabled: !!item.id }
+  );
+
+  const preProductionStatus: string = item.preProductionStatus ?? "";
+  const correctionAction: string | null = correctionData?.correctionAction ?? null;
+  const requireClientResend: boolean = correctionData?.requireClientResend ?? false;
+  const sendProofForApproval: boolean = correctionData?.sendProofForApproval ?? false;
+
+  // Cenário A — Arte Final Aprovada (em produção)
+  if (preProductionStatus === "arte_final_aprovada") {
+    return (
+      <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p className="text-xs text-amber-800 leading-relaxed">
+          ⚠️ <strong>Atenção:</strong> A imagem acima é apenas uma prévia do arquivo que já foi aprovado e encaminhado para a produção. Esta imagem serve estritamente para visualização do layout geral enviado e a qualidade da impressão dependerá estritamente da resolução original do seu arquivo, não sendo de nossa responsabilidade quaisquer distorções ou pixels aparentes decorrentes de artes enviadas em baixa qualidade.
+        </p>
+      </div>
+    );
+  }
+
+  // Cenário B — Correção/Ajuste (Ajustar Arte OU Exigir Reenvio)
+  if (preProductionStatus === "ajustar_arte" || requireClientResend || correctionAction === "resend") {
+    return (
+      <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p className="text-xs text-amber-800 leading-relaxed">
+          ⚠️ <strong>Atenção:</strong> A imagem acima é um print da tela feito pelo operador para demonstrar o erro localizado na sua arte. A resolução desta imagem serve apenas para referência do ajuste necessário. A qualidade da impressão dependerá estritamente da resolução original do seu arquivo, não sendo de nossa responsabilidade quaisquer distorções ou pixels aparentes decorrentes de artes enviadas em baixa qualidade. Verifique seu arquivo antes de aprovar.
+        </p>
+      </div>
+    );
+  }
+
+  // Cenário C — Prova para Validação (Enviar Prova para Aprovação)
+  if (sendProofForApproval || correctionAction === "proof") {
+    return (
+      <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p className="text-xs text-amber-800 leading-relaxed">
+          ⚠️ <strong>Atenção:</strong> A imagem acima é uma prova de layout para sua validação visual. Lembramos que a impressão final utilizará diretamente o arquivo enviado por você (incluindo artes feitas por IA ou outros aplicativos). A qualidade da impressão dependerá estritamente da resolução original do seu arquivo, não sendo de nossa responsabilidade quaisquer distorções ou pixels aparentes decorrentes de artes enviadas em baixa qualidade. Verifique seu arquivo antes de aprovar.
+        </p>
+      </div>
+    );
+  }
+
+  // Nenhum alerta para status de transição interna (liberado_analise, aguardando_*, etc.)
+  return null;
+}
+
 function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url: string) => void }) {
   const [imgError, setImgError] = useState(false);
 
@@ -96,6 +147,8 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
           </Button>
         </div>
       </div>
+      {/* Alerta dinâmico de resolução — exibido logo abaixo da prévia */}
+      <PreviewResolutionAlert item={item} />
     </div>
   );
 }

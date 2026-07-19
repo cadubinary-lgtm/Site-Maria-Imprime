@@ -215,6 +215,7 @@ function ArtPreviewColumn({
   selectedStatus?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const deletePreviewMutation = trpc.checkout.deleteArtPreview.useMutation({
     onSuccess: () => { onRefresh(); toast.success("Prévia removida"); },
@@ -227,10 +228,32 @@ function ArtPreviewColumn({
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const imageItem = items.find(it => it.type.startsWith("image/"));
+    if (!imageItem) return;
+    e.preventDefault();
+    const blob = imageItem.getAsFile();
+    if (!blob) return;
+    // Cria um File com nome descritivo baseado na data/hora
+    const ext = blob.type === "image/png" ? "png" : blob.type === "image/jpeg" ? "jpg" : "webp";
+    const now = new Date();
+    const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const file = new File([blob], `print_${ts}.${ext}`, { type: blob.type });
+    onPendingFileChange(file);
+    toast.success("🖼️ Imagem colada da área de transferência!");
+  };
+
   return (
     <div className="space-y-3">
-      {/* Upload — apenas seleção local, envio acontece via "Enviar para o Cliente" */}
-      <div className="bg-orange-50 rounded-lg border border-orange-200 p-2.5 space-y-2">
+      {/* Upload — seleção local ou Ctrl+V; envio acontece via "Enviar para o Cliente" */}
+      <div
+        ref={dropZoneRef}
+        className="bg-orange-50 rounded-lg border border-orange-200 p-2.5 space-y-2 focus-within:ring-2 focus-within:ring-orange-400 focus-within:ring-offset-1"
+        onPaste={handlePaste}
+        tabIndex={0}
+        title="Cole uma imagem aqui com Ctrl+V ou clique em Selecionar"
+      >
         <p className="text-[10px] font-semibold text-orange-800 uppercase tracking-wide">Enviar prévia</p>
         <Textarea
           placeholder={selectedStatus === "liberado_analise" || selectedStatus === "ajustar_arte" ? "Descreva o motivo ou observação (Obrigatório)..." : "Observação (opcional)..."}
@@ -248,7 +271,7 @@ function ArtPreviewColumn({
                 <Upload className="w-3 h-3" />
                 Selecionar
               </Button>
-              <p className="text-[10px] text-gray-400">JPG/PNG · 10MB</p>
+              <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-orange-100 border border-orange-300 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
             </>
           ) : (
             <div className="flex items-center gap-1.5 bg-white border border-orange-200 rounded px-2 py-1 w-full">
