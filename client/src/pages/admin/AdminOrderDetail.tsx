@@ -231,7 +231,7 @@ function ArtPreviewColumn({
       <div className="bg-orange-50 rounded-lg border border-orange-200 p-2.5 space-y-2">
         <p className="text-[10px] font-semibold text-orange-800 uppercase tracking-wide">Enviar prévia</p>
         <Textarea
-          placeholder="Observação (opcional)..."
+          placeholder={selectedStatus === "liberado_analise" || selectedStatus === "ajustar_arte" ? "Descreva o motivo ou observação (Obrigatório)..." : "Observação (opcional)..."}
           value={pendingNotes}
           onChange={(e) => onPendingNotesChange(e.target.value)}
           rows={2}
@@ -397,6 +397,11 @@ function PreImpressaoColumn({
         <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
           disabled={isCommercialLocked || mutation.isPending || (selected === preProductionStatus && !pendingPreviewFile)}
           onClick={async () => {
+            // Validação: se o status exigir observação obrigatória, verifica se está preenchida
+            if ((selected === "liberado_analise" || selected === "ajustar_arte") && !pendingPreviewNotes.trim()) {
+              toast.error("A observação é obrigatória para este status");
+              return;
+            }
             // Se há prévia pendente, faz upload antes de salvar o status
             if (pendingPreviewFile) {
               try {
@@ -480,6 +485,11 @@ function PreImpressaoColumn({
           className="w-full h-7 text-xs bg-blue-600 hover:bg-blue-700"
           disabled={isSendingToClient || correctionMutation.isPending || (!requireResend && !sendProof)}
           onClick={async () => {
+            // Validação: se o status exigir observação obrigatória, verifica se está preenchida
+            if ((selected === "liberado_analise" || selected === "ajustar_arte") && !operatorNote.trim()) {
+              toast.error("A observação é obrigatória para este status");
+              return;
+            }
             setIsSendingToClient(true);
             try {
               // Se há prévia pendente para upload, faz o upload primeiro
