@@ -260,7 +260,7 @@ function ArtPreviewColumn({
         {pendingFile && (
           <p className="text-[10px] text-orange-600 font-medium">
             {selectedStatus === "arte_final_aprovada"
-              ? '✅ Arquivo selecionado. Clique em "Salvar" para aprovar a arte final.'
+              ? '✅ Arquivo selecionado. Clique em "Salvar" para enviar a arte final para a produção.'
               : '⚠️ Arquivo selecionado. Clique em "Enviar para o Cliente" para confirmar o envio.'}
           </p>
         )}
