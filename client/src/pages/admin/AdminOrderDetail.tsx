@@ -603,8 +603,9 @@ export default function AdminOrderDetail() {
   // Prévias são carregadas por item individualmente via ItemPreviewCard
 
   const updateMutation = trpc.checkout.updateOrderStatus.useMutation({
-    onSuccess: () => {
-      utils.checkout.getOrderById.invalidate({ id: orderId! });
+    onSuccess: async () => {
+      // Aguarda o refetch completo para que o painel de Pré-Impressão atualize em tempo real
+      await utils.checkout.getOrderById.invalidate({ id: orderId! });
       utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
       utils.checkout.getAllOrders.invalidate();
       utils.admin.getAllOrders.invalidate();
