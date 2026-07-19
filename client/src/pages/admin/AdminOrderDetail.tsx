@@ -46,10 +46,14 @@ const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
 }));
 
 const PRE_PRODUCTION_OPTIONS = [
+  { value: "aguardando_liberacao_comercial", label: "Aguardando Liberação Comercial", icon: Clock, color: "bg-gray-100 text-gray-500" },
   { value: "liberado_analise",    label: "Liberado para Análise", icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
   { value: "ajustar_arte",        label: "Ajustar Arte",          icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
   { value: "arte_final_aprovada", label: "Arte Final Aprovada",   icon: CheckCircle, color: "bg-green-100 text-green-700" },
 ];
+
+/** Status do pedido que bloqueiam a pré-impressão */
+const LOCKED_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
 
 function fileNameFromUrl(url: string): string {
   try {
@@ -294,14 +298,18 @@ function ArtPreviewColumn({
 const PROOF_TERM = `Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!`;
 
 function PreImpressaoColumn({
-  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange,
+  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange, orderStatus,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   pendingPreviewFile: File | null; pendingPreviewNotes: string;
   onPreviewUploaded: () => void;
   onSelectedStatusChange?: (s: string) => void;
+  orderStatus?: string;
 }) {
-  const [selected, setSelected] = useState(preProductionStatus);
+  const isCommercialLocked = LOCKED_ORDER_STATUSES.includes(orderStatus ?? "");
+  // Quando o pedido está bloqueado comercialmente, exibe sempre o status de espera
+  const effectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
+  const [selected, setSelected] = useState(effectiveStatus);
   // Notifica o pai quando o status muda (para alerta dinâmico na col de prévia)
   const handleSelectedChange = (v: string) => { setSelected(v); onSelectedStatusChange?.(v); };
   const [requireResend, setRequireResend] = useState(false);
@@ -368,9 +376,16 @@ function PreImpressaoColumn({
           </Badge>
         )}
       </div>
+      {/* Banner de bloqueio comercial */}
+      {isCommercialLocked && (
+        <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 rounded px-2 py-1.5 text-[10px] text-gray-600">
+          <span>🔒</span>
+          <span>Aguardando liberação do setor comercial. O pedido precisa estar em <strong>Analisando</strong> para liberar a pré-impressão.</span>
+        </div>
+      )}
       <div className="flex gap-1.5">
-        <Select value={selected} onValueChange={handleSelectedChange}>
-          <SelectTrigger className="flex-1 h-7 text-xs bg-white">
+        <Select value={selected} onValueChange={handleSelectedChange} disabled={isCommercialLocked}>
+          <SelectTrigger className={`flex-1 h-7 text-xs bg-white ${isCommercialLocked ? "opacity-50 cursor-not-allowed" : ""}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -380,7 +395,7 @@ function PreImpressaoColumn({
           </SelectContent>
         </Select>
         <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
-          disabled={mutation.isPending || (selected === preProductionStatus && !pendingPreviewFile)}
+          disabled={isCommercialLocked || mutation.isPending || (selected === preProductionStatus && !pendingPreviewFile)}
           onClick={async () => {
             // Se há prévia pendente, faz upload antes de salvar o status
             if (pendingPreviewFile) {
@@ -414,8 +429,8 @@ function PreImpressaoColumn({
         </Button>
       </div>
 
-      {/* Ações de Correção — ocultas quando arte está aprovada */}
-      {selected === "arte_final_aprovada" ? null : <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
+      {/* Ações de Correção — ocultas quando arte está aprovada ou pedido bloqueado comercialmente */}
+      {(selected === "arte_final_aprovada" || isCommercialLocked) ? null : <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
         <p className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">Ação de Correção</p>
         <div className="space-y-1.5">
           <label className="flex items-start gap-2 cursor-pointer">
@@ -512,10 +527,11 @@ function PreImpressaoColumn({
 
 // ─── Wrapper por item: carrega prévias independentes e renderiza Col 3 ─────────────────
 function ItemPreviewSection({
-  orderId, orderItemId, preProductionStatus, onLightbox,
+  orderId, orderItemId, preProductionStatus, onLightbox, orderStatus,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   onLightbox: (url: string) => void;
+  orderStatus?: string;
 }) {
   const utils = trpc.useUtils();
   const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
@@ -559,6 +575,7 @@ function ItemPreviewSection({
         pendingPreviewNotes={pendingPreviewNotes}
         onPreviewUploaded={handlePreviewUploaded}
         onSelectedStatusChange={setSelectedStatus}
+        orderStatus={orderStatus}
       />
     </div>
   );
@@ -935,6 +952,7 @@ export default function AdminOrderDetail() {
                         orderItemId={item.id}
                         preProductionStatus={item.preProductionStatus || "liberado_analise"}
                         onLightbox={setLightboxUrl}
+                        orderStatus={o.status}
                       />
 
                     </div>
