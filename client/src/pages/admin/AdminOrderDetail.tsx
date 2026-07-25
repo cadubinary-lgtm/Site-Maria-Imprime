@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
+import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
 import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
 import AdminLayout from "@/components/AdminLayout";
@@ -940,60 +941,20 @@ export default function AdminOrderDetail() {
                     {/* Grid 3 colunas com divisores visuais */}
                     <div className="grid grid-cols-1 lg:grid-cols-3">
 
-                      {/* Col 1 — Especificações — layout padronizado igual ao carrinho do cliente */}
+                      {/* Col 1 — Especificações — componente padronizado */}
                       <div className="p-5 lg:border-r border-gray-100">
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                           <Ruler className="w-3 h-3" /> Especificações
                         </p>
-                        <div className="space-y-3">
-                          {/* Dimensões */}
-                          {(largura || altura) && (
-                            <div>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Medidas</p>
-                              <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
-                              {largura && altura && (
-                                <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
-                              )}
-                            </div>
-                          )}
-                          {/* Acabamentos — cada um em linha separada como no carrinho */}
-                          {acabamentos.length > 0 && (
-                            <div>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
-                                <Layers className="w-3 h-3" /> Acabamentos
-                              </p>
-                              <div className="space-y-0.5">
-                                {acabamentos.map((v, vi) => (
-                                  <p key={vi} className="text-xs text-gray-700">
-                                    <span className="text-gray-400">{v.name}:</span>{" "}
-                                    <span className="font-semibold text-gray-900">{v.value}</span>
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {/* Outras variações — mesmo padrão */}
-                          {outrasVariacoes.length > 0 && (
-                            <div className="space-y-0.5">
-                              {outrasVariacoes.map((v, vi) => (
-                                <p key={vi} className="text-xs text-gray-700">
-                                  <span className="text-gray-400">{v.name}:</span>{" "}
-                                  <span className="font-semibold text-gray-900">{v.value}</span>
-                                </p>
-                              ))}
-                            </div>
-                          )}
-                          {/* Observação */}
-                          {item.notes && (
-                            <p className="text-xs text-gray-700">
-                              <span className="text-gray-400">Obs.:</span>{" "}
-                              <span className="italic">{item.notes}</span>
-                            </p>
-                          )}
-                          {!largura && !altura && acabamentos.length === 0 && outrasVariacoes.length === 0 && !item.notes && (
-                            <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
-                          )}
-                        </div>
+                        <OrderItemSpecs
+                          customDimensions={item.customDimensions}
+                          variationSnapshot={item.variationSnapshot}
+                          selectedAttributes={item.selectedAttributes}
+                          notes={item.notes}
+                        />
+                        {!item.customDimensions && !item.variationSnapshot && !item.selectedAttributes && !item.notes && (
+                          <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
+                        )}
                       </div>
 
                       {/* Col 2 — Arquivo do cliente (filtrado por item via artFileUrl) */}
