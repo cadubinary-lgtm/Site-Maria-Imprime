@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -643,6 +644,10 @@ export default function AdminOrderDetail() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
+  // Controle de visibilidade de preços por role
+  const { adminUser } = useAdminAuth();
+  const isProductionRole = adminUser?.role === "production";
+
   const utils = trpc.useUtils();
 
   const { data: order, isLoading } = trpc.checkout.getOrderById.useQuery(
@@ -922,67 +927,68 @@ export default function AdminOrderDetail() {
                             <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
                           </div>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-xs text-gray-400">Unit. {fmt(parseFloat(item.priceAtOrder))}</p>
-                          <p className="font-bold text-gray-800">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
-                        </div>
+                        {/* Preços: ocultos para Linha de Produção */}
+                        {!isProductionRole && (
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-xs text-gray-400">Unit. {fmt(parseFloat(item.priceAtOrder))}</p>
+                            <p className="font-bold text-gray-800">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     {/* Grid 3 colunas com divisores visuais */}
                     <div className="grid grid-cols-1 lg:grid-cols-3">
 
-                      {/* Col 1 — Especificações */}
+                      {/* Col 1 — Especificações — layout padronizado igual ao carrinho do cliente */}
                       <div className="p-5 lg:border-r border-gray-100">
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                           <Ruler className="w-3 h-3" /> Especificações
                         </p>
-                        <div className="space-y-2.5">
+                        <div className="space-y-3">
+                          {/* Dimensões */}
                           {(largura || altura) && (
                             <div>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Dimensões</p>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Medidas</p>
                               <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
                               {largura && altura && (
                                 <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
                               )}
                             </div>
                           )}
+                          {/* Acabamentos — cada um em linha separada como no carrinho */}
                           {acabamentos.length > 0 && (
                             <div>
                               <p className="text-[10px] text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
                                 <Layers className="w-3 h-3" /> Acabamentos
                               </p>
-                              <div className="space-y-1">
+                              <div className="space-y-0.5">
                                 {acabamentos.map((v, vi) => (
-                                  <div key={vi} className="flex gap-1">
-                                    <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
-                                    <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                  </div>
+                                  <p key={vi} className="text-xs text-gray-700">
+                                    <span className="text-gray-400">{v.name}:</span>{" "}
+                                    <span className="font-semibold text-gray-900">{v.value}</span>
+                                  </p>
                                 ))}
                               </div>
                             </div>
                           )}
+                          {/* Outras variações — mesmo padrão */}
                           {outrasVariacoes.length > 0 && (
-                            <div>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Outras Especificações</p>
-                              <div className="space-y-1">
-                                {outrasVariacoes.map((v, vi) => (
-                                  <div key={vi} className="flex gap-1">
-                                    <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
-                                    <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                  </div>
-                                ))}
-                              </div>
+                            <div className="space-y-0.5">
+                              {outrasVariacoes.map((v, vi) => (
+                                <p key={vi} className="text-xs text-gray-700">
+                                  <span className="text-gray-400">{v.name}:</span>{" "}
+                                  <span className="font-semibold text-gray-900">{v.value}</span>
+                                </p>
+                              ))}
                             </div>
                           )}
+                          {/* Observação */}
                           {item.notes && (
-                            <div className="flex items-start gap-1.5">
-                              <StickyNote className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                              <div>
-                                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Obs.</p>
-                                <p className="text-xs text-gray-900 italic">{item.notes}</p>
-                              </div>
-                            </div>
+                            <p className="text-xs text-gray-700">
+                              <span className="text-gray-400">Obs.:</span>{" "}
+                              <span className="italic">{item.notes}</span>
+                            </p>
                           )}
                           {!largura && !altura && acabamentos.length === 0 && outrasVariacoes.length === 0 && !item.notes && (
                             <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
