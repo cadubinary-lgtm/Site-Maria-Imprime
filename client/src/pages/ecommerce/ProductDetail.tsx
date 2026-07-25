@@ -596,11 +596,27 @@ export default function ProductDetail() {
       let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
       if (artFile && fileMode === "upload") {
         toast.loading("Enviando arquivo...", { id: "upload" });
-        const fd = new FormData(); fd.append("file", artFile);
-        const r = await fetch("/api/upload-art", { method: "POST", body: fd });
-        toast.dismiss("upload");
-        if (!r.ok) throw new Error((await r.json()).error ?? "Erro no upload");
-        artUrl = (await r.json()).url;
+        try {
+          const fd = new FormData(); fd.append("file", artFile);
+          const r = await fetch("/api/upload-art", { method: "POST", body: fd });
+          toast.dismiss("upload");
+          if (!r.ok) {
+            const errData = await r.json().catch(() => ({}));
+            throw new Error(errData.error ?? "Erro no upload do arquivo");
+          }
+          const uploadData = await r.json();
+          artUrl = uploadData.url;
+        } catch (uploadErr: any) {
+          toast.dismiss("upload");
+          toast.error(
+            uploadErr?.message?.includes("presign") || uploadErr?.message?.includes("403")
+              ? "Serviço de upload temporariamente indisponível. Seu pedido foi adicionado sem o arquivo — envie a arte pelo WhatsApp ou após finalizar o pedido."
+              : (uploadErr?.message ?? "Erro ao enviar o arquivo"),
+            { duration: 8000 }
+          );
+          // Continua sem o arquivo — não bloqueia o carrinho
+          artUrl = undefined;
+        }
       }
 
       const shippingId = selectedShipping ? String(selectedShipping.id) : "retirada";
