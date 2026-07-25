@@ -89,8 +89,12 @@ import { pricingRulesRouter } from "./routers-pricing-rules";
 import { logisticsRouter } from "./routers-logistics";
 import { gerenciadorFinanceiroRouter, gestaoFiscalRouter } from "./routers-gerenciador";
 import { financeiroRouter } from "./routers-financeiro";
-import { adminAuthRouter } from "./routers-admin-auth";
+import { adminAuthRouter, adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { paymentRouter } from "./routers-payment";
+
+// Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
+// Usado em todas as procedures do checkout/erp que o painel admin consome
+const adminAnyProcedure = adminOrManusAuthProcedure;
 
 // Procedimento protegido apenas para admin
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -319,8 +323,8 @@ export const appRouter = router({
           throw new Error(`Erro ao criar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
       }),
-    getAllOrders: adminProcedure.query(() => getAllOrders()),
-    getOrderWithItems: adminProcedure
+    getAllOrders: adminAnyProcedure.query(() => getAllOrders()),
+    getOrderWithItems: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ input }) => {
         const db = await getDb();
@@ -336,7 +340,7 @@ export const appRouter = router({
         const items = (itemRows[0] ?? []) as any[];
         return { order, items };
       }),
-    deleteOrder: adminProcedure
+    deleteOrder: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .mutation(async ({ input }) => {
         const { orders: ordersTable, orderItems, orderStatusHistory } = await import("../drizzle/schema.js");
@@ -347,7 +351,7 @@ export const appRouter = router({
         await db.delete(ordersTable).where(eq(ordersTable.id, input.orderId));
         return { success: true };
       }),
-    updateOrderStatus: adminProcedure
+    updateOrderStatus: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]),
@@ -356,7 +360,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await updateOrderStatus(input.orderId, input.newStatus, input.notes);
       }),
-    updatePreProductionStatus: adminProcedure
+    updatePreProductionStatus: adminAnyProcedure
       .input(z.object({
         orderItemId: z.number(),
         preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada"]),
@@ -390,7 +394,7 @@ export const appRouter = router({
         }
         return { success: true };
       }),
-    updateProductionStatus: adminProcedure
+    updateProductionStatus: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         productionStatus: z.enum(["pendente", "impresso", "acabamento_finalizado"]),
@@ -1370,38 +1374,25 @@ export const appRouter = router({
       return await getOrdersByUser(ctx.user.id);
     }),
 
-        getOrderById: protectedProcedure
+        getOrderById: adminAnyProcedure
       .input(z.object({ id: z.number() }))
-      .query(async ({ ctx, input }) => {
-        // Admin pode ver qualquer pedido — retorna pedido + itens
-        if (ctx.user.role === "admin") {
-          const db = await getDb();
-          if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-          const order = await getOrderById(input.id);
-          if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
-          const { sql: sqlOp } = await import("drizzle-orm");
-          const itemRows = await db.execute(
-            sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.id}`
-          ) as any;
-          const items = (itemRows[0] ?? []) as any[];
-          return { ...order, items };
-        }
-        const result = await getOrderDetailByUser(input.id, ctx.user.id);
-        if (!result) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
-        }
-        return result;
+      .query(async ({ input }) => {
+        // Suporta admin_session e Manus OAuth — admin pode ver qualquer pedido
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const order = await getOrderById(input.id);
+        if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
+        const { sql: sqlOp } = await import("drizzle-orm");
+        const itemRows = await db.execute(
+          sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.id}`
+        ) as any;
+        const items = (itemRows[0] ?? []) as any[];
+        return { ...order, items };
       }),
-    getOrderHistory: protectedProcedure
+    getOrderHistory: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
-      .query(async ({ ctx, input }) => {
-        // Admin pode ver histórico de qualquer pedido
-        if (ctx.user.role !== "admin") {
-          const result = await getOrderDetailByUser(input.orderId, ctx.user.id);
-          if (!result) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
-          }
-        }
+      .query(async ({ input }) => {
+        // Suporta admin_session e Manus OAuth — admin pode ver histórico de qualquer pedido
         return await getOrderStatusHistory(input.orderId);
       }),
     reorder: protectedProcedure
@@ -1428,14 +1419,14 @@ export const appRouter = router({
         }
         return { addedCount };
       }),
-    getAllOrders: adminProcedure.query(async () => {
+    getAllOrders: adminAnyProcedure.query(async () => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       const { orders: ordersTable } = await import("../drizzle/schema.js");
       const { desc } = await import("drizzle-orm");
       return db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
     }),
-    updateOrderStatus: adminProcedure
+    updateOrderStatus: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]),
@@ -1447,7 +1438,7 @@ export const appRouter = router({
       }),
 
     // ── Arquivos do cliente por pedido ──────────────────────────────────────
-    getOrderFiles: adminProcedure
+    getOrderFiles: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ input }) => {
         const db = await getDb();
@@ -1495,7 +1486,7 @@ export const appRouter = router({
         return db.select().from(orderArtPreviews).where(eq(orderArtPreviews.orderId, order.id)).orderBy(desc(orderArtPreviews.createdAt));
       }),
 
-    saveArtPreview: adminProcedure
+    saveArtPreview: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         orderItemId: z.number().optional(),
@@ -1507,18 +1498,20 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderArtPreviews } = await import("../drizzle/schema.js");
+        // Suporta tanto admin_session (adminUser.adminId) quanto Manus OAuth (user.id)
+        const uploadedBy = (ctx as any).adminUser?.adminId ?? (ctx as any).user?.id ?? 0;
         await db.insert(orderArtPreviews).values({
           orderId: input.orderId,
           orderItemId: input.orderItemId ?? null,
           imageUrl: input.imageUrl,
           imageKey: input.imageKey,
-          uploadedBy: ctx.user.id,
+          uploadedBy,
           notes: input.notes ?? null,
         });
         return { success: true };
       }),
 
-    deleteArtPreview: adminProcedure
+    deleteArtPreview: adminAnyProcedure
       .input(z.object({ previewId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -1530,7 +1523,7 @@ export const appRouter = router({
       }),
 
     // ── Prazo de entrega ────────────────────────────────────────────────────────────────────────────────────
-    setDeliveryDeadline: adminProcedure
+    setDeliveryDeadline: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         // timestamp em ms (UTC) ou null para remover
@@ -1547,7 +1540,7 @@ export const appRouter = router({
         return { success: true };
       }),
     // ── Reconciliação de itens do pedido (admin) ─────────────────────────────────────────────────────────
-    addOrderItem: adminProcedure
+    addOrderItem: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
         productId: z.number().optional(),
@@ -1569,7 +1562,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    deleteOrderItem: adminProcedure
+    deleteOrderItem: adminAnyProcedure
       .input(z.object({ itemId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -1614,7 +1607,7 @@ export const appRouter = router({
       }),
 
     // ── Fluxo de Correção de Artes ──────────────────────────────────────────────────────────────────────────────
-    saveArtCorrectionAction: adminProcedure
+    saveArtCorrectionAction: adminAnyProcedure
       .input(z.object({
         orderItemId: z.number(),
         requireClientResend: z.boolean().optional(),
@@ -2064,7 +2057,7 @@ export const appRouter = router({
      * Envia pedido para produção — só permitido quando todos os itens
      * têm preProductionStatus === 'arte_final_aprovada'.
      */
-    sendToProduction: adminProcedure
+    sendToProduction: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -2102,7 +2095,7 @@ export const appRouter = router({
   }),
   // ERP KPIs — Pedidos do dia, produção ativa, pedidos atrasados
   erp: router({
-    getDashboardKPIs: adminProcedure.query(async () => {
+    getDashboardKPIs: adminAnyProcedure.query(async () => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { sql: sqlOp } = await import("drizzle-orm");
