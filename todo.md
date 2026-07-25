@@ -2372,3 +2372,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar useEffect no PreImpressaoColumn para sincronizar com orderStatus
 - [x] Adicionar useEffect no ItemPreviewSection para sincronizar selectedStatus com preProductionStatus
 - [x] Reatividade em tempo real: quando status global muda, bloco Pré-Impressão atualiza sem F5
+
+## Especificações e Controle de Preços por Role (Sessão Atual)
+- [x] Refatorar bloco de Especificações para layout do carrinho do cliente (Medidas, Acabamentos, linhas separadas)
+- [x] Ocultar preços (Unit. e Total) para usuários com role 'production' (Linha de Produção)
+- [x] Importar useAdminAuth no AdminOrderDetail para obter a role do usuário logado
