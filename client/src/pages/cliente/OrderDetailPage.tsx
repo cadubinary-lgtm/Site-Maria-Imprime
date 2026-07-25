@@ -12,6 +12,7 @@ import { Loader2, ArrowLeft, Package, MapPin, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
+import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 
 // ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
 // Constrói a URL absoluta da imagem a partir de uma URL relativa ou absoluta,
@@ -664,54 +665,13 @@ export default function OrderDetailPage() {
 
                         {/* Corpo: specs + prévia aprovada + ação de correção */}
                         <div className="p-4 space-y-3">
-                          {/* Especificações técnicas */}
-                          {(largura || altura || acabamentos.length > 0 || outrasVariacoes.length > 0 || item.notes) && (
-                            <div className="bg-gray-50 rounded-lg p-3 space-y-2.5">
-                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <Ruler className="w-3 h-3" /> Especificações
-                              </p>
-                              {(largura || altura) && (
-                                <div>
-                                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Dimensões</p>
-                                  <p className="text-sm font-semibold text-gray-900">{largura} × {altura} m</p>
-                                  {largura && altura && (
-                                    <p className="text-xs text-gray-500">{(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²</p>
-                                  )}
-                                </div>
-                              )}
-                              {acabamentos.length > 0 && (
-                                <div>
-                                  <p className="text-[10px] text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-1">
-                                    <Layers className="w-3 h-3" /> Acabamentos
-                                  </p>
-                                  <div className="space-y-0.5">
-                                    {acabamentos.map((v, vi) => (
-                                      <div key={vi} className="flex gap-1">
-                                        <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
-                                        <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {outrasVariacoes.length > 0 && (
-                                <div className="space-y-0.5">
-                                  {outrasVariacoes.map((v, vi) => (
-                                    <div key={vi} className="flex gap-1">
-                                      <span className="text-[10px] text-gray-400 flex-shrink-0">{v.name}:</span>
-                                      <span className="text-xs text-gray-900 font-medium">{v.value}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {item.notes && (
-                                <div className="flex items-start gap-1.5">
-                                  <StickyNote className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                                  <p className="text-xs text-gray-700 italic">{item.notes}</p>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          {/* Especificações técnicas padronizadas */}
+                          <OrderItemSpecs
+                            customDimensions={item.customDimensions}
+                            variationSnapshot={item.variationSnapshot}
+                            selectedAttributes={item.selectedAttributes}
+                            notes={item.notes}
+                          />
 
                           {/* Prévia aprovada */}
                           <ItemApprovedPreview item={item} onLightbox={setLightboxUrl} />

@@ -19,6 +19,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 
 interface CartItem {
   id: number;
@@ -77,8 +78,6 @@ function CartItemCard({
   onRemove: (id: number) => void;
   isUpdating: boolean;
 }) {
-  const attrs = parseAttributes(item.selectedAttributes);
-  const variations = parseVariations(item.variationSnapshot);
   const subtotal = Number(item.priceAtCart) * item.quantity;
 
   return (
@@ -102,49 +101,19 @@ function CartItemCard({
       <div className="flex-1 min-w-0 text-center sm:text-left">
         <p className="font-medium text-gray-900 line-clamp-2">{item.productName}</p>
 
-        {/* Dimensões */}
-        {item.customDimensions && (
-          <p className="text-sm text-gray-500 mt-0.5">
-            Medidas: {item.customDimensions}
-          </p>
-        )}
-
-        {/* Variações e atributos selecionados */}
-        {(variations.length > 0 || Object.keys(attrs).length > 0) && (
-          <div className="mt-1 space-y-0.5">
-            {variations.map((v, i) => (
-              <p key={i} className="text-xs text-gray-800">{v.name}: {v.value}</p>
-            ))}
-            {Object.entries(attrs).map(([key, value]) => (
-              <p key={key} className="text-xs text-gray-800">{key}: {value}</p>
-            ))}
-          </div>
-        )}
-
-        {/* Arquivo de arte */}
-        {item.artFileUrl && (
-          <div className="mt-1">
-            {item.artFileUrl.startsWith('http') && !item.artFileUrl.includes('manus-storage') ? (
-              <p className="text-xs text-gray-800">Arte: <a href={item.artFileUrl} target="_blank" rel="noreferrer" className="underline truncate">{item.artFileUrl}</a></p>
-            ) : (
-              <p className="text-xs text-gray-800">Arte: {item.artFileUrl.split('/').pop()?.replace(/^\d+-/, '') ?? 'Arquivo enviado'}</p>
-            )}
-          </div>
-        )}
-        {/* Prazo, previsão e entrega */}
-        <div className="mt-1 space-y-0.5">
-          {item.prazoName && (
-            <p className="text-xs text-gray-800">Prazo: {item.prazoName}</p>
-          )}
-          {item.forecastLabel && (
-            <p className="text-xs text-gray-800">{item.forecastLabel}</p>
-          )}
-          {item.shippingLabel && (
-            <p className="text-xs text-gray-800">
-              Entrega: {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}
-            </p>
-          )}
-        </div>
+        {/* Especificações padronizadas */}
+        <OrderItemSpecs
+          compact
+          customDimensions={item.customDimensions}
+          variationSnapshot={item.variationSnapshot}
+          selectedAttributes={item.selectedAttributes}
+          artFileUrl={item.artFileUrl}
+          notes={item.notes}
+          prazoName={item.prazoName}
+          forecastLabel={item.forecastLabel}
+          shippingLabel={item.shippingLabel}
+          shippingPrice={item.shippingPrice}
+        />
 
         {/* Preço unitário */}
         <p className="text-sm text-gray-500 mt-1">
