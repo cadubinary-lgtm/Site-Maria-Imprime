@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -335,6 +335,14 @@ function PreImpressaoColumn({
   // Quando o pedido está bloqueado comercialmente, exibe sempre o status de espera
   const effectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
   const [selected, setSelected] = useState(effectiveStatus);
+  
+  // ─── Sincronizar estado local com mudanças de orderStatus (reatividade em tempo real) ───
+  useEffect(() => {
+    const newEffectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
+    setSelected(newEffectiveStatus);
+    onSelectedStatusChange?.(newEffectiveStatus);
+  }, [orderStatus, preProductionStatus, isCommercialLocked, onSelectedStatusChange]);
+  
   // Notifica o pai quando o status muda (para alerta dinâmico na col de prévia)
   const handleSelectedChange = (v: string) => { setSelected(v); onSelectedStatusChange?.(v); };
   const [requireResend, setRequireResend] = useState(false);
@@ -576,6 +584,11 @@ function ItemPreviewSection({
   const [pendingPreviewNotes, setPendingPreviewNotes] = useState("");
   // Estado do status selecionado no dropdown (para mensagem dinâmica no alerta)
   const [selectedStatus, setSelectedStatus] = useState(preProductionStatus);
+  
+  // Sincronizar selectedStatus com preProductionStatus (reatividade em tempo real)
+  useEffect(() => {
+    setSelectedStatus(preProductionStatus);
+  }, [preProductionStatus]);
 
   const { data: itemPreviews = [], isLoading: itemPreviewsLoading } =
     trpc.checkout.getArtPreviews.useQuery({ orderId, orderItemId });

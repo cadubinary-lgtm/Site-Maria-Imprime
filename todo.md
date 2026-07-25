@@ -2367,3 +2367,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alertas dinâmicos de resolução na tela do cliente (Cenário A: arte_final_aprovada)
 - [x] Alertas dinâmicos de resolução na tela do cliente (Cenário B: ajustar_arte/reenvio)
 - [x] Alertas dinâmicos de resolução na tela do cliente (Cenário C: prova para aprovação)
+
+## Reatividade em Tempo Real do Bloco Pré-Impressão (Sessão Atual)
+- [x] Adicionar useEffect no PreImpressaoColumn para sincronizar com orderStatus
+- [x] Adicionar useEffect no ItemPreviewSection para sincronizar selectedStatus com preProductionStatus
+- [x] Reatividade em tempo real: quando status global muda, bloco Pré-Impressão atualiza sem F5
