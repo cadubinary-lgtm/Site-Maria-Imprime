@@ -252,6 +252,12 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     }
   };
 
+  // Hook de prévias de arte — DEVE ficar aqui no topo (regras dos hooks do React)
+  const artPreviewsQuery = trpc.checkout.getArtPreviews.useQuery(
+    { orderId: item.orderId, orderItemId: item.id },
+    { enabled: !!item.id && !!item.orderId }
+  );
+
   if (isLoading || !correctionData?.correctionAction) return null;
 
   // Opção 1: Exigir Reenvio do Cliente
@@ -318,12 +324,8 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
 
   // Opção 2: Enviar Prova para Aprovação — layout em duas colunas
   if (correctionData.correctionAction === "proof") {
-    // Busca as prévias de arte para exibir na coluna esquerda
-    const artPreviews = trpc.checkout.getArtPreviews.useQuery(
-      { orderId: item.orderId, orderItemId: item.id },
-      { enabled: !!item.id && !!item.orderId }
-    );
-    const latestPreview = (artPreviews.data as any[])?.[0];
+    // Usa o hook já declarado no topo do componente (regras dos hooks do React)
+    const latestPreview = (artPreviewsQuery.data as any[])?.[0];
     const previewImageUrl = latestPreview?.imageUrl ? buildImageUrl(latestPreview.imageUrl) : (item.artPreviewUrl ? buildImageUrl(item.artPreviewUrl) : null);
 
     // Texto do WhatsApp com número do pedido
