@@ -338,7 +338,23 @@ export const appRouter = router({
           sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.orderId}`
         ) as any;
         const items = (itemRows[0] ?? []) as any[];
-        return { order, items };
+        // Buscar dados completos do cliente (customerAccount + endereço padrão)
+        let customerData: any = null;
+        if (order.customerId) {
+          const customerRows = await db.execute(
+            sqlOp`SELECT
+              ca.id, ca.firstName, ca.lastName, ca.email, ca.phone, ca.cpfCnpj,
+              addr.fullName as addrFullName, addr.phone as addrPhone,
+              addr.street, addr.number, addr.complement, addr.neighborhood,
+              addr.city, addr.state, addr.zipCode
+            FROM customer_accounts ca
+            LEFT JOIN customerAddresses addr ON addr.userId = ca.id AND addr.isDefault = 1
+            WHERE ca.id = ${order.customerId}
+            LIMIT 1`
+          ) as any;
+          customerData = (customerRows[0] ?? [])[0] ?? null;
+        }
+        return { order, items, customerData };
       }),
     deleteOrder: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
@@ -1387,7 +1403,24 @@ export const appRouter = router({
           sqlOp`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${input.id}`
         ) as any;
         const items = (itemRows[0] ?? []) as any[];
-        return { ...order, items };
+        // Buscar dados completos do cliente (customerAccount + endereço padrão)
+        let customerData: any = null;
+        const orderAny = order as any;
+        if (orderAny.customerId) {
+          const customerRows = await db.execute(
+            sqlOp`SELECT
+              ca.id, ca.firstName, ca.lastName, ca.email, ca.phone, ca.cpfCnpj,
+              addr.fullName as addrFullName, addr.phone as addrPhone,
+              addr.street, addr.number, addr.complement, addr.neighborhood,
+              addr.city, addr.state, addr.zipCode
+            FROM customer_accounts ca
+            LEFT JOIN customerAddresses addr ON addr.userId = ca.id AND addr.isDefault = 1
+            WHERE ca.id = ${orderAny.customerId}
+            LIMIT 1`
+          ) as any;
+          customerData = (customerRows[0] ?? [])[0] ?? null;
+        }
+        return { ...order, items, customerData };
       }),
     getOrderHistory: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))

@@ -26,6 +26,24 @@ import {
   Search,
 } from "lucide-react";
 
+function formatPhoneDisplay(phone: string | null | undefined): string {
+  if (!phone) return "Não informado";
+  const digits = phone.replace(/\D/g, "");
+  // Remove +55 se vier com código do país
+  const local = digits.startsWith("55") && digits.length > 11 ? digits.slice(2) : digits;
+  if (local.length === 11) return `(${local.slice(0,2)}) ${local.slice(2,7)}-${local.slice(7)}`;
+  if (local.length === 10) return `(${local.slice(0,2)}) ${local.slice(2,6)}-${local.slice(6)}`;
+  return phone;
+}
+
+function formatCpfCnpjDisplay(value: string | null | undefined): string {
+  if (!value) return "Não informado";
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 11) return `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6,9)}-${digits.slice(9)}`;
+  if (digits.length === 14) return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5,8)}/${digits.slice(8,12)}-${digits.slice(12)}`;
+  return value;
+}
+
 const STATUS_LABELS: Record<string, string> = {
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
@@ -412,7 +430,7 @@ export default function MyAccountPage() {
                         <Input value={editForm.phone} onChange={setField("phone")} placeholder="(11) 99999-9999" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">
-                          {(displayProfile as any).phone || <span className="text-gray-400 italic">Não informado</span>}
+                          {formatPhoneDisplay((displayProfile as any).phone)}
                         </p>
                       )}
                     </div>
@@ -423,7 +441,7 @@ export default function MyAccountPage() {
                         <Input value={editForm.cpfCnpj} onChange={setField("cpfCnpj")} placeholder="000.000.000-00" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">
-                          {(profile?.cpfCnpj) || <span className="text-gray-400 italic">Não informado</span>}
+                          {formatCpfCnpjDisplay(profile?.cpfCnpj)}
                         </p>
                       )}
                     </div>
