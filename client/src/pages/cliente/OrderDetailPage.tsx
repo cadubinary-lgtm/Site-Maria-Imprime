@@ -487,6 +487,33 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   return null;
 }
 
+// ─── Wrapper com exclusão mútua: Prova Pendente vs Arte Aprovada ────────────────
+// Regra: se há uma prova/correção ATIVA (correctionAction não nulo), renderiza APENAS
+// o bloco de correção (laranja ou azul). O bloco verde só aparece quando não há
+// nenhuma ação pendente E as condições de produção/aprovada são satisfeitas.
+function ItemPreviewOrApproved({
+  item, orderId, orderStatus, onLightbox
+}: {
+  item: any; orderId: number; orderStatus?: string; onLightbox: (url: string) => void;
+}) {
+  const { data: correctionData, isLoading } = trpc.checkout.getItemCorrectionAction.useQuery(
+    { orderItemId: item.id },
+    { enabled: !!item.id }
+  );
+
+  // Enquanto carrega, não renderiza nada para evitar flash
+  if (isLoading) return null;
+
+  // Se há uma ação de correção ativa (resend ou proof), renderiza SOMENTE o bloco de correção
+  const hasActiveCorrection = !!correctionData?.correctionAction;
+  if (hasActiveCorrection) {
+    return <ItemCorrectionAction item={item} orderId={orderId} />;
+  }
+
+  // Sem ação pendente: renderiza o bloco verde de arte aprovada (se condições satisfeitas)
+  return <ItemApprovedPreview item={item} onLightbox={onLightbox} orderStatus={orderStatus} />;
+}
+
 // Status steps dinâmicos por tipo de entrega e pagamento
 function getStatusSteps(order: any) {
   const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
@@ -793,11 +820,8 @@ export default function OrderDetailPage() {
                             notes={item.notes}
                           />
 
-                          {/* Prévia aprovada */}
-                          <ItemApprovedPreview item={item} onLightbox={setLightboxUrl} orderStatus={order.status} />
-
-                          {/* Ação de correção */}
-                          <ItemCorrectionAction item={item} orderId={order.id} />
+                          {/* Bloco de prévia/correção: exclusão mútua entre prova pendente e arte aprovada */}
+                          <ItemPreviewOrApproved item={item} orderId={order.id} orderStatus={order.status} onLightbox={setLightboxUrl} />
                         </div>
                       </div>
                     );
