@@ -1093,39 +1093,59 @@ export default function AdminOrderDetail() {
           })()}
 
           {/* ── Dados do Cliente ── */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" /> Dados do Cliente
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Nome</p>
-                  <p className="font-semibold text-gray-900">{o.deliveryFullName || "Não informado"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Telefone</p>
-                  <p className="font-semibold text-gray-900">{formatPhone(o.deliveryPhone)}</p>
-                </div>
-                {o.guestEmail && (
-                  <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">E-mail</p>
-                    <p className="font-semibold text-gray-900 break-all">{o.guestEmail}</p>
+          {(() => {
+            // Prioridade: dados do perfil cadastrado > dados do checkout
+            const cd = o.customerData;
+            const name = cd ? `${cd.firstName} ${cd.lastName}` : (o.deliveryFullName || o.guestName || "Não informado");
+            const phone = cd?.phone || o.deliveryPhone || null;
+            const email = cd?.email || o.guestEmail || null;
+            const cpfCnpj = cd?.cpfCnpj || o.cpfCnpj || null;
+            // Endereço: prioridade ao endereço padrão do cadastro, depois ao do checkout
+            const addrObj = cd?.street ? {
+              deliveryStreet: cd.street,
+              deliveryNumber: cd.number,
+              deliveryComplement: cd.complement,
+              deliveryNeighborhood: cd.neighborhood,
+              deliveryCity: cd.city,
+              deliveryState: cd.state,
+              deliveryZipCode: cd.zipCode,
+            } : o;
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" /> Dados do Cliente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Nome</p>
+                      <p className="font-semibold text-gray-900">{name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Telefone</p>
+                      <p className="font-semibold text-gray-900">{formatPhone(phone)}</p>
+                    </div>
+                    {email && (
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">E-mail</p>
+                        <p className="font-semibold text-gray-900 break-all">{email}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">CPF/CNPJ</p>
+                      <p className="font-semibold text-gray-900">{formatCpfCnpj(cpfCnpj)}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Endereço de Entrega</p>
+                      <p className="font-semibold text-gray-900">{formatAddress(addrObj)}</p>
+                    </div>
                   </div>
-                )}
-                <div>
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">CPF/CNPJ</p>
-                  <p className="font-semibold text-gray-900">{formatCpfCnpj(o.cpfCnpj)}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Endereço de Entrega</p>
-                  <p className="font-semibold text-gray-900">{formatAddress(o)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* ── Resumo Financeiro ── */}
           <Card>
