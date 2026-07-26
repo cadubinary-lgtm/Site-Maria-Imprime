@@ -4,6 +4,8 @@
  * Usado em: CartPage, OrderDetailPage (cliente) e AdminOrderDetail (admin).
  * Rótulos curtos e limpos conforme padrão definido.
  *
+ * Layout: Rótulo (cinza, caixa alta) acima do valor (preto, destaque)
+ *
  * Rótulos padrão:
  *   Medidas: 1x1
  *   Impressão: Solvente
@@ -155,7 +157,15 @@ export function OrderItemSpecs({
   const hasContent = largura || altura || allSpecs.length > 0 || artFileUrl || notes || prazoName || forecastLabel || shippingLabel;
   if (!hasContent) return null;
 
-  // ── Linha de especificação padrão ──────────────────────────────────────────
+  // ── Bloco de especificação em layout vertical (rótulo acima do valor) ──────
+  const SpecBlock = ({ label, value }: { label: string; value: string }) => (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
+      <span className="text-sm font-medium text-gray-900 leading-snug">{value}</span>
+    </div>
+  );
+
+  // ── Linha de especificação padrão (para modo compacto) ──────────────────────
   const SpecLine = ({ label, value }: { label: string; value: string }) => (
     <p className="text-xs text-gray-700 leading-relaxed">
       <span className="text-gray-400">{label}:</span>{" "}
@@ -195,50 +205,55 @@ export function OrderItemSpecs({
     );
   }
 
-  // Modo padrão: bloco cinza com título
+  // Modo padrão: grid de blocos em layout vertical (rótulo acima do valor)
   return (
-    <div className="bg-gray-50 rounded-lg p-3 space-y-1.5">
+    <div className="space-y-3">
       {/* Dimensões */}
       {(largura || altura) && (
-        <SpecLine label="Medidas" value={`${largura} × ${altura} m${largura && altura ? ` (${(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²)` : ''}`} />
+        <SpecBlock label="Medidas" value={`${largura} × ${altura} m${largura && altura ? ` (${(parseFloat(largura) * parseFloat(altura)).toFixed(2)} m²)` : ''}`} />
       )}
 
       {/* Especificações agrupadas */}
       {allSpecs.map((s, i) => (
-        <SpecLine key={i} label={s.label} value={s.value} />
+        <SpecBlock key={i} label={s.label} value={s.value} />
       ))}
 
       {/* Arte */}
       {artFileUrl && (
         artFileUrl.startsWith('http') && !artFileUrl.includes('manus-storage') ? (
-          <p className="text-xs text-gray-700 leading-relaxed">
-            <span className="text-gray-400">Arte:</span>{" "}
-            <a href={artFileUrl} target="_blank" rel="noreferrer" className="underline text-blue-600 break-all">{artFileUrl}</a>
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Arte</span>
+            <a href={artFileUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-600 underline break-all hover:text-blue-700">{artFileUrl}</a>
+          </div>
         ) : (
-          <SpecLine label="Arte" value={formatArtFileName(artFileUrl)} />
+          <SpecBlock label="Arte" value={formatArtFileName(artFileUrl)} />
         )
       )}
 
       {/* Observação */}
       {notes && (
-        <p className="text-xs text-gray-700 leading-relaxed flex items-start gap-1">
-          <FileText className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-          <span><span className="text-gray-400">Obs.:</span> <span className="italic">{notes}</span></span>
-        </p>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+            <FileText className="w-3 h-3" /> Obs.
+          </span>
+          <span className="text-sm font-medium text-gray-900 italic leading-snug">{notes}</span>
+        </div>
       )}
 
       {/* Prazo */}
-      {prazoName && <SpecLine label="Prazo" value={prazoName} />}
+      {prazoName && <SpecBlock label="Prazo" value={prazoName} />}
 
       {/* Previsão */}
       {forecastLabel && (
-        <p className="text-xs text-gray-700 leading-relaxed">{forecastLabel}</p>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Previsão</span>
+          <span className="text-sm font-medium text-gray-900 leading-snug">{forecastLabel}</span>
+        </div>
       )}
 
       {/* Entrega */}
       {shippingLabel && (
-        <SpecLine label="Entrega" value={formatShipping(shippingLabel, shippingPrice)} />
+        <SpecBlock label="Entrega" value={formatShipping(shippingLabel, shippingPrice)} />
       )}
     </div>
   );
