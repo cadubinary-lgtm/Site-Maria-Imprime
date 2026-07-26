@@ -72,11 +72,13 @@ function CartItemCard({
   onUpdateQuantity,
   onRemove,
   isUpdating,
+  isRecalculating,
 }: {
   item: CartItem;
   onUpdateQuantity: (id: number, qty: number) => void;
   onRemove: (id: number) => void;
   isUpdating: boolean;
+  isRecalculating: boolean;
 }) {
   const subtotal = Number(item.priceAtCart) * item.quantity;
 
@@ -120,6 +122,12 @@ function CartItemCard({
         <p className="text-sm text-gray-500 mt-1">
           {formatCurrency(item.priceAtCart)} / {item.unit}
         </p>
+        {/* Indicador de recálculo de frete */}
+        {isRecalculating && (
+          <p className="text-xs text-blue-500 mt-1 animate-pulse">
+            🔄 Recalculando frete...
+          </p>
+        )}
 
         {/* Controles de quantidade e subtotal */}
         <div className="flex items-center justify-between mt-2">
@@ -174,9 +182,22 @@ export default function CartPage() {
   // Carrinho funciona para todos: visitantes (cart_session), clientes (customer_session) e admin (session_token)
   const { data: items, isLoading, refetch } = trpc.cart.getItems.useQuery();
 
+  const [recalculating, setRecalculating] = useState<number | null>(null);
+
   const updateQty = trpc.cart.updateQuantity.useMutation({
-    onSuccess: () => refetch(),
-    onError: () => toast.error("Erro ao atualizar quantidade"),
+    onSuccess: async (_, variables) => {
+      await refetch();
+      // Verificar se o frete foi recalculado (item com CEP e transportadora)
+      const item = cartItems.find(i => i.id === variables.id);
+      if (item?.cepDestino && item?.shippingMethod && item.shippingMethod !== 'retirada' && !item.shippingMethod.startsWith('local_')) {
+        toast.success("Quantidade e frete atualizados!");
+      }
+      setRecalculating(null);
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar quantidade");
+      setRecalculating(null);
+    },
   });
 
   const removeItem = trpc.cart.removeItem.useMutation({
@@ -198,6 +219,11 @@ export default function CartPage() {
   const handleUpdateQuantity = async (id: number, qty: number) => {
     if (qty < 1) return;
     setUpdatingId(id);
+    // Verificar se o item tem frete por transportadora para mostrar indicador de recálculo
+    const item = cartItems.find(i => i.id === id);
+    if (item?.cepDestino && item?.shippingMethod && item.shippingMethod !== 'retirada' && !item.shippingMethod.startsWith('local_')) {
+      setRecalculating(id);
+    }
     await updateQty.mutateAsync({ id, quantity: qty });
     setUpdatingId(null);
   };
@@ -316,6 +342,7 @@ export default function CartPage() {
                         onUpdateQuantity={handleUpdateQuantity}
                         onRemove={handleRemove}
                         isUpdating={updatingId === item.id}
+                        isRecalculating={recalculating === item.id}
                       />
                       {index < cartItems.length - 1 && <Separator />}
                     </div>
