@@ -898,7 +898,11 @@ export const customerAuthRouter = router({
       // Buscar itens do pedido original
       const rows = await db.execute(
         sqlFn`
-          SELECT oi.productId, oi.quantity, oi.priceAtOrder, oi.selectedAttributes, oi.artFileUrl, oi.notes
+          SELECT oi.productId, oi.quantity, oi.priceAtOrder,
+            oi.selectedAttributes, oi.artFileUrl, oi.notes,
+            oi.variationSnapshot, oi.customDimensions,
+            oi.prazoName, oi.prazoHours, oi.forecastDate, oi.forecastLabel,
+            oi.shippingMethod, oi.shippingPrice, oi.shippingLabel, oi.cepDestino
           FROM orderItems oi
           INNER JOIN orders o ON o.id = oi.orderId
           WHERE o.id = ${input.orderId} AND o.customerId = ${session.customerId}
@@ -918,6 +922,16 @@ export const customerAuthRouter = router({
           selectedAttributes: item.selectedAttributes ?? undefined,
           artFileUrl: item.artFileUrl ?? undefined,
           notes: item.notes ?? undefined,
+          variationSnapshot: item.variationSnapshot ?? undefined,
+          customDimensions: item.customDimensions ?? undefined,
+          prazoName: item.prazoName ?? undefined,
+          prazoHours: item.prazoHours ?? undefined,
+          forecastDate: item.forecastDate ?? undefined,
+          forecastLabel: item.forecastLabel ?? undefined,
+          shippingMethod: item.shippingMethod ?? undefined,
+          shippingPrice: item.shippingPrice ? parseFloat(item.shippingPrice) : undefined,
+          shippingLabel: item.shippingLabel ?? undefined,
+          cepDestino: item.cepDestino ?? undefined,
         });
         addedCount++;
       }
