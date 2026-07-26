@@ -25,6 +25,49 @@ import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
 import AdminLayout from "@/components/AdminLayout";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Formata telefone para (XX) XXXXX-XXXX ou (XX) XXXX-XXXX */
+function formatPhone(phone?: string | null): string {
+  if (!phone) return "Não informado";
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  } else if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+  }
+  return phone;
+}
+
+/** Formata CPF/CNPJ para exibição */
+function formatCpfCnpj(doc?: string | null): string {
+  if (!doc) return "Não informado";
+  const cleaned = doc.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    // CPF: XXX.XXX.XXX-XX
+    return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+  } else if (cleaned.length === 14) {
+    // CNPJ: XX.XXX.XXX/XXXX-XX
+    return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5, 8)}/${cleaned.slice(8, 12)}-${cleaned.slice(12)}`;
+  }
+  return doc;
+}
+
+/** Formata endereço completo */
+function formatAddress(order: any): string {
+  const parts = [];
+  if (order.deliveryStreet) parts.push(order.deliveryStreet);
+  if (order.deliveryNumber) parts.push(order.deliveryNumber);
+  if (order.deliveryComplement) parts.push(order.deliveryComplement);
+  if (order.deliveryNeighborhood) parts.push(order.deliveryNeighborhood);
+  if (order.deliveryCity || order.deliveryState) {
+    const city = order.deliveryCity || "";
+    const state = order.deliveryState || "";
+    parts.push(`${city}${city && state ? "/" : ""}${state}`);
+  }
+  if (order.deliveryZipCode) parts.push(`CEP ${order.deliveryZipCode}`);
+  return parts.length > 0 ? parts.join(" - ") : "Endereço não informado";
+}
+
 function getAdminStatusSteps(order: any) {
   const isPickup = order.shippingMethod === "retirada" || order.shippingMethod === "pickup" || !order.deliveryStreet;
   const isInProduction = ["em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue"].includes(order.status);
@@ -1060,27 +1103,25 @@ export default function AdminOrderDetail() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Nome</p>
-                  <p className="font-semibold text-gray-900">{o.deliveryFullName}</p>
+                  <p className="font-semibold text-gray-900">{o.deliveryFullName || "Não informado"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Telefone</p>
-                  <p className="font-semibold text-gray-900">{o.deliveryPhone}</p>
+                  <p className="font-semibold text-gray-900">{formatPhone(o.deliveryPhone)}</p>
                 </div>
                 {o.guestEmail && (
-                  <div className="md:col-span-2">
+                  <div>
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">E-mail</p>
-                    <p className="font-semibold text-gray-900">{o.guestEmail}</p>
+                    <p className="font-semibold text-gray-900 break-all">{o.guestEmail}</p>
                   </div>
                 )}
+                <div>
+                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">CPF/CNPJ</p>
+                  <p className="font-semibold text-gray-900">{formatCpfCnpj(o.cpfCnpj)}</p>
+                </div>
                 <div className="md:col-span-2">
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Endereço de Entrega</p>
-                  <p className="font-semibold text-gray-900">
-                    {o.deliveryStreet}, {o.deliveryNumber}
-                    {o.deliveryComplement ? ` - ${o.deliveryComplement}` : ""}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {o.deliveryNeighborhood} · {o.deliveryCity} - {o.deliveryState} · CEP {o.deliveryZipCode}
-                  </p>
+                  <p className="font-semibold text-gray-900">{formatAddress(o)}</p>
                 </div>
               </div>
             </CardContent>
