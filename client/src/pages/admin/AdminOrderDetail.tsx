@@ -30,10 +30,12 @@ import AdminLayout from "@/components/AdminLayout";
 function formatPhone(phone?: string | null): string {
   if (!phone) return "Não informado";
   const cleaned = phone.replace(/\D/g, "");
-  if (cleaned.length === 11) {
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
-  } else if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+  // Remove +55 se vier com código do país (13 dígitos = +55 + 11)
+  const local = cleaned.startsWith("55") && cleaned.length > 11 ? cleaned.slice(2) : cleaned;
+  if (local.length === 11) {
+    return `(${local.slice(0, 2)}) ${local.slice(2, 7)}-${local.slice(7)}`;
+  } else if (local.length === 10) {
+    return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`;
   }
   return phone;
 }
@@ -1097,19 +1099,21 @@ export default function AdminOrderDetail() {
             // Prioridade: dados do perfil cadastrado > dados do checkout
             const cd = o.customerData;
             const name = cd ? `${cd.firstName} ${cd.lastName}` : (o.deliveryFullName || o.guestName || "Não informado");
+            // Telefone: perfil (com remoção de +55) > checkout
             const phone = cd?.phone || o.deliveryPhone || null;
             const email = cd?.email || o.guestEmail || null;
             const cpfCnpj = cd?.cpfCnpj || o.cpfCnpj || null;
-            // Endereço: prioridade ao endereço padrão do cadastro, depois ao do checkout
-            const addrObj = cd?.street ? {
-              deliveryStreet: cd.street,
-              deliveryNumber: cd.number,
-              deliveryComplement: cd.complement,
-              deliveryNeighborhood: cd.neighborhood,
-              deliveryCity: cd.city,
-              deliveryState: cd.state,
-              deliveryZipCode: cd.zipCode,
-            } : o;
+            // Endereço: customerData já vem com COALESCE (addr > ca.address*)
+            // formatAddress espera campos com prefixo "delivery" — mapeamos aqui
+            const addrObj = {
+              deliveryStreet: cd?.street || o.deliveryStreet || null,
+              deliveryNumber: cd?.number || o.deliveryNumber || null,
+              deliveryComplement: cd?.complement || o.deliveryComplement || null,
+              deliveryNeighborhood: cd?.neighborhood || o.deliveryNeighborhood || null,
+              deliveryCity: cd?.city || o.deliveryCity || null,
+              deliveryState: cd?.state || o.deliveryState || null,
+              deliveryZipCode: cd?.zipCode || o.deliveryZipCode || null,
+            };
             return (
               <Card>
                 <CardHeader>
