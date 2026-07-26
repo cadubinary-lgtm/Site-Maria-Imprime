@@ -436,7 +436,7 @@ function PreImpressaoColumn({
     setSendProof(checked);
     if (checked) {
       setRequireResend(false);
-      setOperatorNote(PROOF_TERM); // Preenche automaticamente com o termo
+      // Campo de texto inicia vazio — operador escreve livremente
     } else {
       setOperatorNote("");
     }

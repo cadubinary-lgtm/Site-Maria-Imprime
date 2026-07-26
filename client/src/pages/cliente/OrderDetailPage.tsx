@@ -85,8 +85,14 @@ function PreviewResolutionAlert({ item }: { item: any }) {
   return null;
 }
 
-function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url: string) => void }) {
+function ItemApprovedPreview({ item, onLightbox, orderStatus }: { item: any; onLightbox: (url: string) => void; orderStatus?: string }) {
   const [imgError, setImgError] = useState(false);
+
+  // Bloco verde só aparece se: status global é 'em_producao' (ou posterior) OU dropdown rosa salvo em 'arte_final_aprovada'
+  const IN_PRODUCTION_STATUSES = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'];
+  const isInProduction = IN_PRODUCTION_STATUSES.includes(orderStatus ?? '');
+  const isArteFinalAprovada = (item.preProductionStatus ?? '') === 'arte_final_aprovada';
+  if (!isInProduction && !isArteFinalAprovada) return null;
 
   const { data: previews = [], isLoading } = trpc.checkout.getArtPreviews.useQuery(
     { orderId: item.orderId, orderItemId: item.id },
@@ -389,7 +395,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             {/* Mensagem da equipe (balão de chat) — só aparece se o operador digitou algo */}
             {operatorNote ? (
               <div className="bg-blue-100 border border-blue-200 rounded-2xl rounded-tl-sm px-4 py-3">
-                <p className="text-xs font-semibold text-blue-700 mb-1">💬 Orientação da Equipe</p>
+                <p className="text-xs font-semibold text-blue-700 mb-1">⚠️ Notas Importantes do Layout:</p>
                 <p className="text-sm text-blue-900 leading-relaxed whitespace-pre-wrap">{operatorNote}</p>
               </div>
             ) : (
@@ -788,7 +794,7 @@ export default function OrderDetailPage() {
                           />
 
                           {/* Prévia aprovada */}
-                          <ItemApprovedPreview item={item} onLightbox={setLightboxUrl} />
+                          <ItemApprovedPreview item={item} onLightbox={setLightboxUrl} orderStatus={order.status} />
 
                           {/* Ação de correção */}
                           <ItemCorrectionAction item={item} orderId={order.id} />
