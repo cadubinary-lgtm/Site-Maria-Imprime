@@ -2010,7 +2010,11 @@ export const appRouter = router({
         const orderNumber = order?.orderNumber ?? item?.orderId ?? "";
 
         await db.update(orderItems)
-          .set({ preProductionStatus: "arte_final_aprovada" } as any)
+          .set({
+            preProductionStatus: "arte_final_aprovada",
+            correctionAction: null,          // limpa a prova pendente
+            sendProofForApproval: false,     // reseta flag de prova
+          } as any)
           .where(eq(orderItems.id, input.orderItemId));
 
         // Notifica o operador com número do pedido e link direto
