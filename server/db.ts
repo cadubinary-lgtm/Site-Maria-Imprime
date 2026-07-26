@@ -1081,6 +1081,14 @@ export async function createOrderFromCart(data: {
     customDimensions?: string;
     artFileUrl?: string;
     notes?: string;
+    prazoName?: string | null;
+    prazoHours?: number | null;
+    forecastDate?: string | null;
+    forecastLabel?: string | null;
+    shippingMethod?: string | null;
+    shippingPrice?: number | null;
+    shippingLabel?: string | null;
+    cepDestino?: string | null;
   }>;
 }) {
   const db = await getDb();
@@ -1139,9 +1147,11 @@ export async function createOrderFromCart(data: {
       const productIdVal = item.productId ? Number(item.productId) : null;
       const itemResult = await db.execute(
         sql`
-          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, notes)
+          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, notes, prazoName, prazoHours, forecastDate, forecastLabel, shippingMethod, shippingPrice, shippingLabel, cepDestino)
           VALUES (${orderId}, ${productIdVal}, ${item.productName ?? 'Produto'}, ${item.quantity}, ${item.priceAtCart},
-            ${item.selectedAttributes ?? null}, ${item.variationSnapshot ?? null}, ${item.customDimensions ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null})
+            ${item.selectedAttributes ?? null}, ${item.variationSnapshot ?? null}, ${item.customDimensions ?? null}, ${item.artFileUrl ?? null}, ${item.notes ?? null},
+            ${item.prazoName ?? null}, ${item.prazoHours ?? 0}, ${item.forecastDate ?? null}, ${item.forecastLabel ?? null},
+            ${item.shippingMethod ?? null}, ${item.shippingPrice ?? 0}, ${item.shippingLabel ?? null}, ${item.cepDestino ?? null})
         `
       );
       const itemInsertId = (itemResult as any)[0]?.insertId ?? (itemResult as any).insertId;

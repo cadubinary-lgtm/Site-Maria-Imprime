@@ -166,6 +166,14 @@ export const orderItems = mysqlTable("orderItems", {
   customDimensions: varchar("customDimensions", { length: 100 }), // Ex: "1x2" (largura x altura em metros)
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   notes: longtext("notes"), // Observações do cliente
+  prazoName: varchar("prazoName", { length: 100 }), // Nome do prazo de produção
+  prazoHours: int("prazoHours").default(0), // Prazo de produção em horas
+  forecastDate: varchar("forecastDate", { length: 50 }), // Data prevista de entrega/retirada
+  forecastLabel: varchar("forecastLabel", { length: 255 }), // Texto da previsão de entrega
+  shippingMethod: varchar("shippingMethod", { length: 50 }), // Método de frete
+  shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).default("0"), // Valor do frete
+  shippingLabel: varchar("shippingLabel", { length: 255 }), // Nome exibível do frete
+  cepDestino: varchar("cepDestino", { length: 10 }), // CEP de destino
   preProductionStatus: varchar("preProductionStatus", { length: 50 }).default("liberado_analise"), // Status de pré-impressão por item
   requireClientResend: boolean("requireClientResend").default(false), // Operador exigiu reenvio do cliente
   sendProofForApproval: boolean("sendProofForApproval").default(false), // Operador enviou prova para aprovação
