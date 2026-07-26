@@ -395,6 +395,7 @@ function PreImpressaoColumn({
   const [requireResend, setRequireResend] = useState(false);
   const [sendProof, setSendProof] = useState(false);
   const [operatorNote, setOperatorNote] = useState("");
+  const [termText, setTermText] = useState(PROOF_TERM);
   const [isSendingToClient, setIsSendingToClient] = useState(false);
   const utils = trpc.useUtils();
 
@@ -416,6 +417,7 @@ function PreImpressaoColumn({
       setRequireResend(false);
       setSendProof(false);
       setOperatorNote("");
+      setTermText(PROOF_TERM);
       utils.checkout.getOrderById.invalidate({ id: orderId });
       utils.checkout.getItemCorrectionAction.invalidate({ orderItemId });
     },
@@ -436,7 +438,8 @@ function PreImpressaoColumn({
     setSendProof(checked);
     if (checked) {
       setRequireResend(false);
-      // Campo de texto inicia vazio — operador escreve livremente
+      setOperatorNote(""); // Mensagem personalizada inicia vazia
+      setTermText(PROOF_TERM); // Termo já vem preenchido com o texto oficial
     } else {
       setOperatorNote("");
     }
@@ -544,7 +547,7 @@ function PreImpressaoColumn({
           </label>
         </div>
 
-        {/* Campo de Observação */}
+        {/* Campo 1 — Mensagem personalizada para o cliente */}
         {(requireResend || sendProof) && (
           <div className="space-y-1">
             <p className="text-[10px] font-medium text-gray-700">
@@ -553,8 +556,21 @@ function PreImpressaoColumn({
             <textarea
               value={operatorNote}
               onChange={(e) => setOperatorNote(e.target.value)}
-              placeholder={requireResend ? "Ex: A resolução da imagem está muito baixa (abaixo de 150 DPI). Por favor, envie um arquivo com maior qualidade." : ""}
-              rows={requireResend ? 3 : 5}
+              placeholder="Digite um recado personalizado para o cliente..."
+              rows={3}
+              className="w-full text-xs border border-blue-200 rounded p-1.5 resize-none bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+            />
+          </div>
+        )}
+
+        {/* Campo 2 — Termo de Responsabilidade editável (só aparece ao enviar prova) */}
+        {sendProof && (
+          <div className="space-y-1">
+            <p className="text-[10px] font-medium text-gray-700">Termo de Responsabilidade (editável):</p>
+            <textarea
+              value={termText}
+              onChange={(e) => setTermText(e.target.value)}
+              rows={5}
               className="w-full text-xs border border-blue-200 rounded p-1.5 resize-none bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
             />
           </div>
@@ -599,6 +615,7 @@ function PreImpressaoColumn({
                 requireClientResend: requireResend,
                 sendProofForApproval: sendProof,
                 operatorNote: operatorNote.trim() || undefined,
+                termText: sendProof ? (termText.trim() || undefined) : undefined,
               });
               // Atualiza automaticamente o status de pré-impressão com base na ação selecionada
               const autoStatus = requireResend ? "aguardando_reenvio_arquivo" : "aguardando_aprovacao_cliente";

@@ -1658,6 +1658,7 @@ export const appRouter = router({
         requireClientResend: z.boolean().optional(),
         sendProofForApproval: z.boolean().optional(),
         operatorNote: z.string().optional(),
+        termText: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -1673,6 +1674,7 @@ export const appRouter = router({
             sendProofForApproval: input.sendProofForApproval ?? false,
             correctionAction: correctionAction,
             operatorNote: input.operatorNote ?? null,
+            termText: input.termText ?? null,
             // Muda o status de pré-impressão conforme a ação
             preProductionStatus: input.requireClientResend ? "com_problemas" : (input.sendProofForApproval ? "aguardando_aprovacao" : undefined),
           } as any)
@@ -1833,6 +1835,7 @@ export const appRouter = router({
           sendProofForApproval: (item as any).sendProofForApproval ?? false,
           correctionAction: (item as any).correctionAction ?? null,
           operatorNote: (item as any).operatorNote ?? null,
+          termText: (item as any).termText ?? null,
           clientRefusalNote: (item as any).clientRefusalNote ?? null,
         };
       }),

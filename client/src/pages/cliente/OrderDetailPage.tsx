@@ -338,8 +338,9 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     const waMessage = encodeURIComponent(`Olá, estou com dúvidas sobre a prévia da arte do meu pedido ${item.orderNumber || item.orderId}`);
     const waLink = `https://wa.me/5522999459596?text=${waMessage}`;
 
-    // Termo de responsabilidade — texto fixo, sempre no accordion
-    const termText = "Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!";
+    // Termo de responsabilidade — vem do banco (editado pelo operador) ou usa o texto padrão
+    const PROOF_TERM_DEFAULT = "Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!";
+    const termText = (correctionData as any).termText?.trim() || PROOF_TERM_DEFAULT;
     // Nota do operador — exibida SOMENTE no balão de chat, se existir
     const operatorNote = correctionData.operatorNote?.trim() || null;
 
