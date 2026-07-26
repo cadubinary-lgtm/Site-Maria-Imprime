@@ -13,6 +13,12 @@ import { Loader2, ArrowLeft, Package, MapPin, Clock,
 import { toast } from "sonner";
 import { useState, useRef } from "react";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
 // Constrói a URL absoluta da imagem a partir de uma URL relativa ou absoluta,
@@ -154,6 +160,34 @@ function ItemApprovedPreview({ item, onLightbox }: { item: any; onLightbox: (url
   );
 }
 
+// ─── Versão compacta (legenda discreta) do alerta de resolução ─────────────────
+function PreviewResolutionAlertCompact({ item }: { item: any }) {
+  const { data: correctionData } = trpc.checkout.getItemCorrectionAction.useQuery(
+    { orderItemId: item.id },
+    { enabled: !!item.id }
+  );
+  const preProductionStatus: string = item.preProductionStatus ?? "";
+  const correctionAction: string | null = correctionData?.correctionAction ?? null;
+  const requireClientResend: boolean = correctionData?.requireClientResend ?? false;
+  const sendProofForApproval: boolean = correctionData?.sendProofForApproval ?? false;
+
+  let text = "";
+  if (preProductionStatus === "arte_final_aprovada") {
+    text = "Prévia do arquivo aprovado. Qualidade de impressão depende da resolução original do arquivo enviado.";
+  } else if (preProductionStatus === "ajustar_arte" || requireClientResend || correctionAction === "resend") {
+    text = "Print do operador para referência do ajuste. Qualidade de impressão depende da resolução original do arquivo enviado.";
+  } else if (sendProofForApproval || correctionAction === "proof") {
+    text = "Prova de layout para validação visual. Qualidade de impressão depende da resolução original do arquivo enviado.";
+  }
+
+  if (!text) return null;
+  return (
+    <p className="text-[11px] text-gray-500 italic text-center leading-relaxed px-2">
+      ⚠️ {text}
+    </p>
+  );
+}
+
 // ─── Componente de Ação de Correção por Item ──────────────────────────────────────────────────────────────────────────────
 function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number }) {
   const utils = trpc.useUtils();
@@ -282,82 +316,161 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     );
   }
 
-  // Opção 2: Enviar Prova para Aprovação
+  // Opção 2: Enviar Prova para Aprovação — layout em duas colunas
   if (correctionData.correctionAction === "proof") {
+    // Busca as prévias de arte para exibir na coluna esquerda
+    const artPreviews = trpc.checkout.getArtPreviews.useQuery(
+      { orderId: item.orderId, orderItemId: item.id },
+      { enabled: !!item.id && !!item.orderId }
+    );
+    const latestPreview = (artPreviews.data as any[])?.[0];
+    const previewImageUrl = latestPreview?.imageUrl ? buildImageUrl(latestPreview.imageUrl) : (item.artPreviewUrl ? buildImageUrl(item.artPreviewUrl) : null);
+
+    // Texto do WhatsApp com número do pedido
+    const waMessage = encodeURIComponent(`Olá, estou com dúvidas sobre a prévia da arte do meu pedido ${item.orderNumber || item.orderId}`);
+    const waLink = `https://wa.me/5522999459596?text=${waMessage}`;
+
+    // Termo de responsabilidade padrão
+    const defaultTerm = "Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!";
+    const termText = correctionData.operatorNote || defaultTerm;
+
     return (
-      <div className="border border-blue-200 bg-blue-50 rounded-xl p-4 mt-3">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <FileText className="w-5 h-5 text-blue-600" />
+      <div className="border border-blue-200 bg-blue-50 rounded-xl overflow-hidden mt-3">
+        {/* Cabeçalho */}
+        <div className="px-4 pt-4 pb-2 border-b border-blue-100">
+          <p className="text-sm font-bold text-blue-800">🎨 Prévia da Arte Pronta para Aprovação</p>
+        </div>
+
+        {/* Layout em duas colunas */}
+        <div className="flex flex-col md:flex-row gap-0">
+
+          {/* ── Coluna Esquerda: Imagem (60%) ── */}
+          <div className="md:w-[60%] p-4 flex flex-col items-center justify-start gap-3 border-b md:border-b-0 md:border-r border-blue-100 bg-white/60">
+            {previewImageUrl ? (
+              <>
+                <div
+                  className="relative group cursor-pointer w-full max-w-xs"
+                  onClick={() => {
+                    const url = previewImageUrl;
+                    if (url) {
+                      // Abre lightbox via evento customizado ou window.open
+                      window.open(url, "_blank");
+                    }
+                  }}
+                >
+                  <img
+                    src={previewImageUrl}
+                    alt="Prévia da Arte"
+                    className="w-full rounded-xl border border-blue-200 shadow-sm object-contain max-h-64"
+                  />
+                  <div className="absolute inset-0 bg-black/25 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-white/90 rounded-full p-2">
+                      <ZoomIn className="w-5 h-5 text-blue-700" />
+                    </div>
+                  </div>
+                </div>
+                {/* Legenda discreta abaixo da imagem */}
+                <PreviewResolutionAlertCompact item={item} />
+              </>
+            ) : (
+              <div className="w-full max-w-xs h-40 rounded-xl border border-blue-200 bg-blue-100/50 flex flex-col items-center justify-center gap-2">
+                <FileText className="w-8 h-8 text-blue-400" />
+                <p className="text-xs text-blue-600 text-center">Prévia sendo preparada<br/>pela nossa equipe</p>
+              </div>
+            )}
           </div>
-          <div className="flex-1 space-y-3">
-            <div>
-              <p className="text-sm font-bold text-blue-800">🎨 Prévia da Arte Pronta para Aprovação</p>
-              <p className="text-xs text-blue-600 mt-0.5">
-                Nossa equipe preparou a arte do seu produto. Revise com atenção antes de aprovar.
-              </p>
-            </div>
-            {/* Prévia da arte */}
-            {item.artPreviewUrl && (
-              <div className="bg-white border border-blue-200 rounded-lg p-2 inline-block">
-                <img src={item.artPreviewUrl} alt="Prévia da Arte" className="max-w-[200px] max-h-[200px] object-contain rounded" />
-              </div>
-            )}
-            {/* Termo de responsabilidade */}
-            {correctionData.operatorNote && (
-              <div className="bg-white border border-blue-200 rounded-lg p-3">
-                <p className="text-xs font-semibold text-blue-700 mb-1">📄 Termo de Responsabilidade:</p>
-                <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{correctionData.operatorNote}</p>
-              </div>
-            )}
-            {/* Botões de ação */}
-            {!showRefusalInput ? (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700 text-white gap-2"
-                  disabled={approveMutation.isPending}
-                  onClick={() => approveMutation.mutate({ orderItemId: item.id })}
-                >
-                  {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />}
-                  Aprovar Arte e Iniciar Produção
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50 gap-2"
-                  onClick={() => setShowRefusalInput(true)}
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  Recusar Prova
-                </Button>
+
+          {/* ── Coluna Direita: Informações e Ações (40%) ── */}
+          <div className="md:w-[40%] p-4 flex flex-col gap-3">
+
+            {/* Mensagem da equipe (balão de chat) */}
+            {correctionData.operatorNote ? (
+              <div className="bg-blue-100 border border-blue-200 rounded-2xl rounded-tl-sm px-3 py-2.5">
+                <p className="text-[11px] font-semibold text-blue-700 mb-0.5">💬 Orientação da Equipe</p>
+                <p className="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">{correctionData.operatorNote}</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-red-700">Descreva o que precisa ser alterado:</p>
-                <textarea
-                  value={refusalNote}
-                  onChange={(e) => setRefusalNote(e.target.value)}
-                  placeholder="Ex: Preciso que o texto do telefone seja alterado para (11) 99999-0000 e a cor do fundo fique mais escura."
-                  rows={3}
-                  className="w-full text-sm border border-red-200 rounded-lg p-2.5 resize-none bg-white focus:outline-none focus:ring-2 focus:ring-red-300"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="bg-red-600 hover:bg-red-700 text-white gap-2"
-                    disabled={refuseMutation.isPending || !refusalNote.trim()}
-                    onClick={() => refuseMutation.mutate({ orderItemId: item.id, refusalNote: refusalNote.trim() })}
-                  >
-                    {refuseMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    Enviar Recusa
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setShowRefusalInput(false); setRefusalNote(""); }}>
-                    Cancelar
-                  </Button>
-                </div>
+              <div className="bg-green-50 border border-green-200 rounded-2xl rounded-tl-sm px-3 py-2.5">
+                <p className="text-[11px] font-semibold text-green-700 mb-0.5">✅ Arte pronta!</p>
+                <p className="text-xs text-green-800 leading-relaxed">Nossa equipe preparou a arte do seu produto. Revise com atenção antes de aprovar.</p>
               </div>
             )}
+
+            {/* Termo de Responsabilidade retrátil */}
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="term" className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-gray-600 hover:no-underline hover:bg-gray-50">
+                  📄 Ler Termo de Responsabilidade
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3">
+                  <p className="text-[11px] text-gray-500 leading-relaxed whitespace-pre-wrap">{termText}</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            {/* Botões de ação */}
+            <div className="mt-auto space-y-2">
+              {!showRefusalInput ? (
+                <>
+                  <Button
+                    size="sm"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
+                    disabled={approveMutation.isPending}
+                    onClick={() => approveMutation.mutate({ orderItemId: item.id })}
+                  >
+                    {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />}
+                    Aprovar Arte e Iniciar Produção
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-red-300 text-red-600 hover:bg-red-50 gap-2 bg-transparent"
+                    onClick={() => setShowRefusalInput(true)}
+                  >
+                    <AlertCircle className="w-4 h-4" />
+                    Recusar Prova
+                  </Button>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-red-700">Descreva o que precisa ser alterado:</p>
+                  <textarea
+                    value={refusalNote}
+                    onChange={(e) => setRefusalNote(e.target.value)}
+                    placeholder="Ex: Preciso que o texto do telefone seja alterado para (11) 99999-0000 e a cor do fundo fique mais escura."
+                    rows={3}
+                    className="w-full text-sm border border-red-200 rounded-lg p-2.5 resize-none bg-white focus:outline-none focus:ring-2 focus:ring-red-300"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white gap-2 flex-1"
+                      disabled={refuseMutation.isPending || !refusalNote.trim()}
+                      onClick={() => refuseMutation.mutate({ orderItemId: item.id, refusalNote: refusalNote.trim() })}
+                    >
+                      {refuseMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      Enviar Recusa
+                    </Button>
+                    <Button size="sm" variant="outline" className="bg-transparent" onClick={() => { setShowRefusalInput(false); setRefusalNote(""); }}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Botão de suporte WhatsApp */}
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 text-[11px] text-green-700 hover:text-green-900 transition-colors pt-1"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                Dúvidas sobre a sua arte? Fale com nosso suporte
+              </a>
+            </div>
           </div>
         </div>
       </div>
