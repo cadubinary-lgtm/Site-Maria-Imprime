@@ -1328,10 +1328,13 @@ export default function CheckoutPage() {
                 {selectedFrete && step !== "entrega" && (
                   <button
                     type="button"
-                    onClick={() => setStep("entrega")}
+                    onClick={() => {
+                      setSelectedFrete(null); // limpa seleção para reabrir tela de entrega sem auto-skip
+                      setStep("entrega");
+                    }}
                     className="w-full text-xs text-center text-gray-500 border border-gray-200 rounded-lg py-1.5 hover:border-orange-300 hover:text-orange-600 transition-colors"
                   >
-                    Alterar frete
+                    Alterar forma de envio
                   </button>
                 )}
 
