@@ -344,9 +344,15 @@ export const appRouter = router({
           const customerRows = await db.execute(
             sqlOp`SELECT
               ca.id, ca.firstName, ca.lastName, ca.email, ca.phone, ca.cpfCnpj,
-              addr.fullName as addrFullName, addr.phone as addrPhone,
-              addr.street, addr.number, addr.complement, addr.neighborhood,
-              addr.city, addr.state, addr.zipCode
+              COALESCE(addr.fullName, CONCAT(ca.firstName, ' ', ca.lastName)) as addrFullName,
+              COALESCE(addr.phone, ca.phone) as addrPhone,
+              COALESCE(addr.street, ca.addressStreet) as street,
+              COALESCE(addr.number, ca.addressNumber) as number,
+              COALESCE(addr.complement, ca.addressComplement) as complement,
+              COALESCE(addr.neighborhood, ca.addressNeighborhood) as neighborhood,
+              COALESCE(addr.city, ca.addressCity) as city,
+              COALESCE(addr.state, ca.addressState) as state,
+              COALESCE(addr.zipCode, ca.addressZipCode) as zipCode
             FROM customer_accounts ca
             LEFT JOIN customerAddresses addr ON addr.userId = ca.id AND addr.isDefault = 1
             WHERE ca.id = ${order.customerId}
@@ -1410,9 +1416,15 @@ export const appRouter = router({
           const customerRows = await db.execute(
             sqlOp`SELECT
               ca.id, ca.firstName, ca.lastName, ca.email, ca.phone, ca.cpfCnpj,
-              addr.fullName as addrFullName, addr.phone as addrPhone,
-              addr.street, addr.number, addr.complement, addr.neighborhood,
-              addr.city, addr.state, addr.zipCode
+              COALESCE(addr.fullName, CONCAT(ca.firstName, ' ', ca.lastName)) as addrFullName,
+              COALESCE(addr.phone, ca.phone) as addrPhone,
+              COALESCE(addr.street, ca.addressStreet) as street,
+              COALESCE(addr.number, ca.addressNumber) as number,
+              COALESCE(addr.complement, ca.addressComplement) as complement,
+              COALESCE(addr.neighborhood, ca.addressNeighborhood) as neighborhood,
+              COALESCE(addr.city, ca.addressCity) as city,
+              COALESCE(addr.state, ca.addressState) as state,
+              COALESCE(addr.zipCode, ca.addressZipCode) as zipCode
             FROM customer_accounts ca
             LEFT JOIN customerAddresses addr ON addr.userId = ca.id AND addr.isDefault = 1
             WHERE ca.id = ${orderAny.customerId}
