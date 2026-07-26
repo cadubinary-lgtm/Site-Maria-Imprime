@@ -353,8 +353,8 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
         {/* Layout em duas colunas */}
         <div className="flex flex-col md:flex-row gap-0">
 
-          {/* ── Coluna Esquerda: Imagem (60%) ── */}
-          <div className="md:w-[60%] p-4 flex flex-col items-center justify-start gap-3 border-b md:border-b-0 md:border-r border-blue-100 bg-white/60">
+          {/* ── Coluna Esquerda: Imagem (55%) ── */}
+          <div className="md:w-[55%] p-4 flex flex-col items-center justify-start gap-3 border-b md:border-b-0 md:border-r border-blue-100 bg-white/60">
             {previewImageUrl ? (
               <>
                 <div
@@ -389,13 +389,13 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             )}
           </div>
 
-          {/* ── Coluna Direita: Informações e Ações (40%) ── */}
-          <div className="md:w-[40%] p-4 flex flex-col gap-3 min-w-0">
+          {/* ── Coluna Direita: Informações e Ações (45%) ── */}
+          <div className="md:w-[45%] p-4 flex flex-col gap-3 min-w-0">
 
             {/* Mensagem da equipe (balão de chat) — só aparece se o operador digitou algo */}
             {operatorNote ? (
               <div className="bg-blue-100 border border-blue-200 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                <p className="text-[11px] font-semibold text-blue-700 mb-1 whitespace-nowrap">⚠️ Notas Importantes do Layout:</p>
+                <p className="text-xs font-semibold text-blue-700 mb-1">⚠️ Notas Importantes do Layout:</p>
                 <p className="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">{operatorNote}</p>
               </div>
             ) : (
@@ -408,7 +408,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             {/* Termo de Responsabilidade retrátil — texto jurídico fixo */}
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="term" className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                <AccordionTrigger className="px-3 py-2.5 text-[11px] font-medium text-gray-600 hover:no-underline hover:bg-gray-50 whitespace-nowrap">
+                <AccordionTrigger className="px-3 py-2.5 text-xs font-medium text-gray-600 hover:no-underline hover:bg-gray-50">
                   📄 Ler Termo de Responsabilidade
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3">
@@ -422,12 +422,12 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
               {!showRefusalInput ? (
                 <>
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-1.5 h-10 text-xs font-semibold px-2"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-1.5 h-auto py-2.5 text-xs font-semibold px-3 whitespace-normal text-center leading-tight"
                     disabled={approveMutation.isPending}
                     onClick={() => approveMutation.mutate({ orderItemId: item.id })}
                   >
                     {approveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" /> : <ThumbsUp className="w-3.5 h-3.5 flex-shrink-0" />}
-                    <span className="truncate">Aprovar Arte e Iniciar Produção</span>
+                    Aprovar Arte e Iniciar Produção
                   </Button>
                   <Button
                     variant="outline"
