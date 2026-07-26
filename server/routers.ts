@@ -935,9 +935,9 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        let sessionId = getCookieFromReq(req, "cart_session") ?? null;
-        // Resolver customer_session para clientes autenticados
-        if (!userId && !sessionId) {
+        // Resolver sessionId: customer_session tem PRIORIDADE sobre cart_session
+        let sessionId: string | null = null;
+        if (!userId) {
           const customerSessionToken = getCookieFromReq(req, "customer_session");
           if (customerSessionToken) {
             try {
@@ -952,6 +952,8 @@ export const appRouter = router({
               }
             } catch (_) {}
           }
+          // Fallback para cart_session se não há customer_session
+          if (!sessionId) sessionId = getCookieFromReq(req, "cart_session") ?? null;
         }
         // Recalcular frete se o item tem CEP e método de entrega por transportadora
         let newShippingPrice: number | null = null;
