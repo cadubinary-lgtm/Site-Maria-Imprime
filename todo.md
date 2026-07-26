@@ -2377,3 +2377,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Refatorar bloco de Especificações para layout do carrinho do cliente (Medidas, Acabamentos, linhas separadas)
 - [x] Ocultar preços (Unit. e Total) para usuários com role 'production' (Linha de Produção)
 - [x] Importar useAdminAuth no AdminOrderDetail para obter a role do usuário logado
+
+## Ajustes de Comunicação e Lógica Condicional (Jul 2026)
+
+- [x] Zerar campo de texto do operador no bloco azul (remover PROOF_TERM do handleSendProofChange — campo inicia vazio)
+- [x] Bloco verde 'Arte Final Aprovada' só exibido se status global 'em_producao' (ou posterior) OU preProductionStatus 'arte_final_aprovada'
+- [x] Renomear balão azul de '💬 Orientação da Equipe' para '⚠️ Notas Importantes do Layout:'
+- [x] Balão azul oculto quando operatorNote está vazio (já implementado, título atualizado)
+- [x] Accordion 'Ler Termo de Responsabilidade' mantido na tela do cliente
