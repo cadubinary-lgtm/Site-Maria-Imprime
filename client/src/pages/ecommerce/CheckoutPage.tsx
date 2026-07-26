@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
+import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import {
   ChevronRight, ChevronLeft, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
@@ -1178,15 +1179,10 @@ export default function CheckoutPage() {
                     {/* Itens */}
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-3 text-sm">Itens do Pedido</h3>
-                      <div className="space-y-2">
-                        {cartItems.map((item: any) => {
-                          let variations: Array<{name: string; value: string}> = [];
-                          try { if (item.variationSnapshot) variations = JSON.parse(item.variationSnapshot); } catch {}
-                          let attrs: Record<string, string> = {};
-                          try { if (item.selectedAttributes) attrs = JSON.parse(item.selectedAttributes); } catch {}
-                          return (
-                          <div key={item.id} className="p-3 border rounded-lg space-y-1.5">
-                            <div className="flex items-start gap-3">
+                      <div className="space-y-4">
+                        {cartItems.map((item: any) => (
+                          <div key={item.id} className="p-3 border rounded-lg">
+                            <div className="flex items-start gap-3 mb-3">
                               {item.productImage && (
                                 <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-cover rounded flex-shrink-0" />
                               )}
@@ -1198,45 +1194,20 @@ export default function CheckoutPage() {
                                 {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
                               </p>
                             </div>
-                            {/* Variações — texto simples igual ao carrinho */}
-                            {variations.length > 0 && (
-                              <div className="space-y-0.5">
-                                {variations.map((v: any, i: number) => (
-                                  <p key={i} className="text-xs text-gray-600">{v.name}: {v.value}</p>
-                                ))}
-                              </div>
-                            )}
-                            {/* Atributos — texto simples igual ao carrinho */}
-                            {Object.keys(attrs).length > 0 && (
-                              <div className="space-y-0.5">
-                                {Object.entries(attrs).map(([k, v]: [string, any]) => (
-                                  <p key={k} className="text-xs text-gray-600">{k}: {v}</p>
-                                ))}
-                              </div>
-                            )}
-                            {/* Medidas */}
-                            {item.customDimensions && (
-                              <p className="text-xs text-gray-600">Medidas: {item.customDimensions}</p>
-                            )}
-                            {/* Arquivo */}
-                            {item.artFileUrl && (
-                              <p className="text-xs text-gray-600">Arte: {item.artFileUrl.split('/').pop()}</p>
-                            )}
-                            {/* Prazo */}
-                            {item.prazoName && (
-                              <p className="text-xs text-gray-600">Prazo: {item.prazoName}</p>
-                            )}
-                            {/* Previsão */}
-                            {item.forecastLabel && (
-                              <p className="text-xs text-gray-600">Previsão de entrega: {item.forecastLabel}</p>
-                            )}
-                            {/* Entrega */}
-                            {item.shippingLabel && (
-                              <p className="text-xs text-gray-600">Entrega: {item.shippingLabel}{Number(item.shippingPrice) > 0 ? ` — ${formatCurrency(Number(item.shippingPrice))}` : ' — Grátis'}</p>
-                            )}
+                            {/* Especificações padronizadas em bloco vertical */}
+                            <OrderItemSpecs
+                              customDimensions={item.customDimensions}
+                              variationSnapshot={item.variationSnapshot}
+                              selectedAttributes={item.selectedAttributes}
+                              artFileUrl={item.artFileUrl}
+                              notes={item.notes}
+                              prazoName={item.prazoName}
+                              forecastLabel={item.forecastLabel}
+                              shippingLabel={item.shippingLabel}
+                              shippingPrice={item.shippingPrice}
+                            />
                           </div>
-                        );
-                        })}
+                        ))}
                       </div>
                     </div>
                   </div>

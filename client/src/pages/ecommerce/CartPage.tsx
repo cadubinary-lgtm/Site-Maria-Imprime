@@ -101,19 +101,20 @@ function CartItemCard({
       <div className="flex-1 min-w-0 text-center sm:text-left">
         <p className="font-medium text-gray-900 line-clamp-2">{item.productName}</p>
 
-        {/* Especificações padronizadas */}
-        <OrderItemSpecs
-          compact
-          customDimensions={item.customDimensions}
-          variationSnapshot={item.variationSnapshot}
-          selectedAttributes={item.selectedAttributes}
-          artFileUrl={item.artFileUrl}
-          notes={item.notes}
-          prazoName={item.prazoName}
-          forecastLabel={item.forecastLabel}
-          shippingLabel={item.shippingLabel}
-          shippingPrice={item.shippingPrice}
-        />
+        {/* Especificações padronizadas em bloco vertical */}
+        <div className="mt-2 mb-2">
+          <OrderItemSpecs
+            customDimensions={item.customDimensions}
+            variationSnapshot={item.variationSnapshot}
+            selectedAttributes={item.selectedAttributes}
+            artFileUrl={item.artFileUrl}
+            notes={item.notes}
+            prazoName={item.prazoName}
+            forecastLabel={item.forecastLabel}
+            shippingLabel={item.shippingLabel}
+            shippingPrice={item.shippingPrice}
+          />
+        </div>
 
         {/* Preço unitário */}
         <p className="text-sm text-gray-500 mt-1">
