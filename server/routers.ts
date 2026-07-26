@@ -1027,9 +1027,9 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
         const userId = ctx.user?.id ?? null;
-        let sessionId = getCookieFromReq(req, "cart_session") ?? null;
-        // Resolver customer_session para clientes autenticados
-        if (!userId && !sessionId) {
+        // Resolver customer_session PRIMEIRO (tem prioridade sobre cart_session)
+        let sessionId: string | null = null;
+        if (!userId) {
           const customerSessionToken = getCookieFromReq(req, "customer_session");
           if (customerSessionToken) {
             try {
@@ -1044,6 +1044,10 @@ export const appRouter = router({
               }
             } catch (_) {}
           }
+          // Fallback para cart_session se não há customer_session
+          if (!sessionId) sessionId = getCookieFromReq(req, "cart_session") ?? null;
+        } else {
+          sessionId = getCookieFromReq(req, "cart_session") ?? null;
         }
         await removeFromCart(input.id, userId, sessionId);
         return { success: true };
@@ -1052,9 +1056,9 @@ export const appRouter = router({
     clear: publicProcedure.mutation(async ({ ctx }) => {
       const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
-      let sessionId = getCookieFromReq(req, "cart_session") ?? null;
-      // Resolver customer_session para clientes autenticados
-      if (!userId && !sessionId) {
+      // Resolver customer_session PRIMEIRO
+      let sessionId: string | null = null;
+      if (!userId) {
         const customerSessionToken = getCookieFromReq(req, "customer_session");
         if (customerSessionToken) {
           try {
@@ -1069,6 +1073,7 @@ export const appRouter = router({
             }
           } catch (_) {}
         }
+        if (!sessionId) sessionId = getCookieFromReq(req, "cart_session") ?? null;
       }
       await clearCart(userId, sessionId);
       return { success: true };
@@ -1469,17 +1474,27 @@ export const appRouter = router({
         if (!order) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado" });
         }
-        // Adicionar cada item do pedido ao carrinho
+        // Adicionar cada item do pedido ao carrinho — clonar 100% dos campos
         let addedCount = 0;
         for (const item of (order as any).items ?? []) {
           await addToCart({
             userId: ctx.user.id,
             productId: item.productId,
             quantity: item.quantity,
-            priceAtCart: parseFloat(item.priceAtOrder),
+            priceAtCart: parseFloat(item.priceAtOrder ?? item.priceAtCart ?? "0"),
             selectedAttributes: item.selectedAttributes ?? undefined,
+            customDimensions: item.customDimensions ?? undefined,
             artFileUrl: item.artFileUrl ?? undefined,
             notes: item.notes ?? undefined,
+            shippingMethod: item.shippingMethod ?? undefined,
+            shippingPrice: item.shippingPrice ? parseFloat(item.shippingPrice) : undefined,
+            shippingLabel: item.shippingLabel ?? undefined,
+            variationSnapshot: item.variationSnapshot ?? undefined,
+            prazoName: item.prazoName ?? undefined,
+            prazoHours: item.prazoHours ?? undefined,
+            forecastDate: item.forecastDate ?? undefined,
+            forecastLabel: item.forecastLabel ?? undefined,
+            cepDestino: item.cepDestino ?? undefined,
           });
           addedCount++;
         }
