@@ -202,6 +202,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showRefusalInput, setShowRefusalInput] = useState(false);
   const [refusalNote, setRefusalNote] = useState("");
+  const [termAccepted, setTermAccepted] = useState(false);
 
   const { data: correctionData, isLoading } = trpc.checkout.getItemCorrectionAction.useQuery(
     { orderItemId: item.id },
@@ -422,9 +423,22 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             <div className="space-y-2">
               {!showRefusalInput ? (
                 <>
+                  {/* Checkbox obrigatório de aceite do termo */}
+                  <label className="flex items-start gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={termAccepted}
+                      onChange={(e) => setTermAccepted(e.target.checked)}
+                      className="mt-0.5 w-3.5 h-3.5 accent-green-600 flex-shrink-0"
+                    />
+                    <span className="text-[11px] text-gray-600 leading-tight">
+                      Li e aceito o{" "}
+                      <span className="font-semibold text-gray-800">Termo de Responsabilidade</span>
+                    </span>
+                  </label>
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-1.5 h-auto py-2.5 text-xs font-semibold px-3 whitespace-normal text-center leading-tight"
-                    disabled={approveMutation.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white gap-1.5 h-auto py-2.5 text-xs font-semibold px-3 whitespace-normal text-center leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={approveMutation.isPending || !termAccepted}
                     onClick={() => approveMutation.mutate({ orderItemId: item.id })}
                   >
                     {approveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" /> : <ThumbsUp className="w-3.5 h-3.5 flex-shrink-0" />}
