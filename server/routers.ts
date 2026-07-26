@@ -416,6 +416,27 @@ export const appRouter = router({
         }
         return { success: true };
       }),
+    // ── Gatilho de Produção: dispara os 3 status de uma vez quando operador clica em Salvar com Arte Final Aprovada ──
+    triggerProductionStart: adminAnyProcedure
+      .input(z.object({
+        orderItemId: z.number(),
+        orderId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItems: orderItemsT, orders: ordersT } = await import("../drizzle/schema.js");
+        // 1. Status de pré-impressão do item → em_producao
+        await db.update(orderItemsT)
+          .set({ preProductionStatus: "em_producao" } as any)
+          .where(eq(orderItemsT.id, input.orderItemId));
+        // 2. Status do pedido → em_producao (visível para o cliente e painel geral)
+        await db.update(ordersT)
+          .set({ status: "em_producao" } as any)
+          .where(eq(ordersT.id, input.orderId));
+        return { success: true };
+      }),
+
     updateProductionStatus: adminAnyProcedure
       .input(z.object({
         orderId: z.number(),
