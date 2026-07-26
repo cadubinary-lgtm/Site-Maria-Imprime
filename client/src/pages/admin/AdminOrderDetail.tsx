@@ -486,8 +486,8 @@ function PreImpressaoColumn({
             ))}
           </SelectContent>
         </Select>
-        {/* Botão Salvar: oculto em status intermediários, visível APENAS em arte_final_aprovada */}
-        {selected === "arte_final_aprovada" ? (
+        {/* Botão Produzir: aparece APENAS quando status = arte_final_aprovada */}
+        {selected === "arte_final_aprovada" && (
           <>
             <Button size="sm" className="h-7 text-xs bg-green-600 hover:bg-green-700 px-2.5"
               disabled={productionMutation.isPending}
@@ -533,44 +533,6 @@ function PreImpressaoColumn({
               </DialogContent>
             </Dialog>
           </>
-        ) : (
-          // Status intermediários: botão Salvar normal (sem gatilho de produção)
-          !isCommercialLocked && selected !== "arte_final_aprovada" && (
-            <Button size="sm" className="h-7 text-xs bg-orange-500 hover:bg-orange-600 px-2.5"
-              disabled={mutation.isPending || (selected === preProductionStatus && !pendingPreviewFile)}
-              onClick={async () => {
-                if ((selected === "liberado_analise" || selected === "ajustar_arte") && !pendingPreviewNotes.trim()) {
-                  toast.error("A observação é obrigatória para este status");
-                  return;
-                }
-                if (pendingPreviewFile) {
-                  try {
-                    const formData = new FormData();
-                    formData.append("file", pendingPreviewFile);
-                    const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
-                    if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Erro no upload da prévia"); }
-                    const { url, key } = await res.json();
-                    await fetch("/api/trpc/checkout.saveArtPreview", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        json: { orderId, orderItemId, imageUrl: url, imageKey: key, notes: pendingPreviewNotes || undefined }
-                      }),
-                    });
-                    onPreviewUploaded();
-                    toast.success("Prévia salva!");
-                  } catch (err: any) {
-                    toast.error(err?.message || "Erro ao enviar prévia");
-                    return;
-                  }
-                }
-                if (selected !== preProductionStatus) {
-                  mutation.mutate({ orderItemId, preProductionStatus: selected as any });
-                }
-              }}>
-              {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
-            </Button>
-          )
         )}
       </div>
 
