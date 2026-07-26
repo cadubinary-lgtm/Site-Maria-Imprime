@@ -395,7 +395,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             {/* Mensagem da equipe (balão de chat) — só aparece se o operador digitou algo */}
             {operatorNote ? (
               <div className="bg-blue-100 border border-blue-200 rounded-2xl rounded-tl-sm px-3 py-2.5">
-                <p className="text-xs font-semibold text-blue-700 mb-1">⚠️ Notas Importantes do Layout:</p>
+                <p className="text-xs font-semibold text-blue-700 mb-1">⚠️ Notas do Layout:</p>
                 <p className="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">{operatorNote}</p>
               </div>
             ) : (
@@ -409,7 +409,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="term" className="border border-gray-200 rounded-lg overflow-hidden bg-white">
                 <AccordionTrigger className="px-3 py-2.5 text-xs font-medium text-gray-600 hover:no-underline hover:bg-gray-50">
-                  📄 Ler Termo de Responsabilidade
+                  📄 Termo de Responsabilidade
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3">
                   <p className="text-[11px] text-gray-500 leading-relaxed">{termText}</p>
