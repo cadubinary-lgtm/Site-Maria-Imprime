@@ -1526,3 +1526,19 @@ export const emailHistory = mysqlTable("emailHistory", {
 
 export type EmailHistory = typeof emailHistory.$inferSelect;
 export type InsertEmailHistory = typeof emailHistory.$inferInsert;
+
+/**
+ * orderItemLogs — Histórico de ações de pré-impressão por item de pedido
+ * Registra cada ação do operador: envio de prova, exigência de reenvio, início de produção
+ */
+export const orderItemLogs = mysqlTable("orderItemLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  orderItemId: int("orderItemId").notNull(),
+  orderId: int("orderId").notNull(),
+  action: varchar("action", { length: 200 }).notNull(), // ex: "Enviou prova para aprovação", "Exigiu reenvio de arte", "Iniciou produção"
+  operatorName: varchar("operatorName", { length: 150 }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+
+export type OrderItemLog = typeof orderItemLogs.$inferSelect;
+export type InsertOrderItemLog = typeof orderItemLogs.$inferInsert;

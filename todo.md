@@ -2385,3 +2385,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Renomear balão azul de '💬 Orientação da Equipe' para '⚠️ Notas Importantes do Layout:'
 - [x] Balão azul oculto quando operatorNote está vazio (já implementado, título atualizado)
 - [x] Accordion 'Ler Termo de Responsabilidade' mantido na tela do cliente
+
+## Sessão: Histórico de Logs e Status Em Produção
+
+- [x] Adicionar "Em Produção" no select de Pré-Impressão (select não ficava em branco após clicar em Produzir)
+- [x] Criar tabela `orderItemLogs` no banco para histórico de auditoria por item
+- [x] Criar procedure `getOrderItemLogs` para buscar logs por orderItemId
+- [x] Registrar log "Exigiu reenvio de arte" ao enviar ação de reenvio (saveArtCorrectionAction)
+- [x] Registrar log "Enviou prova para aprovação" ao enviar prova (saveArtCorrectionAction)
+- [x] Registrar log "Iniciou produção" ao clicar em Produzir (triggerProductionStart)
+- [x] Adicionar `em_producao` no enum da procedure updatePreProductionStatus
+- [x] Renderizar linha do tempo de logs na coluna direita do AdminOrderDetail
+- [x] Invalidar cache dos logs após ações de envio/produção para atualização em tempo real
