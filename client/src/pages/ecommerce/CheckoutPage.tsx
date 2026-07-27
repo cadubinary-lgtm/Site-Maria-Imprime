@@ -126,6 +126,7 @@ export default function CheckoutPage() {
   // Frete
   const [selectedFrete, setSelectedFrete] = useState<FreteOption | null>(null);
   const entregaCardRef = useRef<HTMLDivElement>(null);
+  const isResettingFreteRef = useRef(false); // bloqueia auto-select ao resetar frete
 
   // Pagamento
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -154,6 +155,8 @@ export default function CheckoutPage() {
   const trpcUtils = trpc.useUtils();
 
   const handleShippingMethodSelected = (method: any, zipCodeUsed: string) => {
+    // Ignorar callback automático do ShippingMethodSelector durante reset de frete
+    if (isResettingFreteRef.current) return;
     const isPickup = method.id === "retirada" || method.id === "pickup";
     const freteOption: FreteOption = {
       id: method.id,
@@ -1330,11 +1333,15 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedFrete(null); // limpa seleção para reabrir tela de entrega sem auto-skip
+                      // Ativa flag para bloquear auto-select do ShippingMethodSelector durante o reset
+                      isResettingFreteRef.current = true;
+                      setSelectedFrete(null);
                       setStep("entrega");
+                      // Desativa a flag após o React re-renderizar (2 frames)
                       setTimeout(() => {
+                        isResettingFreteRef.current = false;
                         entregaCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }, 80);
+                      }, 150);
                     }}
                     className="w-full text-xs text-center text-gray-500 border border-gray-200 rounded-lg py-1.5 hover:border-orange-300 hover:text-orange-600 transition-colors"
                   >
