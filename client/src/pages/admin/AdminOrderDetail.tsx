@@ -99,6 +99,7 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
   { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
   { value: "arte_final_aprovada",           label: "Arte Final Aprovada",            icon: CheckCircle, color: "bg-green-100 text-green-700" },
+  { value: "nova_arte_reenviada",           label: "Nova Arte Reenviada",             icon: AlertCircle, color: "bg-amber-100 text-amber-700" },
   { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
 ];
 
@@ -153,7 +154,24 @@ const EXT_COLORS: Record<string, string> = {
 };
 
 // ─── Coluna 2: Arquivo do item ───────────────────────────────────────────────
-function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null; onLightbox: (url: string) => void }) {
+function ItemFileColumn({
+  artFileUrl, onLightbox, preProductionStatus, orderItemId, orderId,
+}: {
+  artFileUrl?: string | null;
+  onLightbox: (url: string) => void;
+  preProductionStatus?: string;
+  orderItemId?: number;
+  orderId?: number;
+}) {
+  const utils = trpc.useUtils();
+  const logDownloadMutation = trpc.checkout.logArtDownload.useMutation({
+    onSuccess: () => utils.checkout.getOrderItemLogs.invalidate({ orderItemId }),
+  });
+
+  // Buscar histórico de versões (logs de reenvio) para exibir versões anteriores
+  // Usamos os logs do item para detectar reenvios — por simplicidade, o artFileUrl atual é sempre a versão mais recente
+  const isNewArt = preProductionStatus === "nova_arte_reenviada";
+
   if (!artFileUrl) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[100px] text-gray-300">
@@ -168,11 +186,14 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
   const isPdf = /\.pdf$/i.test(name);
   const ext = (name.split(".").pop() ?? "FILE").toUpperCase();
   const badgeColor = EXT_COLORS[ext] ?? "bg-gray-100 text-gray-700";
-  // Detectar arquivo legado (espaços no nome = bug de assinatura S3)
   const storageKey = artFileUrl.replace('/manus-storage/', '');
   const isLegacyFile = storageKey.includes(' ');
 
   function handleDownload() {
+    // Registrar log de download quando status é nova_arte_reenviada
+    if (isNewArt && orderItemId && orderId) {
+      logDownloadMutation.mutate({ orderItemId, orderId });
+    }
     downloadFile(
       artFileUrl!,
       name,
@@ -191,6 +212,19 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
 
   return (
     <div className="space-y-2">
+      {/* Badge de alerta: Nova Arte Reenviada */}
+      {isNewArt && (
+        <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 rounded-lg px-2.5 py-1.5 mb-1">
+          <AlertCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+          <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">⚠️ NOVA ARTE REENVIADA</span>
+        </div>
+      )}
+
+      {/* Label de versão */}
+      {isNewArt && (
+        <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wide">Versão 2 (Atual)</p>
+      )}
+
       {/* Miniatura */}
       {isImage ? (
         <div
@@ -239,7 +273,7 @@ function ItemFileColumn({ artFileUrl, onLightbox }: { artFileUrl?: string | null
           </Button>
         )}
         <Button variant="outline" size="sm"
-          className="h-7 text-xs gap-1 px-2 text-gray-600 hover:bg-gray-50"
+          className={`h-7 text-xs gap-1 px-2 ${isNewArt ? "text-amber-700 border-amber-300 hover:bg-amber-50" : "text-gray-600 hover:bg-gray-50"}`}
           title="Baixar arquivo"
           onClick={handleDownload}>
           <Download className="w-3 h-3" /> Baixar
@@ -1078,7 +1112,13 @@ export default function AdminOrderDetail() {
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                           <FileImage className="w-3 h-3 text-blue-500" /> Arquivo do Cliente
                         </p>
-                        <ItemFileColumn artFileUrl={item.artFileUrl} onLightbox={setLightboxUrl} />
+                        <ItemFileColumn
+                          artFileUrl={item.artFileUrl}
+                          onLightbox={setLightboxUrl}
+                          preProductionStatus={item.preProductionStatus || "liberado_analise"}
+                          orderItemId={item.id}
+                          orderId={orderId!}
+                        />
                       </div>
 
                       {/* Col 3 — Prévia da Arte + Pré-Impressão (independente por item) */}

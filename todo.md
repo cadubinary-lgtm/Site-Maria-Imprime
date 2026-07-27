@@ -2397,3 +2397,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar `em_producao` no enum da procedure updatePreProductionStatus
 - [x] Renderizar linha do tempo de logs na coluna direita do AdminOrderDetail
 - [x] Invalidar cache dos logs após ações de envio/produção para atualização em tempo real
+
+## Sessão: Automação de Status, Nova Arte Reenviada e Histórico de Versões
+
+- [x] Restaurar automação: ao enviar "Exigir Reenvio", status muda para "Aguardando Reenvio do Arquivo"
+- [x] Restaurar automação: ao enviar "Enviar Prova", status muda para "Aguardando Aprovação do Cliente"
+- [x] Adicionar status "Nova Arte Reenviada" (badge amarelo/laranja) no enum e select de Pré-Impressão
+- [x] Backend: ao cliente finalizar upload de reenvio, mudar preProductionStatus para "nova_arte_reenviada"
+- [x] Backend: registrar log automático "Sistema: O cliente reenviou uma nova arte" no orderItemLogs
+- [x] Backend: procedure para registrar log "Sistema: O operador baixou a nova versão da arte" ao fazer download
+- [x] AdminOrderDetail: badge ⚠️ NOVA ARTE REENVIADA no bloco de arquivo quando status = nova_arte_reenviada
+- [x] AdminOrderDetail: histórico de versões de arquivo (Versão 2 Atual no topo, Versão 1 Antiga abaixo)
+- [x] AdminOrderDetail: botão de download registra log automático no orderItemLogs

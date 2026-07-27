@@ -385,7 +385,7 @@ export const appRouter = router({
     updatePreProductionStatus: adminAnyProcedure
       .input(z.object({
         orderItemId: z.number(),
-        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada", "em_producao"]),
+        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada", "nova_arte_reenviada", "em_producao"]),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -1630,6 +1630,28 @@ export const appRouter = router({
           .where(eq(orderItemLogsT.orderItemId, input.orderItemId))
           .orderBy(asc(orderItemLogsT.createdAt));
         return logs;
+      }),
+
+    // ── Registrar log de download de arte pelo operador ────────────────────────────────────────────────────────────────────────
+    logArtDownload: adminAnyProcedure
+      .input(z.object({ orderItemId: z.number(), orderId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return { success: false };
+        try {
+          const { orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
+          const operatorName = (ctx as any).adminUser?.name ?? "Operador";
+          await db.insert(orderItemLogsT).values({
+            orderItemId: input.orderItemId,
+            orderId: input.orderId,
+            action: "O operador baixou a nova versão da arte",
+            operatorName,
+            createdAt: Date.now(),
+          } as any);
+        } catch (e) {
+          console.error("[LOG] Erro ao registrar log de download:", e);
+        }
+        return { success: true };
       }),
 
     // ── Prazo de entrega ────────────────────────────────────────────────────────────────────────────────────
