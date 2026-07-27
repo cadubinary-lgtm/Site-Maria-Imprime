@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -125,6 +125,7 @@ export default function CheckoutPage() {
 
   // Frete
   const [selectedFrete, setSelectedFrete] = useState<FreteOption | null>(null);
+  const entregaCardRef = useRef<HTMLDivElement>(null);
 
   // Pagamento
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -759,7 +760,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Formulário */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card ref={entregaCardRef as any}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {STEPS[stepIndex].icon}
@@ -1331,6 +1332,9 @@ export default function CheckoutPage() {
                     onClick={() => {
                       setSelectedFrete(null); // limpa seleção para reabrir tela de entrega sem auto-skip
                       setStep("entrega");
+                      setTimeout(() => {
+                        entregaCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 80);
                     }}
                     className="w-full text-xs text-center text-gray-500 border border-gray-200 rounded-lg py-1.5 hover:border-orange-300 hover:text-orange-600 transition-colors"
                   >
