@@ -99,6 +99,7 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
   { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
   { value: "arte_final_aprovada",           label: "Arte Final Aprovada",            icon: CheckCircle, color: "bg-green-100 text-green-700" },
+  { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
 ];
 
 /** Status do pedido que bloqueiam a pré-impressão */
@@ -412,9 +413,16 @@ function PreImpressaoColumn({
     onSuccess: () => {
       toast.success("▶ Pedido enviado para produção!");
       utils.checkout.getOrderById.invalidate({ id: orderId });
+      utils.checkout.getOrderItemLogs.invalidate({ orderItemId });
     },
     onError: () => toast.error("Erro ao iniciar produção"),
   });
+
+  // Query de logs do item (linha do tempo)
+  const { data: itemLogs = [] } = trpc.checkout.getOrderItemLogs.useQuery(
+    { orderItemId },
+    { refetchOnWindowFocus: false }
+  );
 
   const correctionMutation = trpc.checkout.saveArtCorrectionAction.useMutation({
     onSuccess: (data) => {
@@ -429,6 +437,7 @@ function PreImpressaoColumn({
       setTermText(PROOF_TERM);
       utils.checkout.getOrderById.invalidate({ id: orderId });
       utils.checkout.getItemCorrectionAction.invalidate({ orderItemId });
+      utils.checkout.getOrderItemLogs.invalidate({ orderItemId });
     },
     onError: () => toast.error("Erro ao enviar para o cliente"),
   });
@@ -650,6 +659,32 @@ function PreImpressaoColumn({
           Enviar para o Cliente
         </Button>
       </div>}
+
+      {/* Linha do tempo de logs do item */}
+      {itemLogs.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+            <Clock className="w-3 h-3" /> Histórico
+          </p>
+          <div className="space-y-1.5">
+            {(itemLogs as any[]).map((log: any) => {
+              const d = new Date(log.createdAt);
+              const dateStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+              const timeStr = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+              return (
+                <div key={log.id} className="flex items-start gap-1.5 text-[10px] text-gray-600">
+                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+                  <span>
+                    <span className="font-medium text-gray-400">[{dateStr} - {timeStr}]</span>{" "}
+                    <span className="font-semibold text-gray-700">{log.operatorName ?? "Operador"}</span>{" "}
+                    <span className="text-gray-600">{log.action}</span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

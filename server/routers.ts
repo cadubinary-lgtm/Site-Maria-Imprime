@@ -385,7 +385,7 @@ export const appRouter = router({
     updatePreProductionStatus: adminAnyProcedure
       .input(z.object({
         orderItemId: z.number(),
-        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada"]),
+        preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada", "em_producao"]),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -422,10 +422,10 @@ export const appRouter = router({
         orderItemId: z.number(),
         orderId: z.number(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orderItems: orderItemsT, orders: ordersT } = await import("../drizzle/schema.js");
+        const { orderItems: orderItemsT, orders: ordersT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
         // 1. Status de pré-impressão do item → em_producao
         await db.update(orderItemsT)
           .set({ preProductionStatus: "em_producao" } as any)
@@ -434,6 +434,19 @@ export const appRouter = router({
         await db.update(ordersT)
           .set({ status: "em_producao" } as any)
           .where(eq(ordersT.id, input.orderId));
+        // 3. Registrar log de auditoria
+        try {
+          const operatorName = (ctx as any).adminUser?.name ?? "Operador";
+          await db.insert(orderItemLogsT).values({
+            orderItemId: input.orderItemId,
+            orderId: input.orderId,
+            action: "Iniciou produção",
+            operatorName,
+            createdAt: Date.now(),
+          } as any);
+        } catch (logErr) {
+          console.error("[LOG] Erro ao registrar log de produção:", logErr);
+        }
         return { success: true };
       }),
 
@@ -1605,6 +1618,20 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // ── Histórico de logs por item ────────────────────────────────────────────────────────────────────────
+    getOrderItemLogs: adminAnyProcedure
+      .input(z.object({ orderItemId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+        const { orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
+        const { eq, asc } = await import("drizzle-orm");
+        const logs = await db.select().from(orderItemLogsT)
+          .where(eq(orderItemLogsT.orderItemId, input.orderItemId))
+          .orderBy(asc(orderItemLogsT.createdAt));
+        return logs;
+      }),
+
     // ── Prazo de entrega ────────────────────────────────────────────────────────────────────────────────────
     setDeliveryDeadline: adminAnyProcedure
       .input(z.object({
@@ -1698,7 +1725,7 @@ export const appRouter = router({
         operatorNote: z.string().optional(),
         termText: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems, orders } = await import("../drizzle/schema.js");
@@ -1732,6 +1759,26 @@ export const appRouter = router({
           }
         }
         
+        // Registrar log de ação do operador
+        try {
+          const { orderItemLogs: orderItemLogsT2 } = await import("../drizzle/schema.js");
+          const operatorName2 = (ctx as any).adminUser?.name ?? "Operador";
+          const actionLabel2 = input.requireClientResend
+            ? "Exigiu reenvio de arte"
+            : (input.sendProofForApproval ? "Enviou prova para aprovação" : "Atualizou ação de correção");
+          if (item?.orderId) {
+            await db.insert(orderItemLogsT2).values({
+              orderItemId: input.orderItemId,
+              orderId: item.orderId,
+              action: actionLabel2,
+              operatorName: operatorName2,
+              createdAt: Date.now(),
+            } as any);
+          }
+        } catch (logErr2) {
+          console.error("[LOG] Erro ao registrar log de ação:", logErr2);
+        }
+
         // Notifica o operador sobre o envio
         try {
           const { notifyOwner } = await import("./_core/notification.js");
