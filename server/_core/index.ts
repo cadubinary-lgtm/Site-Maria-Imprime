@@ -121,23 +121,39 @@ async function startServer() {
             // Busca dados do item para notificação
             const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, orderItemId)).limit(1);
             const item = itemRows[0];
-            // Salva URL do arquivo e reseta status de pré-impressão para "Analisando"
+            // Salva URL do arquivo e muda status para "nova_arte_reenviada"
             await db.update(orderItems)
               .set({
                 artFileUrl: url,
-                preProductionStatus: 'liberado_analise',
+                preProductionStatus: 'nova_arte_reenviada',
                 requireClientResend: false,
                 correctionAction: null,
               } as any)
               .where(eq(orderItems.id, orderItemId));
+            // Registra log no histórico do item
+            try {
+              const { orderItemLogs } = await import('../../drizzle/schema.js');
+              const orderId2 = (item as any)?.orderId;
+              if (orderId2) {
+                await db.insert(orderItemLogs).values({
+                  orderItemId,
+                  orderId: orderId2,
+                  action: 'O cliente reenviou uma nova arte',
+                  operatorName: 'Sistema',
+                  createdAt: Date.now(),
+                } as any);
+              }
+            } catch (logErr) {
+              console.error('Erro ao registrar log de reenvio:', logErr);
+            }
             // Notifica o operador
             try {
               const { notifyOwner } = await import('./notification.js');
               const productName = (item as any)?.productName ?? `Item #${orderItemId}`;
               const orderId = (item as any)?.orderId;
               await notifyOwner({
-                title: '📨 Arte Reenviada pelo Cliente',
-                content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${orderItemId}, Pedido ID: ${orderId}). O status voltou para "Analisando". Acesse o painel para revisar.`,
+                title: '📨 Nova Arte Reenviada pelo Cliente',
+                content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${orderItemId}, Pedido ID: ${orderId}). Status atualizado para "Nova Arte Reenviada". Acesse o painel para revisar.`,
               });
             } catch (notifyErr) {
               console.error('Erro ao notificar operador:', notifyErr);
