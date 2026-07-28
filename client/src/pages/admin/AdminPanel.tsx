@@ -227,9 +227,9 @@ export default function AdminPanel() {
     const file = e.target.files?.[0];
     if (file) {
       // Validar formato de imagem
-      const allowedFormats = ['image/jpeg', 'image/png'];
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedFormats.includes(file.type)) {
-        showNotification('error', 'Apenas formatos JPG e PNG são aceitos');
+        showNotification('error', 'Apenas formatos JPG, PNG e WEBP são aceitos');
         return;
       }
       
@@ -260,9 +260,9 @@ export default function AdminPanel() {
     const file = e.target.files?.[0];
     if (file) {
       // Validar formato de imagem
-      const allowedFormats = ['image/jpeg', 'image/png'];
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedFormats.includes(file.type)) {
-        showNotification('error', 'Apenas formatos JPG e PNG são aceitos');
+        showNotification('error', 'Apenas formatos JPG, PNG e WEBP são aceitos');
         return;
       }
       
@@ -483,7 +483,7 @@ export default function AdminPanel() {
                   <input
                     ref={createFileInputRef}
                     type="file"
-                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                     onChange={handleCreatePhotoUpload}
                     className="hidden"
                   />
@@ -665,7 +665,7 @@ export default function AdminPanel() {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                         onChange={handlePhotoUpload}
                         className="hidden"
                       />
