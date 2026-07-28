@@ -3,8 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
-
-const BADGES = ["Mais vendido", "Promoção", "Destaque", "Novo", "Recomendado", "Exclusivo", ""];
+import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 
 export function FeaturedProducts() {
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
@@ -34,15 +33,9 @@ export function FeaturedProducts() {
           {featured.map((product: any, idx: number) => (
             <Link key={product.id} href={`/produto/${product.id}`}>
               <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm">
-                {/* Badge */}
-                {BADGES[idx] && (
-                  <div className="bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full inline-block m-3">
-                    {BADGES[idx]}
-                  </div>
-                )}
-
                 {/* Product image - 1:1 aspect ratio, object-contain */}
                 <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                  <ProductTagBadges tags={(product as any).tags} />
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}

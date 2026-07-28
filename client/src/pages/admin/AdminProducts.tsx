@@ -41,6 +41,7 @@ export default function AdminProducts() {
     minHeight: "",
     maxHeight: "",
     specifications: [] as { label: string; value: string }[],
+    tags: [] as string[],
   });
 
   // ─── Queries & Mutations ──────────────────────────────────────────────────
@@ -113,6 +114,9 @@ export default function AdminProducts() {
       specifications: (() => {
         try { return product.specifications ? JSON.parse(product.specifications) : []; } catch { return []; }
       })(),
+      tags: (() => {
+        try { return product.tags ? JSON.parse(product.tags) : []; } catch { return []; }
+      })(),
     }));
   };
 
@@ -150,6 +154,7 @@ export default function AdminProducts() {
         minHeight: (editForm as any).calculationType === "m2" ? (editForm as any).minHeight : undefined,
         maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
         specifications: (editForm as any).specifications?.length > 0 ? JSON.stringify((editForm as any).specifications) : undefined,
+        tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
       });
       await updateSegmentsMutation.mutateAsync({ productId: editingId, segmentIds: editForm.segmentIds });
       toast.success("Produto atualizado com sucesso!");
@@ -446,6 +451,29 @@ export default function AdminProducts() {
                           )}
 
                           {/* Especificações Técnicas */}
+                          {/* Tags do Produto */}
+                          <div className="border-t pt-4 mt-4">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Tags do Produto</h3>
+                            <p className="text-sm text-gray-500 mb-3">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                              {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
+                                <label key={tag} className="flex items-center gap-2 cursor-pointer select-none">
+                                  <Checkbox
+                                    checked={((editForm as any).tags || []).includes(tag)}
+                                    onCheckedChange={(checked) => {
+                                      setEditForm((prev) => ({
+                                        ...prev,
+                                        tags: checked
+                                          ? [...((prev as any).tags || []), tag]
+                                          : ((prev as any).tags || []).filter((t: string) => t !== tag),
+                                      } as any));
+                                    }}
+                                  />
+                                  <span className="text-sm text-gray-700">{tag}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
                           <div className="border-t pt-4 mt-4">
                             <div className="flex items-center justify-between mb-3">
                               <h3 className="text-lg font-semibold text-gray-900">Especificações Técnicas</h3>

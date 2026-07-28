@@ -51,6 +51,7 @@ export const products = mysqlTable("products", {
   allowMotoExpress: boolean("allowMotoExpress").default(true).notNull(), // Permite moto express
   allowedCarriers: longtext("allowedCarriers").default("[]").notNull(), // JSON array de IDs de transportadoras
   specifications: longtext("specifications"), // JSON array de { label, value } para especificações técnicas
+  tags: longtext("tags"), // JSON array de tags: ["Mais vendido", "Promoção", "Destaque", "Novo"]
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

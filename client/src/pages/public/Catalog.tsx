@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
+import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -229,6 +230,7 @@ export default function Catalog() {
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem */}
                         <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                          <ProductTagBadges tags={(product as any).tags} />
                           {product.imageUrl ? (
                             <img
                               src={product.imageUrl}

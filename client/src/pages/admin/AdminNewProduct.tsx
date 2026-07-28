@@ -42,6 +42,7 @@ export default function AdminNewProduct() {
     maxHeight: "",
     segmentIds: [] as number[],
     specifications: [] as { label: string; value: string }[],
+    tags: [] as string[],
   });
 
   const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
@@ -104,6 +105,7 @@ export default function AdminNewProduct() {
         logisticsLength: createLogistics.length ? parseFloat(createLogistics.length) : undefined,
         allowedCarrierIds: createLogistics.allowedCarrierIds.length > 0 ? createLogistics.allowedCarrierIds : undefined,
         specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
+        tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
       });
 
       const newProductId = (result as any)?.id;
@@ -139,7 +141,7 @@ export default function AdminNewProduct() {
       setCreateForm({
         name: "", description: "", price: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
         calculationType: "unidade", pricePerM2: "", minWidth: "", maxWidth: "",
-        minHeight: "", maxHeight: "", segmentIds: [], specifications: [],
+        minHeight: "", maxHeight: "", segmentIds: [], specifications: [], tags: [],
       });
       setCreateDeliveryOptions([]);
       setCreateLogistics({ weight: "", width: "", height: "", length: "", allowedCarrierIds: [] });
@@ -369,6 +371,29 @@ export default function AdminNewProduct() {
                   ) : (
                     <p className="text-sm text-gray-400">Nenhuma transportadora cadastrada</p>
                   )}
+                </div>
+              </div>
+              {/* Tags do Produto */}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900">Tags do Produto</h3>
+                <p className="text-sm text-gray-500">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
+                    <label key={tag} className="flex items-center gap-2 cursor-pointer select-none">
+                      <Checkbox
+                        checked={createForm.tags.includes(tag)}
+                        onCheckedChange={(checked) => {
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            tags: checked
+                              ? [...prev.tags, tag]
+                              : prev.tags.filter((t) => t !== tag),
+                          }));
+                        }}
+                      />
+                      <span className="text-sm text-gray-700">{tag}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
               {/* Especificações Técnicas */}

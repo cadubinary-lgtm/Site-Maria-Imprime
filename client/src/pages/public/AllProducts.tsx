@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { formatProductPrice } from '@/lib/productPrice';
+import { formatProductPrice } from "@/lib/productPrice";
+import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -164,7 +165,8 @@ export default function AllProducts() {
               <Link key={product.id} href={`/produto/${product.id}`} className="block group">
                 <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   {product.imageUrl && (
-                    <div className="w-full aspect-square bg-gray-50 overflow-hidden">
+                    <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
+                      <ProductTagBadges tags={(product as any).tags} />
                       <img
                         src={product.imageUrl}
                         alt={product.name}
