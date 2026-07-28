@@ -2409,3 +2409,12 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] AdminOrderDetail: badge ⚠️ NOVA ARTE REENVIADA no bloco de arquivo quando status = nova_arte_reenviada
 - [x] AdminOrderDetail: histórico de versões de arquivo (Versão 2 Atual no topo, Versão 1 Antiga abaixo)
 - [x] AdminOrderDetail: botão de download registra log automático no orderItemLogs
+
+## Sessão: Imagens 1:1 e 6º Campo de Foto
+
+- [x] Adicionar campo image6Url no schema de produtos (não necessário - galleryUrls já é JSON array)
+- [x] Migrar banco de dados com novo campo (não necessário)
+- [x] Atualizar painel de cadastro: adicionar 6º campo de foto (grid 3x2, 6 slots)
+- [x] Catálogo: cards com proporção 1:1 e object-fit contain
+- [x] Página interna do produto: imagem principal 1:1 com object-fit contain
+- [x] Carrossel de miniaturas: proporção 1:1 correta sem espremimento

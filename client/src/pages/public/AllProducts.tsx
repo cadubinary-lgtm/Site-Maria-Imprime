@@ -164,11 +164,11 @@ export default function AllProducts() {
               <Link key={product.id} href={`/produto/${product.id}`} className="block group">
                 <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   {product.imageUrl && (
-                    <div className="w-full h-48 bg-gray-800 overflow-hidden">
+                    <div className="w-full aspect-square bg-gray-50 overflow-hidden">
                       <img
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                       />
                     </div>
                   )}

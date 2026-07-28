@@ -228,15 +228,15 @@ export default function Catalog() {
                     <Card key={product.id} className="hover:shadow-lg transition border-gray-200 overflow-hidden">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem */}
-                        <div className="relative h-40 bg-gray-100 overflow-hidden">
+                        <div className="relative aspect-square bg-gray-50 overflow-hidden">
                           {product.imageUrl ? (
                             <img
                               src={product.imageUrl}
                               alt={product.name}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                              className="w-full h-full object-contain hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
                               <span className="text-gray-400 text-sm">Sem imagem</span>
                             </div>
                           )}

@@ -757,13 +757,13 @@ export default function ProductDetail() {
 
             {/* Foto principal */}
             <div className="bg-white rounded-lg lg:rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="relative h-40 bg-gray-100 overflow-hidden">
+              <div className="relative aspect-square bg-gray-50 overflow-hidden">
                 {galleryImages.length > 0 ? (
                   <>
                     <img
                       src={galleryImages[currentImageIndex]}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                     {galleryImages.length > 1 && (
                       <>
@@ -792,7 +792,7 @@ export default function ProductDetail() {
               {/* Miniaturas */}
               {galleryImages.length > 1 && (
                 <div className="flex gap-2 p-3 overflow-x-auto">
-                  {galleryImages.slice(0, 5).map((img, idx) => (
+                  {galleryImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
@@ -802,7 +802,7 @@ export default function ProductDetail() {
                           : "border-gray-200 hover:border-orange-300"
                       }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" className="w-full h-full object-contain bg-gray-50" />
                     </button>
                   ))}
                 </div>
