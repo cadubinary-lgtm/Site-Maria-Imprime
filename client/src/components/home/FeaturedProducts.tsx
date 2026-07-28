@@ -41,16 +41,16 @@ export function FeaturedProducts() {
                   </div>
                 )}
 
-                {/* Product image - padronizado h-40 igual ao catalogo */}
-                <div className="relative h-40 bg-gray-100 overflow-hidden">
+                {/* Product image - 1:1 aspect ratio, object-contain */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="text-4xl">
+                    <div className="w-full h-full flex items-center justify-center text-4xl">
                       {product.segment === "varejo" && "📦"}
                       {product.segment === "servicos" && "🔧"}
                       {product.segment === "alimentacao" && "🍔"}

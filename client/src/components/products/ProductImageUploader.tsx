@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 
 interface ProductImageUploaderProps {
   mainImageUrl: string;
-  galleryUrls: string[]; // até 4 fotos adicionais
+  galleryUrls: string[]; // até 6 fotos adicionais
   onMainImageChange: (url: string, key?: string) => void;
   onGalleryChange: (urls: string[]) => void;
 }
@@ -87,7 +87,7 @@ export function ProductImageUploader({
   return (
     <div className="space-y-4">
       <Label className="text-sm font-semibold text-gray-700">Fotos do Produto</Label>
-      <p className="text-xs text-gray-500">1 foto principal + até 4 fotos adicionais (JPG, PNG — máx. 10MB cada)</p>
+      <p className="text-xs text-gray-500">1 foto principal + até 6 fotos adicionais (JPG, PNG — máx. 10MB cada)</p>
 
       {/* Foto Principal */}
       <div>
@@ -133,9 +133,9 @@ export function ProductImageUploader({
 
       {/* Fotos Adicionais */}
       <div>
-        <p className="text-xs font-medium text-gray-600 mb-2">Fotos Adicionais (até 4)</p>
-        <div className="grid grid-cols-4 gap-2">
-          {[0, 1, 2, 3].map((slot) => {
+        <p className="text-xs font-medium text-gray-600 mb-2">Fotos Adicionais (até 6)</p>
+        <div className="grid grid-cols-3 gap-2">
+          {[0, 1, 2, 3, 4, 5].map((slot) => {
             const url = galleryUrls[slot];
             const isUploading = uploadingGallery === slot;
             return (
