@@ -338,11 +338,11 @@ function ArtPreviewColumn({
       >
         <p className="text-[10px] font-semibold text-orange-800 uppercase tracking-wide">Enviar prévia</p>
         <Textarea
-          placeholder={selectedStatus === "liberado_analise" || selectedStatus === "ajustar_arte" ? "Descreva o motivo ou observação (Obrigatório)..." : "Observação (opcional)..."}
+          placeholder="Clique aqui e cole o print (Ctrl + V)"
           value={pendingNotes}
           onChange={(e) => onPendingNotesChange(e.target.value)}
           rows={2}
-          className="bg-white text-xs py-1.5"
+          className="bg-white text-xs py-1.5 w-1/2"
         />
         <div className="flex items-center gap-1.5 flex-wrap">
           <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
