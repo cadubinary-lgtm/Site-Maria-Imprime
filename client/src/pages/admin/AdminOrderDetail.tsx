@@ -344,26 +344,35 @@ function ArtPreviewColumn({
           rows={2}
           className="bg-white text-xs py-1.5 w-full resize-none"
         />
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
-          {!pendingFile ? (
-            <>
-              <Button size="sm" className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1 px-2.5"
-                onClick={() => fileRef.current?.click()}>
-                <Upload className="w-3 h-3" />
-                Selecionar
-              </Button>
-              <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-orange-100 border border-orange-300 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
-            </>
-          ) : (
-            <div className="flex items-center gap-1.5 bg-white border border-orange-200 rounded px-2 py-1 w-full">
-              <Upload className="w-3 h-3 text-orange-500 flex-shrink-0" />
-              <span className="text-[10px] text-gray-700 truncate flex-1">{pendingFile.name}</span>
-              <button className="text-gray-400 hover:text-red-500 text-[10px] ml-1 flex-shrink-0"
-                onClick={() => onPendingFileChange(null)}>✕</button>
-            </div>
-          )}
-        </div>
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
+        
+        {pendingFile && (
+          <div className="relative inline-block">
+            <img
+              src={URL.createObjectURL(pendingFile)}
+              alt="Preview"
+              className="max-h-24 w-auto object-cover rounded border border-orange-300 bg-white"
+            />
+            <button
+              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+              onClick={() => onPendingFileChange(null)}
+              title="Remover imagem"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
+        {!pendingFile && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button size="sm" className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1 px-2.5"
+              onClick={() => fileRef.current?.click()}>
+              <Upload className="w-3 h-3" />
+              Selecionar
+            </Button>
+            <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-orange-100 border border-orange-300 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
+          </div>
+        )}
         {pendingFile && (
           <p className="text-[10px] text-orange-600 font-medium">
             {selectedStatus === "arte_final_aprovada"
