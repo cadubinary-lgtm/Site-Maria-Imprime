@@ -33,8 +33,8 @@ export function FeaturedProducts() {
           {featured.map((product: any, idx: number) => (
             <Link key={product.id} href={`/produto/${product.id}`} className="group">
               <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm overflow-hidden">
-                {/* Product image - sangrada no topo, arredondamento apenas nos cantos superiores */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-[inherit]">
+                {/* Product image - sangrada no topo, cancela py-6/px-6 do Card */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl -mt-6 -mx-6">
                   <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                   {product.imageUrl ? (
                     <img

@@ -229,7 +229,7 @@ export default function Catalog() {
                     <Card key={product.id} className="group hover:shadow-lg transition border-gray-200 overflow-hidden">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem sangrada no topo */}
-                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-[inherit]">
+                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl -mt-6 -mx-6">
                           <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                           {product.imageUrl ? (
                             <img
