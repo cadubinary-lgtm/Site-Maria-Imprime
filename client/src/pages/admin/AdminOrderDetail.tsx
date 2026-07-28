@@ -288,16 +288,17 @@ function ItemFileColumn({
 // para que o botão "Enviar para o Cliente" possa disparar o upload junto com a ação de correção
 function ArtPreviewColumn({
   orderId, orderItemId, previews, previewsLoading, onLightbox, onRefresh,
-  pendingFile, pendingNotes, onPendingFileChange, onPendingNotesChange, selectedStatus,
+  pendingFile, onPendingFileChange, selectedStatus,
 }: {
   orderId: number; orderItemId: number; previews: any[]; previewsLoading: boolean;
   onLightbox: (url: string) => void; onRefresh: () => void;
-  pendingFile: File | null; pendingNotes: string;
-  onPendingFileChange: (f: File | null) => void; onPendingNotesChange: (n: string) => void;
+  pendingFile: File | null;
+  onPendingFileChange: (f: File | null) => void;
   selectedStatus?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const deletePreviewMutation = trpc.checkout.deleteArtPreview.useMutation({
     onSuccess: () => { onRefresh(); toast.success("Prévia removida"); },
@@ -317,59 +318,83 @@ function ArtPreviewColumn({
     e.preventDefault();
     const blob = imageItem.getAsFile();
     if (!blob) return;
-    // Cria um File com nome descritivo baseado na data/hora
     const ext = blob.type === "image/png" ? "png" : blob.type === "image/jpeg" ? "jpg" : "webp";
     const now = new Date();
     const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
     const file = new File([blob], `print_${ts}.${ext}`, { type: blob.type });
     onPendingFileChange(file);
-    toast.success("🖼️ Imagem colada da área de transferência!");
+    toast.success("🖼️ Imagem colada com sucesso!");
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer?.files ?? []);
+    const imageFile = files.find(f => f.type.startsWith("image/"));
+    if (imageFile) {
+      onPendingFileChange(imageFile);
+      toast.success("📸 Arquivo arrastado com sucesso!");
+    } else {
+      toast.error("Por favor, arraste uma imagem (JPG ou PNG)");
+    }
   };
 
   return (
     <div className="space-y-3">
-      {/* Upload — seleção local ou Ctrl+V; envio acontece via "Enviar para o Cliente" */}
+      {/* Upload — Drag and Drop + Paste + Click */}
       <div
         ref={dropZoneRef}
-        className="bg-orange-50 rounded-lg border border-orange-200 p-2.5 space-y-2 focus-within:ring-2 focus-within:ring-orange-400 focus-within:ring-offset-1"
+        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all ${
+          isDragging
+            ? "border-orange-500 bg-orange-100"
+            : pendingFile
+            ? "border-green-300 bg-green-50"
+            : "border-orange-300 bg-orange-50 hover:border-orange-400 hover:bg-orange-100"
+        } focus-within:ring-2 focus-within:ring-orange-400 focus-within:ring-offset-1`}
         onPaste={handlePaste}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         tabIndex={0}
-        title="Cole uma imagem aqui com Ctrl+V ou clique em Selecionar"
+        onClick={() => !pendingFile && fileRef.current?.click()}
       >
-        <p className="text-[10px] font-semibold text-orange-800 uppercase tracking-wide">Enviar prévia</p>
-        <Textarea
-          placeholder={selectedStatus === "liberado_analise" || selectedStatus === "ajustar_arte" ? "Descreva o motivo ou observação (Obrigatório)..." : "Observação (opcional)..."}
-          value={pendingNotes}
-          onChange={(e) => onPendingNotesChange(e.target.value)}
-          rows={2}
-          className="bg-white text-xs py-1.5"
-        />
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
-          {!pendingFile ? (
-            <>
-              <Button size="sm" className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1 px-2.5"
-                onClick={() => fileRef.current?.click()}>
-                <Upload className="w-3 h-3" />
-                Selecionar
-              </Button>
-              <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-orange-100 border border-orange-300 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
-            </>
-          ) : (
-            <div className="flex items-center gap-1.5 bg-white border border-orange-200 rounded px-2 py-1 w-full">
-              <Upload className="w-3 h-3 text-orange-500 flex-shrink-0" />
-              <span className="text-[10px] text-gray-700 truncate flex-1">{pendingFile.name}</span>
-              <button className="text-gray-400 hover:text-red-500 text-[10px] ml-1 flex-shrink-0"
-                onClick={() => onPendingFileChange(null)}>✕</button>
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
+        
+        {!pendingFile ? (
+          <>
+            <div className="flex justify-center mb-2">
+              <ImagePlus className="w-6 h-6 text-orange-500" />
             </div>
-          )}
-        </div>
-        {pendingFile && (
-          <p className="text-[10px] text-orange-600 font-medium">
-            {selectedStatus === "arte_final_aprovada"
-              ? '✅ Arquivo selecionado. Clique em "Salvar" para enviar a prévia da arte final para o cliente e liberar para a produção.'
-              : '⚠️ Arquivo selecionado. Clique em "Enviar para o Cliente" para confirmar o envio.'}
-          </p>
+            <p className="text-sm font-semibold text-orange-800 mb-1">📸 Cole o print (Ctrl + V) ou arraste e solte a prévia aqui</p>
+            <p className="text-[11px] text-gray-600">ou clique para selecionar (JPG ou PNG até 10MB)</p>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-700">{pendingFile.name}</span>
+            </div>
+            <p className="text-[11px] text-green-600">✅ Pronto para enviar. Clique em "Enviar para o Cliente" para confirmar.</p>
+            <button
+              className="text-[10px] text-gray-500 hover:text-red-500 mt-2 underline"
+              onClick={(e) => { e.stopPropagation(); onPendingFileChange(null); }}
+            >
+              Trocar arquivo
+            </button>
+          </>
         )}
       </div>
 
@@ -765,9 +790,7 @@ function ItemPreviewSection({
         onLightbox={onLightbox}
         onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId })}
         pendingFile={pendingPreviewFile}
-        pendingNotes={pendingPreviewNotes}
         onPendingFileChange={setPendingPreviewFile}
-        onPendingNotesChange={setPendingPreviewNotes}
         selectedStatus={selectedStatus}
       />
       <PreImpressaoColumn
