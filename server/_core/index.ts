@@ -54,9 +54,9 @@ async function startServer() {
       const { originalname, buffer, mimetype } = req.file;
       
       // Validar formato de imagem
-      const allowedMimeTypes = ['image/jpeg', 'image/png'];
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedMimeTypes.includes(mimetype)) {
-        return res.status(400).json({ error: 'Apenas formatos JPG e PNG sao aceitos' });
+        return res.status(400).json({ error: 'Apenas formatos JPG, PNG e WEBP sao aceitos' });
       }
       
       // Generate unique filename
