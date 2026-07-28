@@ -32,9 +32,9 @@ export function FeaturedProducts() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {featured.map((product: any, idx: number) => (
             <Link key={product.id} href={`/produto/${product.id}`}>
-              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm">
-                {/* Product image - 1:1 aspect ratio, object-contain */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden">
+              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm overflow-hidden">
+                {/* Product image - sangrada no topo, arredondamento apenas nos cantos superiores */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-[inherit]">
                   <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                   {product.imageUrl ? (
                     <img

@@ -228,8 +228,8 @@ export default function Catalog() {
                   {paginatedProducts.map((product) => (
                     <Card key={product.id} className="hover:shadow-lg transition border-gray-200 overflow-hidden">
                       <Link href={`/produto/${product.id}`}>
-                        {/* Imagem */}
-                        <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                        {/* Imagem sangrada no topo */}
+                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-[inherit]">
                           <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                           {product.imageUrl ? (
                             <img
