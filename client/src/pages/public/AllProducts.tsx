@@ -170,7 +170,7 @@ export default function AllProducts() {
                       <img
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                        className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                       />
                     </div>
                   )}
