@@ -52,6 +52,7 @@ export const products = mysqlTable("products", {
   allowedCarriers: longtext("allowedCarriers").default("[]").notNull(), // JSON array de IDs de transportadoras
   specifications: longtext("specifications"), // JSON array de { label, value } para especificações técnicas
   tags: longtext("tags"), // JSON array de tags: ["Mais vendido", "Promoção", "Destaque", "Novo"]
+  tagPosition: varchar("tag_position", { length: 30 }).$default(() => "top-right"), // Posição das tags no card
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

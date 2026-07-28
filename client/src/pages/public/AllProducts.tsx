@@ -166,7 +166,7 @@ export default function AllProducts() {
                 <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   {product.imageUrl && (
                     <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-                      <ProductTagBadges tags={(product as any).tags} />
+                      <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                       <img
                         src={product.imageUrl}
                         alt={product.name}

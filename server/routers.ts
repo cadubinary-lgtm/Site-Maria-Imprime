@@ -274,6 +274,7 @@ export const appRouter = router({
         allowedCarrierIds: z.array(z.number()).optional(),
         specifications: z.string().optional(), // JSON array de { label, value }
         tags: z.string().optional(), // JSON array de tags
+        tagPosition: z.string().optional(), // Posição das tags no card
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -306,6 +307,7 @@ export const appRouter = router({
             allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : '[]',
             specifications: input.specifications || null,
             tags: input.tags || null,
+            tagPosition: input.tagPosition || "top-right",
             isActive: true,
           } as any);
           
@@ -484,6 +486,7 @@ export const appRouter = router({
         maxHeight: z.string().optional(),
         specifications: z.string().optional(), // JSON array de { label, value }
         tags: z.string().optional(), // JSON array de tags
+        tagPosition: z.string().optional(), // Posição das tags no card
         // Campos de logística
         weight: z.number().optional(),
         logisticsWidth: z.number().optional(),
@@ -514,6 +517,7 @@ export const appRouter = router({
         if (input.maxHeight) updateData.maxHeight = parseFloat(input.maxHeight);
         if (input.specifications !== undefined) updateData.specifications = input.specifications || null;
         if (input.tags !== undefined) updateData.tags = input.tags || null;
+        if (input.tagPosition !== undefined) updateData.tagPosition = input.tagPosition || "top-right";
         // Campos de logística
         if (input.weight !== undefined) updateData.weight = input.weight;
         if (input.logisticsWidth !== undefined) updateData.width = input.logisticsWidth;

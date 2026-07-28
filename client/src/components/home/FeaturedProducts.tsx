@@ -35,7 +35,7 @@ export function FeaturedProducts() {
               <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm">
                 {/* Product image - 1:1 aspect ratio, object-contain */}
                 <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                  <ProductTagBadges tags={(product as any).tags} />
+                  <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}

@@ -42,6 +42,7 @@ export default function AdminProducts() {
     maxHeight: "",
     specifications: [] as { label: string; value: string }[],
     tags: [] as string[],
+    tagPosition: "top-right" as string,
   });
 
   // ─── Queries & Mutations ──────────────────────────────────────────────────
@@ -117,6 +118,7 @@ export default function AdminProducts() {
       tags: (() => {
         try { return product.tags ? JSON.parse(product.tags) : []; } catch { return []; }
       })(),
+      tagPosition: product.tagPosition || "top-right",
     }));
   };
 
@@ -155,6 +157,7 @@ export default function AdminProducts() {
         maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
         specifications: (editForm as any).specifications?.length > 0 ? JSON.stringify((editForm as any).specifications) : undefined,
         tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
+        tagPosition: (editForm as any).tagPosition || "top-right",
       });
       await updateSegmentsMutation.mutateAsync({ productId: editingId, segmentIds: editForm.segmentIds });
       toast.success("Produto atualizado com sucesso!");
@@ -473,6 +476,27 @@ export default function AdminProducts() {
                                 </label>
                               ))}
                             </div>
+                            {((editForm as any).tags || []).length > 0 && (
+                              <div className="space-y-1">
+                                <Label className="text-sm font-medium text-gray-700">Posição das Tags no Card</Label>
+                                <Select
+                                  value={(editForm as any).tagPosition || "top-right"}
+                                  onValueChange={(val) => setEditForm((prev) => ({ ...prev, tagPosition: val } as any))}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Selecione a posição" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="top-left">Canto Superior Esquerdo</SelectItem>
+                                    <SelectItem value="top-right">Canto Superior Direito (padrão)</SelectItem>
+                                    <SelectItem value="bottom-left">Canto Inferior Esquerdo</SelectItem>
+                                    <SelectItem value="bottom-right">Canto Inferior Direito</SelectItem>
+                                    <SelectItem value="top-center">Centro Superior</SelectItem>
+                                    <SelectItem value="bottom-center">Centro Inferior</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
                           </div>
                           <div className="border-t pt-4 mt-4">
                             <div className="flex items-center justify-between mb-3">
