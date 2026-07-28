@@ -226,10 +226,10 @@ export default function Catalog() {
                 {/* Grid de Produtos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                   {paginatedProducts.map((product) => (
-                    <Card key={product.id} className="group hover:shadow-lg transition border-gray-200 overflow-hidden">
+                    <Card key={product.id} className="group hover:shadow-lg transition border-gray-200 overflow-hidden p-0">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem sangrada no topo */}
-                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl -mt-6 -mx-6">
+                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl">
                           <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                           {product.imageUrl ? (
                             <img
@@ -245,7 +245,7 @@ export default function Catalog() {
                         </div>
                       </Link>
 
-                      <CardContent className="p-4">
+                      <CardContent className="p-4 px-4 pt-4">
                         <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-2">
                           {product.name}
                         </h3>
