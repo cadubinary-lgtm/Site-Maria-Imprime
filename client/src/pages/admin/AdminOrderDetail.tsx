@@ -342,7 +342,7 @@ function ArtPreviewColumn({
           value={pendingNotes}
           onChange={(e) => onPendingNotesChange(e.target.value)}
           rows={2}
-          className="bg-white text-xs py-1.5 w-1/2"
+          className="bg-white text-xs py-1.5 w-full resize-none"
         />
         <div className="flex items-center gap-1.5 flex-wrap">
           <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
