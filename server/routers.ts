@@ -273,6 +273,7 @@ export const appRouter = router({
         logisticsLength: z.number().optional(),
         allowedCarrierIds: z.array(z.number()).optional(),
         specifications: z.string().optional(), // JSON array de { label, value }
+        tags: z.string().optional(), // JSON array de tags
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -304,6 +305,7 @@ export const appRouter = router({
             length: input.logisticsLength ?? null,
             allowedCarriers: input.allowedCarrierIds && input.allowedCarrierIds.length > 0 ? JSON.stringify(input.allowedCarrierIds) : '[]',
             specifications: input.specifications || null,
+            tags: input.tags || null,
             isActive: true,
           } as any);
           
@@ -481,6 +483,7 @@ export const appRouter = router({
         minHeight: z.string().optional(),
         maxHeight: z.string().optional(),
         specifications: z.string().optional(), // JSON array de { label, value }
+        tags: z.string().optional(), // JSON array de tags
         // Campos de logística
         weight: z.number().optional(),
         logisticsWidth: z.number().optional(),
@@ -510,6 +513,7 @@ export const appRouter = router({
         if (input.minHeight) updateData.minHeight = parseFloat(input.minHeight);
         if (input.maxHeight) updateData.maxHeight = parseFloat(input.maxHeight);
         if (input.specifications !== undefined) updateData.specifications = input.specifications || null;
+        if (input.tags !== undefined) updateData.tags = input.tags || null;
         // Campos de logística
         if (input.weight !== undefined) updateData.weight = input.weight;
         if (input.logisticsWidth !== undefined) updateData.width = input.logisticsWidth;
