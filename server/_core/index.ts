@@ -45,6 +45,16 @@ async function startServer() {
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   });
   
+  // Helper: sanitiza nome de arquivo para evitar 403 do S3/CloudFront
+  function sanitizeFilename(name: string): string {
+    return name
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remover acentos
+      .replace(/[^a-zA-Z0-9._-]/g, '_') // substituir espaços e caracteres especiais
+      .replace(/_+/g, '_') // colapsar múltiplos _ em um
+      .replace(/^_|_$/g, '') // remover _ no início/fim
+      || 'arquivo';
+  }
+
   app.post('/api/upload', upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
@@ -59,9 +69,9 @@ async function startServer() {
         return res.status(400).json({ error: 'Apenas formatos JPG, PNG e WEBP sao aceitos' });
       }
       
-      // Generate unique filename
+      // Generate unique filename with sanitized name (prevents S3 403 errors)
       const timestamp = Date.now();
-      const filename = `products/${timestamp}-${originalname}`;
+      const filename = `products/${timestamp}-${sanitizeFilename(originalname)}`;
 
       // Upload to S3
       const { url } = await storagePut(filename, buffer, mimetype);
@@ -182,7 +192,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Apenas formatos PNG e WebP são aceitos' });
       }
       const timestamp = Date.now();
-      const filename = `segment-icons/${timestamp}-${originalname}`;
+      const filename = `segment-icons/${timestamp}-${sanitizeFilename(originalname)}`;
       const { url, key } = await storagePut(filename, buffer, mimetype);
       res.json({ url, key });
     } catch (error) {
@@ -221,7 +231,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Apenas formatos JPG, PNG, WEBP e GIF são aceitos' });
       }
       const timestamp = Date.now();
-      const filename = `art-previews/${timestamp}-${originalname}`;
+      const filename = `art-previews/${timestamp}-${sanitizeFilename(originalname)}`;
       const { url, key } = await storagePut(filename, buffer, mimetype);
       res.json({ url, key });
     } catch (error) {
