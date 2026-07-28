@@ -43,6 +43,7 @@ export default function AdminNewProduct() {
     segmentIds: [] as number[],
     specifications: [] as { label: string; value: string }[],
     tags: [] as string[],
+    tagPosition: "top-right" as string,
   });
 
   const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
@@ -106,6 +107,7 @@ export default function AdminNewProduct() {
         allowedCarrierIds: createLogistics.allowedCarrierIds.length > 0 ? createLogistics.allowedCarrierIds : undefined,
         specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
         tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
+        tagPosition: createForm.tagPosition || "top-right",
       });
 
       const newProductId = (result as any)?.id;
@@ -141,7 +143,7 @@ export default function AdminNewProduct() {
       setCreateForm({
         name: "", description: "", price: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
         calculationType: "unidade", pricePerM2: "", minWidth: "", maxWidth: "",
-        minHeight: "", maxHeight: "", segmentIds: [], specifications: [], tags: [],
+        minHeight: "", maxHeight: "", segmentIds: [], specifications: [], tags: [], tagPosition: "top-right",
       });
       setCreateDeliveryOptions([]);
       setCreateLogistics({ weight: "", width: "", height: "", length: "", allowedCarrierIds: [] });
@@ -395,6 +397,27 @@ export default function AdminNewProduct() {
                     </label>
                   ))}
                 </div>
+                {createForm.tags.length > 0 && (
+                  <div className="space-y-1">
+                    <Label className="text-sm font-medium text-gray-700">Posição das Tags no Card</Label>
+                    <Select
+                      value={createForm.tagPosition}
+                      onValueChange={(val) => setCreateForm((prev) => ({ ...prev, tagPosition: val }))}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione a posição" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top-left">Canto Superior Esquerdo</SelectItem>
+                        <SelectItem value="top-right">Canto Superior Direito (padrão)</SelectItem>
+                        <SelectItem value="bottom-left">Canto Inferior Esquerdo</SelectItem>
+                        <SelectItem value="bottom-right">Canto Inferior Direito</SelectItem>
+                        <SelectItem value="top-center">Centro Superior</SelectItem>
+                        <SelectItem value="bottom-center">Centro Inferior</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               {/* Especificações Técnicas */}
               <div className="border border-gray-200 rounded-lg p-4 space-y-3">
