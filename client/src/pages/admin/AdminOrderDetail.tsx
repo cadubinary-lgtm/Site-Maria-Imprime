@@ -347,18 +347,18 @@ function ArtPreviewColumn({
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
         
         {pendingFile && (
-          <div className="relative inline-block">
+          <div className="space-y-2">
             <img
               src={URL.createObjectURL(pendingFile)}
               alt="Preview"
-              className="max-h-24 w-auto object-cover rounded border border-orange-300 bg-white"
+              className="w-full max-h-64 object-contain rounded border border-orange-300 bg-white"
             />
             <button
-              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+              className="w-full py-1.5 text-sm bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 rounded transition-colors"
               onClick={() => onPendingFileChange(null)}
               title="Remover imagem"
             >
-              ✕
+              Excluir
             </button>
           </div>
         )}
@@ -779,6 +779,34 @@ function ItemPreviewSection({
         onPendingNotesChange={setPendingPreviewNotes}
         selectedStatus={selectedStatus}
       />
+    </div>
+  );
+}
+
+// ─── Wrapper por item: Pré-Impressão e Ação de Correção (Col 3) ─────────────────
+function ItemProductionSection({
+  orderId, orderItemId, preProductionStatus, orderStatus,
+}: {
+  orderId: number; orderItemId: number; preProductionStatus: string;
+  orderStatus?: string;
+}) {
+  const utils = trpc.useUtils();
+  const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
+  const [pendingPreviewNotes, setPendingPreviewNotes] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(preProductionStatus);
+  
+  useEffect(() => {
+    setSelectedStatus(preProductionStatus);
+  }, [preProductionStatus]);
+
+  const handlePreviewUploaded = () => {
+    setPendingPreviewFile(null);
+    setPendingPreviewNotes("");
+    utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId });
+  };
+
+  return (
+    <div className="p-5 space-y-4">
       <PreImpressaoColumn
         orderId={orderId}
         orderItemId={orderItemId}
@@ -1100,42 +1128,55 @@ export default function AdminOrderDetail() {
                     {/* Grid 3 colunas com divisores visuais */}
                     <div className="grid grid-cols-1 lg:grid-cols-3">
 
-                      {/* Col 1 — Especificações — componente padronizado */}
-                      <div className="p-5 lg:border-r border-gray-100">
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
-                          <Ruler className="w-3 h-3" /> Especificações
-                        </p>
-                        <OrderItemSpecs
-                          customDimensions={item.customDimensions}
-                          variationSnapshot={item.variationSnapshot}
-                          selectedAttributes={item.selectedAttributes}
-                          notes={item.notes}
-                        />
-                        {!item.customDimensions && !item.variationSnapshot && !item.selectedAttributes && !item.notes && (
-                          <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
-                        )}
+                      {/* Col 1 — Especificações + Arquivo do Cliente */}
+                      <div className="lg:border-r border-gray-100">
+                        {/* Especificações */}
+                        <div className="p-5 lg:border-b border-gray-100">
+                          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                            <Ruler className="w-3 h-3" /> Especificações
+                          </p>
+                          <OrderItemSpecs
+                            customDimensions={item.customDimensions}
+                            variationSnapshot={item.variationSnapshot}
+                            selectedAttributes={item.selectedAttributes}
+                            notes={item.notes}
+                          />
+                          {!item.customDimensions && !item.variationSnapshot && !item.selectedAttributes && !item.notes && (
+                            <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>
+                          )}
+                        </div>
+
+                        {/* Arquivo do Cliente */}
+                        <div className="p-5">
+                          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                            <FileImage className="w-3 h-3 text-blue-500" /> Arquivo do Cliente
+                          </p>
+                          <ItemFileColumn
+                            artFileUrl={item.artFileUrl}
+                            onLightbox={setLightboxUrl}
+                            preProductionStatus={item.preProductionStatus || "liberado_analise"}
+                            orderItemId={item.id}
+                            orderId={orderId!}
+                          />
+                        </div>
                       </div>
 
-                      {/* Col 2 — Arquivo do cliente (filtrado por item via artFileUrl) */}
-                      <div className="p-5 lg:border-r border-gray-100">
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
-                          <FileImage className="w-3 h-3 text-blue-500" /> Arquivo do Cliente
-                        </p>
-                        <ItemFileColumn
-                          artFileUrl={item.artFileUrl}
-                          onLightbox={setLightboxUrl}
-                          preProductionStatus={item.preProductionStatus || "liberado_analise"}
-                          orderItemId={item.id}
+                      {/* Col 2 — Prévia da Arte */}
+                      <div className="lg:border-r border-gray-100">
+                        <ItemPreviewSection
                           orderId={orderId!}
+                          orderItemId={item.id}
+                          preProductionStatus={item.preProductionStatus || "liberado_analise"}
+                          onLightbox={setLightboxUrl}
+                          orderStatus={o.status}
                         />
                       </div>
 
-                      {/* Col 3 — Prévia da Arte + Pré-Impressão (independente por item) */}
-                      <ItemPreviewSection
+                      {/* Col 3 — Pré-Impressão + Ação de Correção */}
+                      <ItemProductionSection
                         orderId={orderId!}
                         orderItemId={item.id}
                         preProductionStatus={item.preProductionStatus || "liberado_analise"}
-                        onLightbox={setLightboxUrl}
                         orderStatus={o.status}
                       />
 
