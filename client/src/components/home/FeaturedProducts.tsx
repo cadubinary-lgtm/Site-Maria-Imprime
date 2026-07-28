@@ -32,9 +32,9 @@ export function FeaturedProducts() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {featured.map((product: any, idx: number) => (
             <Link key={product.id} href={`/produto/${product.id}`} className="group">
-              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm overflow-hidden">
+              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm overflow-hidden p-0">
                 {/* Product image - sangrada no topo, cancela py-6/px-6 do Card */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl -mt-6 -mx-6">
+                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl">
                   <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
                   {product.imageUrl ? (
                     <img
@@ -53,7 +53,7 @@ export function FeaturedProducts() {
                   )}
                 </div>
 
-                <CardContent className="pt-6">
+                <CardContent className="px-4 pt-4 pb-4">
                   <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">{product.name}</h3>
                   <p className="text-xs text-gray-600 line-clamp-2 mb-4 font-light">{product.description}</p>
                   <p className="text-xl font-bold text-pink-600 mb-4">R$ {parseFloat(product.price).toFixed(2)}</p>
