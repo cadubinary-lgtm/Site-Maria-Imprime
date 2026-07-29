@@ -256,6 +256,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ],
           },
           { label: "Produção Kanban", href: "/admin/producao/kanban", badge: inProductionCount || undefined },
+          { label: "Validação de Arquivos", href: "/admin/validacao-arquivos" },
         ],
       },
     },
@@ -327,11 +328,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // CRM
-    { group: "CRM - CLIENTES" },
-    { item: { label: "Clientes", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
-    { item: { label: "Clientes Loja", href: "/admin/clientes-loja", icon: <UserCheck className="w-4 h-4" /> } },
-    { item: { label: "Validação de Arquivos", href: "/admin/validacao-arquivos", icon: <FileCheck className="w-4 h-4" /> } },
+    // CRM - Transformado em menu retrátil
+    {
+      item: {
+        label: "CRM - CLIENTES",
+        icon: <Users className="w-4 h-4" />,
+        children: [
+          { label: "Clientes Site", href: "/admin/clientes-loja" },
+          { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
+          { label: "Novo Cliente", href: "/admin/clientes" },
+        ],
+      },
+    },
     // Relatórios
     { group: "RELATÓRIOS" },
     { item: { label: "Dashboards", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> } },
