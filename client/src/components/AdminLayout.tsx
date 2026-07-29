@@ -304,13 +304,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Pagamentos
-    { group: "PAGAMENTOS" },
+    // API Pagamentos - Transformado em menu retrátil
     {
       item: {
-        label: "Mercado Pago",
+        label: "API PAGAMENTOS",
         icon: <CreditCard className="w-4 h-4" />,
-        href: "/admin/pagamentos/mercadopago",
+        children: [
+          { label: "Mercado Pago", href: "/admin/pagamentos/mercadopago" },
+        ],
       },
     },
     // Produtos - Transformado em menu retrátil
