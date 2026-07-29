@@ -363,11 +363,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Backoffice
-    { group: "BACKOFFICE" },
-    { item: { label: "Meu Perfil", href: "/admin/perfil", icon: <UserCircle className="w-4 h-4" /> } },
-    { item: { label: "Administradores", href: "/admin/administradores", icon: <ShieldCheck className="w-4 h-4" /> } },
-    { item: { label: "Logs de Auditoria", href: "/admin/auditoria", icon: <ScrollText className="w-4 h-4" /> } },
+    // Backoffice - Transformado em menu retrátil
+    {
+      item: {
+        label: "BACKOFFICE",
+        icon: <Settings className="w-4 h-4" />,
+        children: [
+          { label: "Meu Perfil", href: "/admin/perfil" },
+          { label: "Administradores", href: "/admin/administradores" },
+          { label: "Logs de Auditoria", href: "/admin/auditoria" },
+        ],
+      },
+    },
   ];
 
   return (
