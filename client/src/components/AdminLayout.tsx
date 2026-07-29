@@ -340,15 +340,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Relatórios
-    { group: "RELATÓRIOS" },
-    { item: { label: "Dashboards", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> } },
-    { item: { label: "ERP", href: "/admin/erp", icon: <BarChart3 className="w-4 h-4" /> } },
-    { item: { label: "Automação", href: "/admin/automacao", icon: <Zap className="w-4 h-4" /> } },
-    // Sistema
-    { group: "SISTEMA" },
-    { item: { label: "Usuários", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
-    { item: { label: "Integrações", href: "/admin/vincular-atributos", icon: <Link2 className="w-4 h-4" /> } },
+    // Relatórios - Transformado em menu retrátil
+    {
+      item: {
+        label: "RELATÓRIOS",
+        icon: <BarChart3 className="w-4 h-4" />,
+        children: [
+          { label: "Dashboards", href: "/admin" },
+          { label: "ERP", href: "/admin/erp" },
+          { label: "Automação", href: "/admin/automacao" },
+        ],
+      },
+    },
+    // Sistema - Transformado em menu retrátil
+    {
+      item: {
+        label: "SISTEMA",
+        icon: <Settings className="w-4 h-4" />,
+        children: [
+          { label: "Usuários", href: "/admin/clientes" },
+          { label: "Integrações", href: "/admin/vincular-atributos" },
+        ],
+      },
+    },
     // Backoffice
     { group: "BACKOFFICE" },
     { item: { label: "Meu Perfil", href: "/admin/perfil", icon: <UserCircle className="w-4 h-4" /> } },
