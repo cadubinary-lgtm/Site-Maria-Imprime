@@ -240,9 +240,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
+    { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
     // LINHA DE PRODUÇÃO
     { group: "LINHA DE PRODUÇÃO" },
-    { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
     {
       item: {
         label: "Pré-Impressão",
