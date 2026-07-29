@@ -259,30 +259,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Financeiro
-    { group: "FINANCEIRO" },
+    // Financeiro - Transformado em menu retrátil
     {
       item: {
-        label: "Gerenciador Financeiro",
-        icon: <TrendingUp className="w-4 h-4" />,
+        label: "FINANCEIRO",
+        icon: <DollarSign className="w-4 h-4" />,
         children: [
-          { label: "Dashboard Financeiro", href: "/admin/financeiro-dashboard" },
-          { label: "Contas a Receber", href: "/admin/financeiro/receber" },
-          { label: "Contas Recebidas", href: "/admin/financeiro/recebidas" },
-          { label: "Pagamentos na Retirada", href: "/admin/financeiro/retirada" },
-          { label: "Fluxo de Caixa", href: "/admin/financeiro/fluxo" },
-          { label: "Relatórios Financeiros", href: "/admin/financeiro/relatorios" },
-        ],
-      },
-    },
-    {
-      item: {
-        label: "Gestão Fiscal",
-        icon: <Receipt className="w-4 h-4" />,
-        children: [
-          { label: "Dashboard Fiscal", href: "/admin/fiscal" },
-          { label: "Notas Fiscais", href: "/admin/fiscal/notas" },
-          { label: "Configurações Fiscais", href: "/admin/fiscal/configuracoes" },
+          {
+            label: "Gerenciador Financeiro",
+            icon: <TrendingUp className="w-4 h-4" />,
+            children: [
+              { label: "Dashboard Financeiro", href: "/admin/financeiro-dashboard" },
+              { label: "Contas a Receber", href: "/admin/financeiro/receber" },
+              { label: "Contas Recebidas", href: "/admin/financeiro/recebidas" },
+              { label: "Pagamentos na Retirada", href: "/admin/financeiro/retirada" },
+              { label: "Fluxo de Caixa", href: "/admin/financeiro/fluxo" },
+              { label: "Relatórios Financeiros", href: "/admin/financeiro/relatorios" },
+            ],
+          },
+          {
+            label: "Gestão Fiscal",
+            icon: <Receipt className="w-4 h-4" />,
+            children: [
+              { label: "Dashboard Fiscal", href: "/admin/fiscal" },
+              { label: "Notas Fiscais", href: "/admin/fiscal/notas" },
+              { label: "Configurações Fiscais", href: "/admin/fiscal/configuracoes" },
+            ],
+          },
         ],
       },
     },
