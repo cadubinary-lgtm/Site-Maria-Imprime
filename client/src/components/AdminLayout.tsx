@@ -313,15 +313,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         href: "/admin/pagamentos/mercadopago",
       },
     },
-    // Produtos
-    { group: "PRODUTOS" },
-    { item: { label: "Produtos", href: "/admin/produtos", icon: <Package className="w-4 h-4" /> } },
+    // Produtos - Transformado em menu retrátil
+    {
+      item: {
+        label: "PRODUTOS",
+        icon: <Package className="w-4 h-4" />,
+        children: [
+          { label: "Todos os Produtos", href: "/admin/produtos" },
+          { label: "Gerenciar Variações", href: "/admin/variacoes" },
+          { label: "Segmentos", href: "/admin/segmentos" },
+        ],
+      },
+    },
     { item: { label: "Novo Produto", href: "/admin/novo-produto", icon: <Plus className="w-4 h-4" /> } },
-    { item: { label: "Gerenciar Variações", href: "/admin/variacoes", icon: <Settings className="w-4 h-4" /> } },
-    { item: { label: "Segmentos", href: "/admin/segmentos", icon: <Layers className="w-4 h-4" /> } },
-    { item: { label: "Atributos", href: "/admin/atributos", icon: <Tag className="w-4 h-4" /> } },
-    { item: { label: "Regras", href: "/admin/regras", icon: <Sliders className="w-4 h-4" /> } },
-    { item: { label: "Regras Dinâmicas", href: "/admin/regras-dinamicas", icon: <Zap className="w-4 h-4" /> } },
     // CRM
     { group: "CRM - CLIENTES" },
     { item: { label: "Clientes", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
