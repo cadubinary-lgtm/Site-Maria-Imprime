@@ -219,28 +219,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const inProductionCount = orders?.filter((o: any) => o.status === "em_producao").length ?? 0;
 
   const navItems: { group?: string; item?: NavItem }[] = [
-    // COMERCIAL E VENDAS
-    { group: "COMERCIAL E VENDAS" },
+    // COMERCIAL E VENDAS - Transformado em menu retrátil
     {
       item: {
-        label: "Novos Pedidos",
-        icon: <ShoppingCart className="w-4 h-4" />,
-        badge: pendingCount || undefined,
-        href: "/admin/pedidos/novos",
-      },
-    },
-    {
-      item: {
-        label: "Pedidos",
+        label: "COMERCIAL E VENDAS",
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
+          { label: "Novos Pedidos", href: "/admin/pedidos/novos", badge: pendingCount || undefined },
           { label: "Todos os Pedidos", href: "/admin/pedidos" },
           { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
-          { label: "Com Problemas", href: "/admin/pedidos?status=cancelado" },
+          { label: "Ordens de Serviço (O.S.)", href: "/admin/os" },
         ],
       },
     },
-    { item: { label: "Ordens de Serviço (O.S.)", href: "/admin/os", icon: <ClipboardList className="w-4 h-4" /> } },
     // LINHA DE PRODUÇÃO
     { group: "LINHA DE PRODUÇÃO" },
     {
@@ -374,113 +365,79 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 placeholder="Buscar menu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                className="w-full bg-gray-800 text-white text-sm rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder-gray-500"
               />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-0.5"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-              )}
             </div>
           </div>
 
-          {/* Nav */}
-          <nav ref={navRef as React.RefObject<HTMLElement>} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-            {/* Dashboard link */}
-            <NavLink item={{ label: "Painel Admin", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> }} searchQuery={searchQuery} />
-
-            {navItems.map((entry, i) => {
-              // Se há busca, não renderiza grupos vazios
-              if (entry.group) {
-                if (searchQuery) {
-                  // Verifica se há algum item no grupo que corresponde à busca
-                  const hasMatchingItems = navItems.slice(i + 1).some((e) => {
-                    if (e.group) return false; // Próximo grupo encontrado
-                    return e.item && matchesSearch(e.item, searchQuery);
-                  });
-                  if (!hasMatchingItems) return null;
-                }
-                return <NavGroup key={i} label={entry.group} />;
+          {/* Navigation */}
+          <nav
+            ref={navRef}
+            className="flex-1 overflow-y-auto px-2 py-3 space-y-1"
+            style={{ scrollBehavior: "auto" }}
+          >
+            {navItems.map((item, idx) => {
+              if (item.group) {
+                return <NavGroup key={`group-${idx}`} label={item.group} />;
               }
-              if (entry.item) return <NavLink key={i} item={entry.item} searchQuery={searchQuery} />;
-              return null;
+              return (
+                <NavLink
+                  key={item.item?.label || idx}
+                  item={item.item!}
+                  searchQuery={searchQuery}
+                />
+              );
             })}
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-gray-800 px-3 py-3">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {user?.name?.[0]?.toUpperCase() ?? "A"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-white text-xs font-medium truncate">{user?.name ?? "Admin"}</p>
-                <p className="text-gray-400 text-[10px]">Administrador</p>
-              </div>
-            </div>
+          <div className="px-3 py-3 border-t border-gray-800">
             <button
               onClick={logout}
-              className="w-full flex items-center gap-2 text-gray-400 hover:text-white text-xs py-1.5 px-2 rounded hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              Sair
+              <LogOut className="w-4 h-4" />
+              <span>Sair</span>
             </button>
           </div>
         </aside>
 
-        {/* Main area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top bar */}
-          <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 flex-shrink-0">
+        {/* Main Content */}
+        <main
+          ref={mainRef}
+          className="flex-1 overflow-auto bg-white"
+        >
+          {/* Header */}
+          <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-gray-500 hover:text-gray-900 p-1 rounded"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {sidebarOpen ? (
+                <X className="w-5 h-5 text-gray-600" />
+              ) : (
+                <Menu className="w-5 h-5 text-gray-600" />
+              )}
             </button>
-
-            {/* Search */}
-            <div className="flex-1 max-w-md relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Buscar pedidos, clientes, produtos..."
-                className="pl-9 h-9 text-sm bg-gray-50 border-gray-200"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">⌘K</span>
+            <div className="flex-1 px-4">
+              <h1 className="text-lg font-semibold text-gray-900">
+                Painel Admin
+              </h1>
             </div>
+            <button
+              onClick={logout}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Sair"
+            >
+              <LogOut className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
 
-            <div className="flex items-center gap-3 ml-auto">
-              {/* Notificações */}
-              <button className="relative text-gray-500 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100">
-                <Bell className="w-5 h-5" />
-                {pendingCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
-                    {pendingCount > 9 ? "9+" : pendingCount}
-                  </span>
-                )}
-              </button>
-
-              {/* User */}
-              <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
-                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
-                  {user?.name?.[0]?.toUpperCase() ?? "A"}
-                </div>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900 leading-tight">{user?.name ?? "Admin"}</p>
-                  <p className="text-[11px] text-gray-500">Administrador</p>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Page content */}
-          <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50">
+          {/* Content */}
+          <div className="p-6">
             {children}
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </SidebarScrollContext.Provider>
   );
