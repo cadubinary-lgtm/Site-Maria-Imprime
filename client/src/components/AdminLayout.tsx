@@ -289,11 +289,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Logística
-    { group: "LOGÍSTICA" },
+    // Logística - Transformado em menu retrátil
     {
       item: {
-        label: "Logística",
+        label: "LOGÍSTICA",
         icon: <Truck className="w-4 h-4" />,
         children: [
           { label: "Dashboard", href: "/admin/logistica" },
