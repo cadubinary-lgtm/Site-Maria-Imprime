@@ -232,30 +232,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // LINHA DE PRODUÇÃO
-    { group: "LINHA DE PRODUÇÃO" },
+    // LINHA DE PRODUÇÃO - Transformado em menu retrátil
     {
       item: {
-        label: "Pré-Impressão",
-        icon: <Layers className="w-4 h-4" />,
-        children: [
-          { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
-          { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
-        ],
-      },
-    },
-    {
-      item: {
-        label: "Status de Produção",
+        label: "LINHA DE PRODUÇÃO",
         icon: <Printer className="w-4 h-4" />,
         children: [
-          { label: "Pendente", href: "/admin/status-producao?status=pendente" },
-          { label: "Impresso", href: "/admin/status-producao?status=impresso" },
-          { label: "Acabamento Finalizado", href: "/admin/status-producao?status=acabamento_finalizado" },
+          {
+            label: "Pré-Impressão",
+            icon: <Layers className="w-4 h-4" />,
+            children: [
+              { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
+              { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
+            ],
+          },
+          {
+            label: "Status de Produção",
+            icon: <Printer className="w-4 h-4" />,
+            children: [
+              { label: "Pendente", href: "/admin/status-producao?status=pendente" },
+              { label: "Impresso", href: "/admin/status-producao?status=impresso" },
+              { label: "Acabamento Finalizado", href: "/admin/status-producao?status=acabamento_finalizado" },
+            ],
+          },
+          { label: "Produção Kanban", href: "/admin/producao/kanban", badge: inProductionCount || undefined },
         ],
       },
     },
-    { item: { label: "Produção Kanban", href: "/admin/producao/kanban", icon: <Kanban className="w-4 h-4" />, badge: inProductionCount || undefined } },
     // Financeiro
     { group: "FINANCEIRO" },
     {
