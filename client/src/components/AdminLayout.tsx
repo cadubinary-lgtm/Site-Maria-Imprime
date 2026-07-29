@@ -321,12 +321,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <Package className="w-4 h-4" />,
         children: [
           { label: "Todos os Produtos", href: "/admin/produtos" },
+          { label: "Novo Produto", href: "/admin/novo-produto" },
           { label: "Gerenciar Variações", href: "/admin/variacoes" },
           { label: "Segmentos", href: "/admin/segmentos" },
         ],
       },
     },
-    { item: { label: "Novo Produto", href: "/admin/novo-produto", icon: <Plus className="w-4 h-4" /> } },
     // CRM
     { group: "CRM - CLIENTES" },
     { item: { label: "Clientes", href: "/admin/clientes", icon: <Users className="w-4 h-4" /> } },
