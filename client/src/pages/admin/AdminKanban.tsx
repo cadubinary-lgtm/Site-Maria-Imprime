@@ -7,15 +7,15 @@ import { toast } from "sonner";
 
 // ─── Colunas do Kanban (fluxo de produção) ──────────────────────────────────
 const KANBAN_COLUMNS = [
-  { id: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: "💳", bg: "bg-green-50",   border: "border-green-200",   badge: "bg-green-100 text-green-800",   header: "bg-green-500" },
-  { id: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: "🏪", bg: "bg-blue-50",    border: "border-blue-200",    badge: "bg-blue-100 text-blue-800",    header: "bg-blue-500" },
-  { id: "analisando",          label: "Analisando",             icon: "🔍", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800", header: "bg-orange-500" },
-  { id: "com_problemas",       label: "Com Problemas",          icon: "⚠️", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
-  { id: "em_producao",         label: "Em Produção",            icon: "⚙️", bg: "bg-orange-50",  border: "border-orange-200",  badge: "bg-orange-100 text-orange-800", header: "bg-orange-500" },
-  { id: "pronto_entrega",      label: "Pronto para Entrega",    icon: "🚚", bg: "bg-teal-50",    border: "border-teal-200",    badge: "bg-teal-100 text-teal-800",    header: "bg-teal-500" },
-  { id: "pronto_retirada",     label: "Pronto para Retirada",   icon: "🎁", bg: "bg-cyan-50",    border: "border-cyan-200",    badge: "bg-cyan-100 text-cyan-800",    header: "bg-cyan-500" },
-  { id: "entregue",            label: "Entregue",               icon: "✔️", bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-800",header: "bg-emerald-500" },
-  { id: "cancelado",           label: "Cancelado",              icon: "❌", bg: "bg-red-50",     border: "border-red-200",     badge: "bg-red-100 text-red-800",      header: "bg-red-500" },
+  { id: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: "💳", bg: "bg-gray-50",   border: "border-t-4 border-emerald-500",   badge: "bg-gray-200 text-gray-700",   header: "bg-white" },
+  { id: "pagamento_retirada",  label: "Pagamento na Retirada",  icon: "🏪", bg: "bg-gray-50",    border: "border-t-4 border-blue-500",    badge: "bg-gray-200 text-gray-700",    header: "bg-white" },
+  { id: "analisando",          label: "Analisando",             icon: "🔍", bg: "bg-gray-50",  border: "border-t-4 border-purple-500",  badge: "bg-gray-200 text-gray-700", header: "bg-white" },
+  { id: "com_problemas",       label: "Com Problemas",          icon: "⚠️", bg: "bg-gray-50",     border: "border-t-4 border-amber-500",     badge: "bg-gray-200 text-gray-700",      header: "bg-white" },
+  { id: "em_producao",         label: "Em Produção",            icon: "⚙️", bg: "bg-gray-50",  border: "border-t-4 border-pink-500",  badge: "bg-gray-200 text-gray-700", header: "bg-white" },
+  { id: "pronto_entrega",      label: "Pronto para Entrega",    icon: "🚚", bg: "bg-gray-50",    border: "border-t-4 border-cyan-500",    badge: "bg-gray-200 text-gray-700",    header: "bg-white" },
+  { id: "pronto_retirada",     label: "Pronto para Retirada",   icon: "🎁", bg: "bg-gray-50",    border: "border-t-4 border-indigo-500",    badge: "bg-gray-200 text-gray-700",    header: "bg-white" },
+  { id: "entregue",            label: "Entregue",               icon: "✔️", bg: "bg-gray-50", border: "border-t-4 border-emerald-500", badge: "bg-gray-200 text-gray-700",header: "bg-white" },
+  { id: "cancelado",           label: "Cancelado",              icon: "❌", bg: "bg-gray-50",     border: "border-t-4 border-gray-400",     badge: "bg-gray-200 text-gray-700",      header: "bg-white" },
 ];
 
 // Status seguintes para avançar o pedido (com_problemas não avança via botão genérico)
@@ -223,16 +223,16 @@ export default function AdminKanban() {
       </div>
 
       {/* Filtro de colunas visíveis */}
-      <div className="flex flex-wrap gap-2">
-        <span className="text-xs text-gray-500 self-center">Mostrar/ocultar:</span>
+      <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-gray-200">
+        <span className="text-xs text-gray-600 font-semibold self-center">Mostrar/ocultar:</span>
         {KANBAN_COLUMNS.map(col => (
           <button
             key={col.id}
             onClick={() => toggleCol(col.id)}
-            className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
               hiddenCols.has(col.id)
-                ? "bg-gray-100 text-gray-400 border-gray-200"
-                : `${col.badge} border-transparent`
+                ? "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-150"
+                : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
             }`}
           >
             {col.icon} {col.label} ({byStatus[col.id].length})
@@ -251,12 +251,12 @@ export default function AdminKanban() {
                 className={`flex-shrink-0 w-52 rounded-xl border ${col.border} ${col.bg} overflow-hidden`}
               >
                 {/* Header da coluna */}
-                <div className={`${col.header} px-3 py-2 flex items-center justify-between`}>
+                <div className={`${col.header} ${col.border} px-3 py-3 flex items-center justify-between border-b border-gray-200`}>
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{col.icon}</span>
-                    <span className="text-white text-xs font-semibold leading-tight">{col.label}</span>
+                    <span className="text-gray-700 text-xs font-semibold leading-tight">{col.label}</span>
                   </div>
-                  <span className="bg-white/30 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="bg-gray-200 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5">
                     {colOrders.length}
                   </span>
                 </div>
