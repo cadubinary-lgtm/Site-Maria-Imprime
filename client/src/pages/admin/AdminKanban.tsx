@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Search, X } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -138,6 +138,7 @@ export default function AdminKanban() {
   const updateStatusMutation = trpc.checkout.updateOrderStatus.useMutation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set(["entregue", "cancelado"]));
+  const [searchQuery, setSearchQuery] = useState("");
 
   const orders: Order[] = (allOrders ?? []) as Order[];
 
@@ -196,13 +197,24 @@ export default function AdminKanban() {
     );
   }
 
+  // Filtrar pedidos por busca
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery.trim()) return orders;
+    const query = searchQuery.toLowerCase();
+    return orders.filter(o => 
+      o.orderNumber.toLowerCase().includes(query)
+    );
+  }, [orders, searchQuery]);
+
   // Agrupar pedidos por status
   const byStatus: Record<string, Order[]> = {};
   for (const col of KANBAN_COLUMNS) {
-    byStatus[col.id] = orders.filter(o => o.status === col.id);
+    byStatus[col.id] = filteredOrders.filter(o => o.status === col.id);
   }
 
   const visibleCols = KANBAN_COLUMNS.filter(c => !hiddenCols.has(c.id));
+  const totalFiltered = filteredOrders.length;
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <AdminLayout>
@@ -221,6 +233,31 @@ export default function AdminKanban() {
           </button>
         </Link>
       </div>
+
+      {/* Barra de pesquisa */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Buscar por número do pedido..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-white text-sm rounded-lg pl-9 pr-9 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder-gray-400"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+      {isSearching && (
+        <p className="text-xs text-gray-500 px-1">
+          {totalFiltered} pedido{totalFiltered !== 1 ? "s" : ""} encontrado{totalFiltered !== 1 ? "s" : ""}
+        </p>
+      )}
 
       {/* Filtro de colunas visíveis */}
       <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-gray-200">
