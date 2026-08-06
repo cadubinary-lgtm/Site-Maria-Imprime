@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ExternalLink, Search, X } from "lucide-react";
+import { Loader2, ExternalLink, Search, X, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -139,6 +139,7 @@ export default function AdminKanban() {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set(["entregue", "cancelado"]));
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "priority">("date");
 
   const orders: Order[] = (allOrders ?? []) as Order[];
 
@@ -206,10 +207,21 @@ export default function AdminKanban() {
     );
   }, [orders, searchQuery]);
 
+  // Ordenar pedidos
+  const sortedOrders = useMemo(() => {
+    const sorted = [...filteredOrders];
+    if (sortBy === "date") {
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === "priority") {
+      sorted.sort((a, b) => parseFloat(b.totalPrice.toString()) - parseFloat(a.totalPrice.toString()));
+    }
+    return sorted;
+  }, [filteredOrders, sortBy]);
+
   // Agrupar pedidos por status
   const byStatus: Record<string, Order[]> = {};
   for (const col of KANBAN_COLUMNS) {
-    byStatus[col.id] = filteredOrders.filter(o => o.status === col.id);
+    byStatus[col.id] = sortedOrders.filter(o => o.status === col.id);
   }
 
   const visibleCols = KANBAN_COLUMNS.filter(c => !hiddenCols.has(c.id));
@@ -259,6 +271,22 @@ export default function AdminKanban() {
         </p>
       )}
 
+      {/* Botão de Ordenação */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-600 font-semibold">Ordenar por:</span>
+        <div className="relative inline-block">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "date" | "priority")}
+            className="appearance-none bg-white text-sm rounded-lg px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer pr-8 text-gray-700"
+          >
+            <option value="date">Data de entrada (mais recentes)</option>
+            <option value="priority">Prioridade (maior valor)</option>
+          </select>
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
+      </div>
+
       {/* Filtro de colunas visíveis */}
       <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-gray-200">
         <span className="text-xs text-gray-600 font-semibold self-center">Mostrar/ocultar:</span>
@@ -277,7 +305,20 @@ export default function AdminKanban() {
         ))}
       </div>
 
-      {/* Kanban Board — scroll horizontal */}
+      {/* Mensagem de nenhum pedido encontrado ou Kanban Board */}
+      {totalFiltered === 0 && isSearching ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Search className="w-12 h-12 text-gray-300 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhum pedido encontrado</h3>
+          <p className="text-sm text-gray-500 mb-4">Nenhum pedido corresponde à sua busca: <span className="font-semibold text-gray-700">"{searchQuery}"</span></p>
+          <button
+            onClick={() => setSearchQuery("")}
+            className="text-sm text-orange-600 hover:text-orange-700 underline"
+          >
+            Limpar busca
+          </button>
+        </div>
+      ) : (
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-4" style={{ minWidth: `${visibleCols.length * 220}px` }}>
           {visibleCols.map(col => {
@@ -320,6 +361,7 @@ export default function AdminKanban() {
           })}
         </div>
       </div>
+      )}
     </div>
     </AdminLayout>
   );
