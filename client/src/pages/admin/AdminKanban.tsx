@@ -72,18 +72,21 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   onCancel: (id: number) => void;
   isUpdating: boolean;
 }) {
+  const [showModal, setShowModal] = useState(false);
   const col = KANBAN_COLUMNS.find(c => c.id === order.status);
   const nextStatus = NEXT_STATUS[order.status];
   const isComProblemas = order.status === "com_problemas";
 
   return (
     <div className="bg-white rounded-md border border-gray-100 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
-      {/* Número do pedido + link */}
+      {/* Número do pedido + ícone de olho */}
       <div className="flex items-center justify-between">
-        <span className="font-bold text-sm text-gray-900">{order.orderNumber}</span>
-        <Link href={`/admin/pedidos/${order.id}`}>
-          <ExternalLink className="w-3.5 h-3.5 text-gray-400 hover:text-orange-500 cursor-pointer" />
-        </Link>
+        <button onClick={() => setShowModal(true)} className="font-bold text-sm text-gray-900 hover:text-orange-500 transition-colors cursor-pointer">
+          {order.orderNumber}
+        </button>
+        <button onClick={() => setShowModal(true)} className="text-gray-400 hover:text-orange-500 transition-colors">
+          👁️
+        </button>
       </div>
 
       {/* Valor OU tag de estado da arte (apenas na coluna Com Problemas) */}
@@ -108,6 +111,43 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
       )}
 
       {/* Ações removidas - operador usa drag-and-drop para mover cards */}
+
+      {/* Modal de Detalhes */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900">{order.orderNumber}</h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">X</button>
+            </div>
+            <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+              <div>
+                <p className="text-xs text-gray-500 font-semibold">VALOR</p>
+                <p className="text-sm font-bold text-gray-900">R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-semibold">DATA DO PEDIDO</p>
+                <p className="text-sm text-gray-700">{new Date(order.createdAt).toLocaleDateString("pt-BR")}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-semibold">STATUS</p>
+                <p className="text-sm text-gray-700">{col?.label || "Desconhecido"}</p>
+              </div>
+            </div>
+            <div className="mb-4">
+              <a href={`/admin/pedidos/${order.id}`} className="w-full inline-block text-center bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2 rounded-md transition-colors">
+                Ver Detalhes Completos
+              </a>
+            </div>
+            <div className="pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500 font-semibold mb-2">CONTATO RAPIDO</p>
+              <button className="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 rounded-md transition-colors flex items-center justify-center gap-2">
+                Abrir WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
