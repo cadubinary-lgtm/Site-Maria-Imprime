@@ -77,7 +77,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   const isComProblemas = order.status === "com_problemas";
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-md border border-gray-100 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
       {/* Número do pedido + link */}
       <div className="flex items-center justify-between">
         <span className="font-bold text-sm text-gray-900">{order.orderNumber}</span>
@@ -326,10 +326,10 @@ export default function AdminKanban() {
             return (
               <div
                 key={col.id}
-                className={`flex-shrink-0 w-52 rounded-xl border ${col.border} ${col.bg} overflow-hidden`}
+                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.bg} overflow-hidden`}
               >
                 {/* Header da coluna */}
-                <div className={`${col.header} ${col.border} px-3 py-3 flex items-center justify-between border-b border-gray-200`}>
+                <div className={`${col.header} ${col.border} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{col.icon}</span>
                     <span className="text-gray-700 text-xs font-semibold leading-tight">{col.label}</span>
