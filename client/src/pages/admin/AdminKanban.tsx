@@ -107,28 +107,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
         </span>
       )}
 
-      {/* Ações */}
-      <div className="flex gap-1 pt-1">
-        {/* Na coluna com_problemas, não há botão Avançar genérico — o operador usa o detalhe do pedido */}
-        {!isComProblemas && nextStatus && (
-          <button
-            onClick={() => onAdvance(order.id, nextStatus)}
-            disabled={isUpdating}
-            className="flex-1 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded px-2 py-1 disabled:opacity-50 transition-colors"
-          >
-            {isUpdating ? "..." : "Avançar →"}
-          </button>
-        )}
-        {order.status !== "cancelado" && order.status !== "entregue" && (
-          <button
-            onClick={() => onCancel(order.id)}
-            disabled={isUpdating}
-            className="text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded px-2 py-1 disabled:opacity-50 transition-colors"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      {/* Ações removidas - operador usa drag-and-drop para mover cards */}
     </div>
   );
 }
@@ -326,7 +305,8 @@ export default function AdminKanban() {
             return (
               <div
                 key={col.id}
-                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.border} ${col.bg} overflow-hidden`}
+                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.bg} overflow-hidden`}
+                style={{ borderTop: '4px solid ' + (col.border.includes('emerald') ? '#10b981' : col.border.includes('blue') ? '#3b82f6' : col.border.includes('purple') ? '#a855f7' : col.border.includes('amber') ? '#f59e0b' : col.border.includes('pink') ? '#ec4899' : col.border.includes('cyan') ? '#06b6d4' : col.border.includes('indigo') ? '#6366f1' : '#9ca3af') }}
               >
                 {/* Header da coluna */}
                 <div className={`${col.header} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
