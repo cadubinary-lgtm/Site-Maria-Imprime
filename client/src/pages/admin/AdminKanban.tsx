@@ -326,10 +326,10 @@ export default function AdminKanban() {
             return (
               <div
                 key={col.id}
-                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.bg} overflow-hidden`}
+                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.border} ${col.bg} overflow-hidden`}
               >
                 {/* Header da coluna */}
-                <div className={`${col.header} ${col.border} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
+                <div className={`${col.header} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{col.icon}</span>
                     <span className="text-gray-700 text-xs font-semibold leading-tight">{col.label}</span>
