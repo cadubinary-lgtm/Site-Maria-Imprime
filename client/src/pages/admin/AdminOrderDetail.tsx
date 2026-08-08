@@ -770,10 +770,13 @@ function PreImpressaoColumn({
 // ─── Wrapper por item: carrega prévias independentes e renderiza Col 3 ─────────────────
 function ItemPreviewSection({
   orderId, orderItemId, preProductionStatus, onLightbox, orderStatus,
+  onExternalFileChange, onExternalNotesChange,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   onLightbox: (url: string) => void;
   orderStatus?: string;
+  onExternalFileChange?: (f: File | null) => void;
+  onExternalNotesChange?: (n: string) => void;
 }) {
   const utils = trpc.useUtils();
   const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
@@ -810,8 +813,8 @@ function ItemPreviewSection({
         onRefresh={() => utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId })}
         pendingFile={pendingPreviewFile}
         pendingNotes={pendingPreviewNotes}
-        onPendingFileChange={setPendingPreviewFile}
-        onPendingNotesChange={setPendingPreviewNotes}
+        onPendingFileChange={(f) => { setPendingPreviewFile(f); onExternalFileChange?.(f); }}
+        onPendingNotesChange={(n) => { setPendingPreviewNotes(n); onExternalNotesChange?.(n); }}
         selectedStatus={selectedStatus}
       />
     </div>
@@ -821,24 +824,19 @@ function ItemPreviewSection({
 // ─── Wrapper por item: Pré-Impressão e Ação de Correção (Col 3) ─────────────────
 function ItemProductionSection({
   orderId, orderItemId, preProductionStatus, orderStatus,
+  pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   orderStatus?: string;
+  pendingPreviewFile: File | null;
+  pendingPreviewNotes: string;
+  onPreviewUploaded: () => void;
 }) {
-  const utils = trpc.useUtils();
-  const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
-  const [pendingPreviewNotes, setPendingPreviewNotes] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(preProductionStatus);
   
   useEffect(() => {
     setSelectedStatus(preProductionStatus);
   }, [preProductionStatus]);
-
-  const handlePreviewUploaded = () => {
-    setPendingPreviewFile(null);
-    setPendingPreviewNotes("");
-    utils.checkout.getArtPreviews.invalidate({ orderId, orderItemId });
-  };
 
   return (
     <div className="p-5 space-y-4">
@@ -848,7 +846,7 @@ function ItemProductionSection({
         preProductionStatus={preProductionStatus}
         pendingPreviewFile={pendingPreviewFile}
         pendingPreviewNotes={pendingPreviewNotes}
-        onPreviewUploaded={handlePreviewUploaded}
+        onPreviewUploaded={onPreviewUploaded}
         onSelectedStatusChange={setSelectedStatus}
         orderStatus={orderStatus}
       />
@@ -867,6 +865,16 @@ export default function AdminOrderDetail() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  // Estado compartilhado de prévia pendente por itemId (Col2 → Col3)
+  const [pendingFiles, setPendingFiles] = useState<Map<number, File>>(new Map());
+  const [pendingNotes, setPendingNotes] = useState<Map<number, string>>(new Map());
+  const setPendingFile = (itemId: number, file: File | null) => {
+    setPendingFiles(prev => { const m = new Map(prev); file ? m.set(itemId, file) : m.delete(itemId); return m; });
+  };
+  const setPendingNote = (itemId: number, note: string) => {
+    setPendingNotes(prev => { const m = new Map(prev); m.set(itemId, note); return m; });
+  };
 
   // Controle de visibilidade de preços por role
   const { adminUser } = useAdminAuth();
@@ -1211,6 +1219,8 @@ export default function AdminOrderDetail() {
                           preProductionStatus={item.preProductionStatus || "liberado_analise"}
                           onLightbox={setLightboxUrl}
                           orderStatus={o.status}
+                          onExternalFileChange={(f) => setPendingFile(item.id, f)}
+                          onExternalNotesChange={(n) => setPendingNote(item.id, n)}
                         />
                       </div>
 
@@ -1220,6 +1230,9 @@ export default function AdminOrderDetail() {
                         orderItemId={item.id}
                         preProductionStatus={item.preProductionStatus || "liberado_analise"}
                         orderStatus={o.status}
+                        pendingPreviewFile={pendingFiles.get(item.id) ?? null}
+                        pendingPreviewNotes={pendingNotes.get(item.id) ?? ""}
+                        onPreviewUploaded={() => { setPendingFile(item.id, null); setPendingNote(item.id, ""); }}
                       />
 
                     </div>
