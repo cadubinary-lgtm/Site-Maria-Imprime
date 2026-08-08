@@ -78,36 +78,18 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
 
   return (
     <div className="bg-white rounded-md border border-gray-100 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
-      {/* Número do pedido + link */}
-      <div className="flex items-center justify-between">
-        <span className="font-bold text-sm text-gray-900">{order.orderNumber}</span>
-        <Link href={`/admin/pedidos/${order.id}`}>
-          <ExternalLink className="w-3.5 h-3.5 text-gray-400 hover:text-orange-500 cursor-pointer" />
-        </Link>
-      </div>
+      {/* Linha 1: Número do pedido */}
+      <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
 
-      {/* Valor OU tag de estado da arte (apenas na coluna Com Problemas) */}
-      {isComProblemas && artState !== "none" ? (
-        <ArtStateTag state={artState} />
-      ) : (
-        <div className="text-xs text-gray-500">
-          R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}
-        </div>
-      )}
+      {/* Linha 2: Link Ver pedido */}
+      <Link href={`/admin/pedidos/${order.id}`} className="text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors">
+        Ver pedido
+      </Link>
 
-      {/* Data */}
+      {/* Linha 3: Data do pedido */}
       <div className="text-xs text-gray-400">
         {new Date(order.createdAt).toLocaleDateString("pt-BR")}
       </div>
-
-      {/* Badge de status */}
-      {col && (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${col.badge}`}>
-          {col.icon} {col.label}
-        </span>
-      )}
-
-      {/* Ações removidas - operador usa drag-and-drop para mover cards */}
     </div>
   );
 }
