@@ -68,12 +68,14 @@ function ArtStateTag({ state }: { state: ArtState }) {
   return null;
 }
 
-function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
+function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragStart, onDragEnd }: {
   order: Order;
   artState: ArtState;
   onAdvance: (id: number, nextStatus: string) => void;
   onCancel: (id: number) => void;
   isUpdating: boolean;
+  onDragStart: (orderId: number) => void;
+  onDragEnd: () => void;
 }) {
   const col = KANBAN_COLUMNS.find(c => c.id === order.status);
   const nextStatus = NEXT_STATUS[order.status];
@@ -87,7 +89,12 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
     : daysInColumn > 5;
 
   return (
-    <div className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${isLateOrder ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}`}>
+    <div
+      draggable
+      onDragStart={() => onDragStart(order.id)}
+      onDragEnd={onDragEnd}
+      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${isLateOrder ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}`}
+    >
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
 
@@ -104,7 +111,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
       </div>
 
       {/* Linha 4: Link Ver pedido */}
-      <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors font-medium">
+      <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium">
         Ver pedido
       </Link>
     </div>
@@ -115,6 +122,8 @@ export default function AdminKanban() {
   const { data: allOrders, isLoading, refetch } = trpc.checkout.getAllOrders.useQuery();
   const updateStatusMutation = trpc.checkout.updateOrderStatus.useMutation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [draggedOrderId, setDraggedOrderId] = useState<number | null>(null);
+  const [dragOverColId, setDragOverColId] = useState<string | null>(null);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set(["entregue", "cancelado"]));
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
@@ -166,6 +175,39 @@ export default function AdminKanban() {
       else next.add(colId);
       return next;
     });
+  };
+
+  const handleDragStart = (orderId: number) => {
+    setDraggedOrderId(orderId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, colId: string) => {
+    e.preventDefault();
+    setDragOverColId(colId);
+  };
+
+  const handleDrop = async (e: React.DragEvent, colId: string) => {
+    e.preventDefault();
+    setDragOverColId(null);
+    if (draggedOrderId === null) return;
+    const order = orders.find(o => o.id === draggedOrderId);
+    if (!order || order.status === colId) return;
+    setUpdatingId(draggedOrderId);
+    setDraggedOrderId(null);
+    try {
+      await updateStatusMutation.mutateAsync({ orderId: draggedOrderId, newStatus: colId as any });
+      toast.success("Status atualizado!");
+      refetch();
+    } catch {
+      toast.error("Erro ao mover pedido");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedOrderId(null);
+    setDragOverColId(null);
   };
 
   // Filtrar pedidos por busca (DEVE ficar antes de qualquer return condicional)
@@ -304,7 +346,13 @@ export default function AdminKanban() {
             return (
               <div
                 key={col.id}
-                className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.bg} overflow-hidden`}
+                className={`flex-shrink-0 w-52 rounded-lg border overflow-hidden transition-colors ${
+                  dragOverColId === col.id
+                    ? 'border-pink-400 bg-pink-50'
+                    : `border-gray-200 ${col.bg}`
+                }`}
+                onDragOver={(e) => handleDragOver(e, col.id)}
+                onDrop={(e) => handleDrop(e, col.id)}
               >
                 {/* Header da coluna */}
                 <div className={`${col.header} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
@@ -330,6 +378,8 @@ export default function AdminKanban() {
                         onAdvance={handleAdvance}
                         onCancel={handleCancel}
                         isUpdating={updatingId === order.id}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
                       />
                     ))
                   )}
