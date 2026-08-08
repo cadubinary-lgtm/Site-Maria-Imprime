@@ -128,7 +128,14 @@ export default function AdminKanban() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
 
-  const orders: Order[] = (allOrders ?? []) as Order[];
+  // Estado local para atualização otimista: sobrescreve o status localmente antes da API responder
+  const [optimisticOverrides, setOptimisticOverrides] = useState<Record<number, string>>({});
+
+  const orders: Order[] = useMemo(() => {
+    const base = (allOrders ?? []) as Order[];
+    if (Object.keys(optimisticOverrides).length === 0) return base;
+    return base.map(o => optimisticOverrides[o.id] ? { ...o, status: optimisticOverrides[o.id] } : o);
+  }, [allOrders, optimisticOverrides]);
 
   // IDs dos pedidos na coluna "Com Problemas" para buscar estado das artes
   const comProblemasIds = useMemo(
@@ -192,16 +199,19 @@ export default function AdminKanban() {
     if (draggedOrderId === null) return;
     const order = orders.find(o => o.id === draggedOrderId);
     if (!order || order.status === colId) return;
-    setUpdatingId(draggedOrderId);
+    // Atualização otimista: muda o status localmente de imediato
+    const previousStatus = order.status;
+    setOptimisticOverrides(prev => ({ ...prev, [draggedOrderId]: colId }));
     setDraggedOrderId(null);
     try {
       await updateStatusMutation.mutateAsync({ orderId: draggedOrderId, newStatus: colId as any });
-      toast.success("Status atualizado!");
+      // Após confirmação da API, remove o override e sincroniza com o servidor
+      setOptimisticOverrides(prev => { const next = { ...prev }; delete next[draggedOrderId]; return next; });
       refetch();
     } catch {
+      // Rollback: reverte para o status anterior em caso de erro
+      setOptimisticOverrides(prev => { const next = { ...prev }; delete next[draggedOrderId]; return next; });
       toast.error("Erro ao mover pedido");
-    } finally {
-      setUpdatingId(null);
     }
   };
 
