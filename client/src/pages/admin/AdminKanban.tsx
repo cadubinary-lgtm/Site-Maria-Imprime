@@ -93,7 +93,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
       draggable
       onDragStart={() => onDragStart(order.id)}
       onDragEnd={onDragEnd}
-      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${isLateOrder ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}`}
+      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
     >
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
