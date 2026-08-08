@@ -306,7 +306,6 @@ export default function AdminKanban() {
               <div
                 key={col.id}
                 className={`flex-shrink-0 w-52 rounded-lg border border-gray-200 ${col.bg} overflow-hidden`}
-                style={{ borderTop: '4px solid ' + (col.border.includes('emerald') ? '#10b981' : col.border.includes('blue') ? '#3b82f6' : col.border.includes('purple') ? '#a855f7' : col.border.includes('amber') ? '#f59e0b' : col.border.includes('pink') ? '#ec4899' : col.border.includes('cyan') ? '#06b6d4' : col.border.includes('indigo') ? '#6366f1' : '#9ca3af') }}
               >
                 {/* Header da coluna */}
                 <div className={`${col.header} px-3 py-3 flex items-center gap-2 justify-between border-b border-gray-200`}>
