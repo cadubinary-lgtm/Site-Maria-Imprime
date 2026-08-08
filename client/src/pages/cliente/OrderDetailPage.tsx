@@ -262,14 +262,7 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
   // Hook de prévias de arte — DEVE ficar aqui no topo (regras dos hooks do React)
   const artPreviewsQuery = trpc.checkout.getArtPreviews.useQuery(
     { orderId: item.orderId, orderItemId: item.id },
-    {
-      enabled: !!item.id && !!item.orderId,
-      // Polling a cada 5s enquanto não há prévia disponível para detectar quando o operador salvar
-      refetchInterval: (data) => {
-        const previews = (data as unknown) as any[] | undefined;
-        return (!previews || previews.length === 0) ? 5000 : false;
-      },
-    }
+    { enabled: !!item.id && !!item.orderId }
   );
 
   if (isLoading || !correctionData?.correctionAction) return null;
@@ -392,9 +385,8 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
               </>
             ) : (
               <div className="w-full max-w-xs h-40 rounded-xl border border-blue-200 bg-blue-100/50 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-                <p className="text-xs text-blue-600 text-center font-medium">Prévia sendo preparada<br/>pela nossa equipe</p>
-                <p className="text-[10px] text-blue-400 text-center">Atualizando automaticamente...</p>
+                <FileText className="w-8 h-8 text-blue-400" />
+                <p className="text-xs text-blue-600 text-center">Prévia sendo preparada<br/>pela nossa equipe</p>
               </div>
             )}
           </div>
