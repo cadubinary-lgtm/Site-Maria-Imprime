@@ -37,6 +37,7 @@ type Order = {
   clientId?: number;
   deliveryFullName?: string | null;
   guestName?: string | null;
+  deliveryDeadline?: number | null;
 };
 
 type ArtState = "waiting" | "approved" | "refused" | "none";
@@ -79,7 +80,11 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   const isComProblemas = order.status === "com_problemas";
   
   const daysInColumn = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-  const isLateOrder = daysInColumn > 5;
+  // Prazo dinâmico: usa deliveryDeadline do pedido (timestamp ms UTC)
+  // Se não houver prazo cadastrado, fallback de 5 dias a partir da criação
+  const isLateOrder = order.deliveryDeadline
+    ? Date.now() > order.deliveryDeadline
+    : daysInColumn > 5;
 
   return (
     <div className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${isLateOrder ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}`}>
