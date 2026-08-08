@@ -485,6 +485,8 @@ function PreImpressaoColumn({
     onError: () => toast.error("Erro ao enviar para o cliente"),
   });
 
+  const saveArtPreviewMutation = trpc.checkout.saveArtPreview.useMutation();
+
   const current = PRE_PRODUCTION_OPTIONS.find(o => o.value === selected);
 
   const handleRequireResendChange = (checked: boolean) => {
@@ -623,12 +625,9 @@ function PreImpressaoColumn({
                 uploadedPreviewUrl = url;
                 uploadedPreviewKey = key;
                 // Salva a prévia no banco
-                await fetch("/api/trpc/checkout.saveArtPreview", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    json: { orderId, orderItemId, imageUrl: url, imageKey: key, notes: pendingPreviewNotes || undefined }
-                  }),
+                await saveArtPreviewMutation.mutateAsync({
+                  orderId, orderItemId, imageUrl: url, imageKey: key,
+                  notes: pendingPreviewNotes || undefined
                 });
                 onPreviewUploaded();
               }
@@ -718,12 +717,9 @@ function PreImpressaoColumn({
                     const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
                     if (res.ok) {
                       const { url, key } = await res.json();
-                      await fetch("/api/trpc/checkout.saveArtPreview", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          json: { orderId, orderItemId, imageUrl: url, imageKey: key, notes: pendingPreviewNotes || undefined }
-                        }),
+                      await saveArtPreviewMutation.mutateAsync({
+                        orderId, orderItemId, imageUrl: url, imageKey: key,
+                        notes: pendingPreviewNotes || undefined
                       });
                       onPreviewUploaded();
                     }
