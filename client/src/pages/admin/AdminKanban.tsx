@@ -35,6 +35,8 @@ type Order = {
   totalPrice: string | number;
   createdAt: string | number | Date;
   clientId?: number;
+  deliveryFullName?: string | null;
+  guestName?: string | null;
 };
 
 type ArtState = "waiting" | "approved" | "refused" | "none";
@@ -75,21 +77,34 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   const col = KANBAN_COLUMNS.find(c => c.id === order.status);
   const nextStatus = NEXT_STATUS[order.status];
   const isComProblemas = order.status === "com_problemas";
+  
+  const daysInColumn = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  const isOldOrder = daysInColumn > 7;
 
   return (
     <div className="bg-white rounded-md border border-gray-100 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
 
-      {/* Linha 2: Link Ver pedido */}
-      <Link href={`/admin/pedidos/${order.id}`} className="text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors">
+      {/* Linha 2: Nome do cliente */}
+      <div className="text-xs text-gray-500">
+        {order.deliveryFullName || order.guestName || "Cliente"}
+      </div>
+
+      {/* Linha 3: Data com indicador de alerta */}
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-gray-400">
+          {new Date(order.createdAt).toLocaleDateString("pt-BR")}
+        </span>
+        {isOldOrder && (
+          <span className="text-xs text-orange-500" title={`Ha ${daysInColumn} dias nesta coluna`}>⚠️</span>
+        )}
+      </div>
+
+      {/* Linha 4: Link Ver pedido */}
+      <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors font-medium">
         Ver pedido
       </Link>
-
-      {/* Linha 3: Data do pedido */}
-      <div className="text-xs text-gray-400">
-        {new Date(order.createdAt).toLocaleDateString("pt-BR")}
-      </div>
     </div>
   );
 }
