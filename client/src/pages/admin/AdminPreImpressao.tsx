@@ -174,9 +174,9 @@ export default function AdminPreImpressao() {
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 whitespace-nowrap">Pré-Impressão:</span>
                         {isAwaitingRelease ? (
-                          <span className="bg-pink-600 text-white font-semibold rounded px-2.5 py-1 text-xs">
+                          <Badge className="text-xs border bg-pink-600 text-white border-pink-600 hover:bg-pink-600">
                             Aguardando liberação
-                          </span>
+                          </Badge>
                         ) : (
                           <Badge className={`text-xs border ${statusCfg?.color}`}>
                             {statusCfg?.label ?? currentPreStatus}
