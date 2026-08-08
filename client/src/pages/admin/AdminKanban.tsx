@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ExternalLink, Search, X, ChevronDown } from "lucide-react";
+import { Loader2, ExternalLink, Search, X, ChevronDown, GripVertical } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -90,10 +90,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
 
   return (
     <div
-      draggable
-      onDragStart={() => onDragStart(order.id)}
-      onDragEnd={onDragEnd}
-      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
+      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
     >
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
@@ -110,10 +107,22 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
         </span>
       </div>
 
-      {/* Linha 4: Link Ver pedido */}
-      <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium">
-        Ver pedido
-      </Link>
+      {/* Linha 4: Link Ver pedido + Drag Handle */}
+      <div className="flex items-center justify-between">
+        <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium">
+          Ver pedido
+        </Link>
+        {/* Drag Handle - único ponto de arrasto */}
+        <div
+          draggable
+          onDragStart={(e) => { e.stopPropagation(); onDragStart(order.id); }}
+          onDragEnd={(e) => { e.stopPropagation(); onDragEnd(); }}
+          title="Arraste para mover"
+          className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors p-0.5 rounded select-none"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+      </div>
     </div>
   );
 }
