@@ -15,7 +15,7 @@ import {
 import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
   Download, FileImage, Upload, Trash2, Eye, ImagePlus, X, Printer, FileText,
-  Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle, PlayCircle,
+  Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle, PlayCircle, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
@@ -831,6 +831,7 @@ export default function AdminOrderDetail() {
   const [statusNotes, setStatusNotes] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Controle de visibilidade de preços por role
   const { adminUser } = useAdminAuth();
@@ -1035,8 +1036,14 @@ export default function AdminOrderDetail() {
               </div>
 
               <div className="border-t pt-4">
-                <p className="text-sm font-semibold text-gray-700 mb-4">Histórico de Status</p>
-                {histLoading ? (
+                <button
+                  onClick={() => setHistoryOpen(prev => !prev)}
+                  className="flex items-center gap-2 w-full text-left cursor-pointer group mb-2"
+                >
+                  <p className="text-sm font-semibold text-gray-700">Histórico de Status</p>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${historyOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {historyOpen && (histLoading ? (
                   <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
                 ) : history && (history as any[]).length > 0 ? (
                   <div className="space-y-3">
@@ -1061,7 +1068,7 @@ export default function AdminOrderDetail() {
                   </div>
                 ) : (
                   <p className="text-gray-400 text-sm">Nenhum histórico disponível</p>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>
