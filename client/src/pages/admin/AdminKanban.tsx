@@ -38,6 +38,7 @@ type Order = {
   deliveryFullName?: string | null;
   guestName?: string | null;
   deliveryDeadline?: number | null;
+  updatedAt?: string | number | Date | null;
 };
 
 type ArtState = "waiting" | "approved" | "refused" | "none";
@@ -82,6 +83,10 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
   const isComProblemas = order.status === "com_problemas";
   
   const daysInColumn = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  // Dias parado na coluna atual: usa updatedAt (última mudança de status), fallback para createdAt
+  const lastStatusChange = order.updatedAt ? new Date(order.updatedAt) : new Date(order.createdAt);
+  const daysInCurrentCol = Math.floor((Date.now() - lastStatusChange.getTime()) / (1000 * 60 * 60 * 24));
+  const daysLabel = daysInCurrentCol === 0 ? "Hoje" : `${daysInCurrentCol} dia${daysInCurrentCol !== 1 ? 's' : ''}`;
   // Prazo dinâmico: usa deliveryDeadline do pedido (timestamp ms UTC)
   // Se não houver prazo cadastrado, fallback de 5 dias a partir da criação
   const isLateOrder = order.deliveryDeadline
@@ -102,6 +107,9 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
 
       {/* Linha 3: Data com indicador de alerta */}
       <div className="flex items-center gap-1">
+        <span className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded font-medium">
+          {daysLabel}
+        </span>
         <span className="text-xs text-gray-400">
           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
         </span>
