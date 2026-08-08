@@ -710,6 +710,27 @@ function PreImpressaoColumn({
               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               disabled={productionMutation.isPending}
               onClick={async () => {
+                // Se há prévia pendente, faz upload e salva antes de iniciar produção
+                if (pendingPreviewFile) {
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", pendingPreviewFile);
+                    const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
+                    if (res.ok) {
+                      const { url, key } = await res.json();
+                      await fetch("/api/trpc/checkout.saveArtPreview", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          json: { orderId, orderItemId, imageUrl: url, imageKey: key, notes: pendingPreviewNotes || undefined }
+                        }),
+                      });
+                      onPreviewUploaded();
+                    }
+                  } catch {
+                    // Continua para produção mesmo se upload da prévia falhar
+                  }
+                }
                 await productionMutation.mutateAsync({ orderItemId, orderId });
                 setShowProductionConfirm(false);
               }}
