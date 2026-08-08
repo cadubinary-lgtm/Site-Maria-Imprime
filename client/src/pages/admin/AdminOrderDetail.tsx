@@ -98,7 +98,6 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "ajustar_arte",                  label: "Ajustar Arte",                   icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
   { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
   { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
-  { value: "arte_final_aprovada",           label: "Arte Final Aprovada",            icon: CheckCircle, color: "bg-green-100 text-green-700" },
   { value: "nova_arte_reenviada",           label: "Nova Arte Reenviada",             icon: AlertCircle, color: "bg-amber-100 text-amber-700" },
   { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
 ];
@@ -442,6 +441,7 @@ function PreImpressaoColumn({
   const [termText, setTermText] = useState(PROOF_TERM);
   const [isSendingToClient, setIsSendingToClient] = useState(false);
   const [showProductionConfirm, setShowProductionConfirm] = useState(false);
+  const [arteFinalAprovada, setArteFinalAprovada] = useState(preProductionStatus === "arte_final_aprovada");
   const utils = trpc.useUtils();
 
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
@@ -538,58 +538,10 @@ function PreImpressaoColumn({
             ))}
           </SelectContent>
         </Select>
-        {/* Botão Produzir: aparece APENAS quando status = arte_final_aprovada */}
-        {selected === "arte_final_aprovada" && (
-          <>
-            <Button size="sm" className="h-7 text-xs bg-green-600 hover:bg-green-700 px-2.5"
-              disabled={productionMutation.isPending}
-              onClick={() => setShowProductionConfirm(true)}>
-              {productionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "▶ Produzir"}
-            </Button>
-
-            {/* Modal de confirmação de início de produção */}
-            <Dialog open={showProductionConfirm} onOpenChange={setShowProductionConfirm}>
-              <DialogContent className="max-w-sm" aria-describedby="prod-confirm-desc">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-green-700">
-                    <PlayCircle className="w-5 h-5" />
-                    Iniciar Produção
-                  </DialogTitle>
-                  <DialogDescription id="prod-confirm-desc" className="text-sm text-gray-600 pt-1">
-                    Ao confirmar, o pedido será movido para <strong>Em Produção</strong> e o cliente será notificado. Essa ação não pode ser desfeita automaticamente.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-transparent"
-                    onClick={() => setShowProductionConfirm(false)}
-                    disabled={productionMutation.isPending}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    disabled={productionMutation.isPending}
-                    onClick={async () => {
-                      await productionMutation.mutateAsync({ orderItemId, orderId });
-                      setShowProductionConfirm(false);
-                    }}
-                  >
-                    {productionMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
-                    Confirmar Produção
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
       </div>
 
       {/* Ações de Correção — ocultas quando arte está aprovada ou pedido bloqueado comercialmente */}
-      {(selected === "arte_final_aprovada" || isCommercialLocked) ? null : <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
+      {isCommercialLocked ? null : <div className="bg-blue-50 rounded-lg border border-blue-200 p-2.5 space-y-2 mt-2">
         <p className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">Ação de Correção</p>
         <div className="space-y-1.5">
           <label className="flex items-start gap-2 cursor-pointer">
@@ -702,6 +654,72 @@ function PreImpressaoColumn({
           Enviar para o Cliente
         </Button>
       </div>}
+
+      {/* ── Bloco fixo: Arte Final Aprovada + Produzir ── */}
+      {!isCommercialLocked && (
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={arteFinalAprovada}
+              onChange={(e) => {
+                setArteFinalAprovada(e.target.checked);
+                if (e.target.checked) {
+                  mutation.mutate({ orderItemId, preProductionStatus: "arte_final_aprovada" as any });
+                }
+              }}
+              className="w-3.5 h-3.5 accent-green-600 flex-shrink-0"
+            />
+            <span className="text-xs font-medium text-gray-700">Arte Final Aprovada</span>
+          </label>
+          <Button
+            size="sm"
+            className={`h-7 text-xs px-2.5 transition-colors ${arteFinalAprovada ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+            disabled={!arteFinalAprovada || productionMutation.isPending}
+            onClick={() => setShowProductionConfirm(true)}
+          >
+            {productionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "▶ Produzir"}
+          </Button>
+        </div>
+      )}
+
+      {/* Modal de confirmação de início de produção */}
+      <Dialog open={showProductionConfirm} onOpenChange={setShowProductionConfirm}>
+        <DialogContent className="max-w-sm" aria-describedby="prod-confirm-desc">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-700">
+              <PlayCircle className="w-5 h-5" />
+              Iniciar Produção
+            </DialogTitle>
+            <DialogDescription id="prod-confirm-desc" className="text-sm text-gray-600 pt-1">
+              Ao confirmar, o pedido será movido para <strong>Em Produção</strong> e o cliente será notificado. Essa ação não pode ser desfeita automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 bg-transparent"
+              onClick={() => setShowProductionConfirm(false)}
+              disabled={productionMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              disabled={productionMutation.isPending}
+              onClick={async () => {
+                await productionMutation.mutateAsync({ orderItemId, orderId });
+                setShowProductionConfirm(false);
+              }}
+            >
+              {productionMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+              Confirmar Produção
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Linha do tempo de logs do item */}
       {itemLogs.length > 0 && (
