@@ -79,10 +79,10 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
   const isComProblemas = order.status === "com_problemas";
   
   const daysInColumn = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-  const isOldOrder = daysInColumn > 7;
+  const isLateOrder = daysInColumn > 5;
 
   return (
-    <div className="bg-white rounded-md border border-gray-100 shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
+    <div className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${isLateOrder ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}`}>
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
 
@@ -96,9 +96,6 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating }: {
         <span className="text-xs text-gray-400">
           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
         </span>
-        {isOldOrder && (
-          <span className="text-xs text-orange-500" title={`Ha ${daysInColumn} dias nesta coluna`}>⚠️</span>
-        )}
       </div>
 
       {/* Linha 4: Link Ver pedido */}
