@@ -343,7 +343,7 @@ export async function updateOrderStatus(orderId: number, status: string, notes?:
         const SITE_URL = process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space";
         const trackUrl = guestToken
           ? `${SITE_URL}/pedido/acompanhar/${guestToken}`
-          : `${SITE_URL}/minha-conta/pedidos/${orderNumber}`;
+          : `${SITE_URL}/pedido/${orderId}`;
         await sendOrderStatusUpdateEmail(emailTo, firstName, orderNumber, statusLabel, trackUrl);
         console.log(`[STATUS] E-mail de status enviado para ${emailTo}: ${statusLabel}`);
       }

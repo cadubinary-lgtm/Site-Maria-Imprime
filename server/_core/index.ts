@@ -378,7 +378,7 @@ async function startServer() {
               const orderNumber = (ord as any).orderNumber ?? String(orderId);
               const trackUrl = guestToken
                 ? `${SITE_URL}/pedido/acompanhar/${guestToken}`
-                : `${SITE_URL}/pedido/${orderNumber}`;
+                : `${SITE_URL}/pedido/${orderId}`;
               const totalPago = Number((ord as any).totalPrice ?? 0).toFixed(2);
 
               // Buscar e-mail e nome do cliente
