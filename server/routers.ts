@@ -1380,7 +1380,7 @@ export const appRouter = router({
             const { sendOrderConfirmationWithLink } = await import("./emailService");
             const trackUrl = guestToken
               ? `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/acompanhar/${guestToken}`
-              : `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/minha-conta/pedidos/${orderNumber}`;
+              : `${process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space"}/pedido/${orderId}`;
             const result = await sendOrderConfirmationWithLink(emailTo, emailFirstName, orderNumber, totalPrice.toFixed(2), trackUrl);
             console.log(`[CHECKOUT] E-mail de confirmação enviado para ${emailTo}:`, result);
           } catch (e) {
@@ -1413,7 +1413,13 @@ export const appRouter = router({
         const { eq, sql: drizzleSql } = await import("drizzle-orm");
         // Fetch order
         const orderRows = await dbInstance.select().from(orders).where(eq(orders.orderNumber, input.orderNumber)).limit(1);
-        const order = orderRows[0] ?? null;
+        let order = orderRows[0] ?? null;
+        // Fallback: se não encontrou pelo orderNumber, tenta pelo ID numérico
+        if (!order && /^\d+$/.test(input.orderNumber)) {
+          const { eq: eqId } = await import("drizzle-orm");
+          const byIdRows = await dbInstance.select().from(orders).where(eqId(orders.id, parseInt(input.orderNumber))).limit(1);
+          order = byIdRows[0] ?? null;
+        }
         if (!order) return null;
         // Fetch items with product image
         const itemRows = await dbInstance.execute(
@@ -1834,7 +1840,10 @@ export const appRouter = router({
               const productNameEmail = (item as any).productName ?? `Item #${input.orderItemId}`;
               const operatorNoteEmail = (input.operatorNote ?? null) as string | null;
               const SITE_URL = process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space";
-              const trackUrl = `${SITE_URL}/pedido/${orderNumber}`;
+              const guestTokenEmail = (order2 as any).guestToken;
+              const trackUrl = guestTokenEmail
+                ? `${SITE_URL}/pedido/acompanhar/${guestTokenEmail}`
+                : `${SITE_URL}/pedido/${order2.id}`;
 
               // Determinar e-mail e nome do cliente (3 caminhos em ordem de prioridade)
               let emailTo: string | null = null;
@@ -2435,5 +2444,3 @@ export const appRouter = router({
   }),
 });
 export type AppRouter = typeof appRouter;
-
-
