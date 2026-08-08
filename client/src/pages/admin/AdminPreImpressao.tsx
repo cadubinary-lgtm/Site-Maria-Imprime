@@ -146,6 +146,8 @@ export default function AdminPreImpressao() {
             {filtered.map((order: any) => {
               const currentPreStatus = order.preProductionStatus || "liberado_analise";
               const statusCfg = PRE_PRODUCTION_STATUS[currentPreStatus];
+              // Pedidos com pagamento aprovado ou na retirada ainda não foram liberados pelo comercial
+              const isAwaitingRelease = order.status === "pagamento_aprovado" || order.status === "pagamento_retirada";
               return (
                 <Card key={order.orderId ?? order.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4">
@@ -171,9 +173,15 @@ export default function AdminPreImpressao() {
                       {/* Status de Pré-Impressão */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 whitespace-nowrap">Pré-Impressão:</span>
-                        <Badge className={`text-xs border ${statusCfg?.color}`}>
-                          {statusCfg?.label ?? currentPreStatus}
-                        </Badge>
+                        {isAwaitingRelease ? (
+                          <span className="bg-pink-600 text-white font-semibold rounded px-2.5 py-1 text-xs">
+                            Aguardando liberação
+                          </span>
+                        ) : (
+                          <Badge className={`text-xs border ${statusCfg?.color}`}>
+                            {statusCfg?.label ?? currentPreStatus}
+                          </Badge>
+                        )}
                       </div>
 
                       {/* Status de pré-impressão é gerenciado por item na tela de detalhes */}
