@@ -645,7 +645,7 @@ function PreImpressaoColumn({
               // Se há prévia pendente para upload, faz o upload primeiro
               let uploadedPreviewUrl: string | undefined;
               let uploadedPreviewKey: string | undefined;
-              if (pendingPreviewFile && sendProof) {
+              if (pendingPreviewFile && (sendProof || requireResend)) {
                 const formData = new FormData();
                 formData.append("file", pendingPreviewFile);
                 const res = await fetch("/api/upload-art-preview", { method: "POST", body: formData });
