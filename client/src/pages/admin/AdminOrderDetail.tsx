@@ -920,6 +920,7 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
   const [isUpdating, setIsUpdating] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [showSendToProductionConfirm, setShowSendToProductionConfirm] = useState(false);
 
   // Estado compartilhado de prévia pendente por itemId (Col2 → Col3)
   const [pendingFiles, setPendingFiles] = useState<Map<number, File>>(new Map());
@@ -1353,7 +1354,7 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                       )}
                     </div>
                     <Button
-                      onClick={() => orderId && sendToProductionMutation.mutate({ orderId })}
+                      onClick={() => setShowSendToProductionConfirm(true)}
                       disabled={!allApproved || sendToProductionMutation.isPending}
                       size="lg"
                       className={`gap-2 ${
@@ -1375,6 +1376,47 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
           })()}
 
           {/* ── Dados do Cliente ── */}
+          {/* ── Modal de confirmação: Enviar para Produção ── */}
+          <Dialog open={showSendToProductionConfirm} onOpenChange={setShowSendToProductionConfirm}>
+            <DialogContent className="max-w-sm" aria-describedby="send-prod-desc">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-green-700">
+                  <PlayCircle className="w-5 h-5" />
+                  Enviar para Produção
+                </DialogTitle>
+                <DialogDescription id="send-prod-desc" className="text-sm text-gray-600 pt-1">
+                  Todos os itens deste pedido serão liberados para a linha de produção e o cliente será notificado. Essa ação não pode ser desfeita automaticamente.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 bg-transparent"
+                  onClick={() => setShowSendToProductionConfirm(false)}
+                  disabled={sendToProductionMutation.isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={sendToProductionMutation.isPending}
+                  onClick={() => {
+                    if (!orderId) return;
+                    sendToProductionMutation.mutate({ orderId }, {
+                      onSuccess: () => setShowSendToProductionConfirm(false),
+                    });
+                  }}
+                >
+                  {sendToProductionMutation.isPending
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                    : null}
+                  Confirmar Produção
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           {(() => {
             // Prioridade: dados do perfil cadastrado > dados do checkout
             const cd = o.customerData;
