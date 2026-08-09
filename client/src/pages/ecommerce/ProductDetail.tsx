@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
+import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
@@ -159,6 +160,7 @@ export default function ProductDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, setLocation] = useLocation();
   const { openCart } = useCartDrawer();
+  const { state: uploadState, upload: doChunkedUpload, cancel: cancelUpload, reset: resetUpload } = useChunkedUpload();
 
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: product, isLoading } = trpc.products.getById.useQuery(
@@ -597,43 +599,13 @@ export default function ProductDetail() {
 
       let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
       if (artFile && fileMode === "upload") {
-        const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB por pedaço
-        const totalChunks = Math.ceil(artFile.size / CHUNK_SIZE);
-        const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        toast.loading(`Enviando arquivo (0/${totalChunks})...`, { id: "upload" });
         try {
-          let finalUrl: string | undefined;
-          for (let i = 0; i < totalChunks; i++) {
-            const start = i * CHUNK_SIZE;
-            const chunk = artFile.slice(start, start + CHUNK_SIZE);
-            const fd = new FormData();
-            fd.append("chunk", chunk, artFile.name);
-            fd.append("uploadId", uploadId);
-            fd.append("chunkIndex", String(i));
-            fd.append("totalChunks", String(totalChunks));
-            fd.append("filename", artFile.name);
-            fd.append("contentType", artFile.type || "application/octet-stream");
-            const r = await fetch("/api/upload-art-chunk", { method: "POST", body: fd });
-            if (!r.ok) {
-              const errData = await r.json().catch(() => ({}));
-              throw new Error(errData.error ?? `Erro no upload (HTTP ${r.status})`);
-            }
-            const data = await r.json();
-            toast.loading(`Enviando arquivo (${i + 1}/${totalChunks})...`, { id: "upload" });
-            if (data.status === "complete") {
-              finalUrl = data.url;
-            }
-          }
-          toast.dismiss("upload");
-          artUrl = finalUrl;
+          const { url } = await doChunkedUpload(artFile);
+          artUrl = url;
         } catch (uploadErr: any) {
-          toast.dismiss("upload");
+          if (uploadErr?.message === "CANCELLED") { setIsProcessing(false); return; }
           console.error('[upload-art] catch:', uploadErr?.message);
-          toast.error(
-            uploadErr?.message ?? "Erro ao enviar o arquivo",
-            { duration: 8000 }
-          );
-          // Continua sem o arquivo — não bloqueia o carrinho
+          toast.error(uploadErr?.message ?? "Erro ao enviar o arquivo", { duration: 8000 });
           artUrl = undefined;
         }
       }
@@ -1178,7 +1150,28 @@ export default function ProductDetail() {
                             <span className="text-xs text-green-700 font-medium">Arquivo selecionado</span>
                           </div>
                         </div>
-                        <button type="button" onClick={() => { setArtFile(null); setArtFilePreview(null); }} className="text-gray-400 hover:text-red-500">✕</button>
+                        <button type="button" onClick={() => { setArtFile(null); setArtFilePreview(null); resetUpload(); }} className="text-gray-400 hover:text-red-500">✕</button>
+                      </div>
+                    )}
+                    {uploadState.isUploading && (
+                      <div className="space-y-1 mt-1">
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>Enviando... {uploadState.currentChunk}/{uploadState.totalChunks} partes</span>
+                          <span>{uploadState.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-1.5">
+                          <div
+                            className="bg-pink-500 h-1.5 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadState.progress}%` }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          className="text-xs text-gray-400 hover:text-red-500 underline"
+                          onClick={cancelUpload}
+                        >
+                          Cancelar envio
+                        </button>
                       </div>
                     )}
                     <div className="flex items-center gap-1.5 text-xs text-gray-500">
