@@ -2,7 +2,7 @@ import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useState } from "react";
-import { X, ShoppingCart, Minus, Plus, Trash2, Package, Lock } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus, Trash2, Package, Lock, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 
@@ -38,6 +38,7 @@ export function CartSidePanel() {
   const { isOpen, closeCart } = useCartDrawer();
   const [, setLocation] = useLocation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const utils = trpc.useUtils();
 
   const { data: items = [], isLoading } = trpc.cart.getItems.useQuery(undefined, {
@@ -132,6 +133,13 @@ export function CartSidePanel() {
             {cartItems.map((item) => {
               const isUpdating = updatingId === item.id;
               const subtotalItem = Number(item.priceAtCart) * item.quantity;
+              const isExpanded = expandedItems.has(item.id);
+              const toggleExpand = () => setExpandedItems(prev => {
+                const next = new Set(prev);
+                if (next.has(item.id)) next.delete(item.id);
+                else next.add(item.id);
+                return next;
+              });
               return (
                 <div key={item.id} className="py-4">
                   {/* Produto: imagem + nome */}
@@ -150,24 +158,32 @@ export function CartSidePanel() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm leading-tight">{item.productName}</p>
+                      <button
+                        onClick={toggleExpand}
+                        className="flex items-center gap-1 w-full text-left"
+                      >
+                        <p className="font-semibold text-gray-900 text-sm leading-tight flex-1">{item.productName}</p>
+                        <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                      </button>
                       <p className="text-xs text-gray-500 mt-0.5">{fmt(Number(item.priceAtCart))} / {item.unit}</p>
                     </div>
                   </div>
 
-                  {/* Especificações detalhadas */}
-                  <div className="mb-3 text-xs">
-                    <OrderItemSpecs
-                      customDimensions={item.customDimensions}
-                      variationSnapshot={item.variationSnapshot}
-                      selectedAttributes={item.selectedAttributes}
-                      artFileUrl={item.artFileUrl}
-                      notes={item.notes}
-                      prazoName={item.prazoName}
-                      forecastLabel={item.forecastLabel}
-                      shippingLabel={item.shippingLabel}
-                      shippingPrice={item.shippingPrice}
-                    />
+                  {/* Especificações detalhadas — recolhidas por padrão */}
+                  <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? "max-h-96 mb-3" : "max-h-0"}`}>
+                    <div className="text-xs pt-1">
+                      <OrderItemSpecs
+                        customDimensions={item.customDimensions}
+                        variationSnapshot={item.variationSnapshot}
+                        selectedAttributes={item.selectedAttributes}
+                        artFileUrl={item.artFileUrl}
+                        notes={item.notes}
+                        prazoName={item.prazoName}
+                        forecastLabel={item.forecastLabel}
+                        shippingLabel={item.shippingLabel}
+                        shippingPrice={item.shippingPrice}
+                      />
+                    </div>
                   </div>
 
                   {/* Quantidade + subtotal + remover */}
