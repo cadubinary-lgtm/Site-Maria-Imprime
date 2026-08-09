@@ -98,10 +98,10 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "liberado_analise",              label: "Liberado para Análise",          icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
   { value: "ajustar_arte",                  label: "Ajustar Arte",                   icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
   { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
-  { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
+  { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-purple-100 text-purple-700" },
   { value: "nova_arte_reenviada",           label: "Nova Arte Reenviada",             icon: AlertCircle, color: "bg-amber-100 text-amber-700" },
   { value: "arte_final_aprovada",           label: "Arte Final Aprovada",             icon: CheckCircle, color: "bg-green-100 text-green-700" },
-  { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
+  { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-blue-100 text-blue-700" },
 ];
 
 /** Status do pedido que bloqueiam a pré-impressão */
@@ -1234,10 +1234,10 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                   aguardando_liberacao_comercial: { label: "Aguardando Liberação", cls: "bg-pink-100 text-pink-800" },
                   ajustar_arte: { label: "Ajustar Arte", cls: "bg-orange-100 text-orange-800" },
                   aguardando_reenvio_arquivo: { label: "Aguardando Reenvio", cls: "bg-orange-100 text-orange-800" },
-                  aguardando_aprovacao_cliente: { label: "Aguardando Aprovação", cls: "bg-blue-100 text-blue-800" },
+                  aguardando_aprovacao_cliente: { label: "Aguardando Aprovação", cls: "bg-purple-100 text-purple-800" },
                   nova_arte_reenviada: { label: "Nova Arte Enviada", cls: "bg-indigo-100 text-indigo-800" },
                   arte_final_aprovada: { label: "Arte Final Aprovada", cls: "bg-green-100 text-green-800" },
-                  em_producao: { label: "Em Produção", cls: "bg-emerald-100 text-emerald-800" },
+                  em_producao: { label: "Em Produção", cls: "bg-blue-100 text-blue-800" },
                 };
                 const statusBadge = itemStatusConfig[itemStatus] ?? { label: itemStatus, cls: "bg-gray-100 text-gray-700" };
 
