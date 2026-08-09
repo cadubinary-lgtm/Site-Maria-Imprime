@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ExternalLink, Search, X, ChevronDown, GripVertical } from "lucide-react";
+import { Loader2, Search, X, ChevronDown, GripVertical, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -69,7 +69,7 @@ function ArtStateTag({ state }: { state: ArtState }) {
   return null;
 }
 
-function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragStart, onDragEnd }: {
+function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragStart, onDragEnd, onSelect, isSelected }: {
   order: Order;
   artState: ArtState;
   onAdvance: (id: number, nextStatus: string) => void;
@@ -77,6 +77,8 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
   isUpdating: boolean;
   onDragStart: (orderId: number) => void;
   onDragEnd: () => void;
+  onSelect: (orderId: number) => void;
+  isSelected: boolean;
 }) {
   const col = KANBAN_COLUMNS.find(c => c.id === order.status);
   const nextStatus = NEXT_STATUS[order.status];
@@ -95,7 +97,8 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
 
   return (
     <div
-      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
+      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-pointer ${isSelected ? 'ring-2 ring-pink-400 border-pink-300' : ''} ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
+      onClick={() => onSelect(order.id)}
     >
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
@@ -117,9 +120,12 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
 
       {/* Linha 4: Link Ver pedido + Drag Handle */}
       <div className="flex items-center justify-between">
-        <Link href={`/admin/pedidos/${order.id}`} className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium">
+        <button
+          onClick={(e) => { e.stopPropagation(); onSelect(order.id); }}
+          className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium"
+        >
           Ver pedido
-        </Link>
+        </button>
         {/* Drag Handle - único ponto de arrasto */}
         <div
           draggable
@@ -135,6 +141,147 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
   );
 }
 
+// ─── Painel de Detalhes do Pedido (Split Screen) ─────────────────────────────
+function KanbanOrderPanel({ orderId }: { orderId: number }) {
+  const { data: order, isLoading } = trpc.checkout.getOrderById.useQuery(
+    { id: orderId },
+    { enabled: !!orderId }
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="p-6 text-center text-sm text-gray-500">
+        Pedido não encontrado.
+      </div>
+    );
+  }
+
+  const o = order as any;
+  const statusLabels: Record<string, string> = {
+    pagamento_aprovado: "Pagamento Aprovado",
+    pagamento_retirada: "Pagamento na Retirada",
+    analisando: "Analisando",
+    com_problemas: "Com Problemas",
+    em_producao: "Em Produção",
+    pronto_entrega: "Pronto para Entrega",
+    pronto_retirada: "Pronto para Retirada",
+    entregue: "Entregue",
+    cancelado: "Cancelado",
+  };
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* Número e status */}
+      <div className="space-y-1">
+        <div className="font-bold text-gray-900 text-sm">{o.orderNumber}</div>
+        <div className="text-xs text-gray-500">{o.deliveryFullName || o.guestName || "Cliente"}</div>
+        <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
+          {statusLabels[o.status] || o.status}
+        </span>
+      </div>
+
+      {/* Resumo financeiro */}
+      <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs">
+        <div className="flex justify-between">
+          <span className="text-gray-500">Total</span>
+          <span className="font-semibold text-gray-900">
+            R$ {parseFloat(o.totalPrice || "0").toFixed(2).replace(".", ",")}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">Data</span>
+          <span className="text-gray-700">{new Date(o.createdAt).toLocaleDateString("pt-BR")}</span>
+        </div>
+        {o.deliveryDeadline && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Prazo</span>
+            <span className={`font-medium ${Date.now() > o.deliveryDeadline ? 'text-pink-600' : 'text-gray-700'}`}>
+              {new Date(o.deliveryDeadline).toLocaleDateString("pt-BR")}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Itens do pedido */}
+      {o.items && o.items.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+            Itens ({o.items.length})
+          </div>
+          {o.items.map((item: any) => (
+            <div key={item.id} className="bg-white border border-gray-100 rounded-lg p-3 space-y-1.5">
+              <div className="flex items-center gap-2">
+                {item.productImageUrl && (
+                  <img src={item.productImageUrl} alt={item.productName} className="w-8 h-8 object-contain rounded border border-gray-100 flex-shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-gray-800 truncate">{item.productName}</div>
+                  <div className="text-xs text-gray-500">Qtd: {item.quantity}</div>
+                </div>
+                <div className="ml-auto text-xs font-semibold text-gray-900 flex-shrink-0">
+                  R$ {parseFloat(item.totalPrice || "0").toFixed(2).replace(".", ",")}
+                </div>
+              </div>
+              {/* Arquivo do cliente */}
+              {item.artFileUrl && (
+                <div className="pt-1 border-t border-gray-100">
+                  <div className="text-xs text-gray-500 mb-1">Arquivo do cliente:</div>
+                  <a
+                    href={item.artFileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-pink-600 hover:text-pink-700 hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Baixar arquivo
+                  </a>
+                </div>
+              )}
+              {/* Status de pré-impressão */}
+              {item.preProductionStatus && item.preProductionStatus !== "liberado_analise" && (
+                <div className="pt-1 border-t border-gray-100">
+                  <span className="text-xs text-gray-500">Pré-impressão: </span>
+                  <span className="text-xs font-medium text-gray-700">{item.preProductionStatus.replace(/_/g, " ")}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Contato */}
+      {(o.deliveryPhone || o.guestPhone) && (
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Contato</div>
+          <a
+            href={`https://wa.me/55${(o.deliveryPhone || o.guestPhone || "").replace(/\D/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium"
+          >
+            📱 WhatsApp: {o.deliveryPhone || o.guestPhone}
+          </a>
+        </div>
+      )}
+
+      {/* Link para detalhes completos */}
+      <Link href={`/admin/pedidos/${orderId}`}>
+        <button className="w-full text-xs text-center py-2 px-4 rounded-lg border border-pink-200 text-pink-600 hover:bg-pink-50 transition-colors font-medium">
+          Abrir detalhes completos →
+        </button>
+      </Link>
+    </div>
+  );
+}
+
 export default function AdminKanban() {
   const { data: allOrders, isLoading, refetch } = trpc.checkout.getAllOrders.useQuery();
   const updateStatusMutation = trpc.checkout.updateOrderStatus.useMutation();
@@ -144,6 +291,7 @@ export default function AdminKanban() {
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set(["entregue", "cancelado"]));
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
   // Estado local para atualização otimista: sobrescreve o status localmente antes da API responder
   const [optimisticOverrides, setOptimisticOverrides] = useState<Record<number, string>>({});
@@ -277,7 +425,9 @@ export default function AdminKanban() {
 
   return (
     <AdminLayout>
-    <div className="p-5 space-y-4">
+    <div className={`flex h-full overflow-hidden ${selectedOrderId ? 'gap-0' : ''}`}>
+    {/* Painel Esquerdo: Kanban */}
+    <div className={`transition-all duration-300 overflow-y-auto p-5 space-y-4 ${selectedOrderId ? 'w-3/5 border-r border-gray-200' : 'w-full'}`}>
       {/* Cabeçalho */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -398,16 +548,18 @@ export default function AdminKanban() {
                     <p className="text-xs text-gray-400 text-center py-4">Nenhum pedido</p>
                   ) : (
                     colOrders.map(order => (
-                      <KanbanCard
-                        key={order.id}
-                        order={order}
-                        artState={(artStatusMap as Record<number, ArtState>)[order.id] ?? "none"}
-                        onAdvance={handleAdvance}
-                        onCancel={handleCancel}
-                        isUpdating={updatingId === order.id}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                      />
+                     <KanbanCard
+                       key={order.id}
+                       order={order}
+                       artState={(artStatusMap as Record<number, ArtState>)[order.id] ?? "none"}
+                       onAdvance={handleAdvance}
+                       onCancel={handleCancel}
+                       isUpdating={updatingId === order.id}
+                       onDragStart={handleDragStart}
+                       onDragEnd={handleDragEnd}
+                       onSelect={setSelectedOrderId}
+                       isSelected={selectedOrderId === order.id}
+                     />
                     ))
                   )}
                 </div>
@@ -417,6 +569,36 @@ export default function AdminKanban() {
         </div>
       </div>
       )}
+    </div>
+
+    {/* Painel Direito: Detalhes do Pedido */}
+    {selectedOrderId && (
+      <div className="w-2/5 flex flex-col overflow-hidden border-l border-gray-200 bg-white">
+        {/* Header do painel */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+          <span className="text-sm font-semibold text-gray-700">Detalhes do Pedido</span>
+          <div className="flex items-center gap-2">
+            <Link href={`/admin/pedidos/${selectedOrderId}`}>
+              <button className="text-xs text-pink-600 hover:text-pink-700 flex items-center gap-1 transition-colors">
+                <ExternalLink className="w-3.5 h-3.5" />
+                Abrir completo
+              </button>
+            </Link>
+            <button
+              onClick={() => setSelectedOrderId(null)}
+              className="p-1 rounded hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
+              title="Fechar painel"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        {/* Conteúdo do painel */}
+        <div className="flex-1 overflow-y-auto">
+          <KanbanOrderPanel orderId={selectedOrderId} />
+        </div>
+      </div>
+    )}
     </div>
     </AdminLayout>
   );
