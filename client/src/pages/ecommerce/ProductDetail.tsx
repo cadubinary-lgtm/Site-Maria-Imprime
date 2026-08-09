@@ -673,9 +673,10 @@ export default function ProductDetail() {
         forecastLabel,
         cepDestino: cepDestinoVal,
       });
-      toast.success("Adicionado ao carrinho!", {
-        action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
-      });
+     toast.success("Adicionado ao carrinho!", {
+       action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
+     });
+      setLocation("/carrinho");
     } catch { toast.error("Erro ao adicionar ao carrinho"); }
     finally { setIsProcessing(false); }
   };
@@ -1569,10 +1570,10 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* ═══════════════════════════════════════════════════════════════
-              COLUNA DIREITA — Resumo do Pedido
-          ═══════════════════════════════════════════════════════════════ */}
-          <div className="sticky top-4 space-y-4">
+         {/* ═══════════════════════════════════════════════════════════════
+             COLUNA DIREITA — Resumo do Pedido
+         ═══════════════════════════════════════════════════════════════ */}
+          <div className="sticky top-4 h-fit space-y-4">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
               {/* Header do resumo */}
@@ -1840,5 +1841,3 @@ export default function ProductDetail() {
     </div>
   );
 }
-
-
