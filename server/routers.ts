@@ -402,7 +402,7 @@ export const appRouter = router({
           .set({ preProductionStatus: input.preProductionStatus } as any)
           .where(eq(orderItemsT.id, input.orderItemId));
         // Se aprovado, verifica se todos os itens do pedido foram aprovados
-        // e atualiza o status do pedido para em_producao
+        // e atualiza o status do pedido para em_producao APENAS se for pedido de 1 item
         if (input.preProductionStatus === "arte_final_aprovada") {
           const [item] = await db.select({ orderId: orderItemsT.orderId })
             .from(orderItemsT)
@@ -413,7 +413,9 @@ export const appRouter = router({
               .from(orderItemsT)
               .where(eq(orderItemsT.orderId, item.orderId));
             const allApproved = allItems.every((i: any) => i.preProductionStatus === "arte_final_aprovada");
-            if (allApproved) {
+            // Só muda o status global automaticamente se for pedido de 1 único item.
+            // Pedidos com múltiplos itens aguardam o botão "Enviar para Produção" (sendToProduction).
+            if (allApproved && allItems.length === 1) {
               await db.update(ordersT)
                 .set({ status: "em_producao" } as any)
                 .where(eq(ordersT.id, item.orderId));
@@ -432,14 +434,20 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems: orderItemsT, orders: ordersT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
-        // 1. Status de pré-impressão do item → em_producao
+        // 1. Status de pré-impressão do item → em_producao (sempre)
         await db.update(orderItemsT)
           .set({ preProductionStatus: "em_producao" } as any)
           .where(eq(orderItemsT.id, input.orderItemId));
-        // 2. Status do pedido → em_producao (visível para o cliente e painel geral)
-        await db.update(ordersT)
-          .set({ status: "em_producao" } as any)
-          .where(eq(ordersT.id, input.orderId));
+        // 2. Status do pedido → em_producao APENAS se for pedido de 1 único item.
+        // Pedidos com múltiplos itens aguardam o botão "Enviar para Produção".
+        const allItemsOfOrder = await db.select({ preProductionStatus: orderItemsT.preProductionStatus })
+          .from(orderItemsT)
+          .where(eq(orderItemsT.orderId, input.orderId));
+        if (allItemsOfOrder.length === 1) {
+          await db.update(ordersT)
+            .set({ status: "em_producao" } as any)
+            .where(eq(ordersT.id, input.orderId));
+        }
         // 3. Registrar log de auditoria
         try {
           const operatorName = (ctx as any).adminUser?.name ?? "Operador";

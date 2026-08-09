@@ -1,5 +1,11 @@
 # Gráfica Ponto Digital - TODO
 
+## Correção Bug Multi-Item — Status Prematuro
+- [x] Backend: updatePreProductionStatus — não muda status global para em_producao se pedido tem mais de 1 item
+- [x] Backend: triggerProductionStart (botão Produzir) — não muda status global para em_producao se pedido tem mais de 1 item
+- [x] Frontend: bloco verde Enviar para Produção agora aparece também quando status é analisando (não apenas com_problemas)
+- [x] Frontend: bloco verde oculto para pedidos de 1 único item (botão Produzir já cuida disso)
+
 ## Fase 1: Estrutura e Direção Visual
 - [x] Definir paleta de cores (azul profissional + laranja vibrante)
 - [x] Criar schema de banco de dados (produtos, pedidos, usuários com 3 roles)
