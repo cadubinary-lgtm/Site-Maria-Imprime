@@ -7,6 +7,8 @@ import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useAuth } from "./_core/hooks/useAuth";
 import { getLoginUrl } from "./const";
 import Header from "./components/Header";
+import { CartSidePanel } from "./components/CartSidePanel";
+import { useCartDrawer } from "./contexts/CartDrawerContext";
 
 // ─── Páginas Públicas ────────────────────────────────────────────────────────
 import Home from "./pages/public/Home";
@@ -349,15 +351,30 @@ function Router() {
   );
 }
 
+function AppLayout() {
+  const { isOpen } = useCartDrawer();
+  return (
+    <div className="flex h-screen overflow-hidden">
+      {/* Coluna principal: 70% quando carrinho aberto, 100% quando fechado */}
+      <div className={`flex flex-col min-w-0 transition-all duration-300 ${isOpen ? "w-[70%]" : "w-full"}`}>
+        <Header />
+        <div className="flex-1 overflow-y-auto">
+          <Router />
+        </div>
+      </div>
+      {/* Coluna do carrinho: 30% fixo quando aberto */}
+      {isOpen && <CartSidePanel />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-         <Toaster />
-         <Header />
-          <MiniCartDrawer />
-         <Router />
+          <Toaster />
+          <AppLayout />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
@@ -365,4 +382,3 @@ function App() {
 }
 
 export default App;
-import { MiniCartDrawer } from "./components/MiniCartDrawer";
