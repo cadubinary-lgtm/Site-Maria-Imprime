@@ -240,7 +240,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         children: [
           {
             label: "Pré-Impressão",
-            icon: <Layers className="w-4 h-4" />,
             children: [
               { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
               { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
@@ -248,7 +247,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           },
           {
             label: "Status de Produção",
-            icon: <Printer className="w-4 h-4" />,
             children: [
               { label: "Pendente", href: "/admin/status-producao?status=pendente" },
               { label: "Impresso", href: "/admin/status-producao?status=impresso" },
@@ -268,7 +266,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         children: [
           {
             label: "Gerenciador Financeiro",
-            icon: <TrendingUp className="w-4 h-4" />,
             children: [
               { label: "Dashboard Financeiro", href: "/admin/financeiro-dashboard" },
               { label: "Contas a Receber", href: "/admin/financeiro/receber" },
@@ -280,7 +277,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           },
           {
             label: "Gestão Fiscal",
-            icon: <Receipt className="w-4 h-4" />,
             children: [
               { label: "Dashboard Fiscal", href: "/admin/fiscal" },
               { label: "Notas Fiscais", href: "/admin/fiscal/notas" },
