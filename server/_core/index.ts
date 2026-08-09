@@ -177,9 +177,10 @@ async function startServer() {
       }
 
       res.json({ url, key, orderItemId });
-    } catch (error) {
-      console.error('Art upload error:', error);
-      res.status(500).json({ error: 'Falha ao fazer upload do arquivo' });
+    } catch (error: any) {
+      const errMsg = error?.message ?? String(error);
+      console.error('[upload-art] ERROR:', errMsg, '| stack:', error?.stack?.split('\n')[0]);
+      res.status(500).json({ error: errMsg || 'Falha ao fazer upload do arquivo' });
     }
   });
 
