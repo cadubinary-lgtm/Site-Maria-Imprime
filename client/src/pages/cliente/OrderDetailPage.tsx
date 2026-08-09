@@ -288,6 +288,25 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{correctionData.operatorNote}</p>
               </div>
             )}
+            {/* Prévia do erro enviada pelo operador */}
+            {(() => {
+              const latestPreview = (artPreviewsQuery.data as any[])?.[0];
+              const previewUrl = latestPreview?.imageUrl ? buildImageUrl(latestPreview.imageUrl) : null;
+              if (!previewUrl) return null;
+              return (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-orange-700">🖼️ Print do erro identificado:</p>
+                  <img
+                    src={previewUrl}
+                    alt="Print do erro"
+                    className="w-full max-h-64 object-contain rounded-lg border border-orange-200 bg-white cursor-pointer"
+                    onClick={() => window.open(previewUrl, "_blank")}
+                    title="Clique para ampliar"
+                  />
+                  <p className="text-[10px] text-orange-500">Clique na imagem para ampliar</p>
+                </div>
+              );
+            })()}
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-700">Selecione o arquivo corrigido e clique em Enviar:</p>
               <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.cdr,.psd,.tif,.tiff" className="hidden" onChange={handleFileSelect} />

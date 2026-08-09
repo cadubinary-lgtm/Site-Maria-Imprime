@@ -912,7 +912,10 @@ export default function AdminOrderDetail() {
   const utils = trpc.useUtils();
 
   const { data: order, isLoading } = trpc.checkout.getOrderById.useQuery(
-    { id: orderId! }, { enabled: !!orderId }
+    { id: orderId! }, {
+      enabled: !!orderId,
+      refetchInterval: 15000, // Atualiza a cada 15s para detectar nova arte reenviada pelo cliente
+    }
   );
   const { data: history, isLoading: histLoading } = trpc.checkout.getOrderHistory.useQuery(
     { orderId: orderId! }, { enabled: !!orderId }
