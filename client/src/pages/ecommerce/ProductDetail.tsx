@@ -177,6 +177,7 @@ export default function ProductDetail() {
     { productId: productId || 0 }, { enabled: !!productId }
   );
   const addToCartMutation = trpc.cart.addItem.useMutation();
+  const getPresignedUrlMutation = trpc.artUpload.getPresignedUrl.useMutation();
 
   // ─── Galeria ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -599,17 +600,22 @@ export default function ProductDetail() {
       if (artFile && fileMode === "upload") {
         toast.loading("Enviando arquivo...", { id: "upload" });
         try {
-          const fd = new FormData(); fd.append("file", artFile);
-          const r = await fetch("/api/upload-art", { method: "POST", body: fd });
+          // 1. Obter URL pré-assinada do servidor (não passa pelo gateway)
+          const { uploadUrl, storageUrl, contentType } = await getPresignedUrlMutation.mutateAsync({
+            filename: artFile.name,
+            contentType: artFile.type || "application/octet-stream",
+          });
+          // 2. PUT direto ao S3 — contorna o limite HTTP 413 do gateway
+          const s3Resp = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": contentType },
+            body: artFile,
+          });
           toast.dismiss("upload");
-          if (!r.ok) {
-            const errData = await r.json().catch(() => ({}));
-            const errMsg = errData.error ?? `Erro no upload (HTTP ${r.status})`;
-            console.error('[upload-art] HTTP', r.status, errMsg);
-            throw new Error(errMsg);
+          if (!s3Resp.ok) {
+            throw new Error(`Upload S3 falhou (HTTP ${s3Resp.status})`);
           }
-          const uploadData = await r.json();
-          artUrl = uploadData.url;
+          artUrl = storageUrl;
         } catch (uploadErr: any) {
           toast.dismiss("upload");
           console.error('[upload-art] catch:', uploadErr?.message);
