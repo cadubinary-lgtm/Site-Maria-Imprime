@@ -238,13 +238,41 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
     if (!selectedFile) return;
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("orderItemId", String(item.id));
-      const res = await fetch("/api/upload-art", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || "Upload falhou");
+      // Chunked upload: pedaços de 5MB para contornar o limite do gateway
+      const CHUNK_SIZE = 5 * 1024 * 1024;
+      const totalChunks = Math.ceil(selectedFile.size / CHUNK_SIZE);
+      const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      let finalUrl: string | undefined;
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const chunk = selectedFile.slice(start, start + CHUNK_SIZE);
+        const fd = new FormData();
+        fd.append("chunk", chunk, selectedFile.name);
+        fd.append("uploadId", uploadId);
+        fd.append("chunkIndex", String(i));
+        fd.append("totalChunks", String(totalChunks));
+        fd.append("filename", selectedFile.name);
+        fd.append("contentType", selectedFile.type || "application/octet-stream");
+        fd.append("orderItemId", String(item.id));
+        const res = await fetch("/api/upload-art-chunk", { method: "POST", body: fd });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error || `Upload falhou (HTTP ${res.status})`);
+        }
+        const data = await res.json();
+        if (data.status === "complete") {
+          finalUrl = data.url;
+        }
+      }
+      if (!finalUrl) throw new Error("Upload incompleto");
+      // Notificar o backend sobre o reenvio com a nova URL
+      const notifyFd = new FormData();
+      notifyFd.append("orderItemId", String(item.id));
+      notifyFd.append("artUrl", finalUrl);
+      const notifyRes = await fetch("/api/upload-art-notify", { method: "POST", body: notifyFd });
+      if (!notifyRes.ok) {
+        // Fallback: mesmo sem notificação, o upload foi feito
+        console.warn("[upload-art-notify] falhou, mas upload ok");
       }
       // Backend já salva artFileUrl, atualiza status e notifica operador
       toast.success("✅ Arte reenviada com sucesso! Nossa equipe irá analisar em breve.");
