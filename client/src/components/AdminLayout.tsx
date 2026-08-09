@@ -70,15 +70,41 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
   const hasActiveChild = item.children?.some(
     (child) => child.href && (location === child.href || location.startsWith(child.href + "?"))
   ) ?? false;
-  const [open, setOpen] = useState(() => hasActiveChild);
-  const isActive = item.href ? location === item.href : false;
   const hasChildren = item.children && item.children.length > 0;
+  const isActive = item.href ? location === item.href : false;
   const isGroupActive = hasChildren && hasActiveChild;
 
-  // Mantém o dropdown aberto sempre que um filho estiver ativo
+  // Chave única para persistir o estado no localStorage
+  const storageKey = hasChildren ? `sidebar_open_${item.label}` : null;
+
+  const [open, setOpen] = useState(() => {
+    // Prioridade: filho ativo > localStorage > fechado por padrão
+    if (hasActiveChild) return true;
+    if (storageKey) {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved !== null) return saved === "true";
+      } catch (_) {}
+    }
+    return false;
+  });
+
+  // Persiste o estado no localStorage ao mudar
+  const toggleOpen = () => {
+    const next = !open;
+    setOpen(next);
+    if (storageKey) {
+      try { localStorage.setItem(storageKey, String(next)); } catch (_) {}
+    }
+  };
+
+  // Garante que o menu fique aberto quando um filho está ativo (ex: ao navegar diretamente pela URL)
   useEffect(() => {
     if (hasActiveChild) {
       setOpen(true);
+      if (storageKey) {
+        try { localStorage.setItem(storageKey, "true"); } catch (_) {}
+      }
     }
   }, [hasActiveChild, location]);
 
@@ -120,7 +146,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
         <button
           onClick={() => {
             saveScrollPosition();
-            setOpen(!open);
+            toggleOpen();
           }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
             ${isGroupActive ? "bg-gray-800 text-white" : isActive ? "bg-orange-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
