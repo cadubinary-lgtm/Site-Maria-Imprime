@@ -297,6 +297,7 @@ function ArtPreviewColumn({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [pendingLightbox, setPendingLightbox] = useState(false);
 
   const deletePreviewMutation = trpc.checkout.deleteArtPreview.useMutation({
     onSuccess: () => { onRefresh(); toast.success("Prévia removida"); },
@@ -326,6 +327,7 @@ function ArtPreviewColumn({
   };
 
   return (
+    <>
     <div className="space-y-3">
       {/* Upload — seleção local ou Ctrl+V; envio acontece via "Enviar para o Cliente" */}
       <div
@@ -350,7 +352,9 @@ function ArtPreviewColumn({
             <img
               src={URL.createObjectURL(pendingFile)}
               alt="Preview"
-              className="w-full max-h-64 object-contain rounded border border-orange-300 bg-white"
+              className="w-full max-h-64 object-contain rounded border border-orange-300 bg-white cursor-zoom-in hover:opacity-90 transition-opacity"
+              onClick={() => setPendingLightbox(true)}
+              title="Clique para ampliar em tela cheia"
             />
             <button
               className="w-full py-1.5 text-sm bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 rounded transition-colors"
@@ -407,6 +411,31 @@ function ArtPreviewColumn({
         </div>
       )}
     </div>
+
+    {/* Lightbox tela cheia para imagem pendente */}
+    {pendingLightbox && pendingFile && (
+      <div
+        className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+        onClick={() => setPendingLightbox(false)}
+      >
+        <div className="relative max-w-[95vw] max-h-[95vh]" onClick={(e) => e.stopPropagation()}>
+          <img
+            src={URL.createObjectURL(pendingFile)}
+            alt="Prévia ampliada"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+          />
+          <button
+            className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
+            onClick={() => setPendingLightbox(false)}
+            title="Fechar"
+          >
+            <X className="w-4 h-4 text-gray-700" />
+          </button>
+          <p className="text-center text-white/60 text-xs mt-2">Clique fora ou no X para fechar · {pendingFile.name}</p>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
