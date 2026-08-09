@@ -597,26 +597,40 @@ export default function ProductDetail() {
 
       let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
       if (artFile && fileMode === "upload") {
-        toast.loading("Enviando arquivo...", { id: "upload" });
+        const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB por pedaço
+        const totalChunks = Math.ceil(artFile.size / CHUNK_SIZE);
+        const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        toast.loading(`Enviando arquivo (0/${totalChunks})...`, { id: "upload" });
         try {
-          const fd = new FormData(); fd.append("file", artFile);
-          const r = await fetch("/api/upload-art", { method: "POST", body: fd });
-          toast.dismiss("upload");
-          if (!r.ok) {
-            const errData = await r.json().catch(() => ({}));
-            const errMsg = errData.error ?? `Erro no upload (HTTP ${r.status})`;
-            console.error('[upload-art] HTTP', r.status, errMsg);
-            throw new Error(errMsg);
+          let finalUrl: string | undefined;
+          for (let i = 0; i < totalChunks; i++) {
+            const start = i * CHUNK_SIZE;
+            const chunk = artFile.slice(start, start + CHUNK_SIZE);
+            const fd = new FormData();
+            fd.append("chunk", chunk, artFile.name);
+            fd.append("uploadId", uploadId);
+            fd.append("chunkIndex", String(i));
+            fd.append("totalChunks", String(totalChunks));
+            fd.append("filename", artFile.name);
+            fd.append("contentType", artFile.type || "application/octet-stream");
+            const r = await fetch("/api/upload-art-chunk", { method: "POST", body: fd });
+            if (!r.ok) {
+              const errData = await r.json().catch(() => ({}));
+              throw new Error(errData.error ?? `Erro no upload (HTTP ${r.status})`);
+            }
+            const data = await r.json();
+            toast.loading(`Enviando arquivo (${i + 1}/${totalChunks})...`, { id: "upload" });
+            if (data.status === "complete") {
+              finalUrl = data.url;
+            }
           }
-          const uploadData = await r.json();
-          artUrl = uploadData.url;
+          toast.dismiss("upload");
+          artUrl = finalUrl;
         } catch (uploadErr: any) {
           toast.dismiss("upload");
           console.error('[upload-art] catch:', uploadErr?.message);
           toast.error(
-            uploadErr?.message?.includes("413") || uploadErr?.message?.includes("Payload Too Large")
-              ? "Arquivo muito grande. O limite é 10MB. Compacte o arquivo e tente novamente, ou envie a arte por WhatsApp após finalizar o pedido."
-              : (uploadErr?.message ?? "Erro ao enviar o arquivo"),
+            uploadErr?.message ?? "Erro ao enviar o arquivo",
             { duration: 8000 }
           );
           // Continua sem o arquivo — não bloqueia o carrinho

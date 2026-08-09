@@ -422,6 +422,59 @@ async function startServer() {
   });
 
   // tRPC API
+
+  // ============================================================
+  // CHUNKED UPLOAD — recebe pedaços de 5MB e remonta no servidor
+  // Contorna o limite do gateway sem expor chaves no frontend
+  // ============================================================
+  const chunkUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 8 * 1024 * 1024 }, // 8MB por pedaço (margem de segurança)
+  });
+
+  // Armazenamento temporário de chunks em memória (por uploadId)
+  const chunkStore = new Map<string, { chunks: Buffer[]; total: number; filename: string; contentType: string }>();
+
+  // Recebe um chunk
+  app.post('/api/upload-art-chunk', chunkUpload.single('chunk'), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Chunk ausente' });
+      const { uploadId, chunkIndex, totalChunks, filename, contentType } = req.body;
+      if (!uploadId || chunkIndex === undefined || !totalChunks || !filename) {
+        return res.status(400).json({ error: 'Parâmetros ausentes' });
+      }
+      const idx = parseInt(chunkIndex);
+      const total = parseInt(totalChunks);
+      if (!chunkStore.has(uploadId)) {
+        chunkStore.set(uploadId, { chunks: new Array(total), total, filename, contentType: contentType || 'application/octet-stream' });
+      }
+      const entry = chunkStore.get(uploadId)!;
+      entry.chunks[idx] = req.file.buffer;
+      // Verificar se todos os chunks chegaram
+      const received = entry.chunks.filter(Boolean).length;
+      if (received < total) {
+        return res.json({ status: 'partial', received, total });
+      }
+      // Todos os chunks recebidos — montar o arquivo completo
+      const fullBuffer = Buffer.concat(entry.chunks);
+      chunkStore.delete(uploadId);
+      // Sanitizar nome do arquivo
+      const sanitized = sanitizeFilename(entry.filename);
+      const hash = Math.random().toString(36).slice(2, 10);
+      const dotIdx = sanitized.lastIndexOf('.');
+      const ext = dotIdx !== -1 ? sanitized.slice(dotIdx) : '';
+      const base = dotIdx !== -1 ? sanitized.slice(0, dotIdx) : sanitized;
+      const key = `client-art/${Date.now()}-${base}_${hash}${ext}`;
+      // Upload para o Forge/S3
+      const { storagePut } = await import('../storage');
+      const { url } = await storagePut(key, fullBuffer, entry.contentType);
+      return res.json({ status: 'complete', url, key });
+    } catch (err: any) {
+      console.error('[upload-art-chunk] ERROR:', err?.message);
+      return res.status(500).json({ error: err?.message ?? 'Erro no upload' });
+    }
+  });
+
   app.use(
     "/api/trpc",
     createExpressMiddleware({
