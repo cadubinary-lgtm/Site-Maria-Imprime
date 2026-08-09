@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -157,6 +158,7 @@ export default function ProductDetail() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, setLocation] = useLocation();
+  const { openCart } = useCartDrawer();
 
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: product, isLoading } = trpc.products.getById.useQuery(

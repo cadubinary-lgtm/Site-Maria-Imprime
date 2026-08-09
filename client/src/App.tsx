@@ -354,9 +354,10 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <Toaster />
-          <Header />
-          <Router />
+         <Toaster />
+         <Header />
+          <MiniCartDrawer />
+         <Router />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
@@ -364,3 +365,4 @@ function App() {
 }
 
 export default App;
+import { MiniCartDrawer } from "./components/MiniCartDrawer";
