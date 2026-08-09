@@ -2272,6 +2272,11 @@ export const appRouter = router({
           .set({ correctionAction: null } as any)
           .where(eq(orderItems.orderId, input.orderId));
 
+        // Atualiza o status de cada item para "em_producao"
+        await db.update(orderItems)
+          .set({ preProductionStatus: "em_producao" } as any)
+          .where(eq(orderItems.orderId, input.orderId));
+
         await db.update(orders)
           .set({ status: "em_producao" } as any)
           .where(eq(orders.id, input.orderId));
