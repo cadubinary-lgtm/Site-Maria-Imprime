@@ -893,10 +893,9 @@ function ItemProductionSection({
 }
 
 // ─── Componente principal ────────────────────────────────────────────────────
-export default function AdminOrderDetail() {
-  const [, params] = useRoute("/admin/pedidos/:id");
+export function OrderDetailContent({ orderId: externalOrderId }: { orderId: number | null }) {
   const [, setLocation] = useLocation();
-  const orderId = params?.id ? parseInt(params.id) : null;
+  const orderId = externalOrderId;
 
   const [newStatus, setNewStatus] = useState<string>("");
   const [statusNotes, setStatusNotes] = useState("");
@@ -999,8 +998,8 @@ export default function AdminOrderDetail() {
 
 
   return (
-    <AdminLayout>
-      <div className="min-h-screen bg-gray-50 py-8">
+    <>
+    <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-5xl mx-auto px-4 space-y-6">
 
           {/* ── Header ── */}
@@ -1526,6 +1525,16 @@ export default function AdminOrderDetail() {
           </div>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+export default function AdminOrderDetail() {
+  const [, params] = useRoute("/admin/pedidos/:id");
+  const orderId = params?.id ? parseInt(params.id) : null;
+  return (
+    <AdminLayout>
+      <OrderDetailContent orderId={orderId} />
     </AdminLayout>
   );
 }
