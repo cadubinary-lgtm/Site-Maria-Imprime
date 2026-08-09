@@ -1236,7 +1236,7 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                   aguardando_reenvio_arquivo: { label: "Aguardando Reenvio", cls: "bg-orange-100 text-orange-800" },
                   aguardando_aprovacao_cliente: { label: "Aguardando Aprovação", cls: "bg-blue-100 text-blue-800" },
                   nova_arte_reenviada: { label: "Nova Arte Enviada", cls: "bg-indigo-100 text-indigo-800" },
-                  arte_final_aprovada: { label: "Arte Aprovada", cls: "bg-green-100 text-green-800" },
+                  arte_final_aprovada: { label: "Arte Final Aprovada", cls: "bg-green-100 text-green-800" },
                   em_producao: { label: "Em Produção", cls: "bg-emerald-100 text-emerald-800" },
                 };
                 const statusBadge = itemStatusConfig[itemStatus] ?? { label: itemStatus, cls: "bg-gray-100 text-gray-700" };
