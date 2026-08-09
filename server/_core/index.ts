@@ -85,11 +85,12 @@ async function startServer() {
   // Upload endpoint para arte do cliente — aceita todos os formatos gráficos
   const uploadArt = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB - alinhado com o frontend
   });
   app.post('/api/upload-art', uploadArt.single('file'), async (req, res) => {
     try {
       if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo fornecido' });
+
       const { originalname, buffer, mimetype } = req.file;
       const allowedMimeTypes = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
@@ -180,6 +181,14 @@ async function startServer() {
       console.error('Art upload error:', error);
       res.status(500).json({ error: 'Falha ao fazer upload do arquivo' });
     }
+  });
+
+  // Middleware de erro para o multer do upload-art (ex: arquivo muito grande)
+  app.use('/api/upload-art', (err: any, req: any, res: any, _next: any) => {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'Arquivo muito grande. O limite máximo é 100MB.' });
+    }
+    return res.status(400).json({ error: err?.message ?? 'Erro no upload do arquivo' });
   });
 
   // Upload endpoint para ícones de segmentos — aceita PNG e WebP
