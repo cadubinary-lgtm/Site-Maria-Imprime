@@ -749,7 +749,7 @@ export default function ProductDetail() {
           <span className="text-gray-800 font-medium">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr] lg:grid-cols-[260px_1fr_300px] gap-4 lg:gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-4 lg:gap-6 items-start">
 
           {/* ═══════════════════════════════════════════════════════════════
               COLUNA ESQUERDA — Galeria + Info
