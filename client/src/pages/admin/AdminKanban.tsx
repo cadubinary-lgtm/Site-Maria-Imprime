@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Search, X, ChevronDown, GripVertical, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import { OrderDetailContent } from "./AdminOrderDetail";
 
 // ─── Colunas do Kanban (fluxo de produção) ──────────────────────────────────
 const KANBAN_COLUMNS = [
@@ -141,146 +142,6 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
   );
 }
 
-// ─── Painel de Detalhes do Pedido (Split Screen) ─────────────────────────────
-function KanbanOrderPanel({ orderId }: { orderId: number }) {
-  const { data: order, isLoading } = trpc.checkout.getOrderById.useQuery(
-    { id: orderId },
-    { enabled: !!orderId }
-  );
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
-      </div>
-    );
-  }
-
-  if (!order) {
-    return (
-      <div className="p-6 text-center text-sm text-gray-500">
-        Pedido não encontrado.
-      </div>
-    );
-  }
-
-  const o = order as any;
-  const statusLabels: Record<string, string> = {
-    pagamento_aprovado: "Pagamento Aprovado",
-    pagamento_retirada: "Pagamento na Retirada",
-    analisando: "Analisando",
-    com_problemas: "Com Problemas",
-    em_producao: "Em Produção",
-    pronto_entrega: "Pronto para Entrega",
-    pronto_retirada: "Pronto para Retirada",
-    entregue: "Entregue",
-    cancelado: "Cancelado",
-  };
-
-  return (
-    <div className="p-4 space-y-4">
-      {/* Número e status */}
-      <div className="space-y-1">
-        <div className="font-bold text-gray-900 text-sm">{o.orderNumber}</div>
-        <div className="text-xs text-gray-500">{o.deliveryFullName || o.guestName || "Cliente"}</div>
-        <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
-          {statusLabels[o.status] || o.status}
-        </span>
-      </div>
-
-      {/* Resumo financeiro */}
-      <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Total</span>
-          <span className="font-semibold text-gray-900">
-            R$ {parseFloat(o.totalPrice || "0").toFixed(2).replace(".", ",")}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Data</span>
-          <span className="text-gray-700">{new Date(o.createdAt).toLocaleDateString("pt-BR")}</span>
-        </div>
-        {o.deliveryDeadline && (
-          <div className="flex justify-between">
-            <span className="text-gray-500">Prazo</span>
-            <span className={`font-medium ${Date.now() > o.deliveryDeadline ? 'text-pink-600' : 'text-gray-700'}`}>
-              {new Date(o.deliveryDeadline).toLocaleDateString("pt-BR")}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Itens do pedido */}
-      {o.items && o.items.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-            Itens ({o.items.length})
-          </div>
-          {o.items.map((item: any) => (
-            <div key={item.id} className="bg-white border border-gray-100 rounded-lg p-3 space-y-1.5">
-              <div className="flex items-center gap-2">
-                {item.productImageUrl && (
-                  <img src={item.productImageUrl} alt={item.productName} className="w-8 h-8 object-contain rounded border border-gray-100 flex-shrink-0" />
-                )}
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold text-gray-800 truncate">{item.productName}</div>
-                  <div className="text-xs text-gray-500">Qtd: {item.quantity}</div>
-                </div>
-                <div className="ml-auto text-xs font-semibold text-gray-900 flex-shrink-0">
-                  R$ {parseFloat(item.totalPrice || "0").toFixed(2).replace(".", ",")}
-                </div>
-              </div>
-              {/* Arquivo do cliente */}
-              {item.artFileUrl && (
-                <div className="pt-1 border-t border-gray-100">
-                  <div className="text-xs text-gray-500 mb-1">Arquivo do cliente:</div>
-                  <a
-                    href={item.artFileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-pink-600 hover:text-pink-700 hover:underline"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Baixar arquivo
-                  </a>
-                </div>
-              )}
-              {/* Status de pré-impressão */}
-              {item.preProductionStatus && item.preProductionStatus !== "liberado_analise" && (
-                <div className="pt-1 border-t border-gray-100">
-                  <span className="text-xs text-gray-500">Pré-impressão: </span>
-                  <span className="text-xs font-medium text-gray-700">{item.preProductionStatus.replace(/_/g, " ")}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Contato */}
-      {(o.deliveryPhone || o.guestPhone) && (
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Contato</div>
-          <a
-            href={`https://wa.me/55${(o.deliveryPhone || o.guestPhone || "").replace(/\D/g, "")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium"
-          >
-            📱 WhatsApp: {o.deliveryPhone || o.guestPhone}
-          </a>
-        </div>
-      )}
-
-      {/* Link para detalhes completos */}
-      <Link href={`/admin/pedidos/${orderId}`}>
-        <button className="w-full text-xs text-center py-2 px-4 rounded-lg border border-pink-200 text-pink-600 hover:bg-pink-50 transition-colors font-medium">
-          Abrir detalhes completos →
-        </button>
-      </Link>
-    </div>
-  );
-}
 
 export default function AdminKanban() {
   const { data: allOrders, isLoading, refetch } = trpc.checkout.getAllOrders.useQuery();
@@ -593,10 +454,10 @@ export default function AdminKanban() {
             </button>
           </div>
         </div>
-        {/* Conteúdo do painel */}
-        <div className="flex-1 overflow-y-auto">
-          <KanbanOrderPanel orderId={selectedOrderId} />
-        </div>
+       {/* Conteúdo do painel */}
+       <div className="flex-1 overflow-y-auto">
+          <OrderDetailContent orderId={selectedOrderId} />
+       </div>
       </div>
     )}
     </div>
