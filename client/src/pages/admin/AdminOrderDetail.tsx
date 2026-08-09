@@ -16,6 +16,7 @@ import {
   Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
   Download, FileImage, Upload, Trash2, Eye, ImagePlus, X, Printer, FileText,
   Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle, PlayCircle, ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ORDER_STATUS } from "./AdminOrders";
@@ -442,7 +443,7 @@ function ArtPreviewColumn({
 const PROOF_TERM = `Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!`;
 
 function PreImpressaoColumn({
-  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange, orderStatus, totalItems,
+  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange, orderStatus, totalItems, onCollapseItem,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   pendingPreviewFile: File | null; pendingPreviewNotes: string;
@@ -450,6 +451,7 @@ function PreImpressaoColumn({
   onSelectedStatusChange?: (s: string) => void;
   orderStatus?: string;
   totalItems?: number;
+  onCollapseItem?: () => void;
 }) {
   // totalItems: quando > 1, o botão Produzir apenas marca arte_final_aprovada sem mudar status global
   const isCommercialLocked = LOCKED_ORDER_STATUSES.includes(orderStatus ?? "");
@@ -485,9 +487,11 @@ function PreImpressaoColumn({
 
   const productionMutation = trpc.admin.triggerProductionStart.useMutation({
     onSuccess: () => {
-      toast.success("▶ Pedido enviado para produção!");
+      toast.success("▶ Item enviado para produção!");
       utils.checkout.getOrderById.invalidate({ id: orderId });
       utils.checkout.getOrderItemLogs.invalidate({ orderItemId });
+      // Colapsa automaticamente o card deste item após aprovar
+      onCollapseItem?.();
     },
     onError: () => toast.error("Erro ao iniciar produção"),
   });
@@ -878,7 +882,7 @@ function ItemPreviewSection({
 // ─── Wrapper por item: Pré-Impressão e Ação de Correção (Col 3) ─────────────────
 function ItemProductionSection({
   orderId, orderItemId, preProductionStatus, orderStatus, totalItems,
-  pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded,
+  pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onCollapseItem,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   orderStatus?: string;
@@ -886,6 +890,7 @@ function ItemProductionSection({
   pendingPreviewFile: File | null;
   pendingPreviewNotes: string;
   onPreviewUploaded: () => void;
+  onCollapseItem?: () => void;
 }) {
   const [selectedStatus, setSelectedStatus] = useState(preProductionStatus);
   
@@ -905,6 +910,7 @@ function ItemProductionSection({
         onSelectedStatusChange={setSelectedStatus}
         orderStatus={orderStatus}
         totalItems={totalItems}
+        onCollapseItem={onCollapseItem}
       />
     </div>
   );
@@ -921,6 +927,16 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [showSendToProductionConfirm, setShowSendToProductionConfirm] = useState(false);
+  // Accordion dos cards de item: Set de índices expandidos (todos expandidos por padrão)
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+  const toggleItemExpanded = (idx: number) => setExpandedItems(prev => {
+    const next = new Set(prev);
+    if (next.has(idx)) next.delete(idx); else next.add(idx);
+    return next;
+  });
+  const collapseItem = (idx: number) => setExpandedItems(prev => {
+    const next = new Set(prev); next.delete(idx); return next;
+  });
 
   // Estado compartilhado de prévia pendente por itemId (Col2 → Col3)
   const [pendingFiles, setPendingFiles] = useState<Map<number, File>>(new Map());
@@ -1185,6 +1201,11 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
 
             {o.items && o.items.length > 0 ? (
               o.items.map((item: any, i: number) => {
+                // Initialize all items as expanded on first render
+                if (expandedItems.size === 0 && o.items && o.items.length > 0) {
+                  // Use a ref-free approach: start all expanded via the initial Set
+                }
+                const isExpanded = !expandedItems.has(i);
                 // Parse variações
                 let variations: { name: string; value: string }[] = [];
                 if (item.variationSnapshot) { try { variations = JSON.parse(item.variationSnapshot); } catch {} }
@@ -1205,10 +1226,27 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                   .filter(([k]) => !["peso", "weight", "weightKg", "largura", "altura"].includes(k))
                   .map(([k, v]) => ({ name: k, value: String(v) }));
 
+                // Badge de status do item
+                const itemStatus = item.preProductionStatus ?? "liberado_analise";
+                const itemStatusConfig: Record<string, { label: string; cls: string }> = {
+                  liberado_analise: { label: "Liberado para Análise", cls: "bg-yellow-100 text-yellow-800" },
+                  aguardando_liberacao_comercial: { label: "Aguardando Liberação", cls: "bg-pink-100 text-pink-800" },
+                  ajustar_arte: { label: "Ajustar Arte", cls: "bg-orange-100 text-orange-800" },
+                  aguardando_reenvio_arquivo: { label: "Aguardando Reenvio", cls: "bg-orange-100 text-orange-800" },
+                  aguardando_aprovacao_cliente: { label: "Aguardando Aprovação", cls: "bg-blue-100 text-blue-800" },
+                  nova_arte_reenviada: { label: "Nova Arte Enviada", cls: "bg-indigo-100 text-indigo-800" },
+                  arte_final_aprovada: { label: "Arte Aprovada", cls: "bg-green-100 text-green-800" },
+                  em_producao: { label: "Em Produção", cls: "bg-emerald-100 text-emerald-800" },
+                };
+                const statusBadge = itemStatusConfig[itemStatus] ?? { label: itemStatus, cls: "bg-gray-100 text-gray-700" };
+
                 return (
                   <Card key={i} className="border border-gray-200 shadow-sm overflow-hidden">
-                    {/* Cabeçalho do item */}
-                    <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 px-5 py-3.5">
+                    {/* Cabeçalho do item — clicável para expandir/recolher */}
+                    <div
+                      className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 px-5 py-3.5 cursor-pointer select-none"
+                      onClick={() => toggleItemExpanded(i)}
+                    >
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                           {item.productImage ? (
@@ -1220,22 +1258,35 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                             </div>
                           )}
                           <div>
-                            <p className="font-bold text-gray-900">{item.productName}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-bold text-gray-900">{item.productName}</p>
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge.cls}`}>
+                                {statusBadge.label}
+                              </span>
+                            </div>
                             <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
                           </div>
                         </div>
-                        {/* Preços: ocultos para Linha de Produção */}
-                        {!isProductionRole && (
-                          <div className="text-right flex-shrink-0">
-                            <p className="text-xs text-gray-400">Unit. {fmt(parseFloat(item.priceAtOrder))}</p>
-                            <p className="font-bold text-gray-800">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          {/* Preços: ocultos para Linha de Produção */}
+                          {!isProductionRole && (
+                            <div className="text-right">
+                              <p className="text-xs text-gray-400">Unit. {fmt(parseFloat(item.priceAtOrder))}</p>
+                              <p className="font-bold text-gray-800">Total: {fmt(parseFloat(item.priceAtOrder) * item.quantity)}</p>
+                            </div>
+                          )}
+                          {/* Seta de toggle */}
+                          <div className="text-gray-400 hover:text-gray-600 transition-colors">
+                            {isExpanded
+                              ? <ChevronUp className="w-5 h-5" />
+                              : <ChevronDown className="w-5 h-5" />}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Grid 3 colunas com divisores visuais */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3">
+                    {/* Grid 3 colunas com divisores visuais — colapsável */}
+                    {isExpanded && <div className="grid grid-cols-1 lg:grid-cols-3">
 
                       {/* Col 1 — Especificações + Arquivo do Cliente */}
                       <div className="lg:border-r border-gray-100">
@@ -1294,9 +1345,10 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                         pendingPreviewFile={pendingFiles.get(item.id) ?? null}
                         pendingPreviewNotes={pendingNotes.get(item.id) ?? ""}
                         onPreviewUploaded={() => { setPendingFile(item.id, null); setPendingNote(item.id, ""); }}
+                        onCollapseItem={() => collapseItem(i)}
                       />
 
-                    </div>
+                    </div>}
                   </Card>
                 );
               })
