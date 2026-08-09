@@ -100,6 +100,7 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "aguardando_reenvio_arquivo",    label: "Aguardando Reenvio do Arquivo",  icon: Clock,       color: "bg-red-100 text-red-700" },
   { value: "aguardando_aprovacao_cliente",  label: "Aguardando Aprovação do Cliente", icon: Clock,       color: "bg-blue-100 text-blue-700" },
   { value: "nova_arte_reenviada",           label: "Nova Arte Reenviada",             icon: AlertCircle, color: "bg-amber-100 text-amber-700" },
+  { value: "arte_final_aprovada",           label: "Arte Final Aprovada",             icon: CheckCircle, color: "bg-green-100 text-green-700" },
   { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
 ];
 
