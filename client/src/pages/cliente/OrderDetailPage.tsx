@@ -12,6 +12,7 @@ import { Loader2, ArrowLeft, Package, MapPin, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
+import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import {
   Accordion,
@@ -198,8 +199,9 @@ function PreviewResolutionAlertCompact({ item }: { item: any }) {
 function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number }) {
   const utils = trpc.useUtils();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { state: uploadState, upload: doChunkedUpload, cancel: cancelUpload, reset: resetUpload } = useChunkedUpload();
+  const isUploading = uploadState.isUploading;
   const [showRefusalInput, setShowRefusalInput] = useState(false);
   const [refusalNote, setRefusalNote] = useState("");
   const [termAccepted, setTermAccepted] = useState(false);
@@ -236,58 +238,26 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
 
   const handleSendArt = async () => {
     if (!selectedFile) return;
-    setIsUploading(true);
     try {
-      // Chunked upload: pedaços de 5MB para contornar o limite do gateway
-      const CHUNK_SIZE = 5 * 1024 * 1024;
-      const totalChunks = Math.ceil(selectedFile.size / CHUNK_SIZE);
-      const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      let finalUrl: string | undefined;
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * CHUNK_SIZE;
-        const chunk = selectedFile.slice(start, start + CHUNK_SIZE);
-        const fd = new FormData();
-        fd.append("chunk", chunk, selectedFile.name);
-        fd.append("uploadId", uploadId);
-        fd.append("chunkIndex", String(i));
-        fd.append("totalChunks", String(totalChunks));
-        fd.append("filename", selectedFile.name);
-        fd.append("contentType", selectedFile.type || "application/octet-stream");
-        fd.append("orderItemId", String(item.id));
-        const res = await fetch("/api/upload-art-chunk", { method: "POST", body: fd });
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData?.error || `Upload falhou (HTTP ${res.status})`);
-        }
-        const data = await res.json();
-        if (data.status === "complete") {
-          finalUrl = data.url;
-        }
-      }
-      if (!finalUrl) throw new Error("Upload incompleto");
+      const { url: finalUrl } = await doChunkedUpload(selectedFile, { orderItemId: String(item.id) });
       // Notificar o backend sobre o reenvio com a nova URL
       const notifyFd = new FormData();
       notifyFd.append("orderItemId", String(item.id));
       notifyFd.append("artUrl", finalUrl);
       const notifyRes = await fetch("/api/upload-art-notify", { method: "POST", body: notifyFd });
-      if (!notifyRes.ok) {
-        // Fallback: mesmo sem notificação, o upload foi feito
-        console.warn("[upload-art-notify] falhou, mas upload ok");
-      }
-      // Backend já salva artFileUrl, atualiza status e notifica operador
+      if (!notifyRes.ok) console.warn("[upload-art-notify] falhou, mas upload ok");
       toast.success("✅ Arte reenviada com sucesso! Nossa equipe irá analisar em breve.");
       setSelectedFile(null);
+      resetUpload();
       if (fileRef.current) fileRef.current.value = "";
-      // Aguarda invalidate para garantir refetch imediato na tela
       await Promise.all([
         utils.checkout.getOrderByNumber.invalidate(),
         utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id }),
         utils.checkout.getArtPreviews.invalidate({ orderId: item.orderId, orderItemId: item.id }),
       ]);
     } catch (err: any) {
+      if (err?.message === "CANCELLED") return;
       toast.error(err?.message || "Erro ao enviar arquivo. Tente novamente.");
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -362,15 +332,35 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
                       onClick={() => { setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; }}
                     >✕</button>
                   </div>
-                  <Button
-                    size="sm"
-                    className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
-                    disabled={isUploading}
-                    onClick={handleSendArt}
-                  >
-                    {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {isUploading ? "Enviando..." : "Enviar Nova Arte"}
-                  </Button>
+                  {isUploading ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs text-gray-600">
+                        <span>Enviando... {uploadState.currentChunk}/{uploadState.totalChunks} partes</span>
+                        <span>{uploadState.progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div
+                          className="bg-orange-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadState.progress}%` }}
+                        />
+                      </div>
+                      <button
+                        className="text-xs text-gray-500 hover:text-red-500 underline"
+                        onClick={cancelUpload}
+                      >
+                        Cancelar envio
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
+                      onClick={handleSendArt}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Enviar Nova Arte
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
