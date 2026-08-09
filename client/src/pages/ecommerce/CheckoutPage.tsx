@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import {
-  ChevronRight, ChevronLeft, ShoppingBag, MapPin,
+  ChevronRight, ChevronLeft, ChevronDown, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
   QrCode, Copy, Check, Store, AlertCircle, RefreshCw,
 } from "lucide-react";
@@ -92,6 +92,12 @@ const SIMULATED_PIX_KEY = "00020126580014BR.GOV.BCB.PIX0136grafica-ponto-digital
 export default function CheckoutPage() {
   const [location, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("dados");
+  const [expandedCheckoutItems, setExpandedCheckoutItems] = useState<Set<number>>(new Set());
+  const toggleCheckoutItem = (id: number) => setExpandedCheckoutItems(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
 
@@ -1184,34 +1190,45 @@ export default function CheckoutPage() {
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-3 text-sm">Itens do Pedido</h3>
                       <div className="space-y-4">
-                        {cartItems.map((item: any) => (
-                          <div key={item.id} className="p-3 border rounded-lg">
-                            <div className="flex items-start gap-3 mb-3">
-                              {item.productImage && (
-                                <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-cover rounded flex-shrink-0" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm text-gray-900 truncate">{item.productName}</p>
-                                <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                        {cartItems.map((item: any) => {
+                            const isExpanded = expandedCheckoutItems.has(item.id);
+                            return (
+                              <div key={item.id} className="p-3 border rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  {item.productImage && (
+                                    <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-cover rounded flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <button
+                                      onClick={() => toggleCheckoutItem(item.id)}
+                                      className="flex items-center gap-1 w-full text-left"
+                                    >
+                                      <p className="font-medium text-sm text-gray-900 truncate flex-1">{item.productName}</p>
+                                      <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                    </button>
+                                    <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                                  </div>
+                                  <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                                    {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
+                                  </p>
+                                </div>
+                                {/* Especificações recolhidas por padrão */}
+                                <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? "max-h-96 mt-3" : "max-h-0"}`}>
+                                  <OrderItemSpecs
+                                    customDimensions={item.customDimensions}
+                                    variationSnapshot={item.variationSnapshot}
+                                    selectedAttributes={item.selectedAttributes}
+                                    artFileUrl={item.artFileUrl}
+                                    notes={item.notes}
+                                    prazoName={item.prazoName}
+                                    forecastLabel={item.forecastLabel}
+                                    shippingLabel={item.shippingLabel}
+                                    shippingPrice={item.shippingPrice}
+                                  />
+                                </div>
                               </div>
-                              <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                                {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
-                              </p>
-                            </div>
-                            {/* Especificações padronizadas em bloco vertical */}
-                            <OrderItemSpecs
-                              customDimensions={item.customDimensions}
-                              variationSnapshot={item.variationSnapshot}
-                              selectedAttributes={item.selectedAttributes}
-                              artFileUrl={item.artFileUrl}
-                              notes={item.notes}
-                              prazoName={item.prazoName}
-                              forecastLabel={item.forecastLabel}
-                              shippingLabel={item.shippingLabel}
-                              shippingPrice={item.shippingPrice}
-                            />
-                          </div>
-                        ))}
+                            );
+                          })}
                       </div>
                     </div>
                   </div>
