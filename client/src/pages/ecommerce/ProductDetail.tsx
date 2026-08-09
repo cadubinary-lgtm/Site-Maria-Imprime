@@ -604,16 +604,17 @@ export default function ProductDetail() {
           toast.dismiss("upload");
           if (!r.ok) {
             const errData = await r.json().catch(() => ({}));
-            throw new Error(errData.error ?? "Erro no upload do arquivo");
+            const errMsg = errData.error ?? `Erro no upload (HTTP ${r.status})`;
+            console.error('[upload-art] HTTP', r.status, errMsg);
+            throw new Error(errMsg);
           }
           const uploadData = await r.json();
           artUrl = uploadData.url;
         } catch (uploadErr: any) {
           toast.dismiss("upload");
+          console.error('[upload-art] catch:', uploadErr?.message);
           toast.error(
-            uploadErr?.message?.includes("presign") || uploadErr?.message?.includes("403")
-              ? "Serviço de upload temporariamente indisponível. Seu pedido foi adicionado sem o arquivo — envie a arte pelo WhatsApp ou após finalizar o pedido."
-              : (uploadErr?.message ?? "Erro ao enviar o arquivo"),
+            uploadErr?.message ?? "Erro ao enviar o arquivo",
             { duration: 8000 }
           );
           // Continua sem o arquivo — não bloqueia o carrinho
