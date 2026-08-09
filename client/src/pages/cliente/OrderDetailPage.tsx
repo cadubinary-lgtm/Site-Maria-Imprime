@@ -278,8 +278,12 @@ function ItemCorrectionAction({ item, orderId }: { item: any; orderId: number })
       toast.success("✅ Arte reenviada com sucesso! Nossa equipe irá analisar em breve.");
       setSelectedFile(null);
       if (fileRef.current) fileRef.current.value = "";
-      utils.checkout.getOrderByNumber.invalidate();
-      utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id });
+      // Aguarda invalidate para garantir refetch imediato na tela
+      await Promise.all([
+        utils.checkout.getOrderByNumber.invalidate(),
+        utils.checkout.getItemCorrectionAction.invalidate({ orderItemId: item.id }),
+        utils.checkout.getArtPreviews.invalidate({ orderId: item.orderId, orderItemId: item.id }),
+      ]);
     } catch (err: any) {
       toast.error(err?.message || "Erro ao enviar arquivo. Tente novamente.");
     } finally {
