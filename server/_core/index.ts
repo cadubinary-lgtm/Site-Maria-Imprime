@@ -428,7 +428,8 @@ async function startServer() {
   // ============================================================
 
   // Endpoint de notificação pós-chunked-upload: atualiza banco com a URL final
-  app.post('/api/upload-art-notify', express.urlencoded({ extended: true }), async (req, res) => {
+  const notifyUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1024 } });
+  app.post('/api/upload-art-notify', notifyUpload.none(), async (req, res) => {
     try {
       const { orderItemId: orderItemIdStr, artUrl } = req.body ?? {};
       const orderItemId = orderItemIdStr ? Number(orderItemIdStr) : null;
