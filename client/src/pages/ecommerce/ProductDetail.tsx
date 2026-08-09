@@ -675,10 +675,10 @@ export default function ProductDetail() {
         forecastLabel,
         cepDestino: cepDestinoVal,
       });
-     toast.success("Adicionado ao carrinho!", {
-       action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
-     });
-      setLocation("/carrinho");
+    toast.success("Adicionado ao carrinho!", {
+      action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
+    });
+      openCart();
     } catch { toast.error("Erro ao adicionar ao carrinho"); }
     finally { setIsProcessing(false); }
   };
