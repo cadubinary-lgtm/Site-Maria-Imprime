@@ -799,13 +799,14 @@ function PreImpressaoColumn({
 // ─── Wrapper por item: carrega prévias independentes e renderiza Col 3 ─────────────────
 function ItemPreviewSection({
   orderId, orderItemId, preProductionStatus, onLightbox, orderStatus,
-  onExternalFileChange, onExternalNotesChange,
+  onExternalFileChange, onExternalNotesChange, externalFile,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   onLightbox: (url: string) => void;
   orderStatus?: string;
   onExternalFileChange?: (f: File | null) => void;
   onExternalNotesChange?: (n: string) => void;
+  externalFile?: File | null;
 }) {
   const utils = trpc.useUtils();
   const [pendingPreviewFile, setPendingPreviewFile] = useState<File | null>(null);
@@ -817,6 +818,14 @@ function ItemPreviewSection({
   useEffect(() => {
     setSelectedStatus(preProductionStatus);
   }, [preProductionStatus]);
+
+  // Quando o pai zerar o arquivo (após envio confirmado), limpar o state local
+  useEffect(() => {
+    if (externalFile === null || externalFile === undefined) {
+      setPendingPreviewFile(null);
+      setPendingPreviewNotes("");
+    }
+  }, [externalFile]);
 
   const { data: itemPreviews = [], isLoading: itemPreviewsLoading } =
     trpc.checkout.getArtPreviews.useQuery({ orderId, orderItemId });
@@ -1253,6 +1262,7 @@ export default function AdminOrderDetail() {
                           orderStatus={o.status}
                           onExternalFileChange={(f) => setPendingFile(item.id, f)}
                           onExternalNotesChange={(n) => setPendingNote(item.id, n)}
+                          externalFile={pendingFiles.get(item.id) ?? null}
                         />
                       </div>
 
