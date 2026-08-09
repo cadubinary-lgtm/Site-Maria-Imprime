@@ -1317,19 +1317,30 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
             const items: any[] = o.items ?? [];
             // Para pedidos de 1 item: o bloco não precisa aparecer (o botão "Produzir" já cuida disso)
             if (items.length <= 1) return null;
+
             const allApproved = items.length > 0 && items.every(
               (i: any) => i.preProductionStatus === "arte_final_aprovada"
             );
-            const hasPending = items.some(
-              (i: any) => i.correctionAction === "resend" || i.correctionAction === "proof" || i.preProductionStatus === "aguardando_aprovacao"
+
+            // Há ação de correção pendente (resend ou proof) em algum item
+            const hasCorrectionPending = items.some(
+              (i: any) => i.correctionAction === "resend" || i.correctionAction === "proof"
             );
             const hasRefused = items.some(
               (i: any) => i.preProductionStatus === "com_problemas" && i.clientRefusalNote
             );
+            const hasPending = items.some(
+              (i: any) => i.preProductionStatus === "aguardando_aprovacao"
+            );
+
+            // Regra: se todos aprovados → verde.
+            // Se há ação de correção pendente ou recusa → amarelo com motivo.
+            // Se nenhum dos dois → não exibe o bloco (operador ainda está analisando).
+            if (!allApproved && !hasCorrectionPending && !hasRefused && !hasPending) return null;
 
             let lockReason = "";
             if (!allApproved) {
-              if (hasPending) lockReason = "Aguardando resposta do cliente";
+              if (hasCorrectionPending || hasPending) lockReason = "Aguardando resposta do cliente";
               else if (hasRefused) lockReason = "Cliente recusou a arte — corrija e reenvie";
               else lockReason = "Todos os itens precisam ter a arte aprovada";
             }
