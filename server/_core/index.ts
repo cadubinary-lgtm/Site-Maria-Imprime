@@ -425,6 +425,54 @@ async function startServer() {
 
   // ============================================================
   // CHUNKED UPLOAD — recebe pedaços de 5MB e remonta no servidor
+  // ============================================================
+
+  // Endpoint de notificação pós-chunked-upload: atualiza banco com a URL final
+  app.post('/api/upload-art-notify', express.urlencoded({ extended: true }), async (req, res) => {
+    try {
+      const { orderItemId: orderItemIdStr, artUrl } = req.body ?? {};
+      const orderItemId = orderItemIdStr ? Number(orderItemIdStr) : null;
+      if (!orderItemId || isNaN(orderItemId) || !artUrl) {
+        return res.status(400).json({ error: 'orderItemId e artUrl são obrigatórios' });
+      }
+      const { getDb } = await import('../db.js');
+      const { orderItems, orderItemLogs } = await import('../../drizzle/schema.js');
+      const { eq } = await import('drizzle-orm');
+      const db = await getDb();
+      if (!db) return res.status(500).json({ error: 'DB indisponível' });
+      const itemRows = await db.select().from(orderItems).where(eq(orderItems.id, orderItemId)).limit(1);
+      const item = itemRows[0];
+      await db.update(orderItems).set({
+        artFileUrl: artUrl,
+        preProductionStatus: 'nova_arte_reenviada',
+        requireClientResend: false,
+        correctionAction: null,
+      } as any).where(eq(orderItems.id, orderItemId));
+      // Log
+      const orderId2 = (item as any)?.orderId;
+      if (orderId2) {
+        await db.insert(orderItemLogs).values({
+          orderItemId, orderId: orderId2,
+          action: 'O cliente reenviou uma nova arte',
+          operatorName: 'Sistema', createdAt: Date.now(),
+        } as any).catch(() => {});
+      }
+      // Notifica operador
+      const { notifyOwner } = await import('./notification.js');
+      const productName = (item as any)?.productName ?? `Item #${orderItemId}`;
+      await notifyOwner({
+        title: '📨 Nova Arte Reenviada pelo Cliente',
+        content: `O cliente reenviou a arte do produto "${productName}" (Item ID: ${orderItemId}, Pedido ID: ${orderId2}). Status atualizado para "Nova Arte Reenviada".`,
+      }).catch(() => {});
+      return res.json({ success: true });
+    } catch (err: any) {
+      console.error('[upload-art-notify] ERROR:', err?.message);
+      return res.status(500).json({ error: err?.message ?? 'Erro interno' });
+    }
+  });
+
+  // ============================================================
+  // CHUNKED UPLOAD — recebe pedaços de 5MB e remonta no servidor
   // Contorna o limite do gateway sem expor chaves no frontend
   // ============================================================
   const chunkUpload = multer({
