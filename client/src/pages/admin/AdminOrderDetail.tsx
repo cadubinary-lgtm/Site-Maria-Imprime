@@ -442,14 +442,16 @@ function ArtPreviewColumn({
 const PROOF_TERM = `Layout para aprovação! Favor conferir todas as informações contidas no layout. A aprovação do layout é de inteira responsabilidade do cliente a verificação de possíveis erros ortográficos ou de identidade. Cores dos produtos e materiais poderão sofrer variações de 15% para mais ou 15% para menos. Após confirmação, não nos responsabilizamos por erros. Obrigado pela compreensão!`;
 
 function PreImpressaoColumn({
-  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange, orderStatus,
+  orderId, orderItemId, preProductionStatus, pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded, onSelectedStatusChange, orderStatus, totalItems,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   pendingPreviewFile: File | null; pendingPreviewNotes: string;
   onPreviewUploaded: () => void;
   onSelectedStatusChange?: (s: string) => void;
   orderStatus?: string;
+  totalItems?: number;
 }) {
+  // totalItems: quando > 1, o botão Produzir apenas marca arte_final_aprovada sem mudar status global
   const isCommercialLocked = LOCKED_ORDER_STATUSES.includes(orderStatus ?? "");
   // Quando o pedido está bloqueado comercialmente, exibe sempre o status de espera
   const effectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
@@ -704,11 +706,25 @@ function PreImpressaoColumn({
             size="sm"
             className={`h-7 text-xs px-2.5 transition-colors ${arteFinalAprovada ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
             disabled={!arteFinalAprovada || productionMutation.isPending}
-            onClick={() => setShowProductionConfirm(true)}
+            onClick={() => {
+              // Multi-item: apenas confirma aprovação deste item; status global aguarda botão verde do rodapé
+              if ((totalItems ?? 1) > 1) {
+                toast.success("✅ Arte aprovada! Continue aprovando os demais itens.");
+                return;
+              }
+              // 1 item: abre modal de confirmação de produção normalmente
+              setShowProductionConfirm(true);
+            }}
           >
             {productionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "▶ Produzir"}
           </Button>
         </div>
+      )}
+      {/* Nota visual para pedidos multi-item: o botão Produzir marca apenas este item */}
+      {!isCommercialLocked && (totalItems ?? 1) > 1 && arteFinalAprovada && (
+        <p className="text-[10px] text-green-700 italic mt-1">
+          ✅ Item aprovado. Use o botão "Enviar para Produção" abaixo para liberar todos os itens.
+        </p>
       )}
 
       {/* Modal de confirmação de início de produção */}
@@ -861,11 +877,12 @@ function ItemPreviewSection({
 
 // ─── Wrapper por item: Pré-Impressão e Ação de Correção (Col 3) ─────────────────
 function ItemProductionSection({
-  orderId, orderItemId, preProductionStatus, orderStatus,
+  orderId, orderItemId, preProductionStatus, orderStatus, totalItems,
   pendingPreviewFile, pendingPreviewNotes, onPreviewUploaded,
 }: {
   orderId: number; orderItemId: number; preProductionStatus: string;
   orderStatus?: string;
+  totalItems?: number;
   pendingPreviewFile: File | null;
   pendingPreviewNotes: string;
   onPreviewUploaded: () => void;
@@ -887,6 +904,7 @@ function ItemProductionSection({
         onPreviewUploaded={onPreviewUploaded}
         onSelectedStatusChange={setSelectedStatus}
         orderStatus={orderStatus}
+        totalItems={totalItems}
       />
     </div>
   );
@@ -1271,6 +1289,7 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
                         orderItemId={item.id}
                         preProductionStatus={item.preProductionStatus || "liberado_analise"}
                         orderStatus={o.status}
+                        totalItems={(o.items ?? []).length}
                         pendingPreviewFile={pendingFiles.get(item.id) ?? null}
                         pendingPreviewNotes={pendingNotes.get(item.id) ?? ""}
                         onPreviewUploaded={() => { setPendingFile(item.id, null); setPendingNote(item.id, ""); }}
@@ -1290,9 +1309,13 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
             )}
           </div>
 
-          {/* ── Botão Enviar para Produção — rodapé da seção de itens ── */}
-          {o.status === "com_problemas" && (() => {
+         {/* ── Botão Enviar para Produção — rodapé da seção de itens ── */}
+          {(o.status === "com_problemas" || o.status === "analisando") && (() => {
+            // Bloco visível para pedidos em análise (analisando) ou com problemas (com_problemas).
+            // O status global SÓ muda para em_producao quando o operador clicar em "Enviar para Produção".
             const items: any[] = o.items ?? [];
+            // Para pedidos de 1 item: o bloco não precisa aparecer (o botão "Produzir" já cuida disso)
+            if (items.length <= 1) return null;
             const allApproved = items.length > 0 && items.every(
               (i: any) => i.preProductionStatus === "arte_final_aprovada"
             );
