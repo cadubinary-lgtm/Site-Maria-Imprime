@@ -1,4 +1,4 @@
-import { router } from "./_core/trpc";
+import { router, publicProcedure } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -539,6 +539,35 @@ export const quotationsRouter = router({
       await db.delete(quotations).where(eq(quotations.id, input.id));
 
       return { success: true };
+    }),
+
+  // ── Buscar opções de variações e atributos de um produto ──────────────
+  getProductOptions: adminAnyProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input }) => {
+      const { getVariationTypesByProduct, getVariationOptionsByType } = await import("./db.js");
+      const { getProductAttributes } = await import("./db-attributes.js");
+
+      // Variações (material, acabamento) - sistema variationTypes
+      const varTypes = await getVariationTypesByProduct(input.productId);
+      const variationsWithOptions = await Promise.all(
+        varTypes.map(async (vt) => ({
+          id: vt.id,
+          name: vt.name,
+          type: vt.type,
+          options: await getVariationOptionsByType(vt.id),
+        }))
+      );
+
+      // Atributos (impressão, etc.) - sistema productAttributes
+      const attrs = await getProductAttributes(input.productId);
+      const attributesWithValues = attrs.map((pa: any) => ({
+        attributeId: pa.attributeId,
+        name: pa.attribute?.name ?? "",
+        values: (pa.values ?? []).map((v: any) => ({ id: v.id, value: v.value })),
+      }));
+
+      return { variations: variationsWithOptions, attributes: attributesWithValues };
     }),
 
   // ── Buscar clientes para autocomplete ──────────────────────────────────
