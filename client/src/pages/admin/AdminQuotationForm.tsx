@@ -98,6 +98,11 @@ export default function AdminQuotationForm() {
   // Estado para opções dinâmicas por produto (productId -> { variations, attributes })
   const [productOptionsCache, setProductOptionsCache] = useState<Record<number, any>>({});
   const [activeProductIdForOptions, setActiveProductIdForOptions] = useState<number | null>(null);
+  // Cache de precificação por produto (productId -> { pricePerM2, calculationType, variations, attributes })
+  const [pricingCache, setPricingCache] = useState<Record<number, any>>({});
+  const [activePricingProductId, setActivePricingProductId] = useState<number | null>(null);
+  // Acerto Total (override do total calculado)
+  const [acertoTotal, setAcertoTotal] = useState<string>("");
 
   // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
   useEffect(() => {
@@ -179,6 +184,17 @@ export default function AdminQuotationForm() {
     }
   }, [activeProductOptions, activeProductIdForOptions]);
 
+  // ── Product pricing (pricePerM2, calculationType, modifiers) ──────────────
+  const { data: activePricingData } = trpc.quotations.getProductPricing.useQuery(
+    { productId: activePricingProductId! },
+    { enabled: !!activePricingProductId }
+  );
+  useEffect(() => {
+    if (activePricingProductId && activePricingData) {
+      setPricingCache(prev => ({ ...prev, [activePricingProductId]: activePricingData }));
+    }
+  }, [activePricingData, activePricingProductId]);
+
   // ── Client search ────────────────────────────────────────────────────────
   const { data: clientResults } = trpc.quotations.searchClients.useQuery(
     { search: clientSearch },
@@ -218,12 +234,62 @@ export default function AdminQuotationForm() {
     p.name.toLowerCase().includes(productSearch.toLowerCase())
   );
 
+  // ── Cálculo de preço por item baseado nas specs ──────────────────────────
+  const calcItemUnitPrice = (item: QuotationItem, pricing: any | null): number => {
+    if (!pricing) return item.unitPrice;
+    const specs = item._specsParsed ?? {};
+    const w = parseFloat(specs.width ?? specs.largura ?? "0") || 0;
+    const h = parseFloat(specs.height ?? specs.altura ?? "0") || 0;
+    const area = w * h;
+    const billedArea = area > 0 ? Math.max(area, 1) : 0;
+
+    if ((pricing.calculationType === "m2" || pricing.calculationType === "metro_linear") && pricing.pricePerM2 > 0) {
+      const baseArea = pricing.calculationType === "metro_linear" ? (w > 0 ? w : 1) : billedArea;
+      if (baseArea <= 0) return 0;
+      let price = pricing.pricePerM2 * baseArea;
+
+      // Modificadores de variações
+      (pricing.variations ?? []).forEach((vt: any) => {
+        const selectedName = specs[vt.name.toLowerCase().replace(/\s+/g, "_")];
+        if (!selectedName) return;
+        const opt = (vt.options ?? []).find((o: any) => o.name === selectedName);
+        if (!opt) return;
+        const mod = parseFloat(opt.priceModifier?.toString() ?? "0");
+        if (opt.calculationType === "m2") price += mod * baseArea;
+        else price += mod;
+      });
+
+      // Modificadores de atributos
+      (pricing.attributes ?? []).forEach((attr: any) => {
+        const selectedValue = specs[attr.name.toLowerCase().replace(/\s+/g, "_")];
+        if (!selectedValue) return;
+        const v = (attr.values ?? []).find((val: any) => val.value === selectedValue);
+        if (!v) return;
+        price += parseFloat(v.priceModifier?.toString() ?? "0");
+      });
+
+      return Math.max(0, price);
+    }
+
+    // Produto por unidade/pacote: usa preço base + modifiers fixos
+    let price = pricing.price ?? 0;
+    (pricing.variations ?? []).forEach((vt: any) => {
+      const selectedName = specs[vt.name.toLowerCase().replace(/\s+/g, "_")];
+      if (!selectedName) return;
+      const opt = (vt.options ?? []).find((o: any) => o.name === selectedName);
+      if (opt) price += parseFloat(opt.priceModifier?.toString() ?? "0");
+    });
+    return Math.max(0, price);
+  };
+
   // ── Calculations ─────────────────────────────────────────────────────────
   const subtotal = items.reduce((acc, i) => acc + i.totalPrice, 0);
   const discountAmount = discountType === "percentual"
     ? Math.round((subtotal * discountValue) / 100 * 100) / 100
     : Math.min(discountValue, subtotal);
-  const total = Math.max(0, subtotal - discountAmount + shippingPrice);
+  const calculatedTotal = Math.max(0, subtotal - discountAmount + shippingPrice);
+  const acertoValue = parseFloat(acertoTotal.replace(",", ".")) || 0;
+  const total = acertoValue > 0 ? acertoValue : calculatedTotal;
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const createMutation = trpc.quotations.create.useMutation({
@@ -296,9 +362,12 @@ export default function AdminQuotationForm() {
     setExpandedItems((prev) => { const s = new Set(prev); s.add(items.length); return s; });
     setShowAddProduct(false);
     setProductSearch("");
-    // Carregar opções do produto
+    // Carregar opções e pricing do produto
     if (!productOptionsCache[product.id]) {
       setActiveProductIdForOptions(product.id);
+    }
+    if (!pricingCache[product.id]) {
+      setActivePricingProductId(product.id);
     }
   };
 
@@ -312,9 +381,20 @@ export default function AdminQuotationForm() {
         const u = updates.unitPrice ?? next[idx].unitPrice;
         next[idx].totalPrice = q * u;
       }
+      // Se specs mudaram, recalcular preço automaticamente
+      if (updates.specifications !== undefined || updates._specsParsed !== undefined) {
+        const pricing = pricingCache[next[idx].productId];
+        if (pricing) {
+          const newUnitPrice = calcItemUnitPrice(next[idx], pricing);
+          if (newUnitPrice > 0) {
+            next[idx].unitPrice = newUnitPrice;
+            next[idx].totalPrice = newUnitPrice * next[idx].quantity;
+          }
+        }
+      }
       return next;
     });
-  }, []);
+  }, [pricingCache]);
 
   const removeItem = (idx: number) => {
     setItems((prev) => prev.filter((_, i) => i !== idx));
@@ -326,10 +406,13 @@ export default function AdminQuotationForm() {
       if (next.has(idx)) next.delete(idx); else next.add(idx);
       return next;
     });
-    // Carregar opções do produto ao expandir
+    // Carregar opções e pricing do produto ao expandir
     const item = items[idx];
     if (item && !productOptionsCache[item.productId]) {
       setActiveProductIdForOptions(item.productId);
+    }
+    if (item && !pricingCache[item.productId]) {
+      setActivePricingProductId(item.productId);
     }
   };
 
@@ -873,6 +956,30 @@ export default function AdminQuotationForm() {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Frete</span>
                 <span className="font-medium">{fmt(shippingPrice)}</span>
+              </div>
+
+              {/* Acerto Total (override comercial) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-gray-500 font-medium">Acerto Total</label>
+                  {acertoValue > 0 && (
+                    <button className="text-xs text-gray-400 hover:text-red-500 underline" onClick={() => setAcertoTotal("")}>
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={acertoTotal}
+                  onChange={(e) => setAcertoTotal(e.target.value)}
+                  className="h-8 text-sm"
+                  placeholder={`Calculado: ${fmt(calculatedTotal)}`}
+                />
+                {acertoValue > 0 && (
+                  <p className="text-xs text-amber-600 mt-0.5">⚠ Valor manual sobrepõe o cálculo automático</p>
+                )}
               </div>
 
               <div className="border-t border-gray-100 pt-3">
