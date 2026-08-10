@@ -1544,3 +1544,97 @@ export const orderItemLogs = mysqlTable("orderItemLogs", {
 
 export type OrderItemLog = typeof orderItemLogs.$inferSelect;
 export type InsertOrderItemLog = typeof orderItemLogs.$inferInsert;
+
+
+/**
+ * Quotations (Orçamentos) - Tabela principal de orçamentos
+ */
+export const quotations = mysqlTable("quotations", {
+  id: int("id").autoincrement().primaryKey(),
+  quotationNumber: varchar("quotationNumber", { length: 50 }).notNull().unique(),
+  clientId: int("clientId").notNull(),
+  operatorId: int("operatorId").notNull(), // Usuário que criou o orçamento
+  status: mysqlEnum("status", ["rascunho", "enviado", "em_negociacao", "aprovado", "recusado", "expirado", "cancelado"]).notNull().default("rascunho"),
+  
+  // Snapshot financeiro (imutável)
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  discountType: mysqlEnum("discountType", ["percentual", "fixo"]).default("fixo"),
+  discountValue: decimal("discountValue", { precision: 10, scale: 2 }).default("0"),
+  discountAmount: decimal("discountAmount", { precision: 10, scale: 2 }).default("0"), // Valor final do desconto aplicado
+  shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).default("0"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  
+  // Entrega
+  shippingMethod: varchar("shippingMethod", { length: 50 }), // pickup, delivery, carrier_X
+  shippingLabel: varchar("shippingLabel", { length: 255 }), // Nome exibível
+  shippingEstimatedDays: int("shippingEstimatedDays").default(0),
+  deliveryAddress: longtext("deliveryAddress"), // JSON com endereço completo
+  
+  // Condições comerciais
+  paymentMethod: varchar("paymentMethod", { length: 50 }), // pix, dinheiro, cartao, boleto
+  productionDeadline: int("productionDeadline").default(0), // Dias de produção
+  quotationValidity: int("quotationValidity").default(30), // Dias de validade
+  commercialNotes: longtext("commercialNotes"), // Observações comerciais
+  
+  // Snapshot JSON (preserva todas as configurações)
+  itemsSnapshot: longtext("itemsSnapshot").notNull(), // JSON com array de itens
+  
+  // Conversão
+  convertedOrderId: int("convertedOrderId"), // ID do pedido gerado
+  convertedProductionJobId: int("convertedProductionJobId"), // ID da OS gerada
+  
+  // Datas
+  sentAt: timestamp("sentAt"), // Data de envio ao cliente
+  approvedAt: timestamp("approvedAt"), // Data de aprovação
+  expiresAt: timestamp("expiresAt"), // Data de expiração
+  canceledAt: timestamp("canceledAt"), // Data de cancelamento
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Quotation = typeof quotations.$inferSelect;
+export type InsertQuotation = typeof quotations.$inferInsert;
+
+/**
+ * Quotation Items - Itens dentro de cada orçamento (snapshot imutável)
+ */
+export const quotationItems = mysqlTable("quotationItems", {
+  id: int("id").autoincrement().primaryKey(),
+  quotationId: int("quotationId").notNull(),
+  
+  // Snapshot do produto
+  productId: int("productId").notNull(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  productImage: varchar("productImage", { length: 255 }), // URL da imagem
+  
+  // Configurações (snapshot JSON)
+  specifications: longtext("specifications").notNull(), // JSON com medidas, acabamentos, etc
+  artFileUrl: text("artFileUrl"), // URL do arquivo de arte
+  artFileKey: varchar("artFileKey", { length: 255 }), // Chave S3
+  
+  // Preço e quantidade (snapshot)
+  quantity: int("quantity").notNull(),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type QuotationItem = typeof quotationItems.$inferSelect;
+export type InsertQuotationItem = typeof quotationItems.$inferInsert;
+
+/**
+ * Quotation History - Histórico de mudanças de status
+ */
+export const quotationHistory = mysqlTable("quotationHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  quotationId: int("quotationId").notNull(),
+  previousStatus: varchar("previousStatus", { length: 50 }),
+  newStatus: varchar("newStatus", { length: 50 }).notNull(),
+  operatorId: int("operatorId").notNull(),
+  notes: longtext("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type QuotationHistory = typeof quotationHistory.$inferSelect;
+export type InsertQuotationHistory = typeof quotationHistory.$inferInsert;

@@ -1,0 +1,732 @@
+import { useState, useEffect, useCallback } from "react";
+import { useLocation, useParams } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Search,
+  User,
+  Package,
+  Truck,
+  CreditCard,
+  Save,
+  Send,
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
+} from "lucide-react";
+import { toast } from "sonner";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface QuotationItem {
+  productId: number;
+  productName: string;
+  productImage?: string;
+  specifications: string; // JSON string
+  artFileUrl?: string;
+  artFileKey?: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  // UI only
+  _specsParsed?: Record<string, string>;
+}
+
+function fmt(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+export default function AdminQuotationForm() {
+  const [, navigate] = useLocation();
+  const params = useParams<{ id?: string }>();
+  const isEdit = !!params.id;
+  const quotationId = params.id ? parseInt(params.id) : undefined;
+
+  // ── Form state ──────────────────────────────────────────────────────────
+  const [clientId, setClientId] = useState<number | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientSearch, setShowClientSearch] = useState(false);
+
+  const [items, setItems] = useState<QuotationItem[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+
+  const [discountType, setDiscountType] = useState<"percentual" | "fixo">("fixo");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [shippingPrice, setShippingPrice] = useState(0);
+  const [shippingMethod, setShippingMethod] = useState("pickup");
+  const [shippingLabel, setShippingLabel] = useState("Retirada na loja");
+  const [shippingEstimatedDays, setShippingEstimatedDays] = useState(0);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+
+  const [paymentMethod, setPaymentMethod] = useState("pix");
+  const [productionDeadline, setProductionDeadline] = useState(3);
+  const [quotationValidity, setQuotationValidity] = useState(30);
+  const [commercialNotes, setCommercialNotes] = useState("");
+
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+
+  // ── Load existing quotation for edit ────────────────────────────────────
+  const { data: existingQuotation } = trpc.quotations.getById.useQuery(
+    { id: quotationId! },
+    { enabled: isEdit && !!quotationId }
+  );
+
+  useEffect(() => {
+    if (!existingQuotation) return;
+    const q = existingQuotation;
+    setClientId(q.clientId);
+    setClientName(q.clientName ?? "");
+    setDiscountType((q.discountType as any) ?? "fixo");
+    setDiscountValue(Number(q.discountValue ?? 0));
+    setShippingPrice(Number(q.shippingPrice ?? 0));
+    setShippingMethod(q.shippingMethod ?? "pickup");
+    setShippingLabel(q.shippingLabel ?? "Retirada na loja");
+    setShippingEstimatedDays(q.shippingEstimatedDays ?? 0);
+    setDeliveryAddress(q.deliveryAddress ?? "");
+    setPaymentMethod(q.paymentMethod ?? "pix");
+    setProductionDeadline(q.productionDeadline ?? 3);
+    setQuotationValidity(q.quotationValidity ?? 30);
+    setCommercialNotes(q.commercialNotes ?? "");
+    setItems(q.items.map((i: any) => ({
+      productId: i.productId,
+      productName: i.productName,
+      productImage: i.productImage,
+      specifications: i.specifications,
+      artFileUrl: i.artFileUrl,
+      quantity: i.quantity,
+      unitPrice: Number(i.unitPrice),
+      totalPrice: Number(i.totalPrice),
+      _specsParsed: (() => { try { return JSON.parse(i.specifications); } catch { return {}; } })(),
+    })));
+  }, [existingQuotation]);
+
+  // ── Client search ────────────────────────────────────────────────────────
+  const { data: clientResults } = trpc.quotations.searchClients.useQuery(
+    { search: clientSearch },
+    { enabled: clientSearch.length >= 2 }
+  );
+
+  // ── Products ─────────────────────────────────────────────────────────────
+  const { data: allProducts } = trpc.products.getAll.useQuery();
+  const filteredProducts = (allProducts ?? []).filter((p: any) =>
+    p.name.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
+  // ── Calculations ─────────────────────────────────────────────────────────
+  const subtotal = items.reduce((acc, i) => acc + i.totalPrice, 0);
+  const discountAmount = discountType === "percentual"
+    ? Math.round((subtotal * discountValue) / 100 * 100) / 100
+    : Math.min(discountValue, subtotal);
+  const total = Math.max(0, subtotal - discountAmount + shippingPrice);
+
+  // ── Mutations ─────────────────────────────────────────────────────────────
+  const createMutation = trpc.quotations.create.useMutation({
+    onSuccess: (res) => {
+      toast.success(`Orçamento ${res.quotationNumber} criado!`);
+      navigate("/admin/orcamentos");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const updateMutation = trpc.quotations.update.useMutation({
+    onSuccess: () => {
+      toast.success("Orçamento atualizado!");
+      navigate("/admin/orcamentos");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const buildPayload = (saveAsDraft: boolean) => ({
+    clientId: clientId!,
+    items: items.map((i) => ({
+      productId: i.productId,
+      productName: i.productName,
+      productImage: i.productImage,
+      specifications: i.specifications,
+      artFileUrl: i.artFileUrl,
+      artFileKey: i.artFileKey,
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
+      totalPrice: i.totalPrice,
+    })),
+    discountType,
+    discountValue,
+    shippingPrice,
+    shippingMethod,
+    shippingLabel,
+    shippingEstimatedDays,
+    deliveryAddress,
+    paymentMethod,
+    productionDeadline,
+    quotationValidity,
+    commercialNotes,
+    saveAsDraft,
+  });
+
+  const handleSave = (saveAsDraft: boolean) => {
+    if (!clientId) { toast.error("Selecione um cliente."); return; }
+    if (items.length === 0) { toast.error("Adicione pelo menos um produto."); return; }
+
+    if (isEdit && quotationId) {
+      updateMutation.mutate({ id: quotationId, ...buildPayload(saveAsDraft) });
+    } else {
+      createMutation.mutate(buildPayload(saveAsDraft));
+    }
+  };
+
+  const addProductToQuote = (product: any) => {
+    const newItem: QuotationItem = {
+      productId: product.id,
+      productName: product.name,
+      productImage: product.imageUrl ?? product.image,
+      specifications: JSON.stringify({ material: "", finish: "", printingType: "" }),
+      quantity: 1,
+      unitPrice: Number(product.basePrice ?? 0),
+      totalPrice: Number(product.basePrice ?? 0),
+      _specsParsed: {},
+    };
+    setItems((prev) => [...prev, newItem]);
+    setExpandedItems((prev) => { const s = new Set(prev); s.add(items.length); return s; });
+    setShowAddProduct(false);
+    setProductSearch("");
+  };
+
+  const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
+    setItems((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...updates };
+      // Recalculate total
+      if (updates.quantity !== undefined || updates.unitPrice !== undefined) {
+        const q = updates.quantity ?? next[idx].quantity;
+        const u = updates.unitPrice ?? next[idx].unitPrice;
+        next[idx].totalPrice = q * u;
+      }
+      return next;
+    });
+  }, []);
+
+  const removeItem = (idx: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const toggleItem = (idx: number) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/admin/orcamentos")} className="gap-1">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </Button>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">
+            {isEdit ? `Editar Orçamento #${existingQuotation?.quotationNumber ?? "..."}` : "Novo Orçamento"}
+          </h1>
+          <p className="text-sm text-gray-500">Preencha os dados abaixo para gerar a proposta comercial</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Coluna principal */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Seção: Cliente */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <User className="w-4 h-4 text-pink-600" />
+              <h2 className="font-semibold text-gray-800">Cliente</h2>
+            </div>
+            <div className="relative">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar cliente por nome, e-mail ou telefone..."
+                    className="pl-9"
+                    value={clientId ? clientName : clientSearch}
+                    onChange={(e) => {
+                      if (clientId) { setClientId(null); setClientName(""); }
+                      setClientSearch(e.target.value);
+                      setShowClientSearch(true);
+                    }}
+                    onFocus={() => setShowClientSearch(true)}
+                  />
+                </div>
+              </div>
+              {showClientSearch && clientSearch.length >= 2 && (clientResults ?? []).length > 0 && (
+                <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {(clientResults ?? []).map((c: any) => (
+                    <button
+                      key={c.id}
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0"
+                      onClick={() => {
+                        setClientId(c.id);
+                        setClientName(c.name);
+                        setClientSearch("");
+                        setShowClientSearch(false);
+                      }}
+                    >
+                      <p className="font-medium text-sm text-gray-800">{c.name}</p>
+                      <p className="text-xs text-gray-400">{c.email ?? c.phone ?? ""}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {clientId && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-1.5 rounded">
+                <User className="w-3.5 h-3.5" />
+                <span className="font-medium">{clientName}</span>
+                <button className="ml-auto text-gray-400 hover:text-red-500 text-xs" onClick={() => { setClientId(null); setClientName(""); }}>
+                  Trocar
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Seção: Produtos */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-pink-600" />
+                <h2 className="font-semibold text-gray-800">Produtos / Serviços</h2>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1 border-pink-200 text-pink-700 hover:bg-pink-50"
+                onClick={() => setShowAddProduct(true)}
+              >
+                <Plus className="w-3.5 h-3.5" /> Adicionar Produto
+              </Button>
+            </div>
+
+            {items.length === 0 ? (
+              <div className="py-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                <Package className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">Nenhum produto adicionado</p>
+                <p className="text-xs mt-1">Clique em "Adicionar Produto" para começar</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {/* Cabeçalho da tabela */}
+                <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                  <div className="col-span-1">Img</div>
+                  <div className="col-span-4">Produto / Especificações</div>
+                  <div className="col-span-2 text-center">Qtd</div>
+                  <div className="col-span-2 text-right">Unit.</div>
+                  <div className="col-span-2 text-right">Total</div>
+                  <div className="col-span-1"></div>
+                </div>
+                {items.map((item, idx) => {
+                  const isExpanded = expandedItems.has(idx);
+                  const specs = item._specsParsed ?? {};
+                  return (
+                    <div key={idx} className="border border-gray-100 rounded-lg overflow-hidden">
+                      {/* Linha principal */}
+                      <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 bg-gray-50">
+                        <div className="col-span-1">
+                          {item.productImage ? (
+                            <img
+                              src={item.productImage}
+                              alt={item.productName}
+                              className="w-8 h-8 object-contain rounded cursor-pointer"
+                              onClick={() => setLightboxImg(item.productImage!)}
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                              <ImageIcon className="w-4 h-4 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="col-span-4">
+                          <button
+                            className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
+                            onClick={() => toggleItem(idx)}
+                          >
+                            {item.productName}
+                            {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          </button>
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={item.quantity}
+                            onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })}
+                            className="w-16 h-7 text-center text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(idx, { unitPrice: parseFloat(e.target.value) || 0 })}
+                            className="w-full h-7 text-right text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
+                          {fmt(item.totalPrice)}
+                        </div>
+                        <div className="col-span-1 flex justify-end">
+                          <button onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      {/* Especificações expandidas */}
+                      {isExpanded && (
+                        <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
+                          {[
+                            { key: "width", label: "Largura (m)" },
+                            { key: "height", label: "Altura (m)" },
+                            { key: "printingType", label: "Impressão" },
+                            { key: "material", label: "Material" },
+                            { key: "finish", label: "Acabamento" },
+                          ].map(({ key, label }) => (
+                            <div key={key}>
+                              <label className="text-xs text-gray-500 font-medium">{label}</label>
+                              <Input
+                                className="h-7 mt-0.5 text-sm"
+                                value={specs[key] ?? ""}
+                                onChange={(e) => {
+                                  const newSpecs = { ...specs, [key]: e.target.value };
+                                  updateItem(idx, {
+                                    specifications: JSON.stringify(newSpecs),
+                                    _specsParsed: newSpecs,
+                                  });
+                                }}
+                              />
+                            </div>
+                          ))}
+                          <div className="col-span-2">
+                            <label className="text-xs text-gray-500 font-medium">URL da Arte</label>
+                            <Input
+                              className="h-7 mt-0.5 text-sm"
+                              placeholder="https://..."
+                              value={item.artFileUrl ?? ""}
+                              onChange={(e) => updateItem(idx, { artFileUrl: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Seção: Entrega */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Truck className="w-4 h-4 text-pink-600" />
+              <h2 className="font-semibold text-gray-800">Entrega</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Método</label>
+                <Select value={shippingMethod} onValueChange={(v) => {
+                  setShippingMethod(v);
+                  if (v === "pickup") { setShippingLabel("Retirada na loja"); setShippingPrice(0); }
+                  else if (v === "delivery") setShippingLabel("Entrega local");
+                  else if (v === "carrier") setShippingLabel("Transportadora");
+                  else if (v === "melhor_envio") setShippingLabel("Melhor Envio");
+                }}>
+                  <SelectTrigger className="mt-0.5 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pickup">Retirada na loja</SelectItem>
+                    <SelectItem value="delivery">Entrega local</SelectItem>
+                    <SelectItem value="carrier">Transportadora</SelectItem>
+                    <SelectItem value="melhor_envio">Melhor Envio</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Valor do frete (R$)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={shippingPrice}
+                  onChange={(e) => setShippingPrice(parseFloat(e.target.value) || 0)}
+                  className="mt-0.5 h-9"
+                  disabled={shippingMethod === "pickup"}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Prazo estimado (dias)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={shippingEstimatedDays}
+                  onChange={(e) => setShippingEstimatedDays(parseInt(e.target.value) || 0)}
+                  className="mt-0.5 h-9"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Descrição do frete</label>
+                <Input
+                  value={shippingLabel}
+                  onChange={(e) => setShippingLabel(e.target.value)}
+                  className="mt-0.5 h-9"
+                />
+              </div>
+              {shippingMethod !== "pickup" && (
+                <div className="col-span-2">
+                  <label className="text-xs text-gray-500 font-medium">Endereço de entrega</label>
+                  <Textarea
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    className="mt-0.5 text-sm"
+                    rows={2}
+                    placeholder="Rua, número, bairro, cidade, CEP..."
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Seção: Condições */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <CreditCard className="w-4 h-4 text-pink-600" />
+              <h2 className="font-semibold text-gray-800">Condições do Orçamento</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Forma de pagamento</label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger className="mt-0.5 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                    <SelectItem value="boleto">Boleto</SelectItem>
+                    <SelectItem value="transferencia">Transferência</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Prazo de produção (dias)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={productionDeadline}
+                  onChange={(e) => setProductionDeadline(parseInt(e.target.value) || 0)}
+                  className="mt-0.5 h-9"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-medium">Validade do orçamento (dias)</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={quotationValidity}
+                  onChange={(e) => setQuotationValidity(parseInt(e.target.value) || 30)}
+                  className="mt-0.5 h-9"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-gray-500 font-medium">Observações comerciais</label>
+                <Textarea
+                  value={commercialNotes}
+                  onChange={(e) => setCommercialNotes(e.target.value)}
+                  className="mt-0.5 text-sm"
+                  rows={3}
+                  placeholder="Condições especiais, prazo de pagamento, informações adicionais..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Coluna lateral: Resumo financeiro */}
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-4">
+            <h2 className="font-semibold text-gray-800 mb-4">Resumo Financeiro</h2>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Subtotal</span>
+                <span className="font-medium">{fmt(subtotal)}</span>
+              </div>
+
+              {/* Desconto */}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-500">Desconto</span>
+                  {discountAmount > 0 && <span className="text-green-600 font-medium">- {fmt(discountAmount)}</span>}
+                </div>
+                <div className="flex gap-2">
+                  <Select value={discountType} onValueChange={(v) => setDiscountType(v as any)}>
+                    <SelectTrigger className="h-8 w-28 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixo">R$ fixo</SelectItem>
+                      <SelectItem value="percentual">% percentual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                    className="h-8 text-sm flex-1"
+                    placeholder={discountType === "percentual" ? "%" : "R$"}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Frete</span>
+                <span className="font-medium">{fmt(shippingPrice)}</span>
+              </div>
+
+              <div className="border-t border-gray-100 pt-3">
+                <div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3">
+                  <span className="font-semibold">TOTAL</span>
+                  <span className="text-xl font-bold">{fmt(total)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ações */}
+            <div className="space-y-2">
+              <Button
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white gap-2"
+                onClick={() => handleSave(false)}
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                <Send className="w-4 h-4" />
+                {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar e Enviar"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => handleSave(true)}
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                <Save className="w-4 h-4" />
+                Salvar como Rascunho
+              </Button>
+            </div>
+
+            {/* Resumo das condições */}
+            {(productionDeadline > 0 || quotationValidity > 0) && (
+              <div className="mt-4 pt-4 border-t border-gray-100 space-y-1.5 text-xs text-gray-500">
+                {productionDeadline > 0 && (
+                  <div className="flex justify-between">
+                    <span>Prazo de produção</span>
+                    <span className="font-medium text-gray-700">{productionDeadline} dias</span>
+                  </div>
+                )}
+                {quotationValidity > 0 && (
+                  <div className="flex justify-between">
+                    <span>Validade do orçamento</span>
+                    <span className="font-medium text-gray-700">{quotationValidity} dias</span>
+                  </div>
+                )}
+                {paymentMethod && (
+                  <div className="flex justify-between">
+                    <span>Pagamento</span>
+                    <span className="font-medium text-gray-700 capitalize">{paymentMethod.replace(/_/g, " ")}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal: Adicionar produto */}
+      <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Adicionar Produto ao Orçamento</DialogTitle>
+          </DialogHeader>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="Buscar produto..."
+              className="pl-9"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="max-h-72 overflow-y-auto space-y-1">
+            {filteredProducts.length === 0 ? (
+              <p className="text-center text-gray-400 py-6 text-sm">Nenhum produto encontrado</p>
+            ) : filteredProducts.map((p: any) => (
+              <button
+                key={p.id}
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 text-left"
+                onClick={() => addProductToQuote(p)}
+              >
+                {p.imageUrl || p.image ? (
+                  <img src={p.imageUrl ?? p.image} alt={p.name} className="w-10 h-10 object-contain rounded border border-gray-100" />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Package className="w-5 h-5 text-gray-400" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-sm text-gray-800">{p.name}</p>
+                  {p.basePrice && <p className="text-xs text-gray-400">{fmt(Number(p.basePrice))}</p>}
+                </div>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center cursor-pointer"
+          onClick={() => setLightboxImg(null)}
+        >
+          <img src={lightboxImg} alt="Arte" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+        </div>
+      )}
+    </div>
+  );
+}
