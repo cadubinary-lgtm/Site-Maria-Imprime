@@ -551,11 +551,11 @@ export function ProductVariationManager() {
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
-      {/* Layout Kanban: 4 colunas */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 flex-1 min-h-0">
+     {/* Layout Kanban: 4 colunas */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-1 min-h-0">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <div className="flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="xl:col-span-2 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Segmentos</p>
           </div>
@@ -583,7 +583,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
-        <div className="flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="xl:col-span-2 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Produtos</p>
           </div>
@@ -624,7 +624,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
-        <div className="flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="xl:col-span-4 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               Variações do Produto
@@ -678,7 +678,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
-        <div className="flex flex-col border-2 border-purple-200 rounded-lg bg-purple-50 overflow-hidden">
+        <div className="xl:col-span-4 flex flex-col border-2 border-purple-200 rounded-lg bg-purple-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">📚 Tipos no Sistema</p>
             {selectedProductId && (
