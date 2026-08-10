@@ -416,13 +416,14 @@ export default function AdminQuotationForm() {
                             <p className="font-medium text-sm text-gray-800">{c.name}</p>
                             <p className="text-xs text-gray-400">{c.email ?? c.phone ?? ""}</p>
                           </div>
-                          {c.clientType && (
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              c.clientType === "site" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
-                            }`}>
-                              {c.clientType === "site" ? "Site" : c.clientType === "balcao" ? "Balcão" : c.clientType}
-                            </span>
-                          )}
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            c.source === "customer_accounts" ? "bg-blue-100 text-blue-700"
+                            : c.source === "users" ? "bg-purple-100 text-purple-700"
+                            : c.clientType === "site" ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {c.source === "customer_accounts" ? "Loja" : c.source === "users" ? "Manus" : c.clientType === "site" ? "Site" : c.clientType === "balcao" ? "Balcão" : c.clientType ?? "CRM"}
+                          </span>
                         </div>
                       </button>
                     ))}

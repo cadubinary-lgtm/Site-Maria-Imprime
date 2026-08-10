@@ -612,20 +612,86 @@ export const quotationsRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-      const { clients } = await import("../drizzle/schema.js");
+      const { clients, customerAccounts, users } = await import("../drizzle/schema.js");
+      const s = `%${input.search}%`;
 
-      const rows = await db
-        .select({ id: clients.id, name: clients.name, email: clients.email, phone: clients.phone, whatsapp: clients.whatsapp })
+      // 1. Buscar na tabela clients (CRM)
+      const crmRows = await db
+        .select({
+          id: clients.id,
+          name: clients.name,
+          email: clients.email,
+          phone: clients.phone,
+          whatsapp: clients.whatsapp,
+          clientType: clients.clientType,
+          source: sql<string>`'crm'`,
+        })
         .from(clients)
+        .where(or(like(clients.name, s), like(clients.email, s), like(clients.phone, s)))
+        .limit(8);
+
+      // 2. Buscar na tabela customer_accounts (clientes da loja)
+      const caRows = await db
+        .select({
+          id: customerAccounts.id,
+          name: sql<string>`CONCAT(${customerAccounts.firstName}, ' ', ${customerAccounts.lastName})`,
+          email: customerAccounts.email,
+          phone: customerAccounts.phone,
+          whatsapp: sql<string | null>`NULL`,
+          clientType: sql<string>`'site'`,
+          source: sql<string>`'customer_accounts'`,
+        })
+        .from(customerAccounts)
         .where(
           or(
-            like(clients.name, `%${input.search}%`),
-            like(clients.email, `%${input.search}%`),
-            like(clients.phone, `%${input.search}%`),
+            like(sql`CONCAT(${customerAccounts.firstName}, ' ', ${customerAccounts.lastName})`, s),
+            like(customerAccounts.email, s),
+            like(customerAccounts.phone, s),
           )
         )
-        .limit(10);
+        .limit(8);
 
-      return rows;
+      // 3. Buscar na tabela users (usuários Manus OAuth com role=user)
+      const userRows = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phone: sql<string | null>`NULL`,
+          whatsapp: sql<string | null>`NULL`,
+          clientType: sql<string>`'site'`,
+          source: sql<string>`'users'`,
+        })
+        .from(users)
+        .where(
+          and(
+            or(like(users.name, s), like(users.email, s)),
+            sql`${users.role} = 'user'`
+          )
+        )
+        .limit(5);
+
+      // Combinar e deduplicar por email
+      const seen = new Set<string>();
+      const combined: Array<{
+        id: number;
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+        whatsapp: string | null;
+        clientType: string;
+        source: string;
+      }> = [];
+
+      for (const row of [...crmRows, ...caRows, ...userRows]) {
+        const key = row.email ?? `${row.source}-${row.id}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          combined.push(row as any);
+        }
+        if (combined.length >= 10) break;
+      }
+
+      return combined;
     }),
 });
