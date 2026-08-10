@@ -575,7 +575,7 @@ export function ProductVariationManager() {
   const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => a.order - b.order);
 
   // Estado para ordem das colunas
-  const [columnOrder, setColumnOrder] = useState(['segmentos', 'produtos', 'variacoes', 'tipos']);
+  const [columnOrder, setColumnOrder] = useState(['segmentos', 'produtos', 'variacoes', 'tipos', 'tipos2']);
   const handleColumnDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -733,14 +733,14 @@ export function ProductVariationManager() {
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
         <SortableColumn id="tipos">{(dragHandle) => (
-        <div className="flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <div className="flex items-center">
-              <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex-1">📚 Tipos no Sistema</p>
+              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex-1">🔧 Variações Comunicação Visual</p>
               {dragHandle}
             </div>
             {selectedProductId && (
-              <p className="text-xs text-purple-600 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
+              <p className="text-xs text-gray-500 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
             )}
           </div>
           <div className="p-3 space-y-4">
@@ -775,7 +775,7 @@ export function ProductVariationManager() {
                 </div>
                 <Button
                   onClick={handleAddGlobalVariationType}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm"
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-sm"
                   disabled={createVariationTypeMutation.isPending}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -795,11 +795,11 @@ export function ProductVariationManager() {
                     <div key={vt.id} className="border rounded-lg bg-white overflow-hidden">
                      <div
                         onClick={() => editingNameId === vt.id ? undefined : setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
-                        className={`p-4 hover:bg-purple-50 transition ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
+                        className={`p-4 hover:bg-gray-50 transition ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
                       >
                         {/* Linha 1: seta + nome */}
                         <div className="flex items-center gap-2">
-                          <div className={`transform transition-transform text-purple-700 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
+                          <div className={`transform transition-transform text-gray-500 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
                           {editingNameId === vt.id ? (
                             <div className="flex items-center gap-2 flex-1" onClick={(e) => e.stopPropagation()}>
                               <Input
@@ -810,17 +810,17 @@ export function ProductVariationManager() {
                                   if (e.key === 'Enter') handleEditName();
                                   if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
                                 }}
-                                className="font-semibold text-purple-900 h-8 text-sm"
+                                className="font-semibold text-gray-800 h-8 text-sm"
                               />
                               <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>Salvar</Button>
                               <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8"><X className="w-3 h-3" /></Button>
                             </div>
                           ) : (
-                            <h4 className="font-semibold text-purple-900 text-sm flex-1">{vt.name}</h4>
+                            <h4 className="font-semibold text-gray-800 text-sm flex-1">{vt.name}</h4>
                           )}
                         </div>
                         {/* Linha 2: info + ações */}
-                        <div className="mt-2 pt-2 border-t border-purple-100 space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="mt-2 pt-2 border-t border-gray-100 space-y-2" onClick={(e) => e.stopPropagation()}>
                           <p className="text-xs text-gray-500">{vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções</p>
                           <div className="flex flex-wrap gap-1">
                             {editingNameId !== vt.id && (
@@ -840,7 +840,7 @@ export function ProductVariationManager() {
                             <Button variant="ghost" size="sm" onClick={() => handleDeleteVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
                           </div>
                           {selectedProductId && (
-                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
+                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
                               <Plus className="w-3 h-3 mr-1" />Adicionar ao Produto
                             </Button>
                           )}
@@ -1044,6 +1044,127 @@ export function ProductVariationManager() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+        )}</SortableColumn>
+
+        <SortableColumn id="tipos2">{(dragHandle) => (
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200 bg-white">
+            <div className="flex items-center">
+              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex-1">🖨️ Variações Offset</p>
+              {dragHandle}
+            </div>
+            {selectedProductId && (
+              <p className="text-xs text-gray-500 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
+            )}
+          </div>
+          <div className="p-3 space-y-4">
+            {/* Formulário Adicionar Novo Tipo Global */}
+            <div className="border rounded-lg p-3 bg-white">
+              <h3 className="font-semibold text-sm mb-3">Adicionar Novo Tipo Global</h3>
+              <div className="space-y-2">
+                <div>
+                  <Label htmlFor="globalVariationType2" className="text-xs">Nome da Variação</Label>
+                  <Input
+                    id="globalVariationType2"
+                    placeholder="Ex: Material, Acabamento..."
+                    value={newGlobalVariationTypeName}
+                    onChange={(e) => setNewGlobalVariationTypeName(e.target.value)}
+                    className="mt-1 text-sm"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="globalRequired2" className="text-xs">Obrigatório?</Label>
+                  <Select
+                    value={newGlobalVariationTypeRequired ? "true" : "false"}
+                    onValueChange={(value) => setNewGlobalVariationTypeRequired(value === "true")}
+                  >
+                    <SelectTrigger id="globalRequired2" className="mt-1 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Sim</SelectItem>
+                      <SelectItem value="false">Não</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  onClick={handleAddGlobalVariationType}
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-sm"
+                  disabled={createVariationTypeMutation.isPending}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Tipo Global
+                </Button>
+              </div>
+            </div>
+
+            {/* Lista de Tipos Globais */}
+            {globalVariationTypes.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhuma variação global cadastrada.</p>
+            ) : (
+              <div className="grid gap-3">
+                {globalVariationTypes.map((vt: VariationType) => {
+                  const isExpanded = expandedGlobalVariationId === vt.id;
+                  return (
+                    <div key={`offset-${vt.id}`} className="border rounded-lg bg-white overflow-hidden">
+                     <div
+                        onClick={() => editingNameId === vt.id ? undefined : setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
+                        className={`p-4 hover:bg-gray-50 transition ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`transform transition-transform text-gray-500 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
+                          {editingNameId === vt.id ? (
+                            <div className="flex items-center gap-2 flex-1" onClick={(e) => e.stopPropagation()}>
+                              <Input
+                                autoFocus
+                                value={editingNameValue}
+                                onChange={(e) => setEditingNameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleEditName();
+                                  if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
+                                }}
+                                className="font-semibold text-gray-800 h-8 text-sm"
+                              />
+                              <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>Salvar</Button>
+                              <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8"><X className="w-3 h-3" /></Button>
+                            </div>
+                          ) : (
+                            <h4 className="font-semibold text-gray-800 text-sm flex-1">{vt.name}</h4>
+                          )}
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-gray-100 space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <p className="text-xs text-gray-500">{vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções</p>
+                          <div className="flex flex-wrap gap-1">
+                            {editingNameId !== vt.id && (
+                              <Button variant="outline" size="sm" onClick={() => { setEditingNameId(vt.id); setEditingNameValue(vt.name); }} className="bg-blue-50 border-blue-300 hover:bg-blue-100 text-xs h-7">
+                                <Edit2 className="w-3 h-3 mr-1" />Editar Nome
+                              </Button>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-gray-500">Obrig.:</span>
+                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleRequired(vt.id, value === "sim")} className="flex gap-2">
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="sim" id={`offset-required-sim-${vt.id}`} /><Label htmlFor={`offset-required-sim-${vt.id}`} className="cursor-pointer text-xs">Sim</Label></div>
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="nao" id={`offset-required-nao-${vt.id}`} /><Label htmlFor={`offset-required-nao-${vt.id}`} className="cursor-pointer text-xs">Não</Label></div>
+                              </RadioGroup>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
+                          </div>
+                          {selectedProductId && (
+                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
+                              <Plus className="w-3 h-3 mr-1" />Adicionar ao Produto
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
