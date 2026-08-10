@@ -92,6 +92,7 @@ import { financeiroRouter } from "./routers-financeiro";
 import { adminAuthRouter, adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { paymentRouter } from "./routers-payment";
 import { artUploadRouter } from "./artUploadRouter";
+import { quotationsRouter } from "./quotationsRouter";
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
 // Usado em todas as procedures do checkout/erp que o painel admin consome
@@ -120,6 +121,7 @@ export const appRouter = router({
   logistics: logisticsRouter,
   payment: paymentRouter,
   artUpload: artUploadRouter,
+  quotations: quotationsRouter,
   gerenciadorFinanceiro: gerenciadorFinanceiroRouter,
   gestaoFiscal: gestaoFiscalRouter,
   financeiro: financeiroRouter,

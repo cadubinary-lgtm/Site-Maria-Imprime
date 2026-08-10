@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
@@ -114,6 +115,8 @@ function AccordionStep({
 
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function ProductDetail() {
+  const { user } = useAuth();
+  const isOperator = user?.role === "admin";
   const [, params] = useRoute("/produto/:id");
   const productId = params?.id ? parseInt(params.id) : null;
 
@@ -1782,7 +1785,33 @@ export default function ProductDetail() {
                   }
                 </Button>
                 
-                {/* Lista de campos pendentes */}
+                {/* Botão Fazer Orçamento - apenas para operadores */}
+                {isOperator && (
+                  <Button
+                    variant="outline"
+                    className="w-full border-pink-300 text-pink-700 hover:bg-pink-50 font-semibold py-3 rounded-xl text-base h-12 gap-2"
+                    onClick={() => {
+                      const specs: Record<string, string> = {};
+                      if (dimWidth) specs.width = dimWidth;
+                      if (dimHeight) specs.height = dimHeight;
+                      const params = new URLSearchParams({
+                        productId: String(productId ?? ""),
+                        productName: encodeURIComponent(product?.name ?? ""),
+                        productImage: encodeURIComponent(product?.imageUrl ?? ""),
+                        unitPrice: String(totalPrice),
+                        quantity: String(quantity),
+                        specifications: encodeURIComponent(JSON.stringify(specs)),
+                        artFileUrl: encodeURIComponent(artLink || ""),
+                      });
+                      setLocation(`/admin/orcamentos/novo?${params.toString()}`);
+                    }}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Fazer Orçamento
+                  </Button>
+                )}
+
+              {/* Lista de campos pendentes */}
                 {!canAddToCart && missingFields.length > 0 && (
                   <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl shadow-sm">
                     <div className="flex items-center gap-2 mb-3">

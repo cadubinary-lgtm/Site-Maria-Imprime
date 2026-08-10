@@ -97,6 +97,11 @@ import AdminsManager from "./pages/admin/AdminsManager";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminProfile from "./pages/admin/AdminProfile";
 
+// ─── Orçamentos ──────────────────────────────────────────────────────────────
+import AdminQuotations from "./pages/admin/AdminQuotations";
+import AdminQuotationForm from "./pages/admin/AdminQuotationForm";
+import AdminQuotationDetail from "./pages/admin/AdminQuotationDetail";
+
 // ─── Páginas ERP ─────────────────────────────────────────────────────────────
 import ERPDashboard from "./pages/erp/ERPDashboard";
 import ProductionDashboard from "./pages/erp/ProductionDashboard";
@@ -169,6 +174,10 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/pedidos/novos" component={NewOrders} />
       <Route path="/admin/pedidos" component={AdminOrders} />
       <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
+      <Route path="/admin/orcamentos" component={AdminQuotations} />
+      <Route path="/admin/orcamentos/novo" component={AdminQuotationForm} />
+      <Route path="/admin/orcamentos/:id/editar" component={AdminQuotationForm} />
+      <Route path="/admin/orcamentos/:id" component={AdminQuotationDetail} />
       <Route path="/admin/os" component={AdminOS} />
       <Route path="/admin/os/:id" component={AdminOSPrint} />
       <Route path="/admin/pre-impressao" component={AdminPreImpressao} />
