@@ -262,11 +262,16 @@ export default function AdminQuotations() {
                                 <MoreHorizontal className="w-3.5 h-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                              <DropdownMenuItem onClick={() => duplicate.mutate({ id: row.id })}>
-                                <Copy className="w-3.5 h-3.5 mr-2" /> Duplicar
-                              </DropdownMenuItem>
-                              {isDraft && (
+                           <DropdownMenuContent align="end" className="w-44">
+                             <DropdownMenuItem onClick={() => duplicate.mutate({ id: row.id })}>
+                               <Copy className="w-3.5 h-3.5 mr-2" /> Duplicar
+                             </DropdownMenuItem>
+                              {!["cancelado", "expirado"].includes(row.status) && (
+                                <DropdownMenuItem onClick={() => navigate(`/admin/orcamentos/${row.id}/editar`)}>
+                                  <Edit className="w-3.5 h-3.5 mr-2" /> Editar
+                                </DropdownMenuItem>
+                              )}
+                             {isDraft && (
                                 <DropdownMenuItem onClick={() => updateStatus.mutate({ id: row.id, status: "enviado" })}>
                                   <Send className="w-3.5 h-3.5 mr-2" /> Enviar ao Cliente
                                 </DropdownMenuItem>
