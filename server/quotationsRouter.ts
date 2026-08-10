@@ -542,6 +542,66 @@ export const quotationsRouter = router({
     }),
 
   // ── Buscar opções de variações e atributos de um produto ──────────────
+  // ── Buscar dados de precificação do produto (pricePerM2, calculationType, modifiers) ──
+  getProductPricing: adminAnyProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { products } = await import("../drizzle/schema.js");
+      const { getVariationTypesByProduct, getVariationOptionsByType } = await import("./db.js");
+      const { getProductAttributes } = await import("./db-attributes.js");
+
+      // Dados base do produto
+      const [product] = await db.select({
+        id: products.id,
+        price: products.price,
+        pricePerM2: products.pricePerM2,
+        calculationType: products.calculationType,
+      }).from(products).where(eq(products.id, input.productId)).limit(1);
+
+      if (!product) return null;
+
+      // Variações com priceModifier e calculationType
+      const varTypes = await getVariationTypesByProduct(input.productId);
+      const variationsWithPricing = await Promise.all(
+        varTypes.map(async (vt) => {
+          const options = await getVariationOptionsByType(vt.id);
+          return {
+            id: vt.id,
+            name: vt.name,
+            options: options.map((o: any) => ({
+              id: o.id,
+              name: o.name,
+              priceModifier: parseFloat(o.priceModifier?.toString() ?? "0"),
+              calculationType: o.calculationType ?? "unit",
+            })),
+          };
+        })
+      );
+
+      // Atributos com priceModifier
+      const attrs = await getProductAttributes(input.productId);
+      const attributesWithPricing = attrs.map((pa: any) => ({
+        attributeId: pa.attributeId,
+        name: pa.attribute?.name ?? "",
+        values: (pa.values ?? []).map((v: any) => ({
+          id: v.id,
+          value: v.value,
+          priceModifier: parseFloat(v.priceModifier?.toString() ?? "0"),
+        })),
+      }));
+
+      return {
+        id: product.id,
+        price: parseFloat(product.price?.toString() ?? "0"),
+        pricePerM2: parseFloat(product.pricePerM2?.toString() ?? "0"),
+        calculationType: product.calculationType,
+        variations: variationsWithPricing,
+        attributes: attributesWithPricing,
+      };
+    }),
+
   getProductOptions: adminAnyProcedure
     .input(z.object({ productId: z.number() }))
     .query(async ({ input }) => {
