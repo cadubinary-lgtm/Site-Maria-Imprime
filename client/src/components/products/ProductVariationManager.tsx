@@ -552,10 +552,10 @@ export function ProductVariationManager() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
      {/* Layout Kanban: 4 colunas */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-1 min-h-0">
+      <div className="flex flex-row overflow-x-auto gap-4 items-start w-full h-[calc(100vh-160px)] pb-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <div className="xl:col-span-2 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="w-[260px] min-w-[260px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Segmentos</p>
           </div>
@@ -583,7 +583,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
-        <div className="xl:col-span-2 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="w-[280px] min-w-[280px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Produtos</p>
           </div>
@@ -624,7 +624,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
-        <div className="xl:col-span-4 flex flex-col border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="w-[380px] min-w-[380px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               Variações do Produto
@@ -678,7 +678,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
-        <div className="xl:col-span-4 flex flex-col border-2 border-purple-200 rounded-lg bg-purple-50 overflow-hidden">
+        <div className="w-[420px] min-w-[420px] flex-shrink-0 flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 h-full overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">📚 Tipos no Sistema</p>
             {selectedProductId && (
