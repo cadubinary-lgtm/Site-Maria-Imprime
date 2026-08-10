@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import * as schema from "../drizzle/schema";
 import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks, customerAccounts } from "../drizzle/schema";
+import { productSegments } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -109,6 +110,15 @@ export async function getProductsBySegment(segment: string) {
     .where(eq(products.segment, segment as any))
     .limit(100);
   return result;
+}
+
+export async function getProductIdsBySegmentId(segmentId: number): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ productId: productSegments.productId })
+    .from(productSegments)
+    .where(eq(productSegments.segmentId, segmentId));
+  return rows.map(r => r.productId);
 }
 
 export async function getProductById(id: number) {

@@ -17,6 +17,7 @@ function getCookieFromReq(req: ExpressRequest, name: string): string | undefined
 import {
   getAllProducts,
   getProductsBySegment,
+  getProductIdsBySegmentId,
   getProductById,
   getProductByName,
   getOrdersByClient,
@@ -140,6 +141,9 @@ export const appRouter = router({
     getBySegment: publicProcedure
       .input(z.object({ segment: z.string() }))
       .query(({ input }) => getProductsBySegment(input.segment)),
+    getBySegmentId: publicProcedure
+      .input(z.object({ segmentId: z.number() }))
+      .query(({ input }) => getProductIdsBySegmentId(input.segmentId)),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(({ input }) => getProductById(input.id)),
