@@ -167,6 +167,10 @@ export function ProductVariationManager() {
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
 
+  // Fetch all segments for filter
+  const { data: allSegments = [] } = trpc.segments.list.useQuery();
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
+
   // Fetch variation types for selected product
   const { data: variationTypes = [], refetch: refetchVariationTypes } = trpc.variations.getByProduct.useQuery(
     { productId: selectedProductId || 0 },
@@ -562,32 +566,67 @@ export function ProductVariationManager() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="productSearch">Buscar Produto</Label>
-                <Input
-                  id="productSearch"
-                  placeholder="Digite o nome do produto..."
-                  value={productSearchQuery}
-                  onChange={(e) => setProductSearchQuery(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                {products
-                  .filter((p: any) =>
-                    p.name.toLowerCase().includes(productSearchQuery.toLowerCase())
-                  )
-                  .map((product: any) => (
-                    <Button
-                      key={product.id}
-                      onClick={() => handleSelectProduct(product.id)}
-                      variant={selectedProductId === product.id ? "default" : "outline"}
-                      className="justify-start"
+              {/* Layout 2 colunas: segmentos à esquerda, produtos à direita */}
+              <div className="grid grid-cols-[180px_1fr] divide-x divide-gray-100 -mx-6 -mb-6 mt-0">
+                {/* Coluna esquerda: Segmentos */}
+                <div className="px-4 py-3 space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Segmentos</p>
+                  <button
+                    onClick={() => setSelectedSegmentId(null)}
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
+                      selectedSegmentId === null ? "bg-pink-50 text-pink-700 font-semibold" : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {(allSegments as any[]).map((seg: any) => (
+                    <button
+                      key={seg.id}
+                      onClick={() => setSelectedSegmentId(seg.id)}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
+                        selectedSegmentId === seg.id ? "bg-pink-50 text-pink-700 font-semibold" : "text-gray-600 hover:bg-gray-50"
+                      }`}
                     >
-                      {product.name}
-                    </Button>
+                      {seg.name}
+                    </button>
                   ))}
+                </div>
+                {/* Coluna direita: Produtos */}
+                <div className="px-4 py-3 space-y-2">
+                  <Input
+                    placeholder="Buscar produto..."
+                    value={productSearchQuery}
+                    onChange={(e) => setProductSearchQuery(e.target.value)}
+                    className="mb-2"
+                  />
+                  <div className="grid gap-2 max-h-80 overflow-y-auto pr-1">
+                    {(products as any[])
+                      .filter((p: any) => {
+                        const matchSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());
+                        const selectedSeg = (allSegments as any[]).find((s: any) => s.id === selectedSegmentId);
+                        const matchSegment = selectedSegmentId === null || p.segment === selectedSeg?.slug || p.segment === selectedSeg?.name?.toLowerCase();
+                        return matchSearch && matchSegment;
+                      })
+                      .map((product: any) => (
+                        <Button
+                          key={product.id}
+                          onClick={() => handleSelectProduct(product.id)}
+                          variant={selectedProductId === product.id ? "default" : "outline"}
+                          className="justify-start text-sm"
+                        >
+                          {product.name}
+                        </Button>
+                      ))}
+                    {(products as any[]).filter((p: any) => {
+                      const matchSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());
+                      const selectedSeg = (allSegments as any[]).find((s: any) => s.id === selectedSegmentId);
+                      const matchSegment = selectedSegmentId === null || p.segment === selectedSeg?.slug || p.segment === selectedSeg?.name?.toLowerCase();
+                      return matchSearch && matchSegment;
+                    }).length === 0 && (
+                      <p className="text-sm text-gray-400 text-center py-4">Nenhum produto encontrado</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
