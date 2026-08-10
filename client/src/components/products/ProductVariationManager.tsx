@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { trpc } from "@/lib/trpc";
@@ -36,6 +36,22 @@ const CALC_TYPE_OPTIONS = [
   { value: "linear", label: "Metro Linear" },
   { value: "package", label: "Pacote" },
 ];
+
+// Componente wrapper para colunas arrastáveis
+function SortableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+  return (
+    <div ref={setNodeRef} style={style} className="flex flex-col min-w-0">
+      {children}
+    </div>
+  );
+}
 
 // Draggable item component
 function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRequired, onEdit, isExpanded, onToggleExpand }: any) {
@@ -541,13 +557,29 @@ export function ProductVariationManager() {
 
   const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => a.order - b.order);
 
+  // Estado para ordem das colunas
+  const [columnOrder, setColumnOrder] = useState(['segmentos', 'produtos', 'variacoes', 'tipos']);
+  const handleColumnDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setColumnOrder((prev) => {
+        const oldIndex = prev.indexOf(active.id as string);
+        const newIndex = prev.indexOf(over.id as string);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    }
+  };
+
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
-     {/* Layout Kanban: 4 colunas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
+     {/* Layout Kanban: 4 colunas com drag-and-drop horizontal */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
+        <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
+        <SortableColumn id="segmentos">
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden cursor-grab active:cursor-grabbing" style={{touchAction: 'none'}}>
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Segmentos</p>
           </div>
@@ -573,8 +605,10 @@ export function ProductVariationManager() {
             ))}
           </div>
         </div>
+        </SortableColumn>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
+        <SortableColumn id="produtos">
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Produtos</p>
@@ -613,8 +647,10 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
+        </SortableColumn>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
+        <SortableColumn id="variacoes">
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -667,8 +703,10 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
+        </SortableColumn>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
+        <SortableColumn id="tipos">
         <div className="flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">📚 Tipos no Sistema</p>
@@ -984,8 +1022,11 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
+        </SortableColumn>
 
-      </div>
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
