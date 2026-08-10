@@ -47,9 +47,24 @@ function SortableColumn({ id, children }: { id: string; children: React.ReactNod
     zIndex: isDragging ? 10 : undefined,
   };
   return (
-    <div ref={setNodeRef} style={style} className="flex flex-col min-w-0">
+    <div ref={setNodeRef} style={style} className="flex flex-col min-w-0 overflow-hidden">
       {children}
     </div>
+  );
+}
+
+// Componente de drag handle para o cabeçalho das colunas
+function ColumnDragHandle({ id }: { id: string }) {
+  const { attributes, listeners } = useSortable({ id });
+  return (
+    <span
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 ml-auto pl-2"
+      title="Arrastar coluna"
+    >
+      <GripVertical className="w-4 h-4" />
+    </span>
   );
 }
 
@@ -579,9 +594,12 @@ export function ProductVariationManager() {
 
         {/* ── COLUNA 1: Segmentos ── */}
         <SortableColumn id="segmentos">
-        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden cursor-grab active:cursor-grabbing" style={{touchAction: 'none'}}>
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Segmentos</p>
+            <div className="flex items-center">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex-1">Segmentos</p>
+              <ColumnDragHandle id="segmentos" />
+            </div>
           </div>
           <div className="p-3 space-y-1">
             <button
@@ -611,7 +629,10 @@ export function ProductVariationManager() {
         <SortableColumn id="produtos">
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Produtos</p>
+            <div className="flex items-center">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex-1">Produtos</p>
+              <ColumnDragHandle id="produtos" />
+            </div>
           </div>
           <div className="p-3">
             <Input
@@ -653,14 +674,17 @@ export function ProductVariationManager() {
         <SortableColumn id="variacoes">
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Variações do Produto
+            <div className="flex items-center">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex-1">
+                Variações do Produto
               {selectedProductId && (
                 <span className="ml-2 text-pink-600 normal-case font-normal">
                   — {(products as any[]).find((p: any) => p.id === selectedProductId)?.name}
                 </span>
               )}
-            </p>
+              </p>
+              <ColumnDragHandle id="variacoes" />
+            </div>
           </div>
           <div className="p-3">
             {!selectedProductId ? (
@@ -709,7 +733,10 @@ export function ProductVariationManager() {
         <SortableColumn id="tipos">
         <div className="flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
-            <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">📚 Tipos no Sistema</p>
+            <div className="flex items-center">
+              <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex-1">📚 Tipos no Sistema</p>
+              <ColumnDragHandle id="tipos" />
+            </div>
             {selectedProductId && (
               <p className="text-xs text-purple-600 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
             )}
