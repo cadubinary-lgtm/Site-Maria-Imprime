@@ -85,6 +85,43 @@ export default function AdminQuotationForm() {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  // Estado para opções dinâmicas por produto (productId -> { variations, attributes })
+  const [productOptionsCache, setProductOptionsCache] = useState<Record<number, any>>({});
+  const [activeProductIdForOptions, setActiveProductIdForOptions] = useState<number | null>(null);
+
+  // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
+  useEffect(() => {
+    if (isEdit) return; // Não sobrescrever dados de edição
+    const params = new URLSearchParams(window.location.search);
+    const productIdParam = params.get("productId");
+    const productNameParam = params.get("productName");
+    const productImageParam = params.get("productImage");
+    const unitPriceParam = params.get("unitPrice");
+    const quantityParam = params.get("quantity");
+    const specificationsParam = params.get("specifications");
+    const artFileUrlParam = params.get("artFileUrl");
+
+    if (productIdParam && productNameParam) {
+      const pid = parseInt(productIdParam);
+      let specs: Record<string, string> = {};
+      try { specs = JSON.parse(decodeURIComponent(specificationsParam ?? "{}")); } catch {}
+      const newItem = {
+        productId: pid,
+        productName: decodeURIComponent(productNameParam),
+        productImage: productImageParam ? decodeURIComponent(productImageParam) : undefined,
+        specifications: JSON.stringify(specs),
+        artFileUrl: artFileUrlParam ? decodeURIComponent(artFileUrlParam) : undefined,
+        quantity: parseInt(quantityParam ?? "1") || 1,
+        unitPrice: parseFloat(unitPriceParam ?? "0") || 0,
+        totalPrice: (parseInt(quantityParam ?? "1") || 1) * (parseFloat(unitPriceParam ?? "0") || 0),
+        _specsParsed: specs,
+      };
+      setItems([newItem]);
+      setExpandedItems(new Set([0]));
+      // Carregar opções do produto
+      setActiveProductIdForOptions(pid);
+    }
+  }, [isEdit]);
 
   // ── Load existing quotation for edit ────────────────────────────────────
   const { data: existingQuotation } = trpc.quotations.getById.useQuery(
@@ -120,6 +157,17 @@ export default function AdminQuotationForm() {
       _specsParsed: (() => { try { return JSON.parse(i.specifications); } catch { return {}; } })(),
     })));
   }, [existingQuotation]);
+
+  // ── Product options (variações e atributos) ─────────────────────────────
+  const { data: activeProductOptions } = trpc.quotations.getProductOptions.useQuery(
+    { productId: activeProductIdForOptions! },
+    { enabled: !!activeProductIdForOptions }
+  );
+  useEffect(() => {
+    if (activeProductIdForOptions && activeProductOptions) {
+      setProductOptionsCache(prev => ({ ...prev, [activeProductIdForOptions]: activeProductOptions }));
+    }
+  }, [activeProductOptions, activeProductIdForOptions]);
 
   // ── Client search ────────────────────────────────────────────────────────
   const { data: clientResults } = trpc.quotations.searchClients.useQuery(
@@ -211,6 +259,10 @@ export default function AdminQuotationForm() {
     setExpandedItems((prev) => { const s = new Set(prev); s.add(items.length); return s; });
     setShowAddProduct(false);
     setProductSearch("");
+    // Carregar opções do produto
+    if (!productOptionsCache[product.id]) {
+      setActiveProductIdForOptions(product.id);
+    }
   };
 
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
@@ -237,6 +289,11 @@ export default function AdminQuotationForm() {
       if (next.has(idx)) next.delete(idx); else next.add(idx);
       return next;
     });
+    // Carregar opções do produto ao expandir
+    const item = items[idx];
+    if (item && !productOptionsCache[item.productId]) {
+      setActiveProductIdForOptions(item.productId);
+    }
   };
 
   return (
@@ -405,41 +462,91 @@ export default function AdminQuotationForm() {
                         </div>
                       </div>
                       {/* Especificações expandidas */}
-                      {isExpanded && (
-                        <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
-                          {[
-                            { key: "width", label: "Largura (m)" },
-                            { key: "height", label: "Altura (m)" },
-                            { key: "printingType", label: "Impressão" },
-                            { key: "material", label: "Material" },
-                            { key: "finish", label: "Acabamento" },
-                          ].map(({ key, label }) => (
-                            <div key={key}>
-                              <label className="text-xs text-gray-500 font-medium">{label}</label>
-                              <Input
-                                className="h-7 mt-0.5 text-sm"
-                                value={specs[key] ?? ""}
-                                onChange={(e) => {
-                                  const newSpecs = { ...specs, [key]: e.target.value };
-                                  updateItem(idx, {
-                                    specifications: JSON.stringify(newSpecs),
-                                    _specsParsed: newSpecs,
-                                  });
-                                }}
-                              />
+                      {isExpanded && (() => {
+                        const opts = productOptionsCache[item.productId];
+                        const updateSpec = (key: string, value: string) => {
+                          const newSpecs = { ...specs, [key]: value };
+                          updateItem(idx, { specifications: JSON.stringify(newSpecs), _specsParsed: newSpecs });
+                        };
+                        return (
+                          <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
+                            {/* Medidas */}
+                            <div>
+                              <label className="text-xs text-gray-500 font-medium">Largura (m)</label>
+                              <Input className="h-7 mt-0.5 text-sm" value={specs.width ?? ""} onChange={(e) => updateSpec("width", e.target.value)} />
                             </div>
-                          ))}
-                          <div className="col-span-2">
-                            <label className="text-xs text-gray-500 font-medium">URL da Arte</label>
-                            <Input
-                              className="h-7 mt-0.5 text-sm"
-                              placeholder="https://..."
-                              value={item.artFileUrl ?? ""}
-                              onChange={(e) => updateItem(idx, { artFileUrl: e.target.value })}
-                            />
+                            <div>
+                              <label className="text-xs text-gray-500 font-medium">Altura (m)</label>
+                              <Input className="h-7 mt-0.5 text-sm" value={specs.height ?? ""} onChange={(e) => updateSpec("height", e.target.value)} />
+                            </div>
+
+                            {/* Atributos dinâmicos (ex: Impressão) */}
+                            {opts?.attributes?.map((attr: any) => (
+                              <div key={attr.attributeId}>
+                                <label className="text-xs text-gray-500 font-medium">{attr.name}</label>
+                                <Select
+                                  value={specs[attr.name.toLowerCase().replace(/\s+/g, "_")] ?? ""}
+                                  onValueChange={(v) => updateSpec(attr.name.toLowerCase().replace(/\s+/g, "_"), v)}
+                                >
+                                  <SelectTrigger className="h-7 mt-0.5 text-sm">
+                                    <SelectValue placeholder={`Selecionar ${attr.name}`} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {attr.values.map((v: any) => (
+                                      <SelectItem key={v.id} value={v.value}>{v.value}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                            {/* Fallback se não há atributos carregados */}
+                            {(!opts || !opts.attributes || opts.attributes.length === 0) && (
+                              <div>
+                                <label className="text-xs text-gray-500 font-medium">Impressão</label>
+                                <Input className="h-7 mt-0.5 text-sm" value={specs.impressao ?? specs.printingType ?? ""} onChange={(e) => updateSpec("impressao", e.target.value)} />
+                              </div>
+                            )}
+
+                            {/* Variações dinâmicas (material, acabamento) */}
+                            {opts?.variations?.map((vt: any) => (
+                              <div key={vt.id}>
+                                <label className="text-xs text-gray-500 font-medium">{vt.name}</label>
+                                <Select
+                                  value={specs[vt.name.toLowerCase().replace(/\s+/g, "_")] ?? ""}
+                                  onValueChange={(v) => updateSpec(vt.name.toLowerCase().replace(/\s+/g, "_"), v)}
+                                >
+                                  <SelectTrigger className="h-7 mt-0.5 text-sm">
+                                    <SelectValue placeholder={`Selecionar ${vt.name}`} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {(vt.options ?? []).map((o: any) => (
+                                      <SelectItem key={o.id} value={o.name}>{o.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                            {/* Fallback se não há variações carregadas */}
+                            {(!opts || !opts.variations || opts.variations.length === 0) && (
+                              <>
+                                <div>
+                                  <label className="text-xs text-gray-500 font-medium">Material</label>
+                                  <Input className="h-7 mt-0.5 text-sm" value={specs.material ?? ""} onChange={(e) => updateSpec("material", e.target.value)} />
+                                </div>
+                                <div>
+                                  <label className="text-xs text-gray-500 font-medium">Acabamento</label>
+                                  <Input className="h-7 mt-0.5 text-sm" value={specs.acabamento ?? specs.finish ?? ""} onChange={(e) => updateSpec("acabamento", e.target.value)} />
+                                </div>
+                              </>
+                            )}
+
+                            <div className="col-span-2">
+                              <label className="text-xs text-gray-500 font-medium">URL da Arte</label>
+                              <Input className="h-7 mt-0.5 text-sm" placeholder="https://..." value={item.artFileUrl ?? ""} onChange={(e) => updateItem(idx, { artFileUrl: e.target.value })} />
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   );
                 })}
