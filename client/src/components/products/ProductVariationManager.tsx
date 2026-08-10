@@ -38,7 +38,8 @@ const CALC_TYPE_OPTIONS = [
 ];
 
 // Componente wrapper para colunas arrastáveis
-function SortableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+// Usa render prop para passar o drag handle aos filhos
+function SortableColumn({ id, children }: { id: string; children: (dragHandle: React.ReactNode) => React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -46,17 +47,7 @@ function SortableColumn({ id, children }: { id: string; children: React.ReactNod
     opacity: isDragging ? 0.7 : 1,
     zIndex: isDragging ? 10 : undefined,
   };
-  return (
-    <div ref={setNodeRef} style={style} className="flex flex-col min-w-0 overflow-hidden">
-      {children}
-    </div>
-  );
-}
-
-// Componente de drag handle para o cabeçalho das colunas
-function ColumnDragHandle({ id }: { id: string }) {
-  const { attributes, listeners } = useSortable({ id });
-  return (
+  const dragHandle = (
     <span
       {...attributes}
       {...listeners}
@@ -65,6 +56,11 @@ function ColumnDragHandle({ id }: { id: string }) {
     >
       <GripVertical className="w-4 h-4" />
     </span>
+  );
+  return (
+    <div ref={setNodeRef} style={style} className="flex flex-col min-w-0 overflow-hidden">
+      {children(dragHandle)}
+    </div>
   );
 }
 
@@ -599,12 +595,12 @@ export function ProductVariationManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <SortableColumn id="segmentos">
+        <SortableColumn id="segmentos">{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex-1">Segmentos</p>
-              <ColumnDragHandle id="segmentos" />
+              {dragHandle}
             </div>
           </div>
           <div className="p-3 space-y-1">
@@ -629,15 +625,15 @@ export function ProductVariationManager() {
             ))}
           </div>
         </div>
-        </SortableColumn>
+        )}</SortableColumn>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
-        <SortableColumn id="produtos">
+        <SortableColumn id="produtos">{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex-1">Produtos</p>
-              <ColumnDragHandle id="produtos" />
+              {dragHandle}
             </div>
           </div>
           <div className="p-3">
@@ -674,10 +670,10 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
-        </SortableColumn>
+        )}</SortableColumn>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
-        <SortableColumn id="variacoes">
+        <SortableColumn id="variacoes">{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
@@ -689,7 +685,7 @@ export function ProductVariationManager() {
                 </span>
               )}
               </p>
-              <ColumnDragHandle id="variacoes" />
+              {dragHandle}
             </div>
           </div>
           <div className="p-3">
@@ -733,15 +729,15 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
-        </SortableColumn>
+        )}</SortableColumn>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
-        <SortableColumn id="tipos">
+        <SortableColumn id="tipos">{(dragHandle) => (
         <div className="flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
             <div className="flex items-center">
               <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex-1">📚 Tipos no Sistema</p>
-              <ColumnDragHandle id="tipos" />
+              {dragHandle}
             </div>
             {selectedProductId && (
               <p className="text-xs text-purple-600 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
@@ -1055,7 +1051,7 @@ export function ProductVariationManager() {
             )}
           </div>
         </div>
-        </SortableColumn>
+        )}</SortableColumn>
 
           </div>
         </SortableContext>
