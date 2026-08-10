@@ -611,51 +611,7 @@ export function ProductVariationManager() {
               <CardContent className="p-0">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-0 items-start">
                   <div className="p-6 space-y-6">
-                {/* Add New Variation Type */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <h3 className="font-semibold mb-4">Adicionar Novo Tipo de Variação</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="variationType">Nome da Variação</Label>
-                        <Input
-                          id="variationType"
-                          placeholder="Ex: Material, Acabamento, Tamanho"
-                          value={newVariationTypeName}
-                          onChange={(e) => setNewVariationTypeName(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="required">Obrigatório?</Label>
-                        <Select
-                          value={newVariationTypeRequired ? "true" : "false"}
-                          onValueChange={(value) => setNewVariationTypeRequired(value === "true")}
-                        >
-                          <SelectTrigger id="required" className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="true">Sim</SelectItem>
-                            <SelectItem value="false">Não</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-end">
-                        <Button
-                          onClick={handleAddVariationType}
-                          className="w-full bg-orange-500 hover:bg-orange-600"
-                          disabled={createVariationTypeMutation.isPending}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Adicionar
-                        </Button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
+               {/* Add New Variation Type */}
                 {/* Variation Types List with Drag & Drop */}
                 <div className="space-y-3">
                   <h3 className="font-semibold">Tipos de Variações Cadastrados (Arraste para reordenar)</h3>
