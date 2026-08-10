@@ -593,7 +593,8 @@ export function ProductVariationManager() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="manage">
+       <TabsContent value="manage">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
           {!selectedProductId ? (
             <Card>
               <CardContent className="pt-6">
@@ -692,11 +693,12 @@ export function ProductVariationManager() {
                   )}
                 </div>
 
-              </CardContent>
+             </CardContent>
             </Card>
           )}
 
         {/* Global Variation Types - Accordion Area */}
+        </div>
         <Card className="border-2 border-purple-200 bg-purple-50">
           <CardHeader>
             <CardTitle className="text-purple-900">📚 Tipos de Variações Cadastrados no Sistema</CardTitle>
