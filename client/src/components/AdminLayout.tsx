@@ -248,7 +248,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // COMERCIAL E VENDAS - Transformado em menu retrátil
     {
       item: {
-        label: "COMERCIAL E VENDAS",
+        label: "VENDAS",
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
           { label: "Novos Pedidos", href: "/admin/pedidos/novos", badge: pendingCount || undefined },
