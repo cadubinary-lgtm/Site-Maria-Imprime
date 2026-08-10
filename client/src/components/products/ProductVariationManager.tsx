@@ -206,6 +206,8 @@ export function ProductVariationManager() {
   const invalidateBoth = async () => {
     await utils.variations.getGlobal.invalidate();
     refetchGlobalVariationTypes();
+    await utils.variationsOffset.getGlobal.invalidate();
+    refetchOffsetVariationTypes();
     if (selectedProductId) {
       await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
       refetchVariationTypes();
@@ -224,6 +226,20 @@ export function ProductVariationManager() {
   const linkGlobalMutation = trpc.adminVariations.linkGlobal.useMutation();
   const syncGlobalOptionsMutation = trpc.adminVariations.syncGlobalOptions.useMutation();
   const syncGlobalNameMutation = trpc.adminVariations.syncGlobalName.useMutation();
+
+  // ===== HOOKS INDEPENDENTES PARA VARIAÇÕES OFFSET (Coluna 5) =====
+  const { data: offsetVariationTypes = [], refetch: refetchOffsetVariationTypes } = trpc.variationsOffset.getGlobal.useQuery();
+  const createOffsetTypeMutation = trpc.variationsOffset.createType.useMutation();
+  const createOffsetOptionMutation = trpc.variationsOffset.createOption.useMutation();
+  const deleteOffsetTypeMutation = trpc.variationsOffset.deleteType.useMutation();
+  const deleteOffsetOptionMutation = trpc.variationsOffset.deleteOption.useMutation();
+  const updateOffsetOptionMutation = trpc.variationsOffset.updateOption.useMutation();
+  const updateOffsetTypeMutation = trpc.variationsOffset.updateType.useMutation();
+  const reorderOffsetTypesMutation = trpc.variationsOffset.reorderTypes.useMutation();
+  const reorderOffsetOptionsMutation = trpc.variationsOffset.reorderOptions.useMutation();
+  const linkOffsetMutation = trpc.variationsOffset.linkGlobal.useMutation();
+  const syncOffsetOptionsMutation = trpc.variationsOffset.syncGlobalOptions.useMutation();
+  const syncOffsetNameMutation = trpc.variationsOffset.syncGlobalName.useMutation();
 
   // Drag & drop sensors
   // Sensors para o DndContext externo (arrastar colunas horizontalmente)
@@ -244,6 +260,9 @@ export function ProductVariationManager() {
   const [newVariationTypeRequired, setNewVariationTypeRequired] = useState(true);
   const [newGlobalVariationTypeName, setNewGlobalVariationTypeName] = useState("");
   const [newGlobalVariationTypeRequired, setNewGlobalVariationTypeRequired] = useState(true);
+  // Estados independentes para Offset
+  const [newOffsetVariationTypeName, setNewOffsetVariationTypeName] = useState('');
+  const [newOffsetVariationTypeRequired, setNewOffsetVariationTypeRequired] = useState(true);
   const [newOptionName, setNewOptionName] = useState("");
   const [newOptionPrice, setNewOptionPrice] = useState("");
   // Por variação global expandida: campos de nova opção separados
@@ -563,6 +582,67 @@ export function ProductVariationManager() {
       toast.error("Erro ao vincular variação");
       console.error(error);
     }
+  };
+
+  // ===== HANDLERS PARA OFFSET (Coluna 5) =====
+  const handleAddOffsetVariationType = async () => {
+    if (!newOffsetVariationTypeName.trim()) return;
+    try {
+      await createOffsetTypeMutation.mutateAsync({ productId: null, type: "material", name: newOffsetVariationTypeName.trim(), isRequired: newOffsetVariationTypeRequired });
+      setNewOffsetVariationTypeName('');
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetchOffsetVariationTypes();
+    } catch (error) { console.error('Erro ao criar tipo offset:', error); }
+  };
+  const handleEditOffsetName = async () => {
+    if (!editingNameId || !editingNameValue.trim()) return;
+    try {
+      await updateOffsetTypeMutation.mutateAsync({ id: editingNameId, name: editingNameValue.trim() });
+      await syncOffsetNameMutation.mutateAsync({ globalVariationId: editingNameId, newName: editingNameValue.trim() });
+      setEditingNameId(null); setEditingNameValue('');
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetchOffsetVariationTypes();
+    } catch (error) { console.error('Erro ao editar nome offset:', error); }
+  };
+  const handleToggleOffsetRequired = async (id: number, isRequired: boolean) => {
+    try {
+      await updateOffsetTypeMutation.mutateAsync({ id, isRequired });
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetchOffsetVariationTypes();
+    } catch (error) { console.error('Erro ao atualizar obrigatório offset:', error); }
+  };
+  const handleMoveOffsetVariationType = async (types: VariationType[], id: number, direction: "up" | "down") => {
+    const idx = types.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const newIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= types.length) return;
+    const updates = types.map((t, i) => {
+      if (i === idx) return { id: t.id, order: newIdx };
+      if (i === newIdx) return { id: t.id, order: idx };
+      return { id: t.id, order: i };
+    });
+    try {
+      await reorderOffsetTypesMutation.mutateAsync({ updates });
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetchOffsetVariationTypes();
+    } catch (error) { console.error('Erro ao reordenar offset:', error); }
+  };
+  const handleDeleteOffsetVariationType = async (id: number) => {
+    if (!confirm('Excluir este tipo de variação offset?')) return;
+    try {
+      await deleteOffsetTypeMutation.mutateAsync({ id });
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetchOffsetVariationTypes();
+    } catch (error) { console.error('Erro ao excluir tipo offset:', error); }
+  };
+  const handleLinkOffsetVariation = async (globalVariationId: number) => {
+    if (!selectedProductId) { toast.error("Selecione um produto"); return; }
+    try {
+      await linkOffsetMutation.mutateAsync({ globalVariationId, productId: selectedProductId });
+      toast.success("Variação offset vinculada ao produto!");
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
+    } catch (error) { toast.error("Erro ao vincular variação offset"); console.error(error); }
   };
 
   // Automaticamente mudar para aba de gerenciamento quando produto é selecionado
@@ -1072,20 +1152,20 @@ export function ProductVariationManager() {
                 <div>
                   <Label htmlFor="globalVariationType2" className="text-xs">Nome da Variação</Label>
                   <Input
-                    id="globalVariationType2"
+                    id="offsetVariationType"
                     placeholder="Ex: Material, Acabamento..."
-                    value={newGlobalVariationTypeName}
-                    onChange={(e) => setNewGlobalVariationTypeName(e.target.value)}
+                    value={newOffsetVariationTypeName}
+                    onChange={(e) => setNewOffsetVariationTypeName(e.target.value)}
                     className="mt-1 text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="globalRequired2" className="text-xs">Obrigatório?</Label>
+                  <Label htmlFor="offsetRequired" className="text-xs">Obrigatório?</Label>
                   <Select
-                    value={newGlobalVariationTypeRequired ? "true" : "false"}
-                    onValueChange={(value) => setNewGlobalVariationTypeRequired(value === "true")}
+                    value={newOffsetVariationTypeRequired ? "true" : "false"}
+                    onValueChange={(value) => setNewOffsetVariationTypeRequired(value === "true")}
                   >
-                    <SelectTrigger id="globalRequired2" className="mt-1 text-sm">
+                    <SelectTrigger id="offsetRequired" className="mt-1 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1095,9 +1175,9 @@ export function ProductVariationManager() {
                   </Select>
                 </div>
                 <Button
-                  onClick={handleAddGlobalVariationType}
+                  onClick={handleAddOffsetVariationType}
                   className="w-full bg-pink-600 hover:bg-pink-700 text-sm"
-                  disabled={createVariationTypeMutation.isPending}
+                  disabled={createOffsetTypeMutation.isPending}
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Tipo Global
@@ -1106,11 +1186,11 @@ export function ProductVariationManager() {
             </div>
 
             {/* Lista de Tipos Globais */}
-            {globalVariationTypes.length === 0 ? (
+            {offsetVariationTypes.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-4">Nenhuma variação global cadastrada.</p>
             ) : (
               <div className="grid gap-3">
-                {globalVariationTypes.map((vt: VariationType) => {
+                {offsetVariationTypes.map((vt: VariationType) => {
                   const isExpanded = expandedGlobalVariationId === vt.id;
                   return (
                     <div key={`offset-${vt.id}`} className="border rounded-lg bg-white overflow-hidden">
@@ -1127,12 +1207,12 @@ export function ProductVariationManager() {
                                 value={editingNameValue}
                                 onChange={(e) => setEditingNameValue(e.target.value)}
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleEditName();
+                                  if (e.key === 'Enter') handleEditOffsetName();
                                   if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
                                 }}
                                 className="font-semibold text-gray-800 h-8 text-sm"
                               />
-                              <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>Salvar</Button>
+                              <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateOffsetTypeMutation.isPending}>Salvar</Button>
                               <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8"><X className="w-3 h-3" /></Button>
                             </div>
                           ) : (
@@ -1149,17 +1229,17 @@ export function ProductVariationManager() {
                             )}
                             <div className="flex items-center gap-1">
                               <span className="text-xs text-gray-500">Obrig.:</span>
-                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleRequired(vt.id, value === "sim")} className="flex gap-2">
+                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleOffsetRequired(vt.id, value === "sim")} className="flex gap-2">
                                 <div className="flex items-center space-x-1"><RadioGroupItem value="sim" id={`offset-required-sim-${vt.id}`} /><Label htmlFor={`offset-required-sim-${vt.id}`} className="cursor-pointer text-xs">Sim</Label></div>
                                 <div className="flex items-center space-x-1"><RadioGroupItem value="nao" id={`offset-required-nao-${vt.id}`} /><Label htmlFor={`offset-required-nao-${vt.id}`} className="cursor-pointer text-xs">Não</Label></div>
                               </RadioGroup>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDeleteVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveOffsetVariationType(offsetVariationTypes as VariationType[], vt.id, "up")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderOffsetTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveOffsetVariationType(offsetVariationTypes as VariationType[], vt.id, "down")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderOffsetTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteOffsetVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
                           </div>
                           {selectedProductId && (
-                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
+                            <Button onClick={() => handleLinkOffsetVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkOffsetMutation.isPending}>
                               <Plus className="w-3 h-3 mr-1" />Adicionar ao Produto
                             </Button>
                           )}
