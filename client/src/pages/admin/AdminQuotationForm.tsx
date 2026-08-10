@@ -499,13 +499,7 @@ export default function AdminQuotationForm() {
                                 </Select>
                               </div>
                             ))}
-                            {/* Fallback se não há atributos carregados */}
-                            {(!opts || !opts.attributes || opts.attributes.length === 0) && (
-                              <div>
-                                <label className="text-xs text-gray-500 font-medium">Impressão</label>
-                                <Input className="h-7 mt-0.5 text-sm" value={specs.impressao ?? specs.printingType ?? ""} onChange={(e) => updateSpec("impressao", e.target.value)} />
-                              </div>
-                            )}
+
 
                             {/* Variações dinâmicas (material, acabamento) */}
                             {opts?.variations?.map((vt: any) => (
