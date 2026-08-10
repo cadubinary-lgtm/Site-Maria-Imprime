@@ -75,6 +75,9 @@ export default function AdminNewProduct() {
     }
     if (!createForm.calculationType) { toast.error("Tipo de cobrança é obrigatório"); return; }
 
+    // Normalizar segment: se vazio, usar "geral" como fallback
+    const effectiveSegment = createForm.segment?.trim() || "geral";
+
     if (createForm.calculationType === "m2") {
       if (!createForm.pricePerM2 || parseFloat(createForm.pricePerM2) <= 0) { toast.error("Preço por m² é obrigatório"); return; }
       if (!createForm.minWidth || parseFloat(createForm.minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
@@ -90,7 +93,7 @@ export default function AdminNewProduct() {
         name: createForm.name,
         description: createForm.description,
         price: createForm.price,
-        segment: createForm.segment,
+        segment: effectiveSegment,
         imageUrl: createForm.imageUrl,
         imageKey: createForm.imageKey || undefined,
         galleryUrls: createForm.galleryUrls.length > 0 ? JSON.stringify(createForm.galleryUrls) : undefined,
@@ -151,8 +154,9 @@ export default function AdminNewProduct() {
       // Redirecionar para lista de produtos
       navigate("/admin/produtos");
     } catch (error) {
-      toast.error("Erro ao criar produto");
-      console.error(error);
+      const msg = (error as any)?.message ?? "Erro desconhecido";
+      toast.error(`Erro ao criar produto: ${msg}`);
+      console.error("[createProduct]", error);
     }
   };
 
