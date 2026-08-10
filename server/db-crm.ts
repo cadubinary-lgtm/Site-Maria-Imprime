@@ -10,7 +10,7 @@ export async function createClient(data: {
   email?: string;
   phone?: string;
   whatsapp?: string;
-  clientType: "balcao" | "revendedor" | "agencia" | "corporativo";
+  clientType: "balcao" | "revendedor" | "agencia" | "corporativo" | "site";
   userId?: number;
 }) {
   const db = await getDb();
@@ -91,7 +91,7 @@ export async function updateClient(
     email: string;
     phone: string;
     whatsapp: string;
-    clientType: "balcao" | "revendedor" | "agencia" | "corporativo";
+    clientType: "balcao" | "revendedor" | "agencia" | "corporativo" | "site";
     notes: string;
     isActive: boolean;
   }>
@@ -202,7 +202,7 @@ export async function getTopClients(limit: number = 10) {
  * Obter clientes por tipo
  */
 export async function getClientsByType(
-  clientType: "balcao" | "revendedor" | "agencia" | "corporativo"
+  clientType: "balcao" | "revendedor" | "agencia" | "corporativo" | "site"
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

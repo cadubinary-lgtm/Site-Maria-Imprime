@@ -570,6 +570,42 @@ export const quotationsRouter = router({
       return { variations: variationsWithOptions, attributes: attributesWithValues };
     }),
 
+  // ── Criar cliente rapidamente inline (sem sair do formulário de orçamento) ──
+  quickCreateClient: adminAnyProcedure
+    .input(z.object({
+      name: z.string().min(1),
+      email: z.string().email().optional().or(z.literal("")),
+      phone: z.string().optional(),
+      whatsapp: z.string().optional(),
+      clientType: z.enum(["balcao", "site", "revendedor", "agencia", "corporativo"]),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { clients } = await import("../drizzle/schema.js");
+      const result = await db.insert(clients).values({
+        name: input.name,
+        email: input.email || null,
+        phone: input.phone || null,
+        whatsapp: input.whatsapp || null,
+        clientType: input.clientType as any,
+        notes: input.notes || null,
+        isActive: true,
+      });
+      const newId = (result as any).insertId ?? (result as any)[0]?.insertId;
+      // Buscar o cliente recém-criado
+      const [newClient] = await db.select({
+        id: clients.id,
+        name: clients.name,
+        email: clients.email,
+        phone: clients.phone,
+        whatsapp: clients.whatsapp,
+        clientType: clients.clientType,
+      }).from(clients).where(eq(clients.id, Number(newId))).limit(1);
+      return newClient;
+    }),
+
   // ── Buscar clientes para autocomplete ──────────────────────────────────
   searchClients: adminAnyProcedure
     .input(z.object({ search: z.string().min(1) }))

@@ -26,7 +26,7 @@ export const crmRouter = router({
         email: z.string().email().optional(),
         phone: z.string().optional(),
         whatsapp: z.string().optional(),
-        clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo"]),
+        clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo", "site"]),
         userId: z.number().optional(),
       })
     )
