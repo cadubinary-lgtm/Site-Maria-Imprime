@@ -23,6 +23,7 @@ import {
   Trash2,
   Search,
   User,
+  UserPlus,
   Package,
   Truck,
   CreditCard,
@@ -31,6 +32,7 @@ import {
   ChevronDown,
   ChevronUp,
   Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,6 +85,14 @@ export default function AdminQuotationForm() {
   const [commercialNotes, setCommercialNotes] = useState("");
 
   const [showAddProduct, setShowAddProduct] = useState(false);
+  // Estado do formulário inline de cadastro de cliente
+  const [showNewClientForm, setShowNewClientForm] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientEmail, setNewClientEmail] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
+  const [newClientWhatsapp, setNewClientWhatsapp] = useState("");
+  const [newClientType, setNewClientType] = useState<"balcao" | "site">("balcao");
+  const [newClientNotes, setNewClientNotes] = useState("");
   const [productSearch, setProductSearch] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   // Estado para opções dinâmicas por produto (productId -> { variations, attributes })
@@ -174,6 +184,33 @@ export default function AdminQuotationForm() {
     { search: clientSearch },
     { enabled: clientSearch.length >= 2 }
   );
+
+  // ── Quick create client ──────────────────────────────────────────────────
+  const quickCreateClient = trpc.quotations.quickCreateClient.useMutation({
+    onSuccess: (newClient) => {
+      if (newClient) {
+        setClientId(newClient.id);
+        setClientName(newClient.name);
+        toast.success(`Cliente "${newClient.name}" cadastrado e selecionado!`);
+      }
+      setShowNewClientForm(false);
+      setNewClientName(""); setNewClientEmail(""); setNewClientPhone("");
+      setNewClientWhatsapp(""); setNewClientNotes(""); setNewClientType("balcao");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleQuickCreateClient = () => {
+    if (!newClientName.trim()) { toast.error("Nome do cliente é obrigatório."); return; }
+    quickCreateClient.mutate({
+      name: newClientName.trim(),
+      email: newClientEmail.trim() || undefined,
+      phone: newClientPhone.trim() || undefined,
+      whatsapp: newClientWhatsapp.trim() || undefined,
+      clientType: newClientType,
+      notes: newClientNotes.trim() || undefined,
+    });
+  };
 
   // ── Products ─────────────────────────────────────────────────────────────
   const { data: allProducts } = trpc.products.getAll.useQuery();
@@ -317,13 +354,27 @@ export default function AdminQuotationForm() {
 
           {/* Seção: Cliente */}
           <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <User className="w-4 h-4 text-pink-600" />
-              <h2 className="font-semibold text-gray-800">Cliente</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-pink-600" />
+                <h2 className="font-semibold text-gray-800">Cliente</h2>
+              </div>
+              {!showNewClientForm && !clientId && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 border-pink-200 text-pink-700 hover:bg-pink-50"
+                  onClick={() => { setShowNewClientForm(true); setShowClientSearch(false); }}
+                >
+                  <UserPlus className="w-3.5 h-3.5" /> Cadastrar Cliente
+                </Button>
+              )}
             </div>
-            <div className="relative">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
+
+            {/* Busca de cliente existente */}
+            {!showNewClientForm && (
+              <div className="relative">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Buscar cliente por nome, e-mail ou telefone..."
@@ -337,34 +388,136 @@ export default function AdminQuotationForm() {
                     onFocus={() => setShowClientSearch(true)}
                   />
                 </div>
-              </div>
-              {showClientSearch && clientSearch.length >= 2 && (clientResults ?? []).length > 0 && (
-                <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {(clientResults ?? []).map((c: any) => (
-                    <button
-                      key={c.id}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0"
-                      onClick={() => {
-                        setClientId(c.id);
-                        setClientName(c.name);
-                        setClientSearch("");
-                        setShowClientSearch(false);
-                      }}
-                    >
-                      <p className="font-medium text-sm text-gray-800">{c.name}</p>
-                      <p className="text-xs text-gray-400">{c.email ?? c.phone ?? ""}</p>
+                {showClientSearch && clientSearch.length >= 2 && (
+                  <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {(clientResults ?? []).length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-400 text-center">
+                        Nenhum cliente encontrado.
+                        <button
+                          className="ml-1 text-pink-600 font-medium hover:underline"
+                          onClick={() => { setShowNewClientForm(true); setShowClientSearch(false); setNewClientName(clientSearch); }}
+                        >
+                          Cadastrar novo?
+                        </button>
+                      </div>
+                    ) : (clientResults ?? []).map((c: any) => (
+                      <button
+                        key={c.id}
+                        className="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0"
+                        onClick={() => {
+                          setClientId(c.id);
+                          setClientName(c.name);
+                          setClientSearch("");
+                          setShowClientSearch(false);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-sm text-gray-800">{c.name}</p>
+                            <p className="text-xs text-gray-400">{c.email ?? c.phone ?? ""}</p>
+                          </div>
+                          {c.clientType && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              c.clientType === "site" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                            }`}>
+                              {c.clientType === "site" ? "Site" : c.clientType === "balcao" ? "Balcão" : c.clientType}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {clientId && (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-1.5 rounded">
+                    <User className="w-3.5 h-3.5" />
+                    <span className="font-medium">{clientName}</span>
+                    <button className="ml-auto text-gray-400 hover:text-red-500 text-xs" onClick={() => { setClientId(null); setClientName(""); }}>
+                      Trocar
                     </button>
-                  ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Formulário inline de cadastro de novo cliente */}
+            {showNewClientForm && (
+              <div className="border border-pink-200 rounded-lg p-4 bg-pink-50/30 space-y-3">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-pink-700">Novo Cliente</p>
+                  <button onClick={() => setShowNewClientForm(false)} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-              )}
-            </div>
-            {clientId && (
-              <div className="mt-2 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-1.5 rounded">
-                <User className="w-3.5 h-3.5" />
-                <span className="font-medium">{clientName}</span>
-                <button className="ml-auto text-gray-400 hover:text-red-500 text-xs" onClick={() => { setClientId(null); setClientName(""); }}>
-                  Trocar
-                </button>
+
+                {/* Canal de venda */}
+                <div>
+                  <label className="text-xs text-gray-500 font-medium block mb-1.5">Canal de venda *</label>
+                  <div className="flex gap-3">
+                    {[
+                      { value: "balcao", label: "Cliente Balcão", desc: "Atendimento presencial" },
+                      { value: "site", label: "Cliente Site", desc: "Compra online" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setNewClientType(opt.value as "balcao" | "site")}
+                        className={`flex-1 flex items-start gap-2 p-3 rounded-lg border text-left transition-all ${
+                          newClientType === opt.value
+                            ? "border-pink-500 bg-pink-50 shadow-sm"
+                            : "border-gray-200 bg-white hover:border-pink-300"
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                          newClientType === opt.value ? "border-pink-500" : "border-gray-300"
+                        }`}>
+                          {newClientType === opt.value && <div className="w-2 h-2 rounded-full bg-pink-500" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${newClientType === opt.value ? "text-pink-700" : "text-gray-800"}`}>{opt.label}</p>
+                          <p className="text-xs text-gray-400">{opt.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="text-xs text-gray-500 font-medium">Nome *</label>
+                    <Input className="h-8 mt-0.5 text-sm" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="Nome completo" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">E-mail</label>
+                    <Input className="h-8 mt-0.5 text-sm" type="email" value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="email@exemplo.com" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">Telefone</label>
+                    <Input className="h-8 mt-0.5 text-sm" value={newClientPhone} onChange={(e) => setNewClientPhone(e.target.value)} placeholder="(00) 00000-0000" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">WhatsApp</label>
+                    <Input className="h-8 mt-0.5 text-sm" value={newClientWhatsapp} onChange={(e) => setNewClientWhatsapp(e.target.value)} placeholder="(00) 00000-0000" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">Observações</label>
+                    <Input className="h-8 mt-0.5 text-sm" value={newClientNotes} onChange={(e) => setNewClientNotes(e.target.value)} placeholder="Opcional" />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white gap-1"
+                    onClick={handleQuickCreateClient}
+                    disabled={quickCreateClient.isPending}
+                  >
+                    {quickCreateClient.isPending ? "Salvando..." : "Salvar e Selecionar"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowNewClientForm(false)}>
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             )}
           </div>

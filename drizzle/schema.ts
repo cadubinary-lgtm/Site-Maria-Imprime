@@ -492,7 +492,7 @@ export const clients = mysqlTable("clients", {
   email: varchar("email", { length: 320 }),
   phone: varchar("phone", { length: 20 }),
   whatsapp: varchar("whatsapp", { length: 20 }),
-  clientType: mysqlEnum("clientType", ["balcao", "revendedor", "agencia", "corporativo"]).default("balcao").notNull(),
+  clientType: mysqlEnum("clientType", ["balcao", "revendedor", "agencia", "corporativo", "site"]).default("balcao").notNull(),
   totalVolume: decimal("totalVolume", { precision: 15, scale: 2 }).default("0").notNull(), // Volume total comprado
   totalOrders: int("totalOrders").default(0).notNull(), // Quantidade de pedidos
   averageTicket: decimal("averageTicket", { precision: 10, scale: 2 }).default("0").notNull(), // Ticket médio
