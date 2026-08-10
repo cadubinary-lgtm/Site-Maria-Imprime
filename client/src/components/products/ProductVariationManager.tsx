@@ -157,6 +157,12 @@ export function ProductVariationManager() {
   const { data: allSegments = [] } = trpc.segments.list.useQuery();
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
+  // Fetch product IDs for selected segment
+  const { data: segmentProductIds } = trpc.products.getBySegmentId.useQuery(
+    { segmentId: selectedSegmentId! },
+    { enabled: selectedSegmentId !== null }
+  );
+
   // Fetch variation types for selected product
   const { data: variationTypes = [], refetch: refetchVariationTypes } = trpc.variations.getByProduct.useQuery(
     { productId: selectedProductId || 0 },
@@ -584,8 +590,7 @@ export function ProductVariationManager() {
             {(products as any[])
               .filter((p: any) => {
                 const matchSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());
-                const selectedSeg = (allSegments as any[]).find((s: any) => s.id === selectedSegmentId);
-                const matchSegment = selectedSegmentId === null || p.segment === selectedSeg?.slug || p.segment === selectedSeg?.name?.toLowerCase();
+                const matchSegment = selectedSegmentId === null || (segmentProductIds ?? []).includes(p.id);
                 return matchSearch && matchSegment;
               })
               .map((product: any) => (
@@ -601,8 +606,8 @@ export function ProductVariationManager() {
             {(products as any[]).filter((p: any) => {
               const matchSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());
               const selectedSeg = (allSegments as any[]).find((s: any) => s.id === selectedSegmentId);
-              const matchSegment = selectedSegmentId === null || p.segment === selectedSeg?.slug || p.segment === selectedSeg?.name?.toLowerCase();
-              return matchSearch && matchSegment;
+              const matchSegment2 = selectedSegmentId === null || (segmentProductIds ?? []).includes(p.id);
+              return matchSearch && matchSegment2;
             }).length === 0 && (
               <p className="text-sm text-gray-400 text-center py-4">Nenhum produto encontrado</p>
             )}
