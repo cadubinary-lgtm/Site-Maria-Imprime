@@ -230,6 +230,12 @@ export function ProductVariationManager() {
   const syncGlobalNameMutation = trpc.adminVariations.syncGlobalName.useMutation();
 
   // Drag & drop sensors
+  // Sensors para o DndContext externo (arrastar colunas horizontalmente)
+  const columnSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+  // Sensors para o DndContext interno (reordenar variações verticalmente)
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -588,7 +594,7 @@ export function ProductVariationManager() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
      {/* Layout Kanban: 4 colunas com drag-and-drop horizontal */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
+      <DndContext sensors={columnSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
         <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
 
