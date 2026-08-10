@@ -235,8 +235,10 @@ export default function AdminQuotationForm() {
   );
 
   // ── Cálculo de preço por item baseado nas specs ──────────────────────────
-  const calcItemUnitPrice = (item: QuotationItem, pricing: any | null): number => {
-    if (!pricing) return item.unitPrice;
+  // Retorna { unitPrice: preço/m² (ou preço unitário), totalPrice: unitPrice × área × qtd }
+  const calcItemPricing = (item: QuotationItem, pricing: any | null): { unitPrice: number; totalPrice: number } => {
+    const fallback = { unitPrice: item.unitPrice, totalPrice: item.totalPrice };
+    if (!pricing) return fallback;
     const specs = item._specsParsed ?? {};
     const w = parseFloat(specs.width ?? specs.largura ?? "0") || 0;
     const h = parseFloat(specs.height ?? specs.altura ?? "0") || 0;
@@ -245,42 +247,50 @@ export default function AdminQuotationForm() {
 
     if ((pricing.calculationType === "m2" || pricing.calculationType === "metro_linear") && pricing.pricePerM2 > 0) {
       const baseArea = pricing.calculationType === "metro_linear" ? (w > 0 ? w : 1) : billedArea;
-      if (baseArea <= 0) return 0;
-      let price = pricing.pricePerM2 * baseArea;
+      if (baseArea <= 0) return fallback;
 
-      // Modificadores de variações
+      // UNIT. = preço por m² base + modificadores por m²
+      let pricePerM2 = pricing.pricePerM2;
+
+      // Modificadores de variações (todos tratados como por m² neste contexto)
       (pricing.variations ?? []).forEach((vt: any) => {
         const selectedName = specs[vt.name.toLowerCase().replace(/\s+/g, "_")];
         if (!selectedName) return;
         const opt = (vt.options ?? []).find((o: any) => o.name === selectedName);
         if (!opt) return;
         const mod = parseFloat(opt.priceModifier?.toString() ?? "0");
-        if (opt.calculationType === "m2") price += mod * baseArea;
-        else price += mod;
+        // Modificadores de variação são por m² (somam ao preço/m²)
+        pricePerM2 += mod;
       });
 
-      // Modificadores de atributos
+      // Modificadores de atributos (por m² também)
       (pricing.attributes ?? []).forEach((attr: any) => {
         const selectedValue = specs[attr.name.toLowerCase().replace(/\s+/g, "_")];
         if (!selectedValue) return;
         const v = (attr.values ?? []).find((val: any) => val.value === selectedValue);
         if (!v) return;
-        price += parseFloat(v.priceModifier?.toString() ?? "0");
+        pricePerM2 += parseFloat(v.priceModifier?.toString() ?? "0");
       });
 
-      return Math.max(0, price);
+      const unitPrice = Math.max(0, pricePerM2);
+      // TOTAL = preço/m² × área × quantidade
+      const totalPrice = unitPrice * baseArea * item.quantity;
+      return { unitPrice, totalPrice };
     }
 
     // Produto por unidade/pacote: usa preço base + modifiers fixos
-    let price = pricing.price ?? 0;
+    let unitPrice = pricing.price ?? 0;
     (pricing.variations ?? []).forEach((vt: any) => {
       const selectedName = specs[vt.name.toLowerCase().replace(/\s+/g, "_")];
       if (!selectedName) return;
       const opt = (vt.options ?? []).find((o: any) => o.name === selectedName);
-      if (opt) price += parseFloat(opt.priceModifier?.toString() ?? "0");
+      if (opt) unitPrice += parseFloat(opt.priceModifier?.toString() ?? "0");
     });
-    return Math.max(0, price);
+    unitPrice = Math.max(0, unitPrice);
+    return { unitPrice, totalPrice: unitPrice * item.quantity };
   };
+  // Alias para compatibilidade
+  const calcItemUnitPrice = (item: QuotationItem, pricing: any | null): number => calcItemPricing(item, pricing).unitPrice;
 
   // ── Calculations ─────────────────────────────────────────────────────────
   const subtotal = items.reduce((acc, i) => acc + i.totalPrice, 0);
@@ -381,14 +391,14 @@ export default function AdminQuotationForm() {
         const u = updates.unitPrice ?? next[idx].unitPrice;
         next[idx].totalPrice = q * u;
       }
-      // Se specs mudaram, recalcular preço automaticamente
-      if (updates.specifications !== undefined || updates._specsParsed !== undefined) {
+      // Se specs ou quantidade mudaram, recalcular preço automaticamente
+      if (updates.specifications !== undefined || updates._specsParsed !== undefined || updates.quantity !== undefined) {
         const pricing = pricingCache[next[idx].productId];
         if (pricing) {
-          const newUnitPrice = calcItemUnitPrice(next[idx], pricing);
-          if (newUnitPrice > 0) {
-            next[idx].unitPrice = newUnitPrice;
-            next[idx].totalPrice = newUnitPrice * next[idx].quantity;
+          const { unitPrice: newUnit, totalPrice: newTotal } = calcItemPricing(next[idx], pricing);
+          if (newUnit > 0) {
+            next[idx].unitPrice = newUnit;
+            next[idx].totalPrice = newTotal;
           }
         }
       }
