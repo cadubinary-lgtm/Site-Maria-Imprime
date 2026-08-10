@@ -71,55 +71,41 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             : "bg-white hover:bg-gray-50"
         }`}
       >
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex items-start gap-3 flex-1">
-            <div {...attributes} {...listeners}>
-              <GripVertical className="w-5 h-5 text-gray-400 mt-1 cursor-grab active:cursor-grabbing" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className={`transform transition-transform text-gray-600 ${isExpanded ? 'rotate-90' : ''}`}>
-                ▶
-              </div>
-              <div>
-                <h4 className="font-semibold">{vt.name}</h4>
-                <p className="text-sm text-gray-600">
-                  {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
-                </p>
-              </div>
-            </div>
+        {/* Linha 1: drag handle + seta + nome */}
+        <div className="flex items-center gap-2">
+          <div {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>
+            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab active:cursor-grabbing flex-shrink-0" />
           </div>
-          <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Obrigatório:</Label>
-              <RadioGroup
-                value={vt.isRequired ? "sim" : "nao"}
-                onValueChange={(value) => {
-                  onToggleRequired(vt.id, value === "sim");
-                }}
-                className="flex gap-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
-                  <Label htmlFor={`required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="nao" id={`required-nao-${vt.id}`} />
-                  <Label htmlFor={`required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(vt.id);
-              }}
-              className="text-red-500 hover:text-red-700"
+          <div className={`transform transition-transform text-gray-500 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
+          <h4 className="font-semibold text-sm flex-1 truncate">{vt.name}</h4>
+        </div>
+        {/* Linha 2: obrigatório + lixeira */}
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">Obrigatório:</span>
+            <RadioGroup
+              value={vt.isRequired ? "sim" : "nao"}
+              onValueChange={(value) => onToggleRequired(vt.id, value === "sim")}
+              className="flex gap-2"
             >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
+                <Label htmlFor={`required-sim-${vt.id}`} className="cursor-pointer text-xs">Sim</Label>
+              </div>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="nao" id={`required-nao-${vt.id}`} />
+                <Label htmlFor={`required-nao-${vt.id}`} className="cursor-pointer text-xs">Não</Label>
+              </div>
+            </RadioGroup>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); onDelete(vt.id); }}
+            className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
         </div>
       </div>
 
@@ -552,14 +538,14 @@ export function ProductVariationManager() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
      {/* Layout Kanban: 4 colunas */}
-      <div className="flex flex-row overflow-x-auto gap-4 items-start w-full h-[calc(100vh-160px)] pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <div className="w-[260px] min-w-[260px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Segmentos</p>
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          <div className="p-3 space-y-1">
             <button
               onClick={() => setSelectedSegmentId(null)}
               className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
@@ -583,7 +569,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
-        <div className="w-[280px] min-w-[280px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Produtos</p>
           </div>
@@ -594,7 +580,7 @@ export function ProductVariationManager() {
               onChange={(e) => setProductSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2">
+          <div className="px-3 pb-3 space-y-2">
             {(products as any[])
               .filter((p: any) => {
                 const matchSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());
@@ -624,7 +610,7 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
-        <div className="w-[380px] min-w-[380px] flex-shrink-0 flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white h-full overflow-hidden">
+        <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               Variações do Produto
@@ -635,7 +621,7 @@ export function ProductVariationManager() {
               )}
             </p>
           </div>
-          <div className="flex-1 overflow-y-auto p-3">
+          <div className="p-3">
             {!selectedProductId ? (
               <p className="text-sm text-gray-400 text-center py-8">Selecione um produto na coluna ao lado</p>
             ) : variationTypes.length === 0 ? (
@@ -678,14 +664,14 @@ export function ProductVariationManager() {
         </div>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
-        <div className="w-[420px] min-w-[420px] flex-shrink-0 flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 h-full overflow-hidden">
+        <div className="flex flex-col border-2 border-purple-200 rounded-xl shadow-sm bg-purple-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-purple-200 bg-purple-100">
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">📚 Tipos no Sistema</p>
             {selectedProductId && (
               <p className="text-xs text-purple-600 mt-0.5">Clique em "Adicionar ao Produto" para vincular</p>
             )}
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-4">
+          <div className="p-3 space-y-4">
             {/* Formulário Adicionar Novo Tipo Global */}
             <div className="border rounded-lg p-3 bg-white">
               <h3 className="font-semibold text-sm mb-3">Adicionar Novo Tipo Global</h3>
@@ -735,115 +721,55 @@ export function ProductVariationManager() {
                   const isExpanded = expandedGlobalVariationId === vt.id;
                   return (
                     <div key={vt.id} className="border rounded-lg bg-white overflow-hidden">
-                      <div
+                     <div
                         onClick={() => editingNameId === vt.id ? undefined : setExpandedGlobalVariationId(isExpanded ? null : vt.id)}
-                        className={`p-4 hover:bg-purple-50 transition flex justify-between items-start gap-4 ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
+                        className={`p-4 hover:bg-purple-50 transition ${editingNameId === vt.id ? '' : 'cursor-pointer'}`}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <div className={`transform transition-transform text-purple-900 ${isExpanded ? 'rotate-90' : ''}`}>
-                              ►
+                        {/* Linha 1: seta + nome */}
+                        <div className="flex items-center gap-2">
+                          <div className={`transform transition-transform text-purple-700 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
+                          {editingNameId === vt.id ? (
+                            <div className="flex items-center gap-2 flex-1" onClick={(e) => e.stopPropagation()}>
+                              <Input
+                                autoFocus
+                                value={editingNameValue}
+                                onChange={(e) => setEditingNameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleEditName();
+                                  if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
+                                }}
+                                className="font-semibold text-purple-900 h-8 text-sm"
+                              />
+                              <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>Salvar</Button>
+                              <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8"><X className="w-3 h-3" /></Button>
                             </div>
-                            {editingNameId === vt.id ? (
-                              <div className="flex items-center gap-2 flex-1" onClick={(e) => e.stopPropagation()}>
-                                <Input
-                                  autoFocus
-                                  value={editingNameValue}
-                                  onChange={(e) => setEditingNameValue(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleEditName();
-                                    if (e.key === 'Escape') { setEditingNameId(null); setEditingNameValue(''); }
-                                  }}
-                                  className="font-semibold text-purple-900 h-8 text-base"
-                                />
-                                <Button size="sm" onClick={handleEditName} className="bg-blue-600 hover:bg-blue-700 h-8" disabled={updateVariationTypeMutation.isPending}>
-                                  Salvar
-                                </Button>
-                                <Button size="sm" variant="outline" onClick={() => { setEditingNameId(null); setEditingNameValue(''); }} className="h-8">
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <h4 className="font-semibold text-purple-900">{vt.name}</h4>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-600 ml-6">
-                            {vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções
-                          </p>
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                          {editingNameId !== vt.id && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setEditingNameId(vt.id);
-                              setEditingNameValue(vt.name);
-                            }}
-                            className="bg-blue-50 border-blue-300 hover:bg-blue-100"
-                          >
-                            <Edit2 className="w-4 h-4 mr-1" />
-                            Editar Nome
-                          </Button>
+                          ) : (
+                            <h4 className="font-semibold text-purple-900 text-sm flex-1">{vt.name}</h4>
                           )}
-                          <div className="flex items-center gap-2">
-                            <Label className="text-sm font-medium">Obrigatório:</Label>
-                            <RadioGroup
-                              value={vt.isRequired ? "sim" : "nao"}
-                              onValueChange={(value) => {
-                                handleToggleRequired(vt.id, value === "sim");
-                              }}
-                              className="flex gap-3"
-                            >
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} />
-                                <Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-sm">Sim</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} />
-                                <Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-sm">Não</Label>
-                              </div>
-                            </RadioGroup>
+                        </div>
+                        {/* Linha 2: info + ações */}
+                        <div className="mt-2 pt-2 border-t border-purple-100 space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <p className="text-xs text-gray-500">{vt.isRequired ? "Obrigatório" : "Opcional"} • {vt.options?.length || 0} opções</p>
+                          <div className="flex flex-wrap gap-1">
+                            {editingNameId !== vt.id && (
+                              <Button variant="outline" size="sm" onClick={() => { setEditingNameId(vt.id); setEditingNameValue(vt.name); }} className="bg-blue-50 border-blue-300 hover:bg-blue-100 text-xs h-7">
+                                <Edit2 className="w-3 h-3 mr-1" />Editar Nome
+                              </Button>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-gray-500">Obrig.:</span>
+                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleRequired(vt.id, value === "sim")} className="flex gap-2">
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} /><Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-xs">Sim</Label></div>
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} /><Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-xs">Não</Label></div>
+                              </RadioGroup>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
                           </div>
-                          <div className="flex gap-0">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")}
-                              disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending}
-                              className="text-gray-400 hover:text-gray-700 px-1"
-                              title="Mover para cima"
-                            >
-                              <ChevronUp className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")}
-                              disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending}
-                              className="text-gray-400 hover:text-gray-700 px-1"
-                              title="Mover para baixo"
-                            >
-                              <ChevronDown className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteVariationType(vt.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
                           {selectedProductId && (
-                            <Button
-                              onClick={() => handleLinkGlobalVariation(vt.id)}
-                              className="bg-purple-600 hover:bg-purple-700 text-white"
-                              size="sm"
-                              disabled={linkGlobalMutation.isPending}
-                            >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Adicionar ao Produto
+                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
+                              <Plus className="w-3 h-3 mr-1" />Adicionar ao Produto
                             </Button>
                           )}
                         </div>
