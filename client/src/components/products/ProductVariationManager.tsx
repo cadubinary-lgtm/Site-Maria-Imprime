@@ -592,7 +592,7 @@ export function ProductVariationManager() {
      {/* Layout Kanban: 4 colunas com drag-and-drop horizontal */}
       <DndContext sensors={columnSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
         <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 w-full p-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
         <SortableColumn id="segmentos">{(dragHandle) => (
