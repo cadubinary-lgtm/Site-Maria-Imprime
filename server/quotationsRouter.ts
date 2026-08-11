@@ -272,7 +272,7 @@ export const quotationsRouter = router({
       return { success: true, quotationId, quotationNumber };
     }),
 
-  // ── Atualizar orçamento (apenas rascunho) ───────────────────────────────
+  // ── Atualizar orçamento ─────────────────────────────────────────────────
   update: adminAnyProcedure
     .input(z.object({
       id: z.number(),
@@ -307,10 +307,6 @@ export const quotationsRouter = router({
 
       const [existing] = await db.select({ status: quotations.status }).from(quotations).where(eq(quotations.id, input.id));
       if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
-      if (!["rascunho", "em_negociacao"].includes(existing.status)) {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Apenas orçamentos em rascunho ou negociação podem ser editados." });
-      }
-
       const updates: Record<string, any> = {};
       if (input.clientId !== undefined) updates.clientId = input.clientId;
       if (input.discountType !== undefined) updates.discountType = input.discountType;
