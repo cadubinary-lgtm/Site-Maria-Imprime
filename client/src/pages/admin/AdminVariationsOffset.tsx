@@ -17,6 +17,14 @@ export default function AdminVariationsOffset() {
   const [editingTypeName, setEditingTypeName] = useState("");
   const [newOptionNames, setNewOptionNames] = useState<Record<number, string>>({});
   const [newOptionPrices, setNewOptionPrices] = useState<Record<number, string>>({});
+  const [newOptionCalcTypes, setNewOptionCalcTypes] = useState<Record<number, string>>({});
+
+  const CALC_TYPE_OPTIONS = [
+    { value: "unit", label: "Unidade" },
+    { value: "m2", label: "m² (Metro Quadrado)" },
+    { value: "linear", label: "Metro Linear" },
+    { value: "package", label: "Pacote" },
+  ];
 
   // ── Queries ───────────────────────────────────────────────────────────────
   const utils = trpc.useUtils();
@@ -92,10 +100,11 @@ export default function AdminVariationsOffset() {
         variationTypeId: typeId,
         name,
         priceModifier: newOptionPrices[typeId] || "0",
-        calculationType: "unit",
+        calculationType: (newOptionCalcTypes[typeId] || "unit") as "unit" | "m2" | "linear" | "package",
       });
       setNewOptionNames(prev => ({ ...prev, [typeId]: "" }));
       setNewOptionPrices(prev => ({ ...prev, [typeId]: "" }));
+      setNewOptionCalcTypes(prev => ({ ...prev, [typeId]: "unit" }));
       await utils.variationsOffset.getGlobal.invalidate();
       refetch();
       toast.success("Opção adicionada!");
@@ -265,11 +274,12 @@ export default function AdminVariationsOffset() {
                       <div key={opt.id} className="flex items-center justify-between py-1.5 px-3 bg-gray-50 rounded-lg border border-gray-100">
                         <span className="text-sm text-gray-700">{opt.name}</span>
                         <div className="flex items-center gap-3">
-                          {parseFloat(opt.priceModifier ?? "0") !== 0 && (
-                            <span className="text-xs text-gray-500">
-                              {parseFloat(opt.priceModifier) > 0 ? "+" : ""}R$ {parseFloat(opt.priceModifier).toFixed(2)}
-                            </span>
-                          )}
+                         {parseFloat(opt.priceModifier ?? "0") !== 0 && (
+                           <span className="text-xs text-gray-500">
+                             {parseFloat(opt.priceModifier) > 0 ? "+" : ""}R$ {parseFloat(opt.priceModifier).toFixed(2)}
+                            /{CALC_TYPE_OPTIONS.find(c => c.value === (opt.calculationType ?? "unit"))?.label ?? "Unidade"}
+                           </span>
+                         )}
                           <button
                             onClick={() => handleDeleteOption(opt.id)}
                             className="text-gray-300 hover:text-red-500 transition"
@@ -297,6 +307,15 @@ export default function AdminVariationsOffset() {
                         value={newOptionPrices[vt.id] ?? ""}
                         onChange={e => setNewOptionPrices(prev => ({ ...prev, [vt.id]: e.target.value }))}
                       />
+                      <select
+                        className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white"
+                        value={newOptionCalcTypes[vt.id] ?? "unit"}
+                        onChange={e => setNewOptionCalcTypes(prev => ({ ...prev, [vt.id]: e.target.value }))}
+                      >
+                        {CALC_TYPE_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                       <Button
                         size="sm"
                         onClick={() => handleAddOption(vt.id)}
