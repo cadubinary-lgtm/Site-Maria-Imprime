@@ -5,7 +5,7 @@ import { productSegments } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq, sql, asc } from 'drizzle-orm';
+import { isNull, desc, eq, sql, asc, and } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -372,6 +372,26 @@ export async function getVariationTypesByProduct(productId: number) {
   const result = await db.select().from(variationTypes)
     .where(eq(variationTypes.productId, productId))
     .orderBy(variationTypes.order);
+  return result;
+}
+
+// Variações globais filtradas por scope (null = comunicação visual, "offset" = offset)
+export async function getGlobalVariationTypesByScope(scope: string | null) {
+  const db = await getDb();
+  if (!db) return [];
+  const whereClause = scope === null
+    ? and(isNull(variationTypes.productId), isNull(variationTypes.scope))
+    : and(isNull(variationTypes.productId), eq(variationTypes.scope as any, scope));
+  const result = await db.select().from(variationTypes)
+    .where(whereClause)
+    .orderBy(variationTypes.order);
+  return result;
+}
+
+export async function createVariationTypeWithScope(data: any, scope: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(variationTypes).values({ ...data, scope } as any);
   return result;
 }
 

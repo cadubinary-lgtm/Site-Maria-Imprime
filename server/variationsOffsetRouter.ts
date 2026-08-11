@@ -2,9 +2,9 @@ import { router, publicProcedure, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-  getGlobalVariationTypes,
+  getGlobalVariationTypesByScope,
+  createVariationTypeWithScope,
   getVariationOptionsByType,
-  createVariationType,
   createVariationOption,
   updateVariationType,
   deleteVariationType,
@@ -25,13 +25,14 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 
 /**
- * Router de variações de Comunicação Visual.
- * Independente do variationsOffsetRouter — mesmas funções de banco, namespace separado.
+ * Router de variações de Offset.
+ * Completamente independente do adminVariations — dados isolados via scope="offset".
+ * Variações criadas aqui NUNCA aparecem na página /admin/variacoes (Comunicação Visual).
  */
 export const variationsOffsetRouter = router({
   getGlobal: publicProcedure
     .query(async () => {
-      const types = await getGlobalVariationTypes();
+      const types = await getGlobalVariationTypesByScope("offset");
       const typesWithOptions = await Promise.all(
         types.map(async (type) => ({
           ...type,
@@ -47,13 +48,13 @@ export const variationsOffsetRouter = router({
       name: z.string(),
       isRequired: z.boolean().default(true),
     }))
-    .mutation(async ({ input }) => {
-      return await createVariationType({
-        productId: input.productId as any,
+      .mutation(async ({ input }) => {
+      return await createVariationTypeWithScope({
+        productId: input.productId,
         type: input.type,
         name: input.name,
         isRequired: input.isRequired,
-      });
+      }, "offset");
     }),
   createOption: adminProcedure
     .input(z.object({
