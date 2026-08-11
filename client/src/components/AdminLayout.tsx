@@ -383,7 +383,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "SISTEMA",
         icon: <Settings className="w-4 h-4" />,
         children: [
-          { label: "Usuários", href: "/admin/clientes" },
+          { label: "Usuários", href: "/admin/usuarios" },
           { label: "Integrações", href: "/admin/vincular-atributos" },
         ],
       },

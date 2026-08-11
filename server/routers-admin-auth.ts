@@ -517,4 +517,68 @@ export const adminAuthRouter = router({
     });
     return { exists: !!existing };
   }),
+
+  /**
+   * Listar admins com campo permissions incluído
+   */
+  listAdminsWithPermissions: adminOrManusAuthProcedure.query(async () => {
+    const db = (await getDb())!;
+    const result = await (db as any).query.adminAccounts.findMany({
+      orderBy: (t: any, { desc }: any) => desc(t.createdAt),
+    });
+    return result.map((a: any) => ({
+      id: a.id,
+      name: a.name,
+      email: a.email,
+      role: a.role,
+      status: a.status,
+      lastLogin: a.lastLogin,
+      createdAt: a.createdAt,
+      permissions: a.permissions ? JSON.parse(a.permissions) : null,
+    }));
+  }),
+
+  /**
+   * Atualizar permissões de menu de um operador
+   */
+  updateAdminPermissions: adminOrManusAuthProcedure
+    .input(z.object({
+      id: z.number(),
+      permissions: z.array(z.string()).nullable(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = (await getDb())!;
+      const adminUser = (ctx as any).adminUser;
+      await db.update(adminAccounts)
+        .set({
+          permissions: input.permissions ? JSON.stringify(input.permissions) : null,
+          updatedAt: Date.now(),
+        } as any)
+        .where(eq(adminAccounts.id, input.id));
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "update_permissions",
+        entity: "adminAccounts",
+        entityId: String(input.id),
+        after: { permissions: input.permissions },
+      });
+      return { success: true };
+    }),
+
+  /**
+   * Retornar permissões do admin logado (para o AdminLayout filtrar menus)
+   */
+  myPermissions: publicProcedure.query(async ({ ctx }) => {
+    const adminUser = await authenticateAdminRequest(ctx.req);
+    if (!adminUser) return null;
+    const db = (await getDb())!;
+    const row = await (db as any).query.adminAccounts.findFirst({
+      where: eq(adminAccounts.id, adminUser.adminId),
+    });
+    if (!row) return null;
+    // superadmin tem acesso total (null = sem restrição)
+    if (row.role === "superadmin") return null;
+    return row.permissions ? JSON.parse(row.permissions) : null;
+  }),
 });
