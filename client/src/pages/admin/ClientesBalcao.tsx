@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Search, Users, UserCheck, AlertCircle, Ban,
   RefreshCw, Mail, Phone, Trash2, Eye, MapPin, ShoppingBag,
-  Calendar, Plus,
+  Calendar, Plus, Store, StoreIcon,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -206,6 +206,14 @@ export default function ClientesBalcao() {
     onError: (err) => toast.error(err.message),
   });
 
+  const togglePickup = trpc.crm.adminToggleBalcaoPickup.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(vars.allow ? "Retirada na loja liberada!" : "Retirada na loja revogada!");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const clients = data?.clients ?? [];
   const total = data?.total ?? 0;
   const activeCount = clients.filter((c: any) => c.isActive).length;
@@ -301,6 +309,7 @@ export default function ClientesBalcao() {
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Cadastro</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600">Retirada</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Ações</th>
                       </tr>
                     </thead>
@@ -333,6 +342,27 @@ export default function ClientesBalcao() {
                           </td>
                           <td className="px-4 py-3 text-gray-500 text-xs">
                             {new Date(client.createdAt).toLocaleDateString("pt-BR")}
+                          </td>
+                          <td className="px-4 py-3">
+                            {client.allowStorePickup ? (
+                              <Button
+                                variant="outline" size="sm"
+                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                onClick={() => togglePickup.mutate({ clientId: client.id, allow: false })}
+                                disabled={togglePickup.isPending}
+                              >
+                                <Store className="w-3.5 h-3.5 mr-1" /> Liberado
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline" size="sm"
+                                className="text-gray-400 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                                onClick={() => togglePickup.mutate({ clientId: client.id, allow: true })}
+                                disabled={togglePickup.isPending}
+                              >
+                                <StoreIcon className="w-3.5 h-3.5 mr-1" /> Liberar
+                              </Button>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1.5">

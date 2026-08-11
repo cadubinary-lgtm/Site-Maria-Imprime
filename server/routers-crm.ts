@@ -192,4 +192,14 @@ export const crmRouter = router({
       await db.update(clients).set({ isActive: false } as any).where(eq(clients.id, input.clientId));
       return { success: true };
     }),
+
+  adminToggleBalcaoPickup: adminProcedure
+    .input(z.object({ clientId: z.number(), allow: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const { clients } = await import("../drizzle/schema.js");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      await db.update(clients).set({ allowStorePickup: input.allow } as any).where(eq(clients.id, input.clientId));
+      return { success: true };
+    }),
 });
