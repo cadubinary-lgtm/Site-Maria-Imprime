@@ -2427,3 +2427,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Correção: Preço da Lona Impressa na Vitrine
 - [x] Corrigir a vitrine pública para exibir o preço-base comercial da Lona Impressa (R$ 75,00/m²), sem fallback incorreto para R$ 1,00
+
+## Habilidade Reutilizável: Integridade de Preços
+- [x] Criar skill para diagnosticar e corrigir divergências entre preço comercial e preço público por tipo de cobrança
+
+## Auditoria de Integridade de Preços
+- [x] Executar varredura no banco para identificar produtos com preço comercial ausente ou fallback técnico indevido
+- [x] Criar teste automatizado de integridade de preços por tipo de cobrança
+- [x] Validar a exibição pública da Lona Impressa com R$ 75,00/m²
