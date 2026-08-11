@@ -241,8 +241,8 @@ export default function AdminQuotationForm() {
     const fallback = { unitPrice: item.unitPrice, totalPrice: item.totalPrice };
     if (!pricing) return fallback;
     const specs = item._specsParsed ?? {};
-    const w = parseFloat(specs.width ?? specs.largura ?? "0") || 0;
-    const h = parseFloat(specs.height ?? specs.altura ?? "0") || 0;
+    const w = parseFloat((specs.width ?? specs.largura ?? "0").replace(",", ".")) || 0;
+    const h = parseFloat((specs.height ?? specs.altura ?? "0").replace(",", ".")) || 0;
     const area = w * h;
     const billedArea = area > 0 ? Math.max(area, 1) : 0;
 
@@ -752,11 +752,33 @@ export default function AdminQuotationForm() {
                             {/* Medidas */}
                             <div>
                               <label className="text-xs text-gray-500 font-medium">Largura (m)</label>
-                              <Input className="h-7 mt-0.5 text-sm" value={specs.width ?? ""} onChange={(e) => updateSpec("width", e.target.value)} />
+                              <Input
+                                className="h-7 mt-0.5 text-sm"
+                                value={specs.width ?? ""}
+                                onChange={(e) => updateSpec("width", e.target.value)}
+                                onBlur={(e) => {
+                                  const raw = e.target.value.replace(",", ".");
+                                  const val = parseFloat(raw);
+                                  if (!isNaN(val) && val > 0) updateSpec("width", val.toFixed(2).replace(".", ","));
+                                }}
+                                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                                placeholder="0,00"
+                              />
                             </div>
                             <div>
                               <label className="text-xs text-gray-500 font-medium">Altura (m)</label>
-                              <Input className="h-7 mt-0.5 text-sm" value={specs.height ?? ""} onChange={(e) => updateSpec("height", e.target.value)} />
+                              <Input
+                                className="h-7 mt-0.5 text-sm"
+                                value={specs.height ?? ""}
+                                onChange={(e) => updateSpec("height", e.target.value)}
+                                onBlur={(e) => {
+                                  const raw = e.target.value.replace(",", ".");
+                                  const val = parseFloat(raw);
+                                  if (!isNaN(val) && val > 0) updateSpec("height", val.toFixed(2).replace(".", ","));
+                                }}
+                                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                                placeholder="0,00"
+                              />
                             </div>
 
                             {/* Atributos dinâmicos (ex: Impressão) */}
