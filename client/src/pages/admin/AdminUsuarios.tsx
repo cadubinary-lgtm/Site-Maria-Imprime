@@ -26,6 +26,7 @@ import {
   UserPlus, KeyRound, Power, Pencil, ShieldCheck, Shield, Wrench,
   Loader2, Users, Lock, RefreshCw, ShieldAlert,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 // ─── Definição da árvore de permissões (espelha o AdminLayout) ────────────────
@@ -199,6 +200,11 @@ export default function AdminUsuarios() {
   const [resetTarget, setResetTarget] = useState<{ id: number; name: string } | null>(null);
   const [newPassword, setNewPassword] = useState("");
 
+  // Estados de edição
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ id: 0, name: "", email: "", role: "admin" as "superadmin" | "admin" | "production" });
+  const [editPermissions, setEditPermissions] = useState<string[] | null>(null);
+
   const createAdmin = trpc.adminAuth.createAdmin.useMutation({
     onSuccess: async (data: any) => {
       // Se não é superadmin e há permissões definidas, salvar
@@ -217,9 +223,27 @@ export default function AdminUsuarios() {
   });
 
   const updatePermissions = trpc.adminAuth.updateAdminPermissions.useMutation({
-    onSuccess: () => { toast.success("Permissões salvas!"); refetch(); setPermOpen(false); },
+    onSuccess: () => { toast.success("Permissões salvas!"); refetch(); setPermOpen(false); setEditOpen(false); },
     onError: (e) => toast.error(e.message),
   });
+
+  const updateAdmin = trpc.adminAuth.updateAdmin.useMutation({
+    onSuccess: async () => {
+      if (editForm.role !== "superadmin") {
+        try { await updatePermissions.mutateAsync({ id: editForm.id, permissions: editPermissions }); } catch (_) {}
+      }
+      toast.success("Operador atualizado com sucesso!");
+      refetch();
+      setEditOpen(false);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const openEdit = (admin: any) => {
+    setEditForm({ id: admin.id, name: admin.name, email: admin.email, role: admin.role });
+    setEditPermissions(admin.permissions ?? null);
+    setEditOpen(true);
+  };
 
   const toggleStatus = trpc.adminAuth.toggleAdminStatus.useMutation({
     onSuccess: () => { toast.success("Status atualizado!"); refetch(); },
@@ -327,14 +351,14 @@ export default function AdminUsuarios() {
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-1.5">
-                                {/* Permissões */}
-                                {isSuperAdmin && admin.role !== "superadmin" && (
+                                {/* Editar */}
+                                {isSuperAdmin && (
                                   <Button
                                     variant="outline" size="sm"
-                                    className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs"
-                                    onClick={() => openPermissions(admin)}
+                                    className="text-gray-600 border-gray-200 hover:bg-gray-50 text-xs"
+                                    onClick={() => openEdit(admin)}
                                   >
-                                    <Lock className="w-3.5 h-3.5 mr-1" /> Permissões
+                                    <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
                                   </Button>
                                 )}
                                 {/* Reset Senha */}
@@ -478,6 +502,75 @@ export default function AdminUsuarios() {
 
       {/* Dialog: Permissões */}
       <Dialog open={permOpen} onOpenChange={setPermOpen}>
+
+      {/* Dialog: Editar Operador */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-gray-800">
+              <Pencil className="w-5 h-5 text-pink-500" /> Editar Operador
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+            <div className="space-y-4">
+              <div className="pb-2 border-b border-gray-100">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Dados do Operador</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Nome completo</Label>
+                <Input value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} className="mt-1.5" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">E-mail</Label>
+                <Input type="email" value={editForm.email} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="mt-1.5" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Perfil de Acesso</Label>
+                <Select value={editForm.role} onValueChange={(v) => {
+                  setEditForm((f) => ({ ...f, role: v as any }));
+                  if (v === "superadmin") setEditPermissions(null);
+                }}>
+                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="superadmin"><span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-orange-500" /> Superadmin</span></SelectItem>
+                    <SelectItem value="admin"><span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-blue-500" /> Admin</span></SelectItem>
+                    <SelectItem value="production"><span className="flex items-center gap-2"><Wrench className="w-3.5 h-3.5 text-gray-500" /> Produção</span></SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <p className="text-xs text-gray-400 italic">Para redefinir a senha, use o botão "Senha" na listagem.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="pb-2 border-b border-gray-100 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Permissões de Menu</p>
+                {editForm.role === "superadmin" && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>}
+              </div>
+              {editForm.role === "superadmin" ? (
+                <div className="flex flex-col items-center justify-center h-40 text-center text-gray-400">
+                  <ShieldCheck className="w-10 h-10 mb-2 text-orange-300" />
+                  <p className="text-sm">Superadmin tem acesso irrestrito a todos os módulos.</p>
+                </div>
+              ) : (
+                <PermissionsPanel value={editPermissions} onChange={setEditPermissions} />
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+            <Button
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+              disabled={updateAdmin.isPending}
+              onClick={() => updateAdmin.mutate({ id: editForm.id, name: editForm.name, email: editForm.email, role: editForm.role })}
+            >
+              {updateAdmin.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-pink-600">
