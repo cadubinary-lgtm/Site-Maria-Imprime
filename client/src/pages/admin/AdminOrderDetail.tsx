@@ -918,7 +918,15 @@ function ItemProductionSection({
 }
 
 // ─── Componente principal ────────────────────────────────────────────────────
-export function OrderDetailContent({ orderId: externalOrderId }: { orderId: number | null }) {
+export function OrderDetailContent({
+  orderId: externalOrderId,
+  backRoute = "/admin/pedidos",
+  backLabel = "Voltar para Pedidos",
+}: {
+  orderId: number | null;
+  backRoute?: string;
+  backLabel?: string;
+}) {
   const [, setLocation] = useLocation();
   const orderId = externalOrderId;
 
@@ -1041,8 +1049,8 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
           {/* ── Header ── */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <Button variant="ghost" onClick={() => setLocation("/admin/pedidos")}>
-                <ChevronLeft className="w-4 h-4 mr-1" /> Voltar para Pedidos
+              <Button variant="ghost" onClick={() => setLocation(backRoute)}>
+                <ChevronLeft className="w-4 h-4 mr-1" /> {backLabel}
               </Button>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm"
@@ -1661,9 +1669,14 @@ export function OrderDetailContent({ orderId: externalOrderId }: { orderId: numb
 export default function AdminOrderDetail() {
   const [, params] = useRoute("/admin/pedidos/:id");
   const orderId = params?.id ? parseInt(params.id) : null;
+  // Detectar se veio do Kanban via ?from=kanban
+  const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const fromKanban = searchParams.get("from") === "kanban";
+  const backRoute = fromKanban ? "/admin/pedidos/kanban" : "/admin/pedidos";
+  const backLabel = fromKanban ? "Voltar para Kanban" : "Voltar para Pedidos";
   return (
     <AdminLayout>
-      <OrderDetailContent orderId={orderId} />
+      <OrderDetailContent orderId={orderId} backRoute={backRoute} backLabel={backLabel} />
     </AdminLayout>
   );
 }

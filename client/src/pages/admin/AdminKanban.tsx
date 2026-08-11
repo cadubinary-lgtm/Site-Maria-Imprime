@@ -435,7 +435,7 @@ export default function AdminKanban() {
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <span className="text-sm font-semibold text-gray-700">Detalhes do Pedido</span>
           <div className="flex items-center gap-2">
-            <Link href={`/admin/pedidos/${selectedOrderId}`}>
+            <Link href={`/admin/pedidos/${selectedOrderId}?from=kanban`}>
               <button className="text-xs text-pink-600 hover:text-pink-700 flex items-center gap-1 transition-colors">
                 <ExternalLink className="w-3.5 h-3.5" />
                 Abrir completo
