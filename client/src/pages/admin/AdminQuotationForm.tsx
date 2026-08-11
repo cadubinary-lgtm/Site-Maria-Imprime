@@ -47,6 +47,7 @@ interface QuotationItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  priceAdjustment?: number; // Ajuste manual (+/-) somado ao total calculado
   // UI only
   _specsParsed?: Record<string, string>;
 }
@@ -399,7 +400,7 @@ export default function AdminQuotationForm() {
       if (updates.quantity !== undefined || updates.unitPrice !== undefined) {
         const q = updates.quantity ?? next[idx].quantity;
         const u = updates.unitPrice ?? next[idx].unitPrice;
-        next[idx].totalPrice = q * u;
+        next[idx].totalPrice = q * u + (next[idx].priceAdjustment ?? 0);
       }
       // Se specs ou quantidade mudaram, recalcular preço automaticamente
       if (updates.specifications !== undefined || updates._specsParsed !== undefined || updates.quantity !== undefined) {
@@ -408,8 +409,18 @@ export default function AdminQuotationForm() {
           const { unitPrice: newUnit, totalPrice: newTotal } = calcItemPricing(next[idx], pricing);
           if (newUnit > 0) {
             next[idx].unitPrice = newUnit;
-            next[idx].totalPrice = newTotal;
+            next[idx].totalPrice = newTotal + (next[idx].priceAdjustment ?? 0);
           }
+        }
+      }
+      // Se o ajuste mudou, recalcular o total
+      if (updates.priceAdjustment !== undefined) {
+        const pricing = pricingCache[next[idx].productId];
+        if (pricing) {
+          const { totalPrice: baseTotal } = calcItemPricing(next[idx], pricing);
+          next[idx].totalPrice = (baseTotal > 0 ? baseTotal : next[idx].unitPrice * next[idx].quantity) + (updates.priceAdjustment ?? 0);
+        } else {
+          next[idx].totalPrice = next[idx].unitPrice * next[idx].quantity + (updates.priceAdjustment ?? 0);
         }
       }
       return next;
@@ -654,9 +665,10 @@ export default function AdminQuotationForm() {
                 {/* Cabeçalho da tabela */}
                 <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
                   <div className="col-span-1">Img</div>
-                  <div className="col-span-5">Produto / Especificações</div>
+                  <div className="col-span-4">Produto / Especificações</div>
                   <div className="col-span-2 text-center">Qtd</div>
-                  <div className="col-span-3 text-right">Total</div>
+                  <div className="col-span-2 text-center">Ajuste</div>
+                  <div className="col-span-2 text-right">Total</div>
                   <div className="col-span-1"></div>
                 </div>
                 {items.map((item, idx) => {
@@ -680,7 +692,7 @@ export default function AdminQuotationForm() {
                             </div>
                           )}
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-4">
                           <button
                             className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                             onClick={() => toggleItem(idx)}
@@ -698,7 +710,21 @@ export default function AdminQuotationForm() {
                             className="w-16 h-7 text-center text-sm"
                           />
                         </div>
-                        <div className="col-span-3 text-right text-sm font-semibold text-gray-800">
+                        <div className="col-span-2 flex justify-center">
+                          <Input
+                            type="number"
+                            step={0.01}
+                            value={item.priceAdjustment ?? ""}
+                            placeholder="0"
+                            title="Adicione (+) ou desconte (-) um valor do total"
+                            onChange={(e) => {
+                              const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                              updateItem(idx, { priceAdjustment: isNaN(val) ? 0 : val });
+                            }}
+                            className="w-20 h-7 text-center text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
                           {fmt(item.totalPrice)}
                         </div>
                         <div className="col-span-1 flex justify-end">
