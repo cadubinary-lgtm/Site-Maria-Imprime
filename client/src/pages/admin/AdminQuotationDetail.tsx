@@ -52,6 +52,44 @@ const PAYMENT_LABELS: Record<string, string> = {
   transferencia: "Transferência",
 };
 
+// ─── Mapa de tradução de chaves de especificação ─────────────────────────────
+const SPEC_LABELS: Record<string, string> = {
+  width: "Largura (m)",
+  height: "Altura (m)",
+  largura: "Largura (m)",
+  altura: "Altura (m)",
+  tipo_de_impressao: "Tipo de Impressão",
+  tipo_de_material: "Tipo de Material",
+  tipo_de_espessura: "Tipo de Espessura",
+  tipo_de_acabamento: "Tipo de Acabamento",
+  tipo_de_bastao: "Tipo de Bastão",
+  tipo_de_qualidade: "Tipo de Qualidade",
+  tipo_de_formato: "Tipo de Formato",
+  tipo_de_papel: "Tipo de Papel",
+  gramatura: "Gramatura",
+  acabamento: "Acabamento",
+  impressao: "Impressão",
+  material: "Material",
+  quantidade: "Quantidade",
+  arte: "Arte",
+};
+const SPEC_FIRST = ["width", "height", "largura", "altura"];
+
+function formatSpecs(s: string, separator = " · "): string {
+  try {
+    const o: Record<string, string> = JSON.parse(s);
+    const entries = Object.entries(o).filter(([, v]) => v && String(v).trim());
+    const ordered = [
+      ...SPEC_FIRST.filter(k => o[k]).map(k => [k, o[k]] as [string, string]),
+      ...entries.filter(([k]) => !SPEC_FIRST.includes(k)),
+    ];
+    return ordered.map(([k, v]) => {
+      const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      return `${label}: ${v}`;
+    }).join(separator);
+  } catch { return ""; }
+}
+
 function fmt(v: number | string | null | undefined) {
   return Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -64,10 +102,7 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any) {
   const items = q.items ?? [];
   const specs = (s: string) => {
-    try {
-      const o = JSON.parse(s);
-      return Object.entries(o).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(" · ");
-    } catch { return ""; }
+    return formatSpecs(s, " · ");
   };
 
   const html = `<!DOCTYPE html>
@@ -347,7 +382,7 @@ export default function AdminQuotationDetail() {
                   {(q.items ?? []).map((item: any) => {
                     let specs: Record<string, string> = {};
                     try { specs = JSON.parse(item.specifications); } catch {}
-                    const specText = Object.entries(specs).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(" · ");
+                    const specText = formatSpecs(item.specifications);
                     return (
                       <tr key={item.id}>
                         <td className="py-2.5 pr-2">
