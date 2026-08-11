@@ -348,6 +348,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { label: "Novo Produto", href: "/admin/novo-produto" },
           { label: "Gerenciar Variações", href: "/admin/variacoes" },
           { label: "Variações Offset", href: "/admin/variacoesoffset" },
+          { label: "Variações Comunicação Visual", href: "/admin/variacoescomunicacaovisual" },
           { label: "Segmentos", href: "/admin/segmentos" },
         ],
       },
