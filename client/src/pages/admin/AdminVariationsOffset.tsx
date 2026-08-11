@@ -176,7 +176,7 @@ export default function AdminVariationsOffset() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/admin/variacoes")}>
+            <Button variant="outline" onClick={() => navigate("/admin/variacoescomunicacaovisual")}>
               Comunicação Visual
             </Button>
             <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
