@@ -495,15 +495,10 @@ export const quotationsRouter = router({
           productId: item.productId,
           productName: item.productName,
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
+          priceAtOrder: item.unitPrice ?? "0",
           artFileUrl: item.artFileUrl,
-          artFileKey: item.artFileKey,
-          width: specs.width,
-          height: specs.height,
-          printingType: specs.printingType,
-          material: specs.material,
-          finish: specs.finish,
+          customDimensions: (specs.width && specs.height) ? `${specs.width}x${specs.height}` : null,
+          selectedAttributes: item.specifications,
           preProductionStatus: "liberado_analise",
         } as any);
       }
