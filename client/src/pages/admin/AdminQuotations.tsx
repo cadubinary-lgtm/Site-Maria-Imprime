@@ -95,7 +95,7 @@ export default function AdminQuotations() {
   });
 
   const deleteMutation = trpc.quotations.delete.useMutation({
-    onSuccess: () => { toast.success("Rascunho excluído."); refetch(); },
+    onSuccess: () => { toast.success("Orçamento excluído."); refetch(); },
     onError: (e) => toast.error(e.message),
   });
 
@@ -294,14 +294,14 @@ export default function AdminQuotations() {
                                   <XCircle className="w-3.5 h-3.5 mr-2" /> Cancelar
                                 </DropdownMenuItem>
                               )}
-                              {isDraft && (
-                                <DropdownMenuItem
-                                  className="text-red-600"
-                                  onClick={() => setDeleteId(row.id)}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir Rascunho
-                                </DropdownMenuItem>
-                              )}
+              {true && (
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => setDeleteId(row.id)}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir Orçamento
+                </DropdownMenuItem>
+              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -319,9 +319,9 @@ export default function AdminQuotations() {
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir rascunho?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir orçamento?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O rascunho será removido permanentemente.
+              Esta ação não pode ser desfeita. O orçamento e todos os seus itens serão removidos permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

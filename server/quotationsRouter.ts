@@ -520,7 +520,7 @@ export const quotationsRouter = router({
       return { success: true, orderId, orderNumber };
     }),
 
-  // ── Excluir (apenas rascunho) ───────────────────────────────────────────
+  // ── Excluir orçamento ──────────────────────────────────────────────────
   delete: adminAnyProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
@@ -530,9 +530,6 @@ export const quotationsRouter = router({
 
       const [existing] = await db.select({ status: quotations.status }).from(quotations).where(eq(quotations.id, input.id));
       if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
-      if (existing.status !== "rascunho") {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Apenas rascunhos podem ser excluídos." });
-      }
 
       await db.delete(quotationHistory).where(eq(quotationHistory.quotationId, input.id));
       await db.delete(quotationItems).where(eq(quotationItems.quotationId, input.id));
