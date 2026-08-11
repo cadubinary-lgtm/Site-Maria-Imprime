@@ -654,10 +654,9 @@ export default function AdminQuotationForm() {
                 {/* Cabeçalho da tabela */}
                 <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
                   <div className="col-span-1">Img</div>
-                  <div className="col-span-4">Produto / Especificações</div>
+                  <div className="col-span-5">Produto / Especificações</div>
                   <div className="col-span-2 text-center">Qtd</div>
-                  <div className="col-span-2 text-right">Unit.</div>
-                  <div className="col-span-2 text-right">Total</div>
+                  <div className="col-span-3 text-right">Total</div>
                   <div className="col-span-1"></div>
                 </div>
                 {items.map((item, idx) => {
@@ -681,7 +680,7 @@ export default function AdminQuotationForm() {
                             </div>
                           )}
                         </div>
-                        <div className="col-span-4">
+                        <div className="col-span-5">
                           <button
                             className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                             onClick={() => toggleItem(idx)}
@@ -699,17 +698,7 @@ export default function AdminQuotationForm() {
                             className="w-16 h-7 text-center text-sm"
                           />
                         </div>
-                        <div className="col-span-2">
-                          <Input
-                            type="number"
-                            min={0}
-                            step={0.01}
-                            value={item.unitPrice}
-                            onChange={(e) => updateItem(idx, { unitPrice: parseFloat(e.target.value) || 0 })}
-                            className="w-full h-7 text-right text-sm"
-                          />
-                        </div>
-                        <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
+                        <div className="col-span-3 text-right text-sm font-semibold text-gray-800">
                           {fmt(item.totalPrice)}
                         </div>
                         <div className="col-span-1 flex justify-end">
