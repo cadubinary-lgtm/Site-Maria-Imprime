@@ -161,7 +161,12 @@ export default function AdminProducts() {
       });
       await utils.products.getAll.invalidate();
       setQuickEditingId(null);
-      toast.success("Preço e unidade de cobrança atualizados");
+      toast.success("Preço atualizado com sucesso", {
+        description: `${product.name}: ${quickCalculationType === "m2" ? "valor por m²" : quickCalculationType === "metro_linear" ? "valor por metro linear" : "valor-base"} salvo.`,
+        position: "top-right",
+        duration: 3500,
+        id: `quick-pricing-${product.id}`,
+      });
     } catch (error) {
       console.error("Erro na edição rápida de preço:", error);
       toast.error("Não foi possível atualizar o preço do produto");
