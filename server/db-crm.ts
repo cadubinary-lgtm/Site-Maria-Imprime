@@ -1,6 +1,6 @@
 import { getDb } from "./db";
 import { clients, orders } from "../drizzle/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, like, or } from "drizzle-orm";
 
 /**
  * Criar novo cliente
@@ -66,14 +66,14 @@ export async function listClients(options: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  const conditions: any[] = [];
+  if (isActive !== undefined) conditions.push(eq(clients.isActive, isActive));
+  if (clientType) conditions.push(eq(clients.clientType, clientType as any));
+
   const result = await db
     .select()
     .from(clients)
-    .where(
-      isActive !== undefined
-        ? eq(clients.isActive, isActive)
-        : undefined
-    )
+    .where(conditions.length > 1 ? and(...conditions) : conditions.length === 1 ? conditions[0] : undefined)
     .orderBy(desc(clients.createdAt))
     .limit(limit)
     .offset(offset);

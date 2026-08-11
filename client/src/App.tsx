@@ -62,6 +62,8 @@ import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
 import ClientsManager from "./pages/admin/ClientsManager";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import ClientesBalcao from "./pages/admin/ClientesBalcao";
+import ClientesSite from "./pages/admin/ClientesSite";
 import FileValidationManager from "./pages/admin/FileValidationManager";
 import { LogisticsDashboard } from "./pages/admin/LogisticsDashboard";
 import { CarriersManager } from "./pages/admin/CarriersManager";
@@ -188,6 +190,8 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/status-producao" component={AdminStatusProducao} />
       <Route path="/admin/clientes" component={ClientsManager} />
       <Route path="/admin/clientes-loja" component={AdminCustomers} />
+      <Route path="/admin/clientes-balcao" component={ClientesBalcao} />
+      <Route path="/admin/clientes-site" component={ClientesSite} />
       <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
       <Route path="/admin/erp" component={ERPDashboard} />
       <Route path="/admin/financeiro" component={FinancialDashboard} />
@@ -275,6 +279,8 @@ function AdminProtectedRoutes() {
       <Route path="/admin/status-producao" component={AdminStatusProducao} />
       <Route path="/admin/clientes" component={ClientsManager} />
       <Route path="/admin/clientes-loja" component={AdminCustomers} />
+      <Route path="/admin/clientes-balcao" component={ClientesBalcao} />
+      <Route path="/admin/clientes-site" component={ClientesSite} />
       <Route path="/admin/validacao-arquivos" component={FileValidationManager} />
       <Route path="/admin/erp" component={ERPDashboard} />
       <Route path="/admin/financeiro" component={FinancialDashboard} />
