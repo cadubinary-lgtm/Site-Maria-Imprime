@@ -26,6 +26,7 @@ import {
   UserPlus, KeyRound, Power, Pencil, ShieldCheck, Shield, Wrench,
   Loader2, Users, Lock, RefreshCw, ShieldAlert,
 } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
@@ -102,7 +103,6 @@ function PermissionsPanel({
 
   const toggle = (key: string) => {
     if (isAll) {
-      // Estava com acesso total → remover tudo exceto o clicado
       onChange(allKeys.filter((k) => k !== key));
       return;
     }
@@ -114,13 +114,11 @@ function PermissionsPanel({
     const childKeys = children.map((c) => c.key);
     const allSelected = isAll || ([parentKey, ...childKeys].every((k) => (value ?? []).includes(k)));
     if (allSelected) {
-      // Desmarcar pai + filhos
       const next = isAll
         ? allKeys.filter((k) => k !== parentKey && !childKeys.includes(k))
         : (value ?? []).filter((k) => k !== parentKey && !childKeys.includes(k));
       onChange(next);
     } else {
-      // Marcar pai + filhos
       const existing = isAll ? allKeys : (value ?? []);
       const next = Array.from(new Set([...existing, parentKey, ...childKeys]));
       onChange(next.length === allKeys.length ? null : next);
@@ -129,42 +127,74 @@ function PermissionsPanel({
 
   const isChecked = (key: string) => isAll || (value ?? []).includes(key);
 
+  // Estado de accordion por grupo (fechado por padrão)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const toggleGroup = (key: string) => setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+
   return (
-    <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-      <div className="flex items-center gap-2 pb-2 border-b">
+    <div className="max-h-[350px] overflow-y-auto pr-3 space-y-1">
+      {/* Acesso Total */}
+      <div className="flex items-center gap-3 py-2 px-3 rounded-lg bg-pink-50 border border-pink-100 mb-2">
         <Checkbox
           id="perm-all"
           checked={isAll}
           onCheckedChange={(checked) => onChange(checked ? null : [])}
         />
-        <label htmlFor="perm-all" className="text-sm font-semibold text-pink-600 cursor-pointer">
-          Acesso Total (Superadmin)
+        <label htmlFor="perm-all" className="text-sm font-semibold text-pink-600 cursor-pointer flex-1">
+          Acesso Total (Liberar Tudo)
         </label>
       </div>
+
+      {/* Grupos com Accordion */}
       {PERMISSION_TREE.map((group) => {
         const parentChecked = isChecked(group.key);
+        const hasChildren = group.children.length > 0;
+        const isOpen = !!openGroups[group.key];
+        // Conta filhos marcados
+        const checkedChildCount = group.children.filter((c) => isChecked(c.key)).length;
+
         return (
-          <div key={group.key} className="space-y-1">
-            <div className="flex items-center gap-2">
+          <div key={group.key} className="rounded-lg border border-gray-100 overflow-hidden">
+            {/* Cabeçalho do grupo */}
+            <div className="flex items-center gap-3 px-3 py-2.5 bg-white hover:bg-gray-50 transition-colors">
               <Checkbox
                 id={`perm-${group.key}`}
                 checked={parentChecked}
                 onCheckedChange={() => toggleParent(group.key, group.children)}
               />
-              <label htmlFor={`perm-${group.key}`} className="text-sm font-semibold text-gray-800 cursor-pointer">
+              <label htmlFor={`perm-${group.key}`} className="text-sm font-semibold text-gray-800 cursor-pointer flex-1">
                 {group.label}
               </label>
+              {hasChildren && (
+                <div className="flex items-center gap-1.5">
+                  {checkedChildCount > 0 && !isAll && (
+                    <span className="text-[10px] font-medium bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded-full">
+                      {checkedChildCount}/{group.children.length}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    {isOpen
+                      ? <ChevronDown className="w-3.5 h-3.5" />
+                      : <ChevronRight className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              )}
             </div>
-            {group.children.length > 0 && (
-              <div className="ml-6 space-y-1">
+            {/* Subitens (colapsáveis) */}
+            {hasChildren && isOpen && (
+              <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
                 {group.children.map((child) => (
-                  <div key={child.key} className="flex items-center gap-2">
+                  <div key={child.key} className="flex items-center gap-3 ml-6">
                     <Checkbox
                       id={`perm-${child.key}`}
                       checked={isChecked(child.key)}
                       onCheckedChange={() => toggle(child.key)}
                     />
-                    <label htmlFor={`perm-${child.key}`} className="text-sm text-gray-600 cursor-pointer">
+                    <label htmlFor={`perm-${child.key}`} className="text-xs text-gray-600 cursor-pointer">
                       {child.label}
                     </label>
                   </div>
