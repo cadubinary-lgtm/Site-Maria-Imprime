@@ -45,6 +45,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminNewProduct from "./pages/admin/AdminNewProduct";
 import AdminVariations from "./pages/admin/AdminVariations";
 import AdminVariationsOffset from "./pages/admin/AdminVariationsOffset";
+import AdminVariationsCv from "./pages/admin/AdminVariationsCv";
 import AdminPanel from "./pages/admin/AdminPanel";
 import AdminAttributesManager from "./pages/admin/AdminAttributesManager";
 import AdminProductAttributesLinker from "./pages/admin/AdminProductAttributesLinker";
@@ -167,6 +168,7 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />
       <Route path="/admin/variacoesoffset" component={AdminVariationsOffset} />
+      <Route path="/admin/variacoescomunicacaovisual" component={AdminVariationsCv} />
       <Route path="/admin/atributos" component={AdminAttributesManager} />
       <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
@@ -257,6 +259,7 @@ function AdminProtectedRoutes() {
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />
       <Route path="/admin/variacoesoffset" component={AdminVariationsOffset} />
+      <Route path="/admin/variacoescomunicacaovisual" component={AdminVariationsCv} />
       <Route path="/admin/atributos" component={AdminAttributesManager} />
       <Route path="/admin/vincular-atributos" component={AdminProductAttributesLinker} />
       <Route path="/admin/regras-builder" component={AdminRulesBuilder} />
