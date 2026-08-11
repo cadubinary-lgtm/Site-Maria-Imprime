@@ -502,30 +502,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ref={mainRef}
           className="flex-1 overflow-auto bg-white"
         >
-          {/* Header */}
-          <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              {sidebarOpen ? (
-                <X className="w-5 h-5 text-gray-600" />
-              ) : (
-                <Menu className="w-5 h-5 text-gray-600" />
-              )}
-            </button>
-            <div className="flex-1 px-4">
-              <h1 className="text-lg font-semibold text-gray-900">
-                Painel Admin
-              </h1>
+          {/* Barra de topo administrativa */}
+          <div className="sticky top-0 z-40 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+              >
+                {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+              <div>
+                <p className="text-xs text-gray-400 leading-none">Painel Admin</p>
+                <p className="text-sm font-semibold text-gray-800 leading-tight mt-0.5">
+                  Bem-vindo de volta{user?.name ? `, ${user.name.split(" ")[0]}` : ""}!
+                </p>
+              </div>
             </div>
-            <button
-              onClick={logout}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Sair"
-            >
-              <LogOut className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5">
+                <div className="w-6 h-6 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-[10px] font-bold">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700 max-w-[140px] truncate">
+                  {user?.name || "Operador"}
+                </span>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  user?.role === "superadmin" ? "bg-orange-100 text-orange-600" :
+                  user?.role === "production" ? "bg-gray-100 text-gray-500" :
+                  "bg-blue-100 text-blue-600"
+                }`}>
+                  {user?.role === "superadmin" ? "Super" : user?.role === "production" ? "Prod." : "Admin"}
+                </span>
+              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                title="Sair do sistema"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+            </div>
           </div>
 
           {/* Content */}
