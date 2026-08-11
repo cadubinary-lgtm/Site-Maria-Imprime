@@ -157,7 +157,7 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any) {
   const items = q.items ?? [];
   const specs = (s: string) => {
-    return formatSpecs(s);
+    return formatSpecs(s).replace(/ ❯ /g, ' <span style="color:#e91e8c;font-weight:700"> ❯ </span> ');
   };
 
   const html = `<!DOCTYPE html>
@@ -457,7 +457,21 @@ export default function AdminQuotationDetail() {
                         </td>
                         <td className="py-2.5 pr-3 font-medium text-gray-800">{item.productName}</td>
                         <td className="py-2.5 pr-3 text-xs text-gray-600 max-w-64 leading-relaxed">
-                          {formatSpecs(item.specifications) || "—"}
+                          {(() => {
+                            const raw = formatSpecs(item.specifications);
+                            if (!raw) return <span>—</span>;
+                            const parts = raw.split(" ❯ ");
+                            return (
+                              <span>
+                                {parts.map((p, i) => (
+                                  <span key={i}>
+                                    {p}
+                                    {i < parts.length - 1 && <span className="text-pink-500 font-bold mx-0.5"> ❯ </span>}
+                                  </span>
+                                ))}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="py-2.5 pr-3 text-center">{item.quantity}</td>
                         <td className="py-2.5 pr-3 text-right">{fmt(item.unitPrice)}</td>
