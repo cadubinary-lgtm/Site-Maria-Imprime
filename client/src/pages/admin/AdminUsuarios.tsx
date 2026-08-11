@@ -187,6 +187,7 @@ export default function AdminUsuarios() {
   // Estados do formulário de criação
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: "admin" as "superadmin" | "admin" | "production" });
+  const [createPermissions, setCreatePermissions] = useState<string[] | null>(null);
 
   // Estados do painel de permissões
   const [permOpen, setPermOpen] = useState(false);
@@ -199,7 +200,19 @@ export default function AdminUsuarios() {
   const [newPassword, setNewPassword] = useState("");
 
   const createAdmin = trpc.adminAuth.createAdmin.useMutation({
-    onSuccess: () => { toast.success("Operador criado com sucesso!"); refetch(); setCreateOpen(false); setCreateForm({ name: "", email: "", password: "", role: "admin" }); },
+    onSuccess: async (data: any) => {
+      // Se não é superadmin e há permissões definidas, salvar
+      if (createForm.role !== "superadmin" && createPermissions !== null) {
+        try {
+          await updatePermissions.mutateAsync({ id: data?.id ?? 0, permissions: createPermissions });
+        } catch (_) {}
+      }
+      toast.success("Operador criado com sucesso!");
+      refetch();
+      setCreateOpen(false);
+      setCreateForm({ name: "", email: "", password: "", role: "admin" });
+      setCreatePermissions(null);
+    },
     onError: (e) => toast.error(e.message),
   });
 
@@ -383,37 +396,70 @@ export default function AdminUsuarios() {
 
       {/* Dialog: Criar Operador */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-pink-600">
               <UserPlus className="w-5 h-5" /> Novo Operador
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <Label>Nome completo</Label>
-              <Input value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} placeholder="Ex: João Silva" className="mt-1" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+            {/* Coluna esquerda: dados do operador */}
+            <div className="space-y-4">
+              <div className="pb-2 border-b border-gray-100">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Dados do Operador</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Nome completo</Label>
+                <Input value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} placeholder="Ex: João Silva" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">E-mail</Label>
+                <Input type="email" value={createForm.email} onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))} placeholder="joao@empresa.com" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Senha <span className="text-gray-400 font-normal">(mín. 8 caracteres)</span></Label>
+                <Input type="password" value={createForm.password} onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••••" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Perfil de Acesso</Label>
+                <Select value={createForm.role} onValueChange={(v) => {
+                  setCreateForm((f) => ({ ...f, role: v as any }));
+                  if (v === "superadmin") setCreatePermissions(null);
+                }}>
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="superadmin">
+                      <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-orange-500" /> Superadmin (acesso total)</span>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-blue-500" /> Admin</span>
+                    </SelectItem>
+                    <SelectItem value="production">
+                      <span className="flex items-center gap-2"><Wrench className="w-3.5 h-3.5 text-gray-500" /> Produção</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label>E-mail</Label>
-              <Input type="email" value={createForm.email} onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))} placeholder="joao@empresa.com" className="mt-1" />
-            </div>
-            <div>
-              <Label>Senha (mín. 8 caracteres)</Label>
-              <Input type="password" value={createForm.password} onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••••" className="mt-1" />
-            </div>
-            <div>
-              <Label>Perfil</Label>
-              <Select value={createForm.role} onValueChange={(v) => setCreateForm((f) => ({ ...f, role: v as any }))}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="superadmin">Superadmin (acesso total)</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="production">Produção</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Coluna direita: permissões */}
+            <div className="space-y-3">
+              <div className="pb-2 border-b border-gray-100 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Permissões de Menu</p>
+                {createForm.role === "superadmin" && (
+                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>
+                )}
+              </div>
+              {createForm.role === "superadmin" ? (
+                <div className="flex flex-col items-center justify-center h-40 text-center text-gray-400">
+                  <ShieldCheck className="w-10 h-10 mb-2 text-orange-300" />
+                  <p className="text-sm">Superadmin tem acesso irrestrito a todos os módulos do sistema.</p>
+                </div>
+              ) : (
+                <PermissionsPanel value={createPermissions} onChange={setCreatePermissions} />
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -421,7 +467,7 @@ export default function AdminUsuarios() {
             <Button
               className="bg-pink-600 hover:bg-pink-700 text-white"
               disabled={createAdmin.isPending}
-              onClick={() => createAdmin.mutate(createForm)}
+              onClick={() => createAdmin.mutate({ ...createForm })}
             >
               {createAdmin.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Criar Operador
