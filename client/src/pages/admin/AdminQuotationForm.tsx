@@ -841,39 +841,17 @@ export default function AdminQuotationForm() {
                             )}
 
                             <div className="col-span-2">
-                              <label className="text-xs text-gray-500 font-medium mb-1 block">Imagem / Print da arte</label>
-                              {/* Área de upload com paste e clique */}
-                              <div
-                                ref={(el) => { artPasteRefs.current[idx] = el; }}
-                                tabIndex={0}
-                                className="relative border-2 border-dashed border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-pink-300 hover:bg-pink-50/30 transition-colors focus:outline-none focus:border-pink-400"
-                                onClick={() => {
-                                  const input = document.createElement("input");
-                                  input.type = "file";
-                                  input.accept = "image/png,image/jpg,image/jpeg";
-                                  input.onchange = async (e) => {
-                                    const file = (e.target as HTMLInputElement).files?.[0];
-                                    if (!file) return;
-                                    setArtUploadingIdx(idx);
-                                    try {
-                                      const { url } = await doArtUpload(file);
-                                      updateItem(idx, { artFileUrl: url });
-                                    } catch (err: any) {
-                                      if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
-                                    } finally {
-                                      setArtUploadingIdx(null);
-                                      resetArtUpload();
-                                    }
-                                  };
-                                  input.click();
-                                }}
-                                onPaste={async (e) => {
-                                  const items = Array.from(e.clipboardData?.items ?? []);
-                                  const imgItem = items.find(it => it.type.startsWith("image/"));
-                                  if (!imgItem) return;
-                                  const file = imgItem.getAsFile();
+                              <label className="text-xs text-gray-500 font-medium mb-1 block">Arte / Layout</label>
+                              {/* Input de arquivo oculto */}
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/jpg"
+                                style={{ display: "none" }}
+                                ref={(el) => { (artPasteRefs.current as any)[`file_${idx}`] = el; }}
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
                                   if (!file) return;
-                                  e.preventDefault();
+                                  e.target.value = "";
                                   setArtUploadingIdx(idx);
                                   try {
                                     const { url } = await doArtUpload(file);
@@ -885,40 +863,99 @@ export default function AdminQuotationForm() {
                                     resetArtUpload();
                                   }
                                 }}
-                              >
-                                {item.artFileUrl ? (
-                                  <div className="relative">
-                                    <img
-                                      src={item.artFileUrl}
-                                      alt="Arte"
-                                      className="max-h-32 mx-auto rounded object-contain"
-                                    />
+                              />
+                              {item.artFileUrl ? (
+                                /* Preview com opções Substituir e Remover */
+                                <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+                                  <img
+                                    src={item.artFileUrl}
+                                    alt="Arte"
+                                    className="max-h-32 mx-auto rounded object-contain"
+                                  />
+                                  <div className="flex gap-2 justify-center">
                                     <button
                                       type="button"
-                                      className="absolute top-0 right-0 bg-white border border-gray-200 rounded-full p-0.5 shadow-sm hover:bg-red-50"
-                                      onClick={(e) => { e.stopPropagation(); updateItem(idx, { artFileUrl: undefined, artFileKey: undefined }); }}
+                                      className="text-xs text-pink-600 hover:text-pink-700 underline"
+                                      onClick={() => (artPasteRefs.current as any)[`file_${idx}`]?.click()}
                                     >
-                                      <X className="w-3 h-3 text-gray-500" />
+                                      Substituir
+                                    </button>
+                                    <span className="text-gray-300 text-xs">|</span>
+                                    <button
+                                      type="button"
+                                      className="text-xs text-gray-400 hover:text-red-500 underline"
+                                      onClick={() => updateItem(idx, { artFileUrl: undefined, artFileKey: undefined })}
+                                    >
+                                      Remover
                                     </button>
                                   </div>
-                                ) : artUploadingIdx === idx ? (
-                                  <div className="space-y-1">
-                                    <div className="text-xs text-gray-500">Enviando... {artUploadState.currentChunk}/{artUploadState.totalChunks} — {artUploadState.progress}%</div>
-                                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                      <div className="bg-pink-500 h-1.5 rounded-full transition-all" style={{ width: `${artUploadState.progress}%` }} />
-                                    </div>
-                                    <button type="button" className="text-xs text-gray-400 hover:text-red-500 underline" onClick={(e) => { e.stopPropagation(); cancelArtUpload(); }}>Cancelar</button>
+                                </div>
+                              ) : artUploadingIdx === idx ? (
+                                /* Barra de progresso */
+                                <div className="border-2 border-dashed border-pink-200 rounded-lg p-4 space-y-2 text-center">
+                                  <div className="text-xs text-gray-500">Enviando... {artUploadState.currentChunk}/{artUploadState.totalChunks} — {artUploadState.progress}%</div>
+                                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div className="bg-pink-500 h-1.5 rounded-full transition-all" style={{ width: `${artUploadState.progress}%` }} />
                                   </div>
-                                ) : (
-                                  <div className="space-y-1">
-                                    <ImageIcon className="w-6 h-6 text-gray-300 mx-auto" />
-                                    <div className="text-xs text-gray-400">
-                                      <span className="font-medium text-pink-500">📋 Cole o print aqui</span> ou clique para selecionar
-                                    </div>
-                                    <div className="text-[10px] text-gray-300">PNG, JPG ou JPEG</div>
+                                  <button type="button" className="text-xs text-gray-400 hover:text-red-500 underline" onClick={cancelArtUpload}>Cancelar</button>
+                                </div>
+                              ) : (
+                                /* Área de paste e drag-and-drop */
+                                <div
+                                  ref={(el) => { artPasteRefs.current[idx] = el; }}
+                                  tabIndex={0}
+                                  className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center focus:outline-none focus:border-pink-400 focus:bg-pink-50/20 transition-colors"
+                                  onPaste={async (e) => {
+                                    const items = Array.from(e.clipboardData?.items ?? []);
+                                    const imgItem = items.find(it => it.type.startsWith("image/"));
+                                    if (!imgItem) return;
+                                    const file = imgItem.getAsFile();
+                                    if (!file) return;
+                                    e.preventDefault();
+                                    setArtUploadingIdx(idx);
+                                    try {
+                                      const { url } = await doArtUpload(file);
+                                      updateItem(idx, { artFileUrl: url });
+                                    } catch (err: any) {
+                                      if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
+                                    } finally {
+                                      setArtUploadingIdx(null);
+                                      resetArtUpload();
+                                    }
+                                  }}
+                                  onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-pink-400", "bg-pink-50/20"); }}
+                                  onDragLeave={(e) => { e.currentTarget.classList.remove("border-pink-400", "bg-pink-50/20"); }}
+                                  onDrop={async (e) => {
+                                    e.preventDefault();
+                                    e.currentTarget.classList.remove("border-pink-400", "bg-pink-50/20");
+                                    const file = e.dataTransfer.files?.[0];
+                                    if (!file || !file.type.startsWith("image/")) return;
+                                    setArtUploadingIdx(idx);
+                                    try {
+                                      const { url } = await doArtUpload(file);
+                                      updateItem(idx, { artFileUrl: url });
+                                    } catch (err: any) {
+                                      if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
+                                    } finally {
+                                      setArtUploadingIdx(null);
+                                      resetArtUpload();
+                                    }
+                                  }}
+                                >
+                                  <ImageIcon className="w-6 h-6 text-gray-300 mx-auto mb-1" />
+                                  <div className="text-xs text-gray-400 mb-2">
+                                    Cole um print aqui <span className="text-gray-300">(Ctrl+V)</span> ou arraste uma imagem
                                   </div>
-                                )}
-                              </div>
+                                  <button
+                                    type="button"
+                                    className="text-xs border border-gray-200 rounded px-3 py-1 text-gray-500 hover:border-pink-300 hover:text-pink-600 transition-colors"
+                                    onClick={() => (artPasteRefs.current as any)[`file_${idx}`]?.click()}
+                                  >
+                                    Selecionar imagem
+                                  </button>
+                                  <div className="text-[10px] text-gray-300 mt-1">PNG, JPG ou JPEG</div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
