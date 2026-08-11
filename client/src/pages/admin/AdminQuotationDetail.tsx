@@ -171,7 +171,7 @@ function printQuotationPDF(q: any) {
   .page { max-width: 800px; margin: 0 auto; padding: 40px; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:3px solid #e91e8c; padding-bottom:24px; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
-  .brand p { font-size:12px; color:#666; margin-top:2px; }
+  .brand img { height:52px; object-fit:contain; display:block; }
   .doc-info { text-align:right; }
   .doc-info .num { font-size:18px; font-weight:700; color:#1a1a1a; }
   .doc-info .date { font-size:12px; color:#666; margin-top:4px; }
@@ -197,8 +197,7 @@ function printQuotationPDF(q: any) {
 <div class="page">
   <div class="header">
     <div class="brand">
-      <h1>Maria Imprime</h1>
-      <p>Sua Gráfica Online</p>
+      <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
     </div>
     <div class="doc-info">
       <div class="num">${q.quotationNumber}</div>
@@ -331,6 +330,7 @@ export default function AdminQuotationDetail() {
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Button>
           <div>
+            <img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-8 object-contain mb-1" />
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-gray-900">{q.quotationNumber}</h1>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.cls}`}>
