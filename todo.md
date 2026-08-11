@@ -2435,3 +2435,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Executar varredura no banco para identificar produtos com preço comercial ausente ou fallback técnico indevido
 - [x] Criar teste automatizado de integridade de preços por tipo de cobrança
 - [x] Validar a exibição pública da Lona Impressa com R$ 75,00/m²
+
+## Edição Rápida de Produtos
+- [x] Permitir alterar preço-base e unidade de cobrança diretamente na lista de produtos do painel admin

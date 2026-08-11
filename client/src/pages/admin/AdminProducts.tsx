@@ -24,6 +24,9 @@ export default function AdminProducts() {
 
   // ─── Estado de edição ─────────────────────────────────────────────────────
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [quickEditingId, setQuickEditingId] = useState<number | null>(null);
+  const [quickPrice, setQuickPrice] = useState("");
+  const [quickCalculationType, setQuickCalculationType] = useState("unidade");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [editForm, setEditForm] = useState({
@@ -120,6 +123,49 @@ export default function AdminProducts() {
       })(),
       tagPosition: product.tagPosition || "top-right",
     }));
+  };
+
+  const isMeasureBased = (calculationType: string) =>
+    calculationType === "m2" || calculationType === "metro_linear";
+
+  const startQuickEdit = (product: any) => {
+    const calculationType = product.calculationType || "unidade";
+    setQuickEditingId(product.id);
+    setQuickCalculationType(calculationType);
+    setQuickPrice(
+      isMeasureBased(calculationType)
+        ? String(product.pricePerM2 ?? "")
+        : String(product.price ?? "")
+    );
+  };
+
+  const handleQuickPricingSave = async (product: any) => {
+    const normalizedPrice = quickPrice.replace(",", ".").trim();
+    const numericPrice = Number.parseFloat(normalizedPrice);
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+      toast.error("Informe um preço-base maior que R$ 0,00");
+      return;
+    }
+
+    try {
+      const measureBased = isMeasureBased(quickCalculationType);
+      await updateProductMutation.mutateAsync({
+        id: product.id,
+        name: product.name,
+        description: product.description || undefined,
+        price: measureBased ? String(product.price ?? "0") : normalizedPrice,
+        segment: product.segment || "geral",
+        imageUrl: product.imageUrl || undefined,
+        calculationType: quickCalculationType as "m2" | "metro_linear" | "pacote" | "unidade",
+        pricePerM2: measureBased ? normalizedPrice : undefined,
+      });
+      await utils.products.getAll.invalidate();
+      setQuickEditingId(null);
+      toast.success("Preço e unidade de cobrança atualizados");
+    } catch (error) {
+      console.error("Erro na edição rápida de preço:", error);
+      toast.error("Não foi possível atualizar o preço do produto");
+    }
   };
 
   const handleSave = async () => {
@@ -342,6 +388,10 @@ export default function AdminProducts() {
 
                   {/* Actions */}
                   <div className="flex gap-2 justify-end md:col-span-1">
+                    <Button variant="outline" size="sm" onClick={() => startQuickEdit(product)}>
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Preço rápido
+                    </Button>
                     <Dialog open={editingId === product.id} onOpenChange={(open) => !open && setEditingId(null)}>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
@@ -564,6 +614,66 @@ export default function AdminProducts() {
                     </Button>
                   </div>
                 </div>
+
+                {quickEditingId === product.id && (
+                  <div className="mt-5 rounded-lg border border-orange-200 bg-orange-50/60 p-4">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                      <div className="flex-1 min-w-0">
+                        <Label className="text-sm font-semibold text-gray-900">Unidade de cobrança</Label>
+                        <Select value={quickCalculationType} onValueChange={setQuickCalculationType}>
+                          <SelectTrigger className="mt-1 bg-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unidade">Unidade</SelectItem>
+                            <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
+                            <SelectItem value="metro_linear">Metro Linear</SelectItem>
+                            <SelectItem value="pacote">Pacote</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Label className="text-sm font-semibold text-gray-900">
+                          {quickCalculationType === "m2"
+                            ? "Preço-base por m² (R$)"
+                            : quickCalculationType === "metro_linear"
+                              ? "Preço-base por metro linear (R$)"
+                              : "Preço-base (R$)"}
+                        </Label>
+                        <Input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={quickPrice}
+                          onChange={(event) => setQuickPrice(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") handleQuickPricingSave(product);
+                          }}
+                          className="mt-1 bg-white"
+                          placeholder="0,00"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setQuickEditingId(null)}
+                          disabled={updateProductMutation.isPending}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600"
+                          onClick={() => handleQuickPricingSave(product)}
+                          disabled={updateProductMutation.isPending}
+                        >
+                          {updateProductMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
