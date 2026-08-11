@@ -121,18 +121,27 @@ function buildSpecPairs(s: string): { label: string; value: string }[] {
 
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
 
-function formatSpecs(s: string, separator = "   ❯   "): string {
+function formatSpecs(s: string): string {
   try {
     const o: Record<string, string> = JSON.parse(s);
-    const entries = Object.entries(o).filter(([, v]) => v && String(v).trim());
-    const ordered = [
-      ...SPEC_FIRST.filter(k => o[k]).map(k => [k, o[k]] as [string, string]),
-      ...entries.filter(([k]) => !SPEC_FIRST.includes(k)),
-    ];
-    return ordered.map(([k, v]) => {
-      const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
-      return `${label}: ${v}`;
-    }).join("   ❯   ");
+    const w = parseFloat((o.width ?? o.largura ?? "").replace(",", ".")) || 0;
+    const h = parseFloat((o.height ?? o.altura ?? "").replace(",", ".")) || 0;
+    const parts: string[] = [];
+    if (w > 0 && h > 0) {
+      parts.push(`Largura (m): ${w.toFixed(2).replace(".", ",")} ❯ Altura (m): ${h.toFixed(2).replace(".", ",")} ❯ Total = ${(w * h).toFixed(2).replace(".", ",")} m²`);
+    } else if (w > 0) {
+      parts.push(`Largura (m): ${w.toFixed(2).replace(".", ",")}`);
+    } else if (h > 0) {
+      parts.push(`Altura (m): ${h.toFixed(2).replace(".", ",")}`);
+    }
+    const skip = new Set(["width", "height", "largura", "altura"]);
+    Object.entries(o)
+      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .forEach(([k, v]) => {
+        const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+        parts.push(`${label}: ${v}`);
+      });
+    return parts.join(" ❯ ");
   } catch { return ""; }
 }
 
@@ -148,11 +157,7 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any) {
   const items = q.items ?? [];
   const specs = (s: string) => {
-    const pairs = buildSpecPairs(s);
-    if (!pairs.length) return "";
-    return pairs.map(p =>
-      `<div style="margin-bottom:5px;line-height:1.4"><div style="color:#444;font-weight:700;font-size:10px">${p.label}</div>${p.value ? `<div style="color:#666;font-size:10px;padding-left:12px;margin-top:1px">${p.value}</div>` : ""}</div>`
-    ).join("");
+    return formatSpecs(s);
   };
 
   const html = `<!DOCTYPE html>
@@ -451,17 +456,8 @@ export default function AdminQuotationDetail() {
                           )}
                         </td>
                         <td className="py-2.5 pr-3 font-medium text-gray-800">{item.productName}</td>
-                        <td className="py-2.5 pr-3 text-xs max-w-56">
-                          {specPairs.length > 0 ? (
-                            <div className="space-y-1.5">
-                              {specPairs.map((p, i) => (
-                                <div key={i}>
-                                  <div className="font-semibold text-gray-700 text-[11px] leading-tight">{p.label}</div>
-                                  {p.value && <div className="text-gray-500 text-[11px] leading-tight pl-3 mt-0.5">{p.value}</div>}
-                                </div>
-                              ))}
-                            </div>
-                          ) : "—"}
+                        <td className="py-2.5 pr-3 text-xs text-gray-600 max-w-64 leading-relaxed">
+                          {formatSpecs(item.specifications) || "—"}
                         </td>
                         <td className="py-2.5 pr-3 text-center">{item.quantity}</td>
                         <td className="py-2.5 pr-3 text-right">{fmt(item.unitPrice)}</td>
