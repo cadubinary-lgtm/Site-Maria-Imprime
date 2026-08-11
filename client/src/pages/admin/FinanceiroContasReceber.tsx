@@ -54,6 +54,8 @@ export default function FinanceiroContasReceber() {
   const [pixDialog, setPixDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [selectedPayment, setSelectedPayment] = useState<"dinheiro" | "pix" | "cartao_credito" | "cartao_debito" | "transferencia">("pix");
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
+  const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
+  const [whatsappPhone, setWhatsappPhone] = useState("");
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
     page,
@@ -226,20 +228,22 @@ export default function FinanceiroContasReceber() {
                           >
                             <QrCode className="h-3 w-3" />
                           </Button>
-                          {item.telefone && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 px-2 text-xs text-green-600"
-                              onClick={() => enviarCobranca.mutate({
-                                orderId: item.pedidoId,
-                                telefone: item.telefone,
-                              })}
-                              title="Enviar Cobrança WhatsApp"
-                            >
-                              <Send className="h-3 w-3" />
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs text-green-600 hover:bg-green-50 hover:border-green-300"
+                            onClick={() => {
+                              if (item.telefone) {
+                                enviarCobranca.mutate({ orderId: item.pedidoId, telefone: item.telefone });
+                              } else {
+                                setWhatsappPhone("");
+                                setWhatsappDialog({ open: true, order: item });
+                              }
+                            }}
+                            title="Enviar Cobrança WhatsApp"
+                          >
+                            <Send className="h-3 w-3" />
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -391,6 +395,64 @@ export default function FinanceiroContasReceber() {
               }}
             >
               {deleteOrder.isPending ? "Excluindo..." : "Sim, excluir pedido"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: WhatsApp sem telefone */}
+      <Dialog open={whatsappDialog.open} onOpenChange={(o) => !o && setWhatsappDialog({ open: false, order: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar Cobrança por WhatsApp</DialogTitle>
+          </DialogHeader>
+          {whatsappDialog.order && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Pedido</span>
+                  <span className="font-mono font-semibold">#{whatsappDialog.order.orderNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Cliente</span>
+                  <span className="font-medium">{whatsappDialog.order.cliente}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Valor</span>
+                  <span className="font-bold text-green-600">{formatCurrency(whatsappDialog.order.valor)}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Número de WhatsApp do cliente
+                </label>
+                <Input
+                  placeholder="Ex: 11999999999"
+                  value={whatsappPhone}
+                  onChange={(e) => setWhatsappPhone(e.target.value.replace(/\D/g, ""))}
+                  maxLength={15}
+                  className="font-mono"
+                />
+                <p className="text-xs text-gray-400 mt-1">Somente números, com DDD. Ex: 11999999999</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWhatsappDialog({ open: false, order: null })}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={whatsappPhone.length < 10 || enviarCobranca.isPending}
+              onClick={() => {
+                if (whatsappDialog.order && whatsappPhone) {
+                  enviarCobranca.mutate({ orderId: whatsappDialog.order.pedidoId, telefone: whatsappPhone });
+                  setWhatsappDialog({ open: false, order: null });
+                }
+              }}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {enviarCobranca.isPending ? "Abrindo..." : "Abrir WhatsApp"}
             </Button>
           </DialogFooter>
         </DialogContent>
