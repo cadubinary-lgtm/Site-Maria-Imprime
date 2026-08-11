@@ -2424,3 +2424,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Catálogo: cards com proporção 1:1 e object-fit contain
 - [x] Página interna do produto: imagem principal 1:1 com object-fit contain
 - [x] Carrossel de miniaturas: proporção 1:1 correta sem espremimento
+
+## Correção: Preço da Lona Impressa na Vitrine
+- [x] Corrigir a vitrine pública para exibir o preço-base comercial da Lona Impressa (R$ 75,00/m²), sem fallback incorreto para R$ 1,00
