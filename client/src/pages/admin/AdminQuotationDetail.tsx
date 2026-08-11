@@ -75,7 +75,7 @@ const SPEC_LABELS: Record<string, string> = {
 };
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
 
-function formatSpecs(s: string, separator = " · "): string {
+function formatSpecs(s: string, separator = "  ·  "): string {
   try {
     const o: Record<string, string> = JSON.parse(s);
     const entries = Object.entries(o).filter(([, v]) => v && String(v).trim());
@@ -84,9 +84,9 @@ function formatSpecs(s: string, separator = " · "): string {
       ...entries.filter(([k]) => !SPEC_FIRST.includes(k)),
     ];
     return ordered.map(([k, v]) => {
-      const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
       return `${label}: ${v}`;
-    }).join(separator);
+    }).join("  ·  ");
   } catch { return ""; }
 }
 
