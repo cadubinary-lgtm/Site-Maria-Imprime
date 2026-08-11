@@ -2438,3 +2438,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Edição Rápida de Produtos
 - [x] Permitir alterar preço-base e unidade de cobrança diretamente na lista de produtos do painel admin
+- [x] Exibir toast de sucesso após salvar preço na edição rápida

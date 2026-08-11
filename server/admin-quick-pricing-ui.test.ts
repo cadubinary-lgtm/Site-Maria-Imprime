@@ -11,5 +11,7 @@ describe("Edição rápida de precificação no painel", () => {
     expect(source).toContain("Preço-base por metro linear (R$)");
     expect(source).toContain("handleQuickPricingSave");
     expect(source).toContain("pricePerM2: measureBased ? normalizedPrice : undefined");
+    expect(source).toContain('toast.success("Preço atualizado com sucesso"');
+    expect(source).toContain('position: "top-right"');
   });
 });
