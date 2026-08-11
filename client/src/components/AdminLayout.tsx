@@ -361,7 +361,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         children: [
           { label: "Clientes Site", href: "/admin/clientes-loja" },
           { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
-          { label: "Novo Cliente", href: "/admin/clientes" },
+          { label: "Todos os Clientes", href: "/admin/clientes" },
         ],
       },
     },

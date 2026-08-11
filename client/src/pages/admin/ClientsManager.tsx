@@ -14,23 +14,35 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { ArrowLeft, Plus, Trash2, Edit2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Search, Users, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-export default function ClientsManager() {
+const TYPE_LABELS: Record<string, { label: string; color: string }> = {
+  balcao:      { label: "Balcão",      color: "bg-blue-100 text-blue-800" },
+  site:        { label: "Site",        color: "bg-green-100 text-green-800" },
+  revendedor:  { label: "Revendedor",  color: "bg-purple-100 text-purple-800" },
+  agencia:     { label: "Agência",     color: "bg-orange-100 text-orange-800" },
+  corporativo: { label: "Corporativo", color: "bg-pink-100 text-pink-800" },
+};
+
+export default function ClientsManager({ defaultType, title, ..._ }: { defaultType?: string; title?: string; [k: string]: any } = {}) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<string>(defaultType ?? "");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     whatsapp: "",
-    clientType: "balcao" as const,
+    clientType: (defaultType ?? "balcao") as any,
   });
 
   // Queries
   const { data: clients, isLoading, refetch } = trpc.crm.listClients.useQuery({
     limit: 100,
     offset: 0,
+    clientType: filterType || undefined,
   });
 
   // Mutations
@@ -107,8 +119,20 @@ export default function ClientsManager() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ name: "", email: "", phone: "", whatsapp: "", clientType: "balcao" });
+    setFormData({ name: "", email: "", phone: "", whatsapp: "", clientType: (defaultType ?? "balcao") as any });
   };
+
+  // Filtro local por busca de texto
+  const filtered = (clients ?? []).filter((c: any) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      c.name?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.phone?.includes(q) ||
+      c.whatsapp?.includes(q)
+    );
+  });
 
   return (
     <AdminLayout>
@@ -122,8 +146,38 @@ export default function ClientsManager() {
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestão de Clientes (CRM)</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{title ?? "Gestão de Clientes (CRM)"}</h1>
           <p className="text-gray-600 mt-2">Gerencie clientes, histórico de pedidos e estatísticas</p>
+        </div>
+
+        {/* Barra de busca e filtros */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <div className="flex gap-2 flex-1 min-w-[200px]">
+            <Input
+              placeholder="Buscar por nome, e-mail ou telefone..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1"
+            />
+            <Button size="sm" variant="outline" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+          {!defaultType && (
+            <Select value={filterType || "todos"} onValueChange={(v) => setFilterType(v === "todos" ? "" : v)}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Tipo de cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os tipos</SelectItem>
+                <SelectItem value="balcao">Balcão</SelectItem>
+                <SelectItem value="site">Site</SelectItem>
+                <SelectItem value="revendedor">Revendedor</SelectItem>
+                <SelectItem value="agencia">Agência</SelectItem>
+                <SelectItem value="corporativo">Corporativo</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Formulário */}
@@ -193,6 +247,7 @@ export default function ClientsManager() {
                         <SelectItem value="revendedor">Revendedor</SelectItem>
                         <SelectItem value="agencia">Agência</SelectItem>
                         <SelectItem value="corporativo">Corporativo</SelectItem>
+                        <SelectItem value="site">Site</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -224,10 +279,17 @@ export default function ClientsManager() {
         {/* Lista de clientes */}
         <Card>
           <CardHeader>
-            <CardTitle>Clientes</CardTitle>
-            <CardDescription>
-              Total: {clients?.length || 0} clientes
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-pink-600" />
+                  Clientes
+                </CardTitle>
+                <CardDescription>
+                  {filtered.length} cliente(s) encontrado(s){filterType ? ` · Tipo: ${TYPE_LABELS[filterType]?.label ?? filterType}` : ""}
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -249,14 +311,14 @@ export default function ClientsManager() {
                     </tr>
                   </thead>
                   <tbody>
-                    {clients.map((client: any) => (
+                    {filtered.map((client: any) => (
                       <tr key={client.id} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-4">{client.name}</td>
                         <td className="py-2 px-4 text-sm text-gray-600">{client.email || "-"}</td>
                         <td className="py-2 px-4 text-sm text-gray-600">{client.phone || "-"}</td>
                         <td className="py-2 px-4">
-                          <span className="inline-block px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded">
-                            {client.clientType}
+                          <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${TYPE_LABELS[client.clientType]?.color ?? "bg-gray-100 text-gray-700"}`}>
+                            {TYPE_LABELS[client.clientType]?.label ?? client.clientType}
                           </span>
                         </td>
                         <td className="py-2 px-4 font-semibold">
