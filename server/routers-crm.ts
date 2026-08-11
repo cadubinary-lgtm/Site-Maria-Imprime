@@ -11,6 +11,9 @@ import {
   getClientsByType,
   updateClientStats,
 } from "./db-crm";
+import { getDb } from "./db";
+import { eq, desc, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 /**
  * CRM Router - Gestão de Clientes
@@ -129,5 +132,64 @@ export const crmRouter = router({
     .input(z.object({ clientId: z.number() }))
     .mutation(async ({ input }) => {
       return await updateClientStats(input.clientId);
+    }),
+
+  adminListBalcaoClients: adminProcedure
+    .input(z.object({
+      search: z.string().optional(),
+      clientType: z.string().optional(),
+      limit: z.number().default(100),
+      offset: z.number().default(0),
+    }))
+    .query(async ({ input }) => {
+      const { clients } = await import("../drizzle/schema.js");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const conditions: any[] = [eq(clients.isActive, true)];
+      if (input.clientType) conditions.push(eq(clients.clientType, input.clientType as any));
+      let rows = await db
+        .select()
+        .from(clients)
+        .where(conditions.length > 1 ? and(...conditions) : conditions[0])
+        .orderBy(desc(clients.createdAt))
+        .limit(input.limit)
+        .offset(input.offset);
+      if (input.search) {
+        const s = input.search.toLowerCase();
+        rows = rows.filter((c: any) =>
+          c.name?.toLowerCase().includes(s) ||
+          c.email?.toLowerCase().includes(s) ||
+          c.phone?.includes(s) ||
+          c.cpfCnpj?.includes(s)
+        );
+      }
+      return { clients: rows, total: rows.length };
+    }),
+
+  adminGetBalcaoClientDetail: adminProcedure
+    .input(z.object({ clientId: z.number() }))
+    .query(async ({ input }) => {
+      const { clients, orders } = await import("../drizzle/schema.js");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const [client] = await db.select().from(clients).where(eq(clients.id, input.clientId)).limit(1);
+      if (!client) throw new TRPCError({ code: "NOT_FOUND", message: "Cliente não encontrado" });
+      const orderRows = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.clientId, input.clientId))
+        .orderBy(desc(orders.createdAt))
+        .limit(20);
+      return { client, orders: orderRows };
+    }),
+
+  adminDeleteBalcaoClient: adminProcedure
+    .input(z.object({ clientId: z.number() }))
+    .mutation(async ({ input }) => {
+      const { clients } = await import("../drizzle/schema.js");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      await db.update(clients).set({ isActive: false } as any).where(eq(clients.id, input.clientId));
+      return { success: true };
     }),
 });
