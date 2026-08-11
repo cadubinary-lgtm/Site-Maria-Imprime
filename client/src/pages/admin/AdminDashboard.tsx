@@ -2,6 +2,10 @@ import { useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import AdminLayout from "@/components/AdminLayout";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { getDefaultAdminRoute } from "@/lib/adminRouteUtils";
 import {
   ShoppingCart, DollarSign, Printer, Package, AlertTriangle,
   ChevronRight, FileText, Users, BarChart3,
@@ -91,6 +95,27 @@ function AlertItem({ type, title, desc, time }: { type: "error"|"warn"|"info"|"o
 }
 
 export default function AdminDashboard() {
+  const [, navigate] = useLocation();
+  const { adminUser } = useAdminAuth();
+
+  // Buscar permissões para redirecionar operadores sem acesso ao dashboard
+  const { data: myPermissions, isLoading: permLoading } = trpc.adminAuth.myPermissions.useQuery(undefined, {
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Redirecionar operadores sem permissão de ver o dashboard
+  useEffect(() => {
+    if (!adminUser || permLoading || myPermissions === undefined) return;
+    // null = acesso total (superadmin) → pode ver o dashboard
+    if (myPermissions === null) return;
+    // Tem permissões restritas → redirecionar para a primeira rota disponível
+    const route = getDefaultAdminRoute(adminUser.role, myPermissions);
+    if (route !== "/admin") {
+      navigate(route);
+    }
+  }, [adminUser, myPermissions, permLoading, navigate]);
+
   const { data: orders, isLoading } = trpc.admin.getAllOrders.useQuery();
   const { data: products } = trpc.products.getAll.useQuery();
   const allOrders = (orders ?? []) as any[];

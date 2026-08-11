@@ -112,6 +112,15 @@ export const adminAuthRouter = router({
           path: "/",
         });
 
+        // Buscar permissões para retornar junto com o login
+        const db2 = (await getDb())!;
+        const adminRow = await (db2 as any).query.adminAccounts.findFirst({
+          where: eq(adminAccounts.id, admin.adminId),
+        });
+        const permissions = adminRow?.role === "superadmin"
+          ? null
+          : (adminRow?.permissions ? JSON.parse(adminRow.permissions) : null);
+
         return {
           success: true,
           admin: {
@@ -119,6 +128,7 @@ export const adminAuthRouter = router({
             name: admin.name,
             email: admin.email,
             role: admin.role,
+            permissions,
           },
         };
       } catch (err) {

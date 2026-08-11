@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { getDefaultAdminRoute } from "@/lib/adminRouteUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +27,25 @@ export default function AdminLogin() {
   // Se já está logado, redirecionar para o painel
   useEffect(() => {
     if (!isLoading && adminUser) {
-      navigate("/admin");
+      // Buscar permissões para redirecionar corretamente
+      // (superadmin → /admin, operador restrito → primeira rota permitida)
+      navigate("/admin"); // será substituído abaixo via myPermissions
     }
   }, [adminUser, isLoading, navigate]);
+
+  // Buscar permissões do operador logado para redirecionamento inteligente
+  const { data: myPermissions } = trpc.adminAuth.myPermissions.useQuery(undefined, {
+    enabled: !!adminUser && !isLoading,
+    retry: false,
+  });
+
+  // Quando permissões carregarem, redirecionar para a rota correta
+  useEffect(() => {
+    if (!isLoading && adminUser && myPermissions !== undefined) {
+      const route = getDefaultAdminRoute(adminUser.role, myPermissions);
+      navigate(route);
+    }
+  }, [adminUser, isLoading, myPermissions, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +62,8 @@ export default function AdminLogin() {
 
     try {
       await login(email, password);
+      // Redirecionar para /admin temporariamente; o useEffect acima vai corrigir
+      // assim que myPermissions carregar
       navigate("/admin");
     } catch (err: any) {
       setLocalError(err?.message || "Falha no login. Verifique suas credenciais.");
