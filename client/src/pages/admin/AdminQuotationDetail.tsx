@@ -241,7 +241,6 @@ function printQuotationPDF(q: any) {
       </tbody>
     </table>
     <div class="totals">
-      <div class="total-row"><span>Subtotal</span><span>${fmt(q.subtotal)}</span></div>
       ${Number(q.discountAmount) > 0 ? `<div class="total-row" style="color:#16a34a"><span>Desconto</span><span>- ${fmt(q.discountAmount)}</span></div>` : ""}
       ${Number(q.shippingPrice) > 0 ? `<div class="total-row"><span>Frete (${q.shippingLabel ?? ""})</span><span>${fmt(q.shippingPrice)}</span></div>` : ""}
       <div class="total-row grand"><span>TOTAL</span><span>${fmt(q.total)}</span></div>
@@ -526,10 +525,6 @@ export default function AdminQuotationDetail() {
           <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-4">
             <h2 className="font-semibold text-gray-800 mb-4">Resumo Financeiro</h2>
             <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal</span>
-                <span className="font-medium">{fmt(q.subtotal)}</span>
-              </div>
               {Number(q.discountAmount) > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Desconto</span>
