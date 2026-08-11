@@ -18,6 +18,11 @@ export default function AdminVariationsOffset() {
   const [newOptionNames, setNewOptionNames] = useState<Record<number, string>>({});
   const [newOptionPrices, setNewOptionPrices] = useState<Record<number, string>>({});
   const [newOptionCalcTypes, setNewOptionCalcTypes] = useState<Record<number, string>>({});
+  // Estados de edição inline de opção
+  const [editingOptionId, setEditingOptionId] = useState<number | null>(null);
+  const [editingOptionName, setEditingOptionName] = useState("");
+  const [editingOptionPrice, setEditingOptionPrice] = useState("");
+  const [editingOptionCalcType, setEditingOptionCalcType] = useState("unit");
 
   const CALC_TYPE_OPTIONS = [
     { value: "unit", label: "Unidade" },
@@ -110,6 +115,31 @@ export default function AdminVariationsOffset() {
       toast.success("Opção adicionada!");
     } catch {
       toast.error("Erro ao adicionar opção");
+    }
+  };
+
+  const handleStartEditOption = (opt: any) => {
+    setEditingOptionId(opt.id);
+    setEditingOptionName(opt.name);
+    setEditingOptionPrice(opt.priceModifier ?? "0");
+    setEditingOptionCalcType(opt.calculationType ?? "unit");
+  };
+
+  const handleSaveOption = async (optId: number) => {
+    if (!editingOptionName.trim()) return;
+    try {
+      await updateOptionMutation.mutateAsync({
+        id: optId,
+        name: editingOptionName.trim(),
+        priceModifier: editingOptionPrice || "0",
+        calculationType: editingOptionCalcType as "unit" | "m2" | "linear" | "package",
+      });
+      setEditingOptionId(null);
+      await utils.variationsOffset.getGlobal.invalidate();
+      refetch();
+      toast.success("Opção atualizada!");
+    } catch {
+      toast.error("Erro ao atualizar opção");
     }
   };
 
@@ -270,25 +300,73 @@ export default function AdminVariationsOffset() {
                 {isExpanded && (
                   <div className="px-4 py-3 space-y-2">
                     {/* Lista de opções */}
-                    {(vt.options ?? []).map((opt: any) => (
-                      <div key={opt.id} className="flex items-center justify-between py-1.5 px-3 bg-gray-50 rounded-lg border border-gray-100">
-                        <span className="text-sm text-gray-700">{opt.name}</span>
-                        <div className="flex items-center gap-3">
-                         {parseFloat(opt.priceModifier ?? "0") !== 0 && (
-                           <span className="text-xs text-gray-500">
-                             {parseFloat(opt.priceModifier) > 0 ? "+" : ""}R$ {parseFloat(opt.priceModifier).toFixed(2)}
-                            /{CALC_TYPE_OPTIONS.find(c => c.value === (opt.calculationType ?? "unit"))?.label ?? "Unidade"}
-                           </span>
-                         )}
-                          <button
-                            onClick={() => handleDeleteOption(opt.id)}
-                            className="text-gray-300 hover:text-red-500 transition"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
+                   {(vt.options ?? []).map((opt: any) => (
+                      <div key={opt.id} className="rounded-lg border border-gray-100 bg-gray-50 overflow-hidden">
+                        {editingOptionId === opt.id ? (
+                          /* Modo edição inline */
+                          <div className="flex gap-2 items-center px-3 py-2">
+                            <input
+                              className="flex-1 border border-pink-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                              value={editingOptionName}
+                              onChange={e => setEditingOptionName(e.target.value)}
+                              onKeyDown={e => { if (e.key === "Enter") handleSaveOption(opt.id); if (e.key === "Escape") setEditingOptionId(null); }}
+                              autoFocus
+                              placeholder="Nome da opção"
+                            />
+                            <input
+                              className="w-24 border border-pink-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                              type="number"
+                              step="0.01"
+                              value={editingOptionPrice}
+                              onChange={e => setEditingOptionPrice(e.target.value)}
+                              placeholder="R$ preço"
+                            />
+                            <select
+                              className="border border-pink-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white"
+                              value={editingOptionCalcType}
+                              onChange={e => setEditingOptionCalcType(e.target.value)}
+                            >
+                              {CALC_TYPE_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                              ))}
+                            </select>
+                            <button onClick={() => handleSaveOption(opt.id)} className="text-green-600 hover:text-green-700 transition">
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setEditingOptionId(null)} className="text-gray-400 hover:text-gray-600 transition">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          /* Modo visualização */
+                          <div className="flex items-center justify-between py-1.5 px-3">
+                            <span className="text-sm text-gray-700">{opt.name}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-gray-500">
+                                {parseFloat(opt.priceModifier ?? "0") !== 0
+                                  ? `${parseFloat(opt.priceModifier) > 0 ? "+" : ""}R$ ${parseFloat(opt.priceModifier).toFixed(2)}`
+                                  : "R$ 0,00"}
+                                /{CALC_TYPE_OPTIONS.find(c => c.value === (opt.calculationType ?? "unit"))?.label ?? "Unidade"}
+                              </span>
+                              <button
+                                onClick={() => handleStartEditOption(opt)}
+                                className="text-gray-400 hover:text-pink-600 transition"
+                                title="Editar opção"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteOption(opt.id)}
+                                className="text-gray-300 hover:text-red-500 transition"
+                                title="Excluir opção"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
+                   ))}
 
                     {/* Formulário de nova opção */}
                     <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
