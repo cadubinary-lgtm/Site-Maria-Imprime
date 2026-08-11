@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { useLocation, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,10 @@ export default function AdminQuotationForm() {
   // Cache de precificação por produto (productId -> { pricePerM2, calculationType, variations, attributes })
   const [pricingCache, setPricingCache] = useState<Record<number, any>>({});
   const [activePricingProductId, setActivePricingProductId] = useState<number | null>(null);
+  // Upload de arte por item (idx -> isUploading)
+  const [artUploadingIdx, setArtUploadingIdx] = useState<number | null>(null);
+  const { state: artUploadState, upload: doArtUpload, cancel: cancelArtUpload, reset: resetArtUpload } = useChunkedUpload();
+  const artPasteRefs = useRef<(HTMLDivElement | null)[]>([]);
   // Acerto Total (override do total calculado)
   const [acertoTotal, setAcertoTotal] = useState<string>("");
 
@@ -836,8 +841,84 @@ export default function AdminQuotationForm() {
                             )}
 
                             <div className="col-span-2">
-                              <label className="text-xs text-gray-500 font-medium">URL da Arte</label>
-                              <Input className="h-7 mt-0.5 text-sm" placeholder="https://..." value={item.artFileUrl ?? ""} onChange={(e) => updateItem(idx, { artFileUrl: e.target.value })} />
+                              <label className="text-xs text-gray-500 font-medium mb-1 block">Imagem / Print da arte</label>
+                              {/* Área de upload com paste e clique */}
+                              <div
+                                ref={(el) => { artPasteRefs.current[idx] = el; }}
+                                tabIndex={0}
+                                className="relative border-2 border-dashed border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-pink-300 hover:bg-pink-50/30 transition-colors focus:outline-none focus:border-pink-400"
+                                onClick={() => {
+                                  const input = document.createElement("input");
+                                  input.type = "file";
+                                  input.accept = "image/png,image/jpg,image/jpeg";
+                                  input.onchange = async (e) => {
+                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                    if (!file) return;
+                                    setArtUploadingIdx(idx);
+                                    try {
+                                      const { url } = await doArtUpload(file);
+                                      updateItem(idx, { artFileUrl: url });
+                                    } catch (err: any) {
+                                      if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
+                                    } finally {
+                                      setArtUploadingIdx(null);
+                                      resetArtUpload();
+                                    }
+                                  };
+                                  input.click();
+                                }}
+                                onPaste={async (e) => {
+                                  const items = Array.from(e.clipboardData?.items ?? []);
+                                  const imgItem = items.find(it => it.type.startsWith("image/"));
+                                  if (!imgItem) return;
+                                  const file = imgItem.getAsFile();
+                                  if (!file) return;
+                                  e.preventDefault();
+                                  setArtUploadingIdx(idx);
+                                  try {
+                                    const { url } = await doArtUpload(file);
+                                    updateItem(idx, { artFileUrl: url });
+                                  } catch (err: any) {
+                                    if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
+                                  } finally {
+                                    setArtUploadingIdx(null);
+                                    resetArtUpload();
+                                  }
+                                }}
+                              >
+                                {item.artFileUrl ? (
+                                  <div className="relative">
+                                    <img
+                                      src={item.artFileUrl}
+                                      alt="Arte"
+                                      className="max-h-32 mx-auto rounded object-contain"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute top-0 right-0 bg-white border border-gray-200 rounded-full p-0.5 shadow-sm hover:bg-red-50"
+                                      onClick={(e) => { e.stopPropagation(); updateItem(idx, { artFileUrl: undefined, artFileKey: undefined }); }}
+                                    >
+                                      <X className="w-3 h-3 text-gray-500" />
+                                    </button>
+                                  </div>
+                                ) : artUploadingIdx === idx ? (
+                                  <div className="space-y-1">
+                                    <div className="text-xs text-gray-500">Enviando... {artUploadState.currentChunk}/{artUploadState.totalChunks} — {artUploadState.progress}%</div>
+                                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                      <div className="bg-pink-500 h-1.5 rounded-full transition-all" style={{ width: `${artUploadState.progress}%` }} />
+                                    </div>
+                                    <button type="button" className="text-xs text-gray-400 hover:text-red-500 underline" onClick={(e) => { e.stopPropagation(); cancelArtUpload(); }}>Cancelar</button>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-1">
+                                    <ImageIcon className="w-6 h-6 text-gray-300 mx-auto" />
+                                    <div className="text-xs text-gray-400">
+                                      <span className="font-medium text-pink-500">📋 Cole o print aqui</span> ou clique para selecionar
+                                    </div>
+                                    <div className="text-[10px] text-gray-300">PNG, JPG ou JPEG</div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
