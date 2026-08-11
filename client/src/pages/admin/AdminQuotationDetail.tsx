@@ -93,6 +93,31 @@ function buildSpecLines(s: string): { line1: string | null; rest: string[] } {
   } catch { return { line1: null, rest: [] }; }
 }
 
+// Retorna linhas no formato { label, value } para exibição com label e valor em linhas separadas
+function buildSpecPairs(s: string): { label: string; value: string }[] {
+  try {
+    const o: Record<string, string> = JSON.parse(s);
+    const w = parseFloat((o.width ?? o.largura ?? "").replace(",", ".")) || 0;
+    const h = parseFloat((o.height ?? o.altura ?? "").replace(",", ".")) || 0;
+    const pairs: { label: string; value: string }[] = [];
+    if (w > 0 || h > 0) {
+      const dim = w > 0 && h > 0
+        ? `Largura(m): ${w.toFixed(2).replace(".", ",")} x Altura(m): ${h.toFixed(2).replace(".", ",")}`
+        : w > 0 ? `Largura(m): ${w.toFixed(2).replace(".", ",")}` : `Altura(m): ${h.toFixed(2).replace(".", ",")}`;
+      const area = w > 0 && h > 0 ? `Total = ${(w * h).toFixed(2).replace(".", ",")} m²` : "";
+      pairs.push({ label: dim, value: area });
+    }
+    const skip = new Set(["width", "height", "largura", "altura"]);
+    Object.entries(o)
+      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .forEach(([k, v]) => {
+        const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+        pairs.push({ label: `${label}:`, value: String(v) });
+      });
+    return pairs;
+  } catch { return []; }
+}
+
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
 
 function formatSpecs(s: string, separator = "   ❯   "): string {
@@ -122,7 +147,11 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any) {
   const items = q.items ?? [];
   const specs = (s: string) => {
-    return formatSpecs(s, " · ");
+    const pairs = buildSpecPairs(s);
+    if (!pairs.length) return "";
+    return pairs.map(p =>
+      `<div style="margin-bottom:3px"><span style="color:#555;font-weight:600;font-size:10px">${p.label}</span>${p.value ? `<br><span style="color:#777;font-size:10px;padding-left:8px">${p.value}</span>` : ""}</div>`
+    ).join("");
   };
 
   const html = `<!DOCTYPE html>
@@ -403,6 +432,7 @@ export default function AdminQuotationDetail() {
                     let specs: Record<string, string> = {};
                     try { specs = JSON.parse(item.specifications); } catch {}
                     const specLines = buildSpecLines(item.specifications);
+                    const specPairs = buildSpecPairs(item.specifications);
                     return (
                       <tr key={item.id}>
                         <td className="py-2.5 pr-2">
@@ -420,12 +450,14 @@ export default function AdminQuotationDetail() {
                           )}
                         </td>
                         <td className="py-2.5 pr-3 font-medium text-gray-800">{item.productName}</td>
-                        <td className="py-2.5 pr-3 text-xs max-w-52">
-                          {specLines.line1 || specLines.rest.length > 0 ? (
-                            <div className="space-y-0.5">
-                              {specLines.line1 && <div className="font-medium text-gray-700">{specLines.line1}</div>}
-                              {specLines.rest.map((line, i) => (
-                                <div key={i} className="text-gray-500">{line}</div>
+                        <td className="py-2.5 pr-3 text-xs max-w-56">
+                          {specPairs.length > 0 ? (
+                            <div className="space-y-1.5">
+                              {specPairs.map((p, i) => (
+                                <div key={i}>
+                                  <div className="font-medium text-gray-600 text-xs">{p.label}</div>
+                                  {p.value && <div className="text-gray-500 text-xs pl-2">{p.value}</div>}
+                                </div>
                               ))}
                             </div>
                           ) : "—"}
