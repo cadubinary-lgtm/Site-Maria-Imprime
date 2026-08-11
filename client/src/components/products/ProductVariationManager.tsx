@@ -241,6 +241,71 @@ export function ProductVariationManager() {
   const syncOffsetOptionsMutation = trpc.variationsOffset.syncGlobalOptions.useMutation();
   const syncOffsetNameMutation = trpc.variationsOffset.syncGlobalName.useMutation();
 
+  // ===== HOOKS INDEPENDENTES PARA VARIAÇÕES COMUNICAÇÃO VISUAL (Coluna 4) =====
+  const { data: cvVariationTypes = [], refetch: refetchCvVariationTypes } = trpc.variationsCv.getGlobal.useQuery();
+  const createCvTypeMutation = trpc.variationsCv.createType.useMutation();
+  const deleteCvTypeMutation = trpc.variationsCv.deleteType.useMutation();
+  const updateCvTypeMutation = trpc.variationsCv.updateType.useMutation();
+  const reorderCvTypesMutation = trpc.variationsCv.reorderTypes.useMutation();
+  const linkCvMutation = trpc.variationsCv.linkGlobal.useMutation();
+  const createCvOptionMutation = trpc.variationsCv.createOption.useMutation();
+  const deleteCvOptionMutation = trpc.variationsCv.deleteOption.useMutation();
+  const updateCvOptionMutation = trpc.variationsCv.updateOption.useMutation();
+
+  const handleAddCvVariationType = async () => {
+    if (!newGlobalVariationTypeName.trim()) { toast.error("Preencha o nome da variação"); return; }
+    try {
+      await createCvTypeMutation.mutateAsync({ productId: null, type: 'material' as const, name: newGlobalVariationTypeName, isRequired: newGlobalVariationTypeRequired });
+      toast.success("Tipo de variação CV criado!");
+      setNewGlobalVariationTypeName("");
+      setNewGlobalVariationTypeRequired(true);
+      await utils.variationsCv.getGlobal.invalidate();
+      refetchCvVariationTypes();
+    } catch { toast.error("Erro ao criar variação CV"); }
+  };
+
+  const handleLinkCvVariation = async (cvVariationId: number) => {
+    if (!selectedProductId) { toast.error("Selecione um produto"); return; }
+    try {
+      await linkCvMutation.mutateAsync({ globalVariationId: cvVariationId, productId: selectedProductId });
+      toast.success("Variação CV vinculada ao produto!");
+      await utils.variationsCv.getGlobal.invalidate();
+      refetchCvVariationTypes();
+      await utils.variations.getByProduct.invalidate({ productId: selectedProductId });
+      refetchVariationTypes();
+    } catch { toast.error("Erro ao vincular variação CV"); }
+  };
+
+  const handleDeleteCvVariationType = async (id: number) => {
+    if (!confirm("Excluir este tipo de variação CV?")) return;
+    try {
+      await deleteCvTypeMutation.mutateAsync({ id });
+      toast.success("Tipo CV excluído");
+      await utils.variationsCv.getGlobal.invalidate();
+      refetchCvVariationTypes();
+    } catch { toast.error("Erro ao excluir tipo CV"); }
+  };
+
+  const handleToggleCvRequired = async (id: number, current: boolean) => {
+    try {
+      await updateCvTypeMutation.mutateAsync({ id, isRequired: !current });
+      await utils.variationsCv.getGlobal.invalidate();
+      refetchCvVariationTypes();
+    } catch { toast.error("Erro ao atualizar"); }
+  };
+
+  const handleMoveCvVariationType = async (list: VariationType[], id: number, dir: "up" | "down") => {
+    const idx = list.findIndex(v => v.id === id);
+    const newIdx = dir === "up" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= list.length) return;
+    const newOrder = arrayMove(list, idx, newIdx);
+    try {
+      await reorderCvTypesMutation.mutateAsync({ updates: newOrder.map((v, i) => ({ id: v.id, order: i })) });
+      await utils.variationsCv.getGlobal.invalidate();
+      refetchCvVariationTypes();
+    } catch { toast.error("Erro ao reordenar"); }
+  };
+
   // Drag & drop sensors
   // Sensors para o DndContext externo (arrastar colunas horizontalmente)
   const columnSensors = useSensors(
@@ -854,9 +919,9 @@ export function ProductVariationManager() {
                   </Select>
                 </div>
                 <Button
-                  onClick={handleAddGlobalVariationType}
+                  onClick={handleAddCvVariationType}
                   className="w-full bg-pink-600 hover:bg-pink-700 text-sm"
-                  disabled={createVariationTypeMutation.isPending}
+                  disabled={createCvTypeMutation.isPending}
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Tipo Global
@@ -865,11 +930,11 @@ export function ProductVariationManager() {
             </div>
 
             {/* Lista de Tipos Globais */}
-            {globalVariationTypes.length === 0 ? (
+            {cvVariationTypes.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-4">Nenhuma variação global cadastrada.</p>
             ) : (
               <div className="grid gap-3">
-                {globalVariationTypes.map((vt: VariationType) => {
+                {cvVariationTypes.map((vt: VariationType) => {
                   const isExpanded = expandedGlobalVariationId === vt.id;
                   return (
                     <div key={vt.id} className="border rounded-lg bg-white overflow-hidden">
@@ -910,17 +975,17 @@ export function ProductVariationManager() {
                             )}
                             <div className="flex items-center gap-1">
                               <span className="text-xs text-gray-500">Obrig.:</span>
-                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleRequired(vt.id, value === "sim")} className="flex gap-2">
+                              <RadioGroup value={vt.isRequired ? "sim" : "nao"} onValueChange={(value) => handleToggleCvRequired(vt.id, value === "sim")} className="flex gap-2">
                                 <div className="flex items-center space-x-1"><RadioGroupItem value="sim" id={`global-required-sim-${vt.id}`} /><Label htmlFor={`global-required-sim-${vt.id}`} className="cursor-pointer text-xs">Sim</Label></div>
                                 <div className="flex items-center space-x-1"><RadioGroupItem value="nao" id={`global-required-nao-${vt.id}`} /><Label htmlFor={`global-required-nao-${vt.id}`} className="cursor-pointer text-xs">Não</Label></div>
                               </RadioGroup>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "up")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleMoveVariationType(globalVariationTypes as VariationType[], vt.id, "down")} disabled={(globalVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (globalVariationTypes as VariationType[]).length - 1 || reorderVariationTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDeleteVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveCvVariationType(cvVariationTypes as VariationType[], vt.id, "up")} disabled={(cvVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === 0 || reorderCvTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronUp className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleMoveCvVariationType(cvVariationTypes as VariationType[], vt.id, "down")} disabled={(cvVariationTypes as VariationType[]).findIndex(g => g.id === vt.id) === (cvVariationTypes as VariationType[]).length - 1 || reorderCvTypesMutation.isPending} className="text-gray-400 hover:text-gray-700 h-7 w-7 p-0"><ChevronDown className="w-3 h-3" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteCvVariationType(vt.id)} className="text-red-500 hover:text-red-700 h-7 w-7 p-0"><Trash2 className="w-3 h-3" /></Button>
                           </div>
                           {selectedProductId && (
-                            <Button onClick={() => handleLinkGlobalVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkGlobalMutation.isPending}>
+                            <Button onClick={() => handleLinkCvVariation(vt.id)} className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7" size="sm" disabled={linkCvMutation.isPending}>
                               <Plus className="w-3 h-3 mr-1" />Adicionar ao Produto
                             </Button>
                           )}
