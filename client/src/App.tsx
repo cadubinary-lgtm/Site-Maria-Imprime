@@ -377,6 +377,14 @@ function Router() {
 
 function AppLayout() {
   const { isOpen } = useCartDrawer();
+  const [location] = useLocation();
+  const isAdminRoute = location.startsWith("/admin") || location.startsWith("/producao");
+
+  // Rotas admin não usam o Header do e-commerce nem o CartSidePanel
+  if (isAdminRoute) {
+    return <Router />;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Coluna principal: 70% quando carrinho aberto, 100% quando fechado */}
