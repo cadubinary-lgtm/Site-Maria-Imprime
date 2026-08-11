@@ -297,11 +297,7 @@ export default function AdminKanban() {
             {orders.length} pedido{orders.length !== 1 ? "s" : ""} no total
           </p>
         </div>
-        <Link href="/admin/pedidos">
-          <button className="text-sm text-orange-600 hover:text-orange-700 underline">
-            Ver lista de pedidos →
-          </button>
-        </Link>
+
       </div>
 
       {/* Barra de pesquisa */}
