@@ -723,6 +723,11 @@ export default function AdminQuotationForm() {
                               updateItem(idx, { priceAdjustment: isNaN(val) ? 0 : val });
                               e.target.value = isNaN(val) || val === 0 ? "" : (val > 0 ? `+R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : `-R$ ${Math.abs(val).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
                             }}
+                            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                            onChange={(e) => {
+                              clearTimeout((e.target as any)._ajusteTimer);
+                              (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
+                            }}
                             className="w-28 h-7 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
                         </div>
