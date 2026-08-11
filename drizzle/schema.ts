@@ -507,6 +507,7 @@ export const clients = mysqlTable("clients", {
   averageTicket: decimal("averageTicket", { precision: 10, scale: 2 }).default("0").notNull(), // Ticket médio
   notes: longtext("notes"),
   isActive: boolean("isActive").default(true).notNull(),
+  allowStorePickup: boolean("allowStorePickup").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
