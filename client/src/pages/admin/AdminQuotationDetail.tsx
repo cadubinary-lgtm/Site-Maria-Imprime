@@ -232,7 +232,7 @@ function printQuotationPDF(q: any) {
       <tbody>
         ${items.map((i: any) => `
         <tr>
-          <td><strong>${i.productName}</strong></td>
+          <td><strong>${i.productName}</strong>${i.artFileUrl ? `<br><img src="${i.artFileUrl}" style="max-width:80px;max-height:60px;object-fit:contain;margin-top:4px;border-radius:4px;border:1px solid #eee" />` : ""}</td>
           <td style="color:#666;font-size:11px">${specs(i.specifications)}</td>
           <td class="td-right">${i.quantity}</td>
           <td class="td-right">${fmt(i.unitPrice)}</td>
@@ -427,7 +427,7 @@ export default function AdminQuotationDetail() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["", "Produto", "Especificações", "Qtd", "Unit.", "Total"].map((h) => (
+                    {["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => (
                       <th key={h} className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide pr-3">{h}</th>
                     ))}
                   </tr>
@@ -471,6 +471,16 @@ export default function AdminQuotationDetail() {
                               </span>
                             );
                           })()}
+                        </td>
+                        <td className="py-2.5 pr-3">
+                          {item.artFileUrl ? (
+                            <img
+                              src={item.artFileUrl}
+                              alt="Arte"
+                              className="w-14 h-14 object-contain rounded border border-gray-100 cursor-pointer"
+                              onClick={() => setLightboxImg(item.artFileUrl)}
+                            />
+                          ) : <span className="text-gray-300 text-xs">—</span>}
                         </td>
                         <td className="py-2.5 pr-3 text-center">{item.quantity}</td>
                         <td className="py-2.5 pr-3 text-right">{fmt(item.unitPrice)}</td>
