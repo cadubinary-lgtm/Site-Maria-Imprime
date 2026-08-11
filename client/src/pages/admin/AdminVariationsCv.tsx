@@ -1,10 +1,28 @@
 import AdminLayout from "@/components/AdminLayout";
+import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import React, { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X, GripVertical } from "lucide-react";
+
+function SortableHandle({ id }: { id: number }) {
+  const { attributes, listeners } = useSortable({ id });
+  return (
+    <span {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 flex-shrink-0" title="Arrastar para reordenar">
+      <GripVertical className="w-4 h-4" />
+    </span>
+  );
+}
+
+function SortableVariationItem({ id, children }: { id: number; children: React.ReactNode }) {
+  const { setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return <div ref={setNodeRef} style={style}>{children}</div>;
+}
 
 export default function AdminVariationsCv() {
   const [, navigate] = useLocation();
@@ -43,6 +61,22 @@ export default function AdminVariationsCv() {
   const deleteOptionMutation = trpc.variationsCv.deleteOption.useMutation();
   const updateOptionMutation = trpc.variationsCv.updateOption.useMutation();
   const reorderTypesMutation = trpc.variationsCv.reorderTypes.useMutation();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = offsetTypes.findIndex((v: any) => v.id === active.id);
+    const newIndex = offsetTypes.findIndex((v: any) => v.id === over.id);
+    const newOrder = arrayMove(offsetTypes as any[], oldIndex, newIndex);
+    try {
+      await reorderTypesMutation.mutateAsync({ updates: newOrder.map((v: any, i: number) => ({ id: v.id, order: i })) });
+      await utils.variationsCv.getGlobal.invalidate();
+      refetch();
+    } catch { toast.error("Erro ao reordenar"); }
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleCreateType = async () => {
@@ -222,7 +256,9 @@ export default function AdminVariationsCv() {
         </div>
 
         {/* Lista de tipos */}
-        <div className="space-y-3">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={(offsetTypes as any[]).map((v: any) => v.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-3">
           {offsetTypes.length === 0 && (
             <div className="text-center py-12 text-gray-400 bg-white border border-gray-200 rounded-xl">
               <p className="text-sm">Nenhum tipo de variação Comunicação Visual cadastrado ainda.</p>
@@ -235,10 +271,12 @@ export default function AdminVariationsCv() {
             const isEditing = editingTypeId === vt.id;
 
             return (
-              <div key={vt.id} className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <SortableVariationItem key={vt.id} id={vt.id}>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 {/* Cabeçalho do tipo */}
                 <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
                   <div className="flex items-center gap-2 flex-1">
+                    <SortableHandle id={vt.id} />
                     <button
                       onClick={() => toggleExpand(vt.id)}
                       className="text-gray-400 hover:text-gray-600 transition"
@@ -407,9 +445,12 @@ export default function AdminVariationsCv() {
                   </div>
                 )}
               </div>
+              </SortableVariationItem>
             );
           })}
-        </div>
+            </div>
+          </SortableContext>
+        </DndContext>
       </div>
     </AdminLayout>
   );
