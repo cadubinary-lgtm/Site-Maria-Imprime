@@ -100,6 +100,7 @@ import AdminSetup from "./pages/admin/AdminSetup";
 import AdminsManager from "./pages/admin/AdminsManager";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminProfile from "./pages/admin/AdminProfile";
+import AdminUsuarios from "./pages/admin/AdminUsuarios";
 
 // ─── Orçamentos ──────────────────────────────────────────────────────────────
 import AdminQuotations from "./pages/admin/AdminQuotations";
@@ -229,6 +230,7 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/administradores" component={AdminsManager} />
       <Route path="/admin/auditoria" component={AuditLogs} />
       <Route path="/admin/perfil" component={AdminProfile} />
+      <Route path="/admin/usuarios" component={AdminUsuarios} />
     </Switch>
   );
 }
@@ -318,6 +320,7 @@ function AdminProtectedRoutes() {
       <Route path="/admin/administradores" component={AdminsManager} />
       <Route path="/admin/auditoria" component={AuditLogs} />
       <Route path="/admin/perfil" component={AdminProfile} />
+      <Route path="/admin/usuarios" component={AdminUsuarios} />
     </Switch>
   );
 }

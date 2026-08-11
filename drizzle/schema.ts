@@ -1425,6 +1425,7 @@ export const adminAccounts = mysqlTable("adminAccounts", {
   createdBy: int("createdBy"), // ID do adminAccount que criou
   createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+  permissions: longtext("permissions"), // JSON array de permissões de menu
 });
 export type AdminAccount = typeof adminAccounts.$inferSelect;
 export type InsertAdminAccount = typeof adminAccounts.$inferInsert;
