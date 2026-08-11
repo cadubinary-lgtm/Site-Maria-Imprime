@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import {
   Search, DollarSign, Eye, Send, CreditCard, Banknote,
-  QrCode, RefreshCw, Filter, Phone
+  QrCode, RefreshCw, Filter, Phone, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
@@ -53,6 +53,7 @@ export default function FinanceiroContasReceber() {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [pixDialog, setPixDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [selectedPayment, setSelectedPayment] = useState<"dinheiro" | "pix" | "cartao_credito" | "cartao_debito" | "transferencia">("pix");
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
     page,
@@ -84,6 +85,15 @@ export default function FinanceiroContasReceber() {
       toast.success("Abrindo WhatsApp...");
     },
     onError: (e) => toast.error("Erro: " + e.message),
+  });
+
+  const deleteOrder = trpc.admin.deleteOrder.useMutation({
+    onSuccess: () => {
+      toast.success("Pedido excluído com sucesso!");
+      setDeleteDialog({ open: false, order: null });
+      refetch();
+    },
+    onError: (e) => toast.error("Erro ao excluir: " + e.message),
   });
 
   const handleSearch = () => {
@@ -230,6 +240,15 @@ export default function FinanceiroContasReceber() {
                               <Send className="h-3 w-3" />
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs text-red-500 hover:bg-red-50 hover:border-red-300"
+                            onClick={() => setDeleteDialog({ open: true, order: item })}
+                            title="Excluir Pedido"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -331,6 +350,52 @@ export default function FinanceiroContasReceber() {
       </Dialog>
 
       {/* Dialog: Pix */}
+      {/* Dialog: Confirmar Exclusão */}
+      <Dialog open={deleteDialog.open} onOpenChange={(o) => !o && setDeleteDialog({ open: false, order: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Excluir Pedido</DialogTitle>
+          </DialogHeader>
+          {deleteDialog.order && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Tem certeza que deseja excluir o pedido abaixo? Esta ação é <strong>irreversível</strong>.
+              </p>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Pedido</span>
+                  <span className="font-mono font-semibold">#{deleteDialog.order.orderNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Cliente</span>
+                  <span className="font-medium">{deleteDialog.order.cliente}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Valor</span>
+                  <span className="font-bold text-red-600">{formatCurrency(deleteDialog.order.valor)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, order: null })}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteOrder.isPending}
+              onClick={() => {
+                if (deleteDialog.order) {
+                  deleteOrder.mutate({ orderId: deleteDialog.order.pedidoId });
+                }
+              }}
+            >
+              {deleteOrder.isPending ? "Excluindo..." : "Sim, excluir pedido"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={pixDialog.open} onOpenChange={(o) => !o && setPixDialog({ open: false, order: null })}>
         <DialogContent>
           <DialogHeader>
