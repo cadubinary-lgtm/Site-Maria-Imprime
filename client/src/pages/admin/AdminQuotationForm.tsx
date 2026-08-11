@@ -95,6 +95,16 @@ export default function AdminQuotationForm() {
   const [newClientWhatsapp, setNewClientWhatsapp] = useState("");
   const [newClientType, setNewClientType] = useState<"balcao" | "site">("balcao");
   const [newClientNotes, setNewClientNotes] = useState("");
+  const [newClientCpfCnpj, setNewClientCpfCnpj] = useState("");
+  const [newClientZipCode, setNewClientZipCode] = useState("");
+  const [newClientStreet, setNewClientStreet] = useState("");
+  const [newClientNumber, setNewClientNumber] = useState("");
+  const [newClientComplement, setNewClientComplement] = useState("");
+  const [newClientNeighborhood, setNewClientNeighborhood] = useState("");
+  const [newClientCity, setNewClientCity] = useState("");
+  const [newClientState, setNewClientState] = useState("");
+  const [cepLoading, setCepLoading] = useState(false);
+  const [manualAddress, setManualAddress] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   // Estado para opções dinâmicas por produto (productId -> { variations, attributes })
@@ -231,6 +241,14 @@ export default function AdminQuotationForm() {
       whatsapp: newClientWhatsapp.trim() || undefined,
       clientType: newClientType,
       notes: newClientNotes.trim() || undefined,
+      cpfCnpj: newClientCpfCnpj.trim() || undefined,
+      addressZipCode: newClientZipCode.trim() || undefined,
+      addressStreet: newClientStreet.trim() || undefined,
+      addressNumber: newClientNumber.trim() || undefined,
+      addressComplement: newClientComplement.trim() || undefined,
+      addressNeighborhood: newClientNeighborhood.trim() || undefined,
+      addressCity: newClientCity.trim() || undefined,
+      addressState: newClientState.trim() || undefined,
     });
   };
 
@@ -620,9 +638,123 @@ export default function AdminQuotationForm() {
                     <Input className="h-8 mt-0.5 text-sm" value={newClientWhatsapp} onChange={(e) => setNewClientWhatsapp(e.target.value)} placeholder="(00) 00000-0000" />
                   </div>
                   <div>
+                    <label className="text-xs text-gray-500 font-medium">CPF / CNPJ</label>
+                    <Input
+                      className="h-8 mt-0.5 text-sm"
+                      value={newClientCpfCnpj}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        if (v.length <= 11) {
+                          setNewClientCpfCnpj(v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3").replace(/(\d{3})(\d{1,3})/, "$1.$2"));
+                        } else {
+                          setNewClientCpfCnpj(v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, "$1.$2.$3/$4").replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3").replace(/(\d{2})(\d{1,3})/, "$1.$2"));
+                        }
+                      }}
+                      placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                    />
+                  </div>
+                  <div>
                     <label className="text-xs text-gray-500 font-medium">Observações</label>
                     <Input className="h-8 mt-0.5 text-sm" value={newClientNotes} onChange={(e) => setNewClientNotes(e.target.value)} placeholder="Opcional" />
                   </div>
+                </div>
+                {/* Endereço */}
+                <div className="border-t border-gray-100 pt-3 mt-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Endereço</label>
+                    <button type="button" className="text-xs text-pink-600 hover:underline" onClick={() => setManualAddress(!manualAddress)}>
+                      {manualAddress ? "Usar CEP" : "Não sei o CEP"}
+                    </button>
+                  </div>
+                  {!manualAddress ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <label className="text-xs text-gray-500 font-medium">CEP</label>
+                        <div className="flex gap-2 mt-0.5">
+                          <Input
+                            className="h-8 text-sm flex-1"
+                            value={newClientZipCode}
+                            onChange={(e) => {
+                              const v = e.target.value.replace(/\D/g, "").slice(0, 8);
+                              const masked = v.length > 5 ? v.slice(0,5) + "-" + v.slice(5) : v;
+                              setNewClientZipCode(masked);
+                              if (v.length === 8) {
+                                setCepLoading(true);
+                                fetch(`https://viacep.com.br/ws/${v}/json/`)
+                                  .then(r => r.json())
+                                  .then(d => {
+                                    if (!d.erro) {
+                                      setNewClientStreet(d.logradouro || "");
+                                      setNewClientNeighborhood(d.bairro || "");
+                                      setNewClientCity(d.localidade || "");
+                                      setNewClientState(d.uf || "");
+                                    }
+                                  })
+                                  .finally(() => setCepLoading(false));
+                              }
+                            }}
+                            placeholder="00000-000"
+                          />
+                          {cepLoading && <span className="text-xs text-gray-400 self-center">Buscando...</span>}
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-xs text-gray-500 font-medium">Logradouro</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientStreet} onChange={(e) => setNewClientStreet(e.target.value)} placeholder="Rua, Av., etc." />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Número *</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientNumber} onChange={(e) => setNewClientNumber(e.target.value)} placeholder="Nº" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Complemento</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientComplement} onChange={(e) => setNewClientComplement(e.target.value)} placeholder="Apto, Sala..." />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Bairro</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientNeighborhood} onChange={(e) => setNewClientNeighborhood(e.target.value)} placeholder="Bairro" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Cidade</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientCity} onChange={(e) => setNewClientCity(e.target.value)} placeholder="Cidade" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Estado (UF)</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientState} onChange={(e) => setNewClientState(e.target.value)} placeholder="SP" maxLength={2} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <label className="text-xs text-gray-500 font-medium">Logradouro</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientStreet} onChange={(e) => setNewClientStreet(e.target.value)} placeholder="Rua, Av., etc." />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Número *</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientNumber} onChange={(e) => setNewClientNumber(e.target.value)} placeholder="Nº" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Complemento</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientComplement} onChange={(e) => setNewClientComplement(e.target.value)} placeholder="Apto, Sala..." />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Bairro</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientNeighborhood} onChange={(e) => setNewClientNeighborhood(e.target.value)} placeholder="Bairro" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Cidade</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientCity} onChange={(e) => setNewClientCity(e.target.value)} placeholder="Cidade" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">CEP</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientZipCode} onChange={(e) => setNewClientZipCode(e.target.value)} placeholder="00000-000" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium">Estado (UF)</label>
+                        <Input className="h-8 mt-0.5 text-sm" value={newClientState} onChange={(e) => setNewClientState(e.target.value)} placeholder="SP" maxLength={2} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-1">

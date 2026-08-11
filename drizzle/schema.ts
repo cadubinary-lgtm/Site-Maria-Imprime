@@ -493,6 +493,14 @@ export const clients = mysqlTable("clients", {
   email: varchar("email", { length: 320 }),
   phone: varchar("phone", { length: 20 }),
   whatsapp: varchar("whatsapp", { length: 20 }),
+  cpfCnpj: varchar("cpfcnpj", { length: 20 }),
+  addressZipCode: varchar("addresszipcode", { length: 10 }),
+  addressStreet: varchar("addressstreet", { length: 255 }),
+  addressNumber: varchar("addressnumber", { length: 20 }),
+  addressComplement: varchar("addresscomplement", { length: 100 }),
+  addressNeighborhood: varchar("addressneighborhood", { length: 100 }),
+  addressCity: varchar("addresscity", { length: 100 }),
+  addressState: varchar("addressstate", { length: 2 }),
   clientType: mysqlEnum("clientType", ["balcao", "revendedor", "agencia", "corporativo", "site"]).default("balcao").notNull(),
   totalVolume: decimal("totalVolume", { precision: 15, scale: 2 }).default("0").notNull(), // Volume total comprado
   totalOrders: int("totalOrders").default(0).notNull(), // Quantidade de pedidos

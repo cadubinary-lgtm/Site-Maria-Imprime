@@ -632,6 +632,14 @@ export const quotationsRouter = router({
       whatsapp: z.string().optional(),
       clientType: z.enum(["balcao", "site", "revendedor", "agencia", "corporativo"]),
       notes: z.string().optional(),
+      cpfCnpj: z.string().optional(),
+      addressZipCode: z.string().optional(),
+      addressStreet: z.string().optional(),
+      addressNumber: z.string().optional(),
+      addressComplement: z.string().optional(),
+      addressNeighborhood: z.string().optional(),
+      addressCity: z.string().optional(),
+      addressState: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -645,6 +653,14 @@ export const quotationsRouter = router({
         clientType: input.clientType as any,
         notes: input.notes || null,
         isActive: true,
+        cpfCnpj: input.cpfCnpj || null,
+        addressZipCode: input.addressZipCode || null,
+        addressStreet: input.addressStreet || null,
+        addressNumber: input.addressNumber || null,
+        addressComplement: input.addressComplement || null,
+        addressNeighborhood: input.addressNeighborhood || null,
+        addressCity: input.addressCity || null,
+        addressState: input.addressState || null,
       });
       const newId = (result as any).insertId ?? (result as any)[0]?.insertId;
       // Buscar o cliente recém-criado
