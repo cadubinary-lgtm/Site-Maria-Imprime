@@ -711,17 +711,19 @@ export default function AdminQuotationForm() {
                           />
                         </div>
                         <div className="col-span-2 flex justify-center">
-                          <Input
-                            type="number"
-                            step={0.01}
-                            value={item.priceAdjustment ?? ""}
-                            placeholder="0"
+                          <input
+                            type="text"
+                            inputMode="decimal"
                             title="Adicione (+) ou desconte (-) um valor do total"
-                            onChange={(e) => {
-                              const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            defaultValue={item.priceAdjustment ? (item.priceAdjustment > 0 ? `+${item.priceAdjustment.toFixed(2).replace(".", ",")}` : item.priceAdjustment.toFixed(2).replace(".", ",")) : ""}
+                            placeholder="R$ 0,00"
+                            onBlur={(e) => {
+                              const raw = e.target.value.replace(/[R$\s]/g, "").replace(",", ".");
+                              const val = parseFloat(raw);
                               updateItem(idx, { priceAdjustment: isNaN(val) ? 0 : val });
+                              e.target.value = isNaN(val) || val === 0 ? "" : (val > 0 ? `+R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : `-R$ ${Math.abs(val).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
                             }}
-                            className="w-20 h-7 text-center text-sm"
+                            className="w-28 h-7 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
                         </div>
                         <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
