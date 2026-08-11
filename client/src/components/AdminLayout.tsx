@@ -198,6 +198,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [location] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Buscar permissões do operador logado (null = acesso total, [] = sem acesso, [...] = lista de chaves)
+  const { data: myPermissions } = trpc.adminAuth.myPermissions.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  // Mapa: label do menu → chave de permissão
+  const MENU_PERMISSION_MAP: Record<string, string> = {
+    "VENDAS": "VENDAS",
+    "LINHA DE PRODUÇÃO": "LINHA_PRODUCAO",
+    "FINANCEIRO": "FINANCEIRO",
+    "LOGÍSTICA": "LOGISTICA",
+    "API PAGAMENTOS": "API_PAGAMENTOS",
+    "PRODUTOS": "PRODUTOS",
+    "CRM - CLIENTES": "CRM",
+    "RELATÓRIOS": "RELATORIOS",
+    "SISTEMA": "SISTEMA",
+    "BACKOFFICE": "BACKOFFICE",
+  };
+
+  // null = acesso total, array = lista de chaves permitidas
+  const hasPermission = (label: string): boolean => {
+    if (myPermissions === undefined) return true;
+    if (myPermissions === null) return true;
+    const key = MENU_PERMISSION_MAP[label];
+    if (!key) return true;
+    return (myPermissions as string[]).includes(key);
+  };
+
   // Ao montar o layout E ao mudar de rota: restaura posição do scroll da sidebar
   useEffect(() => {
     // Reseta scroll do conteúdo principal
@@ -444,6 +473,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               if (item.group) {
                 return <NavGroup key={`group-${idx}`} label={item.group} />;
               }
+              // Filtrar menus principais com base nas permissões do operador
+              if (item.item && !hasPermission(item.item.label)) return null;
               return (
                 <NavLink
                   key={item.item?.label || idx}
