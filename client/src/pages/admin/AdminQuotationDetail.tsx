@@ -73,9 +73,29 @@ const SPEC_LABELS: Record<string, string> = {
   quantidade: "Quantidade",
   arte: "Arte",
 };
+// Função que retorna linhas estruturadas para exibição em JSX
+function buildSpecLines(s: string): { line1: string | null; rest: string[] } {
+  try {
+    const o: Record<string, string> = JSON.parse(s);
+    const w = parseFloat((o.width ?? o.largura ?? "").replace(",", ".")) || 0;
+    const h = parseFloat((o.height ?? o.altura ?? "").replace(",", ".")) || 0;
+    const line1 = (w > 0 && h > 0)
+      ? `Largura (m): ${w.toFixed(2).replace(".", ",")} x Altura (m): ${h.toFixed(2).replace(".", ",")} = ${(w * h).toFixed(2).replace(".", ",")} m²`
+      : (w > 0 ? `Largura (m): ${w.toFixed(2).replace(".", ",")}` : null);
+    const skip = new Set(["width", "height", "largura", "altura"]);
+    const rest = Object.entries(o)
+      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .map(([k, v]) => {
+        const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+        return `${label}: ${v}`;
+      });
+    return { line1, rest };
+  } catch { return { line1: null, rest: [] }; }
+}
+
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
 
-function formatSpecs(s: string, separator = "  ·  "): string {
+function formatSpecs(s: string, separator = "   ❯   "): string {
   try {
     const o: Record<string, string> = JSON.parse(s);
     const entries = Object.entries(o).filter(([, v]) => v && String(v).trim());
@@ -86,7 +106,7 @@ function formatSpecs(s: string, separator = "  ·  "): string {
     return ordered.map(([k, v]) => {
       const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
       return `${label}: ${v}`;
-    }).join("  ·  ");
+    }).join("   ❯   ");
   } catch { return ""; }
 }
 
@@ -382,7 +402,7 @@ export default function AdminQuotationDetail() {
                   {(q.items ?? []).map((item: any) => {
                     let specs: Record<string, string> = {};
                     try { specs = JSON.parse(item.specifications); } catch {}
-                    const specText = formatSpecs(item.specifications);
+                    const specLines = buildSpecLines(item.specifications);
                     return (
                       <tr key={item.id}>
                         <td className="py-2.5 pr-2">
@@ -400,7 +420,16 @@ export default function AdminQuotationDetail() {
                           )}
                         </td>
                         <td className="py-2.5 pr-3 font-medium text-gray-800">{item.productName}</td>
-                        <td className="py-2.5 pr-3 text-gray-500 text-xs max-w-48">{specText || "—"}</td>
+                        <td className="py-2.5 pr-3 text-xs max-w-52">
+                          {specLines.line1 || specLines.rest.length > 0 ? (
+                            <div className="space-y-0.5">
+                              {specLines.line1 && <div className="font-medium text-gray-700">{specLines.line1}</div>}
+                              {specLines.rest.map((line, i) => (
+                                <div key={i} className="text-gray-500">{line}</div>
+                              ))}
+                            </div>
+                          ) : "—"}
+                        </td>
                         <td className="py-2.5 pr-3 text-center">{item.quantity}</td>
                         <td className="py-2.5 pr-3 text-right">{fmt(item.unitPrice)}</td>
                         <td className="py-2.5 font-semibold text-right">{fmt(item.totalPrice)}</td>
