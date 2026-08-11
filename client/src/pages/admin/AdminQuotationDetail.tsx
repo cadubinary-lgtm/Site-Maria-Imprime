@@ -117,6 +117,7 @@ function buildSpecPairs(s: string): { label: string; value: string }[] {
     return pairs;
   } catch { return []; }
 }
+// Retorna o label sem os dois pontos para uso no JSX (adicionamos os dois pontos no render)
 
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
 
@@ -150,7 +151,7 @@ function printQuotationPDF(q: any) {
     const pairs = buildSpecPairs(s);
     if (!pairs.length) return "";
     return pairs.map(p =>
-      `<div style="margin-bottom:3px"><span style="color:#555;font-weight:600;font-size:10px">${p.label}</span>${p.value ? `<br><span style="color:#777;font-size:10px;padding-left:8px">${p.value}</span>` : ""}</div>`
+      `<div style="margin-bottom:5px;line-height:1.4"><div style="color:#444;font-weight:700;font-size:10px">${p.label}</div>${p.value ? `<div style="color:#666;font-size:10px;padding-left:12px;margin-top:1px">${p.value}</div>` : ""}</div>`
     ).join("");
   };
 
@@ -455,8 +456,8 @@ export default function AdminQuotationDetail() {
                             <div className="space-y-1.5">
                               {specPairs.map((p, i) => (
                                 <div key={i}>
-                                  <div className="font-medium text-gray-600 text-xs">{p.label}</div>
-                                  {p.value && <div className="text-gray-500 text-xs pl-2">{p.value}</div>}
+                                  <div className="font-semibold text-gray-700 text-[11px] leading-tight">{p.label}</div>
+                                  {p.value && <div className="text-gray-500 text-[11px] leading-tight pl-3 mt-0.5">{p.value}</div>}
                                 </div>
                               ))}
                             </div>
