@@ -220,6 +220,7 @@ export const variationTypes = mysqlTable("variationTypes", {
   order: int("order").default(0).notNull(),
   isRequired: boolean("isRequired").default(true).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
+  scope: varchar("scope", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
