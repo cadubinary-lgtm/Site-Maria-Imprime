@@ -452,7 +452,11 @@ export default function AdminKanban() {
         </div>
        {/* Conteúdo do painel */}
        <div className="flex-1 overflow-y-auto">
-          <OrderDetailContent orderId={selectedOrderId} />
+          <OrderDetailContent
+            orderId={selectedOrderId}
+            backRoute="/admin/pedidos/kanban"
+            backLabel="Voltar para Kanban"
+          />
        </div>
       </div>
     )}
