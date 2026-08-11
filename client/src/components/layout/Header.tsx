@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle, Package } from "lucide-react";
 import { toast } from "sonner";
+import { formatProductPrice } from "@/lib/productPrice";
 
 function CartIcon() {
   const { data: count } = trpc.cart.getCount.useQuery(undefined, {
@@ -159,7 +160,7 @@ export default function Header() {
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 transition text-sm"
                           >
                             <div className="font-medium text-gray-900">{product.name}</div>
-                            <div className="text-gray-600 text-xs">R$ {parseFloat(product.price).toFixed(2)}</div>
+                            <div className="text-gray-600 text-xs">{formatProductPrice(product)}</div>
                           </button>
                         ))}
                       </div>
