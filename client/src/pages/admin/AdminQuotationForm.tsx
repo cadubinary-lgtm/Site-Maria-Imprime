@@ -252,29 +252,39 @@ export default function AdminQuotationForm() {
       // UNIT. = preço por m² base + modificadores por m²
       let pricePerM2 = pricing.pricePerM2;
 
-      // Modificadores de variações (todos tratados como por m² neste contexto)
+      // Modificadores de variações — separa por m² vs fixo
+      let fixedModifiers = 0;
       (pricing.variations ?? []).forEach((vt: any) => {
         const selectedName = specs[vt.name.toLowerCase().replace(/\s+/g, "_")];
         if (!selectedName) return;
         const opt = (vt.options ?? []).find((o: any) => o.name === selectedName);
         if (!opt) return;
         const mod = parseFloat(opt.priceModifier?.toString() ?? "0");
-        // Modificadores de variação são por m² (somam ao preço/m²)
-        pricePerM2 += mod;
+        if (opt.calculationType === "m2" || opt.calculationType === "metro_linear") {
+          pricePerM2 += mod;
+        } else {
+          // unit / pacote / fixo: soma ao total sem multiplicar pela área
+          fixedModifiers += mod * item.quantity;
+        }
       });
 
-      // Modificadores de atributos (por m² também)
+      // Modificadores de atributos
       (pricing.attributes ?? []).forEach((attr: any) => {
         const selectedValue = specs[attr.name.toLowerCase().replace(/\s+/g, "_")];
         if (!selectedValue) return;
         const v = (attr.values ?? []).find((val: any) => val.value === selectedValue);
         if (!v) return;
-        pricePerM2 += parseFloat(v.priceModifier?.toString() ?? "0");
+        const mod = parseFloat(v.priceModifier?.toString() ?? "0");
+        if (v.calculationType === "m2" || v.calculationType === "metro_linear") {
+          pricePerM2 += mod;
+        } else {
+          fixedModifiers += mod * item.quantity;
+        }
       });
 
       const unitPrice = Math.max(0, pricePerM2);
-      // TOTAL = preço/m² × área × quantidade
-      const totalPrice = unitPrice * baseArea * item.quantity;
+      // TOTAL = (preço/m² × área × quantidade) + modificadores fixos
+      const totalPrice = unitPrice * baseArea * item.quantity + fixedModifiers;
       return { unitPrice, totalPrice };
     }
 
