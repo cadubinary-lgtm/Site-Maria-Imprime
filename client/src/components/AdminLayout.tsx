@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { rememberAdminOrigin } from "@/lib/adminNavigation";
 
 const SIDEBAR_SCROLL_KEY = "admin_sidebar_scroll";
 
@@ -229,6 +230,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Ao montar o layout E ao mudar de rota: restaura posição do scroll da sidebar
   useEffect(() => {
+    rememberAdminOrigin(location);
     // Reseta scroll do conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;

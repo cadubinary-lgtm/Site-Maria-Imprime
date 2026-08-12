@@ -36,6 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getAdminReturnTarget } from "@/lib/adminNavigation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface QuotationItem {
@@ -70,6 +71,7 @@ const specificationLabels: Record<string, string> = {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
   const [, navigate] = useLocation();
+  const returnTarget = getAdminReturnTarget("/admin/orcamentos");
   const params = useParams<{ id?: string }>();
   const isEdit = !!params.id;
   const quotationId = params.id ? parseInt(params.id) : undefined;
@@ -355,7 +357,7 @@ export default function AdminQuotationForm() {
   const createMutation = trpc.quotations.create.useMutation({
     onSuccess: (res) => {
       toast.success(`Orçamento ${res.quotationNumber} criado!`);
-      navigate("/admin/orcamentos");
+      navigate(returnTarget.path);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -363,7 +365,7 @@ export default function AdminQuotationForm() {
   const updateMutation = trpc.quotations.update.useMutation({
     onSuccess: () => {
       toast.success("Orçamento atualizado!");
-      navigate("/admin/orcamentos");
+      navigate(returnTarget.path);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -730,8 +732,8 @@ export default function AdminQuotationForm() {
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/admin/orcamentos")} className="gap-1">
-          <ArrowLeft className="w-4 h-4" /> Voltar
+        <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">
+          <ArrowLeft className="w-4 h-4" /> {returnTarget.label}
         </Button>
         <div>
           <h1 className="text-xl font-bold text-gray-900">

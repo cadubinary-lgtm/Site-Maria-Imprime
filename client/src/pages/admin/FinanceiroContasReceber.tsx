@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { useLocation } from "wouter";
+import { createAdminDetailLocation } from "@/lib/adminNavigation";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -213,7 +214,7 @@ export default function FinanceiroContasReceber() {
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs"
-                            onClick={() => setLocation(`/admin/pedidos/${item.pedidoId}`)}
+                            onClick={() => setLocation(createAdminDetailLocation(`/admin/pedidos/${item.pedidoId}`, "/admin/financeiro/receber"))}
                             title="Ver pedido"
                           >
                             <Eye className="h-3 w-3 mr-1" />

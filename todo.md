@@ -2507,3 +2507,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir edição de valor unitário e recálculo automático do total em itens personalizados
 - [x] Padronizar a visualização ampliada da arte de itens personalizados com o catálogo
 - [x] Adicionar ação Ver pedido em cada linha de Contas a Receber
+- [x] Padronizar retorno ao submenu de origem em detalhes e subpáginas administrativas
+- [x] Aplicar retorno contextual em todas as rotas e submenus do painel administrativo
