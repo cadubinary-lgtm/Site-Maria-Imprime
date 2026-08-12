@@ -2468,4 +2468,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o cabeçalho do e-mail pelo layout rosa de referência com logo à esquerda e mascote à direita
 - [x] Refinar o rodapé dos e-mails para a identidade visual Maria Imprime
 - [x] Otimizar o layout de e-mail para dispositivos móveis
-- [ ] Enviar um novo e-mail real de teste após os refinamentos de layout
+- [x] Enviar um novo e-mail real de teste após os refinamentos de layout
+
+## Identidade Visual: Favicon
+- [x] Criar e aplicar favicon otimizado com o logotipo oficial da Maria Imprime
