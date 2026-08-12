@@ -379,7 +379,9 @@ export function ShippingRulesManager() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm">{quote.company}</p>
-                          <p className="text-xs text-muted-foreground truncate">{quote.name}</p>
+                          {quote.name?.trim() && (
+                            <p className="text-xs text-muted-foreground truncate">{quote.name}</p>
+                          )}
                         </div>
                         <div className="flex items-center gap-1 text-muted-foreground text-xs shrink-0">
                           <Clock className="w-3 h-3" />

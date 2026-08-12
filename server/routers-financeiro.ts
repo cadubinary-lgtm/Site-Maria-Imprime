@@ -4,7 +4,8 @@
  * Não altera nenhuma tabela existente do sistema
  */
 import { z } from "zod";
-import { router, adminProcedure } from "./_core/trpc";
+import { router } from "./_core/trpc";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { getDb } from "./db";
 import {
   orders,
@@ -85,7 +86,7 @@ function mapShippingMethod(method: string | null): string {
 export const financeiroRouter = router({
 
   // ── Dashboard ──────────────────────────────────────────────────────────────
-  getDashboard: adminProcedure
+  getDashboard: adminOrManusAuthProcedure
     .input(z.object({
       periodo: z.enum(["hoje", "semana", "mes", "ano", "custom"]).default("mes"),
       startDate: z.number().optional(),
@@ -197,7 +198,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Contas a Receber ────────────────────────────────────────────────────────
-  getContasReceber: adminProcedure
+  getContasReceber: adminOrManusAuthProcedure
     .input(z.object({
       page: z.number().default(1),
       limit: z.number().default(20),
@@ -252,7 +253,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Contas Recebidas ────────────────────────────────────────────────────────
-  getContasRecebidas: adminProcedure
+  getContasRecebidas: adminOrManusAuthProcedure
     .input(z.object({
       page: z.number().default(1),
       limit: z.number().default(20),
@@ -300,7 +301,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Pagamentos na Retirada ──────────────────────────────────────────────────
-  getPagamentosRetirada: adminProcedure
+  getPagamentosRetirada: adminOrManusAuthProcedure
     .input(z.object({
       page: z.number().default(1),
       limit: z.number().default(20),
@@ -360,7 +361,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Confirmar Pagamento ─────────────────────────────────────────────────────
-  confirmarPagamento: adminProcedure
+  confirmarPagamento: adminOrManusAuthProcedure
     .input(z.object({
       orderId: z.number(),
       formaPagamento: z.enum(["dinheiro", "pix", "cartao_credito", "cartao_debito", "transferencia"]),
@@ -409,7 +410,7 @@ export const financeiroRouter = router({
             status: "pago",
             dataPagamento: Date.now(),
             observacoes: input.observacoes,
-            criadoPor: ctx.user.id,
+            criadoPor: ctx.adminUser.adminId,
           });
         }
       }
@@ -418,7 +419,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Atualizar Status Retirada ───────────────────────────────────────────────
-  atualizarStatusRetirada: adminProcedure
+  atualizarStatusRetirada: adminOrManusAuthProcedure
     .input(z.object({
       orderId: z.number(),
       status: z.enum(["aguardando_producao", "pronto_retirada", "pago", "retirado_cliente", "retirado_terceiros"]),
@@ -478,7 +479,7 @@ export const financeiroRouter = router({
             formaEntrega: "retirada_loja",
             status: input.status,
             observacoes: input.observacoes,
-            criadoPor: ctx.user.id,
+            criadoPor: ctx.adminUser.adminId,
           });
         }
       }
@@ -487,7 +488,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Fluxo de Caixa ──────────────────────────────────────────────────────────
-  getFluxoCaixa: adminProcedure
+  getFluxoCaixa: adminOrManusAuthProcedure
     .input(z.object({
       startDate: z.number().optional(),
       endDate: z.number().optional(),
@@ -588,7 +589,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Adicionar Entrada Manual ────────────────────────────────────────────────
-  addEntradaManual: adminProcedure
+  addEntradaManual: adminOrManusAuthProcedure
     .input(z.object({
       tipo: z.enum(["income", "expense"]),
       categoria: z.string(),
@@ -606,14 +607,14 @@ export const financeiroRouter = router({
         description: input.descricao,
         amount: input.valor.toString(),
         entryDate: input.data,
-        createdBy: ctx.user.id,
+        createdBy: ctx.adminUser.adminId,
       });
 
       return { success: true };
     }),
 
   // ── Editar Entrada Manual ───────────────────────────────────────────────────
-  editEntradaManual: adminProcedure
+  editEntradaManual: adminOrManusAuthProcedure
     .input(z.object({
       id: z.number(),
       tipo: z.enum(["income", "expense"]),
@@ -640,7 +641,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Excluir Entrada Manual ──────────────────────────────────────────────────
-  deleteEntradaManual: adminProcedure
+  deleteEntradaManual: adminOrManusAuthProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -651,7 +652,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Relatórios ──────────────────────────────────────────────────────────────
-  getRelatorio: adminProcedure
+  getRelatorio: adminOrManusAuthProcedure
     .input(z.object({
       tipo: z.enum(["diario", "semanal", "mensal", "anual"]),
       startDate: z.number().optional(),
@@ -734,7 +735,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Gerar Pix ───────────────────────────────────────────────────────────────
-  gerarPix: adminProcedure
+  gerarPix: adminOrManusAuthProcedure
     .input(z.object({
       orderId: z.number(),
       valor: z.number().positive(),
@@ -791,7 +792,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Notificações ────────────────────────────────────────────────────────────
-  getNotificacoes: adminProcedure
+  getNotificacoes: adminOrManusAuthProcedure
     .input(z.object({ apenasNaoLidas: z.boolean().default(false) }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -838,7 +839,7 @@ export const financeiroRouter = router({
     }),
 
   // ── Enviar Cobrança WhatsApp ────────────────────────────────────────────────
-  enviarCobrancaWhatsApp: adminProcedure
+  enviarCobrancaWhatsApp: adminOrManusAuthProcedure
     .input(z.object({
       orderId: z.number(),
       telefone: z.string(),
