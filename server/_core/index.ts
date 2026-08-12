@@ -10,7 +10,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { storagePut, storageGetSignedUrl } from "../storage";
-import { applySecurityHeaders, enforceHttpsInProduction } from "./security";
+import { applySecurityHeaders, createRateLimiter, enforceHttpsInProduction, isLoginAttempt, isPublicUploadRequest } from "./security";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -39,6 +39,36 @@ async function startServer() {
   app.set("trust proxy", 1);
   app.use(enforceHttpsInProduction);
   app.use(applySecurityHeaders);
+  const loginLimiter = createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 8,
+    message: "Muitas tentativas de acesso. Aguarde alguns minutos antes de tentar novamente.",
+  });
+  const uploadLimiter = createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 60,
+    message: "Muitos envios de arquivo em sequência. Aguarde alguns minutos e tente novamente.",
+  });
+  const cspReportLimiter = createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 120,
+    message: "Limite de relatórios atingido.",
+  });
+  app.use((req, res, next) => {
+    if (isLoginAttempt(req)) return loginLimiter(req, res, next);
+    if (isPublicUploadRequest(req)) return uploadLimiter(req, res, next);
+    return next();
+  });
+  app.post(
+    "/api/security/csp-report",
+    cspReportLimiter,
+    express.json({ type: ["application/csp-report", "application/reports+json"], limit: "32kb" }),
+    (req, res) => {
+      const reports = Array.isArray(req.body) ? req.body : [req.body];
+      console.warn("[CSP Report]", JSON.stringify(reports).slice(0, 8_000));
+      return res.sendStatus(204);
+    }
+  );
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -344,16 +374,45 @@ async function startServer() {
   app.post('/api/payments/mercadopago/webhook', async (req, res) => {
     try {
       const { type, data } = req.body || {};
-      console.log('[MP Webhook] Received:', type, data);
+      const { getDb } = await import('../db.js');
+      const { storeSettings: storeSettingsT } = await import('../../drizzle/schema.js');
+      const db = await getDb();
+      if (!db) return res.status(503).json({ error: 'Serviço temporariamente indisponível' });
 
-      if ((type === 'payment' || type === 'payment.updated') && data?.id) {
-        const { getDb } = await import('../db.js');
-        const { orders: ordersT, orderPayments: orderPaymentsT, storeSettings: storeSettingsT } = await import('../../drizzle/schema.js');
+      const settingsRows = await db.select().from(storeSettingsT).limit(1);
+      const webhookSecret = settingsRows[0]?.mercadopagoWebhookSecret;
+      const signedDataId = typeof req.query['data.id'] === 'string' ? req.query['data.id'] : undefined;
+
+      if (!webhookSecret || !signedDataId) {
+        console.warn('[MP Webhook] Assinatura não configurada ou data.id ausente');
+        return res.status(401).json({ error: 'Assinatura do webhook inválida' });
+      }
+
+      try {
+        const { WebhookSignatureValidator } = await import('mercadopago');
+        WebhookSignatureValidator.validate({
+          xSignature: req.header('x-signature'),
+          xRequestId: req.header('x-request-id'),
+          dataId: signedDataId,
+          secret: webhookSecret,
+          toleranceSeconds: 300,
+        });
+      } catch (signatureError) {
+        console.warn('[MP Webhook] Assinatura inválida', signatureError instanceof Error ? signatureError.message : 'erro desconhecido');
+        return res.status(401).json({ error: 'Assinatura do webhook inválida' });
+      }
+
+      if (data?.id && String(data.id) !== signedDataId) {
+        console.warn('[MP Webhook] data.id do corpo não corresponde ao evento assinado');
+        return res.status(400).json({ error: 'Evento de pagamento inconsistente' });
+      }
+
+      console.log('[MP Webhook] Evento autenticado:', type, signedDataId);
+
+      if ((type === 'payment' || type === 'payment.updated') && signedDataId) {
+        const { orders: ordersT, orderPayments: orderPaymentsT } = await import('../../drizzle/schema.js');
         const { eq: eqOp } = await import('drizzle-orm');
         const { updateOrderStatus } = await import('../db.js');
-
-        const db = await getDb();
-        if (!db) { res.sendStatus(200); return; }
 
         // Get access token from DB or env
         let accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN || '';
@@ -368,7 +427,7 @@ async function startServer() {
         const { Payment } = await import('mercadopago');
         const client = new MercadoPagoConfig({ accessToken });
         const paymentApi = new Payment(client);
-        const payment = await paymentApi.get({ id: String(data.id) });
+        const payment = await paymentApi.get({ id: signedDataId });
 
         // Update payment record
         try {

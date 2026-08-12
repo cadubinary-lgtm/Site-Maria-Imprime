@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { applySecurityHeaders, enforceHttpsInProduction } from "./_core/security";
+import { applySecurityHeaders, createRateLimiter, enforceHttpsInProduction, isLoginAttempt, isPublicUploadRequest } from "./_core/security";
 
 function makeResponse() {
   const res = {
     setHeader: vi.fn(),
     status: vi.fn().mockReturnThis(),
     send: vi.fn(),
+    json: vi.fn(),
     redirect: vi.fn(),
   };
   return res as any;
@@ -49,6 +50,28 @@ describe("proteção HTTPS e cabeçalhos", () => {
     expect(res.setHeader).toHaveBeenCalledWith("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     expect(res.setHeader).toHaveBeenCalledWith("X-Content-Type-Options", "nosniff");
     expect(res.setHeader).toHaveBeenCalledWith("Referrer-Policy", "strict-origin-when-cross-origin");
+    expect(res.setHeader).toHaveBeenCalledWith("Content-Security-Policy-Report-Only", expect.stringContaining("report-uri /api/security/csp-report"));
     expect(next).toHaveBeenCalledOnce();
+  });
+
+  it("limita tentativas repetidas por origem sem bloquear a primeira tentativa", () => {
+    const limiter = createRateLimiter({ windowMs: 60_000, max: 2, message: "Limite atingido" });
+    const req = { ip: "198.51.100.10", socket: {}, method: "POST", path: "/api/trpc/customerAuth.login" } as any;
+    const next = vi.fn();
+
+    limiter(req, makeResponse(), next);
+    limiter(req, makeResponse(), next);
+    const blockedResponse = makeResponse();
+    limiter(req, blockedResponse, next);
+
+    expect(next).toHaveBeenCalledTimes(2);
+    expect(blockedResponse.status).toHaveBeenCalledWith(429);
+  });
+
+  it("identifica somente rotas sensíveis de login e upload", () => {
+    expect(isLoginAttempt({ method: "POST", path: "/api/trpc/customerAuth.login" } as any)).toBe(true);
+    expect(isLoginAttempt({ method: "GET", path: "/api/trpc/customerAuth.login" } as any)).toBe(false);
+    expect(isPublicUploadRequest({ method: "POST", path: "/api/upload-art-chunk" } as any)).toBe(true);
+    expect(isPublicUploadRequest({ method: "POST", path: "/api/orders" } as any)).toBe(false);
   });
 });
