@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { parseWhatsAppBusinessDays } from "@/hooks/useCompanySettings";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,11 @@ type CompanyForm = {
   commercialPhone: string;
   whatsappNumber: string;
   showWhatsappButton: boolean;
+  whatsappDefaultMessage: string;
+  useWhatsappBusinessHours: boolean;
+  whatsappBusinessDays: number[];
+  whatsappStartTime: string;
+  whatsappEndTime: string;
   supportEmail: string;
   zipCode: string;
   street: string;
@@ -39,6 +45,11 @@ const DEFAULT_FORM: CompanyForm = {
   commercialPhone: "(22) 99945-9596",
   whatsappNumber: "5522999459596",
   showWhatsappButton: true,
+  whatsappDefaultMessage: "Olá! Como podemos ajudar?",
+  useWhatsappBusinessHours: false,
+  whatsappBusinessDays: [1, 2, 3, 4, 5],
+  whatsappStartTime: "09:00",
+  whatsappEndTime: "17:00",
   supportEmail: "contatomariaimprime@gmail.com",
   zipCode: "28908-200",
   street: "Avenida Antonio Ferreira dos Santos",
@@ -73,6 +84,11 @@ export default function AdminCompanySettings() {
       commercialPhone: settings.commercialPhone || "",
       whatsappNumber: settings.whatsappNumber || "",
       showWhatsappButton: settings.showWhatsappButton ?? true,
+      whatsappDefaultMessage: settings.whatsappDefaultMessage || "",
+      useWhatsappBusinessHours: settings.useWhatsappBusinessHours ?? false,
+      whatsappBusinessDays: parseWhatsAppBusinessDays(settings.whatsappBusinessDays),
+      whatsappStartTime: settings.whatsappStartTime || "09:00",
+      whatsappEndTime: settings.whatsappEndTime || "17:00",
       supportEmail: settings.supportEmail || "",
       zipCode: settings.zipCode || "",
       street: settings.street || "",
@@ -91,6 +107,16 @@ export default function AdminCompanySettings() {
 
   const setField = <K extends keyof CompanyForm>(field: K, value: CompanyForm[K]) => {
     setForm((previous) => ({ ...previous, [field]: value }));
+  };
+
+  const toggleBusinessDay = (day: number) => {
+    setForm((previous) => {
+      const hasDay = previous.whatsappBusinessDays.includes(day);
+      const nextDays = hasDay
+        ? previous.whatsappBusinessDays.filter((currentDay) => currentDay !== day)
+        : [...previous.whatsappBusinessDays, day].sort();
+      return { ...previous, whatsappBusinessDays: nextDays.length ? nextDays : previous.whatsappBusinessDays };
+    });
   };
 
   const applyTermsFormat = (command: string, value?: string) => {
@@ -235,6 +261,36 @@ export default function AdminCompanySettings() {
                     <span className={`text-xs font-medium ${form.showWhatsappButton ? "text-emerald-700" : "text-gray-500"}`}>{form.showWhatsappButton ? "Ativo" : "Desativado"}</span>
                     <Switch id="showWhatsappButton" checked={form.showWhatsappButton} onCheckedChange={(checked) => setField("showWhatsappButton", checked)} />
                   </div>
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="whatsappDefaultMessage">Mensagem padrão do WhatsApp</Label>
+                  <Textarea id="whatsappDefaultMessage" value={form.whatsappDefaultMessage} onChange={(event) => setField("whatsappDefaultMessage", event.target.value)} className="mt-1 min-h-20" placeholder="Olá! Como podemos ajudar?" />
+                  <p className="text-xs text-gray-500 mt-1">Esta mensagem será preenchida automaticamente ao cliente clicar em um botão de WhatsApp do site.</p>
+                </div>
+                <div className="md:col-span-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <Label htmlFor="useWhatsappBusinessHours" className="text-sm font-semibold text-gray-800">Exibir somente no horário de atendimento</Label>
+                      <p className="text-xs text-gray-500 mt-1">Fora do expediente, os botões públicos de WhatsApp ficam ocultos automaticamente.</p>
+                    </div>
+                    <Switch id="useWhatsappBusinessHours" checked={form.useWhatsappBusinessHours} onCheckedChange={(checked) => setField("useWhatsappBusinessHours", checked)} />
+                  </div>
+                  {form.useWhatsappBusinessHours && (
+                    <div className="space-y-3 pt-1 border-t border-gray-200">
+                      <div>
+                        <Label className="text-xs text-gray-600">Dias de atendimento</Label>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {[{ value: 0, label: "Dom" }, { value: 1, label: "Seg" }, { value: 2, label: "Ter" }, { value: 3, label: "Qua" }, { value: 4, label: "Qui" }, { value: 5, label: "Sex" }, { value: 6, label: "Sáb" }].map((day) => (
+                            <Button key={day.value} type="button" size="sm" variant={form.whatsappBusinessDays.includes(day.value) ? "default" : "outline"} className={form.whatsappBusinessDays.includes(day.value) ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => toggleBusinessDay(day.value)}>{day.label}</Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+                        <div><Label htmlFor="whatsappStartTime" className="text-xs text-gray-600">Início</Label><Input id="whatsappStartTime" type="time" value={form.whatsappStartTime} onChange={(event) => setField("whatsappStartTime", event.target.value)} className="mt-1" /></div>
+                        <div><Label htmlFor="whatsappEndTime" className="text-xs text-gray-600">Fim</Label><Input id="whatsappEndTime" type="time" value={form.whatsappEndTime} onChange={(event) => setField("whatsappEndTime", event.target.value)} className="mt-1" /></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="supportEmail">E-mail de Atendimento</Label>
