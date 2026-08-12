@@ -2501,3 +2501,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir rótulos de quantidade, valor unitário e valor total em itens personalizados fechados
 - [x] Alinhar colunas e arte da linha de item personalizado ao cabeçalho de Produtos e Serviços
 - [x] Remover destaque rosa e aplicar o fundo cinza-claro dos itens de catálogo ao item personalizado
+- [x] Reutilizar integralmente o padrão de tabela e interação do catálogo em itens personalizados
+- [x] Preservar dados, cálculos e fluxos existentes ao padronizar visualmente itens personalizados
