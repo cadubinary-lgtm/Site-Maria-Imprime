@@ -20,6 +20,7 @@ type CompanyForm = {
   whatsappNumber: string;
   showWhatsappButton: boolean;
   whatsappDefaultMessage: string;
+  includeProductContext: boolean;
   useWhatsappBusinessHours: boolean;
   whatsappBusinessDays: number[];
   whatsappStartTime: string;
@@ -46,6 +47,7 @@ const DEFAULT_FORM: CompanyForm = {
   whatsappNumber: "5522999459596",
   showWhatsappButton: true,
   whatsappDefaultMessage: "Olá! Como podemos ajudar?",
+  includeProductContext: true,
   useWhatsappBusinessHours: false,
   whatsappBusinessDays: [1, 2, 3, 4, 5],
   whatsappStartTime: "09:00",
@@ -85,6 +87,7 @@ export default function AdminCompanySettings() {
       whatsappNumber: settings.whatsappNumber || "",
       showWhatsappButton: settings.showWhatsappButton ?? true,
       whatsappDefaultMessage: settings.whatsappDefaultMessage || "",
+      includeProductContext: settings.includeProductContext ?? true,
       useWhatsappBusinessHours: settings.useWhatsappBusinessHours ?? false,
       whatsappBusinessDays: parseWhatsAppBusinessDays(settings.whatsappBusinessDays),
       whatsappStartTime: settings.whatsappStartTime || "09:00",
@@ -266,6 +269,13 @@ export default function AdminCompanySettings() {
                   <Label htmlFor="whatsappDefaultMessage">Mensagem padrão do WhatsApp</Label>
                   <Textarea id="whatsappDefaultMessage" value={form.whatsappDefaultMessage} onChange={(event) => setField("whatsappDefaultMessage", event.target.value)} className="mt-1 min-h-20" placeholder="Olá! Como podemos ajudar?" />
                   <p className="text-xs text-gray-500 mt-1">Esta mensagem será preenchida automaticamente ao cliente clicar em um botão de WhatsApp do site.</p>
+                </div>
+                <div className="md:col-span-2 flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3">
+                  <div>
+                    <Label htmlFor="includeProductContext" className="text-sm font-semibold text-gray-800">Incluir produto selecionado na mensagem</Label>
+                    <p className="text-xs text-gray-500 mt-1">Em uma página de produto, a mensagem inclui automaticamente o nome do item. Em outras páginas, será usada apenas a mensagem geral acima.</p>
+                  </div>
+                  <Switch id="includeProductContext" checked={form.includeProductContext} onCheckedChange={(checked) => setField("includeProductContext", checked)} />
                 </div>
                 <div className="md:col-span-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-4">
                   <div className="flex items-center justify-between gap-4">

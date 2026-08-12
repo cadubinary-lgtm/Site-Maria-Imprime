@@ -20,6 +20,7 @@ describe("Módulo isolado de Dados da Empresa", () => {
     const footer = readFileSync("client/src/components/home/Footer.tsx", "utf8");
     const support = readFileSync("client/src/components/home/FAQSupport.tsx", "utf8");
     const product = readFileSync("client/src/pages/ecommerce/ProductDetail.tsx", "utf8");
+    const floatingButton = readFileSync("client/src/components/layout/FloatingWhatsAppButton.tsx", "utf8");
     const osPrint = readFileSync("client/src/pages/admin/AdminOSPrint.tsx", "utf8");
 
     expect(footer).toContain("useCompanySettings");
@@ -28,6 +29,8 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(product).toContain("getWhatsAppUrl(company.whatsappNumber");
     expect(product).toContain("useWhatsAppButtonVisibility(company)");
     expect(footer).toContain("useWhatsAppButtonVisibility(company)");
+    expect(floatingButton).toContain("useWhatsAppButtonVisibility(company)");
+    expect(floatingButton).toContain("getCompanyWhatsAppMessage(company, product?.name)");
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });

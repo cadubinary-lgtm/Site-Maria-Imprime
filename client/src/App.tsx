@@ -6,7 +6,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useAuth } from "./_core/hooks/useAuth";
 import { getLoginUrl } from "./const";
-import Header from "./components/Header";
+import Header from "@/components/layout/Header";
+import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton";
 import { CartSidePanel } from "./components/CartSidePanel";
 import { useCartDrawer } from "./contexts/CartDrawerContext";
 
@@ -396,6 +397,7 @@ function AppLayout() {
         <div className="flex-1 overflow-y-auto">
           <Router />
         </div>
+        <FloatingWhatsAppButton />
       </div>
       {/* Coluna do carrinho: 30% fixo quando aberto */}
       {isOpen && <CartSidePanel />}

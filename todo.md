@@ -2452,3 +2452,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir ativar ou desativar a exibição dos botões públicos de WhatsApp no painel Dados da Empresa
 - [x] Permitir configurar a mensagem padrão enviada ao iniciar o atendimento pelo WhatsApp
 - [x] Permitir definir horário de atendimento e ocultar os botões de WhatsApp fora do expediente
+- [x] Permitir incluir o nome do produto na mensagem do WhatsApp quando o cliente estiver em uma página de produto
+- [x] Manter mensagem geral configurável para pedidos personalizados fora do catálogo
+- [x] Adicionar botão flutuante de WhatsApp no site respeitando ativação e horário de atendimento

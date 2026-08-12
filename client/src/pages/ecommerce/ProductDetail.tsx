@@ -1845,7 +1845,7 @@ export default function ProductDetail() {
                 </Button>
                 {showWhatsApp && (
                   <a
-                    href={getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company))}
+                    href={getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company, product?.name))}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
