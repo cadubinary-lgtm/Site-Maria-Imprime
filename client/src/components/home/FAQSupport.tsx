@@ -1,8 +1,9 @@
-import { getWhatsAppUrl, useCompanySettings } from "@/hooks/useCompanySettings";
+import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
 
 export function FAQSupport() {
   const { company } = useCompanySettings();
-  const whatsappHref = getWhatsAppUrl(company.whatsappNumber);
+  const showWhatsApp = useWhatsAppButtonVisibility(company);
+  const whatsappHref = getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company));
   const benefits = [
     { 
       icon: "/manus-storage/icone-1_652dcf5a.webp",
@@ -48,7 +49,7 @@ export function FAQSupport() {
             </p>
 
             {/* CTA Button */}
-            {company.showWhatsappButton && (
+            {showWhatsApp && (
               <a
                 href={whatsappHref}
                 target="_blank"

@@ -2450,3 +2450,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Consumir dados da empresa no rodapé, contato e botão de WhatsApp do site
 - [x] Consumir logotipo, identificação e termos no layout de impressão da OS
 - [x] Permitir ativar ou desativar a exibição dos botões públicos de WhatsApp no painel Dados da Empresa
+- [x] Permitir configurar a mensagem padrão enviada ao iniciar o atendimento pelo WhatsApp
+- [x] Permitir definir horário de atendimento e ocultar os botões de WhatsApp fora do expediente

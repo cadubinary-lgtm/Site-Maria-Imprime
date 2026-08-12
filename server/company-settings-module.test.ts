@@ -9,6 +9,7 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(schema).toContain('mysqlTable("companySettings"');
     expect(schema).toContain('nextOsNumber: int("nextOsNumber").notNull().default(1001)');
     expect(schema).toContain('showWhatsappButton: boolean("showWhatsappButton").default(true).notNull()');
+    expect(schema).toContain('useWhatsappBusinessHours: boolean("useWhatsappBusinessHours").default(false).notNull()');
     expect(router).toContain("getPublic: publicProcedure");
     expect(router).toContain("getAdmin: adminProcedure");
     expect(router).toContain("save: adminProcedure");
@@ -22,11 +23,11 @@ describe("Módulo isolado de Dados da Empresa", () => {
     const osPrint = readFileSync("client/src/pages/admin/AdminOSPrint.tsx", "utf8");
 
     expect(footer).toContain("useCompanySettings");
-    expect(support).toContain("getWhatsAppUrl(company.whatsappNumber)");
-    expect(support).toContain("company.showWhatsappButton &&");
+    expect(support).toContain("getCompanyWhatsAppMessage(company)");
+    expect(support).toContain("useWhatsAppButtonVisibility(company)");
     expect(product).toContain("getWhatsAppUrl(company.whatsappNumber");
-    expect(product).toContain("company.showWhatsappButton &&");
-    expect(footer).toContain("company.showWhatsappButton &&");
+    expect(product).toContain("useWhatsAppButtonVisibility(company)");
+    expect(footer).toContain("useWhatsAppButtonVisibility(company)");
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });

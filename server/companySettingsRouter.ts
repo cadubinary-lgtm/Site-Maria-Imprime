@@ -12,6 +12,11 @@ const companySettingsInput = z.object({
   commercialPhone: z.string().min(1).max(20),
   whatsappNumber: z.string().min(1).max(20),
   showWhatsappButton: z.boolean().default(true),
+  whatsappDefaultMessage: z.string().max(1000).optional().nullable(),
+  useWhatsappBusinessHours: z.boolean().default(false),
+  whatsappBusinessDays: z.array(z.number().int().min(0).max(6)).min(1).default([1, 2, 3, 4, 5]),
+  whatsappStartTime: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).default("09:00"),
+  whatsappEndTime: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).default("17:00"),
   supportEmail: z.string().email().max(255),
   zipCode: z.string().min(1).max(10),
   street: z.string().min(1).max(255),
@@ -23,6 +28,10 @@ const companySettingsInput = z.object({
   printLogoKey: z.string().max(255).optional().nullable(),
   nextOsNumber: z.number().int().min(1).max(999999999),
   osTerms: z.string().max(10000).optional().nullable(),
+}).superRefine((input, ctx) => {
+  if (input.useWhatsappBusinessHours && input.whatsappStartTime >= input.whatsappEndTime) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["whatsappEndTime"], message: "O horário final deve ser posterior ao horário inicial" });
+  }
 });
 
 const allowedTermsTags = new Set(["b", "strong", "i", "em", "ul", "ol", "li", "br", "p", "div"]);
@@ -79,6 +88,11 @@ export const companySettingsRouter = router({
       commercialPhone: input.commercialPhone.trim(),
       whatsappNumber: input.whatsappNumber.replace(/\D/g, ""),
       showWhatsappButton: input.showWhatsappButton,
+      whatsappDefaultMessage: input.whatsappDefaultMessage?.trim() || null,
+      useWhatsappBusinessHours: input.useWhatsappBusinessHours,
+      whatsappBusinessDays: JSON.stringify(Array.from(new Set(input.whatsappBusinessDays)).sort()),
+      whatsappStartTime: input.whatsappStartTime,
+      whatsappEndTime: input.whatsappEndTime,
       supportEmail: input.supportEmail.trim(),
       zipCode: input.zipCode.trim(),
       street: input.street.trim(),
