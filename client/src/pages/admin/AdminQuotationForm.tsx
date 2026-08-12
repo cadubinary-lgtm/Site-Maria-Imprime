@@ -557,10 +557,19 @@ export default function AdminQuotationForm() {
               </button>
             ) : <ImageIcon className="h-4 w-4 text-gray-300" />}
           </div>
-          <div className="col-span-1 text-center text-sm text-gray-700">{item.quantity}</div>
-          <div className="col-span-2 text-right text-sm text-gray-700">{fmt(item.unitPrice)}</div>
+          <div className="col-span-1 flex flex-col items-center leading-tight">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Qtd</span>
+            <span className="text-sm text-gray-700">{item.quantity}</span>
+          </div>
+          <div className="col-span-2 flex flex-col items-end leading-tight">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Unit.</span>
+            <span className="text-sm text-gray-700">{fmt(item.unitPrice)}</span>
+          </div>
           <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
-            <span>{fmt(item.totalPrice)}</span>
+            <div className="flex flex-col items-end leading-tight">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Valor total</span>
+              <span>{fmt(item.totalPrice)}</span>
+            </div>
             <button
               type="button"
               title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}

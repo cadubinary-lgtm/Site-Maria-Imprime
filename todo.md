@@ -2498,3 +2498,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar expansão e recolhimento aos cards de itens personalizados
 - [x] Posicionar a seta de expansão de itens de catálogo ao lado do valor
 - [x] Alinhar o resumo fechado de itens personalizados ao layout dos itens de catálogo
+- [x] Exibir rótulos de quantidade, valor unitário e valor total em itens personalizados fechados
