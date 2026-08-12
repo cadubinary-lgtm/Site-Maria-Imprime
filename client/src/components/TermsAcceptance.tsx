@@ -515,6 +515,108 @@ Maria Imprime – Sua Gráfica Online
 
 E-mail: contatomariaimprime@gmail.com`;
 
+export const FAQ_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Como faço uma compra?
+
+Escolha o produto, configure as opções disponíveis, informe a quantidade, envie ou disponibilize sua arte quando solicitado, escolha a forma de entrega, realize o pagamento e finalize o pedido.
+
+2. Posso enviar minha própria arte?
+
+Sim. Os produtos que permitem personalização possuem opções para envio da arte, como upload ou link, conforme disponibilizado na página do produto.
+
+3. Quais formatos de arquivo posso enviar?
+
+Os formatos aceitos serão informados na página de cada produto. Quando disponíveis, poderão incluir PDF, PNG, JPG, TIFF, AI e CDR.
+
+4. Qual deve ser a resolução da minha arte?
+
+Recomenda-se utilizar arquivos em boa resolução e preparados de acordo com o tamanho final do produto. A qualidade da arte enviada influencia diretamente o resultado da impressão.
+
+5. A Maria Imprime corrige minha arte?
+
+Quando o produto oferecer serviço específico de criação, ajuste ou conferência de arquivo, as condições serão informadas na página do produto. Não se deve presumir que todo arquivo enviado será corrigido ou redesenhado.
+
+6. Posso cancelar meu pedido?
+
+Solicitações de cancelamento serão analisadas conforme o estágio do pedido e a legislação aplicável. Produtos personalizados podem já estar em processo de produção, portanto o cliente deverá entrar em contato o quanto antes.
+
+7. Posso cancelar depois que a produção começou?
+
+Entre em contato imediatamente. A possibilidade de cancelamento será analisada considerando o estágio da produção, a personalização do produto e os direitos previstos na legislação aplicável.
+
+8. Posso trocar um produto personalizado porque não gostei?
+
+Se o produto estiver de acordo com o pedido e não apresentar defeito, a situação será analisada considerando as características da contratação e a legislação aplicável. Produtos personalizados possuem características diferentes de produtos padronizados, pois são produzidos conforme as especificações escolhidas pelo cliente.
+
+9. E se o produto chegar com defeito?
+
+Entre em contato com a Maria Imprime pelos canais oficiais e informe o número do pedido. Sempre que possível, envie fotos ou vídeos que mostrem o problema.
+
+10. Pequenos respingos ou marcas na impressão são defeitos?
+
+Em impressões de grandes formatos podem ocorrer pequenas características inerentes ao processo produtivo. Quando forem pequenas e não comprometerem a finalidade do produto, não serão consideradas defeitos.
+
+11. E se houver uma mancha em um rosto ou em uma informação importante?
+
+Uma característica que comprometa significativamente um elemento essencial da arte, como rosto, texto principal, logotipo ou informação importante, será analisada individualmente. Se for constatado defeito de produção, será adotada a solução cabível conforme a legislação aplicável.
+
+12. As cores ficarão exatamente iguais às da tela?
+
+Não necessariamente. Monitores, celulares e tablets utilizam diferentes configurações e tecnologias de exibição. Também existem diferenças entre os materiais e processos de impressão. Pequenas variações de tonalidade podem ocorrer.
+
+13. Qual é o prazo de produção?
+
+O prazo é informado na página de cada produto e pode variar de acordo com produto, quantidade, material, acabamento, necessidade de aprovação e outras condições do pedido.
+
+14. O prazo de produção inclui o transporte?
+
+Não. O prazo de produção corresponde à fabricação. O transporte possui prazo próprio de acordo com a modalidade de entrega escolhida.
+
+15. Posso retirar meu pedido?
+
+Quando a opção estiver disponível, o cliente poderá escolher a retirada durante o processo de compra.
+
+16. A Maria Imprime entrega em todo o Brasil?
+
+As regiões atendidas dependerão das modalidades de entrega disponíveis para cada pedido. As opções serão apresentadas durante a compra.
+
+17. Posso acompanhar meu pedido?
+
+Quando o recurso estiver disponível, o cliente poderá acompanhar o status do pedido pelo sistema da Maria Imprime.
+
+18. O que acontece se eu enviar a arte errada?
+
+Entre em contato imediatamente. Se a produção ainda não tiver começado, poderá existir possibilidade de substituição do arquivo. Depois do início da produção, a substituição poderá não ser tecnicamente possível.
+
+19. O que acontece se eu aprovar uma arte com erro?
+
+A aprovação significa que o cliente autorizou aquela versão para produção. Por isso, é muito importante conferir cuidadosamente todos os elementos antes da aprovação.
+
+20. Posso usar imagens encontradas na internet?
+
+Somente quando possuir autorização ou licença adequada para utilização. O cliente é responsável pelos direitos relacionados ao conteúdo enviado.
+
+21. Meus dados pessoais estão protegidos?
+
+A Maria Imprime adota medidas para proteger os dados pessoais e trata as informações conforme sua Política de Privacidade e a legislação aplicável.
+
+22. O site utiliza cookies?
+
+O site poderá utilizar cookies necessários para funcionamento, segurança, carrinho, autenticação e outras funcionalidades, além de outros cookies conforme as configurações do site. Consulte a Política de Cookies para obter mais informações.
+
+23. Como entro em contato com a Maria Imprime?
+
+Utilize os canais oficiais de atendimento disponibilizados no site.
+
+24. Onde posso consultar os termos da compra?
+
+Todos os documentos estão disponíveis na Central de Documentação da Maria Imprime. Durante a compra, o cliente também poderá clicar em “Ler” ao lado de “Aceito os termos e condições”.
+
+25. Preciso aceitar vários termos diferentes?
+
+Não. O processo de compra deverá apresentar um único aceite: “Aceito os termos e condições”. O link “Ler” permite consultar todos os documentos antes da conclusão da compra.`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
@@ -523,7 +625,7 @@ const DOCUMENTS = [
   { title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
   { title: "Política de Cookies", content: COOKIES_POLICY_CONTENT },
   { title: "Termo de Uso do Site", content: SITE_USE_TERMS_CONTENT },
-  { title: "Perguntas Frequentes (FAQ)", content: "Documento em preparação." },
+  { title: "Perguntas Frequentes (FAQ)", content: FAQ_CONTENT },
 ];
 
 export const TERMS_VERSION = "2026-08-12-v2";
