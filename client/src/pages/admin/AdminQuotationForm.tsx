@@ -566,19 +566,10 @@ export default function AdminQuotationForm() {
               </button>
             )}
           </div>
-          <div className="col-span-1 flex flex-col items-center leading-tight">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Qtd</span>
-            <span className="text-sm text-gray-700">{item.quantity}</span>
-          </div>
-          <div className="col-span-2 flex flex-col items-end leading-tight">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Unit.</span>
-            <span className="text-sm text-gray-700">{fmt(item.unitPrice)}</span>
-          </div>
+          <div className="col-span-1 text-center text-sm text-gray-700">{item.quantity}</div>
+          <div className="col-span-2 text-right text-sm text-gray-700">{fmt(item.unitPrice)}</div>
           <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
-            <div className="flex flex-col items-end leading-tight">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Valor total</span>
-              <span>{fmt(item.totalPrice)}</span>
-            </div>
+            <span>{fmt(item.totalPrice)}</span>
             <button
               type="button"
               title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}
@@ -1412,11 +1403,20 @@ export default function AdminQuotationForm() {
                   </div>
                 )}
                 {items.some((item) => item.isCustom) && (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2 pt-1">
                       <div className="h-px flex-1 bg-gray-200" />
                       <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Itens personalizados <span className="normal-case font-normal text-gray-400">— produto ou serviço fora do catálogo</span></span>
                       <div className="h-px flex-1 bg-gray-200" />
+                    </div>
+                    <div className="grid grid-cols-12 gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="col-span-1">Img</div>
+                      <div className="col-span-3">Produto / Serviço</div>
+                      <div className="col-span-1 text-center">Arte</div>
+                      <div className="col-span-1 text-center">Qtd</div>
+                      <div className="col-span-2 text-right">Unit.</div>
+                      <div className="col-span-3 text-right">Total</div>
+                      <div className="col-span-1"></div>
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
                   </div>
