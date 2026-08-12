@@ -111,11 +111,12 @@ function formatArtFileName(url: string): string {
   return raw.replace(/^\d+-/, '').replace(/%20/g, ' ');
 }
 
-/** Formata o preço do frete */
-function formatShipping(label: string, price?: number | string | null): string {
+/** Formata o preço do frete sem repetir o rótulo "Entrega" na linha de especificação. */
+export function formatShipping(label: string, price?: number | string | null): string {
+  const normalizedLabel = label.replace(/^entrega\s*/i, "").trim() || label;
   const p = Number(price ?? 0);
-  if (p > 0) return `${label} — R$ ${p.toFixed(2).replace('.', ',')}`;
-  return `${label} — Grátis`;
+  if (p > 0) return `${normalizedLabel} — R$ ${p.toFixed(2).replace('.', ',')}`;
+  return `${normalizedLabel} — Grátis`;
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────

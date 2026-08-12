@@ -2288,7 +2288,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Retornar cutoffTime no resultado do shipping.calculate para uso no frontend
 - [ ] Adicionar campo "Horário Limite de Produção (Cut-off)" na aba Configurações do LogisticsManager
 - [ ] Exibir aviso institucional dinâmico com horário cut-off na página do produto
-- [ ] Corrigir texto duplicado "EntregaEntrega Local - Carro" no resumo do carrinho/checkout
+- [x] Corrigir texto duplicado "EntregaEntrega Local - Carro" no resumo do carrinho/checkout
 - [ ] Esconder segunda linha de descrição quando for vazia/NULL na listagem de fretes
 
 
