@@ -589,7 +589,7 @@ export default function AdminQuotationForm() {
             </div>
           </div>
           <div className="col-span-3 flex min-w-0 items-center gap-1">
-            <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-gray-300 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
+            <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-pink-500 hover:text-pink-700 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
             <button
               type="button"
               className="min-w-0 flex-1 text-left text-sm font-medium text-gray-800 hover:text-pink-600"
@@ -1227,7 +1227,7 @@ export default function AdminQuotationForm() {
                             </div>
                           ) : (
                             <div className="flex items-center gap-1">
-                              <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-gray-300 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
+                              <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-pink-500 hover:text-pink-700 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
                             <button
                               className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                               onClick={() => toggleItem(idx)}
