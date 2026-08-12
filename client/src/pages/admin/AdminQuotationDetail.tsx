@@ -33,6 +33,7 @@ import {
 import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { formatCompanyAddress, formatCompanyContact } from "@/lib/companyQuotationDetails";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -169,6 +170,8 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const items = q.items ?? [];
   const companyLine = [company?.tradeName ?? "Maria Imprime", company?.cnpj ? `CNPJ: ${company.cnpj}` : "", company?.commercialPhone ?? "", company?.supportEmail ?? ""].filter(Boolean).join(" · ");
+  const companyContact = formatCompanyContact(company);
+  const companyAddress = formatCompanyAddress(company);
   const specs = (s: string) => {
     return formatSpecs(s).replace(/ ❯ /g, ' <span style="color:#e91e8c;font-weight:700"> ❯ </span> ');
   };
@@ -234,8 +237,8 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	    <div class="section-title">Dados da Empresa</div>
 	    <div class="info-grid">
 	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span></div>
-	      <div class="info-item"><label>Contato</label><span>${[company?.commercialPhone, company?.supportEmail].filter(Boolean).join(" · ")}</span></div>
-	      <div class="info-item"><label>CNPJ / Endereço</label><span>${[company?.cnpj, company?.addressStreet ?? company?.logradouro, company?.addressNumber ?? company?.numero, company?.addressCity ?? company?.cidade, company?.addressState ?? company?.estado].filter(Boolean).join(" · ")}</span></div>
+	      <div class="info-item"><label>Contato</label><span>${companyContact}</span></div>
+	      <div class="info-item"><label>CNPJ / Inscrição Estadual</label><span>${[company?.cnpj, company?.stateRegistration ? `IE: ${company.stateRegistration}` : ""].filter(Boolean).join(" · ")}</span><label style="margin-top:6px">Endereço completo</label><span>${companyAddress}</span></div>
 	    </div>
 	    ${responsible ? `<div style="font-size:10px;color:#666;border-top:1px solid #eee;margin-top:10px;padding-top:8px">Responsável pela emissão: ${responsible}</div>` : ""}
 	  </div>
@@ -452,8 +455,8 @@ export default function AdminQuotationDetail() {
         <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
           <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span><span className="block text-xs text-gray-500">{company?.legalName ?? ""}</span></div>
-          <div><span className="text-gray-400 text-xs block">Contato</span><span>{company?.commercialPhone ?? "—"}</span><span className="block text-xs text-gray-500">{company?.supportEmail ?? ""}</span></div>
-          <div><span className="text-gray-400 text-xs block">CNPJ / Endereço</span><span>{company?.cnpj ?? "—"}</span><span className="block text-xs text-gray-500">{company?.addressNumber ? `Endereço cadastrado · Nº ${company.addressNumber}` : "Endereço cadastrado"}</span></div>
+          <div><span className="text-gray-400 text-xs block">Contato</span><span>{company?.commercialPhone ?? "—"}</span><span className="block text-xs text-gray-500">{formatCompanyContact(company)}</span></div>
+          <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company?.cnpj ?? "—"}</span><span className="block text-xs text-gray-500">{company?.stateRegistration ? `IE: ${company.stateRegistration}` : ""}</span><span className="block text-xs text-gray-500 mt-1">{formatCompanyAddress(company)}</span></div>
         </div>
         <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser?.name ?? "—"}</span></p>
       </div>
