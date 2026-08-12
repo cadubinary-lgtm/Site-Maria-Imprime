@@ -54,7 +54,7 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("const isExpanded = expandedItems.has(idx);");
     expect(formSource).toContain("onClick={() => toggleItem(idx)}");
     expect(formSource).toContain("aria-expanded={isExpanded}");
-    expect(formSource).toContain("{isExpanded && <div className=\"space-y-4 pt-4\">");
+    expect(formSource).toContain("{isExpanded && <div className=\"space-y-4 p-4\">");
   });
 
   it("resume o item personalizado fechado no mesmo padrão do catálogo", () => {
@@ -68,6 +68,13 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain(">Qtd</span>");
     expect(formSource).toContain(">Unit.</span>");
     expect(formSource).toContain(">Valor total</span>");
+  });
+
+  it("usa o mesmo acabamento neutro e a ação de arte dos itens de catálogo", () => {
+    expect(formSource).toContain('className="overflow-hidden rounded-lg border border-gray-100 bg-white"');
+    expect(formSource).toContain('grid grid-cols-12 items-center gap-2 bg-gray-50 px-2 py-2');
+    expect(formSource).toContain('title="Anexar arte"');
+    expect(formSource).toContain('h-px flex-1 bg-gray-200');
   });
 
   it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
