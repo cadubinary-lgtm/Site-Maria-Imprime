@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Building2, FileText, ImageIcon, Loader2, MapPin, Phone, Save, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +17,7 @@ type CompanyForm = {
   stateRegistration: string;
   commercialPhone: string;
   whatsappNumber: string;
+  showWhatsappButton: boolean;
   supportEmail: string;
   zipCode: string;
   street: string;
@@ -36,6 +38,7 @@ const DEFAULT_FORM: CompanyForm = {
   stateRegistration: "",
   commercialPhone: "(22) 99945-9596",
   whatsappNumber: "5522999459596",
+  showWhatsappButton: true,
   supportEmail: "contatomariaimprime@gmail.com",
   zipCode: "28908-200",
   street: "Avenida Antonio Ferreira dos Santos",
@@ -69,6 +72,7 @@ export default function AdminCompanySettings() {
       stateRegistration: settings.stateRegistration || "",
       commercialPhone: settings.commercialPhone || "",
       whatsappNumber: settings.whatsappNumber || "",
+      showWhatsappButton: settings.showWhatsappButton ?? true,
       supportEmail: settings.supportEmail || "",
       zipCode: settings.zipCode || "",
       street: settings.street || "",
@@ -221,6 +225,16 @@ export default function AdminCompanySettings() {
                   <Label htmlFor="whatsappNumber">WhatsApp</Label>
                   <Input id="whatsappNumber" value={form.whatsappNumber} onChange={(event) => setField("whatsappNumber", event.target.value.replace(/\D/g, ""))} className="mt-1" inputMode="numeric" placeholder="5522999999999" />
                   <p className="text-xs text-gray-500 mt-1">Somente números, incluindo DDI e DDD.</p>
+                </div>
+                <div className="md:col-span-2 flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  <div>
+                    <Label htmlFor="showWhatsappButton" className="text-sm font-semibold text-gray-800">Exibir botão de WhatsApp no site</Label>
+                    <p className="text-xs text-gray-500 mt-1">Controla os botões públicos de atendimento no rodapé, página inicial e produto.</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-medium ${form.showWhatsappButton ? "text-emerald-700" : "text-gray-500"}`}>{form.showWhatsappButton ? "Ativo" : "Desativado"}</span>
+                    <Switch id="showWhatsappButton" checked={form.showWhatsappButton} onCheckedChange={(checked) => setField("showWhatsappButton", checked)} />
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="supportEmail">E-mail de Atendimento</Label>

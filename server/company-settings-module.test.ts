@@ -8,6 +8,7 @@ describe("Módulo isolado de Dados da Empresa", () => {
 
     expect(schema).toContain('mysqlTable("companySettings"');
     expect(schema).toContain('nextOsNumber: int("nextOsNumber").notNull().default(1001)');
+    expect(schema).toContain('showWhatsappButton: boolean("showWhatsappButton").default(true).notNull()');
     expect(router).toContain("getPublic: publicProcedure");
     expect(router).toContain("getAdmin: adminProcedure");
     expect(router).toContain("save: adminProcedure");
@@ -22,7 +23,10 @@ describe("Módulo isolado de Dados da Empresa", () => {
 
     expect(footer).toContain("useCompanySettings");
     expect(support).toContain("getWhatsAppUrl(company.whatsappNumber)");
+    expect(support).toContain("company.showWhatsappButton &&");
     expect(product).toContain("getWhatsAppUrl(company.whatsappNumber");
+    expect(product).toContain("company.showWhatsappButton &&");
+    expect(footer).toContain("company.showWhatsappButton &&");
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });

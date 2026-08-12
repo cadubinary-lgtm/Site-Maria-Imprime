@@ -2449,3 +2449,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar submenu SISTEMA > Dados da Empresa e formulário administrativo de configuração
 - [x] Consumir dados da empresa no rodapé, contato e botão de WhatsApp do site
 - [x] Consumir logotipo, identificação e termos no layout de impressão da OS
+- [x] Permitir ativar ou desativar a exibição dos botões públicos de WhatsApp no painel Dados da Empresa

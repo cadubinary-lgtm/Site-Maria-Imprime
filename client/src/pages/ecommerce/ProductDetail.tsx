@@ -1842,21 +1842,23 @@ export default function ProductDetail() {
                     : <><FileText className="w-4 h-4 mr-2" />Solicitar orçamento</>
                   }
                 </Button>
-                <a
-                  href={getWhatsAppUrl(company.whatsappNumber, "Olá! Preciso de ajuda com um produto.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-green-500" />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Precisa de ajuda?</p>
-                      <p className="text-xs text-gray-500">Fale com nosso especialista pelo WhatsApp</p>
+                {company.showWhatsappButton && (
+                  <a
+                    href={getWhatsAppUrl(company.whatsappNumber, "Olá! Preciso de ajuda com um produto.")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-green-500" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">Precisa de ajuda?</p>
+                        <p className="text-xs text-gray-500">Fale com nosso especialista pelo WhatsApp</p>
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </a>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </a>
+                )}
               </div>
             </div>
 
