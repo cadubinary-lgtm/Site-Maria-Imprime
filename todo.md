@@ -2534,3 +2534,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Organizar blocos de dados, tabela de itens, resumo financeiro e condições comerciais do orçamento
 - [x] Exibir termos legais de prazo, arte, cores e aceite apenas no rodapé do orçamento personalizado
 - [x] Organizar visualização com dados institucionais, cliente, itens, totais e blocos comerciais no padrão de referência
+- [x] Corrigir atributos selecionados, condicionais de cliente e espaçamento dos cards no orçamento personalizado
+- [x] Reduzir a altura da faixa TOTAL e impedir quebra de dados em Empresa e Cliente no PDF A4
+- [x] Melhorar a leitura de atributos selecionados e ocultar especificações vazias no orçamento personalizado

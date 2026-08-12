@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatCompanyAddress, formatCompanyContact } from "@/lib/companyQuotationDetails";
+import { getSelectedQuotationSpecifications } from "@/lib/quotationSpecifications";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -73,6 +74,9 @@ const SPEC_LABELS: Record<string, string> = {
   acabamento: "Acabamento",
   impressao: "Impressão",
   material: "Material",
+  printingType: "Tipo de Impressão",
+  finish: "Tipo de Acabamento",
+  thickness: "Tipo de Espessura",
   quantidade: "Quantidade",
   arte: "Arte",
 };
@@ -112,9 +116,11 @@ function buildSpecPairs(s: string): { label: string; value: string }[] {
       pairs.push({ label: dim, value: area });
     }
     const skip = new Set(["width", "height", "largura", "altura"]);
-    Object.entries(o)
-      .filter(([k, v]) => !skip.has(k) && !TECHNICAL_SPEC_KEYS.has(k) && v && String(v).trim())
-      .forEach(([k, v]) => {
+    getSelectedQuotationSpecifications(s)
+      .filter(({ key }) => !skip.has(key) && !TECHNICAL_SPEC_KEYS.has(key))
+      .forEach(({ key, value }) => {
+        const k = key;
+        const v = value;
         if (k === "description") {
           pairs.push({ label: "", value: String(v) });
           return;
@@ -211,10 +217,13 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .td-right { text-align:right; }
   .totals { margin-top:16px; border-top:2px solid #e0e0e0; padding-top:16px; }
   .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
-  .total-row.grand { background:#e91e8c; color:#fff; padding:10px 16px; border-radius:8px; margin-top:8px; font-size:16px; font-weight:700; }
+  .total-row.grand { background:#e91e8c; color:#fff; padding:6px 12px; border-radius:8px; margin-top:8px; font-size:15px; font-weight:700; }
   .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
   .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:12px; }
-  .company-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .company-box .info-grid { grid-template-columns:1fr 1fr; gap:8px 14px; }
+  .company-box .info-item { min-width:0; }
+  .company-box .info-item span { overflow-wrap:normal; word-break:normal; }
+  .company-box .full-line { grid-column:1 / -1; }
   .top-grid, .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
   .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin:0; }
   .legal-notes { margin-top:34px; padding-top:12px; border-top:1px solid #eee; font-size:10px; line-height:1.55; color:#555; }
@@ -240,9 +249,12 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 		  <div class="company-box">
 	    <div class="section-title">Dados da Empresa</div>
 	    <div class="info-grid">
-	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span></div>
-	      <div class="info-item"><label>Contato</label><span>${companyContact}</span></div>
-	      <div class="info-item"><label>CNPJ / Inscrição Estadual</label><span>${[company?.cnpj, company?.stateRegistration ? `IE: ${company.stateRegistration}` : ""].filter(Boolean).join(" · ")}</span><label style="margin-top:6px">Endereço completo</label><span>${companyAddress}</span></div>
+	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span>${company?.legalName ? `<span style="display:block;font-size:10px;color:#666">${company.legalName}</span>` : ""}</div>
+	      ${company?.cnpj ? `<div class="info-item"><label>CNPJ / Inscrição Estadual</label><span>${company.cnpj}</span>${company?.stateRegistration ? `<span style="display:block;font-size:10px;color:#666">IE: ${company.stateRegistration}</span>` : ""}</div>` : ""}
+	      ${company?.commercialPhone ? `<div class="info-item"><label>Telefone comercial</label><span>${company.commercialPhone}</span></div>` : ""}
+	      ${company?.whatsappNumber ? `<div class="info-item"><label>WhatsApp</label><span>${company.whatsappNumber}</span></div>` : ""}
+	      ${company?.supportEmail ? `<div class="info-item full-line"><label>E-mail de atendimento</label><span>${company.supportEmail}</span></div>` : ""}
+	      ${companyAddress ? `<div class="info-item full-line"><label>Endereço completo</label><span>${companyAddress}</span></div>` : ""}
 	    </div>
 	    ${responsible ? `<div style="font-size:10px;color:#666;border-top:1px solid #eee;margin-top:10px;padding-top:8px">Responsável pela emissão: ${responsible}</div>` : ""}
 	  </div>
@@ -253,8 +265,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       ${q.clientName ? `<div class="info-item"><label>Nome</label><span>${q.clientName}</span></div>` : ""}
       ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
       ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
-      ${(q.clientPhone || q.clientWhatsapp) ? `<div class="info-item"><label>Telefone / WhatsApp</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
-	      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
+	      ${q.clientPhone ? `<div class="info-item"><label>Telefone</label><span>${q.clientPhone}</span></div>` : ""}
+	      ${q.clientWhatsapp ? `<div class="info-item"><label>WhatsApp</label><span>${q.clientWhatsapp}</span></div>` : ""}
+	      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item full-line"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
 	    </div>
 	  </div>
 	  </div>
@@ -468,23 +481,27 @@ export default function AdminQuotationDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="bg-white rounded-lg border border-gray-200 p-5">
+        <section className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
           <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-3 text-sm">
             <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
-            {formatCompanyContact(company) && <div><span className="text-gray-400 text-xs block">Contato</span><span>{formatCompanyContact(company)}</span></div>}
-            <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span>{company?.cnpj && <span>{company.cnpj}</span>}{company?.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}{formatCompanyAddress(company) && <span className="block text-xs text-gray-500 mt-1">{formatCompanyAddress(company)}</span>}</div>
+            {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
+            {company?.commercialPhone && <div><span className="text-gray-400 text-xs block">Telefone comercial</span><span>{company.commercialPhone}</span></div>}
+            {company?.whatsappNumber && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{company.whatsappNumber}</span></div>}
+            {company?.supportEmail && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">E-mail de atendimento</span><span>{company.supportEmail}</span></div>}
+            {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço completo</span><span className="text-xs text-gray-600 leading-relaxed">{formatCompanyAddress(company)}</span></div>}
           </div>
           {adminUser?.name && <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser.name}</span></p>}
         </section>
 
-        <section className="bg-white rounded-lg border border-gray-200 p-5">
+        <section className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3"><User className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Cliente</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
             {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
             {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
-            {(q.clientPhone || q.clientWhatsapp) && <div><span className="text-gray-400 text-xs block">Telefone / WhatsApp</span><span>{[q.clientPhone, q.clientWhatsapp].filter(Boolean).join(" · ")}</span></div>}
+            {q.clientPhone && <div><span className="text-gray-400 text-xs block">Telefone</span><span>{q.clientPhone}</span></div>}
+            {q.clientWhatsapp && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{q.clientWhatsapp}</span></div>}
             {(q.clientStreet || q.clientCity || q.clientZipCode) && <div className="md:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/"), q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>}
           </div>
         </section>
@@ -512,7 +529,7 @@ export default function AdminQuotationDetail() {
       </section>
 
       <section className="bg-white rounded-lg border border-gray-200 p-5">
-        <div className="space-y-2.5 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div><div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div><div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3 mt-3"><span className="font-semibold">TOTAL</span><span className="text-xl font-bold">{fmt(q.total)}</span></div></div>
+        <div className="space-y-2.5 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div><div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div><div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-2 mt-3"><span className="font-semibold">TOTAL</span><span className="text-lg font-bold">{fmt(q.total)}</span></div></div>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
