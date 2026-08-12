@@ -2526,3 +2526,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Aplicar ajustes técnicos pendentes para conferência visual do orçamento personalizado
 - [ ] Exibir dados do cliente em formulário único e editável após a seleção no orçamento
 - [ ] Carregar nome, documento, contatos e endereço reais do cliente selecionado
+- [ ] Reorganizar cabeçalho, dados do cliente e impressão A4 do orçamento personalizado

@@ -181,7 +181,8 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; }
-  .page { max-width: 800px; margin: 0 auto; padding: 40px; }
+  @page { size: A4; margin: 10mm; }
+  .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:3px solid #e91e8c; padding-bottom:24px; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
   .brand img { height:52px; object-fit:contain; display:block; }
@@ -208,16 +209,17 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .totals { margin-top:16px; border-top:2px solid #e0e0e0; padding-top:16px; }
   .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:10px 16px; border-radius:8px; margin-top:8px; font-size:16px; font-weight:700; }
-  .footer { margin-top:40px; padding-top:16px; border-top:1px solid #e0e0e0; font-size:10px; color:#aaa; text-align:center; }
+  .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
+  .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e0e0e0; font-size:10px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
 </head>
 <body>
-<div class="company-meta">${companyLine}<br>Responsável pela emissão: ${responsible ?? "—"}</div>
 <div class="page">
   <div class="header">
     <div class="brand">
       <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
+      <div class="company-meta">${companyLine}${responsible ? `<br>Responsável pela emissão: ${responsible}` : ""}</div>
     </div>
     <div class="doc-info">
       <div class="num">${q.quotationNumber}</div>
@@ -230,9 +232,11 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   <div class="section">
     <div class="section-title">Cliente</div>
     <div class="info-grid">
-      <div class="info-item"><label>Nome</label><span>${q.clientName ?? "—"}</span></div>
-      <div class="info-item"><label>E-mail</label><span>${q.clientEmail ?? "—"}</span></div>
-      <div class="info-item"><label>Telefone</label><span>${q.clientPhone ?? q.clientWhatsapp ?? "—"}</span></div>
+      ${q.clientName ? `<div class="info-item"><label>Nome</label><span>${q.clientName}</span></div>` : ""}
+      ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
+      ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
+      ${(q.clientPhone || q.clientWhatsapp) ? `<div class="info-item"><label>Telefone / WhatsApp</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
+      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
     </div>
   </div>
 
