@@ -2562,3 +2562,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a disposição original das cinco colunas sem desfazer o cinza-claro dos botões
 - [x] Investigar o indicador numérico travado no Kanban de Linha de Produção
 - [x] Reconciliar itens pendentes do todo.md que já estejam comprovadamente implementados
+- [ ] Auditar e consolidar seções duplicadas do todo.md com evidência técnica atual
