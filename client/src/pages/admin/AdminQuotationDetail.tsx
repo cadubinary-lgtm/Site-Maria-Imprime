@@ -166,8 +166,9 @@ function fmtDate(d: Date | string | null | undefined) {
 }
 
 // ─── PDF Print ───────────────────────────────────────────────────────────────
-function printQuotationPDF(q: any) {
+function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const items = q.items ?? [];
+  const companyLine = [company?.tradeName ?? "Maria Imprime", company?.cnpj ? `CNPJ: ${company.cnpj}` : "", company?.commercialPhone ?? "", company?.supportEmail ?? ""].filter(Boolean).join(" · ");
   const specs = (s: string) => {
     return formatSpecs(s).replace(/ ❯ /g, ' <span style="color:#e91e8c;font-weight:700"> ❯ </span> ');
   };
@@ -212,6 +213,7 @@ function printQuotationPDF(q: any) {
 </style>
 </head>
 <body>
+<div class="company-meta">${companyLine}<br>Responsável pela emissão: ${responsible ?? "—"}</div>
 <div class="page">
   <div class="header">
     <div class="brand">
@@ -373,7 +375,7 @@ export default function AdminQuotationDetail() {
 
         {/* Ações */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q)}>
+          <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
             <Printer className="w-3.5 h-3.5" /> Imprimir PDF
           </Button>
           <Button variant="outline" size="sm" className="gap-1" onClick={() => duplicate.mutate({ id: q.id })}>
