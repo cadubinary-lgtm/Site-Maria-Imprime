@@ -2490,3 +2490,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a navegação administrativa na página /admin/orcamentos sem alterar a listagem
 - [x] Permitir item personalizado com nome e valor manual no formulário de Orçamento
 - [x] Restaurar especificações e upload de arte em itens personalizados sem duplicar o nome
+- [x] Exibir item personalizado sem imagem de produto e com arte separada na tabela de Orçamentos

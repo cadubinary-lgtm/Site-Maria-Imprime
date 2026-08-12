@@ -58,6 +58,15 @@ function fmt(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const specificationLabels: Record<string, string> = {
+  width: "Largura",
+  height: "Altura",
+  printingType: "Tipo de impressão",
+  material: "Tipo de material",
+  thickness: "Tipo de espessura",
+  finish: "Tipo de acabamento",
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
   const [, navigate] = useLocation();
@@ -830,21 +839,28 @@ export default function AdminQuotationForm() {
                 {/* Cabeçalho da tabela */}
                 <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
                   <div className="col-span-1">Img</div>
-                  <div className="col-span-4">Produto / Especificações</div>
-                  <div className="col-span-2 text-center">Qtd</div>
+                  <div className="col-span-3">Produto / Especificações</div>
+                  <div className="col-span-1 text-center">Arte</div>
+                  <div className="col-span-1 text-center">Qtd</div>
                   <div className="col-span-2 text-center">Ajuste</div>
-                  <div className="col-span-2 text-right">Total</div>
+                  <div className="col-span-3 text-right">Total</div>
                   <div className="col-span-1"></div>
                 </div>
                 {items.map((item, idx) => {
                   const isExpanded = expandedItems.has(idx);
                   const specs = item._specsParsed ?? {};
+                  const specificationSummary = Object.entries(specs)
+                    .filter(([key, value]) => key !== "itemType" && Boolean(value))
+                    .map(([key, value]) => `${specificationLabels[key] ?? key}: ${value}`)
+                    .join(" · ");
                   return (
                     <div key={idx} className="border border-gray-100 rounded-lg overflow-hidden">
                       {/* Linha principal */}
                       <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 bg-gray-50">
                         <div className="col-span-1">
-                          {item.productImage ? (
+                          {item.isCustom ? (
+                            <div className="w-8 h-8" aria-hidden="true" />
+                          ) : item.productImage ? (
                             <img
                               src={item.productImage}
                               alt={item.productName}
@@ -857,22 +873,66 @@ export default function AdminQuotationForm() {
                             </div>
                           )}
                         </div>
-                        <div className="col-span-4">
-                          <button
-                            className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
-                            onClick={() => toggleItem(idx)}
-                          >
-                            {item.productName || "Item personalizado"}
-                            {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                          </button>
+                        <div className="col-span-3 min-w-0">
+                          {item.isCustom ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                aria-label="Nome do item personalizado"
+                                value={item.productName}
+                                onChange={(e) => updateItem(idx, { productName: e.target.value })}
+                                placeholder="Nome do produto ou serviço"
+                                className="h-7 text-sm font-medium"
+                              />
+                              <button
+                                type="button"
+                                title={isExpanded ? "Ocultar especificações" : "Editar especificações"}
+                                onClick={() => toggleItem(idx)}
+                                className="p-1 text-gray-500 hover:text-pink-600"
+                              >
+                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
+                              onClick={() => toggleItem(idx)}
+                            >
+                              {item.productName}
+                              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                            </button>
+                          )}
+                          {specificationSummary && (
+                            <p className="mt-1 text-[11px] leading-4 text-gray-500 line-clamp-2">{specificationSummary}</p>
+                          )}
                         </div>
-                        <div className="col-span-2 flex justify-center">
+                        <div className="col-span-1 flex justify-center">
+                          {item.artFileUrl ? (
+                            <button
+                              type="button"
+                              title="Visualizar arte anexada"
+                              className="w-8 h-8 rounded border border-gray-200 overflow-hidden bg-white"
+                              onClick={() => setLightboxImg(item.artFileUrl!)}
+                            >
+                              <img src={item.artFileUrl} alt={`Arte de ${item.productName || "item personalizado"}`} className="w-full h-full object-cover" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              title="Anexar arte"
+                              className="w-8 h-8 rounded border border-dashed border-gray-300 bg-white flex items-center justify-center text-gray-300 hover:border-pink-300 hover:text-pink-500"
+                              onClick={() => toggleItem(idx)}
+                            >
+                              <ImageIcon className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="col-span-1 flex justify-center">
                           <Input
                             type="number"
                             min={1}
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })}
-                            className="w-16 h-7 text-center text-sm"
+                            className="w-14 h-7 text-center text-sm"
                           />
                         </div>
                         <div className="col-span-2 flex justify-center">
@@ -900,7 +960,7 @@ export default function AdminQuotationForm() {
                           />
                           )}
                         </div>
-                        <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
+                        <div className="col-span-3 text-right text-sm font-semibold text-gray-800">
                           {item.isCustom ? (
                             <input
                               type="text"
