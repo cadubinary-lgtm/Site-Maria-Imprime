@@ -50,6 +50,13 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("Itens personalizados");
   });
 
+  it("permite expandir e recolher cada item personalizado", () => {
+    expect(formSource).toContain("const isExpanded = expandedItems.has(idx);");
+    expect(formSource).toContain("onClick={() => toggleItem(idx)}");
+    expect(formSource).toContain("aria-expanded={isExpanded}");
+    expect(formSource).toContain("{isExpanded && <div className=\"space-y-4 pt-4\">");
+  });
+
   it("mantém o valor personalizado integrado ao total do orçamento", () => {
     expect(formSource).toContain("item.isCustom ? (");
     expect(formSource).toContain("unitPrice: value / Math.max(1, item.quantity)");

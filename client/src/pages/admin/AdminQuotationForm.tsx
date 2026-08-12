@@ -509,6 +509,7 @@ export default function AdminQuotationForm() {
 
   const renderCustomItemCard = (item: QuotationItem, idx: number) => {
     const specs = item._specsParsed ?? { itemType: "custom" };
+    const isExpanded = expandedItems.has(idx);
     const updateSpec = (key: string, value: string) => {
       const nextSpecs = { ...specs, [key]: value };
       updateItem(idx, { specifications: JSON.stringify(nextSpecs), _specsParsed: nextSpecs });
@@ -528,22 +529,36 @@ export default function AdminQuotationForm() {
     };
 
     return (
-      <div key={`custom-${idx}`} className="rounded-lg border border-pink-200 bg-white p-4 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-pink-100 pb-3">
-          <div className="flex items-center gap-2">
+      <div key={`custom-${idx}`} className="rounded-lg border border-pink-200 bg-white p-4 shadow-sm">
+        <div className={`flex items-center justify-between gap-3 ${isExpanded ? "border-b border-pink-100 pb-3" : ""}`}>
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            onClick={() => toggleItem(idx)}
+            aria-expanded={isExpanded}
+            aria-label={`${isExpanded ? "Recolher" : "Expandir"} item personalizado`}
+          >
             <div className="w-8 h-8 rounded-md bg-pink-50 flex items-center justify-center">
               <Package className="w-4 h-4 text-pink-600" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Item personalizado</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-gray-800">{item.productName || "Item personalizado"}</p>
               <p className="text-xs text-gray-400">Produto ou serviço fora do catálogo</p>
             </div>
-          </div>
+            {!isExpanded && (
+              <div className="hidden items-center gap-3 text-xs sm:flex">
+                <span className="text-gray-400">Qtd. {item.quantity}</span>
+                <span className="font-semibold text-gray-700">{fmt(item.totalPrice)}</span>
+              </div>
+            )}
+            {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0 text-pink-600" /> : <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />}
+          </button>
           <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
 
+        {isExpanded && <div className="space-y-4 pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-2">
             <label className="text-xs text-gray-500 font-medium">Nome do Produto / Serviço</label>
@@ -650,6 +665,7 @@ export default function AdminQuotationForm() {
             />
           </div>
         </div>
+        </div>}
       </div>
     );
   };
