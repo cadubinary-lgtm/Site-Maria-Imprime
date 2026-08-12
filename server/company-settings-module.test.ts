@@ -31,8 +31,11 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(footer).toContain("useWhatsAppButtonVisibility(company)");
     expect(floatingButton).toContain("useWhatsAppButtonVisibility(company)");
     expect(floatingButton).toContain("getCompanyWhatsAppMessage(company, product?.name)");
+    expect(floatingButton).toContain("whastapp-branco_ab9ddb70.webp");
     expect(footer).toContain("getValidSocialUrl(company.instagramUrl, company.instagramActive)");
     expect(footer).toContain("getValidSocialUrl(company.youtubeUrl, company.youtubeActive)");
+    expect(footer).toContain('className="text-white hover:text-pink-300 transition-colors"');
+    expect(footer).toContain("whastapp-branco_ab9ddb70.webp");
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });
