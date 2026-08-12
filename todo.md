@@ -2546,3 +2546,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ocultar a linha vazia de responsável e distribuir Nome, E-mail e Telefone em três colunas no PDF
 - [x] Adicionar envio direto do orçamento personalizado por e-mail ao cliente cadastrado
 - [x] Remover os cards duplicados de Empresa e Cliente do PDF e consolidar os dados no cabeçalho
+- [x] Adicionar campo de observações ou termos personalizados no rodapé do orçamento e PDF

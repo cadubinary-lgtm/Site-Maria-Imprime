@@ -230,6 +230,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .client-summary-grid label { font-size:8px; color:#888; display:block; margin-bottom:1px; }
   .client-summary-grid span { display:block; font-size:9px; color:#1a1a1a; font-weight:600; overflow-wrap:anywhere; }
   .legal-notes { margin-top:14px; padding-top:7px; border-top:1px solid #eee; font-size:9px; line-height:1.35; color:#555; }
+  .custom-notes { margin-top:7px; padding:7px 8px; border:1px solid #f1d8e7; border-radius:6px; background:#fff9fc; font-size:9px; line-height:1.35; color:#555; white-space:pre-line; }
   .footer { margin-top:12px; padding-top:7px; border-top:1px solid #e0e0e0; font-size:9px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
@@ -310,7 +311,6 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	        ${q.quotationValidity ? `<div class="info-item"><label>Validade</label><span>${q.quotationValidity} dias</span></div>` : ""}
 	        <div class="info-item"><label>Expira em</label><span>${fmtDate(q.expiresAt)}</span></div>
 	      </div>
-	      ${q.commercialNotes ? `<div style="margin-top:12px;padding:12px;background:#f8f8f8;border-radius:6px;font-size:12px;color:#555">${q.commercialNotes}</div>` : ""}
 	    </div>
 	  </div>
 	  <div class="legal-notes">
@@ -319,6 +319,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	    <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
 	    <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
 	  </div>
+	  ${q.commercialNotes ? `<div class="custom-notes"><strong>Observações / Termos personalizados:</strong><br>${q.commercialNotes}</div>` : ""}
 
   <div class="footer">
     Maria Imprime — mariaimprime.com.br · Este orçamento é válido até ${fmtDate(q.expiresAt)} · Sujeito a confirmação de disponibilidade de material.
@@ -562,10 +563,10 @@ export default function AdminQuotationDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><Truck className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Entrega</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Método</span><span>{q.shippingLabel ?? q.shippingMethod ?? "Retirada na loja"}</span></div><div><span className="text-gray-400 text-xs block">Valor do frete</span><span>{fmt(q.shippingPrice)}</span></div>{q.shippingEstimatedDays && <div><span className="text-gray-400 text-xs block">Prazo estimado</span><span>{q.shippingEstimatedDays} dias</span></div>}{q.deliveryAddress && <div className="col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{q.deliveryAddress}</span></div>}</div></section>
-        <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div>{q.commercialNotes && <div className="mt-2 p-2 bg-gray-50 rounded text-sm text-gray-600">{q.commercialNotes}</div>}</section>
+        <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div></section>
       </div>
 
-      <section className="pt-2 text-[11px] text-gray-600 leading-snug space-y-0.5"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p></section>
+      <section className="pt-2 text-[11px] text-gray-600 leading-snug space-y-0.5"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>{q.commercialNotes && <div className="mt-2 rounded border border-pink-100 bg-pink-50/40 px-3 py-2 whitespace-pre-line text-gray-700"><strong>Observações / Termos personalizados:</strong><br />{q.commercialNotes}</div>}</section>
 
       {/* Modal de conversão */}
       <AlertDialog open={showConvertConfirm} onOpenChange={setShowConvertConfirm}>
