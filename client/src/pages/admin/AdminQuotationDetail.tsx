@@ -172,9 +172,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const companyLine = [company?.tradeName ?? "Maria Imprime", company?.cnpj ? `CNPJ: ${company.cnpj}` : "", company?.commercialPhone ?? "", company?.supportEmail ?? ""].filter(Boolean).join(" · ");
   const companyContact = formatCompanyContact(company);
   const companyAddress = formatCompanyAddress(company);
-  const specs = (s: string) => {
-    return formatSpecs(s).replace(/ ❯ /g, ' <span style="color:#e91e8c;font-weight:700"> ❯ </span> ');
-  };
+  const specs = (s: string) => buildSpecPairs(s)
+    .map(({ label, value }) => `<div>${label ? `<span style="color:#777">${label}</span> ` : ""}<span>${value}</span></div>`)
+    .join("");
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -213,8 +213,11 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:10px 16px; border-radius:8px; margin-top:8px; font-size:16px; font-weight:700; }
   .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
-  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:20px; }
+  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:12px; }
   .company-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .top-grid, .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin:0; }
+  .legal-notes { margin-top:34px; padding-top:12px; border-top:1px solid #eee; font-size:10px; line-height:1.55; color:#555; }
   .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e0e0e0; font-size:10px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
@@ -233,7 +236,8 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	      <div class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</div>
 	    </div>
 	  </div>
-	  <div class="company-box">
+		  <div class="top-grid">
+		  <div class="company-box">
 	    <div class="section-title">Dados da Empresa</div>
 	    <div class="info-grid">
 	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span></div>
@@ -250,11 +254,12 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
       ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
       ${(q.clientPhone || q.clientWhatsapp) ? `<div class="info-item"><label>Telefone / WhatsApp</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
-      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
-    </div>
-  </div>
-
-  <div class="section">
+	      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
+	    </div>
+	  </div>
+	  </div>
+	
+	  <div class="section">
     <div class="section-title">Produtos / Serviços</div>
     <table>
       <thead>
@@ -289,22 +294,33 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Condições Comerciais</div>
-    <div class="info-grid">
-      <div class="info-item"><label>Forma de pagamento</label><span>${PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? "—"}</span></div>
-      <div class="info-item"><label>Prazo de produção</label><span>${q.productionDeadline ? `${q.productionDeadline} dias úteis` : "—"}</span></div>
-      <div class="info-item"><label>Entrega</label><span>${q.shippingLabel ?? "Retirada na loja"}</span></div>
-      <div class="info-item"><label>Validade do orçamento</label><span>${fmtDate(q.expiresAt)}</span></div>
-    </div>
-    ${q.commercialNotes ? `<div style="margin-top:12px;padding:12px;background:#f8f8f8;border-radius:6px;font-size:12px;color:#555">${q.commercialNotes}</div>` : ""}
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee;font-size:11px;line-height:1.55;color:#555">
-      <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
-      <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após aprovação podem gerar novo prazo e/ou custos adicionais.</p>
-      <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
-      <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
-    </div>
-  </div>
+	  <div class="commerce-grid">
+	    <div class="section">
+	      <div class="section-title">Entrega</div>
+	      <div class="info-grid">
+	        <div class="info-item"><label>Método</label><span>${q.shippingLabel ?? q.shippingMethod ?? "Retirada na loja"}</span></div>
+	        <div class="info-item"><label>Valor do frete</label><span>${fmt(q.shippingPrice)}</span></div>
+	        ${q.shippingEstimatedDays ? `<div class="info-item"><label>Prazo estimado</label><span>${q.shippingEstimatedDays} dias</span></div>` : ""}
+	        ${q.deliveryAddress ? `<div class="info-item"><label>Endereço</label><span>${q.deliveryAddress}</span></div>` : ""}
+	      </div>
+	    </div>
+	    <div class="section">
+	      <div class="section-title">Condições Comerciais</div>
+	      <div class="info-grid">
+	        ${q.paymentMethod ? `<div class="info-item"><label>Forma de pagamento</label><span>${PAYMENT_LABELS[q.paymentMethod] ?? q.paymentMethod}</span></div>` : ""}
+	        ${q.productionDeadline ? `<div class="info-item"><label>Prazo de produção</label><span>${q.productionDeadline} dias úteis</span></div>` : ""}
+	        ${q.quotationValidity ? `<div class="info-item"><label>Validade</label><span>${q.quotationValidity} dias</span></div>` : ""}
+	        <div class="info-item"><label>Expira em</label><span>${fmtDate(q.expiresAt)}</span></div>
+	      </div>
+	      ${q.commercialNotes ? `<div style="margin-top:12px;padding:12px;background:#f8f8f8;border-radius:6px;font-size:12px;color:#555">${q.commercialNotes}</div>` : ""}
+	    </div>
+	  </div>
+	  <div class="legal-notes">
+	    <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
+	    <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após aprovação podem gerar novo prazo e/ou custos adicionais.</p>
+	    <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
+	    <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
+	  </div>
 
   <div class="footer">
     Maria Imprime — mariaimprime.com.br · Este orçamento é válido até ${fmtDate(q.expiresAt)} · Sujeito a confirmação de disponibilidade de material.
@@ -451,197 +467,60 @@ export default function AdminQuotationDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-5">
-        <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-          <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span><span className="block text-xs text-gray-500">{company?.legalName ?? ""}</span></div>
-          <div><span className="text-gray-400 text-xs block">Contato</span><span>{formatCompanyContact(company) || "—"}</span></div>
-          <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company?.cnpj ?? "—"}</span><span className="block text-xs text-gray-500">{company?.stateRegistration ? `IE: ${company.stateRegistration}` : ""}</span><span className="block text-xs text-gray-500 mt-1">{formatCompanyAddress(company)}</span></div>
-        </div>
-        <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser?.name ?? "—"}</span></p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <section className="bg-white rounded-lg border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
+            {formatCompanyContact(company) && <div><span className="text-gray-400 text-xs block">Contato</span><span>{formatCompanyContact(company)}</span></div>}
+            <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span>{company?.cnpj && <span>{company.cnpj}</span>}{company?.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}{formatCompanyAddress(company) && <span className="block text-xs text-gray-500 mt-1">{formatCompanyAddress(company)}</span>}</div>
+          </div>
+          {adminUser?.name && <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser.name}</span></p>}
+        </section>
+
+        <section className="bg-white rounded-lg border border-gray-200 p-5">
+          <div className="flex items-center gap-2 mb-3"><User className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Cliente</h2></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
+            {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
+            {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
+            {(q.clientPhone || q.clientWhatsapp) && <div><span className="text-gray-400 text-xs block">Telefone / WhatsApp</span><span>{[q.clientPhone, q.clientWhatsapp].filter(Boolean).join(" · ")}</span></div>}
+            {(q.clientStreet || q.clientCity || q.clientZipCode) && <div className="md:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/"), q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>}
+          </div>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Coluna principal */}
-        <div className="lg:col-span-2 space-y-5">
-
-          {/* Cliente */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <User className="w-4 h-4 text-pink-600" />
-              <h2 className="font-semibold text-gray-800">Cliente</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
-              {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
-              {q.clientPhone && <div><span className="text-gray-400 text-xs block">Telefone</span><span>{q.clientPhone}</span></div>}
-              {q.clientWhatsapp && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{q.clientWhatsapp}</span></div>}
-            </div>
-          </div>
-
-          {/* Produtos */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Package className="w-4 h-4 text-pink-600" />
-              <h2 className="font-semibold text-gray-800">Produtos / Serviços</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    {["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => (
-                      <th key={h} className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide pr-3">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {(q.items ?? []).map((item: any) => {
-                    let specs: Record<string, string> = {};
-                    try { specs = JSON.parse(item.specifications); } catch {}
-                    const specLines = buildSpecLines(item.specifications);
-                    const specPairs = buildSpecPairs(item.specifications);
-                    return (
-                      <tr key={item.id}>
-                        <td className="py-2.5 pr-2">
-                          {item.productImage ? (
-                            <img
-                              src={item.productImage}
-                              alt={item.productName}
-                              className="w-10 h-10 object-contain rounded border border-gray-100 cursor-pointer"
-                              onClick={() => setLightboxImg(item.productImage)}
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                              <ImageIcon className="w-5 h-5 text-gray-300" />
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-2.5 pr-3 font-medium text-gray-800">{item.productName}</td>
-                        <td className="py-2.5 pr-3 text-xs text-gray-600 max-w-64 leading-relaxed">
-                          {(() => {
-                            const raw = formatSpecs(item.specifications);
-                            if (!raw) return <span>—</span>;
-                            const parts = raw.split(" ❯ ");
-                            return (
-                              <span>
-                                {parts.map((p, i) => (
-                                  <span key={i}>
-                                    {p}
-                                    {i < parts.length - 1 && <span className="text-pink-500 font-bold mx-0.5"> ❯ </span>}
-                                  </span>
-                                ))}
-                              </span>
-                            );
-                          })()}
-                        </td>
-                        <td className="py-2.5 pr-3">
-                          {item.artFileUrl ? (
-                            <img
-                              src={item.artFileUrl}
-                              alt="Arte"
-                              className="w-14 h-14 object-contain rounded border border-gray-100 cursor-pointer"
-                              onClick={() => setLightboxImg(item.artFileUrl)}
-                            />
-                          ) : <span className="text-gray-300 text-xs">—</span>}
-                        </td>
-                        <td className="py-2.5 pr-3 text-center">{item.quantity}</td>
-                        <td className="py-2.5 pr-3 text-right">{fmt(item.unitPrice)}</td>
-                        <td className="py-2.5 font-semibold text-right">{fmt(item.totalPrice)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Entrega */}
-          {q.shippingMethod && (
-            <div className="bg-white rounded-lg border border-gray-200 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Truck className="w-4 h-4 text-pink-600" />
-                <h2 className="font-semibold text-gray-800">Entrega</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-gray-400 text-xs block">Método</span><span>{q.shippingLabel ?? q.shippingMethod}</span></div>
-                <div><span className="text-gray-400 text-xs block">Valor do frete</span><span>{fmt(q.shippingPrice)}</span></div>
-                <div><span className="text-gray-400 text-xs block">Prazo estimado</span><span>{q.shippingEstimatedDays ? `${q.shippingEstimatedDays} dias` : "—"}</span></div>
-                {q.deliveryAddress && <div className="col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{q.deliveryAddress}</span></div>}
-              </div>
-            </div>
-          )}
-
-          {/* Condições */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="w-4 h-4 text-pink-600" />
-              <h2 className="font-semibold text-gray-800">Condições Comerciais</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline ? `${q.productionDeadline} dias` : "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity ? `${q.quotationValidity} dias` : "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div>
-            </div>
-            {q.commercialNotes && (
-              <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-600">
-                <span className="text-xs text-gray-400 block mb-1">Observações</span>
-                {q.commercialNotes}
-              </div>
-            )}
-            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-600 leading-relaxed">
-              <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
-              <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p>
-              <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
-              <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
-            </div>
-          </div>
+      <section className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="flex items-center gap-2 mb-3"><Package className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Produtos / Serviços</h2></div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead><tr className="bg-gray-50 border-y border-gray-100">{["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => <th key={h} className="text-left py-2.5 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>)}</tr></thead>
+            <tbody className="divide-y divide-gray-100">
+              {(q.items ?? []).map((item: any) => {
+                const specPairs = buildSpecPairs(item.specifications);
+                return <tr key={item.id}>
+                  <td className="py-3 px-2">{item.productImage ? <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.productImage)} /> : <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="w-5 h-5 text-gray-300" /></div>}</td>
+                  <td className="py-3 px-2 font-semibold text-gray-800 align-top">{item.productName}</td>
+                  <td className="py-3 px-2 text-xs text-gray-600 max-w-72 leading-relaxed align-top">{specPairs.length > 0 && <div className="space-y-0.5">{specPairs.map((pair, index) => <p key={index}>{pair.label && <span className="text-gray-500">{pair.label} </span>}<span className={pair.label ? "text-gray-700" : "text-gray-600"}>{pair.value}</span></p>)}</div>}</td>
+                  <td className="py-3 px-2 align-top">{item.artFileUrl && <img src={item.artFileUrl} alt="Arte" className="w-14 h-14 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.artFileUrl)} />}</td>
+                  <td className="py-3 px-2 text-center align-top">{item.quantity}</td><td className="py-3 px-2 text-right align-top">{fmt(item.unitPrice)}</td><td className="py-3 px-2 font-semibold text-right align-top">{fmt(item.totalPrice)}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
         </div>
+      </section>
 
-        {/* Resumo financeiro */}
-        <div>
-          <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-4">
-            <h2 className="font-semibold text-gray-800 mb-4">Resumo Financeiro</h2>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div>
-              <div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div>
-              {Number(q.discountAmount) > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Desconto</span>
-                  <span className="font-medium">- {fmt(q.discountAmount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-gray-500">Frete</span>
-                <span className="font-medium">{fmt(q.shippingPrice)}</span>
-              </div>
-              <div className="border-t border-gray-100 pt-3 mt-1">
-                <div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3">
-                  <span className="font-semibold">TOTAL</span>
-                  <span className="text-xl font-bold">{fmt(q.total)}</span>
-                </div>
-              </div>
-            </div>
+      <section className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="space-y-2.5 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div><div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div><div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3 mt-3"><span className="font-semibold">TOTAL</span><span className="text-xl font-bold">{fmt(q.total)}</span></div></div>
+      </section>
 
-            {/* Datas */}
-            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-500">
-              <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /><span>Criado em {fmtDate(q.createdAt)}</span></div>
-              {q.sentAt && <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5" /><span>Enviado em {fmtDate(q.sentAt)}</span></div>}
-              {q.approvedAt && <div className="flex items-center gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500" /><span>Aprovado em {fmtDate(q.approvedAt)}</span></div>}
-              <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /><span>Válido até {fmtDate(q.expiresAt)}</span></div>
-            </div>
-
-            {/* Botão de impressão */}
-            <Button
-              variant="outline"
-              className="w-full mt-4 gap-2 text-sm"
-              onClick={() => printQuotationPDF(q)}
-            >
-              <FileText className="w-4 h-4" /> Gerar PDF
-            </Button>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <section className="bg-white rounded-lg border border-gray-200 p-5"><div className="flex items-center gap-2 mb-3"><Truck className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Entrega</h2></div><div className="grid grid-cols-2 gap-3 text-sm"><div><span className="text-gray-400 text-xs block">Método</span><span>{q.shippingLabel ?? q.shippingMethod ?? "Retirada na loja"}</span></div><div><span className="text-gray-400 text-xs block">Valor do frete</span><span>{fmt(q.shippingPrice)}</span></div>{q.shippingEstimatedDays && <div><span className="text-gray-400 text-xs block">Prazo estimado</span><span>{q.shippingEstimatedDays} dias</span></div>}{q.deliveryAddress && <div className="col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{q.deliveryAddress}</span></div>}</div></section>
+        <section className="bg-white rounded-lg border border-gray-200 p-5"><div className="flex items-center gap-2 mb-3"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-3 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div>{q.commercialNotes && <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-600">{q.commercialNotes}</div>}</section>
       </div>
+
+      <section className="pt-4 text-xs text-gray-600 leading-relaxed space-y-1"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p></section>
 
       {/* Modal de conversão */}
       <AlertDialog open={showConvertConfirm} onOpenChange={setShowConvertConfirm}>
