@@ -2459,3 +2459,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir no rodapé apenas os ícones sociais com link válido e status ativo
 - [x] Substituir ícones de redes sociais e WhatsApp por versões oficiais de marca
 - [x] Ordenar pedidos do Kanban por data de criação, do mais antigo para o mais recente
+
+## Transição de Marca: Maria Imprime
+- [x] Substituir a marca exibida Gráfica Ponto Digital por Maria Imprime no site, preservando a menção legal do rodapé
+- [x] Atualizar remetente, logotipo e cores dos e-mails automáticos para a identidade Maria Imprime
+- [ ] Validar a identidade atualizada e preparar o disparo de e-mail de teste

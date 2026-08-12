@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 
 export const COMPANY_SETTINGS_FALLBACK = {
   legalName: "Carlos Eduardo Barreto Novaes Pinheiro - ME",
-  tradeName: "Maria Imprime / Gráfica Ponto Digital",
+  tradeName: "Maria Imprime",
   cnpj: "34.528.399/0001-08",
   stateRegistration: "",
   commercialPhone: "(22) 99945-9596",

@@ -98,7 +98,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="text-center text-xs text-gray-600 border-t border-gray-700 pt-8 font-light">
-          <p>© 2026 {company.tradeName}. Todos os direitos reservados.</p>
+          <p>© 2026 Maria Imprime / Gráfica Ponto Digital. Todos os direitos reservados.</p>
           <p className="mt-2">Site protegido (SSL)</p>
         </div>
       </div>

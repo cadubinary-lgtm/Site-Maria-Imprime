@@ -55,7 +55,7 @@ export async function exportBudgetPDF(data: BudgetData): Promise<void> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text(data.companyName || "Gráfica Ponto Digital", margin + 35, yPosition + 10);
+  doc.text(data.companyName || "Maria Imprime", margin + 35, yPosition + 10);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
