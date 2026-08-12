@@ -2439,3 +2439,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Edição Rápida de Produtos
 - [x] Permitir alterar preço-base e unidade de cobrança diretamente na lista de produtos do painel admin
 - [x] Exibir toast de sucesso após salvar preço na edição rápida
+
+## Habilidade Reutilizável: Toasts Administrativos
+- [x] Criar skill para implementar e validar notificações de sucesso após ações administrativas
+
+## Módulo Isolado: Dados da Empresa
+- [x] Criar tabela própria para dados institucionais, fiscais, contato, endereço e configuração de OS
+- [x] Pré-preencher a configuração com os dados institucionais já publicados e próximo número de OS igual a 1001
+- [x] Criar submenu SISTEMA > Dados da Empresa e formulário administrativo de configuração
+- [x] Consumir dados da empresa no rodapé, contato e botão de WhatsApp do site
+- [x] Consumir logotipo, identificação e termos no layout de impressão da OS
