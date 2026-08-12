@@ -1062,9 +1062,9 @@ export default function AdminQuotationForm() {
                             <button
                               className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                               onClick={() => toggleItem(idx)}
+                              aria-label={isExpanded ? "Recolher item" : "Expandir item"}
                             >
                               {item.productName}
-                              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                             </button>
                           )}
                           {specificationSummary && (
@@ -1126,25 +1126,17 @@ export default function AdminQuotationForm() {
                           />
                           )}
                         </div>
-                        <div className="col-span-3 text-right text-sm font-semibold text-gray-800">
-                          {item.isCustom ? (
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              aria-label={`Valor total de ${item.productName || "item personalizado"}`}
-                              title="Defina livremente o valor total do item personalizado"
-                              defaultValue={item.totalPrice > 0 ? fmt(item.totalPrice) : ""}
-                              placeholder="R$ 0,00"
-                              onBlur={(e) => {
-                                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
-                                const value = Math.max(0, parseFloat(raw) || 0);
-                                updateItem(idx, { unitPrice: value / Math.max(1, item.quantity), priceAdjustment: 0 });
-                                e.target.value = value > 0 ? fmt(value) : "";
-                              }}
-                              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                              className="w-28 h-7 text-right text-sm font-semibold border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
-                            />
-                          ) : fmt(item.totalPrice)}
+                        <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
+                          <span>{fmt(item.totalPrice)}</span>
+                          <button
+                            type="button"
+                            title={isExpanded ? "Recolher especificações" : "Expandir especificações"}
+                            onClick={() => toggleItem(idx)}
+                            aria-expanded={isExpanded}
+                            className="rounded p-0.5 text-gray-400 transition-colors hover:text-pink-600"
+                          >
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          </button>
                         </div>
                         <div className="col-span-1 flex justify-end">
                           <button onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors">

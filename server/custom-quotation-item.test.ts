@@ -57,6 +57,11 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("{isExpanded && <div className=\"space-y-4 pt-4\">");
   });
 
+  it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
+    expect(formSource).toContain('className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800"');
+    expect(formSource).toContain('title={isExpanded ? "Recolher especificações" : "Expandir especificações"}');
+  });
+
   it("mantém o valor personalizado integrado ao total do orçamento", () => {
     expect(formSource).toContain("item.isCustom ? (");
     expect(formSource).toContain("unitPrice: value / Math.max(1, item.quantity)");
