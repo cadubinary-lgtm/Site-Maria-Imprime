@@ -168,6 +168,14 @@ export const quotationsRouter = router({
           clientEmail: clients.email,
           clientPhone: clients.phone,
           clientWhatsapp: clients.whatsapp,
+          clientCpfCnpj: clients.cpfCnpj,
+          clientZipCode: clients.addressZipCode,
+          clientStreet: clients.addressStreet,
+          clientNumber: clients.addressNumber,
+          clientComplement: clients.addressComplement,
+          clientNeighborhood: clients.addressNeighborhood,
+          clientCity: clients.addressCity,
+          clientState: clients.addressState,
         })
         .from(quotations)
         .leftJoin(clients, eq(quotations.clientId, clients.id))
