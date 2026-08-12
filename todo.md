@@ -2488,3 +2488,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Correção: Orçamentos
 - [x] Corrigir a tela em branco da rota /admin/orcamentos sem alterar o layout
 - [x] Restaurar a navegação administrativa na página /admin/orcamentos sem alterar a listagem
+- [x] Permitir item personalizado com nome e valor manual no formulário de Orçamento

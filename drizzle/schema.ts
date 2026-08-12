@@ -1659,7 +1659,7 @@ export const quotationItems = mysqlTable("quotationItems", {
   quotationId: int("quotationId").notNull(),
   
   // Snapshot do produto
-  productId: int("productId").notNull(),
+  productId: int("productId"), // nulo para itens personalizados sem cadastro no catálogo
   productName: varchar("productName", { length: 255 }).notNull(),
   productImage: varchar("productImage", { length: 255 }), // URL da imagem
   
