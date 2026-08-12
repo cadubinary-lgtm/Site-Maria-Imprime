@@ -455,7 +455,7 @@ export default function AdminQuotationDetail() {
         <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
           <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span><span className="block text-xs text-gray-500">{company?.legalName ?? ""}</span></div>
-          <div><span className="text-gray-400 text-xs block">Contato</span><span>{company?.commercialPhone ?? "—"}</span><span className="block text-xs text-gray-500">{formatCompanyContact(company)}</span></div>
+          <div><span className="text-gray-400 text-xs block">Contato</span><span>{formatCompanyContact(company) || "—"}</span></div>
           <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company?.cnpj ?? "—"}</span><span className="block text-xs text-gray-500">{company?.stateRegistration ? `IE: ${company.stateRegistration}` : ""}</span><span className="block text-xs text-gray-500 mt-1">{formatCompanyAddress(company)}</span></div>
         </div>
         <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser?.name ?? "—"}</span></p>
