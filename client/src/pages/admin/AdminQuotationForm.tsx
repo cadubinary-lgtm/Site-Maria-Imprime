@@ -646,7 +646,14 @@ export default function AdminQuotationForm() {
           />
           {item.artFileUrl ? (
             <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-              <img src={item.artFileUrl} alt="Arte do item personalizado" className="max-h-40 mx-auto rounded object-contain" />
+              <button
+                type="button"
+                title="Visualizar arte em tamanho ampliado"
+                className="mx-auto block cursor-zoom-in"
+                onClick={() => setLightboxImg(item.artFileUrl!)}
+              >
+                <img src={item.artFileUrl} alt="Arte do item personalizado" className="max-h-40 max-w-full rounded object-contain" />
+              </button>
               <div className="flex gap-2 justify-center">
                 <button type="button" className="text-xs text-pink-600 hover:text-pink-700 underline" onClick={() => (artPasteRefs.current as any)[`file_${idx}`]?.click()}>Substituir</button>
                 <span className="text-gray-300 text-xs">|</span>
