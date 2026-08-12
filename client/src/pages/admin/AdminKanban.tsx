@@ -259,7 +259,10 @@ export default function AdminKanban() {
   const sortedOrders = useMemo(() => {
     const sorted = [...filteredOrders];
     if (sortBy === "date") {
-      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      sorted.sort((a, b) => {
+        const creationDifference = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return creationDifference || a.id - b.id;
+      });
     } else if (sortBy === "priority") {
       sorted.sort((a, b) => parseFloat(b.totalPrice.toString()) - parseFloat(a.totalPrice.toString()));
     }
@@ -334,7 +337,7 @@ export default function AdminKanban() {
             onChange={(e) => setSortBy(e.target.value as "date" | "priority")}
             className="appearance-none bg-white text-sm rounded-lg px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer pr-8 text-gray-700"
           >
-            <option value="date">Data de entrada (mais recentes)</option>
+            <option value="date">Data de entrada (mais antigos)</option>
             <option value="priority">Prioridade (maior valor)</option>
           </select>
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />

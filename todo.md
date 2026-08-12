@@ -2458,3 +2458,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar links editáveis e status Ativo/Desativado para Instagram, Facebook, YouTube e Outros
 - [x] Exibir no rodapé apenas os ícones sociais com link válido e status ativo
 - [x] Substituir ícones de redes sociais e WhatsApp por versões oficiais de marca
+- [x] Ordenar pedidos do Kanban por data de criação, do mais antigo para o mais recente
