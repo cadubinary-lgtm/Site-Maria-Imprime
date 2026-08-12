@@ -2516,3 +2516,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Registrar versão e data do aceite nos pedidos
 - [ ] Adicionar Central de Documentação ao rodapé sem inventar conteúdo pendente
 - [ ] Exibir contato, endereço, CNPJ e responsável logado na visualização e PDF de Orçamentos
+- [ ] Uniformizar exclusivamente as informações comerciais na tela e PDF do orçamento personalizado
+- [ ] Auditar e completar todos os requisitos comerciais na tela e PDF do orçamento personalizado

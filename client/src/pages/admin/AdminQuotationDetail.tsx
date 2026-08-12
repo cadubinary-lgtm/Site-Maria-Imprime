@@ -447,10 +447,10 @@ export default function AdminQuotationDetail() {
               <h2 className="font-semibold text-gray-800">Cliente</h2>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="text-gray-400 text-xs block">Nome</span><span className="font-medium">{q.clientName ?? "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail ?? "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">Telefone</span><span>{q.clientPhone ?? "—"}</span></div>
-              <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{q.clientWhatsapp ?? "—"}</span></div>
+              {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
+              {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
+              {q.clientPhone && <div><span className="text-gray-400 text-xs block">Telefone</span><span>{q.clientPhone}</span></div>}
+              {q.clientWhatsapp && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{q.clientWhatsapp}</span></div>}
             </div>
           </div>
 
@@ -572,6 +572,8 @@ export default function AdminQuotationDetail() {
           <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-4">
             <h2 className="font-semibold text-gray-800 mb-4">Resumo Financeiro</h2>
             <div className="space-y-2.5 text-sm">
+              <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div>
+              <div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div>
               {Number(q.discountAmount) > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Desconto</span>
