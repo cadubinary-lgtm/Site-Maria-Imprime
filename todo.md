@@ -2530,3 +2530,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Corrigir o carregamento de dados reais no bloco Cliente da tela e PDF do orçamento
 - [ ] Recriar o PDF do orçamento no padrão de referência com Dados da Empresa
 - [x] Completar todos os campos cadastrais disponíveis da empresa na tela e no PDF do orçamento personalizado
+- [x] Reproduzir o layout de referência no detalhe e PDF A4 do orçamento personalizado
+- [x] Organizar blocos de dados, tabela de itens, resumo financeiro e condições comerciais do orçamento
+- [x] Exibir termos legais de prazo, arte, cores e aceite apenas no rodapé do orçamento personalizado
+- [x] Organizar visualização com dados institucionais, cliente, itens, totais e blocos comerciais no padrão de referência
