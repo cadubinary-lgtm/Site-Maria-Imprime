@@ -2538,3 +2538,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir a altura da faixa TOTAL e impedir quebra de dados em Empresa e Cliente no PDF A4
 - [x] Melhorar a leitura de atributos selecionados e ocultar especificações vazias no orçamento personalizado
 - [x] Adicionar botão de compartilhamento do orçamento personalizado via WhatsApp do cliente
+- [x] Reduzir definitivamente a altura da faixa TOTAL e separar especificações por linha no orçamento personalizado
+- [x] Criar respiro entre cabeçalho, cards de dados institucionais e cliente no PDF A4
+- [x] Compactar cards, totais, termos e especificações para priorizar espaço aos itens do orçamento
+- [x] Compactar o orçamento apenas por estilos, sem mover ou reordenar campos existentes
