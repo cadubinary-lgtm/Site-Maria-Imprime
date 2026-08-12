@@ -8,8 +8,8 @@ describe("transição de marca Maria Imprime", () => {
 
   it("aplica remetente, logotipo e paleta Maria Imprime aos e-mails automáticos", () => {
     expect(emailService).toContain('const FROM_NAME = "Maria Imprime"');
-    expect(emailService).toContain("logo-maria-imprime_acc5585b.webp");
-    expect(emailService).toContain("mascote-maria-v2_e85aa588.png");
+    expect(emailService).toContain("maria-imprime-email-header_0f02bb0d.png");
+    expect(emailService).toContain("Maria Imprime — sua gráfica online");
     expect(emailService).toContain("background:#ec0069");
     expect(emailService).not.toContain("Gráfica Ponto Digital");
   });
