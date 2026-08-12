@@ -24,6 +24,7 @@ import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
 import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
 import AdminLayout from "@/components/AdminLayout";
+import { getAdminReturnTarget } from "@/lib/adminNavigation";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -1028,7 +1029,7 @@ export function OrderDetailContent({
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
         <p className="text-gray-600">Pedido não encontrado</p>
-        <Button onClick={() => setLocation("/admin/pedidos")}>← Voltar</Button>
+        <Button onClick={() => setLocation(backRoute)}>← {backLabel}</Button>
       </div>
     );
   }
@@ -1669,11 +1670,7 @@ export function OrderDetailContent({
 export default function AdminOrderDetail() {
   const [, params] = useRoute("/admin/pedidos/:id");
   const orderId = params?.id ? parseInt(params.id) : null;
-  // Detectar se veio do Kanban via ?from=kanban
-  const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-  const fromKanban = searchParams.get("from") === "kanban";
-  const backRoute = fromKanban ? "/admin/pedidos/kanban" : "/admin/pedidos";
-  const backLabel = fromKanban ? "Voltar para Kanban" : "Voltar para Pedidos";
+  const { path: backRoute, label: backLabel } = getAdminReturnTarget("/admin/pedidos");
   return (
     <AdminLayout>
       <OrderDetailContent orderId={orderId} backRoute={backRoute} backLabel={backLabel} />

@@ -31,6 +31,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -295,6 +296,7 @@ function printQuotationPDF(q: any) {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationDetail() {
   const [, navigate] = useLocation();
+  const returnTarget = getAdminReturnTarget("/admin/orcamentos");
   const params = useParams<{ id: string }>();
   const quotationId = parseInt(params.id);
 
@@ -322,7 +324,7 @@ export default function AdminQuotationDetail() {
   const convertToOrder = trpc.quotations.convertToOrder.useMutation({
     onSuccess: (res) => {
       toast.success(`Pedido ${res.orderNumber} criado com sucesso!`);
-      navigate(`/admin/pedidos/${res.orderId}`);
+      navigate(createAdminDetailLocation(`/admin/pedidos/${res.orderId}`, returnTarget.path));
     },
     onError: (e) => toast.error(e.message),
   });
@@ -346,8 +348,8 @@ export default function AdminQuotationDetail() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/orcamentos")} className="gap-1">
-            <ArrowLeft className="w-4 h-4" /> Voltar
+          <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">
+            <ArrowLeft className="w-4 h-4" /> {returnTarget.label}
           </Button>
           <div>
             <img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-8 object-contain mb-1" />

@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { getCompanyAddressLine, getCompanyLocationLine, useCompanySettings } from "@/hooks/useCompanySettings";
 import { QRCodeSVG } from "qrcode.react";
+import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import {
   Printer, ArrowLeft, Loader2, AlertCircle, FileText,
   Phone, MapPin, Package, DollarSign,
@@ -140,6 +141,7 @@ export default function AdminOSPrint() {
   const [, setLocation] = useLocation();
   const { company } = useCompanySettings();
   const orderId = params.id ? parseInt(params.id) : undefined;
+  const returnTarget = getAdminReturnTarget("/admin/os");
   const [printMode, setPrintMode] = useState<"a4" | "thermal">("a4");
 
   const { data, isLoading, error } = trpc.admin.getOrderWithItems.useQuery(
@@ -166,7 +168,7 @@ export default function AdminOSPrint() {
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
         <AlertCircle className="w-12 h-12 text-red-400" />
         <p className="text-gray-600">Pedido não encontrado</p>
-        <Button onClick={() => setLocation("/admin/os")}>← Voltar</Button>
+        <Button onClick={() => setLocation(returnTarget.path)}>← {returnTarget.label}</Button>
       </div>
     );
   }
@@ -221,10 +223,10 @@ export default function AdminOSPrint() {
         boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/admin/os")}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> OS
+          <Button variant="ghost" size="sm" onClick={() => setLocation(returnTarget.path)}>
+            <ArrowLeft className="w-4 h-4 mr-1" /> {returnTarget.label}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setLocation(`/admin/pedidos/${orderId}`)}>
+          <Button variant="ghost" size="sm" onClick={() => setLocation(createAdminDetailLocation(`/admin/pedidos/${orderId}`, returnTarget.path))}>
             Ver Pedido
           </Button>
           <div style={{ display: "flex", gap: "4px", backgroundColor: "#f3f4f6", borderRadius: "8px", padding: "4px", marginLeft: "8px" }}>

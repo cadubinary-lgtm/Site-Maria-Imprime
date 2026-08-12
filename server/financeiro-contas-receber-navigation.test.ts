@@ -10,7 +10,7 @@ const pageSource = readFileSync(
 describe("Contas a Receber — visualização de pedido", () => {
   it("exibe uma ação para abrir o detalhe do pedido da linha financeira", () => {
     expect(pageSource).toContain('title="Ver pedido"');
-    expect(pageSource).toContain('onClick={() => setLocation(`/admin/pedidos/${item.pedidoId}`)}');
+    expect(pageSource).toContain('createAdminDetailLocation(`/admin/pedidos/${item.pedidoId}`, "/admin/financeiro/receber")');
     expect(pageSource).toContain("<Eye className=\"h-3 w-3 mr-1\" />");
   });
 });
