@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -307,6 +308,8 @@ export default function AdminQuotationDetail() {
     { id: quotationId },
     { enabled: !!quotationId }
   );
+  const { data: company } = trpc.companySettings.getPublic.useQuery();
+  const { adminUser } = useAdminAuth();
 
   const updateStatus = trpc.quotations.updateStatus.useMutation({
     onSuccess: () => { toast.success("Status atualizado!"); refetch(); },
@@ -419,6 +422,16 @@ export default function AdminQuotationDetail() {
             </Button>
           )}
         </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+          <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span><span className="block text-xs text-gray-500">{company?.legalName ?? ""}</span></div>
+          <div><span className="text-gray-400 text-xs block">Contato</span><span>{company?.commercialPhone ?? "—"}</span><span className="block text-xs text-gray-500">{company?.supportEmail ?? ""}</span></div>
+          <div><span className="text-gray-400 text-xs block">CNPJ / Endereço</span><span>{company?.cnpj ?? "—"}</span><span className="block text-xs text-gray-500">{company?.addressNumber ? `Endereço cadastrado · Nº ${company.addressNumber}` : "Endereço cadastrado"}</span></div>
+        </div>
+        <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser?.name ?? "—"}</span></p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
