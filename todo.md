@@ -2473,3 +2473,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Identidade Visual: Favicon
 - [x] Criar e aplicar favicon otimizado com o logotipo oficial da Maria Imprime
 - [x] Substituir o favicon pelo logotipo circular oficial da Maria Imprime
+
+## Segurança: HTTPS e Cabeçalhos
+- [x] Forçar redirecionamento seguro de HTTP para HTTPS no ambiente hospedado
+- [x] Configurar cabeçalhos de segurança compatíveis e validar o comportamento público
+- [x] Documentar os controles de segurança ativos e os próximos cuidados recomendados

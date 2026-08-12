@@ -10,6 +10,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { storagePut, storageGetSignedUrl } from "../storage";
+import { applySecurityHeaders, enforceHttpsInProduction } from "./security";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -33,6 +34,11 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  // O proxy gerenciado informa o protocolo original em X-Forwarded-Proto.
+  // Confiar apenas no primeiro proxy permite redirecionar HTTP sem afetar o ambiente local.
+  app.set("trust proxy", 1);
+  app.use(enforceHttpsInProduction);
+  app.use(applySecurityHeaders);
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
