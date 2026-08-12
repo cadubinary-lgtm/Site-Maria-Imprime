@@ -2559,3 +2559,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar a cor rosa da marca aos pontos de arraste dos itens
 - [x] Corrigir o arrastar e soltar das colunas em /admin/variacoes
 - [x] Suavizar os destaques rosa das colunas Comunicação Visual e Offset com cinza-claro
+- [x] Restaurar a disposição original das cinco colunas sem desfazer o cinza-claro dos botões
