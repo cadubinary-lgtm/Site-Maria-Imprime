@@ -438,6 +438,7 @@ export default function CheckoutPage() {
         guestName: fullName.trim() || undefined,
         accountPassword: createAccountPassword.trim() || undefined,
         paymentMethod: paymentMethod === "pix" ? "pix" : paymentMethod === "cartao" ? "cartao_credito" : paymentMethod === "retirada_loja" ? "pagar_na_retirada" : undefined,
+        termsVersion: localStorage.getItem("maria_imprime_terms_version") ?? "",
       };
 
       const orderResult = await createOrderMutation.mutateAsync(payload);

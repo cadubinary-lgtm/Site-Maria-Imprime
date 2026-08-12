@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TermsAcceptance } from "@/components/TermsAcceptance";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
@@ -1555,17 +1556,8 @@ export default function ProductDetail() {
             </AccordionStep>
 
             {/* Termos */}
-            <div id="terms" className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="terms-checkbox"
-                  checked={acceptedTerms}
-                  onCheckedChange={c => { setAcceptedTerms(c as boolean); if (c) setValidationError(null); }}
-                />
-                <Label htmlFor="terms-checkbox" className="text-sm cursor-pointer text-gray-700">
-                  Aceito os termos e condições
-                </Label>
-              </div>
+            <div>
+              <TermsAcceptance checked={acceptedTerms} onCheckedChange={checked => { setAcceptedTerms(checked); if (checked) { localStorage.setItem("maria_imprime_terms_version", "2026-08-12"); setValidationError(null); } else localStorage.removeItem("maria_imprime_terms_version"); }} />
               {validationError && (
                 <div className="mt-2 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />

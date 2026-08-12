@@ -1150,6 +1150,7 @@ export const appRouter = router({
         accountPassword: z.string().min(6).optional(),
         // Método de pagamento
         paymentMethod: z.string().optional(),
+        termsVersion: z.string().min(1, "É necessário aceitar os termos e condições"),
       }))
       .mutation(async ({ ctx, input }) => {
         const req = ctx.req as ExpressRequest;
@@ -1316,6 +1317,9 @@ export const appRouter = router({
           shippingPrice: shippingPrice,
           shippingLabel: cartItems[0]?.shippingLabel ?? null,
           paymentMethod: input.paymentMethod ?? null,
+          termsAcceptedAt: new Date(),
+          termsVersion: input.termsVersion,
+          termsDocuments: JSON.stringify({ "Termos e Condições de Venda": input.termsVersion }),
           // Status inicial baseado no método de pagamento:
           // - PIX / cartão = pagamento_aprovado (já pago)
           // - retirada = pagamento_retirada (pagar na retirada)
