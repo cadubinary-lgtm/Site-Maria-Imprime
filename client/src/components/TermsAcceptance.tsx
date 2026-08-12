@@ -185,6 +185,8 @@ Dependendo do produto, isso poderá incluir confirmação do pagamento, envio da
 
 O prazo de produção será informado na página do produto ou durante o processo de compra. Salvo indicação diferente, o prazo de produção será contado em dias úteis.
 
+O prazo exibido no configurador do produto no momento da contratação é a referência aplicável ao pedido, pois ele é definido individualmente na configuração do produto. Quando um produto não possuir prazo ativo configurado, a Maria Imprime não deverá declarar um prazo padrão genérico e a confirmação deverá ocorrer pelos canais oficiais antes da contratação.
+
 4. Prazo de Produção Não é Prazo de Entrega
 
 O prazo de produção corresponde ao período necessário para fabricação do produto. O prazo de transporte é separado e depende da modalidade de entrega escolhida.
@@ -305,15 +307,23 @@ Esta Política explica como os dados pessoais podem ser coletados, utilizados, a
 
 Maria Imprime – Sua Gráfica Online
 
-CNPJ: [INSERIR CNPJ]
+Razão social: Carlos Eduardo Barreto Novaes Pinheiro - ME
 
-Endereço: [INSERIR ENDEREÇO]
+CNPJ: 34.528.399/0001-08
+
+Endereço: Avenida Antonio Ferreira dos Santos, 651, Braga, Cabo Frio/RJ, CEP 28908-200
 
 E-mail de contato: contatomariaimprime@gmail.com
 
 E-mail para assuntos de privacidade: contatomariaimprime@gmail.com
 
-Os dados acima deverão ser preenchidos pela Maria Imprime antes da publicação definitiva.
+2.1. Papéis no tratamento de dados pessoais
+
+A Maria Imprime atua como controladora dos dados pessoais tratados para viabilizar o relacionamento com clientes, pedidos, pagamentos, produção, entrega e atendimento.
+
+Prestadores de serviços contratados para apoiar a operação poderão atuar como operadores quando tratarem dados pessoais em nome da Maria Imprime e conforme suas instruções, ou como controladores independentes quando a legislação e sua própria operação assim determinarem.
+
+O canal de contato para solicitações de titulares e comunicações sobre privacidade é contatomariaimprime@gmail.com. Caso seja formalmente designado encarregado de dados, sua identificação e canal serão publicados nesta Política.
 
 3. Dados que Podemos Coletar
 

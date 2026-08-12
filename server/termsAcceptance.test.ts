@@ -32,6 +32,8 @@ describe("documentação de termos da Maria Imprime", () => {
 
   it("inclui a política de privacidade e o e-mail de contato informado", () => {
     expect(PRIVACY_POLICY_CONTENT).toContain("E-mail de contato: contatomariaimprime@gmail.com");
+    expect(PRIVACY_POLICY_CONTENT).toContain("CNPJ: 34.528.399/0001-08");
+    expect(PRIVACY_POLICY_CONTENT).toContain("Maria Imprime atua como controladora");
     expect(PRIVACY_POLICY_CONTENT).toContain("Direitos do Titular");
     expect(PRIVACY_POLICY_CONTENT).toContain("Política de Cookies");
   });
