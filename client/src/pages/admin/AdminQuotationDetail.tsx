@@ -197,10 +197,10 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .brand { max-width:50%; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
   .brand img { height:52px; object-fit:contain; display:block; }
-  .doc-info { text-align:right; max-width:45%; }
+  .doc-info { text-align:right; width:48%; max-width:none; }
   .doc-info .num { font-size:18px; font-weight:700; color:#1a1a1a; }
-  .doc-info .date { font-size:12px; color:#666; margin-top:4px; }
-  .status-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; background:#e91e8c; color:#fff; margin-top:8px; }
+  .doc-info .date { font-size:11px; color:#666; margin-top:2px; }
+  .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-left:6px; vertical-align:middle; }
   .section { margin-bottom:12px; }
   .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
   .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
@@ -224,11 +224,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .company-meta { font-size:9px; color:#555; line-height:1.25; margin-top:4px; max-width:360px; }
   .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
   .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
-  .client-summary { margin-top:7px; padding-top:5px; border-top:1px dashed #ccc; }
-  .client-summary-title { font-size:9px; color:#777; font-weight:700; margin-bottom:3px; }
-  .client-summary-grid { display:grid; grid-template-columns:1.2fr 1fr 0.8fr; gap:7px; text-align:left; }
-  .client-summary-grid label { font-size:8px; color:#888; display:block; margin-bottom:1px; }
-  .client-summary-grid span { display:block; font-size:9px; color:#1a1a1a; font-weight:600; overflow-wrap:anywhere; }
+  .client-summary { margin-top:6px; padding-top:4px; border-top:1px dashed #ddd; text-align:right; color:#333; }
+  .client-summary p { margin:2px 0; font-size:10px; line-height:1.2; }
+  .client-summary .client-contact { white-space:nowrap; }
   .legal-notes { margin-top:14px; padding-top:7px; border-top:1px solid #eee; font-size:9px; line-height:1.35; color:#555; }
   .custom-notes { margin-top:7px; padding:7px 8px; border:1px solid #f1d8e7; border-radius:6px; background:#fff9fc; font-size:9px; line-height:1.35; color:#555; white-space:pre-line; }
   .footer { margin-top:12px; padding-top:7px; border-top:1px solid #e0e0e0; font-size:9px; color:#aaa; text-align:center; }
@@ -243,17 +241,11 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       <div class="company-meta">${companyLine}</div>
     </div>
 	    <div class="doc-info">
-	      <div class="num">${q.quotationNumber}</div>
-	      <div class="date">Emitido em ${fmtDate(q.createdAt)}</div>
-	      <div class="date">Válido até ${fmtDate(q.expiresAt)}</div>
-	      <div class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</div>
+	      <div class="num">${q.quotationNumber}<span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span></div>
+	      <div class="date">Emitido em ${fmtDate(q.createdAt)} | Válido até ${fmtDate(q.expiresAt)}</div>
 	      ${(q.clientName || q.clientEmail || q.clientPhone || q.clientWhatsapp) ? `<div class="client-summary">
-	        <div class="client-summary-title">Cliente</div>
-	        <div class="client-summary-grid">
-	          ${q.clientName ? `<div><label>Nome</label><span>${q.clientName}</span></div>` : ""}
-	          ${q.clientEmail ? `<div><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
-	          ${q.clientPhone || q.clientWhatsapp ? `<div><label>Telefone</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
-	        </div>
+	        ${q.clientName ? `<p><strong>Cliente:</strong> ${q.clientName}</p>` : ""}
+	        ${q.clientEmail || q.clientPhone || q.clientWhatsapp ? `<p class="client-contact">${[q.clientEmail, q.clientPhone ?? q.clientWhatsapp].filter(Boolean).join(" | ")}</p>` : ""}
 	      </div>` : ""}
 	    </div>
 	  </div>
