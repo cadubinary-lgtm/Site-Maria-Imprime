@@ -31,6 +31,8 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(footer).toContain("useWhatsAppButtonVisibility(company)");
     expect(floatingButton).toContain("useWhatsAppButtonVisibility(company)");
     expect(floatingButton).toContain("getCompanyWhatsAppMessage(company, product?.name)");
+    expect(footer).toContain("getValidSocialUrl(company.instagramUrl, company.instagramActive)");
+    expect(footer).toContain("getValidSocialUrl(company.youtubeUrl, company.youtubeActive)");
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });
