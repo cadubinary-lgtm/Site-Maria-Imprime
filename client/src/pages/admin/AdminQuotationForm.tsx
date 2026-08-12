@@ -1595,13 +1595,13 @@ export default function AdminQuotationForm() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-gray-500 font-medium">Observações comerciais</label>
+                <label className="text-xs text-gray-500 font-medium">Observações / Termos personalizados</label>
                 <Textarea
                   value={commercialNotes}
                   onChange={(e) => setCommercialNotes(e.target.value)}
                   className="mt-0.5 text-sm"
                   rows={3}
-                  placeholder="Condições especiais, prazo de pagamento, informações adicionais..."
+                  placeholder="Insira observações, condições especiais ou termos que devem aparecer no rodapé do orçamento..."
                 />
               </div>
             </div>
