@@ -13,7 +13,7 @@ import {
   financeiroNotificacoes,
   cashFlowEntries,
 } from "../drizzle/schema";
-import { eq, and, gte, lte, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
+import { eq, ne, and, gte, lte, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -231,18 +231,24 @@ export const financeiroRouter = router({
       }
       if (input.formaPagamento) conditions.push(eq(orders.paymentMethod, input.formaPagamento));
 
-      const allOrders = await db.select().from(orders)
-        .where(and(...conditions))
-        .orderBy(desc(orders.createdAt));
-
-      // Filtrar fora cancelados e já pagos (exceto pagamento_retirada pendente)
-      const filtered = allOrders.filter(o =>
-        o.status !== "cancelado" &&
-        !(o.paymentStatus === "pago" && o.paymentMethod !== "pagar_na_retirada")
-      );
-      const total = filtered.length;
+      // Todos os filtros e paginação acontecem no banco: evita carregar a base inteira em memória.
+      conditions.push(ne(orders.status, "cancelado"));
+      conditions.push(or(
+        ne(orders.paymentStatus, "pago"),
+        eq(orders.paymentMethod, "pagar_na_retirada")
+      )!);
+      const whereClause = and(...conditions);
       const offset = (input.page - 1) * input.limit;
-      const paginated = filtered.slice(offset, offset + input.limit);
+      const [summary] = await db
+        .select({ total: sql<number>`count(*)` })
+        .from(orders)
+        .where(whereClause);
+      const paginated = await db.select().from(orders)
+        .where(whereClause)
+        .orderBy(desc(orders.createdAt))
+        .limit(input.limit)
+        .offset(offset);
+      const total = Number(summary?.total ?? 0);
 
       return {
         data: paginated.map(mapOrderToFinanceiro),
@@ -277,19 +283,26 @@ export const financeiroRouter = router({
       const startDate = input.startDate ? new Date(input.startDate) : start;
       const endDate = input.endDate ? new Date(input.endDate) : now;
 
-      const paidOrders = await db.select().from(orders)
-        .where(and(
-          eq(orders.paymentStatus, "pago"),
-          gte(orders.createdAt, startDate),
-          lte(orders.createdAt, endDate)
-        ))
-        .orderBy(desc(orders.updatedAt));
-
-      const total = paidOrders.length;
+      const whereClause = and(
+        eq(orders.paymentStatus, "pago"),
+        gte(orders.createdAt, startDate),
+        lte(orders.createdAt, endDate)
+      );
       const offset = (input.page - 1) * input.limit;
-      const paginated = paidOrders.slice(offset, offset + input.limit);
-
-      const totalValor = paidOrders.reduce((s, o) => s + parseFloat(o.totalPrice || "0"), 0);
+      const [summary] = await db
+        .select({
+          total: sql<number>`count(*)`,
+          totalValor: sql<string>`coalesce(sum(${orders.totalPrice}), 0)`,
+        })
+        .from(orders)
+        .where(whereClause);
+      const paginated = await db.select().from(orders)
+        .where(whereClause)
+        .orderBy(desc(orders.updatedAt))
+        .limit(input.limit)
+        .offset(offset);
+      const total = Number(summary?.total ?? 0);
+      const totalValor = Number(summary?.totalValor ?? 0);
 
       return {
         data: paginated.map(mapOrderToFinanceiro),
