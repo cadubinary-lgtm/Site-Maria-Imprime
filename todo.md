@@ -2554,3 +2554,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar TOTAL instantaneamente durante a edição de QTD e UNIT. nos itens personalizados
 - [x] Adicionar botão de novo item personalizado abaixo da lista
 - [x] Destacar visualmente os campos editáveis quando selecionados
+- [x] Permitir reordenar itens do orçamento por arrastar e soltar
+- [x] Adicionar duplicação de item com cópia de valores, especificações e arte

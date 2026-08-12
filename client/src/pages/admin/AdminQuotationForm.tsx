@@ -33,6 +33,8 @@ import {
   ChevronDown,
   ChevronUp,
   Image as ImageIcon,
+  Copy,
+  GripVertical,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -85,6 +87,7 @@ export default function AdminQuotationForm() {
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [customUnitDrafts, setCustomUnitDrafts] = useState<Record<number, string>>({});
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   const [discountType, setDiscountType] = useState<"percentual" | "fixo">("fixo");
   const [discountValue, setDiscountValue] = useState(0);
@@ -494,6 +497,52 @@ export default function AdminQuotationForm() {
     setItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const remapIndexAfterMove = (index: number, from: number, to: number) => {
+    if (index === from) return to;
+    if (from < to && index > from && index <= to) return index - 1;
+    if (from > to && index >= to && index < from) return index + 1;
+    return index;
+  };
+
+  const reorderItems = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0) return;
+    setItems((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setExpandedItems((prev) => new Set(Array.from(prev, (index) => remapIndexAfterMove(index, from, to))));
+    setCustomUnitDrafts((prev) => Object.fromEntries(Object.entries(prev).map(([index, value]) => [remapIndexAfterMove(Number(index), from, to), value])));
+  };
+
+  const duplicateItem = (idx: number) => {
+    setItems((prev) => {
+      const source = prev[idx];
+      if (!source) return prev;
+      const duplicate: QuotationItem = {
+        ...source,
+        _specsParsed: source._specsParsed ? { ...source._specsParsed } : undefined,
+      };
+      return [...prev.slice(0, idx + 1), duplicate, ...prev.slice(idx + 1)];
+    });
+    setExpandedItems((prev) => new Set(Array.from(prev, (index) => index > idx ? index + 1 : index)));
+    setCustomUnitDrafts((prev) => Object.fromEntries(Object.entries(prev).map(([index, value]) => [Number(index) > idx ? Number(index) + 1 : Number(index), value])));
+  };
+
+  const startItemDrag = (event: React.DragEvent<HTMLElement>, idx: number) => {
+    setDraggedItemIndex(idx);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(idx));
+  };
+
+  const dropItem = (event: React.DragEvent<HTMLElement>, targetIndex: number) => {
+    event.preventDefault();
+    const sourceIndex = Number(event.dataTransfer.getData("text/plain"));
+    reorderItems(Number.isFinite(sourceIndex) ? sourceIndex : (draggedItemIndex ?? targetIndex), targetIndex);
+    setDraggedItemIndex(null);
+  };
+
   const toggleItem = (idx: number) => {
     setExpandedItems((prev) => {
       const next = new Set(prev);
@@ -532,22 +581,25 @@ export default function AdminQuotationForm() {
     };
 
     return (
-      <div key={`custom-${idx}`} className="overflow-hidden rounded-lg border border-gray-100 bg-white">
+      <div key={`custom-${idx}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
         <div className={`grid grid-cols-12 items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
           <div className="col-span-1">
             <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
               <ImageIcon className="w-4 h-4 text-gray-400" />
             </div>
           </div>
-          <button
-            type="button"
-            className="col-span-3 min-w-0 text-left text-sm font-medium text-gray-800 hover:text-pink-600"
-            onClick={() => toggleItem(idx)}
-            aria-expanded={isExpanded}
-            aria-label={`${isExpanded ? "Recolher" : "Expandir"} item personalizado`}
-          >
-            <span className="block truncate">{item.productName || "Item personalizado"}</span>
-          </button>
+          <div className="col-span-3 flex min-w-0 items-center gap-1">
+            <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-gray-300 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
+            <button
+              type="button"
+              className="min-w-0 flex-1 text-left text-sm font-medium text-gray-800 hover:text-pink-600"
+              onClick={() => toggleItem(idx)}
+              aria-expanded={isExpanded}
+              aria-label={`${isExpanded ? "Recolher" : "Expandir"} item personalizado`}
+            >
+              <span className="block truncate">{item.productName || "Item personalizado"}</span>
+            </button>
+          </div>
           <div className="col-span-1 flex justify-center">
             {item.artFileUrl ? (
               <button
@@ -613,7 +665,10 @@ export default function AdminQuotationForm() {
               {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </button>
           </div>
-          <div className="col-span-1 flex justify-end">
+          <div className="col-span-1 flex justify-end gap-1">
+            <button type="button" onClick={() => duplicateItem(idx)} className="text-gray-300 hover:text-pink-600 transition-colors" title="Duplicar item">
+              <Copy className="w-3.5 h-3.5" />
+            </button>
             <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -1132,7 +1187,7 @@ export default function AdminQuotationForm() {
                     .map(([key, value]) => `${specificationLabels[key] ?? key}: ${value}`)
                     .join(" · ");
                   return (
-                    <div key={idx} className="border border-gray-100 rounded-lg overflow-hidden">
+                    <div key={idx} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`border border-gray-100 rounded-lg overflow-hidden transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
                       {/* Linha principal */}
                       <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 bg-gray-50">
                         <div className="col-span-1">
@@ -1171,6 +1226,8 @@ export default function AdminQuotationForm() {
                               </button>
                             </div>
                           ) : (
+                            <div className="flex items-center gap-1">
+                              <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-gray-300 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
                             <button
                               className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                               onClick={() => toggleItem(idx)}
@@ -1178,6 +1235,7 @@ export default function AdminQuotationForm() {
                             >
                               {item.productName}
                             </button>
+                            </div>
                           )}
                           {specificationSummary && (
                             <p className="mt-1 text-[11px] leading-4 text-gray-500 line-clamp-2">{specificationSummary}</p>
@@ -1250,7 +1308,10 @@ export default function AdminQuotationForm() {
                             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           </button>
                         </div>
-                        <div className="col-span-1 flex justify-end">
+                        <div className="col-span-1 flex justify-end gap-1">
+                          <button type="button" onClick={() => duplicateItem(idx)} className="text-gray-300 hover:text-pink-600 transition-colors" title="Duplicar item">
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
                           <button onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
