@@ -2495,3 +2495,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir atualização de orçamento quando productImage estiver ausente
 - [x] Remover dimensões e seleções técnicas dos cards de itens personalizados
 - [x] Alinhar PDF de orçamento ao layout de visualização e ocultar rótulos técnicos personalizados
+- [x] Adicionar expansão e recolhimento aos cards de itens personalizados
