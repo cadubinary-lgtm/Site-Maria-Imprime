@@ -95,4 +95,10 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("unitPrice: value / Math.max(1, item.quantity)");
     expect(formSource).toContain("const subtotal = items.reduce((acc, i) => acc + i.totalPrice, 0);");
   });
+
+  it("permite editar o valor unitário e recalcular o total do item personalizado", () => {
+    expect(formSource).toContain('aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}');
+    expect(formSource).toContain("updateItem(idx, { unitPrice: value });");
+    expect(formSource).toContain("next[idx].totalPrice = q * u +");
+  });
 });

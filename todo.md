@@ -2504,3 +2504,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reutilizar integralmente o padrão de tabela e interação do catálogo em itens personalizados
 - [x] Preservar dados, cálculos e fluxos existentes ao padronizar visualmente itens personalizados
 - [x] Alinhar a lixeira de item personalizado à coluna final do catálogo
+- [x] Permitir edição de valor unitário e recálculo automático do total em itens personalizados

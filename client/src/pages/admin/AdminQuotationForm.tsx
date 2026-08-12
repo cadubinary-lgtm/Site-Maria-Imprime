@@ -567,7 +567,27 @@ export default function AdminQuotationForm() {
             )}
           </div>
           <div className="col-span-1 text-center text-sm text-gray-700">{item.quantity}</div>
-          <div className="col-span-2 text-right text-sm text-gray-700">{fmt(item.unitPrice)}</div>
+          <div className="col-span-2 flex justify-end">
+            <input
+              type="text"
+              inputMode="decimal"
+              aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}
+              defaultValue={item.unitPrice > 0 ? fmt(item.unitPrice) : ""}
+              placeholder="R$ 0,00"
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                const value = Math.max(0, parseFloat(raw) || 0);
+                updateItem(idx, { unitPrice: value });
+              }}
+              onBlur={(e) => {
+                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                const value = Math.max(0, parseFloat(raw) || 0);
+                e.target.value = value > 0 ? fmt(value) : "";
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              className="h-7 w-24 rounded-md border border-input bg-background px-2 text-right text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+            />
+          </div>
           <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
             <span>{fmt(item.totalPrice)}</span>
             <button
