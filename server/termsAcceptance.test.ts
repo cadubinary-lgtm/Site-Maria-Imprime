@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ART_APPROVAL_CONTENT, COOKIES_POLICY_CONTENT, PRIVACY_POLICY_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, SITE_USE_TERMS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
+import { ART_APPROVAL_CONTENT, COOKIES_POLICY_CONTENT, FAQ_CONTENT, PRIVACY_POLICY_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, SITE_USE_TERMS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
 
 describe("documentação de termos da Maria Imprime", () => {
   it("mantém a apresentação e as cláusulas essenciais fornecidas", () => {
@@ -47,5 +47,11 @@ describe("documentação de termos da Maria Imprime", () => {
     expect(SITE_USE_TERMS_CONTENT).toContain("Utilização do Site");
     expect(SITE_USE_TERMS_CONTENT).toContain("Suspensão de Acesso");
     expect(SITE_USE_TERMS_CONTENT).toContain("contatomariaimprime@gmail.com");
+  });
+
+  it("inclui as perguntas frequentes fornecidas", () => {
+    expect(FAQ_CONTENT).toContain("1. Como faço uma compra?");
+    expect(FAQ_CONTENT).toContain("14. O prazo de produção inclui o transporte?");
+    expect(FAQ_CONTENT).toContain("25. Preciso aceitar vários termos diferentes?");
   });
 });
