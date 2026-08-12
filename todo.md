@@ -2573,3 +2573,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar o conteúdo da Política de Cookies com a documentação fornecida e o e-mail de contato
 - [x] Atualizar o conteúdo do Termo de Uso do Site com a documentação fornecida e o e-mail de contato
 - [x] Atualizar o conteúdo de Perguntas Frequentes — FAQ com a documentação fornecida
+- [x] Auditar e corrigir CNPJ, endereço, e-mail, cookies, ferramentas e prazos reais nos documentos e superfícies do site
+- [x] Identificar controlador, operador e canal de contato de privacidade antes de publicar a versão definitiva da LGPD
+- [x] Inserir CNPJ, endereço, e-mail e transparência de papéis LGPD confirmados na Política de Privacidade
+- [x] Ajustar a Política de Produção para usar o prazo configurado por produto como referência
