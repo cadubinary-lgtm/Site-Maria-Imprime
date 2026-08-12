@@ -2466,3 +2466,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar a identidade atualizada e preparar o disparo de e-mail de teste
 - [x] Incorporar logotipo e mascote oficiais em layout de e-mail compatível com clientes de correio
 - [x] Substituir o cabeçalho do e-mail pelo layout rosa de referência com logo à esquerda e mascote à direita
+- [x] Refinar o rodapé dos e-mails para a identidade visual Maria Imprime
+- [x] Otimizar o layout de e-mail para dispositivos móveis
+- [ ] Enviar um novo e-mail real de teste após os refinamentos de layout

@@ -25,11 +25,20 @@ function baseTemplate(title: string, body: string): string {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
+  <style type="text/css">
+    @media only screen and (max-width: 620px) {
+      .email-outer { padding: 0 !important; }
+      .email-shell { width: 100% !important; border-radius: 0 !important; }
+      .email-body { padding: 28px 22px !important; }
+      .email-footer { padding: 26px 22px !important; }
+      .email-button { padding: 14px 24px !important; font-size: 14px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:#fff6fa;font-family:'Segoe UI',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff6fa;padding:40px 0;">
+  <table class="email-outer" width="100%" cellpadding="0" cellspacing="0" style="background:#fff6fa;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(236,0,105,0.12);">
+      <table class="email-shell" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(236,0,105,0.12);">
         <!-- Header -->
         <tr>
           <td style="background:#fdf4f7;padding:0;text-align:center;border-bottom:4px solid #ec0069;">
@@ -38,15 +47,16 @@ function baseTemplate(title: string, body: string): string {
         </tr>
         <!-- Body -->
         <tr>
-          <td style="padding:40px;">
+          <td class="email-body" style="padding:40px;">
             ${body}
           </td>
         </tr>
         <!-- Footer -->
         <tr>
-          <td style="background:#fff6fa;padding:24px 40px;text-align:center;border-top:1px solid #fbcfe8;">
-            <p style="color:#9d174d;font-size:12px;margin:0;">© ${new Date().getFullYear()} Maria Imprime. Todos os direitos reservados.</p>
-            <p style="color:#9d174d;font-size:12px;margin:4px 0 0;">Este e-mail foi enviado automaticamente. Não responda a este endereço.</p>
+          <td class="email-footer" style="background:#2d1020;padding:26px 40px;text-align:center;border-top:4px solid #ec0069;">
+            <p style="color:#ffffff;font-size:14px;font-weight:700;margin:0;">Maria Imprime</p>
+            <p style="color:#f9a8c7;font-size:12px;margin:5px 0 0;">Sua gráfica online, do seu jeito.</p>
+            <p style="color:#fce7f3;font-size:11px;line-height:17px;margin:16px 0 0;">© ${new Date().getFullYear()} Maria Imprime. Todos os direitos reservados.<br/>Este e-mail foi enviado automaticamente. Não responda a este endereço.</p>
           </td>
         </tr>
       </table>
@@ -57,7 +67,7 @@ function baseTemplate(title: string, body: string): string {
 }
 
 function btn(text: string, url: string): string {
-  return `<a href="${url}" style="display:inline-block;background:#ec0069;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:999px;font-weight:700;font-size:15px;margin:24px 0;box-shadow:0 4px 14px rgba(236,0,105,0.24);">${text}</a>`;
+  return `<a class="email-button" href="${url}" style="display:inline-block;background:#ec0069;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:999px;font-weight:700;font-size:15px;margin:24px 0;box-shadow:0 4px 14px rgba(236,0,105,0.24);">${text}</a>`;
 }
 
 function h1(text: string): string {

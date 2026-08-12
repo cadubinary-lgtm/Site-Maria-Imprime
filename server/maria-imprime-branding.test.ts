@@ -11,6 +11,9 @@ describe("transição de marca Maria Imprime", () => {
     expect(emailService).toContain("maria-imprime-email-header_0f02bb0d.png");
     expect(emailService).toContain("Maria Imprime — sua gráfica online");
     expect(emailService).toContain("background:#ec0069");
+    expect(emailService).toContain('class="email-footer"');
+    expect(emailService).toContain("background:#2d1020");
+    expect(emailService).toContain("@media only screen and (max-width: 620px)");
     expect(emailService).not.toContain("Gráfica Ponto Digital");
   });
 
