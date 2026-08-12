@@ -125,9 +125,51 @@ Estes Termos são regidos pelas leis brasileiras. Eventuais conflitos serão ini
 
 Ao concluir a compra, o cliente declara que teve acesso aos documentos disponibilizados, compreendeu as condições aplicáveis e concorda com os termos da contratação.`;
 
+export const ART_APPROVAL_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Objetivo
+
+Este Termo estabelece as condições relacionadas à conferência e aprovação das artes destinadas à produção pela Maria Imprime.
+
+2. Responsabilidade pela Conferência
+
+Antes de aprovar a arte, o cliente deverá conferir cuidadosamente todas as informações apresentadas.
+
+A conferência deverá incluir textos, ortografia, números, telefones, endereços, e-mails, redes sociais, QR Codes, logotipos, imagens, cores, medidas, quantidade, posicionamento dos elementos, informações comerciais e demais elementos da arte.
+
+3. Aprovação
+
+A aprovação da arte significa que o cliente autorizou a produção daquela versão. Após a aprovação, a arte poderá ser encaminhada para produção.
+
+4. Alterações Após Aprovação
+
+Após a aprovação, qualquer solicitação de alteração deverá ser comunicada imediatamente à Maria Imprime. Se a produção ainda não tiver começado, a empresa poderá avaliar a possibilidade de alteração. Se a produção já tiver iniciado, a alteração poderá não ser tecnicamente possível.
+
+Caso seja possível realizar uma alteração que gere custos adicionais, o cliente será informado previamente.
+
+5. Erros da Arte
+
+Erros presentes no arquivo enviado ou aprovados pelo cliente não serão considerados erros de produção da Maria Imprime. Entretanto, caso seja identificado erro comprovadamente causado pela Maria Imprime durante a produção, o caso será analisado e solucionado conforme a legislação aplicável.
+
+6. Ausência de Aprovação
+
+Quando o produto exigir aprovação e o cliente não realizar a aprovação dentro do prazo necessário para produção, o início da produção poderá ser adiado. O prazo de produção poderá ser impactado pela demora na aprovação.
+
+7. Arquivos de Baixa Qualidade
+
+A aprovação da arte não transforma um arquivo de baixa qualidade em um arquivo de alta qualidade. Caso o cliente forneça imagem de baixa resolução, imagem pixelizada ou arquivo inadequado, a qualidade final da impressão poderá ser afetada.
+
+8. Aprovação Eletrônica
+
+A aprovação poderá ocorrer por meio do sistema do site, e-mail, WhatsApp ou outro canal oficial utilizado pela Maria Imprime. A aprovação registrada ficará vinculada ao pedido correspondente.
+
+9. Disposição Final
+
+Ao aprovar a arte, o cliente confirma que teve oportunidade de conferir as informações apresentadas e autoriza a produção daquela versão, sem prejuízo dos direitos assegurados pela legislação aplicável.`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
-  { title: "Termo de Aprovação de Arte", content: "Documento em preparação." },
+  { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
   { title: "Política de Produção e Prazos", content: "Documento em preparação." },
   { title: "Política de Trocas, Cancelamentos e Reembolsos", content: "Documento em preparação." },
   { title: "Política de Privacidade (LGPD)", content: "Documento em preparação." },
