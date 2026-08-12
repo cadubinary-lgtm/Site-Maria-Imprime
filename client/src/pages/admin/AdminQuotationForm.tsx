@@ -84,6 +84,7 @@ export default function AdminQuotationForm() {
 
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+  const [customUnitDrafts, setCustomUnitDrafts] = useState<Record<number, string>>({});
 
   const [discountType, setDiscountType] = useState<"percentual" | "fixo">("fixo");
   const [discountValue, setDiscountValue] = useState(0);
@@ -575,25 +576,29 @@ export default function AdminQuotationForm() {
               aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
               value={item.quantity}
               onChange={(e) => updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
-              className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+              className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-sm text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
             />
           </div>
           <div className="col-span-2 flex justify-end">
             <input
-              key={`custom-header-unit-${idx}-${item.unitPrice}`}
               type="text"
               inputMode="decimal"
               aria-label={`Valor unitário no cabeçalho de ${item.productName || "item personalizado"}`}
-              defaultValue={item.unitPrice > 0 ? fmt(item.unitPrice) : ""}
+              value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
               placeholder="R$ 0,00"
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
+                updateItem(idx, { unitPrice: Math.max(0, parseFloat(raw) || 0) });
+              }}
               onBlur={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 const value = Math.max(0, parseFloat(raw) || 0);
                 updateItem(idx, { unitPrice: value });
-                e.target.value = value > 0 ? fmt(value) : "";
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="h-7 w-24 rounded-md border border-input bg-background px-2 text-right text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+              className="h-7 w-24 rounded-md border border-input bg-background px-2 text-right text-sm text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
             />
           </div>
           <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
@@ -705,25 +710,29 @@ export default function AdminQuotationForm() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-gray-100 pt-3">
           <div>
             <label className="text-xs text-gray-500 font-medium">Quantidade</label>
-            <Input type="number" min={1} value={item.quantity} onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })} className="h-8 mt-0.5 text-sm" />
+            <Input type="number" min={1} value={item.quantity} onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })} className="h-8 mt-0.5 text-sm transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:ring-pink-100" />
           </div>
           <div>
             <label className="text-xs text-gray-500 font-medium">Valor unitário</label>
             <input
-              key={`custom-unit-${idx}-${item.unitPrice}`}
               type="text"
               inputMode="decimal"
               aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}
-              defaultValue={item.unitPrice > 0 ? fmt(item.unitPrice) : ""}
+              value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
               placeholder="R$ 0,00"
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
+                updateItem(idx, { unitPrice: Math.max(0, parseFloat(raw) || 0) });
+              }}
               onBlur={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 const value = Math.max(0, parseFloat(raw) || 0);
                 updateItem(idx, { unitPrice: value });
-                e.target.value = value > 0 ? fmt(value) : "";
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="h-8 mt-0.5 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-pink-400"
+              className="h-8 mt-0.5 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition-colors hover:border-pink-300 focus:border-pink-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-100"
             />
           </div>
           <div>
@@ -741,7 +750,7 @@ export default function AdminQuotationForm() {
                 e.target.value = value > 0 ? fmt(value) : "";
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="h-8 mt-0.5 text-sm font-semibold text-right"
+              className="h-8 mt-0.5 border-pink-100 bg-pink-50/30 text-sm font-semibold text-right transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:bg-white focus-visible:ring-pink-100"
             />
           </div>
         </div>
@@ -1495,6 +1504,11 @@ export default function AdminQuotationForm() {
                       <div className="col-span-1"></div>
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
+                    <div className="pt-1">
+                      <Button type="button" variant="outline" size="sm" onClick={addCustomItemToQuote} className="gap-1.5 border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800">
+                        <Plus className="h-3.5 w-3.5" /> Adicionar novo item
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
