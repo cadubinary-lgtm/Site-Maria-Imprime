@@ -2478,3 +2478,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Forçar redirecionamento seguro de HTTP para HTTPS no ambiente hospedado
 - [x] Configurar cabeçalhos de segurança compatíveis e validar o comportamento público
 - [x] Documentar os controles de segurança ativos e os próximos cuidados recomendados
+- [x] Aplicar rate limiting aos endpoints de login e uploads públicos
+- [x] Validar a assinatura de segurança dos webhooks de pagamento
+- [x] Aplicar Content Security Policy em modo de relatório sem bloquear integrações existentes

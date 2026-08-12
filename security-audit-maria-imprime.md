@@ -19,12 +19,25 @@ Essa abordagem preserva caminhos, parâmetros de consulta e fluxos existentes de
 | Referenciador | Reduzido | `Referrer-Policy: strict-origin-when-cross-origin`. |
 | APIs do navegador | Restritas | Câmera, microfone e geolocalização bloqueados por padrão. |
 | Isolamento de janela | Configurado | `Cross-Origin-Opener-Policy: same-origin-allow-popups`, mantendo compatibilidade com OAuth. |
+| Login e uploads | Limitados | Tentativas de login e envios públicos possuem limites por origem e janela de 15 minutos. |
+| Webhook Mercado Pago | Assinatura validada | `x-signature`, `x-request-id` e `data.id` são validados por HMAC antes de processar pagamentos. |
+| CSP | Modo de relatório | Violações são recebidas em endpoint limitado, sem bloquear integrações existentes. |
 
 ## Controles adicionados na aplicação
 
 O servidor passou a confiar no primeiro proxy gerenciado para identificar o protocolo original e, em produção, redireciona apenas acessos encaminhados via HTTP. Os cabeçalhos de segurança são enviados antes das rotas de autenticação, formulários, uploads e APIs.
 
 > O certificado e o redirecionamento da infraestrutura continuam sendo a camada principal. O middleware interno funciona como defesa adicional, não como substituto do SSL do provedor de hospedagem.
+
+## Proteção contra abuso e pagamentos
+
+As rotas públicas de autenticação possuem até **8 tentativas por origem a cada 15 minutos**. Os endpoints públicos de upload possuem até **60 envios por origem a cada 15 minutos**. Ao atingir o limite, a resposta informa `429` e o tempo restante aproximado para nova tentativa.
+
+O webhook do Mercado Pago só consulta e atualiza pagamentos depois de validar a assinatura HMAC emitida pelo provedor. A verificação usa a chave já configurada no módulo de pagamentos, o cabeçalho `x-signature`, o identificador `x-request-id`, o `data.id` encaminhado e tolerância máxima de cinco minutos contra repetição de eventos.
+
+## CSP em observação
+
+A política de Content Security Policy está ativa no cabeçalho `Content-Security-Policy-Report-Only`. Nesta modalidade, o navegador envia relatórios de violações para `/api/security/csp-report`, mas nenhuma imagem, fonte, script, checkout ou fluxo de OAuth é bloqueado. Após observar os relatórios do ambiente publicado, a política poderá ser endurecida gradualmente.
 
 ## Próximos cuidados recomendados
 
