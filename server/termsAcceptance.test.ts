@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ART_APPROVAL_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
+import { ART_APPROVAL_CONTENT, PRIVACY_POLICY_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
 
 describe("documentação de termos da Maria Imprime", () => {
   it("mantém a apresentação e as cláusulas essenciais fornecidas", () => {
@@ -28,5 +28,11 @@ describe("documentação de termos da Maria Imprime", () => {
     expect(RETURNS_CANCELLATIONS_CONTENT).toContain("Direito de Arrependimento");
     expect(RETURNS_CANCELLATIONS_CONTENT).toContain("Análise Técnica");
     expect(RETURNS_CANCELLATIONS_CONTENT).toContain("Prazo para Comunicação");
+  });
+
+  it("inclui a política de privacidade e o e-mail de contato informado", () => {
+    expect(PRIVACY_POLICY_CONTENT).toContain("E-mail de contato: contatomariaimprime@gmail.com");
+    expect(PRIVACY_POLICY_CONTENT).toContain("Direitos do Titular");
+    expect(PRIVACY_POLICY_CONTENT).toContain("Política de Cookies");
   });
 });
