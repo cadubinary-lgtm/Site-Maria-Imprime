@@ -84,8 +84,9 @@ function buildSpecLines(s: string): { line1: string | null; rest: string[] } {
       : (w > 0 ? `Largura (m): ${w.toFixed(2).replace(".", ",")}` : null);
     const skip = new Set(["width", "height", "largura", "altura"]);
     const rest = Object.entries(o)
-      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .filter(([k, v]) => !skip.has(k) && !TECHNICAL_SPEC_KEYS.has(k) && v && String(v).trim())
       .map(([k, v]) => {
+        if (k === "description") return String(v);
         const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
         return `${label}: ${v}`;
       });
@@ -109,8 +110,12 @@ function buildSpecPairs(s: string): { label: string; value: string }[] {
     }
     const skip = new Set(["width", "height", "largura", "altura"]);
     Object.entries(o)
-      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .filter(([k, v]) => !skip.has(k) && !TECHNICAL_SPEC_KEYS.has(k) && v && String(v).trim())
       .forEach(([k, v]) => {
+        if (k === "description") {
+          pairs.push({ label: "", value: String(v) });
+          return;
+        }
         const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
         pairs.push({ label: `${label}:`, value: String(v) });
       });
@@ -120,6 +125,7 @@ function buildSpecPairs(s: string): { label: string; value: string }[] {
 // Retorna o label sem os dois pontos para uso no JSX (adicionamos os dois pontos no render)
 
 const SPEC_FIRST = ["width", "height", "largura", "altura"];
+const TECHNICAL_SPEC_KEYS = new Set(["itemType", "item_type"]);
 
 function formatSpecs(s: string): string {
   try {
@@ -136,8 +142,12 @@ function formatSpecs(s: string): string {
     }
     const skip = new Set(["width", "height", "largura", "altura"]);
     Object.entries(o)
-      .filter(([k, v]) => !skip.has(k) && v && String(v).trim())
+      .filter(([k, v]) => !skip.has(k) && !TECHNICAL_SPEC_KEYS.has(k) && v && String(v).trim())
       .forEach(([k, v]) => {
+        if (k === "description") {
+          parts.push(String(v));
+          return;
+        }
         const label = SPEC_LABELS[k] ?? k.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
         parts.push(`${label}: ${v}`);
       });
@@ -181,10 +191,16 @@ function printQuotationPDF(q: any) {
   .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .info-item label { font-size:10px; color:#888; display:block; margin-bottom:2px; }
   .info-item span { font-size:13px; font-weight:500; color:#1a1a1a; }
-  table { width:100%; border-collapse:collapse; }
+  table { width:100%; border-collapse:collapse; table-layout:fixed; }
   th { font-size:10px; font-weight:700; text-transform:uppercase; color:#888; padding:8px 10px; background:#f8f8f8; text-align:left; border-bottom:2px solid #e0e0e0; }
   td { font-size:12px; padding:10px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
   tr:last-child td { border-bottom:none; }
+  .col-image { width:8%; } .col-product { width:19%; } .col-specs { width:36%; } .col-art { width:11%; } .col-qty { width:7%; } .col-unit { width:10%; } .col-total { width:11%; }
+  .td-image, .td-art { text-align:center; }
+  .product-image { width:36px; height:36px; object-fit:contain; border:1px solid #eee; border-radius:4px; }
+  .art-image { width:48px; height:48px; object-fit:contain; border:1px solid #eee; border-radius:4px; }
+  .empty-image { width:36px; height:36px; display:inline-block; border-radius:4px; background:#f5f5f5; }
+  .td-specs { color:#666; font-size:11px; line-height:1.45; overflow-wrap:anywhere; }
   .td-right { text-align:right; }
   .totals { margin-top:16px; border-top:2px solid #e0e0e0; padding-top:16px; }
   .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
@@ -221,18 +237,22 @@ function printQuotationPDF(q: any) {
     <table>
       <thead>
         <tr>
-          <th>Produto</th>
-          <th>Especificações</th>
-          <th style="text-align:right">Qtd</th>
-          <th style="text-align:right">Unit.</th>
-          <th style="text-align:right">Total</th>
+          <th class="col-image"></th>
+          <th class="col-product">Produto</th>
+          <th class="col-specs">Especificações</th>
+          <th class="col-art">Arte</th>
+          <th class="col-qty" style="text-align:right">Qtd</th>
+          <th class="col-unit" style="text-align:right">Unit.</th>
+          <th class="col-total" style="text-align:right">Total</th>
         </tr>
       </thead>
       <tbody>
         ${items.map((i: any) => `
         <tr>
-          <td><strong>${i.productName}</strong>${i.artFileUrl ? `<br><img src="${i.artFileUrl}" style="max-width:80px;max-height:60px;object-fit:contain;margin-top:4px;border-radius:4px;border:1px solid #eee" />` : ""}</td>
-          <td style="color:#666;font-size:11px">${specs(i.specifications)}</td>
+          <td class="td-image">${i.productImage ? `<img class="product-image" src="${i.productImage}" alt="" />` : `<span class="empty-image"></span>`}</td>
+          <td><strong>${i.productName}</strong></td>
+          <td class="td-specs">${specs(i.specifications) || "—"}</td>
+          <td class="td-art">${i.artFileUrl ? `<img class="art-image" src="${i.artFileUrl}" alt="Arte" />` : "—"}</td>
           <td class="td-right">${i.quantity}</td>
           <td class="td-right">${fmt(i.unitPrice)}</td>
           <td class="td-right"><strong>${fmt(i.totalPrice)}</strong></td>
