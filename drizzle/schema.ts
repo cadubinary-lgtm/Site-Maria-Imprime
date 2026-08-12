@@ -72,6 +72,7 @@ export const companySettings = mysqlTable("companySettings", {
   stateRegistration: varchar("stateRegistration", { length: 50 }),
   commercialPhone: varchar("commercialPhone", { length: 20 }).notNull(),
   whatsappNumber: varchar("whatsappNumber", { length: 20 }).notNull(),
+  showWhatsappButton: boolean("showWhatsappButton").default(true).notNull(),
   supportEmail: varchar("supportEmail", { length: 255 }).notNull(),
   zipCode: varchar("zipCode", { length: 10 }).notNull(),
   street: varchar("street", { length: 255 }).notNull(),

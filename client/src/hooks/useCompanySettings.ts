@@ -7,6 +7,7 @@ export const COMPANY_SETTINGS_FALLBACK = {
   stateRegistration: "",
   commercialPhone: "(22) 99945-9596",
   whatsappNumber: "5522999459596",
+  showWhatsappButton: true,
   supportEmail: "contatomariaimprime@gmail.com",
   zipCode: "28908-200",
   street: "Avenida Antonio Ferreira dos Santos",
