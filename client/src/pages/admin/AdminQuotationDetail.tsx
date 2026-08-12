@@ -210,6 +210,8 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:10px 16px; border-radius:8px; margin-top:8px; font-size:16px; font-weight:700; }
   .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
+  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:20px; }
+  .company-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:10px; }
   .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e0e0e0; font-size:10px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
@@ -221,15 +223,24 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
       <div class="company-meta">${companyLine}${responsible ? `<br>Responsável pela emissão: ${responsible}` : ""}</div>
     </div>
-    <div class="doc-info">
-      <div class="num">${q.quotationNumber}</div>
-      <div class="date">Emitido em ${fmtDate(q.createdAt)}</div>
-      <div class="date">Válido até ${fmtDate(q.expiresAt)}</div>
-      <div class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</div>
-    </div>
-  </div>
-
-  <div class="section">
+	    <div class="doc-info">
+	      <div class="num">${q.quotationNumber}</div>
+	      <div class="date">Emitido em ${fmtDate(q.createdAt)}</div>
+	      <div class="date">Válido até ${fmtDate(q.expiresAt)}</div>
+	      <div class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</div>
+	    </div>
+	  </div>
+	  <div class="company-box">
+	    <div class="section-title">Dados da Empresa</div>
+	    <div class="info-grid">
+	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span></div>
+	      <div class="info-item"><label>Contato</label><span>${[company?.commercialPhone, company?.supportEmail].filter(Boolean).join(" · ")}</span></div>
+	      <div class="info-item"><label>CNPJ / Endereço</label><span>${[company?.cnpj, company?.addressStreet ?? company?.logradouro, company?.addressNumber ?? company?.numero, company?.addressCity ?? company?.cidade, company?.addressState ?? company?.estado].filter(Boolean).join(" · ")}</span></div>
+	    </div>
+	    ${responsible ? `<div style="font-size:10px;color:#666;border-top:1px solid #eee;margin-top:10px;padding-top:8px">Responsável pela emissão: ${responsible}</div>` : ""}
+	  </div>
+	
+	  <div class="section">
     <div class="section-title">Cliente</div>
     <div class="info-grid">
       ${q.clientName ? `<div class="info-item"><label>Nome</label><span>${q.clientName}</span></div>` : ""}

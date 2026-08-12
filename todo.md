@@ -2528,3 +2528,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Carregar nome, documento, contatos e endereço reais do cliente selecionado
 - [ ] Reorganizar cabeçalho, dados do cliente e impressão A4 do orçamento personalizado
 - [ ] Corrigir o carregamento de dados reais no bloco Cliente da tela e PDF do orçamento
+- [ ] Recriar o PDF do orçamento no padrão de referência com Dados da Empresa
