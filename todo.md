@@ -2524,3 +2524,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Adicionar compartilhamento do orçamento personalizado via WhatsApp
 - [ ] Gerar e conferir PDF de exemplo contra a tela do orçamento personalizado
 - [ ] Aplicar ajustes técnicos pendentes para conferência visual do orçamento personalizado
+- [ ] Exibir dados do cliente em formulário único e editável após a seleção no orçamento
+- [ ] Carregar nome, documento, contatos e endereço reais do cliente selecionado
