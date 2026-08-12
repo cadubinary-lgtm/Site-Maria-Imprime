@@ -702,6 +702,8 @@ export default function OrderDetailPage() {
   const order = (data as any)?.order ?? data as any;
   const items = (data as any)?.items ?? [];
   const isCancelled = order.status === "cancelado";
+  const isPaymentConfirmed = ["pago", "approved"].includes(String(order.paymentStatus ?? "").toLowerCase())
+    || order.status === "pagamento_aprovado";
   const STATUS_STEPS = getStatusSteps(order);
   const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === order.status);
   const progressPercent = currentStepIndex >= 0
@@ -731,9 +733,26 @@ export default function OrderDetailPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${reorderMutation.isPending ? "animate-spin" : ""}`} />
             Recomprar
           </Button>
-        </div>
+	        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {isPaymentConfirmed && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 shadow-sm"
+          >
+            <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-emerald-900">Pagamento confirmado!</p>
+              <p className="mt-0.5 text-sm leading-relaxed text-emerald-800">
+                Recebemos a confirmação do seu pagamento. Seu pedido já está liberado para seguir no processo de produção.
+              </p>
+            </div>
+          </div>
+        )}
+
+	        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main column */}
           <div className="lg:col-span-2 space-y-6">
 
