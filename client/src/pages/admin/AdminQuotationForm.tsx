@@ -529,11 +529,11 @@ export default function AdminQuotationForm() {
     };
 
     return (
-      <div key={`custom-${idx}`} className="rounded-lg border border-pink-200 bg-white p-4 shadow-sm">
-        <div className={`grid grid-cols-12 items-center gap-2 ${isExpanded ? "border-b border-pink-100 pb-3" : ""}`}>
+      <div key={`custom-${idx}`} className="overflow-hidden rounded-lg border border-gray-100 bg-white">
+        <div className={`grid grid-cols-12 items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
           <div className="col-span-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-pink-50">
-              <Package className="w-4 h-4 text-pink-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
+              <ImageIcon className="w-4 h-4 text-gray-400" />
             </div>
           </div>
           <button
@@ -555,7 +555,16 @@ export default function AdminQuotationForm() {
               >
                 <img src={item.artFileUrl} alt={`Arte de ${item.productName || "item personalizado"}`} className="h-full w-full object-cover" />
               </button>
-            ) : <ImageIcon className="h-4 w-4 text-gray-300" />}
+            ) : (
+              <button
+                type="button"
+                title="Anexar arte"
+                className="flex h-8 w-8 items-center justify-center rounded border border-dashed border-gray-300 bg-white text-gray-300 hover:border-pink-300 hover:text-pink-500"
+                onClick={() => toggleItem(idx)}
+              >
+                <ImageIcon className="h-4 w-4" />
+              </button>
+            )}
           </div>
           <div className="col-span-1 flex flex-col items-center leading-tight">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Qtd</span>
@@ -585,7 +594,7 @@ export default function AdminQuotationForm() {
           </button>
         </div>
 
-        {isExpanded && <div className="space-y-4 pt-4">
+        {isExpanded && <div className="space-y-4 p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-2">
             <label className="text-xs text-gray-500 font-medium">Nome do Produto / Serviço</label>
@@ -1405,9 +1414,9 @@ export default function AdminQuotationForm() {
                 {items.some((item) => item.isCustom) && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 pt-1">
-                      <div className="h-px flex-1 bg-pink-100" />
-                      <span className="text-xs font-semibold uppercase tracking-wide text-pink-600">Itens personalizados <span className="normal-case font-normal text-pink-400">— produto ou serviço fora do catálogo</span></span>
-                      <div className="h-px flex-1 bg-pink-100" />
+                      <div className="h-px flex-1 bg-gray-200" />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Itens personalizados <span className="normal-case font-normal text-gray-400">— produto ou serviço fora do catálogo</span></span>
+                      <div className="h-px flex-1 bg-gray-200" />
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
                   </div>

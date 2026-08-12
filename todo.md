@@ -2499,3 +2499,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Posicionar a seta de expansão de itens de catálogo ao lado do valor
 - [x] Alinhar o resumo fechado de itens personalizados ao layout dos itens de catálogo
 - [x] Exibir rótulos de quantidade, valor unitário e valor total em itens personalizados fechados
+- [x] Alinhar colunas e arte da linha de item personalizado ao cabeçalho de Produtos e Serviços
+- [x] Remover destaque rosa e aplicar o fundo cinza-claro dos itens de catálogo ao item personalizado
