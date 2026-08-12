@@ -2577,3 +2577,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Identificar controlador, operador e canal de contato de privacidade antes de publicar a versão definitiva da LGPD
 - [x] Inserir CNPJ, endereço, e-mail e transparência de papéis LGPD confirmados na Política de Privacidade
 - [x] Ajustar a Política de Produção para usar o prazo configurado por produto como referência
+- [x] Corrigir as consultas de automationLogs que falham no painel administrativo
+- [x] Validar a correção de automationLogs sem alterar estrutura visual, páginas ou fluxos
