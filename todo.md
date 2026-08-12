@@ -2472,3 +2472,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Identidade Visual: Favicon
 - [x] Criar e aplicar favicon otimizado com o logotipo oficial da Maria Imprime
+- [x] Substituir o favicon pelo logotipo circular oficial da Maria Imprime
