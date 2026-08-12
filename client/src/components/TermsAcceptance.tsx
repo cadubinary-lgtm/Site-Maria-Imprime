@@ -373,13 +373,77 @@ E-mail: contatomariaimprime@gmail.com
 
 Maria Imprime – Sua Gráfica Online`;
 
+export const COOKIES_POLICY_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. O que são Cookies?
+
+Cookies são pequenos arquivos ou tecnologias semelhantes armazenados no dispositivo do usuário durante a utilização de um site.
+
+Eles podem permitir o funcionamento de recursos, lembrar preferências, manter sessões, armazenar itens do carrinho e coletar informações sobre a utilização do site.
+
+2. Por que utilizamos Cookies?
+
+A Maria Imprime poderá utilizar cookies para funcionamento do site, manutenção do carrinho, autenticação, segurança, preferências, análise de desempenho, melhoria da experiência e outras finalidades informadas ao usuário.
+
+3. Tipos de Cookies
+
+Cookies Necessários
+
+São utilizados para permitir o funcionamento básico do site, incluindo carrinho, login, sessão, segurança e funcionamento de recursos essenciais. A desativação desses cookies poderá prejudicar o funcionamento do site.
+
+Cookies de Funcionalidade
+
+Podem lembrar determinadas preferências e configurações do usuário.
+
+Cookies Analíticos
+
+Podem ser utilizados para compreender como os usuários utilizam o site e identificar oportunidades de melhoria.
+
+Cookies de Publicidade
+
+Quando utilizados, poderão auxiliar na apresentação e medição de publicidade ou conteúdos personalizados.
+
+4. Cookies Próprios e de Terceiros
+
+Cookies próprios são definidos diretamente pela Maria Imprime. Cookies de terceiros poderão ser definidos por serviços externos utilizados pelo site.
+
+5. Controle de Cookies
+
+Quando aplicável, o site poderá disponibilizar mecanismos para que o usuário gerencie cookies não necessários. O usuário poderá também configurar seu navegador para bloquear ou excluir determinados cookies.
+
+6. Cookies Necessários
+
+Alguns cookies são necessários para que funcionalidades essenciais, como carrinho, autenticação e segurança, funcionem corretamente.
+
+Nesta revisão técnica foram identificados cookies funcionais de sessão e operação do site: "app_session_id" (sessão da aplicação), "customer_session" (sessão do cliente), "cart_session" (carrinho) e "admin_session" (sessão administrativa). Eles não são usados para publicidade.
+
+7. Cookies Não Necessários
+
+Cookies não necessários deverão ser tratados de acordo com as opções e mecanismos de consentimento disponibilizados pelo site, quando aplicável.
+
+8. Alterações
+
+Esta Política poderá ser atualizada para refletir alterações nas tecnologias utilizadas, nos serviços ou na legislação.
+
+9. Transparência
+
+A Maria Imprime buscará manter informações claras sobre as finalidades dos cookies utilizados. Esta política não declara individualmente ferramentas analíticas, pixels de publicidade ou serviços de terceiros enquanto não houver confirmação técnica de sua utilização no site.
+
+10. Contato
+
+Dúvidas relacionadas aos cookies poderão ser encaminhadas para:
+
+E-mail: contatomariaimprime@gmail.com
+
+Maria Imprime – Sua Gráfica Online`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
   { title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
   { title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
   { title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
-  { title: "Política de Cookies", content: "Documento em preparação." },
+  { title: "Política de Cookies", content: COOKIES_POLICY_CONTENT },
   { title: "Termo de Uso do Site", content: "Documento em preparação." },
   { title: "Perguntas Frequentes (FAQ)", content: "Documento em preparação." },
 ];
