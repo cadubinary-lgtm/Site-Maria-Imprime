@@ -291,7 +291,7 @@ export async function sendInAppNotification(
  * Gerar mensagem de confirmação de pedido
  */
 export function generateOrderConfirmationMessage(orderId: number, clientName: string): string {
-  return `Olá ${clientName}! 👋\n\nSeu pedido #${orderId} foi confirmado com sucesso! 🎉\n\nEstaremos trabalhando para preparar sua encomenda. Você receberá atualizações de status em breve.\n\nObrigado por escolher a Gráfica Ponto Digital! 🖨️`;
+  return `Olá ${clientName}! 👋\n\nSeu pedido #${orderId} foi confirmado com sucesso! 🎉\n\nEstaremos trabalhando para preparar sua encomenda. Você receberá atualizações de status em breve.\n\nObrigado por escolher a Maria Imprime! 🖨️`;
 }
 
 /**

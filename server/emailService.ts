@@ -1,19 +1,20 @@
 /**
- * Email Service — Gráfica Ponto Digital
+ * Email Service — Maria Imprime
  * Integração com Resend para envio de emails transacionais
  *
  * Para migrar para domínio profissional:
- * 1. Verificar contato@graficapontodigital.com.br no painel Resend
+ * 1. Verificar o e-mail de atendimento da Maria Imprime no painel Resend
  * 2. Atualizar RESEND_FROM_EMAIL=contato@graficapontodigital.com.br
- * 3. Atualizar RESEND_FROM_NAME=Gráfica Ponto Digital
+ * 3. Atualizar RESEND_FROM_NAME=Maria Imprime
  * Nenhuma alteração de código necessária.
  */
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-const FROM_NAME = process.env.RESEND_FROM_NAME || "Gráfica Ponto Digital";
-const SITE_URL = process.env.VITE_SITE_URL || "https://graficaapp-uwgro8uv.manus.space";
+const FROM_NAME = "Maria Imprime";
+const SITE_URL = process.env.VITE_SITE_URL || "https://mariaimprime.com.br";
+const EMAIL_LOGO_URL = `${SITE_URL}/manus-storage/logo-maria-imprime_acc5585b.webp`;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -25,15 +26,15 @@ function baseTemplate(title: string, body: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Segoe UI',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+<body style="margin:0;padding:0;background:#fff6fa;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff6fa;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(236,0,105,0.12);">
         <!-- Header -->
         <tr>
-          <td style="background:#1a1a2e;padding:32px 40px;text-align:center;">
-            <span style="font-size:28px;font-weight:800;color:#FF6B35;letter-spacing:-1px;">●DIGITAL</span>
-            <p style="color:#94a3b8;font-size:13px;margin:6px 0 0;">Gráfica Ponto Digital</p>
+          <td style="background:#fce7f3;padding:28px 40px;text-align:center;border-bottom:4px solid #ec0069;">
+            <img src="${EMAIL_LOGO_URL}" alt="Maria Imprime" width="178" style="display:block;margin:0 auto;height:auto;max-width:178px;" />
+            <p style="color:#8b1e4c;font-size:13px;font-weight:600;margin:10px 0 0;">Sua gráfica online</p>
           </td>
         </tr>
         <!-- Body -->
@@ -44,9 +45,9 @@ function baseTemplate(title: string, body: string): string {
         </tr>
         <!-- Footer -->
         <tr>
-          <td style="background:#f8fafc;padding:24px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-            <p style="color:#94a3b8;font-size:12px;margin:0;">© ${new Date().getFullYear()} Gráfica Ponto Digital. Todos os direitos reservados.</p>
-            <p style="color:#94a3b8;font-size:12px;margin:4px 0 0;">Este email foi enviado automaticamente. Não responda a este endereço.</p>
+          <td style="background:#fff6fa;padding:24px 40px;text-align:center;border-top:1px solid #fbcfe8;">
+            <p style="color:#9d174d;font-size:12px;margin:0;">© ${new Date().getFullYear()} Maria Imprime. Todos os direitos reservados.</p>
+            <p style="color:#9d174d;font-size:12px;margin:4px 0 0;">Este e-mail foi enviado automaticamente. Não responda a este endereço.</p>
           </td>
         </tr>
       </table>
@@ -57,15 +58,15 @@ function baseTemplate(title: string, body: string): string {
 }
 
 function btn(text: string, url: string): string {
-  return `<a href="${url}" style="display:inline-block;background:#FF6B35;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;margin:24px 0;">${text}</a>`;
+  return `<a href="${url}" style="display:inline-block;background:#ec0069;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:999px;font-weight:700;font-size:15px;margin:24px 0;box-shadow:0 4px 14px rgba(236,0,105,0.24);">${text}</a>`;
 }
 
 function h1(text: string): string {
-  return `<h1 style="color:#1a1a2e;font-size:24px;font-weight:700;margin:0 0 8px;">${text}</h1>`;
+  return `<h1 style="color:#2d1020;font-size:24px;font-weight:700;margin:0 0 8px;">${text}</h1>`;
 }
 
 function p(text: string): string {
-  return `<p style="color:#475569;font-size:15px;line-height:1.7;margin:12px 0;">${text}</p>`;
+  return `<p style="color:#5f4251;font-size:15px;line-height:1.7;margin:12px 0;">${text}</p>`;
 }
 
 function divider(): string {
@@ -75,9 +76,9 @@ function divider(): string {
 // ── Templates ─────────────────────────────────────────────────────────────────
 
 export function templateWelcome(firstName: string, verifyUrl: string): string {
-  return baseTemplate("Bem-vindo à Gráfica Ponto Digital!", `
+  return baseTemplate("Bem-vindo à Maria Imprime!", `
     ${h1(`Olá, ${firstName}! 👋`)}
-    ${p("Seja bem-vindo à <strong>Gráfica Ponto Digital</strong>. Estamos felizes em ter você conosco!")}
+    ${p("Seja bem-vindo à <strong>Maria Imprime</strong>. Estamos felizes em ter você conosco!")}
     ${p("Para ativar sua conta e começar a fazer pedidos, confirme seu endereço de email clicando no botão abaixo:")}
     <div style="text-align:center;">${btn("Confirmar meu email", verifyUrl)}</div>
     ${p("Este link expira em <strong>24 horas</strong>. Se você não criou uma conta, ignore este email.")}
@@ -185,30 +186,30 @@ async function send(to: string, subject: string, html: string): Promise<SendResu
 
 export async function sendWelcomeEmail(to: string, firstName: string, verifyToken: string): Promise<SendResult> {
   const verifyUrl = `${SITE_URL}/verificar-email?token=${verifyToken}`;
-  return send(to, "Bem-vindo à Gráfica Ponto Digital — Confirme seu email", templateWelcome(firstName, verifyUrl));
+  return send(to, "Bem-vindo à Maria Imprime — Confirme seu e-mail", templateWelcome(firstName, verifyUrl));
 }
 
 export async function sendVerificationEmail(to: string, firstName: string, verifyToken: string): Promise<SendResult> {
   const verifyUrl = `${SITE_URL}/verificar-email?token=${verifyToken}`;
-  return send(to, "Confirme seu email — Gráfica Ponto Digital", templateVerifyEmail(firstName, verifyUrl));
+  return send(to, "Confirme seu e-mail — Maria Imprime", templateVerifyEmail(firstName, verifyUrl));
 }
 
 export async function sendPasswordResetEmail(to: string, firstName: string, resetToken: string): Promise<SendResult> {
   const resetUrl = `${SITE_URL}/nova-senha?token=${resetToken}`;
-  return send(to, "Redefinição de senha — Gráfica Ponto Digital", templatePasswordReset(firstName, resetUrl));
+  return send(to, "Redefinição de senha — Maria Imprime", templatePasswordReset(firstName, resetUrl));
 }
 
 export async function sendPasswordChangedEmail(to: string, firstName: string): Promise<SendResult> {
-  return send(to, "Sua senha foi alterada — Gráfica Ponto Digital", templatePasswordChanged(firstName));
+  return send(to, "Sua senha foi alterada — Maria Imprime", templatePasswordChanged(firstName));
 }
 
 export async function sendSuspiciousLoginAlert(to: string, firstName: string, ip: string): Promise<SendResult> {
   const time = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-  return send(to, "⚠️ Atividade suspeita na sua conta — Gráfica Ponto Digital", templateSuspiciousLogin(firstName, ip, time));
+  return send(to, "⚠️ Atividade suspeita na sua conta — Maria Imprime", templateSuspiciousLogin(firstName, ip, time));
 }
 
 export async function sendOrderConfirmationEmail(to: string, firstName: string, orderNumber: string, total: string): Promise<SendResult> {
-  return send(to, `Pedido #${orderNumber} confirmado — Gráfica Ponto Digital`, templateOrderConfirmation(firstName, orderNumber, total));
+  return send(to, `Pedido #${orderNumber} confirmado — Maria Imprime`, templateOrderConfirmation(firstName, orderNumber, total));
 }
 
 export function templateOrderConfirmationWithLink(firstName: string, orderNumber: string, total: string, trackUrl: string): string {
@@ -226,11 +227,11 @@ export function templateOrderConfirmationWithLink(firstName: string, orderNumber
 }
 
 export async function sendOrderConfirmationWithLink(to: string, firstName: string, orderNumber: string, total: string, trackUrl: string): Promise<SendResult> {
-  return send(to, `Pedido #${orderNumber} confirmado — Gráfica Ponto Digital`, templateOrderConfirmationWithLink(firstName, orderNumber, total, trackUrl));
+  return send(to, `Pedido #${orderNumber} confirmado — Maria Imprime`, templateOrderConfirmationWithLink(firstName, orderNumber, total, trackUrl));
 }
 
 export async function sendOrderStatusUpdateEmail(to: string, firstName: string, orderNumber: string, newStatus: string, trackUrl?: string): Promise<SendResult> {
-  return send(to, `Pedido #${orderNumber} atualizado — Gráfica Ponto Digital`, templateOrderStatusUpdate(firstName, orderNumber, newStatus, trackUrl));
+  return send(to, `Pedido #${orderNumber} atualizado — Maria Imprime`, templateOrderStatusUpdate(firstName, orderNumber, newStatus, trackUrl));
 }
 
 // ── Template: Pagamento PIX Confirmado (identidade visual rosa) ────────────────────────────────────────

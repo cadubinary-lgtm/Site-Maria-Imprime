@@ -693,7 +693,7 @@ export default function ProductDetail() {
         deadline: selectedDeliveryOption?.name ?? "5 dias úteis",
         notes,
         customerName: "Cliente",
-        companyName: "Gráfica Ponto Digital",
+        companyName: "Maria Imprime",
       });
       toast.success("Orçamento exportado!");
     } catch { toast.error("Erro ao exportar orçamento"); }
