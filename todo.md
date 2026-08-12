@@ -2518,3 +2518,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Exibir contato, endereço, CNPJ e responsável logado na visualização e PDF de Orçamentos
 - [ ] Uniformizar exclusivamente as informações comerciais na tela e PDF do orçamento personalizado
 - [ ] Auditar e completar todos os requisitos comerciais na tela e PDF do orçamento personalizado
+- [ ] Validar e inserir avisos de arte, cor, aceite e prazo exclusivamente no orçamento personalizado
