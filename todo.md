@@ -2557,3 +2557,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir reordenar itens do orçamento por arrastar e soltar
 - [x] Adicionar duplicação de item com cópia de valores, especificações e arte
 - [x] Aplicar a cor rosa da marca aos pontos de arraste dos itens
+- [x] Corrigir o arrastar e soltar das colunas em /admin/variacoes

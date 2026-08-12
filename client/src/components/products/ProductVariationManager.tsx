@@ -39,19 +39,20 @@ const CALC_TYPE_OPTIONS = [
 
 // Componente wrapper para colunas arrastáveis
 // Usa render prop para passar o drag handle aos filhos
-function SortableColumn({ id, children }: { id: string; children: (dragHandle: React.ReactNode) => React.ReactNode }) {
+function SortableColumn({ id, order, children }: { id: string; order: number; children: (dragHandle: React.ReactNode) => React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.7 : 1,
     zIndex: isDragging ? 10 : undefined,
+    order,
   };
   const dragHandle = (
     <span
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 ml-auto pl-2"
+      className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 ml-auto pl-2 touch-none"
       title="Arrastar coluna"
     >
       <GripVertical className="w-4 h-4" />
@@ -742,7 +743,7 @@ export function ProductVariationManager() {
           <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 w-full p-4">
 
         {/* ── COLUNA 1: Segmentos ── */}
-        <SortableColumn id="segmentos">{(dragHandle) => (
+        <SortableColumn id="segmentos" order={columnOrder.indexOf("segmentos")}>{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
@@ -775,7 +776,7 @@ export function ProductVariationManager() {
         )}</SortableColumn>
 
         {/* ── COLUNA 2: Buscar e Listar Produtos ── */}
-        <SortableColumn id="produtos">{(dragHandle) => (
+        <SortableColumn id="produtos" order={columnOrder.indexOf("produtos")}>{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
@@ -820,7 +821,7 @@ export function ProductVariationManager() {
         )}</SortableColumn>
 
         {/* ── COLUNA 3: Gerenciar Variações do Produto ── */}
-        <SortableColumn id="variacoes">{(dragHandle) => (
+        <SortableColumn id="variacoes" order={columnOrder.indexOf("variacoes")}>{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center">
@@ -879,7 +880,7 @@ export function ProductVariationManager() {
         )}</SortableColumn>
 
         {/* ── COLUNA 4: Tipos Cadastrados no Sistema (Global) ── */}
-        <SortableColumn id="tipos">{(dragHandle) => (
+        <SortableColumn id="tipos" order={columnOrder.indexOf("tipos")}>{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <div className="flex items-center">
@@ -946,7 +947,7 @@ export function ProductVariationManager() {
         </div>
         )}</SortableColumn>
 
-        <SortableColumn id="tipos2">{(dragHandle) => (
+        <SortableColumn id="tipos2" order={columnOrder.indexOf("tipos2")}>{(dragHandle) => (
         <div className="flex flex-col border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <div className="flex items-center">
