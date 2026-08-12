@@ -2484,3 +2484,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 ## Área do Cliente: Pagamento Confirmado
 - [x] Exibir alerta visual de sucesso quando o pagamento Mercado Pago for confirmado
+
+## Correção: Orçamentos
+- [x] Corrigir a tela em branco da rota /admin/orcamentos sem alterar o layout

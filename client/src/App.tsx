@@ -278,6 +278,10 @@ function AdminProtectedRoutes() {
       <Route path="/admin/pedidos/novos" component={NewOrders} />
       <Route path="/admin/pedidos" component={AdminOrders} />
       <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
+      <Route path="/admin/orcamentos" component={AdminQuotations} />
+      <Route path="/admin/orcamentos/novo" component={AdminQuotationForm} />
+      <Route path="/admin/orcamentos/:id/editar" component={AdminQuotationForm} />
+      <Route path="/admin/orcamentos/:id" component={AdminQuotationDetail} />
       <Route path="/admin/os" component={AdminOS} />
       <Route path="/admin/os/:id" component={AdminOSPrint} />
       <Route path="/admin/dados-da-empresa" component={AdminCompanySettings} />
