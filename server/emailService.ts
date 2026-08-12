@@ -168,6 +168,49 @@ export function templateOrderStatusUpdate(firstName: string, orderNumber: string
   `);
 }
 
+export type QuotationEmailData = {
+  clientName?: string | null;
+  quotationNumber: string;
+  total: number;
+  expiresAt?: Date | number | string | null;
+  paymentMethod?: string | null;
+  productionDeadline?: number | null;
+  items: Array<{ productName: string; quantity: number; totalPrice: number }>;
+};
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char] ?? char);
+}
+
+export function templateQuotationEmail(data: QuotationEmailData): string {
+  const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const validity = data.expiresAt ? new Date(data.expiresAt).toLocaleDateString("pt-BR") : "conforme condições comerciais";
+  const clientName = escapeHtml(data.clientName?.trim() || "cliente");
+  const items = data.items.map((item) => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #f1e5eb;color:#2d1020;font-size:14px;">${escapeHtml(item.productName)}<br/><span style="color:#8a6a79;font-size:12px;">Quantidade: ${item.quantity}</span></td>
+      <td style="padding:10px 0;border-bottom:1px solid #f1e5eb;color:#2d1020;font-size:14px;text-align:right;font-weight:700;">${currency.format(item.totalPrice)}</td>
+    </tr>`).join("");
+
+  return baseTemplate(`Orçamento ${data.quotationNumber}`, `
+    ${h1(`Orçamento ${escapeHtml(data.quotationNumber)}`)}
+    ${p(`Olá, <strong>${clientName}</strong>! Preparamos seu orçamento. Confira abaixo os produtos, valores e condições comerciais.`)}
+    <div style="background:#fff6fa;border:1px solid #f7c4d9;border-radius:10px;padding:16px;margin:20px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        ${items}
+        <tr><td style="padding:14px 0 0;color:#ec0069;font-size:16px;font-weight:800;">TOTAL</td><td style="padding:14px 0 0;color:#ec0069;font-size:18px;font-weight:800;text-align:right;">${currency.format(data.total)}</td></tr>
+      </table>
+    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:18px 0;">
+      <tr><td style="padding:6px 0;color:#5f4251;font-size:13px;"><strong>Validade:</strong> ${validity}</td></tr>
+      ${data.paymentMethod ? `<tr><td style="padding:6px 0;color:#5f4251;font-size:13px;"><strong>Forma de pagamento:</strong> ${escapeHtml(data.paymentMethod)}</td></tr>` : ""}
+      ${data.productionDeadline ? `<tr><td style="padding:6px 0;color:#5f4251;font-size:13px;"><strong>Prazo de produção:</strong> ${data.productionDeadline} dias úteis após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</td></tr>` : ""}
+    </table>
+    ${divider()}
+    ${p("Para aprovar ou tirar dúvidas sobre este orçamento, responda a este e-mail ou entre em contato pelos nossos canais de atendimento.")}
+  `);
+}
+
 // ── Send Functions ─────────────────────────────────────────────────────────────
 
 type SendResult = { success: boolean; error?: string };
@@ -219,6 +262,10 @@ export async function sendSuspiciousLoginAlert(to: string, firstName: string, ip
 
 export async function sendOrderConfirmationEmail(to: string, firstName: string, orderNumber: string, total: string): Promise<SendResult> {
   return send(to, `Pedido #${orderNumber} confirmado — Maria Imprime`, templateOrderConfirmation(firstName, orderNumber, total));
+}
+
+export async function sendQuotationEmail(to: string, data: QuotationEmailData): Promise<SendResult> {
+  return send(to, `Orçamento ${data.quotationNumber} — Maria Imprime`, templateQuotationEmail(data));
 }
 
 export function templateOrderConfirmationWithLink(firstName: string, orderNumber: string, total: string, trackUrl: string): string {
