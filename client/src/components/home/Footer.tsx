@@ -19,6 +19,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4 text-sm">Institucional</h3>
             <ul className="space-y-2 text-xs">
+              <li><a href="/produto/1200001#terms" className="hover:text-pink-600 transition-colors font-light">Central de Documentação</a></li>
               <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Sobre a Maria Imprime</a></li>
               <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Política de Privacidade</a></li>
               <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Termos de Uso</a></li>
