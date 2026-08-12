@@ -85,6 +85,12 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain('title="Remover item"');
   });
 
+  it("abre a arte personalizada no mesmo visualizador ampliado do catálogo", () => {
+    expect(formSource).toContain('title="Visualizar arte em tamanho ampliado"');
+    expect(formSource).toContain("onClick={() => setLightboxImg(item.artFileUrl!)}");
+    expect(formSource).toContain('className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"');
+  });
+
   it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
     expect(formSource).toContain('className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800"');
     expect(formSource).toContain('title={isExpanded ? "Recolher especificações" : "Expandir especificações"}');
