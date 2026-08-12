@@ -2563,3 +2563,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Investigar o indicador numérico travado no Kanban de Linha de Produção
 - [x] Reconciliar itens pendentes do todo.md que já estejam comprovadamente implementados
 - [ ] Auditar e consolidar seções duplicadas do todo.md com evidência técnica atual
+- [ ] Preparar e entregar uma lista organizada das tarefas pendentes sem evidência técnica
+- [x] Preparar e entregar uma lista organizada das tarefas pendentes sem evidência técnica
