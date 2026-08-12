@@ -194,7 +194,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; }
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom:3px solid #e91e8c; padding-bottom:10px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; border-bottom:3px solid #e91e8c; padding-bottom:8px; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
   .brand img { height:52px; object-fit:contain; display:block; }
   .doc-info { text-align:right; }
@@ -221,14 +221,17 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .totals { margin-top:8px; border-top:2px solid #e0e0e0; padding-top:8px; }
   .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
-  .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
-  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:8px; }
-  .company-box .info-grid { grid-template-columns:1fr 1fr; gap:5px 10px; }
+  .company-meta { font-size:9px; color:#555; line-height:1.25; margin-top:4px; max-width:360px; }
+  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; }
+  .company-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:4px 8px; }
   .company-box .info-item { min-width:0; }
   .company-box .info-item span { overflow-wrap:normal; word-break:normal; }
   .company-box .full-line { grid-column:1 / -1; }
-  .top-grid, .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
-  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding:8px; margin:0; }
+  .top-grid { display:grid; grid-template-columns:1.2fr 0.8fr; gap:8px; margin-top:2px; margin-bottom:6px; }
+  .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
+  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
+  .client-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:4px 8px; }
+  .client-box .full-line { grid-column:1 / -1; }
   .legal-notes { margin-top:14px; padding-top:7px; border-top:1px solid #eee; font-size:9px; line-height:1.35; color:#555; }
   .footer { margin-top:12px; padding-top:7px; border-top:1px solid #e0e0e0; font-size:9px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
@@ -239,7 +242,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   <div class="header">
     <div class="brand">
       <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
-      <div class="company-meta">${companyLine}${responsible ? `<br>Responsável pela emissão: ${responsible}` : ""}</div>
+      <div class="company-meta">${companyLine}</div>
     </div>
 	    <div class="doc-info">
 	      <div class="num">${q.quotationNumber}</div>
@@ -259,17 +262,15 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	      ${company?.supportEmail ? `<div class="info-item full-line"><label>E-mail de atendimento</label><span>${company.supportEmail}</span></div>` : ""}
 	      ${companyAddress ? `<div class="info-item full-line"><label>Endereço completo</label><span>${companyAddress}</span></div>` : ""}
 	    </div>
-	    ${responsible ? `<div style="font-size:10px;color:#666;border-top:1px solid #eee;margin-top:10px;padding-top:8px">Responsável pela emissão: ${responsible}</div>` : ""}
-	  </div>
-	
-	  <div class="section">
+  </div>
+		
+  <div class="section client-box">
     <div class="section-title">Cliente</div>
     <div class="info-grid">
       ${q.clientName ? `<div class="info-item"><label>Nome</label><span>${q.clientName}</span></div>` : ""}
-      ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
       ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
-	      ${q.clientPhone ? `<div class="info-item"><label>Telefone</label><span>${q.clientPhone}</span></div>` : ""}
-	      ${q.clientWhatsapp ? `<div class="info-item"><label>WhatsApp</label><span>${q.clientWhatsapp}</span></div>` : ""}
+      ${q.clientPhone || q.clientWhatsapp ? `<div class="info-item"><label>Telefone</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
+      ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
 	      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item full-line"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
 	    </div>
 	  </div>

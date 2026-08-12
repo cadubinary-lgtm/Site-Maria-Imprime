@@ -2542,3 +2542,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar respiro entre cabeçalho, cards de dados institucionais e cliente no PDF A4
 - [x] Compactar cards, totais, termos e especificações para priorizar espaço aos itens do orçamento
 - [x] Compactar o orçamento apenas por estilos, sem mover ou reordenar campos existentes
+- [x] Compactar exclusivamente o cabeçalho e os cards iniciais do PDF sem alterar a tela de visualização
+- [x] Ocultar a linha vazia de responsável e distribuir Nome, E-mail e Telefone em três colunas no PDF
