@@ -2511,24 +2511,24 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar retorno contextual em todas as rotas e submenus do painel administrativo
 - [x] Diagnosticar e corrigir lentidão e indisponibilidade das páginas financeiras em produção
 - [x] Paginar Contas a Receber e Recebidas diretamente no banco de dados
-- [ ] Criar aceite único global de Termos e Condições em todos os produtos
-- [ ] Criar modal reutilizável da Central de Documentação Maria Imprime
-- [ ] Registrar versão e data do aceite nos pedidos
-- [ ] Adicionar Central de Documentação ao rodapé sem inventar conteúdo pendente
-- [ ] Exibir contato, endereço, CNPJ e responsável logado na visualização e PDF de Orçamentos
-- [ ] Uniformizar exclusivamente as informações comerciais na tela e PDF do orçamento personalizado
-- [ ] Auditar e completar todos os requisitos comerciais na tela e PDF do orçamento personalizado
-- [ ] Validar e inserir avisos de arte, cor, aceite e prazo exclusivamente no orçamento personalizado
-- [ ] Permitir editar CPF/CNPJ e endereço do cliente no orçamento personalizado
+- [x] Criar aceite único global de Termos e Condições em todos os produtos
+- [x] Criar modal reutilizável da Central de Documentação Maria Imprime
+- [x] Registrar versão e data do aceite nos pedidos
+- [x] Adicionar Central de Documentação ao rodapé sem inventar conteúdo pendente
+- [x] Exibir contato, endereço, CNPJ e responsável logado na visualização e PDF de Orçamentos
+- [x] Uniformizar exclusivamente as informações comerciais na tela e PDF do orçamento personalizado
+- [x] Auditar e completar todos os requisitos comerciais na tela e PDF do orçamento personalizado
+- [x] Validar e inserir avisos de arte, cor, aceite e prazo exclusivamente no orçamento personalizado
+- [x] Permitir editar CPF/CNPJ e endereço do cliente no orçamento personalizado
 - [ ] Permitir definir previsão manual de conclusão antes de gerar o PDF do orçamento
-- [ ] Adicionar compartilhamento do orçamento personalizado via WhatsApp
+- [x] Adicionar compartilhamento do orçamento personalizado via WhatsApp
 - [ ] Gerar e conferir PDF de exemplo contra a tela do orçamento personalizado
 - [ ] Aplicar ajustes técnicos pendentes para conferência visual do orçamento personalizado
-- [ ] Exibir dados do cliente em formulário único e editável após a seleção no orçamento
-- [ ] Carregar nome, documento, contatos e endereço reais do cliente selecionado
-- [ ] Reorganizar cabeçalho, dados do cliente e impressão A4 do orçamento personalizado
-- [ ] Corrigir o carregamento de dados reais no bloco Cliente da tela e PDF do orçamento
-- [ ] Recriar o PDF do orçamento no padrão de referência com Dados da Empresa
+- [x] Exibir dados do cliente em formulário único e editável após a seleção no orçamento
+- [x] Carregar nome, documento, contatos e endereço reais do cliente selecionado
+- [x] Reorganizar cabeçalho, dados do cliente e impressão A4 do orçamento personalizado
+- [x] Corrigir o carregamento de dados reais no bloco Cliente da tela e PDF do orçamento
+- [x] Recriar o PDF do orçamento no padrão de referência com Dados da Empresa
 - [x] Completar todos os campos cadastrais disponíveis da empresa na tela e no PDF do orçamento personalizado
 - [x] Reproduzir o layout de referência no detalhe e PDF A4 do orçamento personalizado
 - [x] Organizar blocos de dados, tabela de itens, resumo financeiro e condições comerciais do orçamento
@@ -2560,3 +2560,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o arrastar e soltar das colunas em /admin/variacoes
 - [x] Suavizar os destaques rosa das colunas Comunicação Visual e Offset com cinza-claro
 - [x] Restaurar a disposição original das cinco colunas sem desfazer o cinza-claro dos botões
+- [x] Investigar o indicador numérico travado no Kanban de Linha de Produção
+- [x] Reconciliar itens pendentes do todo.md que já estejam comprovadamente implementados
