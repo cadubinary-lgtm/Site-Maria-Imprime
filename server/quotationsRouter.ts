@@ -189,7 +189,7 @@ export const quotationsRouter = router({
     .input(z.object({
       clientId: z.number(),
       items: z.array(z.object({
-        productId: z.number(),
+        productId: z.number().nullable(),
         productName: z.string(),
         productImage: z.string().optional(),
         specifications: z.string(), // JSON
@@ -278,7 +278,7 @@ export const quotationsRouter = router({
       id: z.number(),
       clientId: z.number().optional(),
       items: z.array(z.object({
-        productId: z.number(),
+        productId: z.number().nullable(),
         productName: z.string(),
         productImage: z.string().optional(),
         specifications: z.string(),

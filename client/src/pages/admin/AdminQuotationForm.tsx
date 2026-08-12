@@ -39,7 +39,7 @@ import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface QuotationItem {
-  productId: number;
+  productId: number | null;
   productName: string;
   productImage?: string;
   specifications: string; // JSON string
@@ -49,6 +49,7 @@ interface QuotationItem {
   unitPrice: number;
   totalPrice: number;
   priceAdjustment?: number; // Ajuste manual (+/-) somado ao total calculado
+  isCustom?: boolean; // Item fora do catálogo, com nome e valor definidos manualmente
   // UI only
   _specsParsed?: Record<string, string>;
 }
@@ -176,17 +177,22 @@ export default function AdminQuotationForm() {
     setProductionDeadline(q.productionDeadline ?? 3);
     setQuotationValidity(q.quotationValidity ?? 30);
     setCommercialNotes(q.commercialNotes ?? "");
-    setItems(q.items.map((i: any) => ({
-      productId: i.productId,
-      productName: i.productName,
-      productImage: i.productImage,
-      specifications: i.specifications,
-      artFileUrl: i.artFileUrl,
-      quantity: i.quantity,
-      unitPrice: Number(i.unitPrice),
-      totalPrice: Number(i.totalPrice),
-      _specsParsed: (() => { try { return JSON.parse(i.specifications); } catch { return {}; } })(),
-    })));
+    setItems(q.items.map((i: any) => {
+      let parsedSpecs: Record<string, string> = {};
+      try { parsedSpecs = JSON.parse(i.specifications); } catch {}
+      return {
+        productId: i.productId,
+        productName: i.productName,
+        productImage: i.productImage,
+        specifications: i.specifications,
+        artFileUrl: i.artFileUrl,
+        quantity: i.quantity,
+        unitPrice: Number(i.unitPrice),
+        totalPrice: Number(i.totalPrice),
+        isCustom: !i.productId || parsedSpecs.itemType === "custom",
+        _specsParsed: parsedSpecs,
+      };
+    }));
   }, [existingQuotation]);
 
   // ── Product options (variações e atributos) ─────────────────────────────
@@ -262,6 +268,7 @@ export default function AdminQuotationForm() {
   // Retorna { unitPrice: preço/m² (ou preço unitário), totalPrice: unitPrice × área × qtd }
   const calcItemPricing = (item: QuotationItem, pricing: any | null): { unitPrice: number; totalPrice: number } => {
     const fallback = { unitPrice: item.unitPrice, totalPrice: item.totalPrice };
+    if (item.isCustom) return fallback;
     if (!pricing) return fallback;
     const specs = item._specsParsed ?? {};
     const w = parseFloat((specs.width ?? specs.largura ?? "0").replace(",", ".")) || 0;
@@ -415,6 +422,23 @@ export default function AdminQuotationForm() {
     }
   };
 
+  const addCustomItemToQuote = () => {
+    const newItem: QuotationItem = {
+      productId: null,
+      productName: "",
+      specifications: JSON.stringify({ itemType: "custom" }),
+      quantity: 1,
+      unitPrice: 0,
+      totalPrice: 0,
+      isCustom: true,
+      _specsParsed: { itemType: "custom" },
+    };
+    setItems((prev) => [...prev, newItem]);
+    setExpandedItems((prev) => { const next = new Set(prev); next.add(items.length); return next; });
+    setShowAddProduct(false);
+    setProductSearch("");
+  };
+
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
     setItems((prev) => {
       const next = [...prev];
@@ -427,7 +451,9 @@ export default function AdminQuotationForm() {
       }
       // Se specs ou quantidade mudaram, recalcular preço automaticamente
       if (updates.specifications !== undefined || updates._specsParsed !== undefined || updates.quantity !== undefined) {
-        const pricing = pricingCache[next[idx].productId];
+        const pricing = !next[idx].isCustom && next[idx].productId !== null
+          ? pricingCache[next[idx].productId]
+          : undefined;
         if (pricing) {
           const { unitPrice: newUnit, totalPrice: newTotal } = calcItemPricing(next[idx], pricing);
           if (newUnit > 0) {
@@ -438,7 +464,9 @@ export default function AdminQuotationForm() {
       }
       // Se o ajuste mudou, recalcular o total
       if (updates.priceAdjustment !== undefined) {
-        const pricing = pricingCache[next[idx].productId];
+        const pricing = !next[idx].isCustom && next[idx].productId !== null
+          ? pricingCache[next[idx].productId]
+          : undefined;
         if (pricing) {
           const { totalPrice: baseTotal } = calcItemPricing(next[idx], pricing);
           next[idx].totalPrice = (baseTotal > 0 ? baseTotal : next[idx].unitPrice * next[idx].quantity) + (updates.priceAdjustment ?? 0);
@@ -462,10 +490,10 @@ export default function AdminQuotationForm() {
     });
     // Carregar opções e pricing do produto ao expandir
     const item = items[idx];
-    if (item && !productOptionsCache[item.productId]) {
+    if (item?.productId !== null && item && !productOptionsCache[item.productId]) {
       setActiveProductIdForOptions(item.productId);
     }
-    if (item && !pricingCache[item.productId]) {
+    if (item?.productId !== null && item && !pricingCache[item.productId]) {
       setActivePricingProductId(item.productId);
     }
   };
@@ -834,7 +862,7 @@ export default function AdminQuotationForm() {
                             className="flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-pink-600 text-left"
                             onClick={() => toggleItem(idx)}
                           >
-                            {item.productName}
+                            {item.productName || "Item personalizado"}
                             {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                           </button>
                         </div>
@@ -848,6 +876,9 @@ export default function AdminQuotationForm() {
                           />
                         </div>
                         <div className="col-span-2 flex justify-center">
+                          {item.isCustom ? (
+                            <span className="text-xs text-gray-300">—</span>
+                          ) : (
                           <input
                             type="text"
                             inputMode="decimal"
@@ -867,9 +898,27 @@ export default function AdminQuotationForm() {
                             }}
                             className="w-28 h-7 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
+                          )}
                         </div>
                         <div className="col-span-2 text-right text-sm font-semibold text-gray-800">
-                          {fmt(item.totalPrice)}
+                          {item.isCustom ? (
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              aria-label={`Valor total de ${item.productName || "item personalizado"}`}
+                              title="Defina livremente o valor total do item personalizado"
+                              defaultValue={item.totalPrice > 0 ? fmt(item.totalPrice) : ""}
+                              placeholder="R$ 0,00"
+                              onBlur={(e) => {
+                                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                                const value = Math.max(0, parseFloat(raw) || 0);
+                                updateItem(idx, { unitPrice: value / Math.max(1, item.quantity), priceAdjustment: 0 });
+                                e.target.value = value > 0 ? fmt(value) : "";
+                              }}
+                              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                              className="w-28 h-7 text-right text-sm font-semibold border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+                            />
+                          ) : fmt(item.totalPrice)}
                         </div>
                         <div className="col-span-1 flex justify-end">
                           <button onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors">
@@ -879,11 +928,28 @@ export default function AdminQuotationForm() {
                       </div>
                       {/* Especificações expandidas */}
                       {isExpanded && (() => {
-                        const opts = productOptionsCache[item.productId];
+                        const opts = item.productId !== null ? productOptionsCache[item.productId] : undefined;
                         const updateSpec = (key: string, value: string) => {
                           const newSpecs = { ...specs, [key]: value };
                           updateItem(idx, { specifications: JSON.stringify(newSpecs), _specsParsed: newSpecs });
                         };
+                        if (item.isCustom) {
+                          return (
+                            <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
+                              <div className="col-span-2">
+                                <label className="text-xs text-gray-500 font-medium">Nome do Produto / Serviço</label>
+                                <Input
+                                  className="h-8 mt-0.5 text-sm"
+                                  value={item.productName}
+                                  onChange={(e) => updateItem(idx, { productName: e.target.value })}
+                                  placeholder="Ex.: Estrutura metálica para lona ou Mão de obra de instalação"
+                                  autoFocus={!item.productName}
+                                />
+                                <p className="text-xs text-gray-400 mt-2">Defina o valor livremente no campo Total. Este item não exige medidas, materiais ou acabamentos.</p>
+                              </div>
+                            </div>
+                          );
+                        }
                         return (
                           <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
                             {/* Medidas */}
@@ -1358,6 +1424,19 @@ export default function AdminQuotationForm() {
           <DialogHeader>
             <DialogTitle>Adicionar Produto ao Orçamento</DialogTitle>
           </DialogHeader>
+          <button
+            type="button"
+            className="w-full flex items-center gap-3 p-3 rounded-lg border border-pink-200 bg-pink-50/50 text-left hover:bg-pink-50 transition-colors"
+            onClick={addCustomItemToQuote}
+          >
+            <div className="w-10 h-10 rounded bg-pink-100 flex items-center justify-center">
+              <Plus className="w-5 h-5 text-pink-600" />
+            </div>
+            <div>
+              <p className="font-medium text-sm text-pink-800">Adicionar item personalizado</p>
+              <p className="text-xs text-pink-600">Para serviços ou produtos que não estão no catálogo</p>
+            </div>
+          </button>
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
