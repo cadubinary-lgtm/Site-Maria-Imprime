@@ -22,10 +22,20 @@ describe("itens personalizados em Orçamentos", () => {
     expect(routerSource).toContain('productId: z.number().nullable(),');
   });
 
-  it("cria um item personalizado com nome livre e marcador de especificação", () => {
+  it("cria um item personalizado sem repetir o campo de nome na área de especificações", () => {
     expect(formSource).toContain("const addCustomItemToQuote");
     expect(formSource).toContain('itemType: "custom"');
-    expect(formSource).toContain('Nome do Produto / Serviço');
+    expect(formSource).toContain('item.productName || "Item personalizado"');
+    expect(formSource).not.toContain("Nome do Produto / Serviço");
+  });
+
+  it("mantém medidas, seleções técnicas e upload de arte visíveis no item personalizado", () => {
+    expect(formSource).toContain("item.isCustom) && [");
+    expect(formSource).toContain('label: "Tipo de Impressão"');
+    expect(formSource).toContain('label: "Tipo de Material"');
+    expect(formSource).toContain('label: "Tipo de Espessura"');
+    expect(formSource).toContain('label: "Tipo de Acabamento"');
+    expect(formSource).toContain("Arte / Layout");
   });
 
   it("mantém o valor personalizado integrado ao total do orçamento", () => {

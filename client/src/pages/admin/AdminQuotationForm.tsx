@@ -933,23 +933,6 @@ export default function AdminQuotationForm() {
                           const newSpecs = { ...specs, [key]: value };
                           updateItem(idx, { specifications: JSON.stringify(newSpecs), _specsParsed: newSpecs });
                         };
-                        if (item.isCustom) {
-                          return (
-                            <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
-                              <div className="col-span-2">
-                                <label className="text-xs text-gray-500 font-medium">Nome do Produto / Serviço</label>
-                                <Input
-                                  className="h-8 mt-0.5 text-sm"
-                                  value={item.productName}
-                                  onChange={(e) => updateItem(idx, { productName: e.target.value })}
-                                  placeholder="Ex.: Estrutura metálica para lona ou Mão de obra de instalação"
-                                  autoFocus={!item.productName}
-                                />
-                                <p className="text-xs text-gray-400 mt-2">Defina o valor livremente no campo Total. Este item não exige medidas, materiais ou acabamentos.</p>
-                              </div>
-                            </div>
-                          );
-                        }
                         return (
                           <div className="px-3 py-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
                             {/* Medidas */}
@@ -1024,19 +1007,30 @@ export default function AdminQuotationForm() {
                                 </Select>
                               </div>
                             ))}
-                            {/* Fallback se não há variações carregadas */}
-                            {(!opts || !opts.variations || opts.variations.length === 0) && (
-                              <>
-                                <div>
-                                  <label className="text-xs text-gray-500 font-medium">Material</label>
-                                  <Input className="h-7 mt-0.5 text-sm" value={specs.material ?? ""} onChange={(e) => updateSpec("material", e.target.value)} />
-                                </div>
-                                <div>
-                                  <label className="text-xs text-gray-500 font-medium">Acabamento</label>
-                                  <Input className="h-7 mt-0.5 text-sm" value={specs.acabamento ?? specs.finish ?? ""} onChange={(e) => updateSpec("acabamento", e.target.value)} />
-                                </div>
-                              </>
-                            )}
+                            {/* Opções genéricas para itens personalizados ou produtos sem variações cadastradas */}
+                            {(!opts || !opts.variations || opts.variations.length === 0 || item.isCustom) && [
+                              { key: "printingType", label: "Tipo de Impressão", options: ["Solvente", "Digital", "Offset", "UV", "Outro"] },
+                              { key: "material", label: "Tipo de Material", options: ["Lona", "Adesivo", "Papel", "PVC", "Acrílico", "Outro"] },
+                              { key: "thickness", label: "Tipo de Espessura", options: ["180g", "280g", "440g", "Outro"] },
+                              { key: "finish", label: "Tipo de Acabamento", options: ["Sem acabamento", "Ilhós", "Laminação", "Corte especial", "Outro"] },
+                            ].map((field) => (
+                              <div key={field.key}>
+                                <label className="text-xs text-gray-500 font-medium">{field.label}</label>
+                                <Select
+                                  value={specs[field.key] ?? ""}
+                                  onValueChange={(value) => updateSpec(field.key, value)}
+                                >
+                                  <SelectTrigger className="h-7 mt-0.5 text-sm">
+                                    <SelectValue placeholder={`Selecionar ${field.label}`} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {field.options.map((option) => (
+                                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
 
                             <div className="col-span-2">
                               <label className="text-xs text-gray-500 font-medium mb-1 block">Arte / Layout</label>
