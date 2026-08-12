@@ -293,12 +293,92 @@ O cliente deverá comunicar qualquer problema assim que identificá-lo, pelos ca
 
 Cada solicitação será analisada individualmente, observando-se as características do pedido, as evidências apresentadas e a legislação aplicável.`;
 
+export const PRIVACY_POLICY_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Apresentação
+
+A Maria Imprime valoriza a privacidade e a proteção dos dados pessoais de seus clientes e usuários.
+
+Esta Política explica como os dados pessoais podem ser coletados, utilizados, armazenados e protegidos durante a utilização do site e dos serviços da Maria Imprime.
+
+2. Quem Somos
+
+Maria Imprime – Sua Gráfica Online
+
+CNPJ: [INSERIR CNPJ]
+
+Endereço: [INSERIR ENDEREÇO]
+
+E-mail de contato: contatomariaimprime@gmail.com
+
+E-mail para assuntos de privacidade: contatomariaimprime@gmail.com
+
+Os dados acima deverão ser preenchidos pela Maria Imprime antes da publicação definitiva.
+
+3. Dados que Podemos Coletar
+
+Dependendo da utilização do site, poderão ser coletados dados de cadastro (nome, CPF ou CNPJ, e-mail, telefone e senha, quando aplicável); dados de entrega (CEP, endereço, número, complemento, bairro, cidade e estado); dados de compra (produtos adquiridos, quantidades, valores, pedidos, histórico de compras, forma de pagamento e informações necessárias para processamento da transação); dados técnicos (endereço IP, navegador, dispositivo, sistema operacional, informações de acesso e registros de segurança).
+
+Arquivos enviados: quando o cliente enviar uma arte, o arquivo poderá ser armazenado para possibilitar a produção e o atendimento do pedido.
+
+4. Finalidades do Tratamento
+
+Os dados poderão ser utilizados para criar e administrar contas, processar pedidos e pagamentos, produzir pedidos, realizar entregas, emitir documentos fiscais, entrar em contato com o cliente, prestar atendimento, acompanhar pedidos, prevenir fraudes, manter a segurança do site, cumprir obrigações legais e melhorar os serviços.
+
+5. Bases Legais
+
+O tratamento de dados poderá ocorrer conforme as bases legais previstas na legislação aplicável, incluindo, quando cabível: execução de contrato; cumprimento de obrigação legal ou regulatória; exercício regular de direitos; legítimo interesse; e consentimento, quando necessário.
+
+6. Compartilhamento
+
+Os dados poderão ser compartilhados quando necessário com prestadores envolvidos na operação do serviço, como meios de pagamento, transportadoras, fornecedores de tecnologia, serviços de hospedagem, serviços de comunicação, sistemas de segurança, contabilidade e autoridades públicas, quando houver obrigação legal.
+
+A Maria Imprime não deverá comercializar dados pessoais de seus clientes de forma incompatível com a legislação aplicável.
+
+7. Pagamentos
+
+Os pagamentos poderão ser processados por empresas especializadas. A Maria Imprime poderá não armazenar diretamente determinados dados sensíveis de pagamento, como números completos de cartão, quando o processamento for realizado por terceiros especializados.
+
+8. Segurança
+
+A Maria Imprime adotará medidas técnicas e administrativas razoáveis para proteger os dados pessoais contra acessos não autorizados, perda, alteração, destruição ou tratamento inadequado.
+
+9. Retenção
+
+Os dados serão mantidos pelo período necessário para cumprir as finalidades para as quais foram coletados e as obrigações legais aplicáveis. Alguns dados poderão precisar ser mantidos mesmo após o encerramento da conta ou pedido quando houver obrigação legal ou necessidade de preservação para exercício regular de direitos.
+
+10. Direitos do Titular
+
+Nos termos da legislação aplicável, o titular poderá solicitar, conforme o caso, confirmação da existência de tratamento, acesso aos dados, correção, atualização, informações sobre compartilhamento, eliminação quando aplicável, revogação do consentimento quando essa for a base legal e demais direitos previstos na legislação.
+
+A solicitação poderá ser realizada pelo canal de privacidade informado pela Maria Imprime.
+
+11. Cookies
+
+O site poderá utilizar cookies e tecnologias semelhantes. O funcionamento dessas tecnologias é explicado na Política de Cookies da Maria Imprime.
+
+12. Menores de Idade
+
+A Maria Imprime não tem como objetivo coletar intencionalmente dados de crianças ou adolescentes de forma incompatível com a legislação aplicável. Caso seja identificada coleta inadequada, serão adotadas medidas cabíveis.
+
+13. Alterações da Política
+
+Esta Política poderá ser atualizada para refletir mudanças legais, tecnológicas ou operacionais. A versão atual estará sempre disponível no site.
+
+14. Contato
+
+Para dúvidas ou solicitações relacionadas à privacidade:
+
+E-mail: contatomariaimprime@gmail.com
+
+Maria Imprime – Sua Gráfica Online`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
   { title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
   { title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
-  { title: "Política de Privacidade (LGPD)", content: "Documento em preparação." },
+  { title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
   { title: "Política de Cookies", content: "Documento em preparação." },
   { title: "Termo de Uso do Site", content: "Documento em preparação." },
   { title: "Perguntas Frequentes (FAQ)", content: "Documento em preparação." },
