@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
+import { useLocation } from "wouter";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -46,6 +47,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 };
 
 export default function FinanceiroContasReceber() {
+  const [, setLocation] = useLocation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -207,6 +209,16 @@ export default function FinanceiroContasReceber() {
                       </td>
                       <td className="p-3">
                         <div className="flex items-center justify-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => setLocation(`/admin/pedidos/${item.pedidoId}`)}
+                            title="Ver pedido"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Ver
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
