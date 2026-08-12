@@ -568,28 +568,17 @@ export default function AdminQuotationForm() {
               </button>
             )}
           </div>
-          <div className="col-span-1 text-center text-sm text-gray-700">{item.quantity}</div>
-          <div className="col-span-2 flex justify-end">
+          <div className="col-span-1 flex justify-center">
             <input
-              type="text"
-              inputMode="decimal"
-              aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}
-              defaultValue={item.unitPrice > 0 ? fmt(item.unitPrice) : ""}
-              placeholder="R$ 0,00"
-              onChange={(e) => {
-                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
-                const value = Math.max(0, parseFloat(raw) || 0);
-                updateItem(idx, { unitPrice: value });
-              }}
-              onBlur={(e) => {
-                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
-                const value = Math.max(0, parseFloat(raw) || 0);
-                e.target.value = value > 0 ? fmt(value) : "";
-              }}
-              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="h-7 w-24 rounded-md border border-input bg-background px-2 text-right text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+              type="number"
+              min={1}
+              aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
+              value={item.quantity}
+              onChange={(e) => updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
+              className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
             />
           </div>
+          <div className="col-span-2 flex justify-end text-sm text-gray-700">{fmt(item.unitPrice)}</div>
           <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
             <span>{fmt(item.totalPrice)}</span>
             <button
@@ -703,7 +692,22 @@ export default function AdminQuotationForm() {
           </div>
           <div>
             <label className="text-xs text-gray-500 font-medium">Valor unitário</label>
-            <div className="h-8 mt-0.5 px-3 flex items-center rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-600">{fmt(item.unitPrice)}</div>
+            <input
+              key={`custom-unit-${idx}-${item.unitPrice}`}
+              type="text"
+              inputMode="decimal"
+              aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}
+              defaultValue={item.unitPrice > 0 ? fmt(item.unitPrice) : ""}
+              placeholder="R$ 0,00"
+              onBlur={(e) => {
+                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
+                const value = Math.max(0, parseFloat(raw) || 0);
+                updateItem(idx, { unitPrice: value });
+                e.target.value = value > 0 ? fmt(value) : "";
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              className="h-8 mt-0.5 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-pink-400"
+            />
           </div>
           <div>
             <label className="text-xs text-gray-500 font-medium">Valor total</label>
@@ -711,6 +715,7 @@ export default function AdminQuotationForm() {
               type="text"
               inputMode="decimal"
               aria-label={`Valor total de ${item.productName || "item personalizado"}`}
+              key={`custom-total-${idx}-${item.totalPrice}`}
               defaultValue={item.totalPrice > 0 ? fmt(item.totalPrice) : ""}
               placeholder="R$ 0,00"
               onBlur={(e) => {
