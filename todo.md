@@ -2551,3 +2551,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ocultar a linha de desconto quando o orçamento não possuir desconto aplicado
 - [x] Permitir editar quantidade e valor unitário nos itens personalizados com total automático
 - [x] Restaurar QTD e UNIT. editáveis no cabeçalho sem bloquear os campos inferiores
+- [x] Atualizar TOTAL instantaneamente durante a edição de QTD e UNIT. nos itens personalizados
+- [x] Adicionar botão de novo item personalizado abaixo da lista
+- [x] Destacar visualmente os campos editáveis quando selecionados
