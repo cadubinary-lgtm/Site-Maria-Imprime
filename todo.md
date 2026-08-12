@@ -2497,3 +2497,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar PDF de orçamento ao layout de visualização e ocultar rótulos técnicos personalizados
 - [x] Adicionar expansão e recolhimento aos cards de itens personalizados
 - [x] Posicionar a seta de expansão de itens de catálogo ao lado do valor
+- [x] Alinhar o resumo fechado de itens personalizados ao layout dos itens de catálogo
