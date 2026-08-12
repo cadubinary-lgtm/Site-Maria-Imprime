@@ -133,7 +133,7 @@ export const quotationsRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-      const { quotations, quotationItems, clients } = await import("../drizzle/schema.js");
+      const { quotations, quotationItems, clients, customerAccounts, users } = await import("../drizzle/schema.js");
 
       const [quotation] = await db
         .select({
@@ -183,13 +183,35 @@ export const quotationsRouter = router({
 
       if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
 
+      let resolvedClient = quotation;
+      if (!quotation.clientName && quotation.clientId) {
+        const [storeClient] = await db
+          .select({
+            name: sql<string>`CONCAT(${customerAccounts.firstName}, ' ', ${customerAccounts.lastName})`,
+            email: customerAccounts.email,
+            phone: customerAccounts.phone,
+          })
+          .from(customerAccounts)
+          .where(eq(customerAccounts.id, quotation.clientId))
+          .limit(1);
+        if (storeClient) resolvedClient = { ...quotation, clientName: storeClient.name, clientEmail: storeClient.email, clientPhone: storeClient.phone };
+      }
+      if (!resolvedClient.clientName && quotation.clientId) {
+        const [oauthClient] = await db
+          .select({ name: users.name, email: users.email })
+          .from(users)
+          .where(eq(users.id, quotation.clientId))
+          .limit(1);
+        if (oauthClient) resolvedClient = { ...resolvedClient, clientName: oauthClient.name, clientEmail: oauthClient.email };
+      }
+
       const items = await db
         .select()
         .from(quotationItems)
         .where(eq(quotationItems.quotationId, input.id))
         .orderBy(quotationItems.id);
 
-      return { ...quotation, items };
+      return { ...resolvedClient, items };
     }),
 
   // ── Criar orçamento ─────────────────────────────────────────────────────
