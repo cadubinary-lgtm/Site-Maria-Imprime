@@ -74,6 +74,7 @@ export const companySettings = mysqlTable("companySettings", {
   whatsappNumber: varchar("whatsappNumber", { length: 20 }).notNull(),
   showWhatsappButton: boolean("showWhatsappButton").default(true).notNull(),
   whatsappDefaultMessage: text("whatsappDefaultMessage"),
+  includeProductContext: boolean("includeProductContext").default(true).notNull(),
   useWhatsappBusinessHours: boolean("useWhatsappBusinessHours").default(false).notNull(),
   whatsappBusinessDays: varchar("whatsappBusinessDays", { length: 32 }).default("[1,2,3,4,5]").notNull(),
   whatsappStartTime: varchar("whatsappStartTime", { length: 5 }).default("09:00").notNull(),

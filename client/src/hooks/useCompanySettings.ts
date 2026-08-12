@@ -10,6 +10,7 @@ export const COMPANY_SETTINGS_FALLBACK = {
   whatsappNumber: "5522999459596",
   showWhatsappButton: true,
   whatsappDefaultMessage: "Olá! Como podemos ajudar?",
+  includeProductContext: true,
   useWhatsappBusinessHours: false,
   whatsappBusinessDays: "[1,2,3,4,5]",
   whatsappStartTime: "09:00",
@@ -48,14 +49,17 @@ export function getWhatsAppUrl(whatsappNumber: string | null | undefined, messag
 type WhatsAppAvailabilitySettings = {
   showWhatsappButton?: boolean | null;
   whatsappDefaultMessage?: string | null;
+  includeProductContext?: boolean | null;
   useWhatsappBusinessHours?: boolean | null;
   whatsappBusinessDays?: string | null;
   whatsappStartTime?: string | null;
   whatsappEndTime?: string | null;
 };
 
-export function getCompanyWhatsAppMessage(company: WhatsAppAvailabilitySettings) {
-  return company.whatsappDefaultMessage?.trim() || COMPANY_SETTINGS_FALLBACK.whatsappDefaultMessage;
+export function getCompanyWhatsAppMessage(company: WhatsAppAvailabilitySettings, productName?: string | null) {
+  const baseMessage = company.whatsappDefaultMessage?.trim() || COMPANY_SETTINGS_FALLBACK.whatsappDefaultMessage;
+  if (!company.includeProductContext || !productName?.trim()) return baseMessage;
+  return `${baseMessage}\n\nTenho interesse no produto: ${productName.trim()}.`;
 }
 
 export function parseWhatsAppBusinessDays(value: string | null | undefined) {

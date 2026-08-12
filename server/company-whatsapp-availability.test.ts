@@ -16,6 +16,11 @@ describe("disponibilidade pública do WhatsApp", () => {
     expect(getWhatsAppUrl("5522999459596", message)).toContain("Ol%C3%A1%2C%20preciso%20de%20atendimento.");
   });
 
+  it("inclui o produto apenas quando a preferência de contexto estiver ativa", () => {
+    expect(getCompanyWhatsAppMessage({ ...allDaysBusinessHours, includeProductContext: true }, "Lona Impressa")).toContain("Tenho interesse no produto: Lona Impressa.");
+    expect(getCompanyWhatsAppMessage({ ...allDaysBusinessHours, includeProductContext: false }, "Lona Impressa")).not.toContain("Lona Impressa");
+  });
+
   it("oculta o botão quando a chave global está desligada", () => {
     expect(isWhatsAppBusinessOpen({ ...allDaysBusinessHours, showWhatsappButton: false }, new Date("2024-01-02T12:00:00Z"))).toBe(false);
   });
