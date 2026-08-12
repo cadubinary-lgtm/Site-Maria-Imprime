@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getDb } from "./db";
 import { eq, desc, like, and, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { sendQuotationEmail } from "./emailService";
 
 const adminAnyProcedure = adminOrManusAuthProcedure;
 
@@ -426,6 +427,76 @@ export const quotationsRouter = router({
       } as any);
 
       return { success: true };
+    }),
+
+  // ── Enviar orçamento por e-mail ───────────────────────────────────────────
+  sendEmail: adminAnyProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { quotations, quotationItems, quotationHistory, clients, customerAccounts, users } = await import("../drizzle/schema.js");
+
+      const [quotation] = await db
+        .select({
+          id: quotations.id,
+          quotationNumber: quotations.quotationNumber,
+          status: quotations.status,
+          clientId: quotations.clientId,
+          clientName: clients.name,
+          clientEmail: clients.email,
+          total: quotations.total,
+          expiresAt: quotations.expiresAt,
+          paymentMethod: quotations.paymentMethod,
+          productionDeadline: quotations.productionDeadline,
+        })
+        .from(quotations)
+        .leftJoin(clients, eq(quotations.clientId, clients.id))
+        .where(eq(quotations.id, input.id));
+
+      if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+
+      let recipientEmail = quotation.clientEmail;
+      let recipientName = quotation.clientName;
+      if (!recipientEmail && quotation.clientId) {
+        const [storeClient] = await db.select({ name: sql<string>`CONCAT(${customerAccounts.firstName}, ' ', ${customerAccounts.lastName})`, email: customerAccounts.email })
+          .from(customerAccounts).where(eq(customerAccounts.id, quotation.clientId)).limit(1);
+        if (storeClient) {
+          recipientEmail = storeClient.email;
+          recipientName = recipientName ?? storeClient.name;
+        }
+      }
+      if (!recipientEmail && quotation.clientId) {
+        const [oauthClient] = await db.select({ name: users.name, email: users.email })
+          .from(users).where(eq(users.id, quotation.clientId)).limit(1);
+        if (oauthClient) {
+          recipientEmail = oauthClient.email;
+          recipientName = recipientName ?? oauthClient.name;
+        }
+      }
+      if (!recipientEmail) throw new TRPCError({ code: "BAD_REQUEST", message: "Este cliente não possui e-mail cadastrado." });
+
+      const items = await db.select({ productName: quotationItems.productName, quantity: quotationItems.quantity, totalPrice: quotationItems.totalPrice })
+        .from(quotationItems).where(eq(quotationItems.quotationId, input.id));
+      const result = await sendQuotationEmail(recipientEmail, {
+        clientName: recipientName,
+        quotationNumber: quotation.quotationNumber,
+        total: Number(quotation.total ?? 0),
+        expiresAt: quotation.expiresAt,
+        paymentMethod: quotation.paymentMethod,
+        productionDeadline: quotation.productionDeadline,
+        items: items.map((item) => ({ productName: item.productName, quantity: Number(item.quantity), totalPrice: Number(item.totalPrice) })),
+      });
+      if (!result.success) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: result.error ?? "Não foi possível enviar o e-mail." });
+
+      if (quotation.status === "rascunho") {
+        const now = new Date();
+        const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.id ?? 1;
+        await db.update(quotations).set({ status: "enviado", sentAt: now }).where(eq(quotations.id, input.id));
+        await db.insert(quotationHistory).values({ quotationId: input.id, previousStatus: quotation.status, newStatus: "enviado", operatorId, notes: "Orçamento enviado por e-mail" } as any);
+      }
+
+      return { success: true, recipientEmail };
     }),
 
   // ── Duplicar orçamento ──────────────────────────────────────────────────

@@ -30,6 +30,7 @@ import {
   Calendar,
   Image as ImageIcon,
   MessageCircle,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
@@ -362,6 +363,7 @@ export default function AdminQuotationDetail() {
   const quotationId = parseInt(params.id);
 
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   const { data: quotation, isLoading, refetch } = trpc.quotations.getById.useQuery(
@@ -390,6 +392,15 @@ export default function AdminQuotationDetail() {
       navigate(createAdminDetailLocation(`/admin/pedidos/${res.orderId}`, returnTarget.path));
     },
     onError: (e) => toast.error(e.message),
+  });
+
+  const sendEmail = trpc.quotations.sendEmail.useMutation({
+    onSuccess: (result) => {
+      setShowEmailConfirm(false);
+      toast.success(`Orçamento enviado para ${result.recipientEmail}.`);
+      refetch();
+    },
+    onError: (error) => toast.error(error.message),
   });
 
   if (isLoading) {
@@ -454,6 +465,20 @@ export default function AdminQuotationDetail() {
           </Button>
           <Button variant="outline" size="sm" className="gap-1 text-green-700 border-green-200 hover:bg-green-50" onClick={shareQuotationOnWhatsapp}>
             <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1 text-pink-700 border-pink-200 hover:bg-pink-50"
+            onClick={() => {
+              if (!q.clientEmail) {
+                toast.error("Cadastre um e-mail para este cliente antes de enviar o orçamento.");
+                return;
+              }
+              setShowEmailConfirm(true);
+            }}
+          >
+            <Mail className="w-3.5 h-3.5" /> E-mail
           </Button>
           <Button variant="outline" size="sm" className="gap-1" onClick={() => duplicate.mutate({ id: q.id })}>
             <Copy className="w-3.5 h-3.5" /> Duplicar
@@ -578,6 +603,27 @@ export default function AdminQuotationDetail() {
               onClick={() => convertToOrder.mutate({ id: q.id })}
             >
               Confirmar Conversão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showEmailConfirm} onOpenChange={setShowEmailConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar orçamento por e-mail?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O orçamento {q.quotationNumber} será enviado para {q.clientEmail}. O e-mail incluirá itens, total, validade e condições comerciais.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendEmail.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-pink-600 hover:bg-pink-700"
+              disabled={sendEmail.isPending}
+              onClick={() => sendEmail.mutate({ id: q.id })}
+            >
+              {sendEmail.isPending ? "Enviando..." : "Confirmar envio"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
