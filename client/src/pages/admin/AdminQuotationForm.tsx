@@ -513,12 +513,6 @@ export default function AdminQuotationForm() {
       const nextSpecs = { ...specs, [key]: value };
       updateItem(idx, { specifications: JSON.stringify(nextSpecs), _specsParsed: nextSpecs });
     };
-    const specificationFields = [
-      { key: "printingType", label: "Tipo de Impressão", options: ["Solvente", "Digital", "Offset", "UV", "Outro"] },
-      { key: "material", label: "Tipo de Material", options: ["Lona", "Adesivo", "Papel", "PVC", "Acrílico", "Outro"] },
-      { key: "thickness", label: "Tipo de Espessura", options: ["180g", "280g", "440g", "Outro"] },
-      { key: "finish", label: "Tipo de Acabamento", options: ["Sem acabamento", "Ilhós", "Laminação", "Corte especial", "Outro"] },
-    ];
 
     const uploadCustomArt = async (file: File) => {
       setArtUploadingIdx(idx);
@@ -570,45 +564,6 @@ export default function AdminQuotationForm() {
               placeholder="Descreva o serviço, materiais, acabamento, observações ou o que será entregue"
             />
           </div>
-          <div>
-            <label className="text-xs text-gray-500 font-medium">Largura (m)</label>
-            <Input
-              className="h-8 mt-0.5 text-sm"
-              value={specs.width ?? ""}
-              onChange={(e) => updateSpec("width", e.target.value)}
-              onBlur={(e) => {
-                const value = parseFloat(e.target.value.replace(",", "."));
-                if (!Number.isNaN(value) && value > 0) updateSpec("width", value.toFixed(2).replace(".", ","));
-              }}
-              placeholder="Opcional"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 font-medium">Altura (m)</label>
-            <Input
-              className="h-8 mt-0.5 text-sm"
-              value={specs.height ?? ""}
-              onChange={(e) => updateSpec("height", e.target.value)}
-              onBlur={(e) => {
-                const value = parseFloat(e.target.value.replace(",", "."));
-                if (!Number.isNaN(value) && value > 0) updateSpec("height", value.toFixed(2).replace(".", ","));
-              }}
-              placeholder="Opcional"
-            />
-          </div>
-          {specificationFields.map((field) => (
-            <div key={field.key}>
-              <label className="text-xs text-gray-500 font-medium">{field.label}</label>
-              <Select value={specs[field.key] ?? ""} onValueChange={(value) => updateSpec(field.key, value)}>
-                <SelectTrigger className="h-8 mt-0.5 text-sm">
-                  <SelectValue placeholder={`Selecionar ${field.label}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
         </div>
 
         <div>

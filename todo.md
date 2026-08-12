@@ -2493,3 +2493,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir item personalizado sem imagem de produto e com arte separada na tabela de Orçamentos
 - [x] Exibir itens personalizados em cards editáveis empilhados no formulário de Orçamentos
 - [x] Corrigir atualização de orçamento quando productImage estiver ausente
+- [x] Remover dimensões e seleções técnicas dos cards de itens personalizados

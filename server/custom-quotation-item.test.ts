@@ -31,12 +31,15 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("Descrição");
   });
 
-  it("mantém medidas, seleções técnicas e upload de arte dentro do card personalizado", () => {
-    expect(formSource).toContain("const specificationFields = [");
-    expect(formSource).toContain('label: "Tipo de Impressão"');
-    expect(formSource).toContain('label: "Tipo de Material"');
-    expect(formSource).toContain('label: "Tipo de Espessura"');
-    expect(formSource).toContain('label: "Tipo de Acabamento"');
+  it("mantém apenas descrição e upload de arte no card personalizado", () => {
+    const customCardSource = formSource.slice(
+      formSource.indexOf("const renderCustomItemCard"),
+      formSource.indexOf("return (", formSource.indexOf("const renderCustomItemCard") + 1)
+    );
+    expect(customCardSource).not.toContain("specificationFields");
+    expect(customCardSource).not.toContain("Largura (m)");
+    expect(customCardSource).not.toContain("Altura (m)");
+    expect(customCardSource).not.toContain("Tipo de Impressão");
     expect(formSource).toContain("Arte / Layout");
   });
 
