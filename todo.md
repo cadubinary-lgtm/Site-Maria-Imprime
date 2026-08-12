@@ -2509,3 +2509,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar ação Ver pedido em cada linha de Contas a Receber
 - [x] Padronizar retorno ao submenu de origem em detalhes e subpáginas administrativas
 - [x] Aplicar retorno contextual em todas as rotas e submenus do painel administrativo
+- [x] Diagnosticar e corrigir lentidão e indisponibilidade das páginas financeiras em produção
