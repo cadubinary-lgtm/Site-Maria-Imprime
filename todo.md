@@ -2548,3 +2548,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover os cards duplicados de Empresa e Cliente do PDF e consolidar os dados no cabeçalho
 - [x] Adicionar campo de observações ou termos personalizados no rodapé do orçamento e PDF
 - [x] Alinhar os dados integrados do cliente no cabeçalho do PDF sem rótulos soltos ou quebras inadequadas
+- [x] Ocultar a linha de desconto quando o orçamento não possuir desconto aplicado
