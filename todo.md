@@ -2519,3 +2519,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Uniformizar exclusivamente as informações comerciais na tela e PDF do orçamento personalizado
 - [ ] Auditar e completar todos os requisitos comerciais na tela e PDF do orçamento personalizado
 - [ ] Validar e inserir avisos de arte, cor, aceite e prazo exclusivamente no orçamento personalizado
+- [ ] Permitir editar CPF/CNPJ e endereço do cliente no orçamento personalizado
+- [ ] Permitir definir previsão manual de conclusão antes de gerar o PDF do orçamento
+- [ ] Adicionar compartilhamento do orçamento personalizado via WhatsApp
+- [ ] Gerar e conferir PDF de exemplo contra a tela do orçamento personalizado
+- [ ] Aplicar ajustes técnicos pendentes para conferência visual do orçamento personalizado
