@@ -264,8 +264,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       </tbody>
     </table>
     <div class="totals">
-      ${Number(q.discountAmount) > 0 ? `<div class="total-row" style="color:#16a34a"><span>Desconto</span><span>- ${fmt(q.discountAmount)}</span></div>` : ""}
-      ${Number(q.shippingPrice) > 0 ? `<div class="total-row"><span>Frete (${q.shippingLabel ?? ""})</span><span>${fmt(q.shippingPrice)}</span></div>` : ""}
+      <div class="total-row"><span>Subtotal</span><span>${fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div>
+      <div class="total-row" style="color:#16a34a"><span>Desconto</span><span>- ${fmt(q.discountAmount)}</span></div>
+      <div class="total-row"><span>Frete / Entrega</span><span>${fmt(q.shippingPrice)}</span></div>
       <div class="total-row grand"><span>TOTAL</span><span>${fmt(q.total)}</span></div>
     </div>
   </div>
@@ -279,6 +280,12 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
       <div class="info-item"><label>Validade do orçamento</label><span>${fmtDate(q.expiresAt)}</span></div>
     </div>
     ${q.commercialNotes ? `<div style="margin-top:12px;padding:12px;background:#f8f8f8;border-radius:6px;font-size:12px;color:#555">${q.commercialNotes}</div>` : ""}
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee;font-size:11px;line-height:1.55;color:#555">
+      <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
+      <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após aprovação podem gerar novo prazo e/ou custos adicionais.</p>
+      <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
+      <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
+    </div>
   </div>
 
   <div class="footer">
@@ -564,6 +571,12 @@ export default function AdminQuotationDetail() {
                 {q.commercialNotes}
               </div>
             )}
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-600 leading-relaxed">
+              <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
+              <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p>
+              <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
+              <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
+            </div>
           </div>
         </div>
 
