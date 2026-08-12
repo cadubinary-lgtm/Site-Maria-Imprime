@@ -769,7 +769,7 @@ export default function AdminQuotationForm() {
             {/* Busca de cliente existente */}
             {!showNewClientForm && (
               <div className="relative">
-                <div className="relative">
+                {!clientId && <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Buscar cliente por nome, e-mail ou telefone..."
@@ -782,8 +782,8 @@ export default function AdminQuotationForm() {
                     }}
                     onFocus={() => setShowClientSearch(true)}
                   />
-                </div>
-                {showClientSearch && clientSearch.length >= 2 && (
+                </div>}
+                {!clientId && showClientSearch && clientSearch.length >= 2 && (
                   <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {(clientResults ?? []).length === 0 ? (
                       <div className="px-4 py-3 text-sm text-gray-400 text-center">
@@ -802,6 +802,18 @@ export default function AdminQuotationForm() {
                         onClick={() => {
                           setClientId(c.id);
                           setClientName(c.name);
+                          setNewClientName(c.name ?? "");
+                          setNewClientEmail(c.email ?? "");
+                          setNewClientPhone(c.phone ?? "");
+                          setNewClientWhatsapp(c.whatsapp ?? "");
+                          setNewClientCpfCnpj(c.cpfCnpj ?? "");
+                          setNewClientZipCode(c.addressZipCode ?? "");
+                          setNewClientStreet(c.addressStreet ?? "");
+                          setNewClientNumber(c.addressNumber ?? "");
+                          setNewClientComplement(c.addressComplement ?? "");
+                          setNewClientNeighborhood(c.addressNeighborhood ?? "");
+                          setNewClientCity(c.addressCity ?? "");
+                          setNewClientState(c.addressState ?? "");
                           setClientSearch("");
                           setShowClientSearch(false);
                         }}
@@ -825,12 +837,23 @@ export default function AdminQuotationForm() {
                   </div>
                 )}
                 {clientId && (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-1.5 rounded">
-                    <User className="w-3.5 h-3.5" />
-                    <span className="font-medium">{clientName}</span>
+                  <div className="mt-2 space-y-3 rounded border border-green-100 bg-green-50 p-3">
+                    <div className="flex items-center gap-2 text-sm text-green-700">
+                      <User className="w-3.5 h-3.5" />
+                      <span className="font-medium">Dados do cliente</span>
                     <button className="ml-auto text-gray-400 hover:text-red-500 text-xs" onClick={() => { setClientId(null); setClientName(""); }}>
                       Trocar
                     </button>
+                  </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <Input value={clientName} onChange={(e) => { setClientName(e.target.value); setNewClientName(e.target.value); }} placeholder="Nome / Razão social" className="h-8 bg-white text-sm" />
+                      <Input value={newClientCpfCnpj} onChange={(e) => setNewClientCpfCnpj(e.target.value)} placeholder="CPF / CNPJ" className="h-8 bg-white text-sm" />
+                      <Input value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="E-mail" className="h-8 bg-white text-sm" />
+                      <Input value={newClientWhatsapp || newClientPhone} onChange={(e) => setNewClientWhatsapp(e.target.value)} placeholder="Telefone / WhatsApp" className="h-8 bg-white text-sm" />
+                      <Input value={newClientStreet} onChange={(e) => setNewClientStreet(e.target.value)} placeholder="Endereço" className="h-8 bg-white text-sm sm:col-span-2" />
+                      <Input value={newClientCity} onChange={(e) => setNewClientCity(e.target.value)} placeholder="Cidade" className="h-8 bg-white text-sm" />
+                      <Input value={newClientState} onChange={(e) => setNewClientState(e.target.value)} placeholder="UF" className="h-8 bg-white text-sm" />
+                    </div>
                   </div>
                 )}
               </div>
