@@ -2515,3 +2515,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Criar modal reutilizável da Central de Documentação Maria Imprime
 - [ ] Registrar versão e data do aceite nos pedidos
 - [ ] Adicionar Central de Documentação ao rodapé sem inventar conteúdo pendente
+- [ ] Exibir contato, endereço, CNPJ e responsável logado na visualização e PDF de Orçamentos
