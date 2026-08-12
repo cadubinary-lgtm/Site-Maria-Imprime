@@ -930,7 +930,7 @@ export function ProductVariationManager() {
                         <div className="px-3 pb-2 pt-1 border-t border-gray-100">
                           <Button
                             onClick={() => handleLinkCvVariation(vt.id)}
-                            className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7"
+                            className="w-full border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 text-xs h-7"
                             size="sm"
                             disabled={linkCvMutation.isPending}
                           >
@@ -997,7 +997,7 @@ export function ProductVariationManager() {
                         <div className="px-3 pb-2 pt-1 border-t border-gray-100">
                           <Button
                             onClick={() => handleLinkOffsetVariation(vt.id)}
-                            className="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs h-7"
+                            className="w-full border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 text-xs h-7"
                             size="sm"
                             disabled={linkOffsetMutation.isPending}
                           >
