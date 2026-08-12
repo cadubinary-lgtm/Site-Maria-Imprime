@@ -530,29 +530,47 @@ export default function AdminQuotationForm() {
 
     return (
       <div key={`custom-${idx}`} className="rounded-lg border border-pink-200 bg-white p-4 shadow-sm">
-        <div className={`flex items-center justify-between gap-3 ${isExpanded ? "border-b border-pink-100 pb-3" : ""}`}>
+        <div className={`grid grid-cols-12 items-center gap-2 ${isExpanded ? "border-b border-pink-100 pb-3" : ""}`}>
+          <div className="col-span-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-pink-50">
+              <Package className="w-4 h-4 text-pink-600" />
+            </div>
+          </div>
           <button
             type="button"
-            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            className="col-span-3 min-w-0 text-left text-sm font-medium text-gray-800 hover:text-pink-600"
             onClick={() => toggleItem(idx)}
             aria-expanded={isExpanded}
             aria-label={`${isExpanded ? "Recolher" : "Expandir"} item personalizado`}
           >
-            <div className="w-8 h-8 rounded-md bg-pink-50 flex items-center justify-center">
-              <Package className="w-4 h-4 text-pink-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-gray-800">{item.productName || "Item personalizado"}</p>
-              <p className="text-xs text-gray-400">Produto ou serviço fora do catálogo</p>
-            </div>
-            {!isExpanded && (
-              <div className="hidden items-center gap-3 text-xs sm:flex">
-                <span className="text-gray-400">Qtd. {item.quantity}</span>
-                <span className="font-semibold text-gray-700">{fmt(item.totalPrice)}</span>
-              </div>
-            )}
-            {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0 text-pink-600" /> : <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />}
+            <span className="block truncate">{item.productName || "Item personalizado"}</span>
           </button>
+          <div className="col-span-1 flex justify-center">
+            {item.artFileUrl ? (
+              <button
+                type="button"
+                title="Visualizar arte anexada"
+                className="h-8 w-8 overflow-hidden rounded border border-gray-200 bg-white"
+                onClick={() => setLightboxImg(item.artFileUrl!)}
+              >
+                <img src={item.artFileUrl} alt={`Arte de ${item.productName || "item personalizado"}`} className="h-full w-full object-cover" />
+              </button>
+            ) : <ImageIcon className="h-4 w-4 text-gray-300" />}
+          </div>
+          <div className="col-span-1 text-center text-sm text-gray-700">{item.quantity}</div>
+          <div className="col-span-2 text-right text-sm text-gray-700">{fmt(item.unitPrice)}</div>
+          <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
+            <span>{fmt(item.totalPrice)}</span>
+            <button
+              type="button"
+              title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}
+              onClick={() => toggleItem(idx)}
+              aria-expanded={isExpanded}
+              className="rounded p-0.5 text-gray-400 transition-colors hover:text-pink-600"
+            >
+              {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+          </div>
           <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
             <Trash2 className="w-4 h-4" />
           </button>
@@ -1379,7 +1397,7 @@ export default function AdminQuotationForm() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 pt-1">
                       <div className="h-px flex-1 bg-pink-100" />
-                      <span className="text-xs font-semibold uppercase tracking-wide text-pink-600">Itens personalizados</span>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-pink-600">Itens personalizados <span className="normal-case font-normal text-pink-400">— produto ou serviço fora do catálogo</span></span>
                       <div className="h-px flex-1 bg-pink-100" />
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}

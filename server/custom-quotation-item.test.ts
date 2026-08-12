@@ -57,6 +57,13 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("{isExpanded && <div className=\"space-y-4 pt-4\">");
   });
 
+  it("resume o item personalizado fechado no mesmo padrão do catálogo", () => {
+    expect(formSource).toContain("— produto ou serviço fora do catálogo");
+    expect(formSource).toContain('className="col-span-3 min-w-0 text-left text-sm font-medium text-gray-800 hover:text-pink-600"');
+    expect(formSource).toContain('alt={`Arte de ${item.productName || "item personalizado"}`}');
+    expect(formSource).toContain('title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}');
+  });
+
   it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
     expect(formSource).toContain('className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800"');
     expect(formSource).toContain('title={isExpanded ? "Recolher especificações" : "Expandir especificações"}');
