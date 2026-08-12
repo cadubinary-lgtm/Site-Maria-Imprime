@@ -58,6 +58,7 @@ import AdminProductionKanban from "./pages/admin/AdminProductionKanban";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminOS from "./pages/admin/AdminOS";
 import AdminOSPrint from "./pages/admin/AdminOSPrint";
+import AdminCompanySettings from "./pages/admin/AdminCompanySettings";
 import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
 import ClientsManager from "./pages/admin/ClientsManager";
@@ -187,6 +188,7 @@ function AdminProtectedRoutesManus() {
       <Route path="/admin/orcamentos/:id" component={AdminQuotationDetail} />
       <Route path="/admin/os" component={AdminOS} />
       <Route path="/admin/os/:id" component={AdminOSPrint} />
+      <Route path="/admin/dados-da-empresa" component={AdminCompanySettings} />
       <Route path="/admin/pre-impressao" component={AdminPreImpressao} />
       <Route path="/admin/status-producao" component={AdminStatusProducao} />
       <Route path="/admin/clientes" component={ClientsManager} />
@@ -277,6 +279,7 @@ function AdminProtectedRoutes() {
       <Route path="/admin/pedidos/:id" component={AdminOrderDetail} />
       <Route path="/admin/os" component={AdminOS} />
       <Route path="/admin/os/:id" component={AdminOSPrint} />
+      <Route path="/admin/dados-da-empresa" component={AdminCompanySettings} />
       <Route path="/admin/pre-impressao" component={AdminPreImpressao} />
       <Route path="/admin/status-producao" component={AdminStatusProducao} />
       <Route path="/admin/clientes" component={ClientsManager} />

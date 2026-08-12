@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
+import { getWhatsAppUrl, useCompanySettings } from "@/hooks/useCompanySettings";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 
@@ -116,6 +117,7 @@ function AccordionStep({
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function ProductDetail() {
   const { user } = useAuth();
+  const { company } = useCompanySettings();
   const isOperator = user?.role === "admin";
   const [, params] = useRoute("/produto/:id");
   const productId = params?.id ? parseInt(params.id) : null;
@@ -1841,7 +1843,7 @@ export default function ProductDetail() {
                   }
                 </Button>
                 <a
-                  href="https://wa.me/5522999459596?text=Olá! Preciso de ajuda com um produto."
+                  href={getWhatsAppUrl(company.whatsappNumber, "Olá! Preciso de ajuda com um produto.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"

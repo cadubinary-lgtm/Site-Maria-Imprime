@@ -1,4 +1,10 @@
+import { getCompanyAddressLine, getCompanyLocationLine, getWhatsAppUrl, useCompanySettings } from "@/hooks/useCompanySettings";
+
 export function Footer() {
+  const { company } = useCompanySettings();
+  const phoneHref = `tel:${company.commercialPhone.replace(/\D/g, "")}`;
+  const whatsappHref = getWhatsAppUrl(company.whatsappNumber);
+
   return (
     <footer className="bg-gray-900 text-gray-400 py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -20,13 +26,13 @@ export function Footer() {
             <h3 className="font-semibold text-white mb-4 text-sm">Atendimento</h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="tel:22999459596" className="hover:text-pink-600 transition-colors font-light">
-                  📞 22 99945-9596
+                <a href={phoneHref} className="hover:text-pink-600 transition-colors font-light">
+                  📞 {company.commercialPhone}
                 </a>
               </li>
               <li>
-                <a href="mailto:contatomariaimprime@gmail.com" className="hover:text-pink-600 transition-colors font-light">
-                  ✉️ contatomariaimprime@gmail.com
+                <a href={`mailto:${company.supportEmail}`} className="hover:text-pink-600 transition-colors font-light">
+                  ✉️ {company.supportEmail}
                 </a>
               </li>
               <li className="text-xs">
@@ -67,7 +73,7 @@ export function Footer() {
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
               </a>
-              <a href="https://wa.me/5522999459596" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.255.949c-1.238.503-2.39 1.242-3.286 2.128-1.797 1.809-2.813 4.26-2.813 6.837 0 1.52.37 3.011 1.07 4.345l-1.137 4.159c-.214.782.156 1.627.93 1.813l.04.01c.217.043.427.06.639.06.758 0 1.467-.263 2.018-.743l3.285-2.776a9.9 9.9 0 004.59 1.15h.005c5.443 0 9.87-4.426 9.87-9.87 0-2.633-.997-5.109-2.812-6.982-1.816-1.873-4.217-2.906-6.758-2.906z" />
                 </svg>
@@ -87,20 +93,23 @@ export function Footer() {
         {/* Company info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 text-xs font-light">
           <div>
-            <p className="font-semibold text-white mb-2 text-xs">Carlos Eduardo Barreto Novaes Pinheiro - ME</p>
-            <p>CNPJ: 34.528.399/0001-08</p>
-            <p>Avenida Antonio Ferreira dos Santos, 651</p>
-            <p>Braga - Cabo Frio - Rio de Janeiro</p>
-            <p>CEP: 28908-200</p>
+            <p className="font-semibold text-white mb-2 text-xs">{company.legalName}</p>
+            <p>CNPJ: {company.cnpj}</p>
+            {company.stateRegistration && <p>IE: {company.stateRegistration}</p>}
+            <p>{getCompanyAddressLine(company)}</p>
+            <p>{getCompanyLocationLine(company)}</p>
+            <p>CEP: {company.zipCode}</p>
           </div>
         </div>
 
         {/* Copyright */}
         <div className="text-center text-xs text-gray-600 border-t border-gray-700 pt-8 font-light">
-          <p>© 2026 Maria Imprime. Todos os direitos reservados.</p>
+          <p>© 2026 {company.tradeName}. Todos os direitos reservados.</p>
           <p className="mt-2">Site protegido (SSL)</p>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;

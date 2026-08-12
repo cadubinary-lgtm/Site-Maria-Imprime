@@ -2,6 +2,7 @@ import { useParams, useLocation } from "wouter";
 import { useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
+import { getCompanyAddressLine, getCompanyLocationLine, useCompanySettings } from "@/hooks/useCompanySettings";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Printer, ArrowLeft, Loader2, AlertCircle, FileText,
@@ -137,6 +138,7 @@ const border = "#d1d5db";
 export default function AdminOSPrint() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const { company } = useCompanySettings();
   const orderId = params.id ? parseInt(params.id) : undefined;
   const [printMode, setPrintMode] = useState<"a4" | "thermal">("a4");
 
@@ -270,31 +272,35 @@ export default function AdminOSPrint() {
               borderRight: `1px solid ${border}`,
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                <div style={{
-                  width: "38px", height: "38px", backgroundColor: orange,
-                  borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                }}>
-                  <FileText style={{ width: "19px", height: "19px", color: "#fff" }} />
-                </div>
+                {company.printLogoUrl ? (
+                  <img src={company.printLogoUrl} alt={`Logotipo ${company.tradeName}`} style={{ width: "72px", height: "38px", objectFit: "contain", flexShrink: 0 }} />
+                ) : (
+                  <div style={{
+                    width: "38px", height: "38px", backgroundColor: orange,
+                    borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <FileText style={{ width: "19px", height: "19px", color: "#fff" }} />
+                  </div>
+                )}
                 <div>
-                  <div style={{ fontSize: "15px", fontWeight: 900, color: "#111827", lineHeight: 1.1 }}>Gráfica</div>
-                  <div style={{ fontSize: "10px", fontWeight: 600, color: "#6b7280" }}>Ponto Digital</div>
+                  <div style={{ fontSize: "13px", fontWeight: 900, color: "#111827", lineHeight: 1.1 }}>{company.tradeName}</div>
+                  <div style={{ fontSize: "8px", fontWeight: 600, color: "#6b7280" }}>CNPJ: {company.cnpj}</div>
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
                   <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                  (22) 99945-9596
+                  {company.commercialPhone}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
                   <svg style={{ width: "9px", height: "9px", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2">
                     <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
-                  contato@graficapontodigital.com.br
+                  {company.supportEmail}
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "5px", fontSize: "9px", color: "#374151" }}>
                   <svg style={{ width: "9px", height: "9px", flexShrink: 0, marginTop: "1px" }} viewBox="0 0 24 24" fill="none" stroke={orange} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                  <span>Rua das Impressões, 123<br />Campos dos Goytacazes - RJ</span>
+                  <span>{getCompanyAddressLine(company)}<br />{getCompanyLocationLine(company)}</span>
                 </div>
               </div>
             </div>
@@ -790,12 +796,10 @@ export default function AdminOSPrint() {
                   INFORMAÇÕES IMPORTANTES
                 </span>
               </div>
-              <ul style={{ margin: 0, paddingLeft: "12px", fontSize: "8px", color: "#374151", lineHeight: 1.7 }}>
-                <li>Confira todas as informações antes de iniciar a produção.</li>
-                <li>Qualquer alteração após a produção iniciada será cobrada.</li>
-                <li>Prazos começam a contar após aprovação da arte.</li>
-                <li>Dúvidas? Entre em contato com nosso atendimento.</li>
-              </ul>
+              <div
+                style={{ fontSize: "8px", color: "#374151", lineHeight: 1.7 }}
+                dangerouslySetInnerHTML={{ __html: company.osTerms || "Confira todas as informações antes de iniciar a produção." }}
+              />
             </div>
             <div style={{ padding: "8px 12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
@@ -816,12 +820,12 @@ export default function AdminOSPrint() {
             padding: "6px 12px", backgroundColor: "#f9fafb",
           }}>
             <div style={{ fontSize: "7px", color: "#6b7280" }}>
-              <strong>Gráfica Ponto Digital</strong> · OS #{o.orderNumber} · Gerado em {fmtDate(new Date())}
+              <strong>{company.tradeName}</strong> · OS #{o.orderNumber} · Gerado em {fmtDate(new Date())}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "7px", fontWeight: 700, color: "#374151" }}>Sistema de Gestão · Ponto Digital ERP</div>
-                <div style={{ fontSize: "6px", color: "#9ca3af" }}>Muito mais controle para sua produção</div>
+                <div style={{ fontSize: "7px", fontWeight: 700, color: "#374151" }}>{company.legalName}</div>
+                <div style={{ fontSize: "6px", color: "#9ca3af" }}>CNPJ: {company.cnpj}</div>
               </div>
               <div style={{
                 width: "24px", height: "24px", backgroundColor: orange,

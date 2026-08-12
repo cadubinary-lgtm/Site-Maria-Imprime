@@ -61,6 +61,36 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 
 /**
+ * Configuração institucional singleton da empresa.
+ * Isolada das tabelas comerciais, de pedidos e de produtos.
+ */
+export const companySettings = mysqlTable("companySettings", {
+  id: int("id").primaryKey().notNull(),
+  legalName: varchar("legalName", { length: 255 }).notNull(),
+  tradeName: varchar("tradeName", { length: 255 }).notNull(),
+  cnpj: varchar("cnpj", { length: 20 }).notNull(),
+  stateRegistration: varchar("stateRegistration", { length: 50 }),
+  commercialPhone: varchar("commercialPhone", { length: 20 }).notNull(),
+  whatsappNumber: varchar("whatsappNumber", { length: 20 }).notNull(),
+  supportEmail: varchar("supportEmail", { length: 255 }).notNull(),
+  zipCode: varchar("zipCode", { length: 10 }).notNull(),
+  street: varchar("street", { length: 255 }).notNull(),
+  addressNumber: varchar("addressNumber", { length: 20 }).notNull(),
+  neighborhood: varchar("neighborhood", { length: 100 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(),
+  printLogoUrl: text("printLogoUrl"),
+  printLogoKey: varchar("printLogoKey", { length: 255 }),
+  nextOsNumber: int("nextOsNumber").notNull().default(1001),
+  osTerms: longtext("osTerms"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CompanySettings = typeof companySettings.$inferSelect;
+export type InsertCompanySettings = typeof companySettings.$inferInsert;
+
+/**
  * Segments table - segmentos de negócio
  */
 export const segments = mysqlTable("segments", {
