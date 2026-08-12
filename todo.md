@@ -2565,3 +2565,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Auditar e consolidar seções duplicadas do todo.md com evidência técnica atual
 - [ ] Preparar e entregar uma lista organizada das tarefas pendentes sem evidência técnica
 - [x] Preparar e entregar uma lista organizada das tarefas pendentes sem evidência técnica
+- [x] Atualizar o conteúdo de Termos e Condições de Venda com a documentação fornecida pela Maria Imprime
