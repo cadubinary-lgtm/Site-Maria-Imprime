@@ -2567,3 +2567,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preparar e entregar uma lista organizada das tarefas pendentes sem evidência técnica
 - [x] Atualizar o conteúdo de Termos e Condições de Venda com a documentação fornecida pela Maria Imprime
 - [x] Atualizar o conteúdo do Termo de Aprovação de Arte com a documentação fornecida
+- [x] Atualizar o conteúdo da Política de Produção e Prazos com a documentação fornecida

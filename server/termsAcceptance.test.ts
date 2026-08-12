@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ART_APPROVAL_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
+import { ART_APPROVAL_CONTENT, PRODUCTION_DEADLINE_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
 
 describe("documentação de termos da Maria Imprime", () => {
   it("mantém a apresentação e as cláusulas essenciais fornecidas", () => {
@@ -16,5 +16,11 @@ describe("documentação de termos da Maria Imprime", () => {
     expect(ART_APPROVAL_CONTENT).toContain("Responsabilidade pela Conferência");
     expect(ART_APPROVAL_CONTENT).toContain("Aprovação Eletrônica");
     expect(ART_APPROVAL_CONTENT).toContain("Arquivos de Baixa Qualidade");
+  });
+
+  it("inclui a política de produção e prazos fornecida", () => {
+    expect(PRODUCTION_DEADLINE_CONTENT).toContain("Prazo de Produção Não é Prazo de Entrega");
+    expect(PRODUCTION_DEADLINE_CONTENT).toContain("Produção em Grandes Formatos");
+    expect(PRODUCTION_DEADLINE_CONTENT).toContain("Situações Excepcionais");
   });
 });

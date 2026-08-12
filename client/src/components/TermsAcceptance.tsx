@@ -167,10 +167,70 @@ A aprovação poderá ocorrer por meio do sistema do site, e-mail, WhatsApp ou o
 
 Ao aprovar a arte, o cliente confirma que teve oportunidade de conferir as informações apresentadas e autoriza a produção daquela versão, sem prejuízo dos direitos assegurados pela legislação aplicável.`;
 
+export const PRODUCTION_DEADLINE_CONTENT = `POLÍTICA DE PRODUÇÃO E PRAZOS
+
+MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Objetivo
+
+Esta Política explica como funcionam os prazos de produção dos pedidos realizados na Maria Imprime.
+
+2. Início da Produção
+
+A produção poderá ser iniciada após o cumprimento das condições necessárias ao pedido.
+
+Dependendo do produto, isso poderá incluir confirmação do pagamento, envio da arte, arquivo adequado, aprovação da arte, confirmação das especificações e demais informações necessárias.
+
+3. Prazo de Produção
+
+O prazo de produção será informado na página do produto ou durante o processo de compra. Salvo indicação diferente, o prazo de produção será contado em dias úteis.
+
+4. Prazo de Produção Não é Prazo de Entrega
+
+O prazo de produção corresponde ao período necessário para fabricação do produto. O prazo de transporte é separado e depende da modalidade de entrega escolhida.
+
+Portanto: Prazo total estimado = produção + transporte.
+
+5. Pendências do Cliente
+
+Quando houver pendência que dependa do cliente, como arquivo, aprovação, informação incorreta, confirmação ou pagamento, o pedido poderá permanecer aguardando até que a pendência seja solucionada.
+
+6. Alteração do Pedido
+
+Alterações realizadas após a confirmação do pedido poderão impactar o prazo de produção. Caso a alteração exija nova preparação, novo arquivo ou nova produção, o novo prazo será informado ao cliente.
+
+7. Grande Volume
+
+Pedidos com grande quantidade ou projetos especiais poderão possuir prazo de produção diferente do prazo padrão apresentado no site. Quando necessário, o prazo será informado ao cliente antes da confirmação da contratação.
+
+8. Produção em Grandes Formatos
+
+Produtos como lonas, banners, outdoors, adesivos, placas, backdrops, painéis e fachadas podem depender de etapas adicionais de impressão e acabamento. Por isso, o prazo poderá variar conforme o produto, quantidade e acabamento escolhido.
+
+9. Finais de Semana e Feriados
+
+Salvo indicação expressa diferente, os prazos de produção são contabilizados em dias úteis. Sábados, domingos e feriados não serão considerados dias úteis para contagem do prazo de produção.
+
+10. Situações Excepcionais
+
+Situações fora do controle razoável da Maria Imprime poderão afetar os prazos, incluindo problemas técnicos, indisponibilidade excepcional de matéria-prima, falhas de fornecedores, interrupções de energia, eventos climáticos, acidentes, greves ou outros eventos de força maior.
+
+11. Entrega
+
+Após a conclusão da produção, o pedido será disponibilizado para retirada ou encaminhado conforme a modalidade de entrega escolhida. O prazo de transporte deverá ser considerado separadamente.
+
+12. Consulta do Pedido
+
+O cliente poderá consultar o status do pedido pelos recursos disponibilizados pela Maria Imprime.
+
+13. Disposição Final
+
+Os prazos apresentados durante a compra fazem parte das informações da contratação e deverão ser observados conforme as condições informadas ao cliente.`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
-  { title: "Política de Produção e Prazos", content: "Documento em preparação." },
+  { title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
   { title: "Política de Trocas, Cancelamentos e Reembolsos", content: "Documento em preparação." },
   { title: "Política de Privacidade (LGPD)", content: "Documento em preparação." },
   { title: "Política de Cookies", content: "Documento em preparação." },
