@@ -80,6 +80,11 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain('h-px flex-1 bg-gray-200');
   });
 
+  it("alinha a ação de exclusão na coluna final do catálogo", () => {
+    expect(formSource).toContain('className="col-span-1 flex justify-end"');
+    expect(formSource).toContain('title="Remover item"');
+  });
+
   it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
     expect(formSource).toContain('className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800"');
     expect(formSource).toContain('title={isExpanded ? "Recolher especificações" : "Expandir especificações"}');

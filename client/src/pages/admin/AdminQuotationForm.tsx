@@ -580,9 +580,11 @@ export default function AdminQuotationForm() {
               {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </button>
           </div>
-          <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="col-span-1 flex justify-end">
+            <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {isExpanded && <div className="space-y-4 p-4">
