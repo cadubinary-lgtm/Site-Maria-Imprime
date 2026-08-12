@@ -2511,3 +2511,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar retorno contextual em todas as rotas e submenus do painel administrativo
 - [x] Diagnosticar e corrigir lentidão e indisponibilidade das páginas financeiras em produção
 - [x] Paginar Contas a Receber e Recebidas diretamente no banco de dados
+- [ ] Criar aceite único global de Termos e Condições em todos os produtos
+- [ ] Criar modal reutilizável da Central de Documentação Maria Imprime
+- [ ] Registrar versão e data do aceite nos pedidos
+- [ ] Adicionar Central de Documentação ao rodapé sem inventar conteúdo pendente

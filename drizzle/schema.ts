@@ -162,6 +162,9 @@ export const orders = mysqlTable("orders", {
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
   paymentStatus: mysqlEnum("paymentStatus", ["pendente", "pago", "falhou"]).default("pendente").notNull(),
   notes: longtext("notes"),
+  termsAcceptedAt: timestamp("termsAcceptedAt"),
+  termsVersion: varchar("termsVersion", { length: 50 }),
+  termsDocuments: longtext("termsDocuments"),
   // Endereço de entrega
   deliveryStreet: varchar("deliveryStreet", { length: 255 }),
   deliveryNumber: varchar("deliveryNumber", { length: 10 }),
