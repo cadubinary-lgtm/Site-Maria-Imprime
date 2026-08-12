@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -111,7 +112,8 @@ export default function AdminQuotations() {
   const rows = data?.rows ?? [];
 
   return (
-    <div className="p-6 space-y-6">
+    <AdminLayout>
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -336,5 +338,6 @@ export default function AdminQuotations() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </AdminLayout>
   );
 }
