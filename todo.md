@@ -2545,3 +2545,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Compactar exclusivamente o cabeçalho e os cards iniciais do PDF sem alterar a tela de visualização
 - [x] Ocultar a linha vazia de responsável e distribuir Nome, E-mail e Telefone em três colunas no PDF
 - [x] Adicionar envio direto do orçamento personalizado por e-mail ao cliente cadastrado
+- [x] Remover os cards duplicados de Empresa e Cliente do PDF e consolidar os dados no cabeçalho

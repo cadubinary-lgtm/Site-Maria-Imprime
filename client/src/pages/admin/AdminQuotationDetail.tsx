@@ -179,8 +179,6 @@ function fmtDate(d: Date | string | null | undefined) {
 function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const items = q.items ?? [];
   const companyLine = [company?.tradeName ?? "Maria Imprime", company?.cnpj ? `CNPJ: ${company.cnpj}` : "", company?.commercialPhone ?? "", company?.supportEmail ?? ""].filter(Boolean).join(" · ");
-  const companyContact = formatCompanyContact(company);
-  const companyAddress = formatCompanyAddress(company);
   const specs = (s: string) => buildSpecPairs(s)
     .map(({ label, value }) => `<div>${label ? `<span style="color:#777">${label}</span> ` : ""}<span>${value}</span></div>`)
     .join("");
@@ -196,9 +194,10 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
   .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; border-bottom:3px solid #e91e8c; padding-bottom:8px; }
+  .brand { max-width:50%; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
   .brand img { height:52px; object-fit:contain; display:block; }
-  .doc-info { text-align:right; }
+  .doc-info { text-align:right; max-width:45%; }
   .doc-info .num { font-size:18px; font-weight:700; color:#1a1a1a; }
   .doc-info .date { font-size:12px; color:#666; margin-top:4px; }
   .status-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; background:#e91e8c; color:#fff; margin-top:8px; }
@@ -223,16 +222,13 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
   .company-meta { font-size:9px; color:#555; line-height:1.25; margin-top:4px; max-width:360px; }
-  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; }
-  .company-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:4px 8px; }
-  .company-box .info-item { min-width:0; }
-  .company-box .info-item span { overflow-wrap:normal; word-break:normal; }
-  .company-box .full-line { grid-column:1 / -1; }
-  .top-grid { display:grid; grid-template-columns:1.2fr 0.8fr; gap:8px; margin-top:2px; margin-bottom:6px; }
   .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
-  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
-  .client-box .info-grid { grid-template-columns:1fr 1fr 1fr; gap:4px 8px; }
-  .client-box .full-line { grid-column:1 / -1; }
+  .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
+  .client-summary { margin-top:7px; padding-top:5px; border-top:1px dashed #ccc; }
+  .client-summary-title { font-size:9px; color:#777; font-weight:700; margin-bottom:3px; }
+  .client-summary-grid { display:grid; grid-template-columns:1.2fr 1fr 0.8fr; gap:7px; text-align:left; }
+  .client-summary-grid label { font-size:8px; color:#888; display:block; margin-bottom:1px; }
+  .client-summary-grid span { display:block; font-size:9px; color:#1a1a1a; font-weight:600; overflow-wrap:anywhere; }
   .legal-notes { margin-top:14px; padding-top:7px; border-top:1px solid #eee; font-size:9px; line-height:1.35; color:#555; }
   .footer { margin-top:12px; padding-top:7px; border-top:1px solid #e0e0e0; font-size:9px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
@@ -250,33 +246,17 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	      <div class="date">Emitido em ${fmtDate(q.createdAt)}</div>
 	      <div class="date">Válido até ${fmtDate(q.expiresAt)}</div>
 	      <div class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</div>
+	      ${(q.clientName || q.clientEmail || q.clientPhone || q.clientWhatsapp) ? `<div class="client-summary">
+	        <div class="client-summary-title">Cliente</div>
+	        <div class="client-summary-grid">
+	          ${q.clientName ? `<div><label>Nome</label><span>${q.clientName}</span></div>` : ""}
+	          ${q.clientEmail ? `<div><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
+	          ${q.clientPhone || q.clientWhatsapp ? `<div><label>Telefone</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
+	        </div>
+	      </div>` : ""}
 	    </div>
 	  </div>
-		  <div class="top-grid">
-		  <div class="company-box">
-	    <div class="section-title">Dados da Empresa</div>
-	    <div class="info-grid">
-	      <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span>${company?.legalName ? `<span style="display:block;font-size:10px;color:#666">${company.legalName}</span>` : ""}</div>
-	      ${company?.cnpj ? `<div class="info-item"><label>CNPJ / Inscrição Estadual</label><span>${company.cnpj}</span>${company?.stateRegistration ? `<span style="display:block;font-size:10px;color:#666">IE: ${company.stateRegistration}</span>` : ""}</div>` : ""}
-	      ${company?.commercialPhone ? `<div class="info-item"><label>Telefone comercial</label><span>${company.commercialPhone}</span></div>` : ""}
-	      ${company?.whatsappNumber ? `<div class="info-item"><label>WhatsApp</label><span>${company.whatsappNumber}</span></div>` : ""}
-	      ${company?.supportEmail ? `<div class="info-item full-line"><label>E-mail de atendimento</label><span>${company.supportEmail}</span></div>` : ""}
-	      ${companyAddress ? `<div class="info-item full-line"><label>Endereço completo</label><span>${companyAddress}</span></div>` : ""}
-	    </div>
-  </div>
 		
-  <div class="section client-box">
-    <div class="section-title">Cliente</div>
-    <div class="info-grid">
-      ${q.clientName ? `<div class="info-item"><label>Nome</label><span>${q.clientName}</span></div>` : ""}
-      ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
-      ${q.clientPhone || q.clientWhatsapp ? `<div class="info-item"><label>Telefone</label><span>${q.clientPhone ?? q.clientWhatsapp}</span></div>` : ""}
-      ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
-	      ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item full-line"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/") , q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
-	    </div>
-	  </div>
-	  </div>
-	
 	  <div class="section">
     <div class="section-title">Produtos / Serviços</div>
     <table>
