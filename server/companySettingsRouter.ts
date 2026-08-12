@@ -4,6 +4,8 @@ import { companySettings } from "../drizzle/schema";
 import { getDb } from "./db";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 
+const optionalSocialUrl = z.string().max(2000).refine((value) => !value || /^https?:\/\/.+/i.test(value), "Informe uma URL completa iniciando com http:// ou https://").optional().nullable();
+
 const companySettingsInput = z.object({
   legalName: z.string().min(1).max(255),
   tradeName: z.string().min(1).max(255),
@@ -19,6 +21,14 @@ const companySettingsInput = z.object({
   whatsappStartTime: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).default("09:00"),
   whatsappEndTime: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).default("17:00"),
   supportEmail: z.string().email().max(255),
+  instagramUrl: optionalSocialUrl,
+  instagramActive: z.boolean().default(false),
+  facebookUrl: optionalSocialUrl,
+  facebookActive: z.boolean().default(false),
+  youtubeUrl: optionalSocialUrl,
+  youtubeActive: z.boolean().default(false),
+  otherSocialUrl: optionalSocialUrl,
+  otherSocialActive: z.boolean().default(false),
   zipCode: z.string().min(1).max(10),
   street: z.string().min(1).max(255),
   addressNumber: z.string().min(1).max(20),
@@ -96,6 +106,14 @@ export const companySettingsRouter = router({
       whatsappStartTime: input.whatsappStartTime,
       whatsappEndTime: input.whatsappEndTime,
       supportEmail: input.supportEmail.trim(),
+      instagramUrl: input.instagramUrl?.trim() || null,
+      instagramActive: input.instagramActive,
+      facebookUrl: input.facebookUrl?.trim() || null,
+      facebookActive: input.facebookActive,
+      youtubeUrl: input.youtubeUrl?.trim() || null,
+      youtubeActive: input.youtubeActive,
+      otherSocialUrl: input.otherSocialUrl?.trim() || null,
+      otherSocialActive: input.otherSocialActive,
       zipCode: input.zipCode.trim(),
       street: input.street.trim(),
       addressNumber: input.addressNumber.trim(),

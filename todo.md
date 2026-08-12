@@ -2455,3 +2455,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir incluir o nome do produto na mensagem do WhatsApp quando o cliente estiver em uma página de produto
 - [x] Manter mensagem geral configurável para pedidos personalizados fora do catálogo
 - [x] Adicionar botão flutuante de WhatsApp no site respeitando ativação e horário de atendimento
+- [x] Adicionar links editáveis e status Ativo/Desativado para Instagram, Facebook, YouTube e Outros
+- [x] Exibir no rodapé apenas os ícones sociais com link válido e status ativo

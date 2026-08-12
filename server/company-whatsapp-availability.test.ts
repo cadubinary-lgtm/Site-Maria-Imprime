@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCompanyWhatsAppMessage, getWhatsAppUrl, isWhatsAppBusinessOpen } from "../client/src/hooks/useCompanySettings";
+import { getCompanyWhatsAppMessage, getValidSocialUrl, getWhatsAppUrl, isWhatsAppBusinessOpen } from "../client/src/hooks/useCompanySettings";
 
 const allDaysBusinessHours = {
   showWhatsappButton: true,
@@ -29,5 +29,12 @@ describe("disponibilidade pública do WhatsApp", () => {
     expect(isWhatsAppBusinessOpen(allDaysBusinessHours, new Date("2024-01-02T12:00:00Z"))).toBe(true);
     expect(isWhatsAppBusinessOpen(allDaysBusinessHours, new Date("2024-01-02T11:00:00Z"))).toBe(false);
     expect(isWhatsAppBusinessOpen(allDaysBusinessHours, new Date("2024-01-02T20:00:00Z"))).toBe(false);
+  });
+
+  it("exibe um link social somente se for válido e estiver ativo", () => {
+    expect(getValidSocialUrl("https://instagram.com/mariaimprime", true)).toBe("https://instagram.com/mariaimprime");
+    expect(getValidSocialUrl("https://instagram.com/mariaimprime", false)).toBeNull();
+    expect(getValidSocialUrl("instagram.com/mariaimprime", true)).toBeNull();
+    expect(getValidSocialUrl("", true)).toBeNull();
   });
 });

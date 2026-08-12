@@ -1,10 +1,14 @@
-import { getCompanyAddressLine, getCompanyLocationLine, getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
+import { getCompanyAddressLine, getCompanyLocationLine, getCompanyWhatsAppMessage, getValidSocialUrl, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
 
 export function Footer() {
   const { company } = useCompanySettings();
   const phoneHref = `tel:${company.commercialPhone.replace(/\D/g, "")}`;
   const showWhatsApp = useWhatsAppButtonVisibility(company);
   const whatsappHref = getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company));
+  const instagramHref = getValidSocialUrl(company.instagramUrl, company.instagramActive);
+  const facebookHref = getValidSocialUrl(company.facebookUrl, company.facebookActive);
+  const youtubeHref = getValidSocialUrl(company.youtubeUrl, company.youtubeActive);
+  const otherSocialHref = getValidSocialUrl(company.otherSocialUrl, company.otherSocialActive);
 
   return (
     <footer className="bg-gray-900 text-gray-400 py-16 px-4">
@@ -64,16 +68,10 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4 text-sm">Siga a Maria</h3>
             <div className="flex gap-4">
-              <a href="https://instagram.com/mariaimprime" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.322a1.44 1.44 0 110-2.88 1.44 1.44 0 010 2.88z" />
-                </svg>
-              </a>
-              <a href="https://facebook.com/mariaimprime" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </a>
+              {instagramHref && <a href={instagramHref} aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.322a1.44 1.44 0 110-2.88 1.44 1.44 0 010 2.88z" /></svg></a>}
+              {facebookHref && <a href={facebookHref} aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg></a>}
+              {youtubeHref && <a href={youtubeHref} aria-label="YouTube" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a2.995 2.995 0 0 0-2.108-2.12C19.524 3.5 12 3.5 12 3.5s-7.524 0-9.39.566A2.995 2.995 0 0 0 .502 6.186C0 8.067 0 12 0 12s0 3.933.502 5.814a2.995 2.995 0 0 0 2.108 2.12C4.476 20.5 12 20.5 12 20.5s7.524 0 9.39-.566a2.995 2.995 0 0 0 2.108-2.12C24 15.933 24 12 24 12s0-3.933-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></a>}
+              {otherSocialHref && <a href={otherSocialHref} aria-label="Outro link social" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.14 1.14" /><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.14-1.14" /></svg></a>}
               {showWhatsApp && (
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -81,11 +79,6 @@ export function Footer() {
                   </svg>
                 </a>
               )}
-              <a href="https://tiktok.com/@mariaimprime" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.498 3.75h-3.75v12.5a2.5 2.5 0 1 1-2.5-2.5c.69 0 1.33.23 1.85.62V7.5a6.25 6.25 0 0 0-6.25 6.25v3.75a9.75 9.75 0 0 0 9.75-9.75V3.75z" />
-                </svg>
-              </a>
             </div>
           </div>
         </div>

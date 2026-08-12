@@ -16,6 +16,14 @@ export const COMPANY_SETTINGS_FALLBACK = {
   whatsappStartTime: "09:00",
   whatsappEndTime: "17:00",
   supportEmail: "contatomariaimprime@gmail.com",
+  instagramUrl: "https://instagram.com/mariaimprime",
+  instagramActive: true,
+  facebookUrl: "https://facebook.com/mariaimprime",
+  facebookActive: true,
+  youtubeUrl: "",
+  youtubeActive: false,
+  otherSocialUrl: "",
+  otherSocialActive: false,
   zipCode: "28908-200",
   street: "Avenida Antonio Ferreira dos Santos",
   addressNumber: "651",
@@ -44,6 +52,16 @@ export function getWhatsAppUrl(whatsappNumber: string | null | undefined, messag
   const number = (whatsappNumber || COMPANY_SETTINGS_FALLBACK.whatsappNumber).replace(/\D/g, "");
   const text = message ? `?text=${encodeURIComponent(message)}` : "";
   return `https://wa.me/${number}${text}`;
+}
+
+export function getValidSocialUrl(url: string | null | undefined, isActive: boolean | null | undefined) {
+  const trimmedUrl = url?.trim() || "";
+  try {
+    const parsed = new URL(trimmedUrl);
+    return isActive && (parsed.protocol === "http:" || parsed.protocol === "https:") ? trimmedUrl : null;
+  } catch {
+    return null;
+  }
 }
 
 type WhatsAppAvailabilitySettings = {

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Building2, FileText, ImageIcon, Loader2, MapPin, Phone, Save, Upload, X } from "lucide-react";
+import { Building2, FileText, Globe2, ImageIcon, Loader2, MapPin, Phone, Save, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 type CompanyForm = {
@@ -26,6 +26,14 @@ type CompanyForm = {
   whatsappStartTime: string;
   whatsappEndTime: string;
   supportEmail: string;
+  instagramUrl: string;
+  instagramActive: boolean;
+  facebookUrl: string;
+  facebookActive: boolean;
+  youtubeUrl: string;
+  youtubeActive: boolean;
+  otherSocialUrl: string;
+  otherSocialActive: boolean;
   zipCode: string;
   street: string;
   addressNumber: string;
@@ -53,6 +61,14 @@ const DEFAULT_FORM: CompanyForm = {
   whatsappStartTime: "09:00",
   whatsappEndTime: "17:00",
   supportEmail: "contatomariaimprime@gmail.com",
+  instagramUrl: "https://instagram.com/mariaimprime",
+  instagramActive: true,
+  facebookUrl: "https://facebook.com/mariaimprime",
+  facebookActive: true,
+  youtubeUrl: "",
+  youtubeActive: false,
+  otherSocialUrl: "",
+  otherSocialActive: false,
   zipCode: "28908-200",
   street: "Avenida Antonio Ferreira dos Santos",
   addressNumber: "651",
@@ -93,6 +109,14 @@ export default function AdminCompanySettings() {
       whatsappStartTime: settings.whatsappStartTime || "09:00",
       whatsappEndTime: settings.whatsappEndTime || "17:00",
       supportEmail: settings.supportEmail || "",
+      instagramUrl: settings.instagramUrl || "",
+      instagramActive: settings.instagramActive ?? false,
+      facebookUrl: settings.facebookUrl || "",
+      facebookActive: settings.facebookActive ?? false,
+      youtubeUrl: settings.youtubeUrl || "",
+      youtubeActive: settings.youtubeActive ?? false,
+      otherSocialUrl: settings.otherSocialUrl || "",
+      otherSocialActive: settings.otherSocialActive ?? false,
       zipCode: settings.zipCode || "",
       street: settings.street || "",
       addressNumber: settings.addressNumber || "",
@@ -330,6 +354,35 @@ export default function AdminCompanySettings() {
                 <div>
                   <Label htmlFor="state">Estado / UF</Label>
                   <Input id="state" value={form.state} maxLength={2} onChange={(event) => setField("state", event.target.value.toUpperCase())} className="mt-1" placeholder="RJ" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><Globe2 className="w-5 h-5 text-pink-600" /> Redes sociais</CardTitle>
+                <CardDescription>Os ícones só aparecem no rodapé quando o link estiver preenchido e a rede estiver ativa.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
+                  <Label htmlFor="instagramUrl" className="font-semibold text-gray-800">Instagram</Label>
+                  <Input id="instagramUrl" type="url" value={form.instagramUrl} onChange={(event) => setField("instagramUrl", event.target.value)} placeholder="https://instagram.com/suaempresa" />
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.instagramActive ? "text-emerald-700" : "text-gray-500"}`}>{form.instagramActive ? "Ativo" : "Desativado"}</span><Switch checked={form.instagramActive} onCheckedChange={(checked) => setField("instagramActive", checked)} /></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
+                  <Label htmlFor="facebookUrl" className="font-semibold text-gray-800">Facebook</Label>
+                  <Input id="facebookUrl" type="url" value={form.facebookUrl} onChange={(event) => setField("facebookUrl", event.target.value)} placeholder="https://facebook.com/suaempresa" />
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.facebookActive ? "text-emerald-700" : "text-gray-500"}`}>{form.facebookActive ? "Ativo" : "Desativado"}</span><Switch checked={form.facebookActive} onCheckedChange={(checked) => setField("facebookActive", checked)} /></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
+                  <Label htmlFor="youtubeUrl" className="font-semibold text-gray-800">YouTube</Label>
+                  <Input id="youtubeUrl" type="url" value={form.youtubeUrl} onChange={(event) => setField("youtubeUrl", event.target.value)} placeholder="https://youtube.com/@suaempresa" />
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.youtubeActive ? "text-emerald-700" : "text-gray-500"}`}>{form.youtubeActive ? "Ativo" : "Desativado"}</span><Switch checked={form.youtubeActive} onCheckedChange={(checked) => setField("youtubeActive", checked)} /></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
+                  <Label htmlFor="otherSocialUrl" className="font-semibold text-gray-800">Outro link</Label>
+                  <Input id="otherSocialUrl" type="url" value={form.otherSocialUrl} onChange={(event) => setField("otherSocialUrl", event.target.value)} placeholder="https://sua-rede.com/perfil" />
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.otherSocialActive ? "text-emerald-700" : "text-gray-500"}`}>{form.otherSocialActive ? "Ativo" : "Desativado"}</span><Switch checked={form.otherSocialActive} onCheckedChange={(checked) => setField("otherSocialActive", checked)} /></div>
                 </div>
               </CardContent>
             </Card>
