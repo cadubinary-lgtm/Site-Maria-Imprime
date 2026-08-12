@@ -15,6 +15,7 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 const FROM_NAME = "Maria Imprime";
 const SITE_URL = process.env.VITE_SITE_URL || "https://mariaimprime.com.br";
 const EMAIL_LOGO_URL = `${SITE_URL}/manus-storage/logo-maria-imprime_acc5585b.webp`;
+const EMAIL_MASCOT_URL = `${SITE_URL}/manus-storage/mascote-maria-v2_e85aa588.png`;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,9 +33,18 @@ function baseTemplate(title: string, body: string): string {
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(236,0,105,0.12);">
         <!-- Header -->
         <tr>
-          <td style="background:#fce7f3;padding:28px 40px;text-align:center;border-bottom:4px solid #ec0069;">
-            <img src="${EMAIL_LOGO_URL}" alt="Maria Imprime" width="178" style="display:block;margin:0 auto;height:auto;max-width:178px;" />
-            <p style="color:#8b1e4c;font-size:13px;font-weight:600;margin:10px 0 0;">Sua gráfica online</p>
+          <td style="background:#fce7f3;padding:20px 32px;text-align:center;border-bottom:4px solid #ec0069;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="left" valign="middle">
+                  <img src="${EMAIL_LOGO_URL}" alt="Maria Imprime" width="178" style="display:block;height:auto;max-width:178px;" />
+                  <p style="color:#8b1e4c;font-size:13px;font-weight:600;margin:8px 0 0;">Sua gráfica online</p>
+                </td>
+                <td align="right" valign="middle" width="96">
+                  <img src="${EMAIL_MASCOT_URL}" alt="Maria, mascote da Maria Imprime" width="82" style="display:block;height:auto;max-width:82px;" />
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <!-- Body -->

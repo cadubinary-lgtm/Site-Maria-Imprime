@@ -2464,3 +2464,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir a marca exibida Gráfica Ponto Digital por Maria Imprime no site, preservando a menção legal do rodapé
 - [x] Atualizar remetente, logotipo e cores dos e-mails automáticos para a identidade Maria Imprime
 - [ ] Validar a identidade atualizada e preparar o disparo de e-mail de teste
+- [x] Incorporar logotipo e mascote oficiais em layout de e-mail compatível com clientes de correio
