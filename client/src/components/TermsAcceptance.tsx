@@ -227,11 +227,77 @@ O cliente poderá consultar o status do pedido pelos recursos disponibilizados p
 
 Os prazos apresentados durante a compra fazem parte das informações da contratação e deverão ser observados conforme as condições informadas ao cliente.`;
 
+export const RETURNS_CANCELLATIONS_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Objetivo
+
+Esta Política estabelece os procedimentos para solicitações relacionadas a cancelamentos, trocas, defeitos e reembolsos.
+
+2. Produtos Personalizados
+
+Grande parte dos produtos comercializados pela Maria Imprime é produzida sob encomenda e personalizada conforme as especificações fornecidas pelo cliente.
+
+Por isso, uma solicitação feita após o início da produção poderá envolver materiais, tinta, acabamento e mão de obra já utilizados. Isso será considerado na análise do pedido, sempre respeitando os direitos previstos na legislação aplicável.
+
+3. Cancelamento Antes da Produção
+
+Quando o cliente solicitar cancelamento antes do início da produção, a Maria Imprime analisará a solicitação conforme o estágio do pedido e as regras legais aplicáveis.
+
+4. Cancelamento Após Início da Produção
+
+Quando a produção já tiver iniciado, o pedido poderá já possuir materiais e etapas produtivas realizadas.
+
+Nesse caso, a possibilidade de cancelamento será analisada individualmente, considerando estágio da produção, personalização do produto, materiais já utilizados, serviços já executados e legislação aplicável.
+
+5. Direito de Arrependimento
+
+Nas situações em que a legislação assegure ao consumidor o direito de arrependimento, a Maria Imprime respeitará o prazo e as condições legalmente aplicáveis. O direito de arrependimento nas compras realizadas fora do estabelecimento comercial é previsto pelo Código de Defesa do Consumidor.
+
+6. Produto com Defeito
+
+Caso o cliente identifique possível defeito de fabricação, deverá entrar em contato com a Maria Imprime pelos canais oficiais.
+
+Sempre que possível, deverão ser enviados número do pedido, fotografias, vídeos quando necessários, descrição do problema e informações solicitadas pela equipe de atendimento.
+
+7. Análise Técnica
+
+A Maria Imprime poderá solicitar informações e imagens para verificar se o problema decorre do processo de produção, do arquivo enviado, do transporte, da instalação, do armazenamento, do uso ou de características naturais do processo gráfico.
+
+8. Grandes Formatos
+
+Em materiais de grandes formatos podem existir pequenas características inerentes ao processo de impressão, como pequenos respingos, pequenas marcas superficiais, pequenas variações de tonalidade e pequenas diferenças de acabamento.
+
+Quando essas características não comprometerem a finalidade do produto, não serão consideradas defeitos. Por outro lado, uma falha que comprometa significativamente um elemento essencial da arte — como um rosto, texto principal, logotipo ou informação essencial — será analisada individualmente.
+
+9. Refabricação
+
+Quando for constatado defeito de fabricação atribuível à Maria Imprime, a empresa poderá realizar a refabricação ou adotar outra solução cabível conforme a legislação aplicável.
+
+10. Reembolso
+
+Quando houver direito ao reembolso, o procedimento será realizado conforme a forma de pagamento utilizada e os prazos aplicáveis.
+
+11. Erros do Cliente
+
+Erros existentes na arte fornecida ou aprovada pelo cliente não serão considerados defeitos de fabricação. Exemplos incluem telefone errado, endereço errado, texto errado, imagem incorreta, logotipo incorreto, medida informada incorretamente e arquivo de baixa resolução.
+
+12. Mau Uso ou Instalação
+
+A garantia relacionada a defeitos de fabricação não abrange danos provocados por instalação inadequada, armazenamento inadequado, exposição inadequada, utilização diferente da finalidade do produto, alterações realizadas por terceiros, acidentes ou mau uso.
+
+13. Prazo para Comunicação
+
+O cliente deverá comunicar qualquer problema assim que identificá-lo, pelos canais oficiais da Maria Imprime, para permitir a análise e eventual solução.
+
+14. Disposição Final
+
+Cada solicitação será analisada individualmente, observando-se as características do pedido, as evidências apresentadas e a legislação aplicável.`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
   { title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
-  { title: "Política de Trocas, Cancelamentos e Reembolsos", content: "Documento em preparação." },
+  { title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
   { title: "Política de Privacidade (LGPD)", content: "Documento em preparação." },
   { title: "Política de Cookies", content: "Documento em preparação." },
   { title: "Termo de Uso do Site", content: "Documento em preparação." },
