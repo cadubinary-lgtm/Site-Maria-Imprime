@@ -29,12 +29,14 @@ import {
   Clock,
   Calendar,
   Image as ImageIcon,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatCompanyAddress, formatCompanyContact } from "@/lib/companyQuotationDetails";
 import { getSelectedQuotationSpecifications } from "@/lib/quotationSpecifications";
+import { buildQuotationWhatsappUrl } from "@/lib/quotationWhatsappShare";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -401,6 +403,22 @@ export default function AdminQuotationDetail() {
   const isDraft = q.status === "rascunho";
   const isEditable = ["rascunho", "em_negociacao"].includes(q.status);
   const alreadyConverted = !!q.convertedOrderId;
+  const shareQuotationOnWhatsapp = () => {
+    const phone = q.clientWhatsapp || q.clientPhone;
+    const message = [
+      `Olá${q.clientName ? `, ${q.clientName}` : ""}!`,
+      `Segue o orçamento ${q.quotationNumber} da Maria Imprime.`,
+      `Total: ${fmt(q.total)}.`,
+      `Validade: ${fmtDate(q.expiresAt)}.`,
+      "Ficamos à disposição para esclarecer qualquer dúvida.",
+    ].join("\n");
+    const url = buildQuotationWhatsappUrl(phone, message);
+    if (!url) {
+      toast.error("Cadastre um telefone ou WhatsApp válido para este cliente antes de compartilhar.");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
@@ -431,6 +449,9 @@ export default function AdminQuotationDetail() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
             <Printer className="w-3.5 h-3.5" /> Imprimir PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-green-700 border-green-200 hover:bg-green-50" onClick={shareQuotationOnWhatsapp}>
+            <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
           </Button>
           <Button variant="outline" size="sm" className="gap-1" onClick={() => duplicate.mutate({ id: q.id })}>
             <Copy className="w-3.5 h-3.5" /> Duplicar

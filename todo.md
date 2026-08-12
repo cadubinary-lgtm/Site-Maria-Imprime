@@ -2537,3 +2537,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir atributos selecionados, condicionais de cliente e espaçamento dos cards no orçamento personalizado
 - [x] Reduzir a altura da faixa TOTAL e impedir quebra de dados em Empresa e Cliente no PDF A4
 - [x] Melhorar a leitura de atributos selecionados e ocultar especificações vazias no orçamento personalizado
+- [x] Adicionar botão de compartilhamento do orçamento personalizado via WhatsApp do cliente
