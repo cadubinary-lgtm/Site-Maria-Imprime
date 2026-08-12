@@ -192,44 +192,45 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; }
-  @page { size: A4; margin: 10mm; }
+  @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:3px solid #e91e8c; padding-bottom:24px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom:3px solid #e91e8c; padding-bottom:10px; }
   .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
   .brand img { height:52px; object-fit:contain; display:block; }
   .doc-info { text-align:right; }
   .doc-info .num { font-size:18px; font-weight:700; color:#1a1a1a; }
   .doc-info .date { font-size:12px; color:#666; margin-top:4px; }
   .status-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; background:#e91e8c; color:#fff; margin-top:8px; }
-  .section { margin-bottom:24px; }
-  .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #f0f0f0; }
-  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .info-item label { font-size:10px; color:#888; display:block; margin-bottom:2px; }
-  .info-item span { font-size:13px; font-weight:500; color:#1a1a1a; }
+  .section { margin-bottom:12px; }
+  .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
+  .info-item label { font-size:9px; color:#888; display:block; margin-bottom:1px; }
+  .info-item span { font-size:11px; font-weight:500; color:#1a1a1a; }
   table { width:100%; border-collapse:collapse; table-layout:fixed; }
-  th { font-size:10px; font-weight:700; text-transform:uppercase; color:#888; padding:8px 10px; background:#f8f8f8; text-align:left; border-bottom:2px solid #e0e0e0; }
-  td { font-size:12px; padding:10px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
+  th { font-size:9px; font-weight:700; text-transform:uppercase; color:#888; padding:5px 6px; background:#f8f8f8; text-align:left; border-bottom:2px solid #e0e0e0; }
+  td { font-size:11px; padding:6px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
   tr:last-child td { border-bottom:none; }
   .col-image { width:8%; } .col-product { width:19%; } .col-specs { width:36%; } .col-art { width:11%; } .col-qty { width:7%; } .col-unit { width:10%; } .col-total { width:11%; }
   .td-image, .td-art { text-align:center; }
   .product-image { width:36px; height:36px; object-fit:contain; border:1px solid #eee; border-radius:4px; }
   .art-image { width:48px; height:48px; object-fit:contain; border:1px solid #eee; border-radius:4px; }
   .empty-image { width:36px; height:36px; display:inline-block; border-radius:4px; background:#f5f5f5; }
-  .td-specs { color:#666; font-size:11px; line-height:1.45; overflow-wrap:anywhere; }
+  .td-specs { color:#666; font-size:10px; line-height:1.3; overflow-wrap:anywhere; }
+  .td-specs div { display:block; margin-bottom:2px; }
   .td-right { text-align:right; }
-  .totals { margin-top:16px; border-top:2px solid #e0e0e0; padding-top:16px; }
-  .total-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
-  .total-row.grand { background:#e91e8c; color:#fff; padding:6px 12px; border-radius:8px; margin-top:8px; font-size:15px; font-weight:700; }
+  .totals { margin-top:8px; border-top:2px solid #e0e0e0; padding-top:8px; }
+  .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
+  .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
   .company-meta { font-size:10px; color:#555; line-height:1.4; margin-top:8px; max-width:360px; }
-  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:12px; }
-  .company-box .info-grid { grid-template-columns:1fr 1fr; gap:8px 14px; }
+  .company-box { border:1px solid #e5e7eb; border-radius:8px; padding:8px; }
+  .company-box .info-grid { grid-template-columns:1fr 1fr; gap:5px 10px; }
   .company-box .info-item { min-width:0; }
   .company-box .info-item span { overflow-wrap:normal; word-break:normal; }
   .company-box .full-line { grid-column:1 / -1; }
-  .top-grid, .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
-  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin:0; }
-  .legal-notes { margin-top:34px; padding-top:12px; border-top:1px solid #eee; font-size:10px; line-height:1.55; color:#555; }
-  .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e0e0e0; font-size:10px; color:#aaa; text-align:center; }
+  .top-grid, .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
+  .top-grid .section, .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding:8px; margin:0; }
+  .legal-notes { margin-top:14px; padding-top:7px; border-top:1px solid #eee; font-size:9px; line-height:1.35; color:#555; }
+  .footer { margin-top:12px; padding-top:7px; border-top:1px solid #e0e0e0; font-size:9px; color:#aaa; text-align:center; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
 </head>
@@ -502,9 +503,9 @@ export default function AdminQuotationDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
-          <h2 className="font-semibold text-gray-800 mb-3">Dados da Empresa</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-3 text-sm">
+        <section className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <h2 className="font-semibold text-gray-800 mb-2">Dados da Empresa</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
             {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
             {company?.commercialPhone && <div><span className="text-gray-400 text-xs block">Telefone comercial</span><span>{company.commercialPhone}</span></div>}
@@ -512,12 +513,12 @@ export default function AdminQuotationDetail() {
             {company?.supportEmail && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">E-mail de atendimento</span><span>{company.supportEmail}</span></div>}
             {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço completo</span><span className="text-xs text-gray-600 leading-relaxed">{formatCompanyAddress(company)}</span></div>}
           </div>
-          {adminUser?.name && <p className="mt-3 pt-3 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser.name}</span></p>}
+          {adminUser?.name && <p className="mt-2 pt-2 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser.name}</span></p>}
         </section>
 
-        <section className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
-          <div className="flex items-center gap-2 mb-3"><User className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Cliente</h2></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+        <section className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-2"><User className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Cliente</h2></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
             {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
             {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
@@ -528,20 +529,20 @@ export default function AdminQuotationDetail() {
         </section>
       </div>
 
-      <section className="bg-white rounded-lg border border-gray-200 p-5">
-        <div className="flex items-center gap-2 mb-3"><Package className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Produtos / Serviços</h2></div>
+      <section className="bg-white rounded-lg border border-gray-200 p-3">
+        <div className="flex items-center gap-2 mb-2"><Package className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Produtos / Serviços</h2></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="bg-gray-50 border-y border-gray-100">{["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => <th key={h} className="text-left py-2.5 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>)}</tr></thead>
+            <thead><tr className="bg-gray-50 border-y border-gray-100">{["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => <th key={h} className="text-left py-1.5 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>)}</tr></thead>
             <tbody className="divide-y divide-gray-100">
               {(q.items ?? []).map((item: any) => {
                 const specPairs = buildSpecPairs(item.specifications);
                 return <tr key={item.id}>
-                  <td className="py-3 px-2">{item.productImage ? <img src={item.productImage} alt={item.productName} className="w-10 h-10 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.productImage)} /> : <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="w-5 h-5 text-gray-300" /></div>}</td>
-                  <td className="py-3 px-2 font-semibold text-gray-800 align-top">{item.productName}</td>
-                  <td className="py-3 px-2 text-xs text-gray-600 max-w-72 leading-relaxed align-top">{specPairs.length > 0 && <div className="space-y-0.5">{specPairs.map((pair, index) => <p key={index}>{pair.label && <span className="text-gray-500">{pair.label} </span>}<span className={pair.label ? "text-gray-700" : "text-gray-600"}>{pair.value}</span></p>)}</div>}</td>
-                  <td className="py-3 px-2 align-top">{item.artFileUrl && <img src={item.artFileUrl} alt="Arte" className="w-14 h-14 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.artFileUrl)} />}</td>
-                  <td className="py-3 px-2 text-center align-top">{item.quantity}</td><td className="py-3 px-2 text-right align-top">{fmt(item.unitPrice)}</td><td className="py-3 px-2 font-semibold text-right align-top">{fmt(item.totalPrice)}</td>
+                  <td className="py-1.5 px-2">{item.productImage ? <img src={item.productImage} alt={item.productName} className="w-8 h-8 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.productImage)} /> : <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-300" /></div>}</td>
+                  <td className="py-1.5 px-2 font-semibold text-gray-800 align-top">{item.productName}</td>
+                  <td className="py-1.5 px-2 text-[11px] text-gray-600 max-w-72 leading-4 align-top">{specPairs.length > 0 && <div className="space-y-0.5">{specPairs.map((pair, index) => <p key={index} className="block">{pair.label && <span className="text-gray-500">{pair.label} </span>}<span className={pair.label ? "text-gray-700" : "text-gray-600"}>{pair.value}</span></p>)}</div>}</td>
+                  <td className="py-1.5 px-2 align-top">{item.artFileUrl && <img src={item.artFileUrl} alt="Arte" className="w-10 h-10 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.artFileUrl)} />}</td>
+                  <td className="py-1.5 px-2 text-center align-top">{item.quantity}</td><td className="py-1.5 px-2 text-right align-top">{fmt(item.unitPrice)}</td><td className="py-1.5 px-2 font-semibold text-right align-top">{fmt(item.totalPrice)}</td>
                 </tr>;
               })}
             </tbody>
@@ -549,16 +550,16 @@ export default function AdminQuotationDetail() {
         </div>
       </section>
 
-      <section className="bg-white rounded-lg border border-gray-200 p-5">
-        <div className="space-y-2.5 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div><div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div><div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-2 mt-3"><span className="font-semibold">TOTAL</span><span className="text-lg font-bold">{fmt(q.total)}</span></div></div>
+      <section className="bg-white rounded-lg border border-gray-200 p-3">
+        <div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div><div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div><div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-3 py-1 min-h-7 mt-2"><span className="font-semibold">TOTAL</span><span className="text-sm font-bold">{fmt(q.total)}</span></div></div>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="bg-white rounded-lg border border-gray-200 p-5"><div className="flex items-center gap-2 mb-3"><Truck className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Entrega</h2></div><div className="grid grid-cols-2 gap-3 text-sm"><div><span className="text-gray-400 text-xs block">Método</span><span>{q.shippingLabel ?? q.shippingMethod ?? "Retirada na loja"}</span></div><div><span className="text-gray-400 text-xs block">Valor do frete</span><span>{fmt(q.shippingPrice)}</span></div>{q.shippingEstimatedDays && <div><span className="text-gray-400 text-xs block">Prazo estimado</span><span>{q.shippingEstimatedDays} dias</span></div>}{q.deliveryAddress && <div className="col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{q.deliveryAddress}</span></div>}</div></section>
-        <section className="bg-white rounded-lg border border-gray-200 p-5"><div className="flex items-center gap-2 mb-3"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-3 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div>{q.commercialNotes && <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-600">{q.commercialNotes}</div>}</section>
+        <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><Truck className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Entrega</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Método</span><span>{q.shippingLabel ?? q.shippingMethod ?? "Retirada na loja"}</span></div><div><span className="text-gray-400 text-xs block">Valor do frete</span><span>{fmt(q.shippingPrice)}</span></div>{q.shippingEstimatedDays && <div><span className="text-gray-400 text-xs block">Prazo estimado</span><span>{q.shippingEstimatedDays} dias</span></div>}{q.deliveryAddress && <div className="col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span>{q.deliveryAddress}</span></div>}</div></section>
+        <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div>{q.commercialNotes && <div className="mt-2 p-2 bg-gray-50 rounded text-sm text-gray-600">{q.commercialNotes}</div>}</section>
       </div>
 
-      <section className="pt-4 text-xs text-gray-600 leading-relaxed space-y-1"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p></section>
+      <section className="pt-2 text-[11px] text-gray-600 leading-snug space-y-0.5"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p></section>
 
       {/* Modal de conversão */}
       <AlertDialog open={showConvertConfirm} onOpenChange={setShowConvertConfirm}>
