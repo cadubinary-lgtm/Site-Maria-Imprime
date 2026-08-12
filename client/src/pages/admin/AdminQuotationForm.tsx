@@ -507,6 +507,198 @@ export default function AdminQuotationForm() {
     }
   };
 
+  const renderCustomItemCard = (item: QuotationItem, idx: number) => {
+    const specs = item._specsParsed ?? { itemType: "custom" };
+    const updateSpec = (key: string, value: string) => {
+      const nextSpecs = { ...specs, [key]: value };
+      updateItem(idx, { specifications: JSON.stringify(nextSpecs), _specsParsed: nextSpecs });
+    };
+    const specificationFields = [
+      { key: "printingType", label: "Tipo de Impressão", options: ["Solvente", "Digital", "Offset", "UV", "Outro"] },
+      { key: "material", label: "Tipo de Material", options: ["Lona", "Adesivo", "Papel", "PVC", "Acrílico", "Outro"] },
+      { key: "thickness", label: "Tipo de Espessura", options: ["180g", "280g", "440g", "Outro"] },
+      { key: "finish", label: "Tipo de Acabamento", options: ["Sem acabamento", "Ilhós", "Laminação", "Corte especial", "Outro"] },
+    ];
+
+    const uploadCustomArt = async (file: File) => {
+      setArtUploadingIdx(idx);
+      try {
+        const { url } = await doArtUpload(file);
+        updateItem(idx, { artFileUrl: url });
+      } catch (err: any) {
+        if (err?.message !== "CANCELLED") toast.error("Erro ao enviar imagem");
+      } finally {
+        setArtUploadingIdx(null);
+        resetArtUpload();
+      }
+    };
+
+    return (
+      <div key={`custom-${idx}`} className="rounded-lg border border-pink-200 bg-white p-4 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3 border-b border-pink-100 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-pink-50 flex items-center justify-center">
+              <Package className="w-4 h-4 text-pink-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Item personalizado</p>
+              <p className="text-xs text-gray-400">Produto ou serviço fora do catálogo</p>
+            </div>
+          </div>
+          <button type="button" onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors" title="Remover item">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="md:col-span-2">
+            <label className="text-xs text-gray-500 font-medium">Nome do Produto / Serviço</label>
+            <Input
+              aria-label="Nome do item personalizado"
+              className="h-8 mt-0.5 text-sm"
+              value={item.productName}
+              onChange={(e) => updateItem(idx, { productName: e.target.value })}
+              placeholder="Ex.: Estrutura metálica para lona ou mão de obra de instalação"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-gray-500 font-medium">Descrição</label>
+            <Textarea
+              className="min-h-20 mt-0.5 text-sm resize-y"
+              value={specs.description ?? ""}
+              onChange={(e) => updateSpec("description", e.target.value)}
+              placeholder="Descreva o serviço, materiais, acabamento, observações ou o que será entregue"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 font-medium">Largura (m)</label>
+            <Input
+              className="h-8 mt-0.5 text-sm"
+              value={specs.width ?? ""}
+              onChange={(e) => updateSpec("width", e.target.value)}
+              onBlur={(e) => {
+                const value = parseFloat(e.target.value.replace(",", "."));
+                if (!Number.isNaN(value) && value > 0) updateSpec("width", value.toFixed(2).replace(".", ","));
+              }}
+              placeholder="Opcional"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 font-medium">Altura (m)</label>
+            <Input
+              className="h-8 mt-0.5 text-sm"
+              value={specs.height ?? ""}
+              onChange={(e) => updateSpec("height", e.target.value)}
+              onBlur={(e) => {
+                const value = parseFloat(e.target.value.replace(",", "."));
+                if (!Number.isNaN(value) && value > 0) updateSpec("height", value.toFixed(2).replace(".", ","));
+              }}
+              placeholder="Opcional"
+            />
+          </div>
+          {specificationFields.map((field) => (
+            <div key={field.key}>
+              <label className="text-xs text-gray-500 font-medium">{field.label}</label>
+              <Select value={specs[field.key] ?? ""} onValueChange={(value) => updateSpec(field.key, value)}>
+                <SelectTrigger className="h-8 mt-0.5 text-sm">
+                  <SelectValue placeholder={`Selecionar ${field.label}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-500 font-medium mb-1 block">Arte / Layout</label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            className="hidden"
+            ref={(el) => { (artPasteRefs.current as any)[`file_${idx}`] = el; }}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              e.target.value = "";
+              await uploadCustomArt(file);
+            }}
+          />
+          {item.artFileUrl ? (
+            <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+              <img src={item.artFileUrl} alt="Arte do item personalizado" className="max-h-40 mx-auto rounded object-contain" />
+              <div className="flex gap-2 justify-center">
+                <button type="button" className="text-xs text-pink-600 hover:text-pink-700 underline" onClick={() => (artPasteRefs.current as any)[`file_${idx}`]?.click()}>Substituir</button>
+                <span className="text-gray-300 text-xs">|</span>
+                <button type="button" className="text-xs text-gray-400 hover:text-red-500 underline" onClick={() => updateItem(idx, { artFileUrl: undefined, artFileKey: undefined })}>Remover</button>
+              </div>
+            </div>
+          ) : artUploadingIdx === idx ? (
+            <div className="border-2 border-dashed border-pink-200 rounded-lg p-4 space-y-2 text-center">
+              <div className="text-xs text-gray-500">Enviando... {artUploadState.currentChunk}/{artUploadState.totalChunks} — {artUploadState.progress}%</div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5"><div className="bg-pink-500 h-1.5 rounded-full transition-all" style={{ width: `${artUploadState.progress}%` }} /></div>
+              <button type="button" className="text-xs text-gray-400 hover:text-red-500 underline" onClick={cancelArtUpload}>Cancelar</button>
+            </div>
+          ) : (
+            <div
+              tabIndex={0}
+              className="border-2 border-dashed border-gray-200 rounded-lg p-5 text-center focus:outline-none focus:border-pink-400 focus:bg-pink-50/20 transition-colors"
+              onPaste={async (e) => {
+                const imageItem = Array.from(e.clipboardData?.items ?? []).find((clipboardItem) => clipboardItem.type.startsWith("image/"));
+                const file = imageItem?.getAsFile();
+                if (!file) return;
+                e.preventDefault();
+                await uploadCustomArt(file);
+              }}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-pink-400", "bg-pink-50/20"); }}
+              onDragLeave={(e) => e.currentTarget.classList.remove("border-pink-400", "bg-pink-50/20")}
+              onDrop={async (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("border-pink-400", "bg-pink-50/20");
+                const file = e.dataTransfer.files?.[0];
+                if (file?.type.startsWith("image/")) await uploadCustomArt(file);
+              }}
+            >
+              <ImageIcon className="w-6 h-6 text-gray-300 mx-auto mb-1" />
+              <div className="text-xs text-gray-400 mb-2">Cole um print aqui <span className="text-gray-300">(Ctrl+V)</span> ou arraste uma imagem</div>
+              <button type="button" className="text-xs border border-gray-200 rounded px-3 py-1 text-gray-500 hover:border-pink-300 hover:text-pink-600 transition-colors" onClick={() => (artPasteRefs.current as any)[`file_${idx}`]?.click()}>Selecionar imagem</button>
+              <div className="text-[10px] text-gray-300 mt-1">PNG, JPG ou JPEG</div>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-gray-100 pt-3">
+          <div>
+            <label className="text-xs text-gray-500 font-medium">Quantidade</label>
+            <Input type="number" min={1} value={item.quantity} onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })} className="h-8 mt-0.5 text-sm" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 font-medium">Valor unitário</label>
+            <div className="h-8 mt-0.5 px-3 flex items-center rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-600">{fmt(item.unitPrice)}</div>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 font-medium">Valor total</label>
+            <Input
+              type="text"
+              inputMode="decimal"
+              aria-label={`Valor total de ${item.productName || "item personalizado"}`}
+              defaultValue={item.totalPrice > 0 ? fmt(item.totalPrice) : ""}
+              placeholder="R$ 0,00"
+              onBlur={(e) => {
+                const value = Math.max(0, parseFloat(e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".")) || 0);
+                updateItem(idx, { unitPrice: value / Math.max(1, item.quantity), priceAdjustment: 0 });
+                e.target.value = value > 0 ? fmt(value) : "";
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              className="h-8 mt-0.5 text-sm font-semibold text-right"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
@@ -835,18 +1027,21 @@ export default function AdminQuotationForm() {
                 <p className="text-xs mt-1">Clique em "Adicionar Produto" para começar</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {/* Cabeçalho da tabela */}
-                <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                  <div className="col-span-1">Img</div>
-                  <div className="col-span-3">Produto / Especificações</div>
-                  <div className="col-span-1 text-center">Arte</div>
-                  <div className="col-span-1 text-center">Qtd</div>
-                  <div className="col-span-2 text-center">Ajuste</div>
-                  <div className="col-span-3 text-right">Total</div>
-                  <div className="col-span-1"></div>
-                </div>
-                {items.map((item, idx) => {
+              <div className="space-y-4">
+                {items.some((item) => !item.isCustom) && (
+                  <div className="space-y-2">
+                    {/* Cabeçalho da tabela */}
+                    <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                      <div className="col-span-1">Img</div>
+                      <div className="col-span-3">Produto / Especificações</div>
+                      <div className="col-span-1 text-center">Arte</div>
+                      <div className="col-span-1 text-center">Qtd</div>
+                      <div className="col-span-2 text-center">Ajuste</div>
+                      <div className="col-span-3 text-right">Total</div>
+                      <div className="col-span-1"></div>
+                    </div>
+                    {items.map((item, idx) => {
+                  if (item.isCustom) return null;
                   const isExpanded = expandedItems.has(idx);
                   const specs = item._specsParsed ?? {};
                   const specificationSummary = Object.entries(specs)
@@ -1214,7 +1409,19 @@ export default function AdminQuotationForm() {
                       })()}
                     </div>
                   );
-                })}
+                    })}
+                  </div>
+                )}
+                {items.some((item) => item.isCustom) && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 pt-1">
+                      <div className="h-px flex-1 bg-pink-100" />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-pink-600">Itens personalizados</span>
+                      <div className="h-px flex-1 bg-pink-100" />
+                    </div>
+                    {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
+                  </div>
+                )}
               </div>
             )}
           </div>
