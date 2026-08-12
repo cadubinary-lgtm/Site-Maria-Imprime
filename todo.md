@@ -2571,3 +2571,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar o conteúdo da Política de Trocas, Cancelamentos e Reembolsos com a documentação fornecida
 - [x] Atualizar o conteúdo da Política de Privacidade — LGPD com a documentação fornecida e o e-mail de contato
 - [x] Atualizar o conteúdo da Política de Cookies com a documentação fornecida e o e-mail de contato
+- [x] Atualizar o conteúdo do Termo de Uso do Site com a documentação fornecida e o e-mail de contato

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ART_APPROVAL_CONTENT, COOKIES_POLICY_CONTENT, PRIVACY_POLICY_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
+import { ART_APPROVAL_CONTENT, COOKIES_POLICY_CONTENT, PRIVACY_POLICY_CONTENT, PRODUCTION_DEADLINE_CONTENT, RETURNS_CANCELLATIONS_CONTENT, SITE_USE_TERMS_CONTENT, TERMS_OF_SALE_CONTENT, TERMS_VERSION } from "../client/src/components/TermsAcceptance";
 
 describe("documentação de termos da Maria Imprime", () => {
   it("mantém a apresentação e as cláusulas essenciais fornecidas", () => {
@@ -41,5 +41,11 @@ describe("documentação de termos da Maria Imprime", () => {
     expect(COOKIES_POLICY_CONTENT).toContain("cart_session");
     expect(COOKIES_POLICY_CONTENT).toContain("não declara individualmente ferramentas analíticas");
     expect(COOKIES_POLICY_CONTENT).not.toContain("Google Analytics");
+  });
+
+  it("inclui o termo de uso do site e o e-mail de contato informado", () => {
+    expect(SITE_USE_TERMS_CONTENT).toContain("Utilização do Site");
+    expect(SITE_USE_TERMS_CONTENT).toContain("Suspensão de Acesso");
+    expect(SITE_USE_TERMS_CONTENT).toContain("contatomariaimprime@gmail.com");
   });
 });

@@ -437,6 +437,84 @@ E-mail: contatomariaimprime@gmail.com
 
 Maria Imprime – Sua Gráfica Online`;
 
+export const SITE_USE_TERMS_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
+
+1. Apresentação
+
+Este Termo estabelece as regras para utilização do site da Maria Imprime.
+
+Ao acessar ou utilizar o site, o usuário deverá respeitar as condições apresentadas neste documento e a legislação aplicável.
+
+2. Utilização do Site
+
+O site deverá ser utilizado exclusivamente para finalidades lícitas.
+
+É proibido utilizar a plataforma para praticar atividades ilegais, tentar acessar áreas restritas, interferir no funcionamento do sistema, distribuir códigos maliciosos, realizar tentativas de fraude, utilizar informações de terceiros sem autorização ou explorar vulnerabilidades de segurança.
+
+3. Cadastro
+
+Quando houver necessidade de cadastro, o usuário deverá fornecer informações verdadeiras. O usuário é responsável pela segurança de suas credenciais de acesso.
+
+4. Conta do Cliente
+
+Quando disponível, a conta poderá permitir acompanhamento de pedidos, consulta de dados, acesso ao histórico, acompanhamento da produção e acesso a informações relacionadas às compras.
+
+5. Pedidos
+
+Os pedidos realizados pelo site estarão sujeitos às condições apresentadas durante a contratação e aos Termos e Condições de Venda.
+
+6. Conteúdo Enviado pelo Usuário
+
+O usuário poderá enviar arquivos para produção. Ao enviar um arquivo, declara possuir autorização para utilização do conteúdo. A Maria Imprime não adquire a propriedade do arquivo enviado pelo cliente.
+
+7. Direitos Autorais
+
+É responsabilidade do usuário garantir que os arquivos enviados não violem direitos de terceiros.
+
+8. Propriedade Intelectual da Maria Imprime
+
+Elementos próprios do site, incluindo marca, logotipo, textos, imagens, layout, elementos gráficos, sistemas e funcionalidades, não poderão ser reproduzidos ou utilizados indevidamente sem autorização.
+
+9. Disponibilidade
+
+A Maria Imprime buscará manter o site disponível, mas poderão ocorrer interrupções decorrentes de manutenção, atualizações, falhas técnicas, problemas de hospedagem, problemas de terceiros ou eventos externos.
+
+10. Segurança
+
+O usuário não deverá tentar comprometer a segurança da plataforma. Atividades suspeitas poderão ser bloqueadas e analisadas.
+
+11. Informações dos Produtos
+
+A Maria Imprime buscará disponibilizar informações corretas sobre seus produtos. Características técnicas, imagens ilustrativas, cores e demais informações deverão ser interpretadas de acordo com as especificações apresentadas na página do produto.
+
+12. Links Externos
+
+O site poderá apresentar links para serviços de terceiros. A Maria Imprime não controla integralmente o conteúdo, funcionamento ou políticas de sites externos.
+
+13. Suspensão de Acesso
+
+Quando houver utilização indevida ou violação das regras do site, a Maria Imprime poderá adotar medidas de segurança e limitar o acesso, observada a legislação aplicável.
+
+14. Alterações do Site
+
+A Maria Imprime poderá alterar, atualizar ou aprimorar funcionalidades do site.
+
+15. Alterações deste Termo
+
+Este Termo poderá ser atualizado sempre que necessário. A versão vigente ficará disponível no site.
+
+16. Legislação
+
+Este Termo será interpretado de acordo com a legislação brasileira, sem prejuízo dos direitos assegurados ao consumidor.
+
+17. Contato
+
+Para dúvidas relacionadas à utilização do site:
+
+Maria Imprime – Sua Gráfica Online
+
+E-mail: contatomariaimprime@gmail.com`;
+
 const DOCUMENTS = [
   { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
@@ -444,7 +522,7 @@ const DOCUMENTS = [
   { title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
   { title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
   { title: "Política de Cookies", content: COOKIES_POLICY_CONTENT },
-  { title: "Termo de Uso do Site", content: "Documento em preparação." },
+  { title: "Termo de Uso do Site", content: SITE_USE_TERMS_CONTENT },
   { title: "Perguntas Frequentes (FAQ)", content: "Documento em preparação." },
 ];
 
