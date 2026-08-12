@@ -22,15 +22,17 @@ describe("itens personalizados em Orçamentos", () => {
     expect(routerSource).toContain('productId: z.number().nullable(),');
   });
 
-  it("cria um item personalizado sem repetir o campo de nome na área de especificações", () => {
+  it("cria um item personalizado em card editável", () => {
     expect(formSource).toContain("const addCustomItemToQuote");
     expect(formSource).toContain('itemType: "custom"');
     expect(formSource).toContain('aria-label="Nome do item personalizado"');
-    expect(formSource).not.toContain("Nome do Produto / Serviço");
+    expect(formSource).toContain("const renderCustomItemCard");
+    expect(formSource).toContain("Nome do Produto / Serviço");
+    expect(formSource).toContain("Descrição");
   });
 
-  it("mantém medidas, seleções técnicas e upload de arte visíveis no item personalizado", () => {
-    expect(formSource).toContain("item.isCustom) && [");
+  it("mantém medidas, seleções técnicas e upload de arte dentro do card personalizado", () => {
+    expect(formSource).toContain("const specificationFields = [");
     expect(formSource).toContain('label: "Tipo de Impressão"');
     expect(formSource).toContain('label: "Tipo de Material"');
     expect(formSource).toContain('label: "Tipo de Espessura"');
@@ -38,12 +40,11 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("Arte / Layout");
   });
 
-  it("não exibe imagem de produto em itens personalizados e reserva uma coluna para a arte", () => {
-    expect(formSource).toContain('item.isCustom ? (');
-    expect(formSource).toContain('<div className="w-8 h-8" aria-hidden="true" />');
-    expect(formSource).toContain('<div className="col-span-1 text-center">Arte</div>');
-    expect(formSource).toContain('title="Visualizar arte anexada"');
-    expect(formSource).toContain('title="Anexar arte"');
+  it("empilha cada item personalizado fora da tabela de produtos de catálogo", () => {
+    expect(formSource).toContain('items.some((item) => !item.isCustom)');
+    expect(formSource).toContain('items.some((item) => item.isCustom)');
+    expect(formSource).toContain('items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)');
+    expect(formSource).toContain("Itens personalizados");
   });
 
   it("mantém o valor personalizado integrado ao total do orçamento", () => {
