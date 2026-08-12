@@ -64,6 +64,12 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain('title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}');
   });
 
+  it("identifica quantidade, valor unitário e valor total no resumo fechado", () => {
+    expect(formSource).toContain(">Qtd</span>");
+    expect(formSource).toContain(">Unit.</span>");
+    expect(formSource).toContain(">Valor total</span>");
+  });
+
   it("posiciona a seta de expansão do item de catálogo junto ao valor", () => {
     expect(formSource).toContain('className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800"');
     expect(formSource).toContain('title={isExpanded ? "Recolher especificações" : "Expandir especificações"}');
