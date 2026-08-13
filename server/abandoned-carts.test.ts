@@ -30,6 +30,8 @@ describe("módulo de carrinhos abandonados", () => {
     const source = readFileSync(routerPath, "utf8");
 
     expect(source).toContain("list: adminProcedure.query");
+    expect(source).toContain("details: adminProcedure.input(cartIdentitySchema).query");
+    expect(source).toContain("deleteOne: adminProcedure.input(cartIdentitySchema).mutation");
     expect(source).toContain("cleanupExpired: adminProcedure.mutation");
   });
 
@@ -42,5 +44,18 @@ describe("módulo de carrinhos abandonados", () => {
     expect(pageSource).toContain("Limpar expirados");
     expect(ordersSource).toContain('get("view") === "carrinho-abandonado"');
     expect(menuSource).toContain('href: "/admin/pedidos?view=carrinho-abandonado"');
+  });
+
+  it("limita exclusão manual a um carrinho identificado e retorna seus itens", () => {
+    const source = readFileSync(dbPath, "utf8");
+    const pageSource = readFileSync(adminPagePath, "utf8");
+
+    expect(source).toContain("export async function getAbandonedCartDetails");
+    expect(source).toContain("export async function deleteAbandonedCart");
+    expect(source).toContain("WHERE ci.userId <=> ${identity.userId}");
+    expect(source).toContain("WHERE userId <=> ${identity.userId}");
+    expect(pageSource).toContain("trpc.abandonedCarts.details.useQuery");
+    expect(pageSource).toContain("trpc.abandonedCarts.deleteOne.useMutation");
+    expect(pageSource).toContain("Excluir este carrinho?");
   });
 });

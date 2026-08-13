@@ -1085,6 +1085,30 @@ export type AbandonedCartSummary = {
   expiresAt: Date;
 };
 
+export type AbandonedCartItemDetail = {
+  id: number;
+  productId: number;
+  productName: string;
+  productImage: string | null;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  selectedAttributes: string | null;
+  variationSnapshot: string | null;
+  customDimensions: string | null;
+  artFileUrl: string | null;
+  notes: string | null;
+  updatedAt: Date;
+};
+
+type AbandonedCartIdentity = { userId: number | null; sessionId: string | null };
+
+function assertAbandonedCartIdentity(identity: AbandonedCartIdentity) {
+  if (identity.userId === null && !identity.sessionId) {
+    throw new Error("Identificação do carrinho é obrigatória");
+  }
+}
+
 /**
  * Agrupa todos os carrinhos ainda abertos para acompanhamento administrativo.
  * Um carrinho é definido pela conta do cliente ou pela sessão anônima e expira
@@ -1126,6 +1150,67 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
     lastActivityAt: new Date(row.lastActivityAt),
     expiresAt: new Date(row.expiresAt),
   }));
+}
+
+/** Retorna todos os produtos e informações disponíveis de um carrinho específico. */
+export async function getAbandonedCartDetails(identity: AbandonedCartIdentity): Promise<AbandonedCartItemDetail[]> {
+  assertAbandonedCartIdentity(identity);
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.execute(sql`
+    SELECT
+      ci.id,
+      ci.productId,
+      p.name AS productName,
+      p.imageUrl AS productImage,
+      ci.quantity,
+      ci.priceAtCart AS unitPrice,
+      (CAST(ci.priceAtCart AS DECIMAL(12,2)) * ci.quantity) AS totalPrice,
+      ci.selectedAttributes,
+      ci.variationSnapshot,
+      ci.customDimensions,
+      ci.artFileUrl,
+      ci.notes,
+      ci.updatedAt
+    FROM cartItems ci
+    INNER JOIN products p ON p.id = ci.productId
+    WHERE ci.userId <=> ${identity.userId}
+      AND ci.sessionId <=> ${identity.sessionId}
+    ORDER BY ci.updatedAt DESC, ci.id DESC
+  `) as any;
+
+  const rows = (result[0] ?? []) as any[];
+  return rows.map((row) => ({
+    id: Number(row.id),
+    productId: Number(row.productId),
+    productName: String(row.productName ?? "Produto não identificado"),
+    productImage: row.productImage ?? null,
+    quantity: Number(row.quantity ?? 0),
+    unitPrice: Number(row.unitPrice ?? 0),
+    totalPrice: Number(row.totalPrice ?? 0),
+    selectedAttributes: row.selectedAttributes ?? null,
+    variationSnapshot: row.variationSnapshot ?? null,
+    customDimensions: row.customDimensions ?? null,
+    artFileUrl: row.artFileUrl ?? null,
+    notes: row.notes ?? null,
+    updatedAt: new Date(row.updatedAt),
+  }));
+}
+
+/** Exclui todos os itens de um único carrinho identificado por conta ou sessão. */
+export async function deleteAbandonedCart(identity: AbandonedCartIdentity): Promise<{ deletedItems: number }> {
+  assertAbandonedCartIdentity(identity);
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.execute(sql`
+    DELETE FROM cartItems
+    WHERE userId <=> ${identity.userId}
+      AND sessionId <=> ${identity.sessionId}
+  `) as any;
+
+  return { deletedItems: Number(result[0]?.affectedRows ?? result.affectedRows ?? 0) };
 }
 
 /** Remove somente carrinhos cuja última atividade inteira tenha ultrapassado 48 horas. */
