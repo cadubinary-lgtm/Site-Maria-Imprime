@@ -398,7 +398,7 @@ function AppLayout() {
       {/* Coluna principal: 70% quando carrinho aberto, 100% quando fechado */}
       <div className={`flex flex-col min-w-0 transition-all duration-300 ${isOpen ? "w-[70%]" : "w-full"}`}>
         <Header />
-        <div className="flex-1 overflow-y-auto">
+        <div id="public-site-scroll-container" className="flex-1 overflow-y-auto">
           <Router />
         </div>
         <FloatingWhatsAppButton />
