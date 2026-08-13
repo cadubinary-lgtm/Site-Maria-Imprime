@@ -287,6 +287,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
           { label: "Ordens de Serviço (O.S.)", href: "/admin/os" },
           { label: "Orçamentos", href: "/admin/orcamentos" },
+          { label: "Carrinho Abandonado", href: "/admin/pedidos?view=carrinho-abandonado" },
         ],
       },
     },

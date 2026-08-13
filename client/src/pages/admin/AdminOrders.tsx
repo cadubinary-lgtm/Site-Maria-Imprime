@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
+import AdminAbandonedCarts from "./AdminAbandonedCarts";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -76,11 +77,17 @@ export default function AdminOrders() {
     });
   }, [allOrders, filter, search]);
 
+  const isAbandonedCartsView = new URLSearchParams(window.location.search).get("view") === "carrinho-abandonado";
+
   const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
   const fmtDate = (d: any) =>
     d ? new Date(d).toLocaleDateString("pt-BR") : "-";
+
+  if (isAbandonedCartsView) {
+    return <AdminAbandonedCarts />;
+  }
 
   if (isLoading) {
     return (

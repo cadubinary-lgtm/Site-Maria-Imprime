@@ -11,6 +11,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { storagePut, storageGetSignedUrl } from "../storage";
 import { applySecurityHeaders, createRateLimiter, enforceHttpsInProduction, isLoginAttempt, isPublicUploadRequest } from "./security";
+import { cleanupAbandonedCartsScheduled } from "../abandonedCartsSchedule";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -588,6 +589,8 @@ async function startServer() {
       return res.status(500).json({ error: err?.message ?? 'Erro no upload' });
     }
   });
+
+  app.post('/api/scheduled/cleanup-abandoned-carts', cleanupAbandonedCartsScheduled);
 
   app.use(
     "/api/trpc",
