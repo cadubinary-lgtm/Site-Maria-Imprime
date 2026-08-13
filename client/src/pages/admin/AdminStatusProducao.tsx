@@ -55,8 +55,8 @@ export default function AdminStatusProducao() {
   const { data: allOrders = [], isLoading } = trpc.checkout.getAllOrders.useQuery();
 
   const updateProductionMutation = trpc.admin.updateProductionStatus.useMutation({
-    onSuccess: () => {
-      toast.success("Status de produção atualizado!");
+    onSuccess: (_data, variables) => {
+      toast.success(variables.productionStatus === "acabamento_finalizado" ? "Produção finalizada: pedido encaminhado para retirada ou entrega." : "Status de produção atualizado!");
       utils.checkout.getAllOrders.invalidate();
     },
     onError: (err) => toast.error(err.message || "Erro ao atualizar status"),
@@ -76,6 +76,10 @@ export default function AdminStatusProducao() {
       })
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [allOrders, filterStatus, search]);
+
+  const history = useMemo(() => (allOrders as any[])
+    .filter((o) => ["pronto_retirada", "pronto_entrega", "entregue"].includes(o.status) && o.productionStatus === "acabamento_finalizado")
+    .sort((a: any, b: any) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()), [allOrders]);
 
   if (isLoading) {
     return (
@@ -214,6 +218,14 @@ export default function AdminStatusProducao() {
             })}
           </div>
         )}
+
+        <Card>
+          <CardContent className="pt-5 pb-5">
+            <h2 className="text-base font-semibold text-gray-900">Histórico de Status de Produção</h2>
+            <p className="mt-1 text-sm text-gray-500">Pedidos que concluíram acabamento e seguiram para retirada ou entrega.</p>
+            {history.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma produção finalizada registrada.</p> : <div className="mt-4 space-y-2">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge className="bg-green-100 text-green-700">{ORDER_STATUS_LABEL[order.status]}</Badge></div>)}</div>}
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );
