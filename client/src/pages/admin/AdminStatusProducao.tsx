@@ -65,6 +65,7 @@ export default function AdminStatusProducao() {
   const filtered = useMemo(() => {
     return (allOrders as any[])
       .filter((o) => {
+        if (o.status !== "em_producao") return false;
         const matchStatus = filterStatus === "todos" || (o.productionStatus || "pendente") === filterStatus;
         const matchSearch =
           !search ||
@@ -95,7 +96,7 @@ export default function AdminStatusProducao() {
               Status de Produção
             </h1>
             <p className="text-gray-500 mt-1 text-sm">
-              Gerencie o status de produção dos pedidos
+              Pedidos em produção entram automaticamente nesta fila para acompanhamento operacional.
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
