@@ -470,9 +470,7 @@ export default function ProductDetail() {
     const nowFilled = w !== "" && h !== "" && parseFloat(w.replace(",", ".")) > 0 && parseFloat(h.replace(",", ".")) > 0;
     if (wasEmpty && nowFilled) {
       // Avança automaticamente para o step de arquivo
-      setTimeout(() => {
-        setOpenSteps(prev => ({ ...prev, [dimStepIdx]: false, [fileStepIdx]: true }));
-      }, 400);
+      setOpenSteps(prev => ({ ...prev, [dimStepIdx]: false, [fileStepIdx]: true }));
     }
     prevDimRef.current = { width: w, height: h };
   }, [dimWidth, dimHeight]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -489,9 +487,7 @@ export default function ProductDetail() {
       r.readAsDataURL(file);
     } else setArtFilePreview(null);
     // Avança automaticamente para o próximo step após selecionar arquivo
-    setTimeout(() => {
-      setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
-    }, 500);
+    setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
@@ -978,12 +974,12 @@ export default function ProductDetail() {
                             setSelectedAttributes(prev => ({ ...prev, [attr.attributeId]: { valueIds: [val.id] } }));
                             setOpenSteps(prev => ({ ...prev, [globalIdx]: false, [globalIdx + 1]: true }));
                             // Smooth scroll para o próximo step
-                            setTimeout(() => {
+                            requestAnimationFrame(() => {
                               const nextStep = document.getElementById(`attr-${attr.attributeId}`)?.nextElementSibling;
                               if (nextStep) {
                                 nextStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
                               }
-                            }, 100);
+                            });
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                             isSel
@@ -1201,9 +1197,7 @@ export default function ProductDetail() {
                             setArtLink(e.target.value);
                             // Avança automaticamente quando o link parece válido
                             if (e.target.value.startsWith("http")) {
-                              setTimeout(() => {
-                                setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
-                              }, 800);
+                              setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
                             }
                           }}
                           className="text-sm flex-1"
@@ -1249,16 +1243,7 @@ export default function ProductDetail() {
                           ? (opt.pricePerM2 ?? 0) * billedArea
                           : (opt.pricePerM2 ?? 0);
                         setDeliveryTax(extra);
-                        // Auto-avanço após 2000ms ao selecionar prazo (verificar se ainda está selecionado)
-                        setTimeout(() => {
-                          // Verificar se o prazo ainda está selecionado antes de avançar
-                          setSelectedDeliveryOption((current: any) => {
-                            if (current?.id === opt.id) {
-                              setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
-                            }
-                            return current;
-                          });
-                        }, 2000);
+                        setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all duration-800 ${
                         selectedDeliveryOption?.id === opt.id
@@ -1331,16 +1316,7 @@ export default function ProductDetail() {
                             setShippingCalculated(false);
                             setCepError(null);
                             setCepAddress(null);
-                            // Auto-avanço após 2000ms ao selecionar retirada (verificar se ainda está selecionada)
-                            setTimeout(() => {
-                              // Verificar se retirada ainda está selecionada antes de avançar
-                              setSelectedShipping(current => {
-                                if (current?.id === 'retirada' || current?.fixedType === 'pickup') {
-                                  setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-                                }
-                                return current;
-                              });
-                            }, 2000);
+                            setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
                           }
                         }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-800 ${
@@ -1497,16 +1473,7 @@ export default function ProductDetail() {
                       type="button"
                       onClick={() => {
                         setSelectedShipping(opt);
-                        // Auto-avanço após 2000ms ao selecionar transportadora (verificar se ainda está selecionada)
-                        setTimeout(() => {
-                          // Verificar se a transportadora ainda está selecionada antes de avançar
-                          setSelectedShipping(current => {
-                            if (current?.id === opt.id) {
-                              setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
-                            }
-                            return current;
-                          });
-                        }, 2000);
+                        setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                         isSel
