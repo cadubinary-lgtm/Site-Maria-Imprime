@@ -2608,3 +2608,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar links de login e recuperação de senha ao aviso de CPF/CNPJ duplicado
 - [x] Destacar o campo de CPF/CNPJ quando houver duplicidade
 - [x] Validar em tempo real se CPF/CNPJ já está cadastrado antes do envio do cadastro
+- [x] Validar em tempo real se o e-mail já está cadastrado no cadastro de cliente
+- [x] Pré-preencher CPF/CNPJ no link de recuperação de senha a partir do aviso de duplicidade
+- [x] Exibir confirmação verde para CPF/CNPJ válido e disponível no cadastro
