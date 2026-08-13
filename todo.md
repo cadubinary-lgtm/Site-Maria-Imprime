@@ -2605,3 +2605,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Preparar orientação de configuração futura para envio oficial automático por WhatsApp
 - [ ] Registrar aprovação recebida no WhatsApp por meio de Arte Final Aprovada e notificar produção pelo canal manual
 - [x] Rolar automaticamente até o aviso de CPF/CNPJ já cadastrado no cadastro de cliente
+- [x] Adicionar links de login e recuperação de senha ao aviso de CPF/CNPJ duplicado
+- [x] Destacar o campo de CPF/CNPJ quando houver duplicidade
+- [x] Validar em tempo real se CPF/CNPJ já está cadastrado antes do envio do cadastro
