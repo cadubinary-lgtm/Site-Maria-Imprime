@@ -1073,6 +1073,82 @@ export async function getCartItemCount(userId: number | null, sessionId?: string
   return Number(row?.total ?? 0);
 }
 
+export type AbandonedCartSummary = {
+  cartKey: string;
+  userId: number | null;
+  sessionId: string | null;
+  itemCount: number;
+  productCount: number;
+  totalValue: number;
+  products: string;
+  lastActivityAt: Date;
+  expiresAt: Date;
+};
+
+/**
+ * Agrupa todos os carrinhos ainda abertos para acompanhamento administrativo.
+ * Um carrinho é definido pela conta do cliente ou pela sessão anônima e expira
+ * 48 horas após a última movimentação de qualquer um de seus itens.
+ */
+export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.execute(sql`
+    SELECT
+      CASE
+        WHEN ci.userId IS NOT NULL THEN CONCAT('user:', ci.userId)
+        ELSE CONCAT('session:', COALESCE(ci.sessionId, 'sem-sessao'))
+      END AS cartKey,
+      ci.userId,
+      ci.sessionId,
+      SUM(ci.quantity) AS itemCount,
+      COUNT(*) AS productCount,
+      COALESCE(SUM(CAST(ci.priceAtCart AS DECIMAL(12,2)) * ci.quantity), 0) AS totalValue,
+      GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS products,
+      MAX(ci.updatedAt) AS lastActivityAt,
+      DATE_ADD(MAX(ci.updatedAt), INTERVAL 48 HOUR) AS expiresAt
+    FROM cartItems ci
+    INNER JOIN products p ON p.id = ci.productId
+    GROUP BY ci.userId, ci.sessionId
+    ORDER BY MAX(ci.updatedAt) ASC
+  `) as any;
+
+  const rows = (result[0] ?? []) as any[];
+  return rows.map((row) => ({
+    cartKey: String(row.cartKey),
+    userId: row.userId === null || row.userId === undefined ? null : Number(row.userId),
+    sessionId: row.sessionId ?? null,
+    itemCount: Number(row.itemCount ?? 0),
+    productCount: Number(row.productCount ?? 0),
+    totalValue: Number(row.totalValue ?? 0),
+    products: String(row.products ?? "Produto não identificado"),
+    lastActivityAt: new Date(row.lastActivityAt),
+    expiresAt: new Date(row.expiresAt),
+  }));
+}
+
+/** Remove somente carrinhos cuja última atividade inteira tenha ultrapassado 48 horas. */
+export async function cleanupExpiredAbandonedCarts(): Promise<{ deletedItems: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.execute(sql`
+    DELETE ci
+    FROM cartItems ci
+    INNER JOIN (
+      SELECT userId, sessionId
+      FROM cartItems
+      GROUP BY userId, sessionId
+      HAVING MAX(updatedAt) < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 48 HOUR)
+    ) expiredCarts
+      ON ci.userId <=> expiredCarts.userId
+      AND ci.sessionId <=> expiredCarts.sessionId
+  `) as any;
+
+  return { deletedItems: Number(result[0]?.affectedRows ?? result.affectedRows ?? 0) };
+}
+
 // ============================================================
 // CHECKOUT HELPERS
 // ============================================================

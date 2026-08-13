@@ -2587,3 +2587,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar todas as etapas selecionáveis do configurador para autoavanço imediato de 0 ms
 - [x] Otimizar a resposta visual e a atualização de dados ao adicionar produto ao carrinho
 - [x] Corrigir atualização do carrinho lateral ao adicionar nova compra com itens já existentes
+- [x] Criar a página Carrinho Abandonado no menu Vendas
+- [ ] Excluir automaticamente carrinhos abandonados após 48 horas

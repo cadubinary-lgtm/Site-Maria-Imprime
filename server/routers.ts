@@ -97,6 +97,7 @@ import { quotationsRouter } from "./quotationsRouter";
 import { variationsCvRouter } from "./variationsCvRouter";
 import { variationsOffsetRouter } from "./variationsOffsetRouter";
 import { companySettingsRouter } from "./companySettingsRouter";
+import { abandonedCartsRouter } from "./abandonedCartsRouter";
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
 // Usado em todas as procedures do checkout/erp que o painel admin consome
@@ -129,6 +130,7 @@ export const appRouter = router({
   variationsCv: variationsCvRouter,
   variationsOffset: variationsOffsetRouter,
   companySettings: companySettingsRouter,
+  abandonedCarts: abandonedCartsRouter,
   gerenciadorFinanceiro: gerenciadorFinanceiroRouter,
   gestaoFiscal: gestaoFiscalRouter,
   financeiro: financeiroRouter,
