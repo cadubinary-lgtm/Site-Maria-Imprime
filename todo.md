@@ -2599,4 +2599,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir na lista de carrinhos abandonados o status visual de lembrete enviado
 - [x] Investigar e corrigir a ausência de carrinhos abandonados na listagem
 - [x] Registrar histórico consultável de carrinhos antes da exclusão definitiva após 48 horas
-- [ ] Retomar a limpeza automática após publicar o histórico de exclusões
+- [x] Retomar a limpeza automática após publicar o histórico de exclusões
+- [ ] Definir e implementar comunicação de pré-impressão por WhatsApp com histórico de status por pedido
+- [ ] Criar botões manuais de WhatsApp para pré-impressão e status de pedidos
+- [ ] Preparar orientação de configuração futura para envio oficial automático por WhatsApp
+- [ ] Registrar aprovação recebida no WhatsApp por meio de Arte Final Aprovada e notificar produção pelo canal manual
+- [x] Rolar automaticamente até o aviso de CPF/CNPJ já cadastrado no cadastro de cliente

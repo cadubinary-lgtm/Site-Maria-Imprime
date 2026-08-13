@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,14 @@ export default function CustomerRegister() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
+  const errorAlertRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!error) return;
+    requestAnimationFrame(() => {
+      errorAlertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [error]);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -161,9 +169,11 @@ export default function CustomerRegister() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
+            <div ref={errorAlertRef}>
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+            </div>
           )}
 
           {/* ── Dados Pessoais ── */}
