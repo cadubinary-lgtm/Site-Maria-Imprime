@@ -545,6 +545,12 @@ function PreImpressaoColumn({
     }
   };
 
+  const handleWhatsAppContact = () => {
+    const message = `Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    toast.success("Mensagem de WhatsApp preparada para o pedido.");
+  };
+
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
       <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1">
@@ -693,7 +699,8 @@ function PreImpressaoColumn({
 
       {/* ── Bloco fixo: Arte Final Aprovada + Produzir ── */}
       {!isCommercialLocked && (
-        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-2">
+        <div className="space-y-2 pt-2 border-t border-gray-100 mt-2">
+        <div className="flex items-center justify-between gap-2">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -724,6 +731,10 @@ function PreImpressaoColumn({
           >
             {productionMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "▶ Produzir"}
           </Button>
+        </div>
+        <Button size="sm" variant="outline" className="w-full h-7 mt-2 border-green-200 text-green-700 hover:bg-green-50" onClick={handleWhatsAppContact}>
+          Enviar pelo WhatsApp
+        </Button>
         </div>
       )}
       {/* Nota visual para pedidos multi-item: o botão Produzir marca apenas este item */}
