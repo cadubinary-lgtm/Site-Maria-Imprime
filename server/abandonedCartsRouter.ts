@@ -1,7 +1,7 @@
 import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { z } from "zod";
-import { cleanupExpiredAbandonedCarts, deleteAbandonedCart, getAbandonedCartDetails, getAbandonedCartSummaries } from "./db";
+import { cleanupExpiredAbandonedCarts, deleteAbandonedCart, getAbandonedCartDetails, getAbandonedCartSummaries, recordAbandonedCartReminder } from "./db";
 import { sendAbandonedCartReminderEmail } from "./emailService";
 import { TRPCError } from "@trpc/server";
 
@@ -33,7 +33,12 @@ export const abandonedCartsRouter = router({
     if (!result.success) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: result.error || "Não foi possível enviar o lembrete." });
     }
+    await recordAbandonedCartReminder(input, "email", details.customer.email, "sent");
     return { success: true, email: details.customer.email };
+  }),
+  markWhatsAppReminderOpened: adminProcedure.input(cartIdentitySchema.safeExtend({ recipient: z.string().min(5) })).mutation(async ({ input }) => {
+    await recordAbandonedCartReminder(input, "whatsapp", input.recipient, "prepared");
+    return { success: true };
   }),
   cleanupExpired: adminProcedure.mutation(async () => cleanupExpiredAbandonedCarts()),
 });

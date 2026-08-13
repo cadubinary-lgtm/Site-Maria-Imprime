@@ -1080,6 +1080,8 @@ export type AbandonedCartSummary = {
   clientName: string | null;
   clientEmail: string | null;
   clientPhone: string | null;
+  emailReminderSentAt: Date | null;
+  whatsappReminderOpenedAt: Date | null;
   itemCount: number;
   productCount: number;
   totalValue: number;
@@ -1132,6 +1134,10 @@ export type AbandonedCartDetails = {
 
 type AbandonedCartIdentity = { userId: number | null; sessionId: string | null };
 
+function getAbandonedCartKey(identity: AbandonedCartIdentity) {
+  return identity.userId !== null ? `user:${identity.userId}` : `session:${identity.sessionId ?? "sem-sessao"}`;
+}
+
 function assertAbandonedCartIdentity(identity: AbandonedCartIdentity) {
   if (identity.userId === null && !identity.sessionId) {
     throw new Error("Identificação do carrinho é obrigatória");
@@ -1162,6 +1168,8 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
       COALESCE(NULLIF(MAX(CONCAT_WS(' ', ca.firstName, ca.lastName)), ''), MAX(u.name)) AS clientName,
       COALESCE(MAX(ca.email), MAX(u.email)) AS clientEmail,
       MAX(ca.phone) AS clientPhone,
+      (SELECT MAX(r.sentAt) FROM abandonedCartReminders r WHERE r.cartKey = CASE WHEN ci.userId IS NOT NULL THEN CONCAT('user:', ci.userId) ELSE CONCAT('session:', COALESCE(ci.sessionId, 'sem-sessao')) END AND r.channel = 'email' AND r.status = 'sent') AS emailReminderSentAt,
+      (SELECT MAX(r.createdAt) FROM abandonedCartReminders r WHERE r.cartKey = CASE WHEN ci.userId IS NOT NULL THEN CONCAT('user:', ci.userId) ELSE CONCAT('session:', COALESCE(ci.sessionId, 'sem-sessao')) END AND r.channel = 'whatsapp' AND r.status = 'prepared') AS whatsappReminderOpenedAt,
       MAX(ci.updatedAt) AS lastActivityAt,
       DATE_ADD(MAX(ci.updatedAt), INTERVAL 48 HOUR) AS expiresAt
     FROM cartItems ci
@@ -1180,6 +1188,8 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
     clientName: row.clientName ?? null,
     clientEmail: row.clientEmail ?? null,
     clientPhone: row.clientPhone ?? null,
+    emailReminderSentAt: row.emailReminderSentAt ? new Date(row.emailReminderSentAt) : null,
+    whatsappReminderOpenedAt: row.whatsappReminderOpenedAt ? new Date(row.whatsappReminderOpenedAt) : null,
     itemCount: Number(row.itemCount ?? 0),
     productCount: Number(row.productCount ?? 0),
     totalValue: Number(row.totalValue ?? 0),
@@ -1301,6 +1311,21 @@ export async function deleteAbandonedCart(identity: AbandonedCartIdentity): Prom
   `) as any;
 
   return { deletedItems: Number(result[0]?.affectedRows ?? result.affectedRows ?? 0) };
+}
+
+export async function recordAbandonedCartReminder(
+  identity: AbandonedCartIdentity,
+  channel: "email" | "whatsapp",
+  recipient: string,
+  status: "sent" | "prepared" | "failed" = "sent"
+) {
+  assertAbandonedCartIdentity(identity);
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.execute(sql`
+    INSERT INTO abandonedCartReminders (cartKey, channel, recipient, status, sentAt)
+    VALUES (${getAbandonedCartKey(identity)}, ${channel}, ${recipient}, ${status}, ${status === "sent" ? new Date() : null})
+  `);
 }
 
 /** Remove somente carrinhos cuja última atividade inteira tenha ultrapassado 48 horas. */
