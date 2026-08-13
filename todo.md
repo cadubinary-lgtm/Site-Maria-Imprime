@@ -2584,3 +2584,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Conectar a barra de busca do banner principal à pesquisa exclusiva de produtos
 - [x] Exibir imagem, preço, carregamento e mensagem de resultado vazio na busca de produtos do banner
 - [x] Corrigir regressão: clique na logo deve rolar suavemente ao topo quando a Home já estiver aberta
+- [x] Padronizar todas as etapas selecionáveis do configurador para autoavanço imediato de 0 ms
