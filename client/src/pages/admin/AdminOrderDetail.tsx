@@ -1048,7 +1048,7 @@ export function OrderDetailContent({
         <div className="max-w-5xl mx-auto px-4 space-y-6">
 
           {/* ── Header ── */}
-          <div>
+          {!isProductionRole && <div>
             <div className="flex items-center justify-between mb-4">
               <Button variant="ghost" onClick={() => setLocation(backRoute)}>
                 <ChevronLeft className="w-4 h-4 mr-1" /> {backLabel}
@@ -1075,10 +1075,10 @@ export function OrderDetailContent({
                 {sc.icon} {sc.label}
               </Badge>
             </div>
-          </div>
+          </div>}
 
           {/* ── Acompanhamento e Atualização do Pedido ── */}
-          <Card className="border-indigo-200">
+          {!isProductionRole && <Card className="border-indigo-200">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-indigo-600" />
@@ -1199,7 +1199,7 @@ export function OrderDetailContent({
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </Card>}
 
           {/* ── ITENS DO PEDIDO — card por produto ── */}
           <div className="space-y-4">
