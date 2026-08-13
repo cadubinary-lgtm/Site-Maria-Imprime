@@ -167,6 +167,7 @@ export default function ProductDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, setLocation] = useLocation();
   const { openCart } = useCartDrawer();
+  const utils = trpc.useUtils();
   const { state: uploadState, upload: doChunkedUpload, cancel: cancelUpload, reset: resetUpload } = useChunkedUpload();
 
   // ─── Queries ────────────────────────────────────────────────────────────
@@ -589,6 +590,17 @@ export default function ProductDetail() {
     if (!acceptedTerms) { setValidationError("Aceite os termos para continuar"); return; }
     setValidationError(null);
     setIsProcessing(true);
+    const optimisticItemId = -Date.now();
+    let optimisticItemAdded = false;
+
+    const removeOptimisticItem = () => {
+      if (!optimisticItemAdded) return;
+      utils.cart.getItems.setData(undefined, current =>
+        ((current ?? []).filter((item: any) => item.id !== optimisticItemId) as any)
+      );
+      utils.cart.getCount.setData(undefined, current => Math.max(0, Number(current ?? 0) - quantity));
+    };
+
     try {
       const attrsJson = Object.keys(selectedAttributes).length > 0
         ? JSON.stringify(Object.fromEntries(
@@ -599,19 +611,6 @@ export default function ProductDetail() {
             })
           ))
         : undefined;
-
-      let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
-      if (artFile && fileMode === "upload") {
-        try {
-          const { url } = await doChunkedUpload(artFile);
-          artUrl = url;
-        } catch (uploadErr: any) {
-          if (uploadErr?.message === "CANCELLED") { setIsProcessing(false); return; }
-          console.error('[upload-art] catch:', uploadErr?.message);
-          toast.error(uploadErr?.message ?? "Erro ao enviar o arquivo", { duration: 8000 });
-          artUrl = undefined;
-        }
-      }
 
       const shippingId = selectedShipping ? String(selectedShipping.id) : "retirada";
       const shippingPrice = selectedShipping?.price ?? 0;
@@ -650,7 +649,50 @@ export default function ProductDetail() {
         ? `${dimWidth}x${dimHeight}`
         : undefined;
 
-      await addToCartMutation.mutateAsync({
+      // Atualiza o drawer e o contador imediatamente; o envio e a confirmação seguem em segundo plano.
+      utils.cart.getItems.setData(undefined, current => ([
+        ...(current ?? []),
+        {
+          id: optimisticItemId,
+          productId,
+          quantity,
+          selectedAttributes: attrsJson ?? null,
+          customDimensions: customDimensions ?? null,
+          priceAtCart: String(effectivePrice),
+          artFileUrl: fileMode === "link" ? artLink || null : null,
+          notes: combinedNotes ?? null,
+          productName: product.name,
+          productImage: product.imageUrl ?? null,
+          calculationType: product.calculationType ?? "unidade",
+          unit: product.unit ?? "unidade",
+          shippingMethod: shippingId,
+          shippingPrice: String(shippingPrice),
+          shippingLabel,
+          variationSnapshot: variationSnapshotJson ?? null,
+          prazoName: prazoName ?? null,
+          prazoHours,
+          forecastDate: forecastDate ?? null,
+          forecastLabel: forecastLabel ?? null,
+          cepDestino: cepDestinoVal ?? null,
+        },
+      ] as any));
+      utils.cart.getCount.setData(undefined, current => Number(current ?? 0) + quantity);
+      optimisticItemAdded = true;
+      openCart();
+
+      let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
+      if (artFile && fileMode === "upload") {
+        try {
+          const { url } = await doChunkedUpload(artFile);
+          artUrl = url;
+        } catch (uploadErr: any) {
+          if (uploadErr?.message === "CANCELLED") { removeOptimisticItem(); setIsProcessing(false); return; }
+          console.error('[upload-art] catch:', uploadErr?.message);
+          toast.error(uploadErr?.message ?? "Erro ao enviar o arquivo", { duration: 8000 });
+          artUrl = undefined;
+        }
+      }
+      const addedItem = await addToCartMutation.mutateAsync({
         productId, quantity,
         selectedAttributes: attrsJson,
         customDimensions,
@@ -667,11 +709,20 @@ export default function ProductDetail() {
         forecastLabel,
         cepDestino: cepDestinoVal,
       });
-    toast.success("Adicionado ao carrinho!", {
-      action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
-    });
-      openCart();
-    } catch { toast.error("Erro ao adicionar ao carrinho"); }
+      utils.cart.getItems.setData(undefined, current =>
+        ((current ?? []).map((item: any) => item.id === optimisticItemId ? { ...item, id: addedItem.id } : item) as any)
+      );
+      await Promise.all([
+        utils.cart.getItems.invalidate(),
+        utils.cart.getCount.invalidate(),
+      ]);
+      toast.success("Adicionado ao carrinho!", {
+        action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
+      });
+    } catch {
+      removeOptimisticItem();
+      toast.error("Erro ao adicionar ao carrinho");
+    }
     finally { setIsProcessing(false); }
   };
 
