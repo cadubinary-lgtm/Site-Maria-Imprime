@@ -15,6 +15,8 @@ describe("módulo de carrinhos abandonados", () => {
 
     expect(source).toContain("export async function getAbandonedCartSummaries");
     expect(source).toContain("DATE_ADD(MAX(ci.updatedAt), INTERVAL 48 HOUR)");
+    expect(source).toContain("clientName");
+    expect(source).toContain("clientEmail");
     expect(source).toContain("HAVING MAX(updatedAt) < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 48 HOUR)");
     expect(source).toContain("DELETE ci");
   });
@@ -32,6 +34,7 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("list: adminProcedure.query");
     expect(source).toContain("details: adminProcedure.input(cartIdentitySchema).query");
     expect(source).toContain("deleteOne: adminProcedure.input(cartIdentitySchema).mutation");
+    expect(source).toContain("sendEmailReminder: adminProcedure.input(cartIdentitySchema).mutation");
     expect(source).toContain("cleanupExpired: adminProcedure.mutation");
   });
 
@@ -56,6 +59,19 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("WHERE userId <=> ${identity.userId}");
     expect(pageSource).toContain("trpc.abandonedCarts.details.useQuery");
     expect(pageSource).toContain("trpc.abandonedCarts.deleteOne.useMutation");
+    expect(pageSource).toContain("trpc.abandonedCarts.sendEmailReminder.useMutation");
     expect(pageSource).toContain("Excluir este carrinho?");
+  });
+
+  it("oferece filtros de cliente e período, dados completos e canais de lembrete", () => {
+    const pageSource = readFileSync(adminPagePath, "utf8");
+    const emailSource = readFileSync(resolve(process.cwd(), "server/emailService.ts"), "utf8");
+
+    expect(pageSource).toContain("Buscar por nome ou e-mail do cliente...");
+    expect(pageSource).toContain('type="date"');
+    expect(pageSource).toContain("Dados cadastrados do cliente");
+    expect(pageSource).toContain("Enviar lembrete por e-mail?");
+    expect(pageSource).toContain("https://wa.me/");
+    expect(emailSource).toContain("sendAbandonedCartReminderEmail");
   });
 });
