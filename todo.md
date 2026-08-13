@@ -2627,6 +2627,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Implementar seletor, feedback e histórico auditável do envio manual de WhatsApp
 - [ ] Criar checkpoint publicável após concluir o envio manual de WhatsApp
 - [ ] Adicionar botão de WhatsApp abaixo de Arte Final Aprovada com mensagem referente ao pedido
+- [x] Adicionar mensagem padrão editável abaixo do botão Enviar pelo WhatsApp
 - [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente
 - [x] Ocultar resumo financeiro, logística e expedição para operador exclusivo de Linha de Produção
 - [x] Exibir número, data de criação e status na visão restrita de Linha de Produção
