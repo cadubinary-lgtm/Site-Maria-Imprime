@@ -380,6 +380,7 @@ export default function AdminKanban() {
         <div className="flex gap-4" style={{ minWidth: `${visibleCols.length * 220}px` }}>
           {visibleCols.map(col => {
             const colOrders = byStatus[col.id];
+            const isAwaitingAnalysis = col.id === "analisando" && colOrders.length > 0;
             return (
               <div
                 key={col.id}
@@ -397,8 +398,15 @@ export default function AdminKanban() {
                     <span className="text-base">{col.icon}</span>
                     <span className="text-gray-700 text-xs font-semibold leading-tight">{col.label}</span>
                   </div>
-                  <span className="bg-gray-200 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5">
-                    {colOrders.length}
+                  <span
+                    className={`text-xs font-semibold rounded-full px-2 py-0.5 ${
+                      isAwaitingAnalysis
+                        ? "bg-pink-100 text-pink-700 border border-pink-200"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    aria-label={isAwaitingAnalysis ? `${colOrders.length} item(ns) pendente(s) de análise` : `${colOrders.length} item(ns)`}
+                  >
+                    {isAwaitingAnalysis ? `${colOrders.length} pendente${colOrders.length !== 1 ? "s" : ""}` : colOrders.length}
                   </span>
                 </div>
 
