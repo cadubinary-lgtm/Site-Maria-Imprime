@@ -483,13 +483,31 @@ export const appRouter = router({
         orderId: z.number(),
         productionStatus: z.enum(["pendente", "impresso", "acabamento_finalizado"]),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-        const { orders: ordersT } = await import("../drizzle/schema.js");
+        const { orders: ordersT, orderItems: orderItemsT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
         await db.update(ordersT)
           .set({ productionStatus: input.productionStatus } as any)
           .where(eq(ordersT.id, input.orderId));
+        const [order] = await db.select({ shippingMethod: ordersT.shippingMethod }).from(ordersT).where(eq(ordersT.id, input.orderId)).limit(1);
+        const [firstItem] = await db.select({ id: orderItemsT.id }).from(orderItemsT).where(eq(orderItemsT.orderId, input.orderId)).limit(1);
+        const isPickup = String(order?.shippingMethod ?? "").toLowerCase().includes("retirada") || String(order?.shippingMethod ?? "").toLowerCase().includes("pickup");
+        const finalStatus = isPickup ? "pronto_retirada" : "pronto_entrega";
+        if (input.productionStatus === "acabamento_finalizado") {
+          await db.update(ordersT).set({ status: finalStatus } as any).where(eq(ordersT.id, input.orderId));
+        }
+        if (firstItem) {
+          await db.insert(orderItemLogsT).values({
+            orderItemId: firstItem.id,
+            orderId: input.orderId,
+            action: input.productionStatus === "acabamento_finalizado"
+              ? `Produção: Acabamento finalizado — encaminhado para ${isPickup ? "Pronto para Retirada" : "Pronto para Entrega"}`
+              : `Produção: ${input.productionStatus === "impresso" ? "Impresso" : "Pendente"}`,
+            operatorName: (ctx as any).adminUser?.name ?? "Operador",
+            createdAt: Date.now(),
+          } as any);
+        }
         return { success: true };
       }),
     updateProduct: adminProcedure

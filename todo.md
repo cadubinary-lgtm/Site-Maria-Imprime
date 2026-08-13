@@ -2634,6 +2634,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Ativar a página Status de Produção com pedidos em produção, procedimentos, conclusão e histórico
 - [ ] Implementar o fluxo completo de Status de Produção com checkpoint publicável
 - [x] Implementar fila de pedidos em produção e procedimentos Pendente, Impresso e Acabamento Finalizado
+- [ ] Encaminhar Acabamento Finalizado para Retirada ou Entrega e registrar histórico de produção
 - [x] Criar checkpoint após personalizar o contato de WhatsApp com cliente e prévia
 - [x] Aplicar no componente de Pré-Impressão o nome do cliente e a miniatura da prévia selecionada
 - [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente
