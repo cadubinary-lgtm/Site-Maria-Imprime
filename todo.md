@@ -2647,3 +2647,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Destacar visualmente a quantidade de itens pendentes no card Analisando do Kanban
 - [x] Destacar visualmente no Kanban itens em Analisando há tempo excessivo
 - [x] Permitir abrir detalhes rápidos pelos badges de Pré-Impressão e Status de Produção
+- [x] Remover valores e exibir data e hora de criação nos cards de Pré-Impressão e Status de Produção

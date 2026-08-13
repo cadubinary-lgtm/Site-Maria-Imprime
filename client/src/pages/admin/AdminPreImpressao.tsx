@@ -35,11 +35,11 @@ const ORDER_STATUS_LABEL: Record<string, string> = {
   cancelado:          "Cancelado",
 };
 
-const fmt = (v: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-
 const fmtDate = (d: any) =>
   d ? new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "-";
+
+const fmtTime = (d: any) =>
+  d ? new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "-";
 
 export default function AdminPreImpressao() {
   const searchStr = useSearch();
@@ -196,10 +196,7 @@ export default function AdminPreImpressao() {
                           </Badge>
                         </div>
                         <p className="text-xs text-gray-500">
-                          {order.deliveryFullName} • {order.deliveryPhone} • {fmtDate(order.createdAt)}
-                        </p>
-                        <p className="text-xs font-semibold text-gray-700 mt-1">
-                          {fmt(Number(order.totalAmount ?? order.totalPrice ?? 0))}
+                          {order.deliveryFullName} • {order.deliveryPhone} • {fmtTime(order.createdAt)} • {fmtDate(order.createdAt)}
                         </p>
                       </div>
 
