@@ -42,7 +42,8 @@ export function CartSidePanel() {
   const utils = trpc.useUtils();
 
   const { data: items = [], isLoading } = trpc.cart.getItems.useQuery(undefined, {
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const updateQty = trpc.cart.updateQuantity.useMutation({

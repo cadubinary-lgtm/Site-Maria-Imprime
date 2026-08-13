@@ -650,6 +650,10 @@ export default function ProductDetail() {
         : undefined;
 
       // Atualiza o drawer e o contador imediatamente; o envio e a confirmação seguem em segundo plano.
+      await Promise.all([
+        utils.cart.getItems.cancel(),
+        utils.cart.getCount.cancel(),
+      ]);
       utils.cart.getItems.setData(undefined, current => ([
         ...(current ?? []),
         {
@@ -712,10 +716,8 @@ export default function ProductDetail() {
       utils.cart.getItems.setData(undefined, current =>
         ((current ?? []).map((item: any) => item.id === optimisticItemId ? { ...item, id: addedItem.id } : item) as any)
       );
-      await Promise.all([
-        utils.cart.getItems.invalidate(),
-        utils.cart.getCount.invalidate(),
-      ]);
+      void utils.cart.getItems.invalidate();
+      void utils.cart.getCount.invalidate();
       toast.success("Adicionado ao carrinho!", {
         action: { label: "Ver Carrinho", onClick: () => setLocation("/carrinho") },
       });

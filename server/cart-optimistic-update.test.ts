@@ -13,6 +13,8 @@ describe("atualização otimista do carrinho", () => {
     expect(source).toContain("utils.cart.getItems.setData(undefined");
     expect(source).toContain("utils.cart.getCount.setData(undefined");
     expect(source).toContain("openCart();");
+    expect(source).toContain("utils.cart.getItems.cancel()");
+    expect(source).toContain("utils.cart.getCount.cancel()");
     expect(source).toContain("utils.cart.getItems.invalidate()");
     expect(source).toContain("utils.cart.getCount.invalidate()");
   });
@@ -23,5 +25,12 @@ describe("atualização otimista do carrinho", () => {
     expect(source).toContain("const isPendingSync = item.id < 0;");
     expect(source).toContain("disabled={cartItems.some(item => item.id < 0)}");
     expect(source).toContain('"Adicionando item..."');
+  });
+
+  it("não sobrescreve itens já visíveis por uma nova consulta ao abrir o painel", () => {
+    const source = readFileSync(cartPanelPath, "utf8");
+
+    expect(source).toContain("refetchOnWindowFocus: false");
+    expect(source).toContain("refetchOnMount: false");
   });
 });

@@ -2586,3 +2586,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir regressão: clique na logo deve rolar suavemente ao topo quando a Home já estiver aberta
 - [x] Padronizar todas as etapas selecionáveis do configurador para autoavanço imediato de 0 ms
 - [x] Otimizar a resposta visual e a atualização de dados ao adicionar produto ao carrinho
+- [x] Corrigir atualização do carrinho lateral ao adicionar nova compra com itens já existentes
