@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Search, X, ChevronDown, GripVertical, ExternalLink } from "lucide-react";
+import { Loader2, Search, X, ChevronDown, GripVertical, ExternalLink, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { OrderDetailContent } from "./AdminOrderDetail";
@@ -90,6 +90,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
   const lastStatusChange = order.updatedAt ? new Date(order.updatedAt) : new Date(order.createdAt);
   const daysInCurrentCol = Math.floor((Date.now() - lastStatusChange.getTime()) / (1000 * 60 * 60 * 24));
   const daysLabel = daysInCurrentCol === 0 ? "Hoje" : `${daysInCurrentCol} dia${daysInCurrentCol !== 1 ? 's' : ''}`;
+  const isAnalysisDelayed = order.status === "analisando" && daysInCurrentCol >= 2;
   // Prazo dinâmico: usa deliveryDeadline do pedido (timestamp ms UTC)
   // Se não houver prazo cadastrado, fallback de 5 dias a partir da criação
   const isLateOrder = order.deliveryDeadline
@@ -98,7 +99,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
 
   return (
     <div
-      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-pointer ${isSelected ? 'ring-2 ring-pink-400 border-pink-300' : ''} ${isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
+      className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-pointer ${isSelected ? 'ring-2 ring-pink-400 border-pink-300' : ''} ${isAnalysisDelayed ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-200' : isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
       onClick={() => onSelect(order.id)}
     >
       {/* Linha 1: Número do pedido */}
@@ -118,6 +119,13 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
         </span>
       </div>
+
+      {isAnalysisDelayed && (
+        <div className="flex items-center gap-1.5 rounded bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-800">
+          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+          Em análise há {daysInCurrentCol} dias
+        </div>
+      )}
 
       {/* Linha 4: Link Ver pedido + Drag Handle */}
       <div className="flex items-center justify-between">
