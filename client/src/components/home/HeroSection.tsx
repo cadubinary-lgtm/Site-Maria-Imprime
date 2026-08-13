@@ -71,7 +71,7 @@ export function HeroSection() {
             className="lg:text-left text-left"
           >
             Precisou imprimir?<br />
-            Pedi pra{" "}
+            Pede pra{" "}
             <span style={{ color: "#E6005C" }}>Maria.</span>
           </h1>
 
