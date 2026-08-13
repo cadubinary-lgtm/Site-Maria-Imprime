@@ -2591,3 +2591,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Excluir automaticamente carrinhos abandonados após 48 horas
 - [ ] Reiniciar e validar o servidor de desenvolvimento após indisponibilidade
 - [x] Ativar a execução automática horária da limpeza de carrinhos abandonados
+- [x] Permitir exclusão manual imediata de cada carrinho abandonado
+- [x] Exibir detalhes e produtos específicos de cada carrinho abandonado
