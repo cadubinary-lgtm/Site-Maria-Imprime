@@ -2582,3 +2582,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o clique na logo para rolar ao topo na página inicial
 - [x] Alterar o texto do banner de "Pedi pra Maria." para "Pede pra Maria." sem modificar o layout
 - [x] Conectar a barra de busca do banner principal à pesquisa exclusiva de produtos
+- [x] Exibir imagem, preço, carregamento e mensagem de resultado vazio na busca de produtos do banner

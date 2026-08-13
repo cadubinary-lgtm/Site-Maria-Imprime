@@ -24,4 +24,14 @@ describe("conteúdo do banner principal", () => {
     expect(source).not.toContain("searchResults?.categories");
     expect(source).not.toContain("searchResults?.materials");
   });
+
+  it("exibe carregamento, miniatura, preço e estado vazio nos resultados", () => {
+    const source = readFileSync(heroSectionPath, "utf8");
+
+    expect(source).toContain('aria-label="Buscando produtos"');
+    expect(source).toContain("animate-spin");
+    expect(source).toContain("product.imageUrl");
+    expect(source).toContain("formatProductPrice(product)");
+    expect(source).toContain("Nenhum produto encontrado para");
+  });
 });
