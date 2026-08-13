@@ -2611,3 +2611,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar em tempo real se o e-mail já está cadastrado no cadastro de cliente
 - [x] Pré-preencher CPF/CNPJ no link de recuperação de senha a partir do aviso de duplicidade
 - [x] Exibir confirmação verde para CPF/CNPJ válido e disponível no cadastro
+- [x] Exibir confirmação verde para e-mail válido e disponível no cadastro
+- [x] Exibir spinner durante a validação em tempo real de e-mail e CPF/CNPJ
+- [ ] Manter pedidos enviados à produção visíveis em Arte Final Aprovada até Pronto para Entrega
+- [ ] Exibir histórico de pedidos finalizados abaixo da lista de Pré-Impressão
+- [x] Corrigir a aba Arte Final Aprovada para incluir pedidos enviados para produção
+- [ ] Validar o ciclo completo de Pré-Impressão até Pronto para Entrega e seu histórico
+- [ ] Auditar o registro de notificações de WhatsApp quando pedido entra em produção
+- [ ] Exibir botões manuais de WhatsApp no bloco de Pré-Impressão
+- [ ] Enviar mensagem manual de WhatsApp conforme a ação selecionada na Pré-Impressão
+- [ ] Implementar o seletor visual de ação e botão Enviar pelo WhatsApp na Pré-Impressão
+- [ ] Gerar checkpoint publicável após validar o seletor e botão manual de WhatsApp
+- [ ] Salvar checkpoint solicitado do estado atual do projeto

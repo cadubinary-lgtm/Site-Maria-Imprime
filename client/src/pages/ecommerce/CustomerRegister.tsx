@@ -209,7 +209,7 @@ export default function CustomerRegister() {
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email *</Label>
-                  <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="joao@email.com" required autoComplete="email" className={emailDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />
+                  <div className="relative"><Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="joao@email.com" required autoComplete="email" className={emailDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />{emailCheck.isLoading ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" /> : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) && !emailDuplicate && <CheckCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600" />}</div>
                   {emailDuplicate && <p className="text-xs font-medium text-red-600">Este e-mail já está cadastrado.</p>}
               </div>
 
@@ -220,7 +220,7 @@ export default function CustomerRegister() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="cpfCnpj">CPF / CNPJ</Label>
-                  <div className="relative"><Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" className={cpfDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />{(cpfDigits.length === 11 || cpfDigits.length === 14) && !cpfDuplicate && !cpfCheck.isLoading && <CheckCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600" />}</div>
+                  <div className="relative"><Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" className={cpfDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />{cpfCheck.isLoading ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" /> : (cpfDigits.length === 11 || cpfDigits.length === 14) && !cpfDuplicate && <CheckCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600" />}</div>
                   {cpfDuplicate && <p className="text-xs font-medium text-red-600">Este CPF/CNPJ já está cadastrado.</p>}
                 </div>
               </div>
