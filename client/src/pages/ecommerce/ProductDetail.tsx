@@ -1795,10 +1795,15 @@ export default function ProductDetail() {
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-base h-12 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing
-                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{uploadState.isUploading ? `Enviando arquivo... ${uploadState.progress}%` : "Processando..."}</>
                     : <><ShoppingCart className="w-4 h-4 mr-2" />Adicionar ao carrinho</>
                   }
                 </Button>
+                {isProcessing && uploadState.isUploading && (
+                  <p className="mt-2 text-center text-xs text-gray-500" aria-live="polite">
+                    Seu arquivo está sendo enviado. Aguarde a conclusão para adicionarmos o produto ao carrinho.
+                  </p>
+                )}
                 
                 {/* Botão Fazer Orçamento - apenas para operadores */}
                 {isOperator && (
