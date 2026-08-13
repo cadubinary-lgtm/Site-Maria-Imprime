@@ -94,11 +94,23 @@ export default function Header() {
     setMobileMenuOpen(false);
   };
 
+  const scrollHomeToTop = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
   const handleLogoClick = () => {
+    setMobileMenuOpen(false);
+    setShowResults(false);
+
+    if (window.location.pathname === "/") {
+      scrollHomeToTop();
+      return;
+    }
+
     navigate("/");
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 0);
+    requestAnimationFrame(() => window.setTimeout(scrollHomeToTop, 80));
   };
 
   const totalResults =
@@ -114,6 +126,14 @@ export default function Header() {
           {/* Logo Oficial */}
           <div
             onClick={handleLogoClick}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleLogoClick();
+              }
+            }}
+            role="button"
+            tabIndex={0}
             className="flex items-center cursor-pointer hover:opacity-80 transition flex-shrink-0"
           >
             <img
@@ -288,15 +308,24 @@ export default function Header() {
 
         {/* Mobile Layout */}
         <div className="md:hidden flex items-center justify-between" style={{paddingLeft: '40px'}}>
-          <Link href="/">
-            <div className="flex items-center cursor-pointer">
+          <div
+            onClick={handleLogoClick}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleLogoClick();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            className="flex items-center cursor-pointer"
+          >
               <img
                 src="/manus-storage/logo-maria-imprime_acc5585b.webp"
                 alt="Maria Imprime - Sua Gráfica Online"
                 className="h-8 w-auto"
               />
-            </div>
-          </Link>
+          </div>
 
           <div className="flex items-center gap-2">
             <CartIcon />
