@@ -19,6 +19,7 @@ import { toast } from "sonner";
 const PRE_PRODUCTION_STATUS: Record<string, { label: string; color: string }> = {
   liberado_analise:    { label: "Liberado para Análise",  color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
   arte_final_aprovada: { label: "Arte Final Aprovada",    color: "bg-green-100 text-green-800 border-green-200" },
+  em_producao:         { label: "Arte Final Aprovada",    color: "bg-green-100 text-green-800 border-green-200" },
 };
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
@@ -64,7 +65,13 @@ export default function AdminPreImpressao() {
   const filtered = useMemo(() => {
     return (allOrders as any[])
       .filter((o) => {
-        const matchStatus = filterStatus === "todos" || (o.preProductionStatus || "liberado_analise") === filterStatus;
+        const isFinishedForDelivery = ["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status);
+        const isApprovedOrProducing = ["arte_final_aprovada", "em_producao"].includes(o.preProductionStatus || "") || o.status === "em_producao";
+        const matchStatus = filterStatus === "todos"
+          ? !isFinishedForDelivery
+          : filterStatus === "arte_final_aprovada"
+            ? isApprovedOrProducing && !isFinishedForDelivery
+            : (o.preProductionStatus || "liberado_analise") === filterStatus && !isFinishedForDelivery;
         const matchSearch =
           !search ||
           o.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
@@ -74,6 +81,10 @@ export default function AdminPreImpressao() {
       })
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [allOrders, filterStatus, search]);
+
+  const history = useMemo(() => (allOrders as any[])
+    .filter((o) => ["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status))
+    .sort((a: any, b: any) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()), [allOrders]);
 
   if (isLoading) {
     return (
@@ -200,6 +211,14 @@ export default function AdminPreImpressao() {
             })}
           </div>
         )}
+
+        <Card>
+          <CardContent className="pt-5 pb-5">
+            <h2 className="text-sm font-semibold text-gray-800">Histórico da Pré-Impressão</h2>
+            <p className="mt-1 text-xs text-gray-500">Pedidos removidos da lista ativa após ficarem Prontos para Entrega.</p>
+            {history.length === 0 ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <div className="mt-4 space-y-2">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge></div>)}</div>}
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );
