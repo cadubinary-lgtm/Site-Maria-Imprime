@@ -2630,6 +2630,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar mensagem padrão editável abaixo do botão Enviar pelo WhatsApp
 - [x] Atualizar a mensagem de WhatsApp conforme reenvio, prova e aprovação de arte
 - [x] Inserir nome do cliente e miniatura da prévia no contato manual de WhatsApp
+- [x] Permitir salvar e reutilizar modelos predefinidos de mensagem de WhatsApp
 - [x] Criar checkpoint após personalizar o contato de WhatsApp com cliente e prévia
 - [x] Aplicar no componente de Pré-Impressão o nome do cliente e a miniatura da prévia selecionada
 - [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente

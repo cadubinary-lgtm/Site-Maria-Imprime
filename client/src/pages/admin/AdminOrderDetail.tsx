@@ -461,6 +461,9 @@ function PreImpressaoColumn({
   const effectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
   const [selected, setSelected] = useState(effectiveStatus);
   const [whatsappMessage, setWhatsappMessage] = useState(`Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`);
+  const [whatsappTemplates, setWhatsappTemplates] = useState<Array<{ name: string; message: string }>>(() => {
+    try { return JSON.parse(localStorage.getItem("maria-imprime-whatsapp-templates") || "[]"); } catch { return []; }
+  });
   
   // ─── Sincronizar estado local com mudanças de orderStatus (reatividade em tempo real) ───
   useEffect(() => {
@@ -583,6 +586,15 @@ function PreImpressaoColumn({
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage.trim())}`, "_blank", "noopener,noreferrer");
     toast.success("Mensagem de WhatsApp preparada para o pedido.");
+  };
+
+  const saveWhatsAppTemplate = () => {
+    const name = window.prompt("Nome do novo modelo de mensagem:");
+    if (!name?.trim() || !whatsappMessage.trim()) return;
+    const updated = [...whatsappTemplates, { name: name.trim(), message: whatsappMessage.trim() }];
+    setWhatsappTemplates(updated);
+    localStorage.setItem("maria-imprime-whatsapp-templates", JSON.stringify(updated));
+    toast.success("Modelo de mensagem salvo.");
   };
 
   return (
@@ -776,6 +788,20 @@ function PreImpressaoColumn({
           placeholder="Digite a mensagem para o cliente..."
           className="w-full resize-none rounded border border-green-200 bg-green-50/40 p-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-400"
         />
+        <div className="flex gap-2">
+          <select
+            defaultValue=""
+            className="min-w-0 flex-1 rounded border border-green-200 bg-white px-2 text-xs text-gray-700"
+            onChange={(event) => {
+              const model = whatsappTemplates[Number(event.target.value)];
+              if (model) setWhatsappMessage(model.message);
+            }}
+          >
+            <option value="">Usar modelo salvo...</option>
+            {whatsappTemplates.map((model, index) => <option key={`${model.name}-${index}`} value={index}>{model.name}</option>)}
+          </select>
+          <Button type="button" size="sm" variant="outline" className="h-7 border-green-200 text-green-700" onClick={saveWhatsAppTemplate}>Salvar modelo</Button>
+        </div>
         {selectedPreviewUrl && (
           <div className="flex items-center gap-2 rounded border border-green-100 bg-green-50/30 p-2">
             <img src={selectedPreviewUrl} alt="Prévia selecionada" className="h-12 w-12 rounded object-cover border border-green-200" />
