@@ -17,6 +17,8 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("DATE_ADD(MAX(ci.updatedAt), INTERVAL 48 HOUR)");
     expect(source).toContain("clientName");
     expect(source).toContain("clientEmail");
+    expect(source).toContain("emailReminderSentAt");
+    expect(source).toContain("whatsappReminderOpenedAt");
     expect(source).toContain("HAVING MAX(updatedAt) < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 48 HOUR)");
     expect(source).toContain("DELETE ci");
   });
@@ -35,6 +37,7 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("details: adminProcedure.input(cartIdentitySchema).query");
     expect(source).toContain("deleteOne: adminProcedure.input(cartIdentitySchema).mutation");
     expect(source).toContain("sendEmailReminder: adminProcedure.input(cartIdentitySchema).mutation");
+    expect(source).toContain("markWhatsAppReminderOpened: adminProcedure.input(cartIdentitySchema.safeExtend");
     expect(source).toContain("cleanupExpired: adminProcedure.mutation");
   });
 
@@ -73,5 +76,15 @@ describe("módulo de carrinhos abandonados", () => {
     expect(pageSource).toContain("Enviar lembrete por e-mail?");
     expect(pageSource).toContain("https://wa.me/");
     expect(emailSource).toContain("sendAbandonedCartReminderEmail");
+  });
+
+  it("registra e informa visualmente o canal de lembrete já acionado", () => {
+    const dbSource = readFileSync(dbPath, "utf8");
+    const pageSource = readFileSync(adminPagePath, "utf8");
+
+    expect(dbSource).toContain("recordAbandonedCartReminder");
+    expect(pageSource).toContain("E-mail enviado");
+    expect(pageSource).toContain("WhatsApp preparado");
+    expect(pageSource).toContain("Não enviado");
   });
 });

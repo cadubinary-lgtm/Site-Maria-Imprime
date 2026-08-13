@@ -2596,3 +2596,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar filtros por nome do cliente e período na página de carrinhos abandonados
 - [x] Exibir todos os dados cadastrados do cliente nos detalhes do carrinho
 - [x] Permitir lembrete manual por e-mail ou WhatsApp para carrinho abandonado
+- [x] Exibir na lista de carrinhos abandonados o status visual de lembrete enviado

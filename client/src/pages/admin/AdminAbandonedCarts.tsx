@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { Clock3, Eye, Loader2, Mail, MessageCircle, Package, Search, ShoppingCart, Trash2 } from "lucide-react";
+import { CheckCircle2, Clock3, Eye, Loader2, Mail, MessageCircle, Package, Search, ShoppingCart, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -59,8 +59,12 @@ export default function AdminAbandonedCarts() {
     onSuccess: ({ email }) => {
       toast.success(`Lembrete enviado para ${email}.`);
       setCartToRemind(null);
+      utils.abandonedCarts.list.invalidate();
     },
     onError: (error) => toast.error(error.message || "Não foi possível enviar o lembrete."),
+  });
+  const whatsappReminderMutation = trpc.abandonedCarts.markWhatsAppReminderOpened.useMutation({
+    onSuccess: () => utils.abandonedCarts.list.invalidate(),
   });
 
   const filteredCarts = useMemo(() => {
@@ -79,6 +83,12 @@ export default function AdminAbandonedCarts() {
   }, [carts, search, startDate, endDate]);
 
   const totalValue = carts.reduce((sum, cart) => sum + Number(cart.totalValue), 0);
+  const openWhatsAppReminder = (cart: typeof carts[number]) => {
+    if (!cart.clientPhone) return;
+    whatsappReminderMutation.mutate({ userId: cart.userId, sessionId: cart.sessionId, recipient: cart.clientPhone });
+    const message = `Olá${cart.clientName ? `, ${cart.clientName}` : ""}! Vimos que você deixou itens no carrinho da Maria Imprime. Posso ajudar a concluir sua compra?`;
+    window.open(`https://wa.me/${cart.clientPhone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <AdminLayout>
@@ -144,7 +154,7 @@ export default function AdminAbandonedCarts() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-sm">
                   <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                    <tr><th className="px-4 py-3 font-medium">Carrinho</th><th className="px-4 py-3 font-medium">Produtos</th><th className="px-4 py-3 font-medium">Itens</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Última atividade</th><th className="px-4 py-3 font-medium">Retenção</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr>
+                    <tr><th className="px-4 py-3 font-medium">Carrinho</th><th className="px-4 py-3 font-medium">Produtos</th><th className="px-4 py-3 font-medium">Itens</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Última atividade</th><th className="px-4 py-3 font-medium">Lembrete</th><th className="px-4 py-3 font-medium">Retenção</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filteredCarts.map((cart) => (
@@ -154,12 +164,18 @@ export default function AdminAbandonedCarts() {
                         <td className="px-4 py-4 text-gray-700">{cart.itemCount}</td>
                         <td className="px-4 py-4 font-semibold text-gray-900">{currency.format(Number(cart.totalValue))}</td>
                         <td className="px-4 py-4 text-gray-600">{new Date(cart.lastActivityAt).toLocaleString("pt-BR")}</td>
+                        <td className="px-4 py-4">
+                          {cart.emailReminderSentAt ? <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100"><CheckCircle2 className="h-3 w-3" />E-mail enviado</Badge>
+                            : cart.whatsappReminderOpenedAt ? <Badge className="gap-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"><MessageCircle className="h-3 w-3" />WhatsApp preparado</Badge>
+                            : <span className="text-xs text-gray-400">Não enviado</span>}
+                          {(cart.emailReminderSentAt || cart.whatsappReminderOpenedAt) && <p className="mt-1 text-[11px] text-gray-400">{new Date(cart.emailReminderSentAt || cart.whatsappReminderOpenedAt!).toLocaleString("pt-BR")}</p>}
+                        </td>
                         <td className="px-4 py-4"><Badge variant="outline" className="gap-1 border-pink-200 bg-pink-50 text-pink-700"><Clock3 className="h-3 w-3" />{formatRemainingTime(cart.expiresAt)}</Badge></td>
                         <td className="px-4 py-4">
                           <div className="flex justify-end gap-2">
                             <Button size="sm" variant="outline" onClick={() => setSelectedCart(cart)}><Eye className="mr-1.5 h-4 w-4" />Detalhes</Button>
                             {cart.clientEmail && <Button size="icon" variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50" aria-label="Enviar lembrete por e-mail" onClick={() => setCartToRemind(cart)}><Mail className="h-4 w-4" /></Button>}
-                            {cart.clientPhone && <Button size="icon" variant="outline" asChild className="border-emerald-200 text-emerald-600 hover:bg-emerald-50"><a aria-label="Enviar lembrete por WhatsApp" href={`https://wa.me/${cart.clientPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá${cart.clientName ? `, ${cart.clientName}` : ""}! Vimos que você deixou itens no carrinho da Maria Imprime. Posso ajudar a concluir sua compra?`)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" /></a></Button>}
+                            {cart.clientPhone && <Button size="icon" variant="outline" className="border-emerald-200 text-emerald-600 hover:bg-emerald-50" aria-label="Preparar lembrete por WhatsApp" onClick={() => openWhatsAppReminder(cart)}><MessageCircle className="h-4 w-4" /></Button>}
                             <Button size="icon" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" aria-label="Excluir carrinho" onClick={() => setCartToDelete(cart)}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </td>

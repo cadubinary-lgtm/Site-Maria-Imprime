@@ -672,6 +672,19 @@ export const automationLogs = mysqlTable("automationLogs", {
 export type AutomationLog = typeof automationLogs.$inferSelect;
 export type InsertAutomationLog = typeof automationLogs.$inferInsert;
 
+/** Histórico de lembretes enviados ou preparados para recuperação de carrinhos abandonados. */
+export const abandonedCartReminders = mysqlTable("abandonedCartReminders", {
+  id: int("id").autoincrement().primaryKey(),
+  cartKey: varchar("cartKey", { length: 320 }).notNull(),
+  channel: mysqlEnum("channel", ["email", "whatsapp"]).notNull(),
+  recipient: varchar("recipient", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["sent", "prepared", "failed"]).notNull(),
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AbandonedCartReminder = typeof abandonedCartReminders.$inferSelect;
+
 /**
  * Production Status History - Histórico detalhado de mudanças de status na produção
  */
