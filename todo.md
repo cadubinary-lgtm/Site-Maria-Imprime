@@ -2643,3 +2643,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir número, data de criação e status na visão restrita de Linha de Produção
 - [ ] Salvar checkpoint solicitado do estado atual do projeto
 - [x] Exibir progresso de upload da arte enquanto o produto é adicionado ao carrinho
+- [x] Exibir a quantidade de produtos aguardando análise na coluna Analisando do Kanban
