@@ -2597,3 +2597,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir todos os dados cadastrados do cliente nos detalhes do carrinho
 - [x] Permitir lembrete manual por e-mail ou WhatsApp para carrinho abandonado
 - [x] Exibir na lista de carrinhos abandonados o status visual de lembrete enviado
+- [x] Investigar e corrigir a ausência de carrinhos abandonados na listagem
+- [x] Registrar histórico consultável de carrinhos antes da exclusão definitiva após 48 horas
+- [ ] Retomar a limpeza automática após publicar o histórico de exclusões

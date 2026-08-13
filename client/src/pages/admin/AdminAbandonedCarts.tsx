@@ -31,6 +31,7 @@ export default function AdminAbandonedCarts() {
   const [cartToRemind, setCartToRemind] = useState<{ cartKey: string; userId: number | null; sessionId: string | null; clientName: string | null; clientEmail: string | null } | null>(null);
   const utils = trpc.useUtils();
   const { data: carts = [], isLoading } = trpc.abandonedCarts.list.useQuery();
+  const { data: deletedHistory = [] } = trpc.abandonedCarts.history.useQuery();
   const detailsInput = selectedCart ?? { userId: null, sessionId: "__not-selected__" };
   const { data: cartDetails, isLoading: isLoadingDetails } = trpc.abandonedCarts.details.useQuery(detailsInput, {
     enabled: Boolean(selectedCart),
@@ -181,6 +182,27 @@ export default function AdminAbandonedCarts() {
                         </td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardContent className="pt-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Histórico de carrinhos excluídos</h2>
+              <p className="text-sm text-gray-500">Registro preservado antes da exclusão definitiva por prazo de 48 horas ou ação manual.</p>
+            </div>
+            {deletedHistory.length === 0 ? (
+              <p className="py-8 text-center text-sm text-gray-500">Nenhum carrinho excluído foi registrado desde a ativação do histórico.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-sm">
+                  <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500"><tr><th className="px-4 py-3 font-medium">Cliente</th><th className="px-4 py-3 font-medium">Produtos</th><th className="px-4 py-3 font-medium">Itens</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Motivo</th><th className="px-4 py-3 font-medium">Excluído em</th></tr></thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {deletedHistory.map((cart) => <tr key={cart.id}><td className="px-4 py-3 font-medium text-gray-900">{cart.clientName || "Visitante"}<p className="mt-0.5 text-xs font-normal text-gray-400">{cart.clientEmail || cart.cartKey}</p></td><td className="max-w-[300px] px-4 py-3 text-gray-600"><span className="line-clamp-2">{cart.products}</span></td><td className="px-4 py-3">{cart.itemCount}</td><td className="px-4 py-3 font-semibold">{currency.format(Number(cart.totalValue))}</td><td className="px-4 py-3"><Badge variant="outline">{cart.deletionReason === "automatic" ? "48 horas" : "Manual"}</Badge></td><td className="px-4 py-3 text-gray-600">{new Date(cart.deletedAt).toLocaleString("pt-BR")}</td></tr>)}
                   </tbody>
                 </table>
               </div>
