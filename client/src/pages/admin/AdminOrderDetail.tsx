@@ -1547,7 +1547,7 @@ export function OrderDetailContent({
           })()}
 
           {/* ── Resumo Financeiro ── */}
-          <Card>
+          {!isProductionRole && <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5" /> Resumo Financeiro
@@ -1610,10 +1610,10 @@ export function OrderDetailContent({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card>}
 
           {/* ── Logística e Entrega ── */}
-          <OrderShippingPanel
+          {!isProductionRole && <OrderShippingPanel
             shippingMethod={o.shippingMethod}
             shippingPrice={o.shippingPrice}
             deliveryZipCode={o.deliveryZipCode}
@@ -1623,11 +1623,11 @@ export function OrderDetailContent({
             deliveryNeighborhood={o.deliveryNeighborhood}
             deliveryCity={o.deliveryCity}
             deliveryState={o.deliveryState}
-          />
+          />}
 
-          <ShippingLabelViewer orderId={o.id} />
+          {!isProductionRole && <ShippingLabelViewer orderId={o.id} />}
 
-          {o.notes && (
+          {!isProductionRole && o.notes && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

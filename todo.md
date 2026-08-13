@@ -2626,4 +2626,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Gerar checkpoint publicável após validar o seletor e botão manual de WhatsApp
 - [ ] Implementar seletor, feedback e histórico auditável do envio manual de WhatsApp
 - [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente
+- [x] Ocultar resumo financeiro, logística e expedição para operador exclusivo de Linha de Produção
 - [ ] Salvar checkpoint solicitado do estado atual do projeto
