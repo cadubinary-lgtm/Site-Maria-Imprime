@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { formatProductPrice } from "@/lib/productPrice";
 
 const ICON_RAPIDA    = "/manus-storage/icone6_2b9ca331.png";
 const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";
@@ -26,7 +27,7 @@ export function HeroSection() {
   const normalizedQuery = searchQuery.trim();
   const { data: searchResults, isLoading: isSearching } = trpc.search.global.useQuery(
     { query: normalizedQuery },
-    { enabled: normalizedQuery.length >= 2 }
+    { enabled: normalizedQuery.length > 0 }
   );
   const productResults = searchResults?.products ?? [];
 
@@ -55,7 +56,7 @@ export function HeroSection() {
       return;
     }
 
-    setShowProductResults(normalizedQuery.length >= 2);
+    setShowProductResults(normalizedQuery.length > 0);
   };
 
   return (
@@ -165,9 +166,14 @@ export function HeroSection() {
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  setShowProductResults(e.target.value.trim().length >= 2);
+                  setShowProductResults(e.target.value.trim().length > 0);
                 }}
-                onFocus={() => normalizedQuery.length >= 2 && setShowProductResults(true)}
+                onFocus={() => normalizedQuery.length > 0 && setShowProductResults(true)}
+                name="hero-product-search"
+                autoComplete="off"
+                aria-busy={isSearching}
+                aria-expanded={showProductResults && normalizedQuery.length > 0}
+                aria-controls="hero-product-results"
                 style={{
                   flex: 1,
                   background: "transparent",
@@ -178,28 +184,56 @@ export function HeroSection() {
                   fontFamily: FONT,
                 }}
               />
+              {isSearching && (
+                <span
+                  aria-label="Buscando produtos"
+                  className="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-gray-200 border-t-pink-600"
+                />
+              )}
             </form>
 
-            {showProductResults && normalizedQuery.length >= 2 && (
+            {showProductResults && normalizedQuery.length > 0 && (
               <div
+                id="hero-product-results"
                 className="absolute left-0 right-0 z-30 overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-lg"
                 style={{ top: "calc(100% + 8px)", maxHeight: "260px" }}
               >
                 {isSearching ? (
                   <p className="px-5 py-3 text-sm text-gray-500">Buscando produtos...</p>
                 ) : productResults.length > 0 ? (
-                  productResults.map((product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      onClick={() => selectProduct(product.id)}
-                      className="block w-full px-5 py-3 text-left text-sm text-gray-800 transition hover:bg-pink-50 focus:bg-pink-50 focus:outline-none"
-                    >
-                      {product.name}
-                    </button>
-                  ))
+                  <div className="divide-y divide-gray-100">
+                    {productResults.map((product) => (
+                      <button
+                        key={product.id}
+                        type="button"
+                        onClick={() => selectProduct(product.id)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-pink-50 focus:bg-pink-50 focus:outline-none"
+                      >
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt=""
+                            className="h-11 w-11 shrink-0 rounded-lg border border-gray-100 object-cover"
+                          />
+                        ) : (
+                          <span
+                            aria-hidden="true"
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-xs font-bold text-pink-600"
+                          >
+                            MI
+                          </span>
+                        )}
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-gray-900">{product.name}</span>
+                          <span className="mt-0.5 block text-xs text-gray-600">{formatProductPrice(product)}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 ) : (
-                  <p className="px-5 py-3 text-sm text-gray-500">Nenhum produto encontrado.</p>
+                  <p className="px-5 py-4 text-sm text-gray-500">
+                    Nenhum produto encontrado para “{normalizedQuery}”. Tente outro termo.
+                  </p>
                 )}
               </div>
             )}
