@@ -1077,6 +1077,18 @@ export function OrderDetailContent({
             </div>
           </div>}
 
+          {isProductionRole && (
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{o.orderNumber}</h1>
+                <p className="mt-1 text-sm text-gray-500">Criado em {fmtDate(o.createdAt)}</p>
+              </div>
+              <Badge className={`${sc.color} px-3 py-1.5 text-sm`}>
+                {sc.icon} {sc.label}
+              </Badge>
+            </div>
+          )}
+
           {/* ── Acompanhamento e Atualização do Pedido ── */}
           {!isProductionRole && <Card className="border-indigo-200">
             <CardHeader className="pb-2">
