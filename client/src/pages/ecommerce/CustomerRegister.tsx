@@ -49,6 +49,8 @@ export default function CustomerRegister() {
     { enabled: cpfDigits.length === 11 || cpfDigits.length === 14, retry: false }
   );
   const cpfDuplicate = cpfCheck.data?.exists === true;
+  const emailCheck = trpc.customerAuth.checkEmail.useQuery({ email: form.email || "invalido@local" }, { enabled: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email), retry: false });
+  const emailDuplicate = emailCheck.data?.exists === true;
 
   const register = trpc.customerAuth.register.useMutation({
     onSuccess: () => {
@@ -108,6 +110,7 @@ export default function CustomerRegister() {
     if (form.password !== form.confirmPassword) { setError("As senhas não coincidem."); return; }
     if (!form.acceptTerms) { setError("Você deve aceitar os termos de uso para continuar."); return; }
     if (cpfDuplicate) { setError("Este CPF/CNPJ já está cadastrado."); return; }
+    if (emailDuplicate) { setError("Este e-mail já está cadastrado. Faça login ou recupere sua senha."); return; }
 
     // Endereço é opcional no cadastro, mas se preenchido deve estar completo
     const hasPartialAddress = form.addressZipCode || form.addressStreet || form.addressNumber || form.addressCity;
@@ -178,7 +181,7 @@ export default function CustomerRegister() {
           {error && (
             <div ref={errorAlertRef}>
             <Alert variant="destructive">
-              <AlertDescription>{error}{error.includes("CPF/CNPJ já está cadastrado") && <span className="mt-2 block text-xs">Já possui conta? <Link href="/login-cliente" className="font-semibold underline">Fazer Login</Link> ou <Link href="/recuperar-senha" className="font-semibold underline">Recuperar Senha</Link>.</span>}</AlertDescription>
+            <AlertDescription>{error}{(error.includes("CPF/CNPJ já está cadastrado") || error.includes("e-mail já está cadastrado")) && <span className="mt-2 block text-xs">Já possui conta? <Link href="/login-cliente" className="font-semibold underline">Fazer Login</Link> ou <Link href={`/recuperar-senha?cpf=${encodeURIComponent(form.cpfCnpj)}`} className="font-semibold underline">Recuperar Senha</Link>.</span>}</AlertDescription>
             </Alert>
             </div>
           )}
@@ -206,7 +209,8 @@ export default function CustomerRegister() {
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email *</Label>
-                <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="joao@email.com" required autoComplete="email" />
+                  <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="joao@email.com" required autoComplete="email" className={emailDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />
+                  {emailDuplicate && <p className="text-xs font-medium text-red-600">Este e-mail já está cadastrado.</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -216,7 +220,7 @@ export default function CustomerRegister() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="cpfCnpj">CPF / CNPJ</Label>
-                  <Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" className={cpfDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />
+                  <div className="relative"><Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" className={cpfDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />{(cpfDigits.length === 11 || cpfDigits.length === 14) && !cpfDuplicate && !cpfCheck.isLoading && <CheckCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600" />}</div>
                   {cpfDuplicate && <p className="text-xs font-medium text-red-600">Este CPF/CNPJ já está cadastrado.</p>}
                 </div>
               </div>

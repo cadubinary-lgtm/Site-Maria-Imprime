@@ -10,6 +10,7 @@ import { CheckCircle, Loader2, ArrowLeft, Mail, KeyRound } from "lucide-react";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const cpfReference = new URLSearchParams(window.location.search).get("cpf");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
@@ -73,6 +74,7 @@ export default function ForgotPassword() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              {cpfReference && <p className="rounded-md bg-orange-50 px-3 py-2 text-xs text-orange-700">CPF/CNPJ informado: <strong>{cpfReference}</strong>. Digite abaixo o e-mail vinculado a este cadastro.</p>}
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>

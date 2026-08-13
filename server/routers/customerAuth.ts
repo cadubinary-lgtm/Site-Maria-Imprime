@@ -62,6 +62,11 @@ async function requireDb() {
 // ── Router ────────────────────────────────────────────────────────────────────
 
 export const customerAuthRouter = router({
+  checkEmail: publicProcedure.input(z.object({ email: z.string().email() })).query(async ({ input }) => {
+    const db = await requireDb();
+    const match = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.email, input.email.toLowerCase().trim())).limit(1);
+    return { exists: match.length > 0 };
+  }),
   checkCpfCnpj: publicProcedure
     .input(z.object({ cpfCnpj: z.string().min(11).max(14) }))
     .query(async ({ input }) => {
