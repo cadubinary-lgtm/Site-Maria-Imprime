@@ -273,7 +273,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ["pagamento_aprovado", "pagamento_retirada"].includes(o.status)
   ).length ?? 0;
 
-  const inProductionCount = orders?.filter((o: any) => o.status === "em_producao").length ?? 0;
+  // O Kanban deve alertar a linha de produção sobre os itens que ainda exigem análise.
+  const awaitingAnalysisCount = orders?.filter((o: any) => o.status === "analisando").length ?? 0;
 
   const navItems: { group?: string; item?: NavItem }[] = [
     // COMERCIAL E VENDAS - Transformado em menu retrátil
@@ -312,7 +313,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               { label: "Acabamento Finalizado", href: "/admin/status-producao?status=acabamento_finalizado" },
             ],
           },
-          { label: "Produção Kanban", href: "/admin/producao/kanban", badge: inProductionCount || undefined },
+          { label: "Produção Kanban", href: "/admin/producao/kanban", badge: awaitingAnalysisCount || undefined },
           { label: "Validação de Arquivos", href: "/admin/validacao-arquivos" },
         ],
       },
