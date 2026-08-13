@@ -685,6 +685,27 @@ export const abandonedCartReminders = mysqlTable("abandonedCartReminders", {
 
 export type AbandonedCartReminder = typeof abandonedCartReminders.$inferSelect;
 
+/** Snapshot auditável de carrinhos removidos definitivamente após o período de retenção. */
+export const deletedAbandonedCarts = mysqlTable("deletedAbandonedCarts", {
+  id: int("id").autoincrement().primaryKey(),
+  cartKey: varchar("cartKey", { length: 320 }).notNull(),
+  userId: int("userId"),
+  sessionId: varchar("sessionId", { length: 255 }),
+  clientName: varchar("clientName", { length: 255 }),
+  clientEmail: varchar("clientEmail", { length: 255 }),
+  clientPhone: varchar("clientPhone", { length: 30 }),
+  products: longtext("products").notNull(),
+  itemCount: int("itemCount").notNull(),
+  productCount: int("productCount").notNull(),
+  totalValue: decimal("totalValue", { precision: 15, scale: 2 }).notNull(),
+  snapshot: longtext("snapshot").notNull(),
+  deletionReason: mysqlEnum("deletionReason", ["automatic", "manual"]).notNull(),
+  lastActivityAt: timestamp("lastActivityAt").notNull(),
+  deletedAt: timestamp("deletedAt").defaultNow().notNull(),
+});
+
+export type DeletedAbandonedCart = typeof deletedAbandonedCarts.$inferSelect;
+
 /**
  * Production Status History - Histórico detalhado de mudanças de status na produção
  */

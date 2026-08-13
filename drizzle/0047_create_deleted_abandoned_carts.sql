@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `deletedAbandonedCarts` (
+  `id` int AUTO_INCREMENT NOT NULL,
+  `cartKey` varchar(320) NOT NULL,
+  `userId` int NULL,
+  `sessionId` varchar(255) NULL,
+  `clientName` varchar(255) NULL,
+  `clientEmail` varchar(255) NULL,
+  `clientPhone` varchar(30) NULL,
+  `products` longtext NOT NULL,
+  `itemCount` int NOT NULL,
+  `productCount` int NOT NULL,
+  `totalValue` decimal(15,2) NOT NULL,
+  `snapshot` longtext NOT NULL,
+  `deletionReason` enum('automatic','manual') NOT NULL,
+  `lastActivityAt` timestamp NOT NULL,
+  `deletedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `deleted_abandoned_carts_deleted_at_idx` (`deletedAt`),
+  KEY `deleted_abandoned_carts_cart_key_idx` (`cartKey`)
+);

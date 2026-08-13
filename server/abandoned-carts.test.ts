@@ -39,6 +39,7 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("sendEmailReminder: adminProcedure.input(cartIdentitySchema).mutation");
     expect(source).toContain("markWhatsAppReminderOpened: adminProcedure.input(cartIdentitySchema.safeExtend");
     expect(source).toContain("cleanupExpired: adminProcedure.mutation");
+    expect(source).toContain("history: adminProcedure.query");
   });
 
   it("expõe a página no menu de Vendas e mostra a política de retenção", () => {
@@ -86,5 +87,15 @@ describe("módulo de carrinhos abandonados", () => {
     expect(pageSource).toContain("E-mail enviado");
     expect(pageSource).toContain("WhatsApp preparado");
     expect(pageSource).toContain("Não enviado");
+  });
+
+  it("preserva um histórico antes da exclusão definitiva dos carrinhos", () => {
+    const dbSource = readFileSync(dbPath, "utf8");
+    const pageSource = readFileSync(adminPagePath, "utf8");
+
+    expect(dbSource).toContain("archiveCartRows");
+    expect(dbSource).toContain("getDeletedAbandonedCartHistory");
+    expect(dbSource).toContain('archiveCartRows(rowsToArchive, "automatic")');
+    expect(pageSource).toContain("Histórico de carrinhos excluídos");
   });
 });

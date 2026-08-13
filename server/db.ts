@@ -1132,10 +1132,67 @@ export type AbandonedCartDetails = {
   items: AbandonedCartItemDetail[];
 };
 
+export type DeletedAbandonedCartHistory = {
+  id: number;
+  cartKey: string;
+  clientName: string | null;
+  clientEmail: string | null;
+  products: string;
+  itemCount: number;
+  productCount: number;
+  totalValue: number;
+  deletionReason: "automatic" | "manual";
+  lastActivityAt: Date;
+  deletedAt: Date;
+};
+
 type AbandonedCartIdentity = { userId: number | null; sessionId: string | null };
 
 function getAbandonedCartKey(identity: AbandonedCartIdentity) {
   return identity.userId !== null ? `user:${identity.userId}` : `session:${identity.sessionId ?? "sem-sessao"}`;
+}
+
+async function archiveCartRows(rows: any[], deletionReason: "automatic" | "manual") {
+  if (rows.length === 0) return 0;
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const groups = new Map<string, any[]>();
+  for (const row of rows) {
+    const key = getAbandonedCartKey({ userId: row.userId === null ? null : Number(row.userId), sessionId: row.sessionId ?? null });
+    groups.set(key, [...(groups.get(key) ?? []), row]);
+  }
+  for (const [cartKey, cartRows] of Array.from(groups.entries())) {
+    const first = cartRows[0];
+    const products = Array.from(new Set(cartRows.map((row: any) => String(row.productName ?? "Produto não identificado")))).join(", ");
+    const itemCount = cartRows.reduce((total: number, row: any) => total + Number(row.quantity ?? 0), 0);
+    const totalValue = cartRows.reduce((total: number, row: any) => total + (Number(row.priceAtCart ?? 0) * Number(row.quantity ?? 0)), 0);
+    const lastActivityAt = new Date(Math.max(...cartRows.map((row: any) => new Date(row.updatedAt).getTime())));
+    await db.execute(sql`
+      INSERT INTO deletedAbandonedCarts (cartKey, userId, sessionId, clientName, clientEmail, clientPhone, products, itemCount, productCount, totalValue, snapshot, deletionReason, lastActivityAt)
+      VALUES (${cartKey}, ${first.userId ?? null}, ${first.sessionId ?? null}, ${first.clientName ?? null}, ${first.clientEmail ?? null}, ${first.clientPhone ?? null}, ${products}, ${itemCount}, ${new Set(cartRows.map((row: any) => row.productId)).size}, ${totalValue.toFixed(2)}, ${JSON.stringify(cartRows)}, ${deletionReason}, ${lastActivityAt})
+    `);
+  }
+  return groups.size;
+}
+
+async function getCartRowsForArchive(identity?: AbandonedCartIdentity) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const filter = identity
+    ? sql`ci.userId <=> ${identity.userId} AND ci.sessionId <=> ${identity.sessionId}`
+    : sql`EXISTS (SELECT 1 FROM cartItems related WHERE related.userId <=> ci.userId AND related.sessionId <=> ci.sessionId GROUP BY related.userId, related.sessionId HAVING MAX(related.updatedAt) < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 48 HOUR))`;
+  const result = await db.execute(sql`
+    SELECT ci.*, p.name AS productName,
+      COALESCE(NULLIF(CONCAT_WS(' ', ca.firstName, ca.lastName), ''), u.name) AS clientName,
+      COALESCE(ca.email, u.email) AS clientEmail,
+      ca.phone AS clientPhone
+    FROM cartItems ci
+    INNER JOIN products p ON p.id = ci.productId
+    LEFT JOIN customer_accounts ca ON ci.sessionId = CONCAT('cust_', ca.id)
+    LEFT JOIN users u ON ci.userId = u.id
+    WHERE ${filter}
+  `) as any;
+  return (result[0] ?? []) as any[];
 }
 
 function assertAbandonedCartIdentity(identity: AbandonedCartIdentity) {
@@ -1303,6 +1360,8 @@ export async function deleteAbandonedCart(identity: AbandonedCartIdentity): Prom
   assertAbandonedCartIdentity(identity);
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  const rowsToArchive = await getCartRowsForArchive(identity);
+  await archiveCartRows(rowsToArchive, "manual");
 
   const result = await db.execute(sql`
     DELETE FROM cartItems
@@ -1311,6 +1370,22 @@ export async function deleteAbandonedCart(identity: AbandonedCartIdentity): Prom
   `) as any;
 
   return { deletedItems: Number(result[0]?.affectedRows ?? result.affectedRows ?? 0) };
+}
+
+export async function getDeletedAbandonedCartHistory(limit = 100): Promise<DeletedAbandonedCartHistory[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.execute(sql`
+    SELECT id, cartKey, clientName, clientEmail, products, itemCount, productCount, totalValue, deletionReason, lastActivityAt, deletedAt
+    FROM deletedAbandonedCarts
+    ORDER BY deletedAt DESC
+    LIMIT ${Math.min(Math.max(limit, 1), 200)}
+  `) as any;
+  return ((result[0] ?? []) as any[]).map((row) => ({
+    id: Number(row.id), cartKey: String(row.cartKey), clientName: row.clientName ?? null, clientEmail: row.clientEmail ?? null,
+    products: String(row.products), itemCount: Number(row.itemCount), productCount: Number(row.productCount), totalValue: Number(row.totalValue),
+    deletionReason: row.deletionReason, lastActivityAt: new Date(row.lastActivityAt), deletedAt: new Date(row.deletedAt),
+  }));
 }
 
 export async function recordAbandonedCartReminder(
@@ -1332,6 +1407,8 @@ export async function recordAbandonedCartReminder(
 export async function cleanupExpiredAbandonedCarts(): Promise<{ deletedItems: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  const rowsToArchive = await getCartRowsForArchive();
+  await archiveCartRows(rowsToArchive, "automatic");
 
   const result = await db.execute(sql`
     DELETE ci
