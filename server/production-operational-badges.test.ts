@@ -33,4 +33,15 @@ describe("alertas e detalhes rápidos da Linha de Produção", () => {
     expect(source).toContain("item.productName");
     expect(source).toContain("Ver pedido");
   });
+
+  it("exibe a hora de criação e não mostra valores nos cards operacionais", () => {
+    const prePrint = readFileSync(prePrintPath, "utf8");
+    const production = readFileSync(productionPath, "utf8");
+
+    for (const source of [prePrint, production]) {
+      expect(source).toContain('new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })');
+      expect(source).toContain("{fmtTime(order.createdAt)} • {fmtDate(order.createdAt)}");
+      expect(source).not.toContain("fmt(Number(order.totalAmount ?? order.totalPrice ?? 0))");
+    }
+  });
 });
