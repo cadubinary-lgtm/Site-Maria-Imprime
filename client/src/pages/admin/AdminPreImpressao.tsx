@@ -15,6 +15,7 @@ import {
 import { Link, useSearch } from "wouter";
 import { Search, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ProductionQuickDetailsDialog } from "@/components/admin/ProductionQuickDetailsDialog";
 
 const PRE_PRODUCTION_STATUS: Record<string, { label: string; color: string }> = {
   liberado_analise:    { label: "Liberado para Análise",  color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -45,6 +46,7 @@ export default function AdminPreImpressao() {
   const urlStatus = new URLSearchParams(searchStr).get("status") || "todos";
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>(urlStatus);
+  const [quickDetailsStatus, setQuickDetailsStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const s = new URLSearchParams(searchStr).get("status") || "todos";
@@ -85,6 +87,14 @@ export default function AdminPreImpressao() {
   const history = useMemo(() => (allOrders as any[])
     .filter((o) => ["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status))
     .sort((a: any, b: any) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()), [allOrders]);
+
+  const preProductionOrdersByStatus = useMemo(() => {
+    const activeOrders = (allOrders as any[]).filter((o) => !["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status));
+    return {
+      liberado_analise: activeOrders.filter((o) => (o.preProductionStatus || "liberado_analise") === "liberado_analise"),
+      arte_final_aprovada: activeOrders.filter((o) => ["arte_final_aprovada", "em_producao"].includes(o.preProductionStatus || "") || o.status === "em_producao"),
+    } as Record<string, any[]>;
+  }, [allOrders]);
 
   if (isLoading) {
     return (
@@ -128,17 +138,29 @@ export default function AdminPreImpressao() {
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {["todos", "liberado_analise", "arte_final_aprovada"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setFilterStatus(s)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                    filterStatus === s
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {s === "todos" ? "Todos" : PRE_PRODUCTION_STATUS[s]?.label ?? s}
-                </button>
+                <div key={s} className="flex items-center gap-1">
+                  <button
+                    onClick={() => setFilterStatus(s)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                      filterStatus === s
+                        ? "bg-orange-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {s === "todos" ? "Todos" : PRE_PRODUCTION_STATUS[s]?.label ?? s}
+                  </button>
+                  {s !== "todos" && (
+                    <button
+                      type="button"
+                      onClick={() => setQuickDetailsStatus(s)}
+                      className="min-w-5 rounded-full border border-pink-200 bg-pink-50 px-1.5 py-0.5 text-xs font-semibold text-pink-700 hover:bg-pink-100"
+                      title={`Ver detalhes de ${PRE_PRODUCTION_STATUS[s]?.label}`}
+                      aria-label={`Ver detalhes de ${preProductionOrdersByStatus[s]?.length ?? 0} itens em ${PRE_PRODUCTION_STATUS[s]?.label}`}
+                    >
+                      {preProductionOrdersByStatus[s]?.length ?? 0}
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -219,6 +241,13 @@ export default function AdminPreImpressao() {
             {history.length === 0 ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <div className="mt-4 space-y-2">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge></div>)}</div>}
           </CardContent>
         </Card>
+        <ProductionQuickDetailsDialog
+          open={Boolean(quickDetailsStatus)}
+          onOpenChange={(open) => !open && setQuickDetailsStatus(null)}
+          title={quickDetailsStatus ? `Detalhes rápidos — ${PRE_PRODUCTION_STATUS[quickDetailsStatus]?.label}` : "Detalhes rápidos"}
+          statusLabel={quickDetailsStatus ? PRE_PRODUCTION_STATUS[quickDetailsStatus]?.label ?? quickDetailsStatus : ""}
+          orders={quickDetailsStatus ? preProductionOrdersByStatus[quickDetailsStatus] ?? [] : []}
+        />
       </div>
     </AdminLayout>
   );

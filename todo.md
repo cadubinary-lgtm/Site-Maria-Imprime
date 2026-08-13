@@ -2645,3 +2645,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir progresso de upload da arte enquanto o produto é adicionado ao carrinho
 - [x] Exibir a quantidade de produtos aguardando análise na coluna Analisando do Kanban
 - [x] Destacar visualmente a quantidade de itens pendentes no card Analisando do Kanban
+- [x] Destacar visualmente no Kanban itens em Analisando há tempo excessivo
+- [x] Permitir abrir detalhes rápidos pelos badges de Pré-Impressão e Status de Produção
