@@ -13,4 +13,15 @@ describe("conteúdo do banner principal", () => {
     expect(source).toContain('<span style={{ color: "#E6005C" }}>Maria.</span>');
     expect(source).not.toContain('Pedi pra{" "}');
   });
+
+  it("conecta a barra de busca exclusivamente aos resultados de produtos", () => {
+    const source = readFileSync(heroSectionPath, "utf8");
+
+    expect(source).toContain("trpc.search.global.useQuery");
+    expect(source).toContain("const productResults = searchResults?.products ?? []");
+    expect(source).toContain("placeholder=\"Buscar produtos...\"");
+    expect(source).toContain('navigate(`/produto/${productId}`)');
+    expect(source).not.toContain("searchResults?.categories");
+    expect(source).not.toContain("searchResults?.materials");
+  });
 });

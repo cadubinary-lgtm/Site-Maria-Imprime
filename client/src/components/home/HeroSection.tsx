@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 const ICON_RAPIDA    = "/manus-storage/icone6_2b9ca331.png";
 const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";
@@ -18,6 +20,43 @@ const pilares = [
 
 export function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showProductResults, setShowProductResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const [, navigate] = useLocation();
+  const normalizedQuery = searchQuery.trim();
+  const { data: searchResults, isLoading: isSearching } = trpc.search.global.useQuery(
+    { query: normalizedQuery },
+    { enabled: normalizedQuery.length >= 2 }
+  );
+  const productResults = searchResults?.products ?? [];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowProductResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectProduct = (productId: number) => {
+    navigate(`/produto/${productId}`);
+    setSearchQuery("");
+    setShowProductResults(false);
+  };
+
+  const submitProductSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (productResults.length === 1) {
+      selectProduct(productResults[0].id);
+      return;
+    }
+
+    setShowProductResults(normalizedQuery.length >= 2);
+  };
 
   return (
     <section
@@ -93,8 +132,9 @@ export function HeroSection() {
           </p>
 
           {/* Barra de busca */}
-          <div style={{ maxWidth: "100%", marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
-            <div
+          <div ref={searchRef} style={{ maxWidth: "100%", marginBottom: "clamp(1rem, 3vw, 1.5rem)", position: "relative" }}>
+            <form
+              onSubmit={submitProductSearch}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -121,9 +161,13 @@ export function HeroSection() {
               </svg>
               <input
                 type="search"
-                placeholder="Buscar produtos, materiais ou serviços..."
+                placeholder="Buscar produtos..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowProductResults(e.target.value.trim().length >= 2);
+                }}
+                onFocus={() => normalizedQuery.length >= 2 && setShowProductResults(true)}
                 style={{
                   flex: 1,
                   background: "transparent",
@@ -134,7 +178,31 @@ export function HeroSection() {
                   fontFamily: FONT,
                 }}
               />
-            </div>
+            </form>
+
+            {showProductResults && normalizedQuery.length >= 2 && (
+              <div
+                className="absolute left-0 right-0 z-30 overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-lg"
+                style={{ top: "calc(100% + 8px)", maxHeight: "260px" }}
+              >
+                {isSearching ? (
+                  <p className="px-5 py-3 text-sm text-gray-500">Buscando produtos...</p>
+                ) : productResults.length > 0 ? (
+                  productResults.map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => selectProduct(product.id)}
+                      className="block w-full px-5 py-3 text-left text-sm text-gray-800 transition hover:bg-pink-50 focus:bg-pink-50 focus:outline-none"
+                    >
+                      {product.name}
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-5 py-3 text-sm text-gray-500">Nenhum produto encontrado.</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 4 Pilares */}
