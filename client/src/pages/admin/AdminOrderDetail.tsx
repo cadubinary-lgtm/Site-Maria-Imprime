@@ -480,6 +480,23 @@ function PreImpressaoColumn({
   const [arteFinalAprovada, setArteFinalAprovada] = useState(preProductionStatus === "arte_final_aprovada");
   const utils = trpc.useUtils();
 
+  useEffect(() => {
+    const base = `Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`;
+    if (requireResend) {
+      setWhatsappMessage(`${base}\n\nIdentificamos que a arte precisa de ajuste. Por favor, envie novamente o arquivo corrigido para continuarmos a produção.`);
+      return;
+    }
+    if (sendProof) {
+      setWhatsappMessage(`${base}\n\nEnviamos a prévia da sua arte para aprovação. Por favor, confira cuidadosamente todas as informações e responda confirmando a aprovação ou informando os ajustes necessários.`);
+      return;
+    }
+    if (arteFinalAprovada) {
+      setWhatsappMessage(`${base}\n\nSua arte foi aprovada e está pronta para seguir para produção. Em breve atualizaremos você sobre o andamento.`);
+      return;
+    }
+    setWhatsappMessage(base);
+  }, [orderId, requireResend, sendProof, arteFinalAprovada]);
+
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
     onSuccess: () => {
       toast.success("Pré-impressão atualizada!");
