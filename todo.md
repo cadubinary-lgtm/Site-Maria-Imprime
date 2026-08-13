@@ -2621,5 +2621,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Exibir botões manuais de WhatsApp no bloco de Pré-Impressão
 - [ ] Enviar mensagem manual de WhatsApp conforme a ação selecionada na Pré-Impressão
 - [ ] Implementar o seletor visual de ação e botão Enviar pelo WhatsApp na Pré-Impressão
+- [ ] Registrar no histórico do pedido cada mensagem manual preparada pelo WhatsApp
+- [ ] Exibir feedback de sucesso ou erro ao preparar mensagem manual de WhatsApp
 - [ ] Gerar checkpoint publicável após validar o seletor e botão manual de WhatsApp
+- [ ] Implementar seletor, feedback e histórico auditável do envio manual de WhatsApp
+- [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente
 - [ ] Salvar checkpoint solicitado do estado atual do projeto
