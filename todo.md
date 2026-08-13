@@ -2581,3 +2581,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar a correção de automationLogs sem alterar estrutura visual, páginas ou fluxos
 - [x] Corrigir o clique na logo para rolar ao topo na página inicial
 - [x] Alterar o texto do banner de "Pedi pra Maria." para "Pede pra Maria." sem modificar o layout
+- [x] Conectar a barra de busca do banner principal à pesquisa exclusiva de produtos
