@@ -131,7 +131,8 @@ export function CartSidePanel() {
         ) : (
           <div className="divide-y divide-gray-100">
             {cartItems.map((item) => {
-              const isUpdating = updatingId === item.id;
+              const isPendingSync = item.id < 0;
+              const isUpdating = updatingId === item.id || isPendingSync;
               const subtotalItem = Number(item.priceAtCart) * item.quantity;
               const isExpanded = expandedItems.has(item.id);
               const toggleExpand = () => setExpandedItems(prev => {
@@ -252,9 +253,10 @@ export function CartSidePanel() {
           </div>
           <button
             onClick={handleCheckout}
-            className="w-full bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-bold py-3 px-4 rounded-xl transition-colors text-sm"
+            disabled={cartItems.some(item => item.id < 0)}
+            className="w-full bg-pink-600 hover:bg-pink-700 active:bg-pink-800 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold py-3 px-4 rounded-xl transition-colors text-sm"
           >
-            Finalizar Pedido →
+            {cartItems.some(item => item.id < 0) ? "Adicionando item..." : "Finalizar Pedido →"}
           </button>
           <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400">
             <Lock className="w-3 h-3" />
