@@ -2593,3 +2593,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ativar a execução automática horária da limpeza de carrinhos abandonados
 - [x] Permitir exclusão manual imediata de cada carrinho abandonado
 - [x] Exibir detalhes e produtos específicos de cada carrinho abandonado
+- [x] Adicionar filtros por nome do cliente e período na página de carrinhos abandonados
+- [x] Exibir todos os dados cadastrados do cliente nos detalhes do carrinho
+- [x] Permitir lembrete manual por e-mail ou WhatsApp para carrinho abandonado

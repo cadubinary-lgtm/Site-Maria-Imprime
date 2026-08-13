@@ -2,6 +2,8 @@ import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { z } from "zod";
 import { cleanupExpiredAbandonedCarts, deleteAbandonedCart, getAbandonedCartDetails, getAbandonedCartSummaries } from "./db";
+import { sendAbandonedCartReminderEmail } from "./emailService";
+import { TRPCError } from "@trpc/server";
 
 const adminProcedure = adminOrManusAuthProcedure;
 const cartIdentitySchema = z.object({
@@ -15,5 +17,23 @@ export const abandonedCartsRouter = router({
   list: adminProcedure.query(async () => getAbandonedCartSummaries()),
   details: adminProcedure.input(cartIdentitySchema).query(async ({ input }) => getAbandonedCartDetails(input)),
   deleteOne: adminProcedure.input(cartIdentitySchema).mutation(async ({ input }) => deleteAbandonedCart(input)),
+  sendEmailReminder: adminProcedure.input(cartIdentitySchema).mutation(async ({ input }) => {
+    const details = await getAbandonedCartDetails(input);
+    if (!details.customer?.email) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Este carrinho não possui e-mail cadastrado." });
+    }
+    const total = details.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const products = details.items.map((item) => item.productName).join(", ");
+    const result = await sendAbandonedCartReminderEmail(
+      details.customer.email,
+      details.customer.firstName || details.customer.name || "cliente",
+      products,
+      new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(total)
+    );
+    if (!result.success) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: result.error || "Não foi possível enviar o lembrete." });
+    }
+    return { success: true, email: details.customer.email };
+  }),
   cleanupExpired: adminProcedure.mutation(async () => cleanupExpiredAbandonedCarts()),
 });

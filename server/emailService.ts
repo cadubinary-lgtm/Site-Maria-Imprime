@@ -268,6 +268,27 @@ export async function sendQuotationEmail(to: string, data: QuotationEmailData): 
   return send(to, `Orçamento ${data.quotationNumber} — Maria Imprime`, templateQuotationEmail(data));
 }
 
+export async function sendAbandonedCartReminderEmail(
+  to: string,
+  firstName: string,
+  products: string,
+  total: string
+): Promise<SendResult> {
+  const safeName = escapeHtml(firstName || "cliente");
+  const safeProducts = escapeHtml(products || "os produtos selecionados");
+  return send(to, "Seu carrinho está esperando por você — Maria Imprime", baseTemplate("Seu carrinho está esperando por você", `
+    ${h1("Seu carrinho está esperando por você")}
+    ${p(`Olá, <strong>${safeName}</strong>! Vimos que você deixou itens no seu carrinho da Maria Imprime.`)}
+    <div style="background:#fff1f6;border:1px solid #f9a8c7;border-radius:12px;padding:16px;margin:18px 0;">
+      <p style="margin:0 0 6px;color:#831843;font-size:13px;font-weight:700;text-transform:uppercase;">Produtos selecionados</p>
+      <p style="margin:0;color:#4a102c;font-size:15px;line-height:1.55;">${safeProducts}</p>
+      <p style="margin:14px 0 0;color:#ec0069;font-size:18px;font-weight:800;">Total estimado: ${escapeHtml(total)}</p>
+    </div>
+    ${p("Se ainda precisar de ajuda para concluir sua compra, estamos prontos para atender você.")}
+    <div style="text-align:center;">${btn("Continuar comprando", SITE_URL)}</div>
+  `));
+}
+
 export function templateOrderConfirmationWithLink(firstName: string, orderNumber: string, total: string, trackUrl: string): string {
   return baseTemplate("Pedido confirmado!", `
     ${h1(`Pedido #${orderNumber} confirmado! 🎉`)}

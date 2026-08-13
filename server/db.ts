@@ -1077,6 +1077,9 @@ export type AbandonedCartSummary = {
   cartKey: string;
   userId: number | null;
   sessionId: string | null;
+  clientName: string | null;
+  clientEmail: string | null;
+  clientPhone: string | null;
   itemCount: number;
   productCount: number;
   totalValue: number;
@@ -1099,6 +1102,32 @@ export type AbandonedCartItemDetail = {
   artFileUrl: string | null;
   notes: string | null;
   updatedAt: Date;
+};
+
+export type AbandonedCartCustomerDetail = {
+  id: number | null;
+  firstName: string | null;
+  lastName: string | null;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  cpfCnpj: string | null;
+  emailVerified: boolean | null;
+  status: string | null;
+  allowStorePickup: boolean | null;
+  addressZipCode: string | null;
+  addressStreet: string | null;
+  addressNumber: string | null;
+  addressComplement: string | null;
+  addressNeighborhood: string | null;
+  addressCity: string | null;
+  addressState: string | null;
+  createdAt: Date | null;
+};
+
+export type AbandonedCartDetails = {
+  customer: AbandonedCartCustomerDetail | null;
+  items: AbandonedCartItemDetail[];
 };
 
 type AbandonedCartIdentity = { userId: number | null; sessionId: string | null };
@@ -1130,10 +1159,15 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
       COUNT(*) AS productCount,
       COALESCE(SUM(CAST(ci.priceAtCart AS DECIMAL(12,2)) * ci.quantity), 0) AS totalValue,
       GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS products,
+      COALESCE(NULLIF(MAX(CONCAT_WS(' ', ca.firstName, ca.lastName)), ''), MAX(u.name)) AS clientName,
+      COALESCE(MAX(ca.email), MAX(u.email)) AS clientEmail,
+      MAX(ca.phone) AS clientPhone,
       MAX(ci.updatedAt) AS lastActivityAt,
       DATE_ADD(MAX(ci.updatedAt), INTERVAL 48 HOUR) AS expiresAt
     FROM cartItems ci
     INNER JOIN products p ON p.id = ci.productId
+    LEFT JOIN customer_accounts ca ON ci.sessionId = CONCAT('cust_', ca.id)
+    LEFT JOIN users u ON ci.userId = u.id
     GROUP BY ci.userId, ci.sessionId
     ORDER BY MAX(ci.updatedAt) ASC
   `) as any;
@@ -1143,6 +1177,9 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
     cartKey: String(row.cartKey),
     userId: row.userId === null || row.userId === undefined ? null : Number(row.userId),
     sessionId: row.sessionId ?? null,
+    clientName: row.clientName ?? null,
+    clientEmail: row.clientEmail ?? null,
+    clientPhone: row.clientPhone ?? null,
     itemCount: Number(row.itemCount ?? 0),
     productCount: Number(row.productCount ?? 0),
     totalValue: Number(row.totalValue ?? 0),
@@ -1152,13 +1189,13 @@ export async function getAbandonedCartSummaries(): Promise<AbandonedCartSummary[
   }));
 }
 
-/** Retorna todos os produtos e informações disponíveis de um carrinho específico. */
-export async function getAbandonedCartDetails(identity: AbandonedCartIdentity): Promise<AbandonedCartItemDetail[]> {
+/** Retorna produtos e dados cadastrais disponíveis de um carrinho específico. */
+export async function getAbandonedCartDetails(identity: AbandonedCartIdentity): Promise<AbandonedCartDetails> {
   assertAbandonedCartIdentity(identity);
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.execute(sql`
+  const itemResult = await db.execute(sql`
     SELECT
       ci.id,
       ci.productId,
@@ -1180,8 +1217,8 @@ export async function getAbandonedCartDetails(identity: AbandonedCartIdentity): 
     ORDER BY ci.updatedAt DESC, ci.id DESC
   `) as any;
 
-  const rows = (result[0] ?? []) as any[];
-  return rows.map((row) => ({
+  const rows = (itemResult[0] ?? []) as any[];
+  const items = rows.map((row) => ({
     id: Number(row.id),
     productId: Number(row.productId),
     productName: String(row.productName ?? "Produto não identificado"),
@@ -1196,6 +1233,59 @@ export async function getAbandonedCartDetails(identity: AbandonedCartIdentity): 
     notes: row.notes ?? null,
     updatedAt: new Date(row.updatedAt),
   }));
+
+  const customerResult = await db.execute(sql`
+    SELECT
+      ca.id,
+      ca.firstName,
+      ca.lastName,
+      COALESCE(NULLIF(CONCAT_WS(' ', ca.firstName, ca.lastName), ''), u.name) AS name,
+      COALESCE(ca.email, u.email) AS email,
+      ca.phone,
+      ca.cpfCnpj,
+      ca.emailVerified,
+      ca.status,
+      ca.allowStorePickup,
+      ca.addressZipCode,
+      ca.addressStreet,
+      ca.addressNumber,
+      ca.addressComplement,
+      ca.addressNeighborhood,
+      ca.addressCity,
+      ca.addressState,
+      ca.createdAt
+    FROM cartItems ci
+    LEFT JOIN customer_accounts ca ON ci.sessionId = CONCAT('cust_', ca.id)
+    LEFT JOIN users u ON ci.userId = u.id
+    WHERE ci.userId <=> ${identity.userId}
+      AND ci.sessionId <=> ${identity.sessionId}
+    LIMIT 1
+  `) as any;
+  const customerRow = ((customerResult[0] ?? []) as any[])[0];
+  const customer = customerRow && (customerRow.id || customerRow.name || customerRow.email)
+    ? {
+        id: customerRow.id === null || customerRow.id === undefined ? null : Number(customerRow.id),
+        firstName: customerRow.firstName ?? null,
+        lastName: customerRow.lastName ?? null,
+        name: customerRow.name ?? null,
+        email: customerRow.email ?? null,
+        phone: customerRow.phone ?? null,
+        cpfCnpj: customerRow.cpfCnpj ?? null,
+        emailVerified: customerRow.emailVerified === null || customerRow.emailVerified === undefined ? null : Boolean(customerRow.emailVerified),
+        status: customerRow.status ?? null,
+        allowStorePickup: customerRow.allowStorePickup === null || customerRow.allowStorePickup === undefined ? null : Boolean(customerRow.allowStorePickup),
+        addressZipCode: customerRow.addressZipCode ?? null,
+        addressStreet: customerRow.addressStreet ?? null,
+        addressNumber: customerRow.addressNumber ?? null,
+        addressComplement: customerRow.addressComplement ?? null,
+        addressNeighborhood: customerRow.addressNeighborhood ?? null,
+        addressCity: customerRow.addressCity ?? null,
+        addressState: customerRow.addressState ?? null,
+        createdAt: customerRow.createdAt ? new Date(Number(customerRow.createdAt)) : null,
+      }
+    : null;
+
+  return { customer, items };
 }
 
 /** Exclui todos os itens de um único carrinho identificado por conta ou sessão. */
