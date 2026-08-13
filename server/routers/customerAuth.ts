@@ -62,6 +62,15 @@ async function requireDb() {
 // ── Router ────────────────────────────────────────────────────────────────────
 
 export const customerAuthRouter = router({
+  checkCpfCnpj: publicProcedure
+    .input(z.object({ cpfCnpj: z.string().min(11).max(14) }))
+    .query(async ({ input }) => {
+      const db = await requireDb();
+      const document = input.cpfCnpj.replace(/\D/g, "");
+      if (document.length !== 11 && document.length !== 14) return { exists: false };
+      const match = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.cpfCnpj, document)).limit(1);
+      return { exists: match.length > 0 };
+    }),
   /**
    * Registro de novo cliente
    */

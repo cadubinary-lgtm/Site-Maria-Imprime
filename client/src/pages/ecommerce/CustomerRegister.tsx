@@ -43,6 +43,12 @@ export default function CustomerRegister() {
     addressCity: "",
     addressState: "",
   });
+  const cpfDigits = form.cpfCnpj.replace(/\D/g, "");
+  const cpfCheck = trpc.customerAuth.checkCpfCnpj.useQuery(
+    { cpfCnpj: cpfDigits || "0".repeat(11) },
+    { enabled: cpfDigits.length === 11 || cpfDigits.length === 14, retry: false }
+  );
+  const cpfDuplicate = cpfCheck.data?.exists === true;
 
   const register = trpc.customerAuth.register.useMutation({
     onSuccess: () => {
@@ -101,6 +107,7 @@ export default function CustomerRegister() {
     if (!/[0-9]/.test(form.password)) { setError("A senha deve conter ao menos um número."); return; }
     if (form.password !== form.confirmPassword) { setError("As senhas não coincidem."); return; }
     if (!form.acceptTerms) { setError("Você deve aceitar os termos de uso para continuar."); return; }
+    if (cpfDuplicate) { setError("Este CPF/CNPJ já está cadastrado."); return; }
 
     // Endereço é opcional no cadastro, mas se preenchido deve estar completo
     const hasPartialAddress = form.addressZipCode || form.addressStreet || form.addressNumber || form.addressCity;
@@ -171,7 +178,7 @@ export default function CustomerRegister() {
           {error && (
             <div ref={errorAlertRef}>
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{error}{error.includes("CPF/CNPJ já está cadastrado") && <span className="mt-2 block text-xs">Já possui conta? <Link href="/login-cliente" className="font-semibold underline">Fazer Login</Link> ou <Link href="/recuperar-senha" className="font-semibold underline">Recuperar Senha</Link>.</span>}</AlertDescription>
             </Alert>
             </div>
           )}
@@ -209,7 +216,8 @@ export default function CustomerRegister() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="cpfCnpj">CPF / CNPJ</Label>
-                  <Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" />
+                  <Input id="cpfCnpj" name="cpfCnpj" value={form.cpfCnpj} onChange={handleChange} placeholder="000.000.000-00" className={cpfDuplicate ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : ""} />
+                  {cpfDuplicate && <p className="text-xs font-medium text-red-600">Este CPF/CNPJ já está cadastrado.</p>}
                 </div>
               </div>
 
