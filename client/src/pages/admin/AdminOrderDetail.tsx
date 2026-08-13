@@ -460,6 +460,7 @@ function PreImpressaoColumn({
   // Quando o pedido está bloqueado comercialmente, exibe sempre o status de espera
   const effectiveStatus = isCommercialLocked ? "aguardando_liberacao_comercial" : preProductionStatus;
   const [selected, setSelected] = useState(effectiveStatus);
+  const [whatsappMessage, setWhatsappMessage] = useState(`Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`);
   
   // ─── Sincronizar estado local com mudanças de orderStatus (reatividade em tempo real) ───
   useEffect(() => {
@@ -546,8 +547,11 @@ function PreImpressaoColumn({
   };
 
   const handleWhatsAppContact = () => {
-    const message = `Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    if (!whatsappMessage.trim()) {
+      toast.error("Digite uma mensagem antes de enviar pelo WhatsApp.");
+      return;
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage.trim())}`, "_blank", "noopener,noreferrer");
     toast.success("Mensagem de WhatsApp preparada para o pedido.");
   };
 
@@ -735,6 +739,13 @@ function PreImpressaoColumn({
         <Button size="sm" variant="outline" className="w-full h-7 mt-2 border-green-200 text-green-700 hover:bg-green-50" onClick={handleWhatsAppContact}>
           Enviar pelo WhatsApp
         </Button>
+        <textarea
+          value={whatsappMessage}
+          onChange={(event) => setWhatsappMessage(event.target.value)}
+          rows={3}
+          placeholder="Digite a mensagem para o cliente..."
+          className="w-full resize-none rounded border border-green-200 bg-green-50/40 p-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-400"
+        />
         </div>
       )}
       {/* Nota visual para pedidos multi-item: o botão Produzir marca apenas este item */}
