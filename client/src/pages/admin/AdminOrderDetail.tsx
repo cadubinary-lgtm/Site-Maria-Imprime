@@ -479,9 +479,22 @@ function PreImpressaoColumn({
   const [showProductionConfirm, setShowProductionConfirm] = useState(false);
   const [arteFinalAprovada, setArteFinalAprovada] = useState(preProductionStatus === "arte_final_aprovada");
   const utils = trpc.useUtils();
+  const { data: whatsappOrder } = trpc.checkout.getOrderById.useQuery({ id: orderId }, { enabled: Boolean(orderId) });
+  const customerName = whatsappOrder?.deliveryFullName || whatsappOrder?.customerData?.name || "cliente";
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const base = `Olá! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`;
+    if (!pendingPreviewFile) {
+      setSelectedPreviewUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(pendingPreviewFile);
+    setSelectedPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [pendingPreviewFile]);
+
+  useEffect(() => {
+    const base = `Olá, ${customerName}! Estamos entrando em contato referente ao pedido #${orderId} da Maria Imprime.`;
     if (requireResend) {
       setWhatsappMessage(`${base}\n\nIdentificamos que a arte precisa de ajuste. Por favor, envie novamente o arquivo corrigido para continuarmos a produção.`);
       return;
@@ -495,7 +508,7 @@ function PreImpressaoColumn({
       return;
     }
     setWhatsappMessage(base);
-  }, [orderId, requireResend, sendProof, arteFinalAprovada]);
+  }, [orderId, customerName, requireResend, sendProof, arteFinalAprovada]);
 
   const mutation = trpc.admin.updatePreProductionStatus.useMutation({
     onSuccess: () => {
@@ -763,6 +776,12 @@ function PreImpressaoColumn({
           placeholder="Digite a mensagem para o cliente..."
           className="w-full resize-none rounded border border-green-200 bg-green-50/40 p-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-400"
         />
+        {selectedPreviewUrl && (
+          <div className="flex items-center gap-2 rounded border border-green-100 bg-green-50/30 p-2">
+            <img src={selectedPreviewUrl} alt="Prévia selecionada" className="h-12 w-12 rounded object-cover border border-green-200" />
+            <span className="text-[10px] text-green-700">Prévia selecionada para conferência antes do contato.</span>
+          </div>
+        )}
         </div>
       )}
       {/* Nota visual para pedidos multi-item: o botão Produzir marca apenas este item */}

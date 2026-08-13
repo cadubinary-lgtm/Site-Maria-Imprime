@@ -2629,6 +2629,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Adicionar botão de WhatsApp abaixo de Arte Final Aprovada com mensagem referente ao pedido
 - [x] Adicionar mensagem padrão editável abaixo do botão Enviar pelo WhatsApp
 - [x] Atualizar a mensagem de WhatsApp conforme reenvio, prova e aprovação de arte
+- [x] Inserir nome do cliente e miniatura da prévia no contato manual de WhatsApp
+- [x] Criar checkpoint após personalizar o contato de WhatsApp com cliente e prévia
+- [x] Aplicar no componente de Pré-Impressão o nome do cliente e a miniatura da prévia selecionada
 - [x] Restringir o detalhe do pedido para operador exclusivo de Linha de Produção a itens e dados do cliente
 - [x] Ocultar resumo financeiro, logística e expedição para operador exclusivo de Linha de Produção
 - [x] Exibir número, data de criação e status na visão restrita de Linha de Produção
