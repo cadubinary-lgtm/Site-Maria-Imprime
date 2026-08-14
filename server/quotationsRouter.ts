@@ -455,6 +455,28 @@ export const quotationsRouter = router({
       return { success: true };
     }),
 
+  // ── Desfazer cancelamento ───────────────────────────────────────────────
+  restoreStatusBeforeCancellation: adminAnyProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { quotations, quotationHistory } = await import("../drizzle/schema.js");
+      const [quotation] = await db.select({ id: quotations.id, status: quotations.status, quotationNumber: quotations.quotationNumber }).from(quotations).where(eq(quotations.id, input.id)).limit(1);
+      if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      if (quotation.status !== "cancelado") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Apenas orçamentos cancelados podem ter o status restaurado." });
+
+      const [cancellation] = await db.select().from(quotationHistory)
+        .where(and(eq(quotationHistory.quotationId, input.id), eq(quotationHistory.newStatus, "cancelado")))
+        .orderBy(desc(quotationHistory.createdAt), desc(quotationHistory.id)).limit(1);
+      if (!cancellation?.previousStatus) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não foi possível identificar o status anterior ao cancelamento." });
+
+      const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.id ?? 1;
+      await db.update(quotations).set({ status: cancellation.previousStatus as any, canceledAt: null }).where(eq(quotations.id, input.id));
+      await db.insert(quotationHistory).values({ quotationId: input.id, previousStatus: "cancelado", newStatus: cancellation.previousStatus, operatorId, notes: "Cancelamento desfeito: status anterior restaurado." } as any);
+      return { success: true, restoredStatus: cancellation.previousStatus };
+    }),
+
   // ── Enviar orçamento por e-mail ───────────────────────────────────────────
   sendEmail: adminAnyProcedure
     .input(z.object({ id: z.number() }))

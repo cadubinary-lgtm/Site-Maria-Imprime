@@ -117,6 +117,14 @@ export default function AdminQuotations() {
     onError: (e) => toast.error(e.message),
   });
 
+  const restoreCancelledStatus = trpc.quotations.restoreStatusBeforeCancellation.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Cancelamento desfeito. Status restaurado para ${STATUS_CONFIG[result.restoredStatus]?.label ?? result.restoredStatus}.`);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const duplicate = trpc.quotations.duplicate.useMutation({
     onSuccess: (res) => {
       toast.success(`Orçamento duplicado: ${res.newNumber}`);
@@ -347,6 +355,11 @@ export default function AdminQuotations() {
                                   onClick={() => updateStatus.mutate({ id: row.id, status: "cancelado" })}
                                 >
                                   <XCircle className="w-3.5 h-3.5 mr-2" /> Cancelar
+                                </DropdownMenuItem>
+                              )}
+                              {row.status === "cancelado" && (
+                                <DropdownMenuItem onClick={() => restoreCancelledStatus.mutate({ id: row.id })}>
+                                  <RotateCcw className="w-3.5 h-3.5 mr-2 text-green-600" /> Restaurar status anterior
                                 </DropdownMenuItem>
                               )}
               {canManageTrash && (
