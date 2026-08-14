@@ -30,3 +30,11 @@ export function createProductEditSignature(form: ProductEditSnapshot): string {
 export function hasUnsavedProductChanges(baseline: string | null, form: ProductEditSnapshot): boolean {
   return baseline !== null && baseline !== createProductEditSignature(form);
 }
+
+export function shouldInitializeProductEditSession(
+  editingId: number | null,
+  waitingInitialSegments: boolean,
+  productSegments: unknown[] | undefined,
+): boolean {
+  return Boolean(editingId && waitingInitialSegments && productSegments);
+}
