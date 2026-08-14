@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, createContext, useContext } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   LayoutDashboard, ShoppingCart, Package, Users, DollarSign,
@@ -66,13 +66,15 @@ function matchesSearch(item: NavItem, query: string): boolean {
 
 function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: number; searchQuery: string }) {
   const [location] = useLocation();
+  const locationSearch = useSearch();
   const ctx = useContext(SidebarScrollContext);
+  const currentLocation = `${location}${locationSearch}`;
 
   const hasActiveChild = item.children?.some(
-    (child) => child.href && (location === child.href || location.startsWith(child.href + "?"))
+    (child) => child.href && currentLocation === child.href
   ) ?? false;
   const hasChildren = item.children && item.children.length > 0;
-  const isActive = item.href ? location === item.href : false;
+  const isActive = item.href ? currentLocation === item.href : false;
   const isGroupActive = hasChildren && hasActiveChild;
 
   // Chave única para persistir o estado no localStorage

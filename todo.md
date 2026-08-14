@@ -2655,4 +2655,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar Esvaziar Lixeira com confirmação e acesso exclusivo de Superadmin
 - [x] Exibir usuário responsável e data/hora exata da exclusão na Lixeira de Contas Recebidas
 - [x] Remover retângulos rosas dos atributos no detalhe do carrinho e manter texto preto
+- [x] Corrigir o destaque de Todos os Pedidos ao abrir Carrinho Abandonado
 - [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin
