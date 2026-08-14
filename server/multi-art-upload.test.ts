@@ -13,6 +13,8 @@ describe("múltiplos arquivos de arte", () => {
     expect(source).toContain("const [artFiles, setArtFiles]");
     expect(source).toContain("multiple");
     expect(source).toContain("removeArtFile");
+    expect(source).toContain("clearAllArtFiles");
+    expect(source).toContain("Limpar todos");
     expect(source).toContain("Envie um ou mais arquivos do seu dispositivo");
     expect(source).toContain("artFiles.map");
     expect(source).toContain('selectArtUploadMode("single")');

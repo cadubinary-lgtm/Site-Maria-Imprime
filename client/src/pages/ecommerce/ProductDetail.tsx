@@ -539,6 +539,14 @@ export default function ProductDetail() {
     resetUpload();
   };
 
+  const clearAllArtFiles = () => {
+    setArtFiles([]);
+    setArtFilesConfirmed(false);
+    setArtUploadSuccess(null);
+    setUploadQueue(null);
+    resetUpload();
+  };
+
   const selectArtUploadMode = (mode: "single" | "multiple") => {
     setArtUploadMode(mode);
     setArtFilesConfirmed(false);
@@ -1283,6 +1291,10 @@ export default function ProductDetail() {
 
                     {artFiles.length > 0 && (
                       <div className="space-y-2">
+                        <div className="flex items-center justify-between px-1">
+                          <span className="text-xs font-medium text-gray-600">{artFiles.length} {artFiles.length === 1 ? "arquivo selecionado" : "arquivos selecionados"}</span>
+                          <button type="button" onClick={clearAllArtFiles} disabled={uploadState.isUploading} className="text-xs font-medium text-red-500 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50">Limpar todos</button>
+                        </div>
                         {artFiles.map((art) => (
                           <div key={art.id} className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
                             {art.preview
