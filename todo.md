@@ -2699,3 +2699,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar a avaliação do produto e ajustar o visual do aviso de campos pendentes
 - [x] Adicionar animação suave de entrada ao aviso de campos pendentes
 - [x] Adicionar subitens de dashboard em Vendas, Linha de Produção, Produtos e Clientes
+- [x] Revisar e padronizar indicadores de status nos subitens do menu administrativo
