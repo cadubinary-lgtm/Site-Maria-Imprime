@@ -1,9 +1,13 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createAdminDetailLocation,
   getAdminReturnTarget,
   isAdminDetailPath,
 } from "../client/src/lib/adminNavigation";
+
+const adminLayoutPath = resolve(process.cwd(), "client/src/components/AdminLayout.tsx");
 
 describe("navegação contextual administrativa", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -58,5 +62,14 @@ describe("navegação contextual administrativa", () => {
       path: "/admin/pedidos/kanban",
       label: "Voltar para Kanban",
     });
+  });
+
+  it("considera a query string para destacar somente o submenu administrativo correto", () => {
+    const source = readFileSync(adminLayoutPath, "utf8");
+
+    expect(source).toContain('import { Link, useLocation, useSearch } from "wouter";');
+    expect(source).toContain("const currentLocation = `${location}${locationSearch}`;");
+    expect(source).toContain("currentLocation === child.href");
+    expect(source).toContain("const isActive = item.href ? currentLocation === item.href : false;");
   });
 });
