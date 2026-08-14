@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2, Star, Trash2 } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2, Star, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -344,7 +344,7 @@ export function ProductImageUploader({
                     <div className={PRODUCT_IMAGE_LAYOUT.thumbnailActions}>
                       <button
                         type="button"
-                        className="rounded-md p-1 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                        className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
                         onClick={(e) => { e.stopPropagation(); handleRemoveGallery(slot); }}
                         title={`Excluir foto ${slot + 2}`}
                         aria-label={`Excluir foto ${slot + 2}`}
@@ -353,11 +353,12 @@ export function ProductImageUploader({
                       </button>
                       <button
                         type="button"
-                        className="rounded-md bg-gray-900 px-1 py-0.5 text-[8px] font-medium text-white transition-colors hover:bg-pink-600"
+                        className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
                         onClick={(e) => { e.stopPropagation(); openGalleryPicker(slot); }}
                         title={`Trocar foto ${slot + 2}`}
+                        aria-label={`Trocar foto ${slot + 2}`}
                       >
-                        Trocar
+                        <RefreshCw className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </>
