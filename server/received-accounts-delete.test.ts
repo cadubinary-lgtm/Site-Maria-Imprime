@@ -69,5 +69,10 @@ describe("lixeira de Contas Recebidas", () => {
     expect(pageSource).toContain("Motivo da exclusão");
     expect(pageSource).toContain("deletionReason.trim().length < 3");
     expect(pageSource).toContain("Mover conta a receber para a lixeira");
+    expect(pageSource).toContain('const [showTrash, setShowTrash] = useState(false);');
+    expect(pageSource).toContain("Lixeira de Contas a Receber");
+    expect(pageSource).toContain("listDeletedContasRecebidas.useQuery");
+    expect(pageSource).toContain("Restaurar esta conta a receber?");
+    expect(pageSource).toContain("Confirmar restauração");
   });
 });
