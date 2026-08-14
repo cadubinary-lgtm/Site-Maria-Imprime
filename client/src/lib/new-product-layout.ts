@@ -5,4 +5,5 @@ export const NEW_PRODUCT_FIELD_LAYOUT = {
   price: "xl:col-span-2",
   segment: "xl:col-span-3",
   description: "xl:col-span-12",
+  segmentsAlignment: "xl:pt-[86px]",
 } as const;

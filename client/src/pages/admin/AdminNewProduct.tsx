@@ -310,7 +310,7 @@ export default function AdminNewProduct() {
                     compact
                   />
                   {/* Segmentos */}
-                  <div>
+                  <div className={NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}>
                     <Label>Segmentos</Label>
                     <MultiSegmentSelector
                       productId={0}
