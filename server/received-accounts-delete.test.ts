@@ -19,6 +19,9 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain('action: "move_received_account_to_trash"');
     expect(source).toContain('action: "restore_received_account"');
     expect(source).toContain("deletedByAdminId: deletedReceivedAccounts.deletedByAdminId");
+    expect(source).toContain('reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000)');
+    expect(source).toContain("deletionReason: input.reason");
+    expect(source).toContain("deletionReason: deletedReceivedAccounts.deletionReason");
   });
 
   it("exibe busca, filtros de data, lixeira e restauração somente para Superadmin", () => {
@@ -46,6 +49,10 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Usuário que excluiu");
     expect(source).toContain("ID do usuário:");
     expect(source).toContain("formatDateTime(item.deletedAt)");
+    expect(source).toContain("Motivo da exclusão");
+    expect(source).toContain("O motivo é obrigatório e ficará registrado na lixeira e na auditoria.");
+    expect(source).toContain("deletionReason.trim().length < 3");
+    expect(source).toContain("item.deletionReason || \"Motivo não informado\"");
     expect(source).toContain("Mover para lixeira");
   });
 });
