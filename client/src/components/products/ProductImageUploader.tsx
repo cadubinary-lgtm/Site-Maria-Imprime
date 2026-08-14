@@ -331,32 +331,35 @@ export function ProductImageUploader({
               >
                 {url ? (
                   <>
-                    <img src={url} alt={`Foto ${slot + 2}`} className="w-full h-full object-contain" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity hover:opacity-100 pointer-events-none">
-                      <Maximize2 className="h-4 w-4 text-white" />
+                    <div className={PRODUCT_IMAGE_LAYOUT.thumbnailImage}>
+                      <img src={url} alt={`Foto ${slot + 2}`} className="h-full w-full object-contain" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity hover:opacity-100 pointer-events-none">
+                        <Maximize2 className="h-4 w-4 text-white" />
+                      </div>
                     </div>
                     {/* Drag handle indicator */}
-                    <div className="absolute top-0.5 left-0.5 text-white/70 pointer-events-none">
+                    <div className="absolute top-0.5 left-0.5 z-10 text-white/70 pointer-events-none">
                       <GripVertical className="w-3 h-3 drop-shadow" />
                     </div>
-                    {/* Replace button (click) */}
-                    <button
-                      type="button"
-                      className="absolute bottom-0.5 left-0.5 bg-black/60 text-white rounded text-[9px] px-1 py-0.5 hover:bg-black/80 z-10"
-                      onClick={(e) => { e.stopPropagation(); openGalleryPicker(slot); }}
-                    >
-                      trocar
-                    </button>
-                    {/* Remove button */}
-                    <button
-                      type="button"
-                      className="absolute top-0.5 right-0.5 z-10 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
-                      onClick={(e) => { e.stopPropagation(); handleRemoveGallery(slot); }}
-                      title={`Excluir foto ${slot + 2}`}
-                      aria-label={`Excluir foto ${slot + 2}`}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
+                    <div className={PRODUCT_IMAGE_LAYOUT.thumbnailActions}>
+                      <button
+                        type="button"
+                        className="rounded-md p-1 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                        onClick={(e) => { e.stopPropagation(); handleRemoveGallery(slot); }}
+                        title={`Excluir foto ${slot + 2}`}
+                        aria-label={`Excluir foto ${slot + 2}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-md bg-gray-900 px-1 py-0.5 text-[8px] font-medium text-white transition-colors hover:bg-pink-600"
+                        onClick={(e) => { e.stopPropagation(); openGalleryPicker(slot); }}
+                        title={`Trocar foto ${slot + 2}`}
+                      >
+                        Trocar
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full gap-1 text-gray-400">
