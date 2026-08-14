@@ -26,6 +26,7 @@ import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhats
 import { useAuth } from "@/_core/hooks/useAuth";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
+import { getProductRatingDisplay } from "@/lib/product-rating";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -187,6 +188,10 @@ export default function ProductDetail() {
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 }, { enabled: !!productId }
+  );
+  const productRating = useMemo(
+    () => getProductRatingDisplay({ rating: (product as any)?.rating, reviewCount: (product as any)?.reviewCount }),
+    [product],
   );
   const { data: productAttributes } = trpc.attributes.getProductAttributes.useQuery(
     productId || 0, { enabled: !!productId }
@@ -954,12 +959,16 @@ export default function ProductDetail() {
                 <Star className="w-3 h-3 fill-orange-500" /> Mais vendido
               </span>
               <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
-              <div className="flex items-center gap-1">
-                {[1,2,3,4,5].map(i => (
-                  <Star key={i} className="w-4 h-4 fill-orange-400 text-orange-400" />
-                ))}
-                <span className="text-sm text-gray-500 ml-1">4,9 (248 avaliações)</span>
-              </div>
+              {productRating && (
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <div className="flex items-center gap-0.5 flex-shrink-0" aria-label={`${productRating.rating} de 5 estrelas`}>
+                    {[1,2,3,4,5].map(i => (
+                      <Star key={i} className="w-4 h-4 fill-orange-400 text-orange-400" />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">{productRating.rating} ({productRating.reviewCount} avaliações)</span>
+                </div>
+              )}
               {product.description && (
                 <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
               )}
@@ -1950,20 +1959,20 @@ export default function ProductDetail() {
 
               {/* Lista de campos pendentes */}
                 {!canAddToCart && missingFields.length > 0 && (
-                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl shadow-sm">
+                  <div className="mt-4 p-4 bg-white border-2 border-pink-200 rounded-xl shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
-                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                      <p className="text-sm font-bold text-amber-900">Quase pronto! Complete os campos abaixo:</p>
+                      <AlertTriangle className="w-5 h-5 text-pink-500 flex-shrink-0" />
+                      <p className="text-sm font-bold text-gray-900">Quase pronto! Complete os campos abaixo:</p>
                     </div>
                     <ul className="space-y-2">
                       {missingFields.map((field) => (
-                        <li key={field.id} className="text-sm text-amber-800 flex items-start gap-3 pl-1 cursor-pointer hover:text-amber-900 transition-colors" onClick={() => scrollToField(field.id)}>
-                          <CheckSquare className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <li key={field.id} className="text-sm text-gray-800 flex items-start gap-3 pl-1 cursor-pointer hover:text-gray-950 transition-colors" onClick={() => scrollToField(field.id)}>
+                          <CheckSquare className="w-4 h-4 text-pink-500 flex-shrink-0 mt-0.5" />
                           <span className="leading-snug underline">{field.message}</span>
                         </li>
                       ))}
                     </ul>
-                    <p className="text-xs text-amber-700 mt-3 pt-3 border-t border-amber-200 italic">Após preencher todos os campos, o botão será ativado automaticamente.</p>
+                    <p className="text-xs text-gray-700 mt-3 pt-3 border-t border-pink-100 italic">Após preencher todos os campos, o botão será ativado automaticamente.</p>
                   </div>
                 )}
                 <Button

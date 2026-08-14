@@ -2696,3 +2696,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar no domínio oficial o Modo Produção, o Token Bearer mascarado e o e-mail da conta
 - [x] Criar habilidade reutilizável para diagnóstico e validação de Produção do Melhor Envio
 - [x] Exibir corretamente o valor do frete e atualizar o total no resumo do pedido
+- [x] Alinhar a avaliação do produto e ajustar o visual do aviso de campos pendentes
