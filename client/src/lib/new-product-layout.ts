@@ -9,7 +9,7 @@ export const NEW_PRODUCT_FIELD_LAYOUT = {
 } as const;
 
 export const EDIT_PRODUCT_MODAL_LAYOUT = {
-  dialog: "w-[calc(100vw-2rem)] max-w-[96vw] xl:max-w-[1480px] max-h-[94vh] overflow-y-auto",
+  dialog: "w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] max-w-[96vw] xl:max-w-[1480px] max-h-[92dvh] overflow-y-auto p-4 sm:p-6",
   details: "grid grid-cols-1 gap-3 xl:grid-cols-12",
   name: "xl:col-span-4",
   calculation: "xl:col-span-3",

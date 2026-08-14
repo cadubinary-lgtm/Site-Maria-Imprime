@@ -2704,3 +2704,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar prazos, logística, tags e especificações ao lado dos blocos principais em telas largas
 - [x] Alinhar verticalmente Segmentos com o início do bloco Logística em telas largas
 - [x] Padronizar o modal de Editar Produto com o layout horizontal de Novo Produto
+- [x] Garantir responsividade móvel, feedback de salvamento e pré-visualização ampliada no modal de Editar Produto

@@ -1,7 +1,10 @@
-import { useState, useRef } from "react";
-import { Upload, X, ImageIcon, Loader2, GripVertical } from "lucide-react";
+import { useMemo, useState, useRef } from "react";
+import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { getPreviewImageLabel, getPreviewImages } from "@/lib/product-image-preview";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -31,6 +34,15 @@ export function ProductImageUploader({
   // Drag-and-drop reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewImages = useMemo(() => getPreviewImages(mainImageUrl, galleryUrls), [mainImageUrl, galleryUrls]);
+  const previewIndex = previewUrl ? previewImages.indexOf(previewUrl) : -1;
+
+  const showAdjacentPreview = (direction: -1 | 1) => {
+    if (previewIndex < 0 || previewImages.length < 2) return;
+    const nextIndex = (previewIndex + direction + previewImages.length) % previewImages.length;
+    setPreviewUrl(previewImages[nextIndex]);
+  };
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -157,14 +169,21 @@ export function ProductImageUploader({
           <div
             className="relative border-2 border-dashed border-gray-300 rounded-xl overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50"
             style={{ height: compact ? 132 : 180 }}
-            onClick={() => !uploadingMain && mainInputRef.current?.click()}
+            onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
           >
             {mainImageUrl ? (
               <>
                 <img src={mainImageUrl} alt="Foto principal" className="w-full h-full object-contain" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <p className="text-white text-sm font-medium">Clique para substituir</p>
+                  <p className="text-white text-sm font-medium">Clique para ampliar</p>
                 </div>
+                <button
+                  type="button"
+                  className="absolute right-2 bottom-2 z-10 rounded-md bg-black/70 px-2 py-1 text-xs font-medium text-white hover:bg-black/85"
+                  onClick={(event) => { event.stopPropagation(); mainInputRef.current?.click(); }}
+                >
+                  substituir
+                </button>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
@@ -224,11 +243,14 @@ export function ProductImageUploader({
                   !isDragging && !isDragOver ? "hover:border-orange-400" : "",
                 ].join(" ")}
                 style={{ height: compact ? 56 : 80 }}
-                onClick={() => !isUploading && !uploadingGallery && !url && openGalleryPicker(slot)}
+                onClick={() => !isUploading && !uploadingGallery && (url ? setPreviewUrl(url) : openGalleryPicker(slot))}
               >
                 {url ? (
                   <>
                     <img src={url} alt={`Foto ${slot + 2}`} className="w-full h-full object-contain" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity hover:opacity-100 pointer-events-none">
+                      <Maximize2 className="h-4 w-4 text-white" />
+                    </div>
                     {/* Drag handle indicator */}
                     <div className="absolute top-0.5 left-0.5 text-white/70 pointer-events-none">
                       <GripVertical className="w-3 h-3 drop-shadow" />
@@ -278,6 +300,41 @@ export function ProductImageUploader({
           </p>
         </div>
       </div>
+
+      <Dialog open={Boolean(previewUrl)} onOpenChange={(open) => !open && setPreviewUrl(null)}>
+        <DialogContent className="w-[calc(100vw-1rem)] max-w-4xl p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Pré-visualização da imagem</DialogTitle>
+            <DialogDescription>{previewUrl ? getPreviewImageLabel(previewImages, previewUrl) : "Imagem do produto"}</DialogDescription>
+          </DialogHeader>
+          {previewUrl && (
+            <div className="space-y-3">
+              <div className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-xl border bg-gray-50 sm:min-h-[460px]">
+                <img src={previewUrl} alt="Pré-visualização ampliada do produto" className="max-h-[68dvh] w-full object-contain" />
+                {previewImages.length > 1 && (
+                  <>
+                    <Button type="button" variant="secondary" size="icon" className="absolute left-3 top-1/2 -translate-y-1/2 shadow-sm" onClick={() => showAdjacentPreview(-1)} aria-label="Ver imagem anterior">
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button type="button" variant="secondary" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 shadow-sm" onClick={() => showAdjacentPreview(1)} aria-label="Ver próxima imagem">
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </>
+                )}
+              </div>
+              {previewImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Selecionar imagem para pré-visualização">
+                  {previewImages.map((url, index) => (
+                    <button type="button" key={url} onClick={() => setPreviewUrl(url)} className={`h-14 w-20 shrink-0 overflow-hidden rounded-md border-2 ${url === previewUrl ? "border-pink-500" : "border-transparent hover:border-gray-300"}`} aria-label={`Ver imagem ${index + 1}`}>
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
