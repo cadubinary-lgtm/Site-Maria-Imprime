@@ -27,6 +27,8 @@ interface DeliveryOptionsManagerProps {
   onChange?: (options: DeliveryOptionData[]) => void;
   /** Valor inicial (modo offline) */
   initialOptions?: DeliveryOptionData[];
+  /** Remove a margem externa quando o componente é usado em uma grade compacta. */
+  compact?: boolean;
 }
 
 const DEFAULT_OPTIONS: DeliveryOptionData[] = [
@@ -40,6 +42,7 @@ export function DeliveryOptionsManager({
   calculationType,
   onChange,
   initialOptions,
+  compact = false,
 }: DeliveryOptionsManagerProps) {
   const isOfflineMode = !productId;
   // Determinar se é cobrança por m² ou por unidade
@@ -210,7 +213,7 @@ export function DeliveryOptionsManager({
   };
 
   return (
-    <Card className="mt-4">
+    <Card className={compact ? "mt-0" : "mt-4"}>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base">Prazos de Produção</CardTitle>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

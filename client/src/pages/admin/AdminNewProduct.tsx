@@ -299,37 +299,42 @@ export default function AdminNewProduct() {
                   </div>
                 </div>
               )}
-              {/* Upload de Fotos */}
-              <ProductImageUploader
-                mainImageUrl={createForm.imageUrl}
-                galleryUrls={createForm.galleryUrls}
-                onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
-                onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
-                compact
-              />
-              {/* Segmentos */}
-              <div>
-                <Label>Segmentos</Label>
-                <MultiSegmentSelector
-                  productId={0}
-                  selectedSegmentIds={createForm.segmentIds}
-                  onSegmentsChange={handleCreateSegmentsChange}
-                />
-              </div>
-              {/* Prazos de Produção */}
-              <DeliveryOptionsManager
-                calculationType={createForm.calculationType}
-                onChange={setCreateDeliveryOptions}
-              />
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start">
+                <div className="space-y-4">
+                  {/* Upload de Fotos */}
+                  <ProductImageUploader
+                    mainImageUrl={createForm.imageUrl}
+                    galleryUrls={createForm.galleryUrls}
+                    onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
+                    onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
+                    compact
+                  />
+                  {/* Segmentos */}
+                  <div>
+                    <Label>Segmentos</Label>
+                    <MultiSegmentSelector
+                      productId={0}
+                      selectedSegmentIds={createForm.segmentIds}
+                      onSegmentsChange={handleCreateSegmentsChange}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {/* Prazos de Produção */}
+                  <DeliveryOptionsManager
+                    calculationType={createForm.calculationType}
+                    onChange={setCreateDeliveryOptions}
+                    compact
+                  />
               {/* Logística */}
-              <div className="border-t pt-4 mt-2 space-y-4">
+              <div className="border-t pt-4 space-y-4">
                 <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
                   <Package className="w-4 h-4 text-orange-500" />
                   Logística
                 </h3>
                 <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-3">
                   <p className="text-sm font-medium text-gray-700">Dimensões e Peso da Embalagem</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     <div>
                       <Label htmlFor="create-weight">Peso (kg)</Label>
                       <Input id="create-weight" type="number" step="0.01" placeholder="Ex: 0.5" value={createLogistics.weight} onChange={(e) => setCreateLogistics((prev) => ({ ...prev, weight: e.target.value }))} />
@@ -351,7 +356,7 @@ export default function AdminNewProduct() {
                 <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-2">
                   <p className="text-sm font-medium text-gray-700">Transportadoras Permitidas</p>
                   {carriersData && (carriersData as any[]).length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {(carriersData as any[]).map((carrier: any) => (
                         <div key={carrier.id} className="flex items-center gap-2">
                           <Checkbox
@@ -381,7 +386,7 @@ export default function AdminNewProduct() {
               <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                 <h3 className="font-semibold text-gray-900">Tags do Produto</h3>
                 <p className="text-sm text-gray-500">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                   {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
                     <label key={tag} className="flex items-center gap-2 cursor-pointer select-none">
                       <Checkbox
@@ -460,6 +465,8 @@ export default function AdminNewProduct() {
                     </Button>
                   </div>
                 ))}
+              </div>
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <Button
