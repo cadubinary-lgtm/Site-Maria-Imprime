@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getPreviewImageLabel, getPreviewImages } from "@/lib/product-image-preview";
+import { getAvailableGallerySlots, placeGalleryImages } from "@/lib/product-gallery-drop";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -35,6 +36,8 @@ export function ProductImageUploader({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isMainDragOver, setIsMainDragOver] = useState(false);
+  const [isGalleryFileDropActive, setIsGalleryFileDropActive] = useState(false);
+  const [isDroppingGalleryFiles, setIsDroppingGalleryFiles] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewImages = useMemo(() => getPreviewImages(mainImageUrl, galleryUrls), [mainImageUrl, galleryUrls]);
   const previewIndex = previewUrl ? previewImages.indexOf(previewUrl) : -1;
@@ -172,6 +175,42 @@ export function ProductImageUploader({
     handleDragEnd();
   };
 
+  const handleGalleryFilesDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    const files = Array.from(event.dataTransfer.files || []);
+    if (files.length === 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setIsGalleryFileDropActive(false);
+
+    const availableSlots = getAvailableGallerySlots(galleryUrls);
+    if (availableSlots.length === 0) {
+      toast.error("A galeria já possui o limite de 6 fotos adicionais.");
+      return;
+    }
+
+    const acceptedFiles = files.slice(0, availableSlots.length);
+    const invalidFile = acceptedFiles.map(validateFile).find(Boolean);
+    if (invalidFile) {
+      toast.error(invalidFile);
+      return;
+    }
+
+    setIsDroppingGalleryFiles(true);
+    try {
+      const uploaded = await Promise.all(acceptedFiles.map(uploadImage));
+      onGalleryChange(placeGalleryImages(galleryUrls, availableSlots, uploaded.map((image) => image.url)));
+      const skipped = files.length - acceptedFiles.length;
+      toast.success(`${uploaded.length} foto${uploaded.length > 1 ? "s" : ""} adicionada${uploaded.length > 1 ? "s" : ""} à galeria!`, {
+        description: skipped > 0 ? `${skipped} arquivo${skipped > 1 ? "s foram ignorados" : " foi ignorado"} por falta de vagas.` : undefined,
+      });
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível adicionar as fotos à galeria");
+    } finally {
+      setIsDroppingGalleryFiles(false);
+    }
+  };
+
   return (
     <div className={compact ? "space-y-2" : "space-y-4"}>
       <Label className="text-sm font-semibold text-gray-700">Fotos do Produto</Label>
@@ -241,13 +280,26 @@ export function ProductImageUploader({
         </div>
 
         {/* ── Fotos Adicionais (com drag-and-drop) ────────────────────────── */}
-        <div>
+        <div
+          className={`rounded-xl transition-colors ${isGalleryFileDropActive ? "bg-pink-50 ring-2 ring-pink-400 ring-offset-2" : ""}`}
+          onDragOver={(event) => {
+            if (event.dataTransfer.types.includes("Files")) {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+              setIsGalleryFileDropActive(true);
+            }
+          }}
+          onDragLeave={(event) => {
+            if (event.currentTarget === event.target) setIsGalleryFileDropActive(false);
+          }}
+          onDrop={handleGalleryFilesDrop}
+        >
           <div className="flex items-center gap-2 mb-2">
-          <p className="text-xs font-medium text-gray-600">Fotos Adicionais (até 6)</p>
-          <span className="text-xs text-gray-400 flex items-center gap-1">
-            <GripVertical className="w-3 h-3" /> arraste para reordenar
-          </span>
-        </div>
+            <p className="text-xs font-medium text-gray-600">Fotos Adicionais (até 6)</p>
+            <span className="text-xs text-gray-400 flex items-center gap-1">
+              <GripVertical className="w-3 h-3" /> arraste para reordenar
+            </span>
+          </div>
           <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2, 3, 4, 5].map((slot) => {
             const url = galleryUrls[slot];
@@ -325,8 +377,12 @@ export function ProductImageUploader({
             className="hidden"
             onChange={handleGalleryUpload}
           />
-          <p className="text-xs text-gray-400 mt-1.5">
-            Clique em um slot vazio para adicionar · Clique em "trocar" para substituir · Arraste para reordenar
+          <p className="text-xs text-gray-400 mt-1.5" aria-live="polite">
+            {isDroppingGalleryFiles
+              ? "Enviando imagens para a galeria..."
+              : isGalleryFileDropActive
+                ? "Solte as imagens para adicioná-las às vagas disponíveis"
+                : "Clique em um slot vazio para adicionar · Solte arquivos nesta área · Arraste fotos para reordenar"}
           </p>
         </div>
       </div>
