@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AdminProductAttributesLinkerV2() {
   return (
-    <div className="container mx-auto py-8">
+    <div className="admin-visual-system container mx-auto py-8">
       <Card>
         <CardHeader>
           <CardTitle>Vincular Atributos ao Produto</CardTitle>

@@ -98,7 +98,7 @@ export default function AdminProductAttributesLinker() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="admin-visual-system space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Vincular Atributos a Produtos</h1>
         <p className="text-gray-600 mt-2">Selecione quais atributos cada produto utilizará</p>

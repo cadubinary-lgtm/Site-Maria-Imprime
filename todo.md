@@ -2716,3 +2716,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir alerta nativo de saída por diálogo com Salvar, Descartar e Continuar editando
 - [x] Remover contornos das miniaturas e manter imagens arredondadas na galeria de edição
 - [x] Padronizar cores de campos, ícones e estados interativos em todo o painel administrativo com referência em Orçamentos
+- [x] Estender o padrão cinza e rosa de campos e ícones a todos os subitens administrativos
