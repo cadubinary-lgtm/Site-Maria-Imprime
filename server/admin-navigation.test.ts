@@ -68,7 +68,7 @@ describe("navegação contextual administrativa", () => {
     const source = readFileSync(adminLayoutPath, "utf8");
 
     expect(source).toContain('import { Link, useLocation, useSearch } from "wouter";');
-    expect(source).toContain("const currentLocation = `${location}${locationSearch}`;");
+    expect(source).toContain("const currentLocation = locationSearch ? `${location}?${locationSearch}` : location;");
     expect(source).toContain("currentLocation === child.href");
     expect(source).toContain("const isActive = item.href ? currentLocation === item.href : false;");
   });

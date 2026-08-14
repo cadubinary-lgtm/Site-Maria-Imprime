@@ -68,7 +68,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
   const [location] = useLocation();
   const locationSearch = useSearch();
   const ctx = useContext(SidebarScrollContext);
-  const currentLocation = `${location}${locationSearch}`;
+  const currentLocation = locationSearch ? `${location}?${locationSearch}` : location;
 
   const hasActiveChild = item.children?.some(
     (child) => child.href && currentLocation === child.href
