@@ -136,7 +136,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
 
   return (
     <AdminLayout>
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="admin-visual-system min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <Link href="/admin">
           <Button variant="ghost" className="mb-6">
