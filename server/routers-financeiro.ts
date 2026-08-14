@@ -406,6 +406,8 @@ export const financeiroRouter = router({
         cliente: orders.guestName,
         deliveryFullName: orders.deliveryFullName,
         valor: orders.totalPrice,
+        paymentStatus: orders.paymentStatus,
+        paymentMethod: orders.paymentMethod,
         deletedAt: deletedReceivedAccounts.deletedAt,
         deletedByAdminId: deletedReceivedAccounts.deletedByAdminId,
         deletedByAdminName: deletedReceivedAccounts.deletedByAdminName,

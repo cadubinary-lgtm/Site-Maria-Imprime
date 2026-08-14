@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import {
   Search, DollarSign, Eye, Send, CreditCard, Banknote,
-  QrCode, RefreshCw, Filter, Phone, Trash2
+  QrCode, RefreshCw, Filter, Phone, Trash2, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
@@ -59,10 +59,13 @@ export default function FinanceiroContasReceber() {
   const [selectedPayment, setSelectedPayment] = useState<"dinheiro" | "pix" | "cartao_credito" | "cartao_debito" | "transferencia">("pix");
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [deletionReason, setDeletionReason] = useState("");
+  const [showTrash, setShowTrash] = useState(false);
+  const [restoreDialog, setRestoreDialog] = useState<{ open: boolean; item: any | null }>({ open: false, item: null });
   const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const { adminUser } = useAdminAuth();
   const canDeleteReceivable = adminUser?.role === "superadmin";
+  const utils = trpc.useUtils();
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
     page,
@@ -70,6 +73,10 @@ export default function FinanceiroContasReceber() {
     search: search || undefined,
     formaPagamento: formaPagamento || undefined,
   });
+  const { data: trashedAccounts = [], isLoading: isLoadingTrash } = trpc.financeiro.listDeletedContasRecebidas.useQuery(undefined, {
+    enabled: canDeleteReceivable && showTrash,
+  });
+  const trashedReceivables = trashedAccounts.filter((item: any) => item.paymentStatus !== "pago" || item.paymentMethod === "pagar_na_retirada");
 
   const confirmarPagamento = trpc.financeiro.confirmarPagamento.useMutation({
     onSuccess: () => {
@@ -106,6 +113,16 @@ export default function FinanceiroContasReceber() {
     onError: (e) => toast.error("Erro ao mover para a lixeira: " + e.message),
   });
 
+  const restoreReceivable = trpc.financeiro.restoreContaRecebida.useMutation({
+    onSuccess: async () => {
+      toast.success("Conta a receber restaurada com sucesso.");
+      setRestoreDialog({ open: false, item: null });
+      await utils.financeiro.getContasReceber.invalidate();
+      await utils.financeiro.listDeletedContasRecebidas.invalidate();
+    },
+    onError: (e) => toast.error("Erro ao restaurar: " + e.message),
+  });
+
   const handleSearch = () => {
     setSearch(searchInput);
     setPage(1);
@@ -120,10 +137,13 @@ export default function FinanceiroContasReceber() {
           <h1 className="text-2xl font-bold text-gray-900">Contas a Receber</h1>
           <p className="text-sm text-gray-500 mt-1">Pedidos aguardando confirmação de pagamento</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Atualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          {canDeleteReceivable && <Button variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : ""}><Trash2 className="h-4 w-4 mr-1" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -299,6 +319,15 @@ export default function FinanceiroContasReceber() {
         </CardContent>
       </Card>
 
+      {canDeleteReceivable && showTrash && (
+        <Card className="border border-pink-200 shadow-sm">
+          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base text-gray-900"><Trash2 className="h-4 w-4 text-pink-600" />Lixeira de Contas a Receber</CardTitle></CardHeader>
+          <CardContent className="p-0">
+            {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !trashedReceivables.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta a receber na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Usuário</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{trashedReceivables.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs text-gray-600">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-600">{item.deletedByAdminName || "Usuário não informado"}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceivable.isPending} onClick={() => setRestoreDialog({ open: true, item })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Dialog: Confirmar Pagamento */}
       <Dialog open={confirmDialog.open} onOpenChange={(o) => !o && setConfirmDialog({ open: false, order: null })}>
         <DialogContent>
@@ -367,6 +396,17 @@ export default function FinanceiroContasReceber() {
             >
               {confirmarPagamento.isPending ? "Confirmando..." : "Confirmar Pagamento"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={restoreDialog.open} onOpenChange={(open) => !open && setRestoreDialog({ open: false, item: null })}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Restaurar esta conta a receber?</DialogTitle></DialogHeader>
+          <p className="text-sm text-gray-600">O pedido #{restoreDialog.item?.orderNumber} voltará imediatamente para a lista ativa de Contas a Receber.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreDialog({ open: false, item: null })}>Cancelar</Button>
+            <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={restoreReceivable.isPending} onClick={() => { if (restoreDialog.item?.orderId) restoreReceivable.mutate({ orderId: restoreDialog.item.orderId }); }}>{restoreReceivable.isPending ? "Restaurando..." : "Confirmar restauração"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

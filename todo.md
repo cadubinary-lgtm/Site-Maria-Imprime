@@ -2668,3 +2668,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar exportação em CSV e PDF para o Fluxo de Caixa filtrado
 - [x] Ocultar do Fluxo de Caixa entradas automáticas de Contas Recebidas movidas para a lixeira
 - [x] Padronizar Contas a Receber com lixeira reversível, Superadmin e motivo obrigatório
+- [x] Exibir a Lixeira de Contas a Receber com restauração e auditoria para Superadmin
