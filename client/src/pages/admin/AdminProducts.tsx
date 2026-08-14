@@ -18,6 +18,7 @@ import { ProductLogisticsTab } from "@/components/products/ProductLogisticsTab";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
+import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
 
 export default function AdminProducts() {
   const [, navigate] = useLocation();
@@ -404,56 +405,58 @@ export default function AdminProducts() {
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className={EDIT_PRODUCT_MODAL_LAYOUT.dialog}>
                         <DialogHeader>
                           <DialogTitle>Editar Produto</DialogTitle>
                           <DialogDescription>Atualize as informações do produto</DialogDescription>
                         </DialogHeader>
 
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="edit-name">Nome</Label>
-                            <Input id="edit-name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-                          </div>
-                          <div>
-                            <Label htmlFor="edit-description">Descrição</Label>
-                            <Textarea id="edit-description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
-                          </div>
-                          {/* Tipo de Cobrança — sempre primeiro */}
-                          <div>
-                            <Label htmlFor="edit-calculationType">Tipo de Cobrança</Label>
-                            <Select
-                              value={(editForm as any).calculationType || "unidade"}
-                              onValueChange={(value) => setEditForm({ ...editForm, calculationType: value } as any)}
-                            >
-                              <SelectTrigger id="edit-calculationType">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="unidade">Unidade</SelectItem>
-                                <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
-                                <SelectItem value="metro_linear">Metro Linear</SelectItem>
-                                <SelectItem value="pacote">Pacote</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {/* Preço Base: visível APENAS para Unidade e Pacote */}
-                          {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
-                            <div>
-                              <Label htmlFor="edit-price">Preço Base (R$)</Label>
-                              <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} placeholder="0.00" />
+                        <div className="space-y-4 xl:space-y-3">
+                          <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
+                            <div className={EDIT_PRODUCT_MODAL_LAYOUT.name}>
+                              <Label htmlFor="edit-name">Nome</Label>
+                              <Input id="edit-name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                             </div>
-                          )}
+                            <div className={EDIT_PRODUCT_MODAL_LAYOUT.description}>
+                              <Label htmlFor="edit-description">Descrição</Label>
+                              <Textarea id="edit-description" rows={2} className="min-h-[68px]" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+                            </div>
+                            {/* Tipo de Cobrança — sempre primeiro */}
+                            <div className={EDIT_PRODUCT_MODAL_LAYOUT.calculation}>
+                              <Label htmlFor="edit-calculationType">Tipo de Cobrança</Label>
+                              <Select
+                                value={(editForm as any).calculationType || "unidade"}
+                                onValueChange={(value) => setEditForm({ ...editForm, calculationType: value } as any)}
+                              >
+                                <SelectTrigger id="edit-calculationType">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unidade">Unidade</SelectItem>
+                                  <SelectItem value="m2">m² (Metro Quadrado)</SelectItem>
+                                  <SelectItem value="metro_linear">Metro Linear</SelectItem>
+                                  <SelectItem value="pacote">Pacote</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {/* Preço Base: visível APENAS para Unidade e Pacote */}
+                            {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
+                              <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
+                                <Label htmlFor="edit-price">Preço Base (R$)</Label>
+                                <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} placeholder="0.00" />
+                              </div>
+                            )}
+                          </div>
 
                           {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
-                            <>
-                              <div>
+                            <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
+                              <div className="sm:col-span-2 xl:col-span-2">
                                 <Label htmlFor="edit-pricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço por Metro Linear (R$)" : "Preço por m² (R$)"}
                                 </Label>
                                 <Input id="edit-pricePerM2" type="number" step="0.01" value={(editForm as any).pricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pricePerM2: e.target.value } as any)} />
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="grid grid-cols-2 gap-2 xl:col-span-2">
                                 <div>
                                   <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
                                   <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => setEditForm({ ...editForm, minWidth: e.target.value } as any)} />
@@ -463,7 +466,7 @@ export default function AdminProducts() {
                                   <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => setEditForm({ ...editForm, maxWidth: e.target.value } as any)} />
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="grid grid-cols-2 gap-2 xl:col-span-2">
                                 <div>
                                   <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
                                   <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => setEditForm({ ...editForm, minHeight: e.target.value } as any)} />
@@ -473,17 +476,21 @@ export default function AdminProducts() {
                                   <Input id="edit-maxHeight" type="number" step="0.01" value={(editForm as any).maxHeight || ""} onChange={(e) => setEditForm({ ...editForm, maxHeight: e.target.value } as any)} />
                                 </div>
                               </div>
-                            </>
+                            </div>
                           )}
 
+                          <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                           {editingId && (
-                            <DeliveryOptionsManager
-                              productId={editingId}
-                              calculationType={(editForm as any).calculationType || "m2"}
-                            />
+                            <div className="xl:col-start-2 xl:row-start-1">
+                              <DeliveryOptionsManager
+                                productId={editingId}
+                                calculationType={(editForm as any).calculationType || "m2"}
+                                compact
+                              />
+                            </div>
                           )}
 
-                          <div>
+                          <div className="xl:col-start-1 xl:row-start-2 self-start">
                             <Label>Segmentos</Label>
                             <MultiSegmentSelector
                               productId={editingId || 0}
@@ -493,16 +500,19 @@ export default function AdminProducts() {
                           </div>
 
                           {/* Upload de Fotos */}
-                          <ProductImageUploader
-                            mainImageUrl={editForm.imageUrl}
-                            galleryUrls={(editForm as any).galleryUrls || []}
-                            onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
-                            onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
-                          />
+                          <div className="xl:col-start-1 xl:row-start-1">
+                            <ProductImageUploader
+                              mainImageUrl={editForm.imageUrl}
+                              galleryUrls={(editForm as any).galleryUrls || []}
+                              onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
+                              onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
+                              compact
+                            />
+                          </div>
 
                           {/* Aba Logística */}
                           {editingId && (
-                            <div className="border-t pt-4 mt-4">
+                            <div className="border-t pt-4 xl:col-start-2 xl:row-start-2">
                               <h3 className="text-lg font-semibold text-gray-900 mb-4">Logística</h3>
                               <ProductLogisticsTab productId={editingId} />
                             </div>
@@ -510,7 +520,7 @@ export default function AdminProducts() {
 
                           {/* Especificações Técnicas */}
                           {/* Tags do Produto */}
-                          <div className="border-t pt-4 mt-4">
+                          <div className="border border-gray-200 rounded-lg p-4 space-y-3 xl:col-start-2">
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">Tags do Produto</h3>
                             <p className="text-sm text-gray-500 mb-3">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -553,7 +563,7 @@ export default function AdminProducts() {
                               </div>
                             )}
                           </div>
-                          <div className="border-t pt-4 mt-4">
+                          <div className="border border-gray-200 rounded-lg p-4 space-y-3 xl:col-start-2">
                             <div className="flex items-center justify-between mb-3">
                               <h3 className="text-lg font-semibold text-gray-900">Especificações Técnicas</h3>
                               <Button
@@ -591,6 +601,7 @@ export default function AdminProducts() {
                                 </Button>
                               </div>
                             ))}
+                          </div>
                           </div>
 
                           <Button
