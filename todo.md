@@ -2694,3 +2694,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preparar checkpoint para publicar a integração do Melhor Envio em Produção
 - [x] Sincronizar a configuração persistida do Melhor Envio usada pelo domínio oficial
 - [x] Validar no domínio oficial o Modo Produção, o Token Bearer mascarado e o e-mail da conta
+- [x] Criar habilidade reutilizável para diagnóstico e validação de Produção do Melhor Envio
+- [x] Exibir corretamente o valor do frete e atualizar o total no resumo do pedido
