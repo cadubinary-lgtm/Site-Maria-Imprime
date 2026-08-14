@@ -15,6 +15,9 @@ describe("Fluxo de Caixa operacional", () => {
     expect(source).toContain("const openingBalance = openingIncome - openingExpense;");
     expect(source).toContain("closingBalance: runningBalance + balance");
     expect(source).toContain("closingBalance: openingBalance + totalIncome - totalExpense");
+    expect(source).toContain("db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts)");
+    expect(source).toContain("const visiblePaidRecords = paidRecords.filter");
+    expect(source).toContain("!record.pedidoId || !trashedOrderIds.has(record.pedidoId)");
   });
 
   it("oferece períodos rápidos, intervalo personalizado e lançamentos manuais", () => {
