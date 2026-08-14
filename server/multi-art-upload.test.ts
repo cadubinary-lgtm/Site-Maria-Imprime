@@ -15,6 +15,11 @@ describe("múltiplos arquivos de arte", () => {
     expect(source).toContain("removeArtFile");
     expect(source).toContain("Envie um ou mais arquivos do seu dispositivo");
     expect(source).toContain("artFiles.map");
+    expect(source).toContain('selectArtUploadMode("single")');
+    expect(source).toContain('selectArtUploadMode("multiple")');
+    expect(source).toContain("Confirmar e continuar");
+    expect(source).toContain("artFilesConfirmed");
+    expect(source).toContain("uploadQueue");
   });
 
   it("persiste todas as URLs de arte no carrinho e no item de pedido", () => {
