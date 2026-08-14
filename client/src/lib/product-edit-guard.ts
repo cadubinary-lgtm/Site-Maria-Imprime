@@ -38,3 +38,7 @@ export function shouldInitializeProductEditSession(
 ): boolean {
   return Boolean(editingId && waitingInitialSegments && productSegments);
 }
+
+export function getProductEditExitAction(baseline: string | null, form: ProductEditSnapshot): "close" | "confirm" {
+  return hasUnsavedProductChanges(baseline, form) ? "confirm" : "close";
+}

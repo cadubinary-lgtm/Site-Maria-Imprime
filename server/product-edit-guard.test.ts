@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession, type ProductEditSnapshot } from "../client/src/lib/product-edit-guard";
+import { createProductEditSignature, getProductEditExitAction, hasUnsavedProductChanges, shouldInitializeProductEditSession, type ProductEditSnapshot } from "../client/src/lib/product-edit-guard";
 
 const form: ProductEditSnapshot = {
   name: "Lona impressa",
@@ -32,5 +32,11 @@ describe("proteção de edição de produto", () => {
     expect(shouldInitializeProductEditSession(20, true, [])).toBe(true);
     expect(shouldInitializeProductEditSession(20, false, [])).toBe(false);
     expect(shouldInitializeProductEditSession(null, true, [])).toBe(false);
+  });
+
+  it("solicita confirmação somente quando existem mudanças pendentes", () => {
+    const baseline = createProductEditSignature(form);
+    expect(getProductEditExitAction(baseline, form)).toBe("close");
+    expect(getProductEditExitAction(baseline, { ...form, name: "Produto alterado" })).toBe("confirm");
   });
 });
