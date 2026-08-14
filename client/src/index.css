@@ -294,6 +294,57 @@
     background-color: oklch(0.98 0.01 180) !important;
   }
 
+  /* ─── PAINEL ADMINISTRATIVO — padrão de Orçamentos ────────────────
+   * Mantém a estrutura de cada página e centraliza apenas as cores
+   * interativas: campos neutros com foco rosa e ícones cinza/rosa.
+   * ───────────────────────────────────────────────────────────────── */
+  .admin-visual-system input:not([type="checkbox"]):not([type="radio"]),
+  .admin-visual-system textarea,
+  .admin-visual-system [data-slot="select-trigger"] {
+    border-color: oklch(0.87 0.002 0);
+    background-color: white;
+  }
+
+  .admin-visual-system input:not([type="checkbox"]):not([type="radio"]):focus,
+  .admin-visual-system textarea:focus,
+  .admin-visual-system [data-slot="select-trigger"]:focus-visible {
+    border-color: oklch(0.591 0.236 10.2) !important;
+    box-shadow: 0 0 0 3px oklch(0.94 0.05 10.2) !important;
+    outline: none;
+  }
+
+  .admin-visual-system .admin-icon-action,
+  .admin-visual-system button:has(> svg:only-child):not([data-admin-keep-color="true"]) {
+    color: oklch(0.58 0.005 0) !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  }
+
+  .admin-visual-system .admin-icon-action:hover,
+  .admin-visual-system button:has(> svg:only-child):not([data-admin-keep-color="true"]):hover {
+    color: oklch(0.591 0.236 10.2) !important;
+    background-color: oklch(0.97 0.02 10.2) !important;
+    border-color: oklch(0.94 0.05 10.2) !important;
+  }
+
+  .admin-visual-system .admin-icon-action:focus-visible,
+  .admin-visual-system button:has(> svg:only-child):not([data-admin-keep-color="true"]):focus-visible {
+    color: oklch(0.591 0.236 10.2) !important;
+    background-color: oklch(0.97 0.02 10.2) !important;
+    box-shadow: 0 0 0 3px oklch(0.94 0.05 10.2) !important;
+    outline: none;
+  }
+
+  .admin-visual-system button[class*="bg-blue-"] {
+    background-color: oklch(0.591 0.236 10.2) !important;
+    color: white !important;
+  }
+
+  .admin-visual-system button[class*="bg-blue-"]:hover {
+    background-color: oklch(0.50 0.22 10.2) !important;
+  }
+
   .container {
     width: 100%;
     margin-left: auto;

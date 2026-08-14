@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Trash2, Edit2 } from "lucide-react";
+import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 export default function SegmentsAdmin() {
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -82,7 +83,7 @@ export default function SegmentsAdmin() {
   if (isLoading) return <div className="p-6">Carregando...</div>;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className={`${ADMIN_VISUAL_SYSTEM.root} p-6 max-w-6xl mx-auto`}>
       <h1 className="text-3xl font-bold mb-6">Gerenciar Segmentos</h1>
 
       {/* Formulário */}
@@ -171,8 +172,11 @@ export default function SegmentsAdmin() {
                 </Button>
                 <Button
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
+                  className={ADMIN_VISUAL_SYSTEM.iconAction}
                   onClick={() => handleDelete(segment.id)}
+                  title={`Excluir segmento ${segment.name}`}
+                  aria-label={`Excluir segmento ${segment.name}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
