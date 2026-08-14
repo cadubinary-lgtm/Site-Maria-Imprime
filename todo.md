@@ -2702,3 +2702,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar e padronizar indicadores de status nos subitens do menu administrativo
 - [x] Reorganizar a página de Novo Produto para reduzir rolagem em telas largas
 - [x] Reorganizar prazos, logística, tags e especificações ao lado dos blocos principais em telas largas
+- [x] Alinhar verticalmente Segmentos com o início do bloco Logística em telas largas

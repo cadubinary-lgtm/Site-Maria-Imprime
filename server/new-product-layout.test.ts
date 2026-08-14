@@ -16,5 +16,6 @@ describe("layout horizontal de Novo Produto", () => {
       "xl:col-span-3",
     ]);
     expect(NEW_PRODUCT_FIELD_LAYOUT.description).toBe("xl:col-span-12");
+    expect(NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment).toBe("xl:pt-[86px]");
   });
 });
