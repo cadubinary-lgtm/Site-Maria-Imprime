@@ -2710,3 +2710,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir adicionar novas imagens por arrastar e soltar arquivos na galeria do modal de Editar Produto
 - [x] Corrigir o ciclo de atualizações repetidas na página de Produtos
 - [x] Inserir na documentação a política de prazo estimado da transportadora e suporte em atrasos externos
+- [x] Alinhar Foto Principal e organizar visualmente Fotos Adicionais no modal de Editar Produto

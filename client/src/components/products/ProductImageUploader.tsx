@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { getPreviewImageLabel, getPreviewImages } from "@/lib/product-image-preview";
 import { getAvailableGallerySlots, placeGalleryImages } from "@/lib/product-gallery-drop";
+import { PRODUCT_IMAGE_LAYOUT } from "@/lib/product-image-layout";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -217,10 +218,13 @@ export function ProductImageUploader({
       <p className="text-xs text-gray-500">
         1 foto principal + até 6 fotos adicionais · JPG, PNG, WEBP · <span className="font-medium text-orange-600">máx. 2MB cada</span>
       </p>
-      <div className={compact ? "grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(360px,1fr)] xl:items-end" : "space-y-4"}>
+      <div className={compact ? PRODUCT_IMAGE_LAYOUT.compactColumns : "space-y-4"}>
         {/* ── Foto Principal ───────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs font-medium text-gray-600 mb-2">Foto Principal</p>
+          <div className={`${PRODUCT_IMAGE_LAYOUT.sectionHeader} mb-2`}>
+            <p className="text-xs font-medium text-gray-600">Foto Principal</p>
+            <span className="text-[11px] font-medium text-pink-600">Capa do produto</span>
+          </div>
           <div
             className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors bg-gray-50 ${isMainDragOver ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-orange-400"}`}
             style={{ height: compact ? 132 : 180 }}
@@ -294,13 +298,13 @@ export function ProductImageUploader({
           }}
           onDrop={handleGalleryFilesDrop}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className={`${PRODUCT_IMAGE_LAYOUT.sectionHeader} mb-2`}>
             <p className="text-xs font-medium text-gray-600">Fotos Adicionais (até 6)</p>
-            <span className="text-xs text-gray-400 flex items-center gap-1">
+            <span className="text-[11px] text-gray-400 flex items-center gap-1 whitespace-nowrap">
               <GripVertical className="w-3 h-3" /> arraste para reordenar
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className={PRODUCT_IMAGE_LAYOUT.galleryPanel}>
           {[0, 1, 2, 3, 4, 5].map((slot) => {
             const url = galleryUrls[slot];
             const isUploading = uploadingGallery === slot;
@@ -377,7 +381,7 @@ export function ProductImageUploader({
             className="hidden"
             onChange={handleGalleryUpload}
           />
-          <p className="text-xs text-gray-400 mt-1.5" aria-live="polite">
+          <p className={PRODUCT_IMAGE_LAYOUT.galleryHint} aria-live="polite">
             {isDroppingGalleryFiles
               ? "Enviando imagens para a galeria..."
               : isGalleryFileDropActive

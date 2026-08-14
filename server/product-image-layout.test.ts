@@ -1,0 +1,10 @@
+import { describe, expect, it } from "vitest";
+import { PRODUCT_IMAGE_LAYOUT } from "../client/src/lib/product-image-layout";
+
+describe("layout compacto das fotos de produto", () => {
+  it("alinha as colunas pelo topo e agrupa miniaturas em uma área organizada", () => {
+    expect(PRODUCT_IMAGE_LAYOUT.compactColumns).toContain("xl:items-start");
+    expect(PRODUCT_IMAGE_LAYOUT.galleryPanel).toContain("rounded-xl");
+    expect(PRODUCT_IMAGE_LAYOUT.sectionHeader).toContain("justify-between");
+  });
+});
