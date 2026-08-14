@@ -104,6 +104,8 @@ export const quotationsRouter = router({
           COUNT(CASE WHEN q.status = 'expirado' THEN 1 END) as expirados,
           COUNT(CASE WHEN q.status = 'recusado' THEN 1 END) as recusados,
           COUNT(CASE WHEN q.status = 'cancelado' THEN 1 END) as cancelados,
+          COUNT(CASE WHEN q.status = 'em_negociacao' THEN 1 END) as emNegociacao,
+          COUNT(CASE WHEN q.status = 'aprovado' AND q.convertedOrderId IS NULL THEN 1 END) as ativos,
           COUNT(CASE WHEN q.status IN ('enviado','em_negociacao','aprovado','recusado','expirado','cancelado') THEN 1 END) as propostasEnviadas,
           COALESCE(SUM(CASE WHEN q.status IN ('enviado','em_negociacao') THEN q.total ELSE 0 END), 0) as valorNegociacao,
           COALESCE(SUM(CASE WHEN q.status = 'aprovado' THEN q.total ELSE 0 END), 0) as valorAprovado,
@@ -131,6 +133,8 @@ export const quotationsRouter = router({
           taxaConversao,
           totalAtivos: Number(kpi.totalOrcamentos ?? 0),
           convertidos: Number(kpi.convertidos ?? 0),
+          pendentes: Number(kpi.rascunhos ?? 0) + Number(kpi.enviados ?? 0) + Number(kpi.emNegociacao ?? 0),
+          ativos: Number(kpi.ativos ?? 0),
         },
         total: Number(kpi.totalOrcamentos ?? 0),
       };

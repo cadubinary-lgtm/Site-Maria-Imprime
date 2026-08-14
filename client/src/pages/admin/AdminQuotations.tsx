@@ -118,6 +118,12 @@ export default function AdminQuotations() {
 
   const kpis = data?.kpis;
   const rows = data?.rows ?? [];
+  const dashboardTotal = (kpis?.ativos ?? 0) + (kpis?.convertidos ?? 0) + (kpis?.pendentes ?? 0);
+  const distribution = kpis ? [
+    { label: "Ativos", value: kpis.ativos, color: "bg-emerald-500", text: "text-emerald-700", detail: "Aprovados e prontos para conversão" },
+    { label: "Convertidos", value: kpis.convertidos, color: "bg-violet-500", text: "text-violet-700", detail: "Já transformados em pedidos" },
+    { label: "Pendentes", value: kpis.pendentes, color: "bg-amber-500", text: "text-amber-700", detail: "Rascunhos, enviados e em negociação" },
+  ] : [];
 
   return (
     <AdminLayout>
@@ -134,18 +140,27 @@ export default function AdminQuotations() {
         </div>
       </div>
 
-      {/* KPIs */}
+      {/* Dashboard comercial */}
       {kpis && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="space-y-3">
+          <div className="grid gap-3 lg:grid-cols-[1fr_1.4fr]">
+            <div className="grid grid-cols-3 gap-3">
+              {distribution.map((item) => <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-xs font-medium text-gray-500">{item.label}</p><p className={`mt-1 text-2xl font-bold ${item.text}`}>{item.value}</p><p className="mt-1 text-[11px] leading-tight text-gray-400">{item.detail}</p></div>)}
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold text-gray-800">Distribuição do funil de orçamentos</h2><p className="text-xs text-gray-500">Visão dos orçamentos que demandam acompanhamento comercial</p></div><span className="text-xs text-gray-500">{dashboardTotal} registro(s)</span></div>
+              {dashboardTotal > 0 ? <><div className="mt-5 flex h-4 overflow-hidden rounded-full bg-gray-100">{distribution.map((item) => item.value > 0 && <div key={item.label} className={`${item.color} transition-all`} style={{ width: `${(item.value / dashboardTotal) * 100}%` }} title={`${item.label}: ${item.value}`} />)}</div><div className="mt-4 grid grid-cols-3 gap-3">{distribution.map((item) => <div key={item.label} className="flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${item.color}`} /><span className="text-xs text-gray-600">{item.label}</span><span className="ml-auto text-xs font-semibold text-gray-800">{item.value}</span></div>)}</div></> : <div className="mt-5 rounded-md bg-gray-50 px-4 py-5 text-center text-sm text-gray-400">Ainda não há dados suficientes para distribuição.</div>}
+            </div>
+          </div>
+          <p className="px-1 text-xs text-gray-400">Orçamentos recusados, expirados e cancelados permanecem fora da distribuição para não distorcer o funil ativo.</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
           {[
-            { label: "Ativos",         value: kpis.totalAtivos,     icon: FileText,    cls: "text-slate-700" },
             { label: "Rascunhos",      value: kpis.rascunhos,      icon: FileText,    cls: "text-gray-600" },
             { label: "Enviados",       value: kpis.enviados,        icon: Send,        cls: "text-blue-600" },
             { label: "Aprovados",      value: kpis.aprovados,       icon: CheckCircle, cls: "text-green-600" },
             { label: "Expirados",      value: kpis.expirados,       icon: Clock,       cls: "text-orange-600" },
             { label: "Em Negociação",  value: fmt(kpis.valorNegociacao), icon: TrendingUp, cls: "text-amber-600", isValue: true },
             { label: "Valor Aprovado", value: fmt(kpis.valorAprovado),   icon: DollarSign, cls: "text-green-600", isValue: true },
-            { label: "Convertidos",    value: kpis.convertidos,    icon: ArrowRight,   cls: "text-purple-600" },
             { label: "Taxa Conversão", value: `${kpis.taxaConversao}%`,  icon: Percent,    cls: "text-pink-600",  isValue: true },
           ].map((k) => (
             <div key={k.label} className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
@@ -156,6 +171,7 @@ export default function AdminQuotations() {
               <p className={`font-bold ${k.isValue ? "text-sm" : "text-xl"} ${k.cls}`}>{k.value}</p>
             </div>
           ))}
+          </div>
         </div>
       )}
 
