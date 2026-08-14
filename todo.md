@@ -2667,3 +2667,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Completar o Fluxo de Caixa com indicadores, filtros e lançamentos operacionais
 - [x] Adicionar exportação em CSV e PDF para o Fluxo de Caixa filtrado
 - [x] Ocultar do Fluxo de Caixa entradas automáticas de Contas Recebidas movidas para a lixeira
+- [x] Padronizar Contas a Receber com lixeira reversível, Superadmin e motivo obrigatório

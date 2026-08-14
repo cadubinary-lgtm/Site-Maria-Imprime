@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const financeiroRouterPath = resolve(process.cwd(), "server/routers-financeiro.ts");
 const receivedAccountsPagePath = resolve(process.cwd(), "client/src/pages/admin/FinanceiroContasRecebidas.tsx");
+const receivableAccountsPagePath = resolve(process.cwd(), "client/src/pages/admin/FinanceiroContasReceber.tsx");
 
 describe("lixeira de Contas Recebidas", () => {
   it("restringe a lixeira e a restauração ao perfil Superadmin no servidor", () => {
@@ -16,7 +17,7 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("confirmation: z.literal(true)");
     expect(source).toContain('adminUser?.role !== "superadmin"');
     expect(source).toContain('code: "FORBIDDEN"');
-    expect(source).toContain('action: "move_received_account_to_trash"');
+    expect(source).toContain('action: "move_receivable_account_to_trash"');
     expect(source).toContain('action: "restore_received_account"');
     expect(source).toContain("deletedByAdminId: deletedReceivedAccounts.deletedByAdminId");
     expect(source).toContain('reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000)');
@@ -54,5 +55,19 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("deletionReason.trim().length < 3");
     expect(source).toContain("item.deletionReason || \"Motivo não informado\"");
     expect(source).toContain("Mover para lixeira");
+  });
+
+  it("protege a exclusão de Contas a Receber com Superadmin, motivo e lixeira reversível", () => {
+    const routerSource = readFileSync(financeiroRouterPath, "utf8");
+    const pageSource = readFileSync(receivableAccountsPagePath, "utf8");
+
+    expect(routerSource).toContain("const deletedRows = await db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts);");
+    expect(routerSource).toContain("moveContaRecebidaToTrash: adminOrManusAuthProcedure");
+    expect(pageSource).toContain('const canDeleteReceivable = adminUser?.role === "superadmin";');
+    expect(pageSource).toContain("{canDeleteReceivable && <Button");
+    expect(pageSource).toContain("moveContaRecebidaToTrash.useMutation");
+    expect(pageSource).toContain("Motivo da exclusão");
+    expect(pageSource).toContain("deletionReason.trim().length < 3");
+    expect(pageSource).toContain("Mover conta a receber para a lixeira");
   });
 });

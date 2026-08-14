@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { useLocation } from "wouter";
 import { createAdminDetailLocation } from "@/lib/adminNavigation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -57,8 +58,11 @@ export default function FinanceiroContasReceber() {
   const [pixDialog, setPixDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [selectedPayment, setSelectedPayment] = useState<"dinheiro" | "pix" | "cartao_credito" | "cartao_debito" | "transferencia">("pix");
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
+  const [deletionReason, setDeletionReason] = useState("");
   const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [whatsappPhone, setWhatsappPhone] = useState("");
+  const { adminUser } = useAdminAuth();
+  const canDeleteReceivable = adminUser?.role === "superadmin";
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
     page,
@@ -92,13 +96,14 @@ export default function FinanceiroContasReceber() {
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
-  const deleteOrder = trpc.admin.deleteOrder.useMutation({
+  const moveToTrash = trpc.financeiro.moveContaRecebidaToTrash.useMutation({
     onSuccess: () => {
-      toast.success("Pedido excluído com sucesso!");
+      toast.success("Conta a receber movida para a lixeira.");
       setDeleteDialog({ open: false, order: null });
+      setDeletionReason("");
       refetch();
     },
-    onError: (e) => toast.error("Erro ao excluir: " + e.message),
+    onError: (e) => toast.error("Erro ao mover para a lixeira: " + e.message),
   });
 
   const handleSearch = () => {
@@ -257,15 +262,15 @@ export default function FinanceiroContasReceber() {
                           >
                             <Send className="h-3 w-3" />
                           </Button>
-                          <Button
+                          {canDeleteReceivable && <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs text-red-500 hover:bg-red-50 hover:border-red-300"
-                            onClick={() => setDeleteDialog({ open: true, order: item })}
-                            title="Excluir Pedido"
+                            onClick={() => { setDeletionReason(""); setDeleteDialog({ open: true, order: item }); }}
+                            title="Mover conta para a lixeira"
                           >
                             <Trash2 className="h-3 w-3" />
-                          </Button>
+                          </Button>}
                         </div>
                       </td>
                     </tr>
@@ -366,17 +371,16 @@ export default function FinanceiroContasReceber() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Pix */}
-      {/* Dialog: Confirmar Exclusão */}
-      <Dialog open={deleteDialog.open} onOpenChange={(o) => !o && setDeleteDialog({ open: false, order: null })}>
+      {/* Dialog: Mover para lixeira */}
+      <Dialog open={deleteDialog.open} onOpenChange={(o) => { if (!o) { setDeleteDialog({ open: false, order: null }); setDeletionReason(""); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-600">Excluir Pedido</DialogTitle>
+            <DialogTitle className="text-red-600">Mover conta a receber para a lixeira</DialogTitle>
           </DialogHeader>
           {deleteDialog.order && (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                Tem certeza que deseja excluir o pedido abaixo? Esta ação é <strong>irreversível</strong>.
+                O pedido abaixo será ocultado de Contas a Receber, mas poderá ser restaurado posteriormente na lixeira por um Superadmin.
               </p>
               <div className="bg-red-50 border border-red-100 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
@@ -392,6 +396,11 @@ export default function FinanceiroContasReceber() {
                   <span className="font-bold text-red-600">{formatCurrency(deleteDialog.order.valor)}</span>
                 </div>
               </div>
+              <div className="space-y-2">
+                <label htmlFor="receivable-deletion-reason" className="text-sm font-medium text-gray-800">Motivo da exclusão <span className="text-red-600">*</span></label>
+                <textarea id="receivable-deletion-reason" value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} placeholder="Descreva por que esta conta deve ser movida para a lixeira" maxLength={1000} className="min-h-24 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+                <p className="text-xs text-gray-500">O motivo é obrigatório e ficará registrado na lixeira e na auditoria.</p>
+              </div>
             </div>
           )}
           <DialogFooter>
@@ -400,14 +409,14 @@ export default function FinanceiroContasReceber() {
             </Button>
             <Button
               variant="destructive"
-              disabled={deleteOrder.isPending}
+              disabled={moveToTrash.isPending || deletionReason.trim().length < 3}
               onClick={() => {
-                if (deleteDialog.order) {
-                  deleteOrder.mutate({ orderId: deleteDialog.order.pedidoId });
+                if (deleteDialog.order && deletionReason.trim().length >= 3) {
+                  moveToTrash.mutate({ orderId: deleteDialog.order.pedidoId, reason: deletionReason.trim() });
                 }
               }}
             >
-              {deleteOrder.isPending ? "Excluindo..." : "Sim, excluir pedido"}
+              {moveToTrash.isPending ? "Movendo..." : "Mover para lixeira"}
             </Button>
           </DialogFooter>
         </DialogContent>

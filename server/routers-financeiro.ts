@@ -233,6 +233,8 @@ export const financeiroRouter = router({
       );
 
       const conditions: any[] = [baseCondition!];
+      const deletedRows = await db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts);
+      const deletedOrderIds = deletedRows.map((row) => row.orderId);
 
       if (input.startDate) conditions.push(gte(orders.createdAt, new Date(input.startDate)));
       if (input.endDate) conditions.push(lte(orders.createdAt, new Date(input.endDate)));
@@ -251,6 +253,9 @@ export const financeiroRouter = router({
         ne(orders.paymentStatus, "pago"),
         eq(orders.paymentMethod, "pagar_na_retirada")
       )!);
+      if (deletedOrderIds.length) {
+        conditions.push(sql`${orders.id} NOT IN (${sql.join(deletedOrderIds.map((id) => sql`${id}`), sql`, `)})`);
+      }
       const whereClause = and(...conditions);
       const offset = (input.page - 1) * input.limit;
       const [summary] = await db
@@ -354,9 +359,6 @@ export const financeiroRouter = router({
 
       const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
       if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Recebimento não encontrado." });
-      if (order.paymentStatus !== "pago") {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente recebimentos confirmados podem ser movidos para a lixeira nesta tela." });
-      }
 
       const existingTrashItem = await db.select({ id: deletedReceivedAccounts.id })
         .from(deletedReceivedAccounts)
@@ -377,7 +379,7 @@ export const financeiroRouter = router({
       await logAudit({
         adminId: adminUser.adminId,
         adminName: adminUser.name,
-        action: "move_received_account_to_trash",
+        action: "move_receivable_account_to_trash",
         entity: "deletedReceivedAccounts",
         entityId: String(input.orderId),
         before: { orderNumber: order.orderNumber, totalPrice: order.totalPrice, paymentStatus: order.paymentStatus },
