@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
@@ -19,7 +20,7 @@ import { ProductImageUploader } from "@/components/products/ProductImageUploader
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
-import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
+import { createProductEditSignature, getProductEditExitAction, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 
 export default function AdminProducts() {
@@ -30,6 +31,7 @@ export default function AdminProducts() {
   const [editBaselineSignature, setEditBaselineSignature] = useState<string | null>(null);
   const [waitingInitialSegments, setWaitingInitialSegments] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+  const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false);
   const [quickEditingId, setQuickEditingId] = useState<number | null>(null);
   const [quickPrice, setQuickPrice] = useState("");
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
@@ -144,6 +146,7 @@ export default function AdminProducts() {
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
+    setIsExitConfirmOpen(false);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(true);
     setDraftSavedAt(null);
@@ -175,16 +178,21 @@ export default function AdminProducts() {
     }));
   };
 
-  const requestEditClose = () => {
-    if (hasUnsavedProductChanges(editBaselineSignature, editForm)) {
-      const confirmed = window.confirm("Você possui alterações não salvas. Deseja descartar as alterações e fechar a edição?");
-      if (!confirmed) return;
-    }
+  const closeEditSession = () => {
     if (editingId) window.localStorage.removeItem(getProductEditDraftKey(editingId));
     setEditingId(null);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(false);
     setDraftSavedAt(null);
+    setIsExitConfirmOpen(false);
+  };
+
+  const requestEditClose = () => {
+    if (getProductEditExitAction(editBaselineSignature, editForm) === "confirm") {
+      setIsExitConfirmOpen(true);
+      return;
+    }
+    closeEditSession();
   };
 
   const isMeasureBased = (calculationType: string) =>
@@ -278,11 +286,7 @@ export default function AdminProducts() {
         position: "top-right",
         duration: 3500,
       });
-      setEditingId(null);
-      window.localStorage.removeItem(getProductEditDraftKey(editingId));
-      setEditBaselineSignature(null);
-      setWaitingInitialSegments(false);
-      setDraftSavedAt(null);
+      closeEditSession();
       refetch();
     } catch (error) {
       console.error("Error:", error);
@@ -695,6 +699,40 @@ export default function AdminProducts() {
                           </Button>
                         </div>
                       </DialogContent>
+                      <AlertDialog open={editingId === product.id && isExitConfirmOpen} onOpenChange={setIsExitConfirmOpen}>
+                        <AlertDialogContent className="max-w-md">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Salvar alterações antes de sair?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Você fez alterações neste produto. Salve agora para manter as informações atualizadas ou descarte apenas se não quiser conservar esta edição.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="sm:flex-row sm:flex-wrap sm:justify-end">
+                            <AlertDialogCancel disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}>
+                              Continuar editando
+                            </AlertDialogCancel>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              onClick={closeEditSession}
+                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                            >
+                              Descartar alterações
+                            </Button>
+                            <Button
+                              type="button"
+                              className="bg-orange-500 hover:bg-orange-600"
+                              onClick={handleSave}
+                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                            >
+                              {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>
+                              ) : "Salvar alterações"}
+                            </Button>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </Dialog>
 
                     <Button
