@@ -403,6 +403,7 @@ export const financeiroRouter = router({
         deliveryFullName: orders.deliveryFullName,
         valor: orders.totalPrice,
         deletedAt: deletedReceivedAccounts.deletedAt,
+        deletedByAdminId: deletedReceivedAccounts.deletedByAdminId,
         deletedByAdminName: deletedReceivedAccounts.deletedByAdminName,
       })
         .from(deletedReceivedAccounts)
