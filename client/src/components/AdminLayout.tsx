@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, createContext, useContext } from "react";
+import { useState, useRef, useEffect, createContext, useContext, useMemo } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
+import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
 
 const SIDEBAR_SCROLL_KEY = "admin_sidebar_scroll";
 
@@ -269,6 +270,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
+  const { data: products } = trpc.products.getAll.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Badge de Novos Pedidos: apenas status iniciais de criação
   // Ao mudar para "analisando" ou posterior, o pedido sai desta contagem automaticamente
@@ -278,6 +282,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // O Kanban deve alertar a linha de produção sobre os itens que ainda exigem análise.
   const awaitingAnalysisCount = orders?.filter((o: any) => o.status === "analisando").length ?? 0;
+  const menuIndicators = useMemo(
+    () => getAdminMenuIndicators(orders as any[] ?? [], products?.length ?? 0),
+    [orders, products],
+  );
 
   const navItems: { group?: string; item?: NavItem }[] = [
     // COMERCIAL E VENDAS - Transformado em menu retrátil
@@ -286,7 +294,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "VENDAS",
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.sales, icon: <LayoutDashboard className="w-4 h-4" /> },
+          { ...ADMIN_DASHBOARD_LINKS.sales, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.salesToday || undefined },
           { label: "Novos Pedidos", href: "/admin/pedidos/novos", badge: pendingCount || undefined },
           { label: "Todos os Pedidos", href: "/admin/pedidos" },
           { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
@@ -302,7 +310,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "LINHA DE PRODUÇÃO",
         icon: <Printer className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" /> },
+          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.inProduction || undefined },
           {
             label: "Pré-Impressão",
             children: [
@@ -381,7 +389,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "PRODUTOS",
         icon: <Package className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.products, icon: <LayoutDashboard className="w-4 h-4" /> },
+          { ...ADMIN_DASHBOARD_LINKS.products, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.products || undefined },
           { label: "Todos os Produtos", href: "/admin/produtos" },
           { label: "Novo Produto", href: "/admin/novo-produto" },
           { label: "Gerenciar Variações", href: "/admin/variacoes" },
@@ -397,7 +405,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "CRM - CLIENTES",
         icon: <Users className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.customers, icon: <LayoutDashboard className="w-4 h-4" /> },
+          { ...ADMIN_DASHBOARD_LINKS.customers, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.customersWithOrders || undefined },
           { label: "Clientes Site", href: "/admin/clientes-loja" },
           { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
           { label: "Todos os Clientes", href: "/admin/clientes" },
