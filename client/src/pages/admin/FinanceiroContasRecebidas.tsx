@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, RefreshCw, CheckCircle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { TrendingUp, RefreshCw, CheckCircle, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { toast } from "sonner";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -26,8 +29,20 @@ type Periodo = "dia" | "semana" | "mes" | "ano";
 export default function FinanceiroContasRecebidas() {
   const [page, setPage] = useState(1);
   const [periodo, setPeriodo] = useState<Periodo>("mes");
+  const [receiptToDelete, setReceiptToDelete] = useState<any | null>(null);
+  const { adminUser } = useAdminAuth();
+  const utils = trpc.useUtils();
+  const canDeleteReceivedAccounts = adminUser?.role === "superadmin";
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasRecebidas.useQuery({ page, limit: 20, periodo });
+  const deleteReceiptMutation = trpc.financeiro.deleteContaRecebida.useMutation({
+    onSuccess: async () => {
+      toast.success("Conta recebida excluída com sucesso.");
+      setReceiptToDelete(null);
+      await utils.financeiro.getContasRecebidas.invalidate();
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível excluir a conta recebida."),
+  });
 
   return (
     <AdminLayout>
@@ -91,8 +106,9 @@ export default function FinanceiroContasRecebidas() {
                     <th className="text-right p-3 font-medium text-gray-600">Valor</th>
                     <th className="text-left p-3 font-medium text-gray-600">Data</th>
                     <th className="text-left p-3 font-medium text-gray-600">Pagamento</th>
-                    <th className="text-left p-3 font-medium text-gray-600">Entrega</th>
-                    <th className="text-left p-3 font-medium text-gray-600">Status</th>
+                      <th className="text-left p-3 font-medium text-gray-600">Entrega</th>
+                      <th className="text-left p-3 font-medium text-gray-600">Status</th>
+                      {canDeleteReceivedAccounts && <th className="text-center p-3 font-medium text-gray-600">Ações</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -113,6 +129,21 @@ export default function FinanceiroContasRecebidas() {
                       <td className="p-3">
                         <Badge className="bg-green-100 text-green-700 border-0 text-xs">Pago</Badge>
                       </td>
+                      {canDeleteReceivedAccounts && (
+                        <td className="p-3 text-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            title={`Excluir recebimento do pedido ${item.orderNumber}`}
+                            aria-label={`Excluir recebimento do pedido ${item.orderNumber}`}
+                            onClick={() => setReceiptToDelete(item)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -129,8 +160,31 @@ export default function FinanceiroContasRecebidas() {
             </div>
           )}
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+        <AlertDialog open={Boolean(receiptToDelete)} onOpenChange={(open) => !open && setReceiptToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir esta conta recebida?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação remove permanentemente o pedido #{receiptToDelete?.orderNumber} e os registros relacionados a ele. Ela não poderá ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteReceiptMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteReceiptMutation.isPending}
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (receiptToDelete?.pedidoId) deleteReceiptMutation.mutate({ orderId: receiptToDelete.pedidoId });
+                }}
+              >
+                {deleteReceiptMutation.isPending ? "Excluindo..." : "Excluir permanentemente"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </AdminLayout>
   );
 }

@@ -4,14 +4,27 @@
  * Não altera nenhuma tabela existente do sistema
  */
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { getDb } from "./db";
+import { logAudit } from "./admin-auth";
 import {
   orders,
   financeiro,
   financeiroNotificacoes,
   cashFlowEntries,
+  orderItems,
+  orderStatusHistory,
+  orderArtPreviews,
+  productionJobs,
+  financialRecords,
+  fileValidations,
+  automationLogs,
+  shipments,
+  fiscalNotes,
+  orderPayments,
+  emailHistory,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
 
@@ -311,6 +324,51 @@ export const financeiroRouter = router({
         page: input.page,
         totalPages: Math.ceil(total / input.limit),
       };
+    }),
+
+  // Exclusão permanente de um recebimento: autorizada somente para Superadmin.
+  // A listagem é derivada do pedido; por isso, a operação remove o pedido e seus registros dependentes.
+  deleteContaRecebida: adminOrManusAuthProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir uma conta recebida." });
+      }
+
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Recebimento não encontrado." });
+      if (order.paymentStatus !== "pago") {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente recebimentos confirmados podem ser excluídos nesta tela." });
+      }
+
+      await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
+      await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId));
+      await db.delete(productionJobs).where(eq(productionJobs.orderId, input.orderId));
+      await db.delete(financialRecords).where(eq(financialRecords.orderId, input.orderId));
+      await db.delete(fileValidations).where(eq(fileValidations.orderId, input.orderId));
+      await db.delete(automationLogs).where(eq(automationLogs.orderId, input.orderId));
+      await db.delete(shipments).where(eq(shipments.orderId, input.orderId));
+      await db.delete(fiscalNotes).where(eq(fiscalNotes.orderId, input.orderId));
+      await db.delete(orderPayments).where(eq(orderPayments.orderId, input.orderId));
+      await db.delete(emailHistory).where(eq(emailHistory.orderId, input.orderId));
+      await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
+      await db.delete(orders).where(eq(orders.id, input.orderId));
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "delete_received_account",
+        entity: "orders",
+        entityId: String(input.orderId),
+        before: { orderNumber: order.orderNumber, totalPrice: order.totalPrice, paymentStatus: order.paymentStatus },
+        ipAddress: ctx.req.ip,
+      });
+
+      return { success: true };
     }),
 
   // ── Pagamentos na Retirada ──────────────────────────────────────────────────

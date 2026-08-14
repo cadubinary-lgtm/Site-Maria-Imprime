@@ -2648,3 +2648,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Destacar visualmente no Kanban itens em Analisando há tempo excessivo
 - [x] Permitir abrir detalhes rápidos pelos badges de Pré-Impressão e Status de Produção
 - [x] Remover valores e exibir data e hora de criação nos cards de Pré-Impressão e Status de Produção
+- [x] Adicionar lixeira em Contas a Receber com confirmação e permissão exclusiva de Superadmin
