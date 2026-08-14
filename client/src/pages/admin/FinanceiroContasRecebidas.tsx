@@ -35,6 +35,7 @@ export default function FinanceiroContasRecebidas() {
   const [endDate, setEndDate] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [receiptToDelete, setReceiptToDelete] = useState<any | null>(null);
+  const [receiptToRestore, setReceiptToRestore] = useState<any | null>(null);
   const { adminUser } = useAdminAuth();
   const utils = trpc.useUtils();
   const canDeleteReceivedAccounts = adminUser?.role === "superadmin";
@@ -66,6 +67,7 @@ export default function FinanceiroContasRecebidas() {
   const restoreReceiptMutation = trpc.financeiro.restoreContaRecebida.useMutation({
     onSuccess: async () => {
       toast.success("Conta recebida restaurada com sucesso.");
+      setReceiptToRestore(null);
       await utils.financeiro.getContasRecebidas.invalidate();
       await utils.financeiro.listDeletedContasRecebidas.invalidate();
     },
@@ -191,11 +193,26 @@ export default function FinanceiroContasRecebidas() {
           </AlertDialogContent>
         </AlertDialog>
 
+        <AlertDialog open={Boolean(receiptToRestore)} onOpenChange={(open) => !open && setReceiptToRestore(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restaurar esta conta recebida?</AlertDialogTitle>
+              <AlertDialogDescription>O pedido #{receiptToRestore?.orderNumber} voltará imediatamente para a lista ativa de Contas Recebidas.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={restoreReceiptMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction className="bg-green-600 hover:bg-green-700" disabled={restoreReceiptMutation.isPending} onClick={(event) => { event.preventDefault(); if (receiptToRestore?.orderId) restoreReceiptMutation.mutate({ orderId: receiptToRestore.orderId }); }}>
+                {restoreReceiptMutation.isPending ? "Restaurando..." : "Confirmar restauração"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {canDeleteReceivedAccounts && showTrash && (
           <Card className="border border-pink-200 shadow-sm">
             <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base text-gray-900"><Trash2 className="h-4 w-4 text-pink-600" />Lixeira de Contas Recebidas</CardTitle></CardHeader>
             <CardContent className="p-0">
-              {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !deletedReceipts.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta recebida na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Por</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{deletedReceipts.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="p-3 text-xs text-gray-500">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-500">{item.deletedByAdminName || "Superadmin"}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceiptMutation.isPending} onClick={() => restoreReceiptMutation.mutate({ orderId: item.orderId })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
+              {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !deletedReceipts.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta recebida na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Por</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{deletedReceipts.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="p-3 text-xs text-gray-500">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-500">{item.deletedByAdminName || "Superadmin"}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceiptMutation.isPending} onClick={() => setReceiptToRestore(item)}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
             </CardContent>
           </Card>
         )}

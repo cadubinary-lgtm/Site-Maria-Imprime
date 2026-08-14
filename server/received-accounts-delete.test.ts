@@ -31,6 +31,10 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Lixeira de Contas Recebidas");
     expect(source).toContain("Restaurar");
     expect(source).toContain("<AlertDialog open={Boolean(receiptToDelete)}");
+    expect(source).toContain("<AlertDialog open={Boolean(receiptToRestore)}");
+    expect(source).toContain("Restaurar esta conta recebida?");
+    expect(source).toContain("Confirmar restauração");
+    expect(source).toContain("onClick={() => setReceiptToRestore(item)}");
     expect(source).toContain("Mover para lixeira");
   });
 });
