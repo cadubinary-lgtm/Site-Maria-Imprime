@@ -342,7 +342,7 @@ export const financeiroRouter = router({
 
   // Move um recebimento para a lixeira sem apagar o pedido ou suas dependências.
   moveContaRecebidaToTrash: adminOrManusAuthProcedure
-    .input(z.object({ orderId: z.number().int().positive() }))
+    .input(z.object({ orderId: z.number().int().positive(), reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000) }))
     .mutation(async ({ ctx, input }) => {
       const adminUser = (ctx as any).adminUser;
       if (adminUser?.role !== "superadmin") {
@@ -370,6 +370,7 @@ export const financeiroRouter = router({
         orderId: input.orderId,
         deletedByAdminId: adminUser.adminId,
         deletedByAdminName: adminUser.name,
+        deletionReason: input.reason,
         deletedAt: Date.now(),
       });
 
@@ -380,6 +381,7 @@ export const financeiroRouter = router({
         entity: "deletedReceivedAccounts",
         entityId: String(input.orderId),
         before: { orderNumber: order.orderNumber, totalPrice: order.totalPrice, paymentStatus: order.paymentStatus },
+        after: { deletionReason: input.reason },
         ipAddress: ctx.req.ip,
       });
 
@@ -405,6 +407,7 @@ export const financeiroRouter = router({
         deletedAt: deletedReceivedAccounts.deletedAt,
         deletedByAdminId: deletedReceivedAccounts.deletedByAdminId,
         deletedByAdminName: deletedReceivedAccounts.deletedByAdminName,
+        deletionReason: deletedReceivedAccounts.deletionReason,
       })
         .from(deletedReceivedAccounts)
         .innerJoin(orders, eq(deletedReceivedAccounts.orderId, orders.id))

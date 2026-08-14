@@ -2662,3 +2662,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Diagnosticar e corrigir a integração da Validação de Arquivos com os uploads de pedidos
 - [x] Remover Validação de Arquivos do menu lateral administrativo
 - [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin
+- [x] Exigir e registrar o motivo ao mover uma Conta Recebida para a lixeira

@@ -210,6 +210,7 @@ export const deletedReceivedAccounts = mysqlTable("deletedReceivedAccounts", {
   orderId: int("orderId").notNull().unique(),
   deletedByAdminId: int("deletedByAdminId"),
   deletedByAdminName: varchar("deletedByAdminName", { length: 255 }),
+  deletionReason: varchar("deletionReason", { length: 1000 }),
   deletedAt: bigint("deletedAt", { mode: "number" }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

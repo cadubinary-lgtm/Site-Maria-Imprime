@@ -43,6 +43,7 @@ export default function FinanceiroContasRecebidas() {
   const [endDate, setEndDate] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [receiptToDelete, setReceiptToDelete] = useState<any | null>(null);
+  const [deletionReason, setDeletionReason] = useState("");
   const [receiptToRestore, setReceiptToRestore] = useState<any | null>(null);
   const [confirmEmptyTrash, setConfirmEmptyTrash] = useState(false);
   const { adminUser } = useAdminAuth();
@@ -67,6 +68,7 @@ export default function FinanceiroContasRecebidas() {
     onSuccess: async () => {
       toast.success("Conta recebida movida para a lixeira.");
       setReceiptToDelete(null);
+      setDeletionReason("");
       await utils.financeiro.getContasRecebidas.invalidate();
       await utils.financeiro.listDeletedContasRecebidas.invalidate();
     },
@@ -186,7 +188,7 @@ export default function FinanceiroContasRecebidas() {
                         <td className="p-3"><Badge variant="outline" className="text-xs">{PAYMENT_LABELS[item.formaPagamento] || item.formaPagamento || "—"}</Badge></td>
                         <td className="p-3 text-xs text-gray-500">{item.formaEntrega === "retirada_loja" ? "Retirada" : item.formaEntrega || "—"}</td>
                         <td className="p-3"><Badge className="border-0 bg-green-100 text-xs text-green-700">Pago</Badge></td>
-                        {canDeleteReceivedAccounts && <td className="p-3 text-center"><Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => setReceiptToDelete(item)}><Trash2 className="h-3.5 w-3.5" /></Button></td>}
+                        {canDeleteReceivedAccounts && <td className="p-3 text-center"><Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setReceiptToDelete(item); }}><Trash2 className="h-3.5 w-3.5" /></Button></td>}
                       </tr>
                     ))}
                   </tbody>
@@ -197,15 +199,20 @@ export default function FinanceiroContasRecebidas() {
           </CardContent>
         </Card>
 
-        <AlertDialog open={Boolean(receiptToDelete)} onOpenChange={(open) => !open && setReceiptToDelete(null)}>
+        <AlertDialog open={Boolean(receiptToDelete)} onOpenChange={(open) => { if (!open) { setReceiptToDelete(null); setDeletionReason(""); } }}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Mover esta conta recebida para a lixeira?</AlertDialogTitle>
               <AlertDialogDescription>O pedido #{receiptToDelete?.orderNumber} será ocultado de Contas Recebidas, mas poderá ser restaurado posteriormente na Lixeira por um Superadmin.</AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="grid gap-2">
+              <label htmlFor="deletion-reason" className="text-sm font-medium text-gray-800">Motivo da exclusão <span className="text-red-600">*</span></label>
+              <textarea id="deletion-reason" value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} placeholder="Descreva por que este recebimento deve ser movido para a lixeira" maxLength={1000} className="min-h-24 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+              <p className="text-xs text-gray-500">O motivo é obrigatório e ficará registrado na lixeira e na auditoria.</p>
+            </div>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={moveReceiptToTrashMutation.isPending}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={moveReceiptToTrashMutation.isPending} onClick={(event) => { event.preventDefault(); if (receiptToDelete?.pedidoId) moveReceiptToTrashMutation.mutate({ orderId: receiptToDelete.pedidoId }); }}>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={moveReceiptToTrashMutation.isPending || deletionReason.trim().length < 3} onClick={(event) => { event.preventDefault(); if (receiptToDelete?.pedidoId && deletionReason.trim().length >= 3) moveReceiptToTrashMutation.mutate({ orderId: receiptToDelete.pedidoId, reason: deletionReason.trim() }); }}>
                 {moveReceiptToTrashMutation.isPending ? "Movendo..." : "Mover para lixeira"}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -248,7 +255,7 @@ export default function FinanceiroContasRecebidas() {
           <Card className="border border-pink-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-base text-gray-900"><Trash2 className="h-4 w-4 text-pink-600" />Lixeira de Contas Recebidas</CardTitle><Button size="sm" variant="outline" className="h-8 border-red-200 text-xs text-red-600 hover:bg-red-50 hover:text-red-700" disabled={isLoadingTrash || !deletedReceipts.length} onClick={() => setConfirmEmptyTrash(true)}><Trash2 className="mr-1 h-3.5 w-3.5" />Esvaziar Lixeira</Button></CardHeader>
             <CardContent className="p-0">
-              {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !deletedReceipts.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta recebida na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Data e hora da exclusão</th><th className="p-3 text-left font-medium text-gray-600">Usuário que excluiu</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{deletedReceipts.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="whitespace-nowrap p-3 text-xs font-medium text-gray-600">{formatDateTime(item.deletedAt)}</td><td className="p-3 text-xs text-gray-600"><span className="font-medium text-gray-700">{item.deletedByAdminName || "Usuário não informado"}</span>{item.deletedByAdminId ? <span className="block text-[11px] text-gray-400">ID do usuário: #{item.deletedByAdminId}</span> : null}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceiptMutation.isPending} onClick={() => setReceiptToRestore(item)}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
+              {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !deletedReceipts.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta recebida na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Data e hora da exclusão</th><th className="p-3 text-left font-medium text-gray-600">Usuário que excluiu</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{deletedReceipts.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs font-medium text-gray-600">{formatDateTime(item.deletedAt)}</td><td className="p-3 text-xs text-gray-600"><span className="font-medium text-gray-700">{item.deletedByAdminName || "Usuário não informado"}</span>{item.deletedByAdminId ? <span className="block text-[11px] text-gray-400">ID do usuário: #{item.deletedByAdminId}</span> : null}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceiptMutation.isPending} onClick={() => setReceiptToRestore(item)}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
             </CardContent>
           </Card>
         )}
