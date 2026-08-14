@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createProductEditSignature, hasUnsavedProductChanges, type ProductEditSnapshot } from "../client/src/lib/product-edit-guard";
+import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession, type ProductEditSnapshot } from "../client/src/lib/product-edit-guard";
 
 const form: ProductEditSnapshot = {
   name: "Lona impressa",
@@ -26,5 +26,11 @@ describe("proteção de edição de produto", () => {
 
     expect(hasUnsavedProductChanges(baseline, { ...form, segmentIds: [1, 2], tags: ["Destaque", "Novo"] })).toBe(false);
     expect(hasUnsavedProductChanges(baseline, { ...form, name: "Lona frontlight" })).toBe(true);
+  });
+
+  it("inicializa segmentos somente uma vez por sessão de edição", () => {
+    expect(shouldInitializeProductEditSession(20, true, [])).toBe(true);
+    expect(shouldInitializeProductEditSession(20, false, [])).toBe(false);
+    expect(shouldInitializeProductEditSession(null, true, [])).toBe(false);
   });
 });

@@ -19,7 +19,7 @@ import { ProductImageUploader } from "@/components/products/ProductImageUploader
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
-import { createProductEditSignature, hasUnsavedProductChanges } from "@/lib/product-edit-guard";
+import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 
 export default function AdminProducts() {
@@ -83,36 +83,33 @@ export default function AdminProducts() {
 
   // ─── Sincronizar segmentos ao editar ─────────────────────────────────────
   useEffect(() => {
-    if (productSegments) {
-      setEditForm((prev) => {
-        let nextForm = {
-          ...prev,
-          segmentIds: productSegments.map((s) => s.id),
-        };
-        if (waitingInitialSegments) {
-          const baselineSignature = createProductEditSignature(nextForm);
-          const draft = typeof window !== "undefined"
-            ? parseProductEditDraft(window.localStorage.getItem(getProductEditDraftKey(editingId || 0)))
-            : null;
+    if (!shouldInitializeProductEditSession(editingId, waitingInitialSegments, productSegments) || editingId === null || !productSegments) return;
+    const productId = editingId;
 
-          if (draft?.baselineSignature === baselineSignature) {
-            nextForm = draft.form;
-            setDraftSavedAt(draft.savedAt);
-            toast.info("Rascunho recuperado", {
-              description: "As alterações locais deste produto foram restauradas.",
-              position: "top-right",
-              id: `product-draft-restored-${editingId}`,
-            });
-          } else {
-            setDraftSavedAt(null);
-          }
+    let nextForm = {
+      ...editForm,
+      segmentIds: productSegments.map((segment) => segment.id),
+    };
+    const baselineSignature = createProductEditSignature(nextForm);
+    const draft = typeof window !== "undefined"
+      ? parseProductEditDraft(window.localStorage.getItem(getProductEditDraftKey(productId)))
+      : null;
 
-          setEditBaselineSignature(baselineSignature);
-          setWaitingInitialSegments(false);
-        }
-        return nextForm;
+    if (draft?.baselineSignature === baselineSignature) {
+      nextForm = draft.form;
+      setDraftSavedAt(draft.savedAt);
+      toast.info("Rascunho recuperado", {
+        description: "As alterações locais deste produto foram restauradas.",
+        position: "top-right",
+        id: `product-draft-restored-${productId}`,
       });
+    } else {
+      setDraftSavedAt(null);
     }
+
+    setEditForm(nextForm);
+    setEditBaselineSignature(baselineSignature);
+    setWaitingInitialSegments(false);
   }, [editingId, productSegments, waitingInitialSegments]);
 
   useEffect(() => {
