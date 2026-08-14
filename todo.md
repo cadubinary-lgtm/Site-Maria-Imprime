@@ -2675,3 +2675,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar e corrigir os indicadores do dashboard de Orçamentos
 - [x] Adicionar gráfico de distribuição Ativos, Convertidos e Pendentes no dashboard de Orçamentos
 - [x] Reorganizar visualmente os indicadores do dashboard de Orçamentos
+- [x] Adicionar filtro de período no dashboard de Orçamentos
+- [x] Corrigir apuração de aprovações, conversões e valores no dashboard de Orçamentos

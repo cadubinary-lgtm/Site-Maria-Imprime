@@ -26,5 +26,9 @@ describe("lixeira e dashboard de orçamentos", () => {
     expect(source).toContain("Distribuição do funil de orçamentos");
     expect(source).toContain("kpis.ativos");
     expect(source).toContain("kpis.pendentes");
+    expect(source).toContain('value: "this_month"');
+    expect(source).toContain('value: "last_month"');
+    expect(source).toContain("kpis.valorConvertido");
+    expect(source).toContain("startDate,");
   });
 });

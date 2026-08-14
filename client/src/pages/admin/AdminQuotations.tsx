@@ -46,6 +46,7 @@ import {
   DollarSign,
   Percent,
   RotateCcw,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -70,11 +71,26 @@ function fmtDate(d: Date | string | null | undefined) {
   return new Date(d).toLocaleDateString("pt-BR");
 }
 
+function toDateInput(date: Date) {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function getMonthRange(offset: number) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+  return { startDate: toDateInput(start), endDate: toDateInput(end) };
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotations() {
   const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [period, setPeriod] = useState<"all" | "this_month" | "last_month" | "custom">("all");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [trashQuotation, setTrashQuotation] = useState<any | null>(null);
   const [deletionReason, setDeletionReason] = useState("");
@@ -82,12 +98,17 @@ export default function AdminQuotations() {
   const [permanentQuotation, setPermanentQuotation] = useState<any | null>(null);
   const { adminUser } = useAdminAuth();
   const canManageTrash = adminUser?.role === "superadmin";
+  const presetRange = period === "this_month" ? getMonthRange(0) : period === "last_month" ? getMonthRange(-1) : { startDate: undefined, endDate: undefined };
+  const startDate = period === "custom" ? customStartDate || undefined : presetRange.startDate;
+  const endDate = period === "custom" ? customEndDate || undefined : presetRange.endDate;
 
   const { data, isLoading, refetch } = trpc.quotations.list.useQuery({
     search: search || undefined,
     status: statusFilter === "all" ? undefined : statusFilter,
     page: 1,
     limit: 50,
+    startDate,
+    endDate,
   });
   const { data: trashedQuotations = [], isLoading: isLoadingTrash } = trpc.quotations.listTrash.useQuery(undefined, { enabled: canManageTrash && showTrash });
 
@@ -143,6 +164,14 @@ export default function AdminQuotations() {
       {/* Dashboard comercial */}
       {kpis && (
         <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-pink-600" /><div><p className="text-sm font-semibold text-gray-800">Período do dashboard</p><p className="text-xs text-gray-500">Aprovações e conversões são apuradas na data em que ocorreram.</p></div></div>
+            <div className="flex flex-wrap items-center gap-2">
+              {[{ value: "all", label: "Todo período" }, { value: "this_month", label: "Este mês" }, { value: "last_month", label: "Mês passado" }].map((item) => <Button key={item.value} variant={period === item.value ? "default" : "outline"} size="sm" className={period === item.value ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod(item.value as typeof period)}>{item.label}</Button>)}
+              <Button variant={period === "custom" ? "default" : "outline"} size="sm" className={period === "custom" ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod("custom")}>Personalizado</Button>
+              {period === "custom" && <><Input type="date" value={customStartDate} onChange={(event) => setCustomStartDate(event.target.value)} className="h-8 w-36 text-xs" /><Input type="date" value={customEndDate} onChange={(event) => setCustomEndDate(event.target.value)} className="h-8 w-36 text-xs" /></>}
+            </div>
+          </div>
           <div className="grid gap-3 lg:grid-cols-[1fr_1.4fr]">
             <div className="grid grid-cols-3 gap-3">
               {distribution.map((item) => <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-xs font-medium text-gray-500">{item.label}</p><p className={`mt-1 text-2xl font-bold ${item.text}`}>{item.value}</p><p className="mt-1 text-[11px] leading-tight text-gray-400">{item.detail}</p></div>)}
@@ -153,7 +182,7 @@ export default function AdminQuotations() {
             </div>
           </div>
           <p className="px-1 text-xs text-gray-400">Orçamentos recusados, expirados e cancelados permanecem fora da distribuição para não distorcer o funil ativo.</p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
           {[
             { label: "Rascunhos",      value: kpis.rascunhos,      icon: FileText,    cls: "text-gray-600" },
             { label: "Enviados",       value: kpis.enviados,        icon: Send,        cls: "text-blue-600" },
@@ -161,6 +190,7 @@ export default function AdminQuotations() {
             { label: "Expirados",      value: kpis.expirados,       icon: Clock,       cls: "text-orange-600" },
             { label: "Em Negociação",  value: fmt(kpis.valorNegociacao), icon: TrendingUp, cls: "text-amber-600", isValue: true },
             { label: "Valor Aprovado", value: fmt(kpis.valorAprovado),   icon: DollarSign, cls: "text-green-600", isValue: true },
+            { label: "Valor Convertido", value: fmt(kpis.valorConvertido), icon: ArrowRight, cls: "text-purple-600", isValue: true },
             { label: "Taxa Conversão", value: `${kpis.taxaConversao}%`,  icon: Percent,    cls: "text-pink-600",  isValue: true },
           ].map((k) => (
             <div key={k.label} className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">

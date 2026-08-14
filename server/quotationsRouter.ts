@@ -3,7 +3,7 @@ import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
-import { eq, desc, like, and, or, sql } from "drizzle-orm";
+import { eq, desc, like, and, or, sql, gte, lte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendQuotationEmail } from "./emailService";
 import { logAudit } from "./admin-auth";
@@ -38,6 +38,8 @@ export const quotationsRouter = router({
     .input(z.object({
       search: z.string().optional(),
       status: z.string().optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
       page: z.number().default(1),
       limit: z.number().default(20),
     }))
@@ -50,6 +52,10 @@ export const quotationsRouter = router({
 
       // Build where conditions
       const conditions: any[] = [sql`NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = ${quotations.id})`];
+      const startAt = input.startDate ? new Date(`${input.startDate}T00:00:00.000`) : undefined;
+      const endAt = input.endDate ? new Date(`${input.endDate}T23:59:59.999`) : undefined;
+      if (startAt && !Number.isNaN(startAt.getTime())) conditions.push(gte(quotations.createdAt, startAt));
+      if (endAt && !Number.isNaN(endAt.getTime())) conditions.push(lte(quotations.createdAt, endAt));
       if (input.status) {
         conditions.push(eq(quotations.status, input.status as any));
       }
@@ -96,21 +102,28 @@ export const quotationsRouter = router({
         .offset(offset);
 
       // KPIs
+      const createdPeriod = startAt ? sql` AND q.createdAt >= ${startAt}` : sql``;
+      const createdEndPeriod = endAt ? sql` AND q.createdAt <= ${endAt}` : sql``;
+      const approvedPeriod = startAt ? sql` AND q.approvedAt >= ${startAt}` : sql``;
+      const approvedEndPeriod = endAt ? sql` AND q.approvedAt <= ${endAt}` : sql``;
+      const convertedPeriod = startAt ? sql` AND q.updatedAt >= ${startAt}` : sql``;
+      const convertedEndPeriod = endAt ? sql` AND q.updatedAt <= ${endAt}` : sql``;
       const kpiRows = await db.execute(sql`
         SELECT
-          COUNT(CASE WHEN q.status = 'rascunho' THEN 1 END) as rascunhos,
-          COUNT(CASE WHEN q.status = 'enviado' THEN 1 END) as enviados,
-          COUNT(CASE WHEN q.status = 'aprovado' THEN 1 END) as aprovados,
-          COUNT(CASE WHEN q.status = 'expirado' THEN 1 END) as expirados,
-          COUNT(CASE WHEN q.status = 'recusado' THEN 1 END) as recusados,
-          COUNT(CASE WHEN q.status = 'cancelado' THEN 1 END) as cancelados,
-          COUNT(CASE WHEN q.status = 'em_negociacao' THEN 1 END) as emNegociacao,
-          COUNT(CASE WHEN q.status = 'aprovado' AND q.convertedOrderId IS NULL THEN 1 END) as ativos,
-          COUNT(CASE WHEN q.status IN ('enviado','em_negociacao','aprovado','recusado','expirado','cancelado') THEN 1 END) as propostasEnviadas,
-          COALESCE(SUM(CASE WHEN q.status IN ('enviado','em_negociacao') THEN q.total ELSE 0 END), 0) as valorNegociacao,
-          COALESCE(SUM(CASE WHEN q.status = 'aprovado' THEN q.total ELSE 0 END), 0) as valorAprovado,
-          COUNT(CASE WHEN q.convertedOrderId IS NOT NULL THEN 1 END) as convertidos,
-          COUNT(*) as totalOrcamentos
+          COUNT(CASE WHEN q.status = 'rascunho' ${createdPeriod}${createdEndPeriod} THEN 1 END) as rascunhos,
+          COUNT(CASE WHEN q.status = 'enviado' ${createdPeriod}${createdEndPeriod} THEN 1 END) as enviados,
+          COUNT(CASE WHEN q.status = 'aprovado' ${approvedPeriod}${approvedEndPeriod} THEN 1 END) as aprovados,
+          COUNT(CASE WHEN q.status = 'expirado' ${createdPeriod}${createdEndPeriod} THEN 1 END) as expirados,
+          COUNT(CASE WHEN q.status = 'recusado' ${createdPeriod}${createdEndPeriod} THEN 1 END) as recusados,
+          COUNT(CASE WHEN q.status = 'cancelado' ${createdPeriod}${createdEndPeriod} THEN 1 END) as cancelados,
+          COUNT(CASE WHEN q.status = 'em_negociacao' ${createdPeriod}${createdEndPeriod} THEN 1 END) as emNegociacao,
+          COUNT(CASE WHEN q.status = 'aprovado' AND q.convertedOrderId IS NULL ${approvedPeriod}${approvedEndPeriod} THEN 1 END) as ativos,
+          COUNT(CASE WHEN q.status IN ('enviado','em_negociacao') ${createdPeriod}${createdEndPeriod} THEN 1 END) as propostasEnviadas,
+          COALESCE(SUM(CASE WHEN q.status IN ('enviado','em_negociacao') ${createdPeriod}${createdEndPeriod} THEN q.total ELSE 0 END), 0) as valorNegociacao,
+          COALESCE(SUM(CASE WHEN q.status = 'aprovado' ${approvedPeriod}${approvedEndPeriod} THEN q.total ELSE 0 END), 0) as valorAprovado,
+          COALESCE(SUM(CASE WHEN q.convertedOrderId IS NOT NULL ${convertedPeriod}${convertedEndPeriod} THEN q.total ELSE 0 END), 0) as valorConvertido,
+          COUNT(CASE WHEN q.convertedOrderId IS NOT NULL ${convertedPeriod}${convertedEndPeriod} THEN 1 END) as convertidos,
+          COUNT(CASE WHEN 1=1 ${createdPeriod}${createdEndPeriod} THEN 1 END) as totalOrcamentos
         FROM quotations q
         WHERE NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = q.id)
       `);
@@ -130,6 +143,7 @@ export const quotationsRouter = router({
           expirados: Number(kpi.expirados ?? 0),
           valorNegociacao: Number(kpi.valorNegociacao ?? 0),
           valorAprovado: Number(kpi.valorAprovado ?? 0),
+          valorConvertido: Number(kpi.valorConvertido ?? 0),
           taxaConversao,
           totalAtivos: Number(kpi.totalOrcamentos ?? 0),
           convertidos: Number(kpi.convertidos ?? 0),
