@@ -6,6 +6,7 @@ import { getDb } from "./db";
 import { eq, desc, like, and, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendQuotationEmail } from "./emailService";
+import { logAudit } from "./admin-auth";
 
 const adminAnyProcedure = adminOrManusAuthProcedure;
 
@@ -43,12 +44,12 @@ export const quotationsRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
-      const { quotations, clients } = await import("../drizzle/schema.js");
+      const { quotations, clients, deletedQuotations } = await import("../drizzle/schema.js");
 
       const offset = (input.page - 1) * input.limit;
 
       // Build where conditions
-      const conditions: any[] = [];
+      const conditions: any[] = [sql`NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = ${quotations.id})`];
       if (input.status) {
         conditions.push(eq(quotations.status, input.status as any));
       }
@@ -97,20 +98,25 @@ export const quotationsRouter = router({
       // KPIs
       const kpiRows = await db.execute(sql`
         SELECT
-          COUNT(CASE WHEN status = 'rascunho' THEN 1 END) as rascunhos,
-          COUNT(CASE WHEN status = 'enviado' THEN 1 END) as enviados,
-          COUNT(CASE WHEN status = 'aprovado' THEN 1 END) as aprovados,
-          COUNT(CASE WHEN status = 'expirado' THEN 1 END) as expirados,
-          COALESCE(SUM(CASE WHEN status IN ('enviado','em_negociacao') THEN total ELSE 0 END), 0) as valorNegociacao,
-          COALESCE(SUM(CASE WHEN status = 'aprovado' THEN total ELSE 0 END), 0) as valorAprovado,
-          COUNT(CASE WHEN convertedOrderId IS NOT NULL THEN 1 END) as convertidos,
+          COUNT(CASE WHEN q.status = 'rascunho' THEN 1 END) as rascunhos,
+          COUNT(CASE WHEN q.status = 'enviado' THEN 1 END) as enviados,
+          COUNT(CASE WHEN q.status = 'aprovado' THEN 1 END) as aprovados,
+          COUNT(CASE WHEN q.status = 'expirado' THEN 1 END) as expirados,
+          COUNT(CASE WHEN q.status = 'recusado' THEN 1 END) as recusados,
+          COUNT(CASE WHEN q.status = 'cancelado' THEN 1 END) as cancelados,
+          COUNT(CASE WHEN q.status IN ('enviado','em_negociacao','aprovado','recusado','expirado','cancelado') THEN 1 END) as propostasEnviadas,
+          COALESCE(SUM(CASE WHEN q.status IN ('enviado','em_negociacao') THEN q.total ELSE 0 END), 0) as valorNegociacao,
+          COALESCE(SUM(CASE WHEN q.status = 'aprovado' THEN q.total ELSE 0 END), 0) as valorAprovado,
+          COUNT(CASE WHEN q.convertedOrderId IS NOT NULL THEN 1 END) as convertidos,
           COUNT(*) as totalOrcamentos
-        FROM quotations
+        FROM quotations q
+        WHERE NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = q.id)
       `);
 
       const kpi = (kpiRows as any)[0] ?? {};
-      const taxaConversao = kpi.totalOrcamentos > 0
-        ? Math.round((kpi.convertidos / kpi.totalOrcamentos) * 100)
+      const propostasEnviadas = Number(kpi.propostasEnviadas ?? 0);
+      const taxaConversao = propostasEnviadas > 0
+        ? Math.round((Number(kpi.convertidos ?? 0) / propostasEnviadas) * 100)
         : 0;
 
       return {
@@ -123,8 +129,10 @@ export const quotationsRouter = router({
           valorNegociacao: Number(kpi.valorNegociacao ?? 0),
           valorAprovado: Number(kpi.valorAprovado ?? 0),
           taxaConversao,
+          totalAtivos: Number(kpi.totalOrcamentos ?? 0),
+          convertidos: Number(kpi.convertidos ?? 0),
         },
-        total: rows.length,
+        total: Number(kpi.totalOrcamentos ?? 0),
       };
     }),
 
@@ -627,6 +635,68 @@ export const quotationsRouter = router({
       await db.delete(quotationItems).where(eq(quotationItems.quotationId, input.id));
       await db.delete(quotations).where(eq(quotations.id, input.id));
 
+      return { success: true };
+    }),
+
+  // ── Lixeira reversível de Orçamentos ───────────────────────────────────
+  listTrash: adminAnyProcedure.query(async ({ ctx }) => {
+    const adminUser = (ctx as any).adminUser;
+    if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode acessar a lixeira de orçamentos." });
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+    const { quotations, clients, deletedQuotations } = await import("../drizzle/schema.js");
+    return db.select({ trashId: deletedQuotations.id, quotationId: quotations.id, quotationNumber: quotations.quotationNumber, clientName: clients.name, total: quotations.total, status: quotations.status, deletedAt: deletedQuotations.deletedAt, deletedByAdminId: deletedQuotations.deletedByAdminId, deletedByAdminName: deletedQuotations.deletedByAdminName, deletionReason: deletedQuotations.deletionReason })
+      .from(deletedQuotations).innerJoin(quotations, eq(deletedQuotations.quotationId, quotations.id)).leftJoin(clients, eq(quotations.clientId, clients.id)).orderBy(desc(deletedQuotations.deletedAt));
+  }),
+
+  moveToTrash: adminAnyProcedure
+    .input(z.object({ id: z.number().int().positive(), reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000) }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode mover orçamentos para a lixeira." });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { quotations, deletedQuotations } = await import("../drizzle/schema.js");
+      const [quotation] = await db.select().from(quotations).where(eq(quotations.id, input.id)).limit(1);
+      if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const [existing] = await db.select({ id: deletedQuotations.id }).from(deletedQuotations).where(eq(deletedQuotations.quotationId, input.id)).limit(1);
+      if (existing) throw new TRPCError({ code: "CONFLICT", message: "Este orçamento já está na lixeira." });
+      await db.insert(deletedQuotations).values({ quotationId: input.id, deletedByAdminId: adminUser.adminId, deletedByAdminName: adminUser.name, deletionReason: input.reason, deletedAt: Date.now() });
+      await logAudit({ adminId: adminUser.adminId, adminName: adminUser.name, action: "move_quotation_to_trash", entity: "deletedQuotations", entityId: String(input.id), before: { quotationNumber: quotation.quotationNumber, status: quotation.status }, after: { deletionReason: input.reason }, ipAddress: ctx.req.ip });
+      return { success: true };
+    }),
+
+  restoreFromTrash: adminAnyProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode restaurar orçamentos." });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { deletedQuotations } = await import("../drizzle/schema.js");
+      const [trashItem] = await db.select().from(deletedQuotations).where(eq(deletedQuotations.quotationId, input.id)).limit(1);
+      if (!trashItem) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não está na lixeira." });
+      await db.delete(deletedQuotations).where(eq(deletedQuotations.quotationId, input.id));
+      await logAudit({ adminId: adminUser.adminId, adminName: adminUser.name, action: "restore_quotation_from_trash", entity: "deletedQuotations", entityId: String(input.id), before: { deletedAt: trashItem.deletedAt }, after: { restoredAt: Date.now() }, ipAddress: ctx.req.ip });
+      return { success: true };
+    }),
+
+  permanentlyDeleteFromTrash: adminAnyProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir orçamentos permanentemente." });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      const { quotations, quotationItems, quotationHistory, deletedQuotations } = await import("../drizzle/schema.js");
+      const [trashItem] = await db.select().from(deletedQuotations).where(eq(deletedQuotations.quotationId, input.id)).limit(1);
+      if (!trashItem) throw new TRPCError({ code: "NOT_FOUND", message: "Apenas orçamentos na lixeira podem ser excluídos permanentemente." });
+      const [quotation] = await db.select().from(quotations).where(eq(quotations.id, input.id)).limit(1);
+      await db.delete(quotationHistory).where(eq(quotationHistory.quotationId, input.id));
+      await db.delete(quotationItems).where(eq(quotationItems.quotationId, input.id));
+      await db.delete(quotations).where(eq(quotations.id, input.id));
+      await db.delete(deletedQuotations).where(eq(deletedQuotations.quotationId, input.id));
+      await logAudit({ adminId: adminUser.adminId, adminName: adminUser.name, action: "permanently_delete_quotation_from_trash", entity: "deletedQuotations", entityId: String(input.id), before: { quotationNumber: quotation?.quotationNumber, deletionReason: trashItem.deletionReason }, after: { permanentlyDeletedAt: Date.now() }, ipAddress: ctx.req.ip });
       return { success: true };
     }),
 

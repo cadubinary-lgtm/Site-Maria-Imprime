@@ -233,6 +233,19 @@ export const deletedOrders = mysqlTable("deletedOrders", {
 
 export type DeletedOrder = typeof deletedOrders.$inferSelect;
 
+/** Lixeira reversível dos orçamentos comerciais. */
+export const deletedQuotations = mysqlTable("deletedQuotations", {
+  id: int("id").autoincrement().primaryKey(),
+  quotationId: int("quotationId").notNull().unique(),
+  deletedByAdminId: int("deletedByAdminId"),
+  deletedByAdminName: varchar("deletedByAdminName", { length: 255 }),
+  deletionReason: varchar("deletionReason", { length: 1000 }),
+  deletedAt: bigint("deletedAt", { mode: "number" }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DeletedQuotation = typeof deletedQuotations.$inferSelect;
+
 /**
  * Order items - itens dentro de cada pedido
  */
