@@ -14,11 +14,13 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("restoreContaRecebida: adminOrManusAuthProcedure");
     expect(source).toContain("listDeletedContasRecebidas: adminOrManusAuthProcedure");
     expect(source).toContain("emptyDeletedContasRecebidas: adminOrManusAuthProcedure");
+    expect(source).toContain("permanentlyDeleteContaRecebida: adminOrManusAuthProcedure");
     expect(source).toContain("confirmation: z.literal(true)");
     expect(source).toContain('adminUser?.role !== "superadmin"');
     expect(source).toContain('code: "FORBIDDEN"');
     expect(source).toContain('action: "move_receivable_account_to_trash"');
     expect(source).toContain('action: "restore_received_account"');
+    expect(source).toContain('action: "permanently_delete_received_account_from_trash"');
     expect(source).toContain("deletedByAdminId: deletedReceivedAccounts.deletedByAdminId");
     expect(source).toContain('reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000)');
     expect(source).toContain("deletionReason: input.reason");
@@ -46,6 +48,8 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Esvaziar a lixeira permanentemente?");
     expect(source).toContain("Esvaziar Lixeira");
     expect(source).toContain("Esvaziar permanentemente");
+    expect(source).toContain("permanentlyDeleteContaRecebida.useMutation");
+    expect(source).toContain("Excluir este item permanentemente?");
     expect(source).toContain("Data e hora da exclusão");
     expect(source).toContain("Usuário que excluiu");
     expect(source).toContain("ID do usuário:");
@@ -74,5 +78,8 @@ describe("lixeira de Contas Recebidas", () => {
     expect(pageSource).toContain("listDeletedContasRecebidas.useQuery");
     expect(pageSource).toContain("Restaurar esta conta a receber?");
     expect(pageSource).toContain("Confirmar restauração");
+    expect(pageSource).toContain("permanentlyDeleteContaRecebida.useMutation");
+    expect(pageSource).toContain("Excluir este item permanentemente?");
+    expect(pageSource).toContain("Excluir permanentemente");
   });
 });

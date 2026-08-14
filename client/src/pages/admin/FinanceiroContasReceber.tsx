@@ -61,6 +61,7 @@ export default function FinanceiroContasReceber() {
   const [deletionReason, setDeletionReason] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [restoreDialog, setRestoreDialog] = useState<{ open: boolean; item: any | null }>({ open: false, item: null });
+  const [permanentDeleteDialog, setPermanentDeleteDialog] = useState<{ open: boolean; item: any | null }>({ open: false, item: null });
   const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const { adminUser } = useAdminAuth();
@@ -121,6 +122,16 @@ export default function FinanceiroContasReceber() {
       await utils.financeiro.listDeletedContasRecebidas.invalidate();
     },
     onError: (e) => toast.error("Erro ao restaurar: " + e.message),
+  });
+
+  const permanentlyDeleteReceivable = trpc.financeiro.permanentlyDeleteContaRecebida.useMutation({
+    onSuccess: async () => {
+      toast.success("Item removido permanentemente da lixeira.");
+      setPermanentDeleteDialog({ open: false, item: null });
+      await utils.financeiro.getContasReceber.invalidate();
+      await utils.financeiro.listDeletedContasRecebidas.invalidate();
+    },
+    onError: (e) => toast.error("Erro ao excluir permanentemente: " + e.message),
   });
 
   const handleSearch = () => {
@@ -323,7 +334,7 @@ export default function FinanceiroContasReceber() {
         <Card className="border border-pink-200 shadow-sm">
           <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base text-gray-900"><Trash2 className="h-4 w-4 text-pink-600" />Lixeira de Contas a Receber</CardTitle></CardHeader>
           <CardContent className="p-0">
-            {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !trashedReceivables.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta a receber na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Usuário</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{trashedReceivables.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs text-gray-600">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-600">{item.deletedByAdminName || "Usuário não informado"}</td><td className="p-3 text-center"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceivable.isPending} onClick={() => setRestoreDialog({ open: true, item })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button></td></tr>)}</tbody></table></div>}
+            {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !trashedReceivables.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta a receber na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Usuário</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{trashedReceivables.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs text-gray-600">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-600">{item.deletedByAdminName || "Usuário não informado"}</td><td className="p-3 text-center"><div className="flex justify-center gap-1"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceivable.isPending} onClick={() => setRestoreDialog({ open: true, item })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button><Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${item.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${item.orderNumber}`} disabled={permanentlyDeleteReceivable.isPending} onClick={() => setPermanentDeleteDialog({ open: true, item })}><Trash2 className="h-3.5 w-3.5" /></Button></div></td></tr>)}</tbody></table></div>}
           </CardContent>
         </Card>
       )}
@@ -407,6 +418,17 @@ export default function FinanceiroContasReceber() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRestoreDialog({ open: false, item: null })}>Cancelar</Button>
             <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={restoreReceivable.isPending} onClick={() => { if (restoreDialog.item?.orderId) restoreReceivable.mutate({ orderId: restoreDialog.item.orderId }); }}>{restoreReceivable.isPending ? "Restaurando..." : "Confirmar restauração"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={permanentDeleteDialog.open} onOpenChange={(open) => !open && setPermanentDeleteDialog({ open: false, item: null })}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="text-red-600">Excluir este item permanentemente?</DialogTitle></DialogHeader>
+          <p className="text-sm text-gray-600">O pedido #{permanentDeleteDialog.item?.orderNumber} e seus registros vinculados serão removidos de forma definitiva. Esta ação não poderá ser desfeita.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPermanentDeleteDialog({ open: false, item: null })}>Cancelar</Button>
+            <Button variant="destructive" disabled={permanentlyDeleteReceivable.isPending} onClick={() => { if (permanentDeleteDialog.item?.orderId) permanentlyDeleteReceivable.mutate({ orderId: permanentDeleteDialog.item.orderId }); }}>{permanentlyDeleteReceivable.isPending ? "Excluindo..." : "Excluir permanentemente"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
