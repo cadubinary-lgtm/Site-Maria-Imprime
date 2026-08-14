@@ -2663,3 +2663,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover Validação de Arquivos do menu lateral administrativo
 - [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin
 - [x] Exigir e registrar o motivo ao mover uma Conta Recebida para a lixeira
+- [x] Diagnosticar e corrigir o funcionamento da página Fluxo de Caixa
+- [x] Completar o Fluxo de Caixa com indicadores, filtros e lançamentos operacionais

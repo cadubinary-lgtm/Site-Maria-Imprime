@@ -27,7 +27,7 @@ import {
   emailHistory,
   deletedReceivedAccounts,
 } from "../drizzle/schema";
-import { eq, ne, and, gte, lte, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
+import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -693,87 +693,105 @@ export const financeiroRouter = router({
       const start = input.startDate ?? monthAgo;
       const end = input.endDate ?? now;
 
-      // Entradas automáticas dos pedidos pagos
-      const paidOrders = await db.select().from(orders)
-        .where(and(
-          eq(orders.paymentStatus, "pago"),
-          gte(orders.createdAt, new Date(start)),
-          lte(orders.createdAt, new Date(end))
-        ));
+      // Entradas automáticas vêm do registro financeiro confirmado, que possui
+      // a data de pagamento real e evita distorções pela data de criação do pedido.
+      const [paidRecords, paidRecordsBeforeStart, manualEntries, manualEntriesBeforeStart] = await Promise.all([
+        db.select().from(financeiro).where(and(
+          eq(financeiro.status, "pago"),
+          isNotNull(financeiro.dataPagamento),
+          gte(financeiro.dataPagamento, start),
+          lte(financeiro.dataPagamento, end)
+        )),
+        db.select().from(financeiro).where(and(
+          eq(financeiro.status, "pago"),
+          isNotNull(financeiro.dataPagamento),
+          lt(financeiro.dataPagamento, start)
+        )),
+        db.select().from(cashFlowEntries)
+          .where(and(gte(cashFlowEntries.entryDate, start), lte(cashFlowEntries.entryDate, end)))
+          .orderBy(desc(cashFlowEntries.entryDate)),
+        db.select().from(cashFlowEntries).where(lt(cashFlowEntries.entryDate, start)),
+      ]);
 
-      // Entradas/saídas manuais
-      const manualEntries = await db.select().from(cashFlowEntries)
-        .where(and(
-          gte(cashFlowEntries.entryDate, start),
-          lte(cashFlowEntries.entryDate, end)
-        ))
-        .orderBy(desc(cashFlowEntries.entryDate));
+      const openingIncome = paidRecordsBeforeStart.reduce((total, record) => total + parseFloat(record.valor || "0"), 0)
+        + manualEntriesBeforeStart.filter((entry) => entry.entryType === "income").reduce((total, entry) => total + parseFloat(entry.amount || "0"), 0);
+      const openingExpense = manualEntriesBeforeStart.filter((entry) => entry.entryType === "expense").reduce((total, entry) => total + parseFloat(entry.amount || "0"), 0);
+      const openingBalance = openingIncome - openingExpense;
 
-      // Agrupar por data
       const dateMap: Record<string, { income: number; expense: number; entries: any[] }> = {};
 
-      for (const o of paidOrders) {
-        const d = new Date(o.createdAt).toISOString().split("T")[0];
-        if (!dateMap[d]) dateMap[d] = { income: 0, expense: 0, entries: [] };
-        const val = parseFloat(o.totalPrice || "0");
-        dateMap[d].income += val;
-        dateMap[d].entries.push({
-          id: `order_${o.id}`,
+      for (const record of paidRecords) {
+        const receivedAt = record.dataPagamento!;
+        const date = new Date(receivedAt).toISOString().split("T")[0];
+        if (!dateMap[date]) dateMap[date] = { income: 0, expense: 0, entries: [] };
+        const value = parseFloat(record.valor || "0");
+        dateMap[date].income += value;
+        dateMap[date].entries.push({
+          id: `financeiro_${record.id}`,
           tipo: "income",
           categoria: "Vendas",
-          descricao: `Pedido #${o.orderNumber}`,
-          valor: val,
-          data: o.createdAt,
+          descricao: record.orderNumber ? `Pedido #${record.orderNumber}` : record.cliente || "Recebimento confirmado",
+          valor: value,
+          data: receivedAt,
           origem: "automatico",
         });
       }
 
-      for (const e of manualEntries) {
-        const d = new Date(e.entryDate).toISOString().split("T")[0];
-        if (!dateMap[d]) dateMap[d] = { income: 0, expense: 0, entries: [] };
-        const val = parseFloat(e.amount || "0");
-        if (e.entryType === "income") {
-          dateMap[d].income += val;
-        } else {
-          dateMap[d].expense += val;
-        }
-        dateMap[d].entries.push({
-          id: `manual_${e.id}`,
-          tipo: e.entryType,
-          categoria: e.category || "Outros",
-          descricao: e.description || "",
-          valor: val,
-          data: new Date(e.entryDate),
+      for (const entry of manualEntries) {
+        const date = new Date(entry.entryDate).toISOString().split("T")[0];
+        if (!dateMap[date]) dateMap[date] = { income: 0, expense: 0, entries: [] };
+        const value = parseFloat(entry.amount || "0");
+        if (entry.entryType === "income") dateMap[date].income += value;
+        else dateMap[date].expense += value;
+        dateMap[date].entries.push({
+          id: `manual_${entry.id}`,
+          tipo: entry.entryType,
+          categoria: entry.category || "Outros",
+          descricao: entry.description || "",
+          valor: value,
+          data: new Date(entry.entryDate),
           origem: "manual",
-          entryId: e.id,
+          entryId: entry.id,
         });
       }
 
+      let runningBalance = openingBalance;
       const timeline = Object.entries(dateMap)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, data]) => ({
-          date,
-          income: data.income,
-          expense: data.expense,
-          balance: data.income - data.expense,
-          entries: data.entries,
-        }));
+        .map(([date, data]) => {
+          const balance = data.income - data.expense;
+          const day = {
+            date,
+            income: data.income,
+            expense: data.expense,
+            balance,
+            openingBalance: runningBalance,
+            closingBalance: runningBalance + balance,
+            entries: data.entries,
+          };
+          runningBalance = day.closingBalance;
+          return day;
+        });
 
-      const totalIncome = timeline.reduce((s, d) => s + d.income, 0);
-      const totalExpense = timeline.reduce((s, d) => s + d.expense, 0);
+      const totalIncome = timeline.reduce((sum, day) => sum + day.income, 0);
+      const totalExpense = timeline.reduce((sum, day) => sum + day.expense, 0);
 
       return {
         timeline,
         totalIncome,
         totalExpense,
         netBalance: totalIncome - totalExpense,
-        manualEntries: manualEntries.map(e => ({
-          id: e.id,
-          tipo: e.entryType,
-          categoria: e.category,
-          descricao: e.description,
-          valor: parseFloat(e.amount || "0"),
-          data: e.entryDate,
+        openingBalance,
+        closingBalance: openingBalance + totalIncome - totalExpense,
+        startDate: start,
+        endDate: end,
+        manualEntries: manualEntries.map(entry => ({
+          id: entry.id,
+          tipo: entry.entryType,
+          categoria: entry.category,
+          descricao: entry.description,
+          valor: parseFloat(entry.amount || "0"),
+          data: entry.entryDate,
         })),
       };
     }),

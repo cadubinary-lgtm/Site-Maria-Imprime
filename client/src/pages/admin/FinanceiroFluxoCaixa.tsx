@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import {
-  DollarSign, TrendingUp, TrendingDown, Plus, Pencil, Trash2, RefreshCw
+  DollarSign, TrendingUp, TrendingDown, Plus, Pencil, Trash2, RefreshCw, CalendarDays, Wallet
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
@@ -22,6 +22,13 @@ function formatCurrency(v: number | string) {
 function formatDate(ts: any) {
   if (!ts) return "—";
   return new Date(ts).toLocaleDateString("pt-BR");
+}
+
+function toDateInput(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 const CATEGORIAS_ENTRADA = ["Vendas", "Serviços", "Outros Recebimentos", "Transferência Recebida"];
@@ -44,22 +51,43 @@ const emptyForm: EntradaForm = {
 };
 
 export default function FinanceiroFluxoCaixa() {
-  const [periodo, setPeriodo] = useState<"7" | "30" | "90">("30");
+  const [periodo, setPeriodo] = useState<"1" | "7" | "30" | "90" | "custom">("30");
+  const [startDate, setStartDate] = useState(() => {
+    const start = new Date();
+    start.setDate(start.getDate() - 29);
+    return toDateInput(start);
+  });
+  const [endDate, setEndDate] = useState(() => toDateInput(new Date()));
   const [form, setForm] = useState<EntradaForm>(emptyForm);
   const [editId, setEditId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const startDate = Date.now() - parseInt(periodo) * 24 * 60 * 60 * 1000;
-  const { data, isLoading, refetch } = trpc.financeiro.getFluxoCaixa.useQuery({ startDate });
+  const queryInput = useMemo(() => ({
+    startDate: new Date(`${startDate}T00:00:00`).getTime(),
+    endDate: new Date(`${endDate}T23:59:59.999`).getTime(),
+    groupBy: "day" as const,
+  }), [startDate, endDate]);
+  const { data, isLoading, refetch } = trpc.financeiro.getFluxoCaixa.useQuery(queryInput, {
+    enabled: queryInput.startDate <= queryInput.endDate,
+  });
+
+  const applyPeriod = (days: 1 | 7 | 30 | 90) => {
+    const end = new Date();
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+    setPeriodo(String(days) as "1" | "7" | "30" | "90");
+    setStartDate(toDateInput(start));
+    setEndDate(toDateInput(end));
+  };
 
   const addEntrada = trpc.financeiro.addEntradaManual.useMutation({
-    onSuccess: () => { toast.success("Entrada adicionada!"); setDialogOpen(false); setForm(emptyForm); refetch(); },
+    onSuccess: () => { toast.success("Movimentação adicionada!"); setDialogOpen(false); setForm(emptyForm); refetch(); },
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
   const editEntrada = trpc.financeiro.editEntradaManual.useMutation({
-    onSuccess: () => { toast.success("Entrada atualizada!"); setDialogOpen(false); setEditId(null); setForm(emptyForm); refetch(); },
+    onSuccess: () => { toast.success("Movimentação atualizada!"); setDialogOpen(false); setEditId(null); setForm(emptyForm); refetch(); },
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
@@ -115,25 +143,43 @@ export default function FinanceiroFluxoCaixa() {
           </Button>
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white"
             onClick={() => { setEditId(null); setForm(emptyForm); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4 mr-1" />Nova Entrada
+            <Plus className="h-4 w-4 mr-1" />Nova movimentação
           </Button>
         </div>
       </div>
 
-      {/* Filtro período */}
-      <div className="flex gap-2">
-        {[["7","7 dias"],["30","30 dias"],["90","90 dias"]] .map(([v, l]) => (
-          <Button key={v} variant={periodo === v ? "default" : "outline"} size="sm"
-            onClick={() => setPeriodo(v as any)}
-            className={periodo === v ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}>
-            {l}
-          </Button>
-        ))}
-      </div>
+      <Card className="border border-gray-200 shadow-sm">
+        <CardContent className="flex flex-wrap items-end gap-3 p-4">
+          <div className="flex flex-wrap gap-2">
+            {([[1, "Hoje"], [7, "7 dias"], [30, "30 dias"], [90, "90 dias"]] as const).map(([days, label]) => (
+              <Button key={days} variant={periodo === String(days) ? "default" : "outline"} size="sm"
+                onClick={() => applyPeriod(days)}
+                className={periodo === String(days) ? "bg-blue-600 text-white hover:bg-blue-700" : ""}>
+                {label}
+              </Button>
+            ))}
+          </div>
+          <label className="grid gap-1 text-xs font-medium text-gray-600">
+            Data inicial
+            <Input type="date" value={startDate} onChange={(event) => { setPeriodo("custom"); setStartDate(event.target.value); }} className="h-9" />
+          </label>
+          <label className="grid gap-1 text-xs font-medium text-gray-600">
+            Data final
+            <Input type="date" value={endDate} onChange={(event) => { setPeriodo("custom"); setEndDate(event.target.value); }} className="h-9" />
+          </label>
+          <div className="flex items-center gap-1 text-xs text-gray-500"><CalendarDays className="h-3.5 w-3.5" />Período de movimentação</div>
+        </CardContent>
+      </Card>
 
       {/* Cards de resumo */}
       {data && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="border-0 bg-slate-50 shadow-sm">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg bg-slate-100 p-2"><Wallet className="h-5 w-5 text-slate-600" /></div>
+              <div><p className="text-xs font-medium text-slate-600">Saldo inicial</p><p className="text-lg font-bold text-slate-800">{formatCurrency(data.openingBalance)}</p></div>
+            </CardContent>
+          </Card>
           <Card className="border-0 shadow-sm bg-green-50">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -156,15 +202,15 @@ export default function FinanceiroFluxoCaixa() {
               </div>
             </CardContent>
           </Card>
-          <Card className={`border-0 shadow-sm ${data.netBalance >= 0 ? "bg-blue-50" : "bg-orange-50"}`}>
+          <Card className={`border-0 shadow-sm ${data.closingBalance >= 0 ? "bg-blue-50" : "bg-orange-50"}`}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${data.netBalance >= 0 ? "bg-blue-100" : "bg-orange-100"}`}>
-                <DollarSign className={`h-5 w-5 ${data.netBalance >= 0 ? "text-blue-600" : "text-orange-600"}`} />
+              <div className={`p-2 rounded-lg ${data.closingBalance >= 0 ? "bg-blue-100" : "bg-orange-100"}`}>
+                <DollarSign className={`h-5 w-5 ${data.closingBalance >= 0 ? "text-blue-600" : "text-orange-600"}`} />
               </div>
               <div>
-                <p className={`text-xs font-medium ${data.netBalance >= 0 ? "text-blue-700" : "text-orange-700"}`}>Saldo Líquido</p>
-                <p className={`text-lg font-bold ${data.netBalance >= 0 ? "text-blue-800" : "text-orange-800"}`}>
-                  {formatCurrency(data.netBalance)}
+                <p className={`text-xs font-medium ${data.closingBalance >= 0 ? "text-blue-700" : "text-orange-700"}`}>Saldo final</p>
+                <p className={`text-lg font-bold ${data.closingBalance >= 0 ? "text-blue-800" : "text-orange-800"}`}>
+                  {formatCurrency(data.closingBalance)}
                 </p>
               </div>
             </CardContent>
@@ -192,8 +238,8 @@ export default function FinanceiroFluxoCaixa() {
                   <div className="flex items-center gap-3 text-xs">
                     <span className="text-green-600 font-medium">+{formatCurrency(day.income)}</span>
                     {day.expense > 0 && <span className="text-red-600 font-medium">-{formatCurrency(day.expense)}</span>}
-                    <span className={`font-bold ${day.balance >= 0 ? "text-blue-600" : "text-red-600"}`}>
-                      = {formatCurrency(day.balance)}
+                    <span className={`font-bold ${day.closingBalance >= 0 ? "text-blue-600" : "text-red-600"}`}>
+                      Saldo acumulado: {formatCurrency(day.closingBalance)}
                     </span>
                   </div>
                 </div>
@@ -234,7 +280,7 @@ export default function FinanceiroFluxoCaixa() {
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) { setDialogOpen(false); setEditId(null); setForm(emptyForm); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editId !== null ? "Editar Entrada" : "Nova Entrada Manual"}</DialogTitle>
+            <DialogTitle>{editId !== null ? "Editar movimentação" : "Nova movimentação manual"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
