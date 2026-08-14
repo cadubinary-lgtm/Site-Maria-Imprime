@@ -316,7 +316,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ],
           },
           { label: "Produção Kanban", href: "/admin/producao/kanban", badge: awaitingAnalysisCount || undefined },
-          { label: "Validação de Arquivos", href: "/admin/validacao-arquivos" },
         ],
       },
     },

@@ -2659,4 +2659,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Destacar Carrinho Abandonado em rosa quando estiver selecionado
 - [x] Paginar o Histórico da Pré-Impressão para limitar os registros carregados por vez
 - [x] Adicionar lixeira permanente com confirmação para registros do Histórico da Pré-Impressão
+- [ ] Diagnosticar e corrigir a integração da Validação de Arquivos com os uploads de pedidos
+- [x] Remover Validação de Arquivos do menu lateral administrativo
 - [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin
