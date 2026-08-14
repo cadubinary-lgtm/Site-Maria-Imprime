@@ -939,6 +939,7 @@ export const appRouter = router({
         customDimensions: z.string().optional(),
         priceAtCart: z.number(),
         artFileUrl: z.string().optional(),
+        artFileUrls: z.string().optional(),
         notes: z.string().optional(),
         shippingMethod: z.string().optional().default("retirada"),
         shippingPrice: z.number().optional().default(0),
