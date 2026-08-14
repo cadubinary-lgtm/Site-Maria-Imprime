@@ -25,6 +25,7 @@ import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
+import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -355,9 +356,10 @@ export default function ProductDetail() {
     return basePrice;
   }, [isM2, isMetroLinear, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
-  const fretePrice = selectedShipping?.price ?? 0;
+  const shippingSummary = getShippingSummary({ selectedShipping, shippingCalculated });
+  const fretePrice = shippingSummary.amount;
   const subtotal = effectivePrice * quantity;
-  const total = subtotal + fretePrice + (selectedDeliveryOption?.priceModifier ?? 0);
+  const total = getOrderTotal(subtotal, fretePrice);
 
   // ─── Previsão de Entrega ─────────────────────────────────────────────
   const deliveryForecast = useMemo(() => {
@@ -441,12 +443,15 @@ export default function ProductDetail() {
     
     // 5. Prazo de produção
     if (!selectedDeliveryOption) missing.push({ id: "prazo", message: "Selecione o prazo de produção" });
+
+    // 6. Entrega
+    if (!selectedShipping) missing.push({ id: "delivery-options", message: "Selecione uma opção de entrega" });
     
-    // 6. Termos
+    // 7. Termos
     if (!acceptedTerms) missing.push({ id: "terms", message: "Aceite os termos e condições" });
     
     return missing;
-  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFiles, artFilesConfirmed, artLink, selectedDeliveryOption, acceptedTerms]);
+  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFiles, artFilesConfirmed, artLink, selectedDeliveryOption, selectedShipping, acceptedTerms]);
 
   const canAddToCart = missingFields.length === 0;
 
@@ -1447,6 +1452,7 @@ export default function ProductDetail() {
 
             {/* ── Opções de Entrega ── */}
             <AccordionStep
+              id="delivery-options"
               number={deliveryStepIdx + 1}
               title="Opções de Entrega"
               isOpen={!!openSteps[deliveryStepIdx]}
@@ -1793,11 +1799,11 @@ export default function ProductDetail() {
                   <div className="flex justify-between gap-2 pb-2 border-b border-gray-100">
                     <span className="text-xs text-gray-400 flex-shrink-0">Entrega</span>
                     <div className="text-right">
-                      <span className={`text-xs font-medium block truncate max-w-[130px] ${fretePrice === 0 ? "text-green-600" : "text-gray-700"}`}>
+                      <span className={`text-xs font-medium block truncate max-w-[130px] ${shippingSummary.isFree ? "text-green-600" : "text-gray-700"}`}>
                         {selectedShipping.name}
                       </span>
-                      <span className={`text-xs ${fretePrice === 0 ? "text-green-600" : "text-gray-400"}`}>
-                        {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
+                      <span className={`text-xs ${shippingSummary.isFree ? "text-green-600" : "text-gray-400"}`}>
+                        {shippingSummary.label}
                       </span>
                     </div>
                   </div>
@@ -1878,8 +1884,8 @@ export default function ProductDetail() {
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Entrega</span>
-                    <span className={`font-medium ${fretePrice === 0 ? "text-green-600" : ""}`}>
-                      {fretePrice === 0 ? "Grátis" : `R$ ${fretePrice.toFixed(2)}`}
+                    <span className={`font-medium ${shippingSummary.isFree ? "text-green-600" : shippingSummary.isPending ? "text-gray-500" : ""}`}>
+                      {shippingSummary.label}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-gray-200">
