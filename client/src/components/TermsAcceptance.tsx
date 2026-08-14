@@ -93,6 +93,10 @@ Nada nesta cláusula deverá ser interpretado como renúncia a direitos assegura
 
 As modalidades de entrega disponíveis serão apresentadas durante a compra. O cliente deverá fornecer corretamente nome, endereço, número, complemento, bairro, cidade, estado, CEP, telefone e outras informações necessárias.
 
+O prazo de entrega exibido na compra é uma estimativa calculada pela transportadora para a modalidade selecionada e poderá variar conforme a operação de transporte. Ele é separado do prazo de produção do pedido.
+
+Atrasos decorrentes de fatores externos ao controle razoável da Maria Imprime, como condições climáticas, greves, acidentes, restrições operacionais da transportadora ou atendimento de áreas de risco, não são de responsabilidade direta da loja. Ainda assim, a Maria Imprime prestará suporte ao cliente pelos canais oficiais para acompanhar a ocorrência e buscar as informações disponíveis junto ao transportador, sem prejuízo dos direitos assegurados pela legislação aplicável.
+
 A Maria Imprime não será responsável por problemas de entrega decorrentes de informações incorretas fornecidas pelo cliente. Quando a entrega for realizada por terceiros, poderão existir situações de atraso ou intercorrência relacionadas ao serviço de transporte.
 
 17. Garantia e Defeitos
@@ -220,6 +224,8 @@ Situações fora do controle razoável da Maria Imprime poderão afetar os prazo
 11. Entrega
 
 Após a conclusão da produção, o pedido será disponibilizado para retirada ou encaminhado conforme a modalidade de entrega escolhida. O prazo de transporte deverá ser considerado separadamente.
+
+O prazo de entrega informado na compra é uma estimativa calculada pela transportadora e pode ser afetado por fatores externos, como condições climáticas, greves, acidentes, restrições operacionais ou áreas de risco. Nessas situações, a Maria Imprime não responde diretamente pelo atraso do transporte, mas prestará suporte ao cliente pelos canais oficiais para acompanhar a ocorrência junto ao transportador, observados os direitos previstos na legislação aplicável.
 
 12. Consulta do Pedido
 
@@ -581,7 +587,7 @@ O prazo é informado na página de cada produto e pode variar de acordo com prod
 
 14. O prazo de produção inclui o transporte?
 
-Não. O prazo de produção corresponde à fabricação. O transporte possui prazo próprio de acordo com a modalidade de entrega escolhida.
+Não. O prazo de produção corresponde à fabricação. O transporte possui prazo próprio de acordo com a modalidade de entrega escolhida. O prazo informado pela transportadora é uma estimativa e pode sofrer impacto de condições climáticas, greves, acidentes, restrições operacionais ou áreas de risco. A Maria Imprime oferece suporte para acompanhamento dessas ocorrências pelos canais oficiais.
 
 15. Posso retirar meu pedido?
 
