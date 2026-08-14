@@ -9,10 +9,11 @@
  *  - logistics.tracking   → rastreamento
  */
 
-import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
+import { router, publicProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "./db";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { logisticsSettings, carriers, shipments, orders, localDeliveryRules, customerAccounts, orderItems } from "../drizzle/schema";
 import { eq, and, like, or } from "drizzle-orm";
 import {
@@ -31,9 +32,13 @@ import {
 // Nunca reutilizar o valor persistido de sandbox nas chamadas à API.
 const MELHOR_ENVIO_SANDBOX = false;
 
-// Middleware: apenas admin pode acessar o módulo de logística
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin") {
+export function hasLogisticsAccess(role: unknown): boolean {
+  return role === "admin" || role === "superadmin";
+}
+
+// Aceita a sessão administrativa oficial ou Manus OAuth, sempre restrita a admin/superadmin.
+const adminProcedure = adminOrManusAuthProcedure.use(({ ctx, next }) => {
+  if (!hasLogisticsAccess((ctx as any).adminUser?.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Acesso restrito a administradores." });
   }
   return next({ ctx });
