@@ -2706,3 +2706,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o modal de Editar Produto com o layout horizontal de Novo Produto
 - [x] Garantir responsividade móvel, feedback de salvamento e pré-visualização ampliada no modal de Editar Produto
 - [x] Confirmar descarte de alterações e reordenar imagens por arrastar e soltar no modal de Editar Produto
+- [x] Destacar a foto de capa, excluir miniaturas rapidamente e salvar rascunho local no modal de Editar Produto
