@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -208,6 +208,10 @@ export function ProductImageUploader({
                 >
                   substituir
                 </button>
+                <div className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-pink-600 px-2 py-1 text-[11px] font-semibold text-white shadow-sm">
+                  <Star className="h-3 w-3 fill-current" />
+                  Foto de capa
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
@@ -290,10 +294,12 @@ export function ProductImageUploader({
                     {/* Remove button */}
                     <button
                       type="button"
-                      className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 z-10"
+                      className="absolute top-0.5 right-0.5 z-10 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
                       onClick={(e) => { e.stopPropagation(); handleRemoveGallery(slot); }}
+                      title={`Excluir foto ${slot + 2}`}
+                      aria-label={`Excluir foto ${slot + 2}`}
                     >
-                      <X className="w-3 h-3" />
+                      <Trash2 className="h-3 w-3" />
                     </button>
                   </>
                 ) : (

@@ -20,6 +20,7 @@ import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
 import { createProductEditSignature, hasUnsavedProductChanges } from "@/lib/product-edit-guard";
+import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 
 export default function AdminProducts() {
   const [, navigate] = useLocation();
@@ -28,6 +29,7 @@ export default function AdminProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editBaselineSignature, setEditBaselineSignature] = useState<string | null>(null);
   const [waitingInitialSegments, setWaitingInitialSegments] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const [quickEditingId, setQuickEditingId] = useState<number | null>(null);
   const [quickPrice, setQuickPrice] = useState("");
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
@@ -83,18 +85,55 @@ export default function AdminProducts() {
   useEffect(() => {
     if (productSegments) {
       setEditForm((prev) => {
-        const nextForm = {
-        ...prev,
-        segmentIds: productSegments.map((s) => s.id),
+        let nextForm = {
+          ...prev,
+          segmentIds: productSegments.map((s) => s.id),
         };
         if (waitingInitialSegments) {
-          setEditBaselineSignature(createProductEditSignature(nextForm));
+          const baselineSignature = createProductEditSignature(nextForm);
+          const draft = typeof window !== "undefined"
+            ? parseProductEditDraft(window.localStorage.getItem(getProductEditDraftKey(editingId || 0)))
+            : null;
+
+          if (draft?.baselineSignature === baselineSignature) {
+            nextForm = draft.form;
+            setDraftSavedAt(draft.savedAt);
+            toast.info("Rascunho recuperado", {
+              description: "As alterações locais deste produto foram restauradas.",
+              position: "top-right",
+              id: `product-draft-restored-${editingId}`,
+            });
+          } else {
+            setDraftSavedAt(null);
+          }
+
+          setEditBaselineSignature(baselineSignature);
           setWaitingInitialSegments(false);
         }
         return nextForm;
       });
     }
-  }, [productSegments, waitingInitialSegments]);
+  }, [editingId, productSegments, waitingInitialSegments]);
+
+  useEffect(() => {
+    if (!editingId || !editBaselineSignature || !hasUnsavedProductChanges(editBaselineSignature, editForm)) return;
+
+    const timeout = window.setTimeout(() => {
+      const savedAt = Date.now();
+      window.localStorage.setItem(
+        getProductEditDraftKey(editingId),
+        serializeProductEditDraft({
+          version: 1,
+          savedAt,
+          baselineSignature: editBaselineSignature,
+          form: editForm,
+        }),
+      );
+      setDraftSavedAt(savedAt);
+    }, 700);
+
+    return () => window.clearTimeout(timeout);
+  }, [editBaselineSignature, editForm, editingId]);
 
   const handleSegmentsChange = useCallback((segmentIds: number[]) => {
     setEditForm((prev) => ({ ...prev, segmentIds }));
@@ -110,6 +149,7 @@ export default function AdminProducts() {
     setEditingId(product.id);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(true);
+    setDraftSavedAt(null);
     let parsedGallery: string[] = [];
     try {
       if (product.galleryUrls) parsedGallery = JSON.parse(product.galleryUrls);
@@ -143,9 +183,11 @@ export default function AdminProducts() {
       const confirmed = window.confirm("Você possui alterações não salvas. Deseja descartar as alterações e fechar a edição?");
       if (!confirmed) return;
     }
+    if (editingId) window.localStorage.removeItem(getProductEditDraftKey(editingId));
     setEditingId(null);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(false);
+    setDraftSavedAt(null);
   };
 
   const isMeasureBased = (calculationType: string) =>
@@ -240,8 +282,10 @@ export default function AdminProducts() {
         duration: 3500,
       });
       setEditingId(null);
+      window.localStorage.removeItem(getProductEditDraftKey(editingId));
       setEditBaselineSignature(null);
       setWaitingInitialSegments(false);
+      setDraftSavedAt(null);
       refetch();
     } catch (error) {
       console.error("Error:", error);
@@ -434,9 +478,16 @@ export default function AdminProducts() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent className={EDIT_PRODUCT_MODAL_LAYOUT.dialog}>
-                        <DialogHeader>
-                          <DialogTitle>Editar Produto</DialogTitle>
-                          <DialogDescription>Atualize as informações do produto</DialogDescription>
+                        <DialogHeader className="sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                          <div>
+                            <DialogTitle>Editar Produto</DialogTitle>
+                            <DialogDescription>Atualize as informações do produto</DialogDescription>
+                          </div>
+                          {draftSavedAt && (
+                            <span className="mt-2 inline-flex w-fit items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 sm:mt-0" aria-live="polite">
+                              Rascunho salvo automaticamente
+                            </span>
+                          )}
                         </DialogHeader>
 
                         <div className="space-y-4 xl:space-y-3">
