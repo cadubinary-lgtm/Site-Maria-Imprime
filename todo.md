@@ -2653,3 +2653,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Transformar a exclusão de Contas Recebidas em lixeira reversível para Superadmin
 - [x] Exigir confirmação antes de restaurar um item da lixeira de Contas Recebidas
 - [x] Adicionar Esvaziar Lixeira com confirmação e acesso exclusivo de Superadmin
+- [x] Exibir usuário responsável e data/hora exata da exclusão na Lixeira de Contas Recebidas
+- [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin

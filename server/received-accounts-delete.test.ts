@@ -18,6 +18,7 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain('code: "FORBIDDEN"');
     expect(source).toContain('action: "move_received_account_to_trash"');
     expect(source).toContain('action: "restore_received_account"');
+    expect(source).toContain("deletedByAdminId: deletedReceivedAccounts.deletedByAdminId");
   });
 
   it("exibe busca, filtros de data, lixeira e restauração somente para Superadmin", () => {
@@ -41,6 +42,10 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Esvaziar a lixeira permanentemente?");
     expect(source).toContain("Esvaziar Lixeira");
     expect(source).toContain("Esvaziar permanentemente");
+    expect(source).toContain("Data e hora da exclusão");
+    expect(source).toContain("Usuário que excluiu");
+    expect(source).toContain("ID do usuário:");
+    expect(source).toContain("formatDateTime(item.deletedAt)");
     expect(source).toContain("Mover para lixeira");
   });
 });
