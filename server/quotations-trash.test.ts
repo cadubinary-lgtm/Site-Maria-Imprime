@@ -22,7 +22,9 @@ describe("lixeira e dashboard de orçamentos", () => {
     expect(source).toContain("Motivo da exclusão");
     expect(source).toContain("Confirmar restauração");
     expect(source).toContain("Excluir orçamento permanentemente?");
-    expect(source).toContain("kpis.totalAtivos");
     expect(source).toContain("kpis.convertidos");
+    expect(source).toContain("Distribuição do funil de orçamentos");
+    expect(source).toContain("kpis.ativos");
+    expect(source).toContain("kpis.pendentes");
   });
 });

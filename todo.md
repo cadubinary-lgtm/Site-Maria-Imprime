@@ -2673,3 +2673,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar lixeira protegida, restauração e exclusão individual em Todos os Pedidos
 - [x] Aplicar lixeira protegida, restauração e exclusão individual em Orçamentos
 - [x] Revisar e corrigir os indicadores do dashboard de Orçamentos
+- [x] Adicionar gráfico de distribuição Ativos, Convertidos e Pendentes no dashboard de Orçamentos
+- [x] Reorganizar visualmente os indicadores do dashboard de Orçamentos
