@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
+import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 
 const SIDEBAR_SCROLL_KEY = "admin_sidebar_scroll";
 
@@ -285,6 +286,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "VENDAS",
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
+          { ...ADMIN_DASHBOARD_LINKS.sales, icon: <LayoutDashboard className="w-4 h-4" /> },
           { label: "Novos Pedidos", href: "/admin/pedidos/novos", badge: pendingCount || undefined },
           { label: "Todos os Pedidos", href: "/admin/pedidos" },
           { label: "Pedidos Kanban", href: "/admin/pedidos/kanban" },
@@ -300,6 +302,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "LINHA DE PRODUÇÃO",
         icon: <Printer className="w-4 h-4" />,
         children: [
+          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" /> },
           {
             label: "Pré-Impressão",
             children: [
@@ -378,6 +381,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "PRODUTOS",
         icon: <Package className="w-4 h-4" />,
         children: [
+          { ...ADMIN_DASHBOARD_LINKS.products, icon: <LayoutDashboard className="w-4 h-4" /> },
           { label: "Todos os Produtos", href: "/admin/produtos" },
           { label: "Novo Produto", href: "/admin/novo-produto" },
           { label: "Gerenciar Variações", href: "/admin/variacoes" },
@@ -393,6 +397,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "CRM - CLIENTES",
         icon: <Users className="w-4 h-4" />,
         children: [
+          { ...ADMIN_DASHBOARD_LINKS.customers, icon: <LayoutDashboard className="w-4 h-4" /> },
           { label: "Clientes Site", href: "/admin/clientes-loja" },
           { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
           { label: "Todos os Clientes", href: "/admin/clientes" },
