@@ -2692,3 +2692,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Desativar o Sandbox e forçar Produção na configuração do Melhor Envio
 - [x] Confirmar que o frete usa exclusivamente o Token Bearer e e-mail persistidos nas configurações de Produção
 - [x] Preparar checkpoint para publicar a integração do Melhor Envio em Produção
+- [x] Sincronizar a configuração persistida do Melhor Envio usada pelo domínio oficial
