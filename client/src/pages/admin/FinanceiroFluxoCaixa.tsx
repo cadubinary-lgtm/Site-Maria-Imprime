@@ -11,8 +11,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import {
-  DollarSign, TrendingUp, TrendingDown, Plus, Pencil, Trash2, RefreshCw, CalendarDays, Wallet
+  DollarSign, TrendingUp, TrendingDown, Plus, Pencil, Trash2, RefreshCw, CalendarDays, Wallet, Download
 } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 
@@ -29,6 +30,15 @@ function toDateInput(value: Date) {
   const month = String(value.getMonth() + 1).padStart(2, "0");
   const day = String(value.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function escapeCsv(value: unknown) {
+  const text = String(value ?? "").replace(/"/g, '""');
+  return `"${text}"`;
+}
+
+function formatCurrencyForExport(value: number | string) {
+  return Number(value).toFixed(2).replace(".", ",");
 }
 
 const CATEGORIAS_ENTRADA = ["Vendas", "Serviços", "Outros Recebimentos", "Transferência Recebida"];
@@ -128,6 +138,93 @@ export default function FinanceiroFluxoCaixa() {
   };
 
   const categorias = form.tipo === "income" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
+  const exportFileName = `fluxo-caixa_${startDate}_a_${endDate}`;
+
+  const exportCsv = () => {
+    if (!data) return;
+    const rows = [
+      ["Relatório de Fluxo de Caixa", `Período: ${formatDate(data.startDate)} a ${formatDate(data.endDate)}`],
+      ["Saldo inicial", formatCurrencyForExport(data.openingBalance)],
+      ["Entradas no período", formatCurrencyForExport(data.totalIncome)],
+      ["Saídas no período", formatCurrencyForExport(data.totalExpense)],
+      ["Saldo final", formatCurrencyForExport(data.closingBalance)],
+      [],
+      ["Data", "Tipo", "Categoria", "Descrição", "Origem", "Valor", "Saldo acumulado"],
+      ...data.timeline.flatMap((day: any) => day.entries.map((entry: any) => [
+        formatDate(entry.data),
+        entry.tipo === "income" ? "Entrada" : "Saída",
+        entry.categoria || "",
+        entry.descricao || "",
+        entry.origem === "automatico" ? "Automático" : "Manual",
+        formatCurrencyForExport(entry.valor),
+        formatCurrencyForExport(day.closingBalance),
+      ])),
+    ];
+    const csv = `\uFEFF${rows.map((row) => row.map(escapeCsv).join(";")).join("\r\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${exportFileName}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado com sucesso.");
+  };
+
+  const exportPdf = () => {
+    if (!data) return;
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let y = 16;
+    const nextLine = (height = 6) => {
+      if (y + height > pageHeight - 14) {
+        doc.addPage();
+        y = 14;
+      }
+    };
+    const write = (text: string, x: number, options?: { bold?: boolean; color?: [number, number, number]; size?: number }) => {
+      doc.setFont("helvetica", options?.bold ? "bold" : "normal");
+      doc.setFontSize(options?.size ?? 9);
+      doc.setTextColor(...(options?.color ?? [40, 40, 40]));
+      doc.text(text, x, y);
+    };
+
+    doc.setFillColor(236, 0, 110);
+    doc.rect(0, 0, pageWidth, 10, "F");
+    write("MARIA IMPRIME — FLUXO DE CAIXA", 14, { bold: true, color: [255, 255, 255], size: 13 });
+    y = 20;
+    write(`Período: ${formatDate(data.startDate)} a ${formatDate(data.endDate)}`, 14, { size: 9, color: [90, 90, 90] });
+    y += 8;
+    write(`Saldo inicial: ${formatCurrency(data.openingBalance)}`, 14, { bold: true });
+    write(`Entradas: ${formatCurrency(data.totalIncome)}`, 84, { bold: true, color: [22, 130, 73] });
+    write(`Saídas: ${formatCurrency(data.totalExpense)}`, 142, { bold: true, color: [190, 24, 93] });
+    write(`Saldo final: ${formatCurrency(data.closingBalance)}`, 202, { bold: true, color: data.closingBalance >= 0 ? [37, 99, 235] : [190, 24, 93] });
+    y += 10;
+    doc.setDrawColor(225, 225, 225);
+    doc.line(14, y - 4, pageWidth - 14, y - 4);
+
+    for (const day of data.timeline as any[]) {
+      nextLine(9);
+      write(`${formatDate(`${day.date}T12:00:00`)}  |  Entradas: ${formatCurrency(day.income)}  |  Saídas: ${formatCurrency(day.expense)}  |  Saldo acumulado: ${formatCurrency(day.closingBalance)}`, 14, { bold: true, color: [65, 65, 65] });
+      y += 6;
+      for (const entry of day.entries as any[]) {
+        nextLine(6);
+        const description = (entry.descricao || entry.categoria || "Movimentação").slice(0, 68);
+        write(entry.tipo === "income" ? "Entrada" : "Saída", 18, { size: 8, color: entry.tipo === "income" ? [22, 130, 73] : [190, 24, 93] });
+        write((entry.categoria || "Outros").slice(0, 28), 48, { size: 8 });
+        write(description, 92, { size: 8 });
+        write(entry.origem === "automatico" ? "Automático" : "Manual", 205, { size: 8, color: [90, 90, 90] });
+        write(`${entry.tipo === "income" ? "+" : "-"}${formatCurrency(entry.valor)}`, 236, { bold: true, size: 8, color: entry.tipo === "income" ? [22, 130, 73] : [190, 24, 93] });
+        y += 5;
+      }
+      y += 2;
+    }
+    doc.setFontSize(7);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, pageHeight - 7);
+    doc.save(`${exportFileName}.pdf`);
+    toast.success("PDF exportado com sucesso.");
+  };
 
   return (
     <AdminLayout>
@@ -140,6 +237,12 @@ export default function FinanceiroFluxoCaixa() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-1" />Atualizar
+          </Button>
+          <Button variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportCsv}>
+            <Download className="h-4 w-4 mr-1" />CSV
+          </Button>
+          <Button variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportPdf}>
+            <Download className="h-4 w-4 mr-1" />PDF
           </Button>
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white"
             onClick={() => { setEditId(null); setForm(emptyForm); setDialogOpen(true); }}>
