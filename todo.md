@@ -2671,3 +2671,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir a Lixeira de Contas a Receber com restauração e auditoria para Superadmin
 - [x] Adicionar exclusão permanente individual confirmada nas lixeiras de Contas a Receber e Contas Recebidas
 - [x] Aplicar lixeira protegida, restauração e exclusão individual em Todos os Pedidos
+- [x] Aplicar lixeira protegida, restauração e exclusão individual em Orçamentos
+- [x] Revisar e corrigir os indicadores do dashboard de Orçamentos
