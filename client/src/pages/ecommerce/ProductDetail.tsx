@@ -137,6 +137,9 @@ export default function ProductDetail() {
   // Configuração
   const [quantity, setQuantity] = useState(1);
   const [artFiles, setArtFiles] = useState<SelectedArtFile[]>([]);
+  const [artUploadMode, setArtUploadMode] = useState<"single" | "multiple">("single");
+  const [artFilesConfirmed, setArtFilesConfirmed] = useState(false);
+  const [uploadQueue, setUploadQueue] = useState<{ current: number; total: number; completed: number; fileName: string } | null>(null);
   const [artLink, setArtLink] = useState("");
   const [fileMode, setFileMode] = useState<"upload" | "link">("upload");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -428,6 +431,7 @@ export default function ProductDetail() {
     
     // 4. Arquivo
     if (fileMode === "upload" && artFiles.length === 0) missing.push({ id: "file-upload", message: "Envie ao menos um arquivo de arte" });
+    if (fileMode === "upload" && artFiles.length > 0 && !artFilesConfirmed) missing.push({ id: "file-upload", message: "Confirme os arquivos selecionados para continuar" });
     if (fileMode === "link" && !artLink) missing.push({ id: "file-link", message: "Informe o link do arquivo" });
     
     // 5. Prazo de produção
@@ -437,7 +441,7 @@ export default function ProductDetail() {
     if (!acceptedTerms) missing.push({ id: "terms", message: "Aceite os termos e condições" });
     
     return missing;
-  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFiles, artLink, selectedDeliveryOption, acceptedTerms]);
+  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFiles, artFilesConfirmed, artLink, selectedDeliveryOption, acceptedTerms]);
 
   const canAddToCart = missingFields.length === 0;
 
@@ -487,7 +491,9 @@ export default function ProductDetail() {
     if (!selected.length) return;
     const validFiles = selected.filter((file) => file.size <= 100 * 1024 * 1024);
     if (validFiles.length !== selected.length) toast.error("Alguns arquivos foram ignorados por excederem 100MB.");
-    const filesWithPreview = await Promise.all(validFiles.map(async (file): Promise<SelectedArtFile> => {
+    const filesForMode = artUploadMode === "single" ? validFiles.slice(0, 1) : validFiles;
+    if (artUploadMode === "single" && validFiles.length > 1) toast.info("Modo de arquivo único: apenas o primeiro arquivo foi selecionado.");
+    const filesWithPreview = await Promise.all(filesForMode.map(async (file): Promise<SelectedArtFile> => {
       const preview = file.type.startsWith("image/")
         ? await new Promise<string | null>((resolve) => {
             const reader = new FileReader();
@@ -499,16 +505,33 @@ export default function ProductDetail() {
       return { id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`, file, preview };
     }));
     setArtFiles((current) => {
-      const existing = new Set(current.map((item) => `${item.file.name}-${item.file.size}-${item.file.lastModified}`));
-      return [...current, ...filesWithPreview.filter((item) => !existing.has(`${item.file.name}-${item.file.size}-${item.file.lastModified}`))];
+      const base = artUploadMode === "single" ? [] : current;
+      const existing = new Set(base.map((item) => `${item.file.name}-${item.file.size}-${item.file.lastModified}`));
+      return [...base, ...filesWithPreview.filter((item) => !existing.has(`${item.file.name}-${item.file.size}-${item.file.lastModified}`))];
     });
+    setArtFilesConfirmed(false);
     e.target.value = "";
-    setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
   };
 
   const removeArtFile = (fileId: string) => {
     setArtFiles((current) => current.filter((item) => item.id !== fileId));
+    setArtFilesConfirmed(false);
     resetUpload();
+  };
+
+  const selectArtUploadMode = (mode: "single" | "multiple") => {
+    setArtUploadMode(mode);
+    setArtFilesConfirmed(false);
+    if (mode === "single" && artFiles.length > 1) {
+      setArtFiles((current) => current.slice(0, 1));
+      toast.info("Mantivemos apenas o primeiro arquivo ao trocar para arquivo único.");
+    }
+  };
+
+  const confirmArtFiles = () => {
+    if (!artFiles.length) return;
+    setArtFilesConfirmed(true);
+    setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
@@ -708,9 +731,12 @@ export default function ProductDetail() {
       let artUrls: string[] = fileMode === "link" && artLink ? [artLink] : [];
       if (artFiles.length && fileMode === "upload") {
         try {
-          for (const art of artFiles) {
+          for (let index = 0; index < artFiles.length; index += 1) {
+            const art = artFiles[index];
+            setUploadQueue({ current: index + 1, total: artFiles.length, completed: index, fileName: art.file.name });
             const { url } = await doChunkedUpload(art.file);
             artUrls.push(url);
+            setUploadQueue({ current: index + 1, total: artFiles.length, completed: index + 1, fileName: art.file.name });
           }
         } catch (uploadErr: any) {
           if (uploadErr?.message === "CANCELLED") { removeOptimisticItem(); setIsProcessing(false); return; }
@@ -718,6 +744,8 @@ export default function ProductDetail() {
           toast.error(uploadErr?.message ?? "Erro ao enviar o arquivo", { duration: 8000 });
           removeOptimisticItem();
           return;
+        } finally {
+          setUploadQueue(null);
         }
       }
       const artUrl = artUrls[0];
@@ -1192,6 +1220,14 @@ export default function ProductDetail() {
 
                 {fileMode === "upload" && (
                   <>
+                    <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-50 p-1">
+                      <button type="button" onClick={() => selectArtUploadMode("single")} className={`rounded-lg px-3 py-2 text-left text-xs font-medium transition ${artUploadMode === "single" ? "bg-white text-pink-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                        <span className="block">Arquivo único</span><span className="font-normal text-[11px] text-gray-400">Uma arte para este produto</span>
+                      </button>
+                      <button type="button" onClick={() => selectArtUploadMode("multiple")} className={`rounded-lg px-3 py-2 text-left text-xs font-medium transition ${artUploadMode === "multiple" ? "bg-white text-pink-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                        <span className="block">Vários arquivos</span><span className="font-normal text-[11px] text-gray-400">Ex.: frente e verso</span>
+                      </button>
+                    </div>
                     <div
                       className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all"
                       onClick={() => fileInputRef.current?.click()}
@@ -1199,7 +1235,7 @@ export default function ProductDetail() {
                       <div className="flex items-center justify-center gap-3">
                         <Upload className="w-6 h-6 text-gray-400 flex-shrink-0" />
                         <div className="text-left">
-                          <p className="text-sm text-gray-600 font-medium">Clique para selecionar um ou mais arquivos</p>
+                          <p className="text-sm text-gray-600 font-medium">{artUploadMode === "single" ? "Clique para selecionar seu arquivo" : "Clique para selecionar ou arraste vários arquivos"}</p>
                           <p className="text-xs text-gray-400">PDF, PNG, JPG, TIFF, AI, CDR — máx 100MB</p>
                         </div>
                         <span className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition flex-shrink-0">
@@ -1213,7 +1249,7 @@ export default function ProductDetail() {
                       type="file"
                       className="hidden"
                       accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.jpeg,.png,.tiff,.tif,.svg"
-                      multiple
+                      multiple={artUploadMode === "multiple"}
                       onChange={handleFileChange}
                     />
 
@@ -1232,18 +1268,22 @@ export default function ProductDetail() {
                             <button type="button" onClick={() => removeArtFile(art.id)} className="text-gray-400 hover:text-red-500" aria-label={`Remover ${art.file.name}`}>✕</button>
                           </div>
                         ))}
+                        <div className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 ${artFilesConfirmed ? "border-green-200 bg-green-50" : "border-pink-200 bg-pink-50"}`}>
+                          <p className={`text-xs ${artFilesConfirmed ? "text-green-700" : "text-pink-700"}`}>{artFilesConfirmed ? `${artFiles.length} ${artFiles.length === 1 ? "arquivo confirmado" : "arquivos confirmados"}. Você pode continuar.` : `Revise os ${artFiles.length} ${artFiles.length === 1 ? "arquivo" : "arquivos"} antes de continuar.`}</p>
+                          {!artFilesConfirmed && <Button type="button" size="sm" onClick={confirmArtFiles} className="h-8 bg-pink-600 text-xs hover:bg-pink-700">Confirmar e continuar</Button>}
+                        </div>
                       </div>
                     )}
                     {uploadState.isUploading && (
                       <div className="space-y-1 mt-1">
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Enviando... {uploadState.currentChunk}/{uploadState.totalChunks} partes</span>
-                          <span>{uploadState.progress}%</span>
+                          <span>{uploadQueue ? `Enviando arquivo ${uploadQueue.current} de ${uploadQueue.total}: ${uploadQueue.fileName}` : `Enviando... ${uploadState.currentChunk}/${uploadState.totalChunks} partes`}</span>
+                          <span>{uploadQueue ? Math.round(((uploadQueue.completed + uploadState.progress / 100) / uploadQueue.total) * 100) : uploadState.progress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-1.5">
                           <div
                             className="bg-pink-500 h-1.5 rounded-full transition-all duration-300"
-                            style={{ width: `${uploadState.progress}%` }}
+                            style={{ width: `${uploadQueue ? Math.round(((uploadQueue.completed + uploadState.progress / 100) / uploadQueue.total) * 100) : uploadState.progress}%` }}
                           />
                         </div>
                         <button
