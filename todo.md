@@ -2684,3 +2684,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir confirmação de continuidade e progresso consolidado durante o envio das artes
 - [x] Adicionar arrastar e soltar e validação amigável de tipo e tamanho no envio de artes
 - [x] Exibir animação e confirmação de sucesso após o envio completo das artes
+- [x] Adicionar botão Limpar todos para os arquivos de arte selecionados
