@@ -2657,4 +2657,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover retângulos rosas dos atributos no detalhe do carrinho e manter texto preto
 - [x] Corrigir o destaque de Todos os Pedidos ao abrir Carrinho Abandonado
 - [x] Destacar Carrinho Abandonado em rosa quando estiver selecionado
+- [x] Paginar o Histórico da Pré-Impressão para limitar os registros carregados por vez
+- [x] Adicionar lixeira permanente com confirmação para registros do Histórico da Pré-Impressão
 - [x] Confirmar a visibilidade da Lixeira de Contas Recebidas na versão publicada para o Superadmin

@@ -13,9 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link, useSearch } from "wouter";
-import { Search, ChevronRight, Layers, Loader2 } from "lucide-react";
+import { Search, ChevronRight, Layers, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductionQuickDetailsDialog } from "@/components/admin/ProductionQuickDetailsDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const PRE_PRODUCTION_STATUS: Record<string, { label: string; color: string }> = {
   liberado_analise:    { label: "Liberado para Análise",  color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -47,6 +49,10 @@ export default function AdminPreImpressao() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>(urlStatus);
   const [quickDetailsStatus, setQuickDetailsStatus] = useState<string | null>(null);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyOrderToDelete, setHistoryOrderToDelete] = useState<any | null>(null);
+  const { adminUser } = useAdminAuth();
+  const canDeleteHistory = adminUser?.role === "superadmin";
 
   useEffect(() => {
     const s = new URLSearchParams(searchStr).get("status") || "todos";
@@ -55,6 +61,7 @@ export default function AdminPreImpressao() {
   const utils = trpc.useUtils();
 
   const { data: allOrders = [], isLoading } = trpc.checkout.getAllOrders.useQuery();
+  const { data: historyResult, isLoading: isLoadingHistory } = trpc.preImpressaoHistory.getHistory.useQuery({ page: historyPage, limit: 20 });
 
   const updatePreProductionMutation = trpc.admin.updatePreProductionStatus.useMutation({
     onSuccess: () => {
@@ -62,6 +69,15 @@ export default function AdminPreImpressao() {
       utils.checkout.getAllOrders.invalidate();
     },
     onError: (err) => toast.error(err.message || "Erro ao atualizar status"),
+  });
+
+  const deleteHistoryMutation = trpc.preImpressaoHistory.deleteHistoryRecord.useMutation({
+    onSuccess: async () => {
+      toast.success("Registro removido permanentemente do histórico.");
+      setHistoryOrderToDelete(null);
+      await utils.preImpressaoHistory.getHistory.invalidate();
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível excluir o registro histórico."),
   });
 
   const filtered = useMemo(() => {
@@ -83,10 +99,6 @@ export default function AdminPreImpressao() {
       })
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [allOrders, filterStatus, search]);
-
-  const history = useMemo(() => (allOrders as any[])
-    .filter((o) => ["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status))
-    .sort((a: any, b: any) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()), [allOrders]);
 
   const preProductionOrdersByStatus = useMemo(() => {
     const activeOrders = (allOrders as any[]).filter((o) => !["pronto_entrega", "pronto_retirada", "entregue"].includes(o.status));
@@ -234,10 +246,24 @@ export default function AdminPreImpressao() {
         <Card>
           <CardContent className="pt-5 pb-5">
             <h2 className="text-sm font-semibold text-gray-800">Histórico da Pré-Impressão</h2>
-            <p className="mt-1 text-xs text-gray-500">Pedidos removidos da lista ativa após ficarem Prontos para Entrega.</p>
-            {history.length === 0 ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <div className="mt-4 space-y-2">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge></div>)}</div>}
+            <p className="mt-1 text-xs text-gray-500">Pedidos removidos da lista ativa após ficarem Prontos para Entrega. São exibidos 20 registros por página.</p>
+            {isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-orange-500" /></div> : !historyResult?.data.length ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <><div className="mt-4 space-y-2">{historyResult.data.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="min-w-0 truncate font-medium">#{order.orderNumber} · {order.deliveryFullName || "Cliente não informado"}</span><div className="flex shrink-0 items-center gap-2"><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${order.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${order.orderNumber}`} onClick={() => setHistoryOrderToDelete(order)}><Trash2 className="h-3.5 w-3.5" /></Button>}</div></div>)}</div>{historyResult.totalPages > 1 && <div className="mt-4 flex items-center justify-between border-t pt-3"><span className="text-xs text-gray-500">Página {historyResult.page} de {historyResult.totalPages} · {historyResult.total} registro(s)</span><div className="flex gap-2"><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</Button><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === historyResult.totalPages} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</Button></div></div>}</>}
           </CardContent>
         </Card>
+        <AlertDialog open={Boolean(historyOrderToDelete)} onOpenChange={(open) => !open && setHistoryOrderToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir este registro histórico permanentemente?</AlertDialogTitle>
+              <AlertDialogDescription>O pedido #{historyOrderToDelete?.orderNumber} e seus registros vinculados serão removidos de forma permanente. Esta ação não poderá ser desfeita.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteHistoryMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); if (historyOrderToDelete?.orderId ?? historyOrderToDelete?.id) deleteHistoryMutation.mutate({ orderId: historyOrderToDelete.orderId ?? historyOrderToDelete.id }); }}>
+                {deleteHistoryMutation.isPending ? "Excluindo..." : "Excluir permanentemente"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <ProductionQuickDetailsDialog
           open={Boolean(quickDetailsStatus)}
           onOpenChange={(open) => !open && setQuickDetailsStatus(null)}
