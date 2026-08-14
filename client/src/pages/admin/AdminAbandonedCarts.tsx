@@ -246,7 +246,7 @@ export default function AdminAbandonedCarts() {
                         <div className="flex flex-wrap items-start justify-between gap-2"><p className="font-semibold text-gray-900">{item.productName}</p><p className="font-semibold text-pink-600">{currency.format(Number(item.totalPrice))}</p></div>
                         <p className="mt-0.5 text-sm text-gray-500">{item.quantity} × {currency.format(Number(item.unitPrice))}</p>
                         {item.customDimensions && <p className="mt-2 text-xs text-gray-500">Medidas: {item.customDimensions}</p>}
-                        {variations.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{variations.map((variation, index) => <Badge key={`${variation.name}-${index}`} variant="secondary" className="font-normal">{variation.name}: {variation.value}</Badge>)}</div>}
+                        {variations.length > 0 && <div className="mt-2 space-y-1">{variations.map((variation, index) => <p key={`${variation.name}-${index}`} className="text-xs text-gray-900"><span className="font-medium">{variation.name}:</span> {variation.value}</p>)}</div>}
                         {item.notes && <p className="mt-2 text-xs text-gray-500">Observação: {item.notes}</p>}
                         {item.artFileUrl && <a href={item.artFileUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-pink-600 hover:underline">Ver arquivo de arte</a>}
                       </div>
