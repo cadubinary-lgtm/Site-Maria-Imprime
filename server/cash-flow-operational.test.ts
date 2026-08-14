@@ -27,4 +27,16 @@ describe("Fluxo de Caixa operacional", () => {
     expect(source).toContain("Saldo inicial");
     expect(source).toContain("Saldo acumulado:");
   });
+
+  it("exporta o período filtrado em CSV e PDF", () => {
+    const source = readFileSync(cashFlowPagePath, "utf8");
+
+    expect(source).toContain('import { jsPDF } from "jspdf";');
+    expect(source).toContain("const exportCsv = () => {");
+    expect(source).toContain("const exportPdf = () => {");
+    expect(source).toContain('anchor.download = `${exportFileName}.csv`;');
+    expect(source).toContain('doc.save(`${exportFileName}.pdf`);');
+    expect(source).toContain("CSV exportado com sucesso.");
+    expect(source).toContain("PDF exportado com sucesso.");
+  });
 });
