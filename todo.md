@@ -2697,3 +2697,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar habilidade reutilizável para diagnóstico e validação de Produção do Melhor Envio
 - [x] Exibir corretamente o valor do frete e atualizar o total no resumo do pedido
 - [x] Alinhar a avaliação do produto e ajustar o visual do aviso de campos pendentes
+- [x] Adicionar animação suave de entrada ao aviso de campos pendentes
