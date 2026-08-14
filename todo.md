@@ -2682,3 +2682,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir múltiplos arquivos de arte com lista removível no configurador de produto
 - [x] Permitir ao cliente escolher entre arquivo único e múltiplos arquivos de arte
 - [x] Exibir confirmação de continuidade e progresso consolidado durante o envio das artes
+- [x] Adicionar arrastar e soltar e validação amigável de tipo e tamanho no envio de artes
+- [x] Exibir animação e confirmação de sucesso após o envio completo das artes

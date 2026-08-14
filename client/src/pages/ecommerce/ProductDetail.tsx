@@ -44,6 +44,9 @@ interface SelectedArtFile {
   preview: string | null;
 }
 
+const ART_ALLOWED_EXTENSIONS = ["pdf", "ai", "cdr", "psd", "eps", "jpg", "jpeg", "png", "tiff", "tif", "svg"];
+const ART_MAX_FILE_SIZE = 100 * 1024 * 1024;
+
 const PRODUCT_FEATURES = [
   { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
@@ -140,6 +143,8 @@ export default function ProductDetail() {
   const [artUploadMode, setArtUploadMode] = useState<"single" | "multiple">("single");
   const [artFilesConfirmed, setArtFilesConfirmed] = useState(false);
   const [uploadQueue, setUploadQueue] = useState<{ current: number; total: number; completed: number; fileName: string } | null>(null);
+  const [isArtDropActive, setIsArtDropActive] = useState(false);
+  const [artUploadSuccess, setArtUploadSuccess] = useState<number | null>(null);
   const [artLink, setArtLink] = useState("");
   const [fileMode, setFileMode] = useState<"upload" | "link">("upload");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -486,11 +491,14 @@ export default function ProductDetail() {
   }, [dimWidth, dimHeight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Arquivo ─────────────────────────────────────────────────────────────
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files ?? []);
+  const addArtFiles = async (selected: File[]) => {
     if (!selected.length) return;
-    const validFiles = selected.filter((file) => file.size <= 100 * 1024 * 1024);
-    if (validFiles.length !== selected.length) toast.error("Alguns arquivos foram ignorados por excederem 100MB.");
+    const unsupportedFiles = selected.filter((file) => !ART_ALLOWED_EXTENSIONS.includes(file.name.split(".").pop()?.toLowerCase() ?? ""));
+    const oversizedFiles = selected.filter((file) => file.size > ART_MAX_FILE_SIZE);
+    const validFiles = selected.filter((file) => !unsupportedFiles.includes(file) && !oversizedFiles.includes(file));
+    if (unsupportedFiles.length) toast.error(`${unsupportedFiles.length} arquivo(s) ignorado(s): use PDF, AI, CDR, PSD, EPS, JPG, PNG, TIFF ou SVG.`);
+    if (oversizedFiles.length) toast.error(`${oversizedFiles.length} arquivo(s) ignorado(s): cada arquivo pode ter no máximo 100 MB.`);
+    if (!validFiles.length) return;
     const filesForMode = artUploadMode === "single" ? validFiles.slice(0, 1) : validFiles;
     if (artUploadMode === "single" && validFiles.length > 1) toast.info("Modo de arquivo único: apenas o primeiro arquivo foi selecionado.");
     const filesWithPreview = await Promise.all(filesForMode.map(async (file): Promise<SelectedArtFile> => {
@@ -510,18 +518,31 @@ export default function ProductDetail() {
       return [...base, ...filesWithPreview.filter((item) => !existing.has(`${item.file.name}-${item.file.size}-${item.file.lastModified}`))];
     });
     setArtFilesConfirmed(false);
+    setArtUploadSuccess(null);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await addArtFiles(Array.from(e.target.files ?? []));
     e.target.value = "";
+  };
+
+  const handleArtDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsArtDropActive(false);
+    await addArtFiles(Array.from(event.dataTransfer.files ?? []));
   };
 
   const removeArtFile = (fileId: string) => {
     setArtFiles((current) => current.filter((item) => item.id !== fileId));
     setArtFilesConfirmed(false);
+    setArtUploadSuccess(null);
     resetUpload();
   };
 
   const selectArtUploadMode = (mode: "single" | "multiple") => {
     setArtUploadMode(mode);
     setArtFilesConfirmed(false);
+    setArtUploadSuccess(null);
     if (mode === "single" && artFiles.length > 1) {
       setArtFiles((current) => current.slice(0, 1));
       toast.info("Mantivemos apenas o primeiro arquivo ao trocar para arquivo único.");
@@ -729,6 +750,7 @@ export default function ProductDetail() {
       openCart();
 
       let artUrls: string[] = fileMode === "link" && artLink ? [artLink] : [];
+      setArtUploadSuccess(null);
       if (artFiles.length && fileMode === "upload") {
         try {
           for (let index = 0; index < artFiles.length; index += 1) {
@@ -738,6 +760,8 @@ export default function ProductDetail() {
             artUrls.push(url);
             setUploadQueue({ current: index + 1, total: artFiles.length, completed: index + 1, fileName: art.file.name });
           }
+          setArtUploadSuccess(artFiles.length);
+          toast.success(`${artFiles.length} ${artFiles.length === 1 ? "arquivo enviado" : "arquivos enviados"} com sucesso.`);
         } catch (uploadErr: any) {
           if (uploadErr?.message === "CANCELLED") { removeOptimisticItem(); setIsProcessing(false); return; }
           console.error('[upload-art] catch:', uploadErr?.message);
@@ -1229,13 +1253,17 @@ export default function ProductDetail() {
                       </button>
                     </div>
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all"
+                      className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${isArtDropActive ? "border-pink-500 bg-pink-50 scale-[1.01]" : "border-gray-300 hover:border-orange-400 hover:bg-orange-50/20"}`}
                       onClick={() => fileInputRef.current?.click()}
+                      onDragEnter={(event) => { event.preventDefault(); setIsArtDropActive(true); }}
+                      onDragOver={(event) => { event.preventDefault(); setIsArtDropActive(true); }}
+                      onDragLeave={(event) => { event.preventDefault(); setIsArtDropActive(false); }}
+                      onDrop={handleArtDrop}
                     >
                       <div className="flex items-center justify-center gap-3">
                         <Upload className="w-6 h-6 text-gray-400 flex-shrink-0" />
                         <div className="text-left">
-                          <p className="text-sm text-gray-600 font-medium">{artUploadMode === "single" ? "Clique para selecionar seu arquivo" : "Clique para selecionar ou arraste vários arquivos"}</p>
+                          <p className="text-sm text-gray-600 font-medium">{isArtDropActive ? "Solte os arquivos aqui" : artUploadMode === "single" ? "Clique para selecionar seu arquivo" : "Clique para selecionar ou arraste vários arquivos"}</p>
                           <p className="text-xs text-gray-400">PDF, PNG, JPG, TIFF, AI, CDR — máx 100MB</p>
                         </div>
                         <span className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition flex-shrink-0">
@@ -1293,6 +1321,12 @@ export default function ProductDetail() {
                         >
                           Cancelar envio
                         </button>
+                      </div>
+                    )}
+                    {artUploadSuccess && !uploadState.isUploading && (
+                      <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-3 py-3 animate-pulse" aria-live="polite">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
+                        <div><p className="text-sm font-semibold text-green-800">Envio concluído com sucesso!</p><p className="text-xs text-green-700">{artUploadSuccess} {artUploadSuccess === 1 ? "arquivo foi enviado" : "arquivos foram enviados"} e serão incluídos no pedido.</p></div>
                       </div>
                     )}
                     <div className="flex items-center gap-1.5 text-xs text-gray-500">

@@ -20,6 +20,11 @@ describe("múltiplos arquivos de arte", () => {
     expect(source).toContain("Confirmar e continuar");
     expect(source).toContain("artFilesConfirmed");
     expect(source).toContain("uploadQueue");
+    expect(source).toContain("ART_ALLOWED_EXTENSIONS");
+    expect(source).toContain("ART_MAX_FILE_SIZE");
+    expect(source).toContain("handleArtDrop");
+    expect(source).toContain("onDrop={handleArtDrop}");
+    expect(source).toContain("Envio concluído com sucesso!");
   });
 
   it("persiste todas as URLs de arte no carrinho e no item de pedido", () => {
