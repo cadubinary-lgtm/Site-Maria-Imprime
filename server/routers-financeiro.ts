@@ -442,6 +442,50 @@ export const financeiroRouter = router({
       return { success: true };
     }),
 
+  // Exclusão permanente: remove somente os pedidos já movidos à lixeira.
+  emptyDeletedContasRecebidas: adminOrManusAuthProcedure
+    .input(z.object({ confirmation: z.literal(true) }))
+    .mutation(async ({ ctx }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode esvaziar a lixeira de contas recebidas." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const trashItems = await db.select({ orderId: deletedReceivedAccounts.orderId })
+        .from(deletedReceivedAccounts);
+      if (!trashItems.length) return { success: true, deletedCount: 0 };
+
+      for (const { orderId } of trashItems) {
+        await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, orderId));
+        await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, orderId));
+        await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+        await db.delete(financialRecords).where(eq(financialRecords.orderId, orderId));
+        await db.delete(fileValidations).where(eq(fileValidations.orderId, orderId));
+        await db.delete(automationLogs).where(eq(automationLogs.orderId, orderId));
+        await db.delete(shipments).where(eq(shipments.orderId, orderId));
+        await db.delete(fiscalNotes).where(eq(fiscalNotes.orderId, orderId));
+        await db.delete(orderPayments).where(eq(orderPayments.orderId, orderId));
+        await db.delete(emailHistory).where(eq(emailHistory.orderId, orderId));
+        await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+        await db.delete(orders).where(eq(orders.id, orderId));
+        await db.delete(deletedReceivedAccounts).where(eq(deletedReceivedAccounts.orderId, orderId));
+      }
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "permanently_empty_received_accounts_trash",
+        entity: "deletedReceivedAccounts",
+        before: { orderIds: trashItems.map((item) => item.orderId), deletedCount: trashItems.length },
+        after: { emptiedAt: Date.now() },
+        ipAddress: ctx.req.ip,
+      });
+
+      return { success: true, deletedCount: trashItems.length };
+    }),
+
   // ── Pagamentos na Retirada ──────────────────────────────────────────────────
   getPagamentosRetirada: adminOrManusAuthProcedure
     .input(z.object({

@@ -12,6 +12,8 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("moveContaRecebidaToTrash: adminOrManusAuthProcedure");
     expect(source).toContain("restoreContaRecebida: adminOrManusAuthProcedure");
     expect(source).toContain("listDeletedContasRecebidas: adminOrManusAuthProcedure");
+    expect(source).toContain("emptyDeletedContasRecebidas: adminOrManusAuthProcedure");
+    expect(source).toContain("confirmation: z.literal(true)");
     expect(source).toContain('adminUser?.role !== "superadmin"');
     expect(source).toContain('code: "FORBIDDEN"');
     expect(source).toContain('action: "move_received_account_to_trash"');
@@ -35,6 +37,10 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Restaurar esta conta recebida?");
     expect(source).toContain("Confirmar restauração");
     expect(source).toContain("onClick={() => setReceiptToRestore(item)}");
+    expect(source).toContain("emptyDeletedContasRecebidas.useMutation");
+    expect(source).toContain("Esvaziar a lixeira permanentemente?");
+    expect(source).toContain("Esvaziar Lixeira");
+    expect(source).toContain("Esvaziar permanentemente");
     expect(source).toContain("Mover para lixeira");
   });
 });
