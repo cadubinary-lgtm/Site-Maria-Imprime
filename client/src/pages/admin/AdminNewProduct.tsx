@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
+import { NEW_PRODUCT_FIELD_LAYOUT } from "@/lib/new-product-layout";
 
 export default function AdminNewProduct() {
   const [, navigate] = useLocation();
@@ -162,7 +163,7 @@ export default function AdminNewProduct() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 xl:space-y-5">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <div>
@@ -175,29 +176,27 @@ export default function AdminNewProduct() {
         </div>
 
         <Card className="border-orange-200 bg-orange-50/30">
-          <CardHeader>
+          <CardHeader className="px-5 py-4">
             <CardTitle className="flex items-center gap-2 text-orange-700">
               <Plus className="w-4 h-4" />
               Dados do Produto
             </CardTitle>
             <CardDescription>Preencha os dados para criar um novo produto no catálogo</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
-              {/* Linha 1: Nome do Produto (largura total) */}
-              <div>
-                <Label htmlFor="create-name">Nome do Produto *</Label>
-                <Input
-                  id="create-name"
-                  value={createForm.name}
-                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                  placeholder="Ex: Adesivo Brilho"
-                  required
-                />
-              </div>
-              {/* Linha 2: Tipo de Cobrança + Preço Base lado a lado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+          <CardContent className="px-5 pb-5 pt-0">
+            <form onSubmit={handleCreate} className="space-y-3">
+              <div className={NEW_PRODUCT_FIELD_LAYOUT.grid}>
+                <div className={NEW_PRODUCT_FIELD_LAYOUT.name}>
+                  <Label htmlFor="create-name">Nome do Produto *</Label>
+                  <Input
+                    id="create-name"
+                    value={createForm.name}
+                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                    placeholder="Ex: Adesivo Brilho"
+                    required
+                  />
+                </div>
+                <div className={NEW_PRODUCT_FIELD_LAYOUT.calculation}>
                   <Label htmlFor="create-calculationType">Tipo de Cobrança *</Label>
                   <Select
                     value={createForm.calculationType}
@@ -214,9 +213,8 @@ export default function AdminNewProduct() {
                     </SelectContent>
                   </Select>
                 </div>
-                {/* Preço Base: visível apenas para Unidade e Pacote */}
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
-                  <div>
+                  <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
                     <Label htmlFor="create-price">Preço Base (R$) *</Label>
                     <Input
                       id="create-price"
@@ -229,37 +227,36 @@ export default function AdminNewProduct() {
                     />
                   </div>
                 )}
-              </div>
-              {/* Linha 3: Descrição */}
-              <div>
-                <Label htmlFor="create-description">Descrição</Label>
-                <Textarea
-                  id="create-description"
-                  value={createForm.description}
-                  onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                  placeholder="Descreva o produto"
-                  rows={3}
-                />
-              </div>
-              {/* Linha 4: Segmento */}
-              <div>
-                <Label htmlFor="create-segment">Segmento</Label>
-                <Select
-                  value={createForm.segment}
-                  onValueChange={(value) => setCreateForm({ ...createForm, segment: value })}
-                  disabled={segmentsLoading}
-                >
-                  <SelectTrigger id="create-segment">
-                    <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SEGMENTS.map((seg) => (
-                      <SelectItem key={seg.id} value={seg.id}>
-                        {seg.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className={NEW_PRODUCT_FIELD_LAYOUT.segment}>
+                  <Label htmlFor="create-segment">Segmento</Label>
+                  <Select
+                    value={createForm.segment}
+                    onValueChange={(value) => setCreateForm({ ...createForm, segment: value })}
+                    disabled={segmentsLoading}
+                  >
+                    <SelectTrigger id="create-segment">
+                      <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SEGMENTS.map((seg) => (
+                        <SelectItem key={seg.id} value={seg.id}>
+                          {seg.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className={NEW_PRODUCT_FIELD_LAYOUT.description}>
+                  <Label htmlFor="create-description">Descrição</Label>
+                  <Textarea
+                    id="create-description"
+                    value={createForm.description}
+                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                    placeholder="Descreva o produto"
+                    rows={2}
+                    className="min-h-[68px]"
+                  />
+                </div>
               </div>
               {/* Campos condicionais para m² e metro linear */}
               {(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && (
@@ -308,6 +305,7 @@ export default function AdminNewProduct() {
                 galleryUrls={createForm.galleryUrls}
                 onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
                 onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
+                compact
               />
               {/* Segmentos */}
               <div>

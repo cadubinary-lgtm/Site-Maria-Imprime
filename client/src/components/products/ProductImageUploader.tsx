@@ -12,6 +12,7 @@ interface ProductImageUploaderProps {
   galleryUrls: string[]; // até 6 fotos adicionais
   onMainImageChange: (url: string, key?: string) => void;
   onGalleryChange: (urls: string[]) => void;
+  compact?: boolean;
 }
 
 export function ProductImageUploader({
@@ -19,6 +20,7 @@ export function ProductImageUploader({
   galleryUrls,
   onMainImageChange,
   onGalleryChange,
+  compact = false,
 }: ProductImageUploaderProps) {
   const [uploadingMain, setUploadingMain] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState<number | null>(null);
@@ -143,63 +145,63 @@ export function ProductImageUploader({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? "space-y-2" : "space-y-4"}>
       <Label className="text-sm font-semibold text-gray-700">Fotos do Produto</Label>
       <p className="text-xs text-gray-500">
         1 foto principal + até 6 fotos adicionais · JPG, PNG, WEBP · <span className="font-medium text-orange-600">máx. 2MB cada</span>
       </p>
-
-      {/* ── Foto Principal ─────────────────────────────────────────────────── */}
-      <div>
-        <p className="text-xs font-medium text-gray-600 mb-2">Foto Principal</p>
-        <div
-          className="relative border-2 border-dashed border-gray-300 rounded-xl overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50"
-          style={{ height: 180 }}
-          onClick={() => !uploadingMain && mainInputRef.current?.click()}
-        >
-          {mainImageUrl ? (
-            <>
-              <img src={mainImageUrl} alt="Foto principal" className="w-full h-full object-contain" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                <p className="text-white text-sm font-medium">Clique para substituir</p>
+      <div className={compact ? "grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(360px,1fr)] xl:items-end" : "space-y-4"}>
+        {/* ── Foto Principal ───────────────────────────────────────────────── */}
+        <div>
+          <p className="text-xs font-medium text-gray-600 mb-2">Foto Principal</p>
+          <div
+            className="relative border-2 border-dashed border-gray-300 rounded-xl overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50"
+            style={{ height: compact ? 132 : 180 }}
+            onClick={() => !uploadingMain && mainInputRef.current?.click()}
+          >
+            {mainImageUrl ? (
+              <>
+                <img src={mainImageUrl} alt="Foto principal" className="w-full h-full object-contain" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <p className="text-white text-sm font-medium">Clique para substituir</p>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
+                {uploadingMain ? (
+                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-10 h-10" />
+                    <p className="text-sm">Clique para adicionar foto principal</p>
+                  </>
+                )}
               </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
-              {uploadingMain ? (
+            )}
+            {uploadingMain && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-              ) : (
-                <>
-                  <ImageIcon className="w-10 h-10" />
-                  <p className="text-sm">Clique para adicionar foto principal</p>
-                </>
-              )}
-            </div>
-          )}
-          {uploadingMain && (
-            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+          <input
+            ref={mainInputRef}
+            type="file"
+            accept={ACCEPT_STRING}
+            className="hidden"
+            onChange={handleMainUpload}
+          />
         </div>
-        <input
-          ref={mainInputRef}
-          type="file"
-          accept={ACCEPT_STRING}
-          className="hidden"
-          onChange={handleMainUpload}
-        />
-      </div>
 
-      {/* ── Fotos Adicionais (com drag-and-drop) ──────────────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
+        {/* ── Fotos Adicionais (com drag-and-drop) ────────────────────────── */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
           <p className="text-xs font-medium text-gray-600">Fotos Adicionais (até 6)</p>
           <span className="text-xs text-gray-400 flex items-center gap-1">
             <GripVertical className="w-3 h-3" /> arraste para reordenar
           </span>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2, 3, 4, 5].map((slot) => {
             const url = galleryUrls[slot];
             const isUploading = uploadingGallery === slot;
@@ -221,7 +223,7 @@ export function ProductImageUploader({
                   isDragOver && dragIndex !== slot ? "border-orange-500 bg-orange-50 scale-105 shadow-md" : "border-gray-300 bg-gray-50",
                   !isDragging && !isDragOver ? "hover:border-orange-400" : "",
                 ].join(" ")}
-                style={{ height: 80 }}
+                style={{ height: compact ? 56 : 80 }}
                 onClick={() => !isUploading && !uploadingGallery && !url && openGalleryPicker(slot)}
               >
                 {url ? (
@@ -263,17 +265,18 @@ export function ProductImageUploader({
               </div>
             );
           })}
+          </div>
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept={ACCEPT_STRING}
+            className="hidden"
+            onChange={handleGalleryUpload}
+          />
+          <p className="text-xs text-gray-400 mt-1.5">
+            Clique em um slot vazio para adicionar · Clique em "trocar" para substituir · Arraste para reordenar
+          </p>
         </div>
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept={ACCEPT_STRING}
-          className="hidden"
-          onChange={handleGalleryUpload}
-        />
-        <p className="text-xs text-gray-400 mt-1.5">
-          Clique em um slot vazio para adicionar · Clique em "trocar" para substituir · Arraste para reordenar
-        </p>
       </div>
     </div>
   );

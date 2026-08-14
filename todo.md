@@ -2700,3 +2700,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar animação suave de entrada ao aviso de campos pendentes
 - [x] Adicionar subitens de dashboard em Vendas, Linha de Produção, Produtos e Clientes
 - [x] Revisar e padronizar indicadores de status nos subitens do menu administrativo
+- [x] Reorganizar a página de Novo Produto para reduzir rolagem em telas largas
