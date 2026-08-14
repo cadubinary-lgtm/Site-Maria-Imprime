@@ -218,6 +218,22 @@ export const deletedReceivedAccounts = mysqlTable("deletedReceivedAccounts", {
 export type DeletedReceivedAccount = typeof deletedReceivedAccounts.$inferSelect;
 
 /**
+ * Lixeira reversível de Todos os Pedidos. Mantém o pedido intacto até que um
+ * Superadmin decida restaurá-lo ou removê-lo de forma permanente.
+ */
+export const deletedOrders = mysqlTable("deletedOrders", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().unique(),
+  deletedByAdminId: int("deletedByAdminId"),
+  deletedByAdminName: varchar("deletedByAdminName", { length: 255 }),
+  deletionReason: varchar("deletionReason", { length: 1000 }),
+  deletedAt: bigint("deletedAt", { mode: "number" }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DeletedOrder = typeof deletedOrders.$inferSelect;
+
+/**
  * Order items - itens dentro de cada pedido
  */
 export const orderItems = mysqlTable("orderItems", {

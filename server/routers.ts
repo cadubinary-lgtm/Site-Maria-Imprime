@@ -99,6 +99,7 @@ import { variationsOffsetRouter } from "./variationsOffsetRouter";
 import { companySettingsRouter } from "./companySettingsRouter";
 import { abandonedCartsRouter } from "./abandonedCartsRouter";
 import { preImpressaoHistoryRouter } from "./preImpressaoHistoryRouter";
+import { ordersTrashRouter } from "./ordersTrashRouter";
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
 // Usado em todas as procedures do checkout/erp que o painel admin consome
@@ -133,6 +134,7 @@ export const appRouter = router({
   companySettings: companySettingsRouter,
   abandonedCarts: abandonedCartsRouter,
   preImpressaoHistory: preImpressaoHistoryRouter,
+  ordersTrash: ordersTrashRouter,
   gerenciadorFinanceiro: gerenciadorFinanceiroRouter,
   gestaoFiscal: gestaoFiscalRouter,
   financeiro: financeiroRouter,
@@ -1580,9 +1582,13 @@ export const appRouter = router({
     getAllOrders: adminAnyProcedure.query(async () => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
-      const { orders: ordersTable } = await import("../drizzle/schema.js");
-      const { desc } = await import("drizzle-orm");
-      return db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+      const { orders: ordersTable, deletedOrders: deletedOrdersTable } = await import("../drizzle/schema.js");
+      const { desc, sql } = await import("drizzle-orm");
+      const deletedRows = await db.select({ orderId: deletedOrdersTable.orderId }).from(deletedOrdersTable);
+      if (!deletedRows.length) return db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+      return db.select().from(ordersTable)
+        .where(sql`${ordersTable.id} NOT IN (${sql.join(deletedRows.map((row) => sql`${row.orderId}`), sql`, `)})`)
+        .orderBy(desc(ordersTable.createdAt));
     }),
     updateOrderStatus: adminAnyProcedure
       .input(z.object({
