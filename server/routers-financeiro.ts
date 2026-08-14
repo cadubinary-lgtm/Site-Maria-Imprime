@@ -450,6 +450,51 @@ export const financeiroRouter = router({
       return { success: true };
     }),
 
+  // Exclusão permanente individual: disponível somente para itens que já estão na lixeira.
+  permanentlyDeleteContaRecebida: adminOrManusAuthProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir permanentemente um item da lixeira." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const [trashItem] = await db.select().from(deletedReceivedAccounts)
+        .where(eq(deletedReceivedAccounts.orderId, input.orderId))
+        .limit(1);
+      if (!trashItem) throw new TRPCError({ code: "NOT_FOUND", message: "Apenas itens presentes na lixeira podem ser excluídos permanentemente." });
+      const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+
+      await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
+      await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId));
+      await db.delete(productionJobs).where(eq(productionJobs.orderId, input.orderId));
+      await db.delete(financialRecords).where(eq(financialRecords.orderId, input.orderId));
+      await db.delete(fileValidations).where(eq(fileValidations.orderId, input.orderId));
+      await db.delete(automationLogs).where(eq(automationLogs.orderId, input.orderId));
+      await db.delete(shipments).where(eq(shipments.orderId, input.orderId));
+      await db.delete(fiscalNotes).where(eq(fiscalNotes.orderId, input.orderId));
+      await db.delete(orderPayments).where(eq(orderPayments.orderId, input.orderId));
+      await db.delete(emailHistory).where(eq(emailHistory.orderId, input.orderId));
+      await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
+      await db.delete(orders).where(eq(orders.id, input.orderId));
+      await db.delete(deletedReceivedAccounts).where(eq(deletedReceivedAccounts.orderId, input.orderId));
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "permanently_delete_received_account_from_trash",
+        entity: "deletedReceivedAccounts",
+        entityId: String(input.orderId),
+        before: { orderNumber: order?.orderNumber, deletedAt: trashItem.deletedAt, deletionReason: trashItem.deletionReason },
+        after: { permanentlyDeletedAt: Date.now() },
+        ipAddress: ctx.req.ip,
+      });
+
+      return { success: true };
+    }),
+
   // Exclusão permanente: remove somente os pedidos já movidos à lixeira.
   emptyDeletedContasRecebidas: adminOrManusAuthProcedure
     .input(z.object({ confirmation: z.literal(true) }))
