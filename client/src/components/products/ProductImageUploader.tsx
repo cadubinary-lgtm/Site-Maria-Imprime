@@ -34,6 +34,7 @@ export function ProductImageUploader({
   // Drag-and-drop reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isMainDragOver, setIsMainDragOver] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewImages = useMemo(() => getPreviewImages(mainImageUrl, galleryUrls), [mainImageUrl, galleryUrls]);
   const previewIndex = previewUrl ? previewImages.indexOf(previewUrl) : -1;
@@ -154,6 +155,21 @@ export function ProductImageUploader({
   const handleDragEnd = () => {
     setDragIndex(null);
     setDragOverIndex(null);
+    setIsMainDragOver(false);
+  };
+
+  const handleDropOnMainImage = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsMainDragOver(false);
+    if (dragIndex === null || !galleryUrls[dragIndex] || !mainImageUrl) return;
+
+    const nextGallery = [...galleryUrls];
+    const nextMainImage = nextGallery[dragIndex];
+    nextGallery[dragIndex] = mainImageUrl;
+    onMainImageChange(nextMainImage);
+    onGalleryChange(nextGallery);
+    toast.success("Ordem das fotos atualizada!");
+    handleDragEnd();
   };
 
   return (
@@ -167,15 +183,23 @@ export function ProductImageUploader({
         <div>
           <p className="text-xs font-medium text-gray-600 mb-2">Foto Principal</p>
           <div
-            className="relative border-2 border-dashed border-gray-300 rounded-xl overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50"
+            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors bg-gray-50 ${isMainDragOver ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-orange-400"}`}
             style={{ height: compact ? 132 : 180 }}
             onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
+            onDragOver={(event) => {
+              if (dragIndex !== null) {
+                event.preventDefault();
+                setIsMainDragOver(true);
+              }
+            }}
+            onDragLeave={() => setIsMainDragOver(false)}
+            onDrop={handleDropOnMainImage}
           >
             {mainImageUrl ? (
               <>
                 <img src={mainImageUrl} alt="Foto principal" className="w-full h-full object-contain" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <p className="text-white text-sm font-medium">Clique para ampliar</p>
+                  <p className="text-white text-sm font-medium">Clique para ampliar ou solte aqui para tornar principal</p>
                 </div>
                 <button
                   type="button"
