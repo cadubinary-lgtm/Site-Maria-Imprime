@@ -72,4 +72,10 @@ describe("navegação contextual administrativa", () => {
     expect(source).toContain("currentLocation === child.href");
     expect(source).toContain("const isActive = item.href ? currentLocation === item.href : false;");
   });
+
+  it("mantém a página de Validação de Arquivos fora do menu lateral", () => {
+    const source = readFileSync(adminLayoutPath, "utf8");
+
+    expect(source).not.toContain('{ label: "Validação de Arquivos", href: "/admin/validacao-arquivos" }');
+  });
 });
