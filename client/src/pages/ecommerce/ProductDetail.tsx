@@ -27,6 +27,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
+import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -1959,7 +1960,7 @@ export default function ProductDetail() {
 
               {/* Lista de campos pendentes */}
                 {!canAddToCart && missingFields.length > 0 && (
-                  <div className="mt-4 p-4 bg-white border-2 border-pink-200 rounded-xl shadow-sm">
+                  <div className={`mt-4 p-4 bg-white border-2 border-pink-200 rounded-xl shadow-sm ${PENDING_FIELDS_NOTICE_MOTION}`}>
                     <div className="flex items-center gap-2 mb-3">
                       <AlertTriangle className="w-5 h-5 text-pink-500 flex-shrink-0" />
                       <p className="text-sm font-bold text-gray-900">Quase pronto! Complete os campos abaixo:</p>
