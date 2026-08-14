@@ -96,6 +96,7 @@ export default function AdminQuotations() {
   const [deletionReason, setDeletionReason] = useState("");
   const [restoreQuotation, setRestoreQuotation] = useState<any | null>(null);
   const [permanentQuotation, setPermanentQuotation] = useState<any | null>(null);
+  const [statusActionQuotation, setStatusActionQuotation] = useState<{ type: "cancel" | "restore"; quotation: any } | null>(null);
   const { adminUser } = useAdminAuth();
   const canManageTrash = adminUser?.role === "superadmin";
   const presetRange = period === "this_month" ? getMonthRange(0) : period === "last_month" ? getMonthRange(-1) : { startDate: undefined, endDate: undefined };
@@ -113,13 +114,14 @@ export default function AdminQuotations() {
   const { data: trashedQuotations = [], isLoading: isLoadingTrash } = trpc.quotations.listTrash.useQuery(undefined, { enabled: canManageTrash && showTrash });
 
   const updateStatus = trpc.quotations.updateStatus.useMutation({
-    onSuccess: () => { toast.success("Status atualizado!"); refetch(); },
+    onSuccess: () => { toast.success("Status atualizado!"); setStatusActionQuotation(null); refetch(); },
     onError: (e) => toast.error(e.message),
   });
 
   const restoreCancelledStatus = trpc.quotations.restoreStatusBeforeCancellation.useMutation({
     onSuccess: (result) => {
       toast.success(`Cancelamento desfeito. Status restaurado para ${STATUS_CONFIG[result.restoredStatus]?.label ?? result.restoredStatus}.`);
+      setStatusActionQuotation(null);
       refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -352,13 +354,13 @@ export default function AdminQuotations() {
                               {!["cancelado", "expirado"].includes(row.status) && (
                                 <DropdownMenuItem
                                   className="text-red-600"
-                                  onClick={() => updateStatus.mutate({ id: row.id, status: "cancelado" })}
+                                  onClick={() => setStatusActionQuotation({ type: "cancel", quotation: row })}
                                 >
                                   <XCircle className="w-3.5 h-3.5 mr-2" /> Cancelar
                                 </DropdownMenuItem>
                               )}
                               {row.status === "cancelado" && (
-                                <DropdownMenuItem onClick={() => restoreCancelledStatus.mutate({ id: row.id })}>
+                                <DropdownMenuItem onClick={() => setStatusActionQuotation({ type: "restore", quotation: row })}>
                                   <RotateCcw className="w-3.5 h-3.5 mr-2 text-green-600" /> Restaurar status anterior
                                 </DropdownMenuItem>
                               )}
@@ -402,6 +404,20 @@ export default function AdminQuotations() {
               onClick={(event) => { event.preventDefault(); if (trashQuotation && deletionReason.trim().length >= 3) moveToTrash.mutate({ id: trashQuotation.id, reason: deletionReason.trim() }); }}
             >
               {moveToTrash.isPending ? "Movendo..." : "Mover para lixeira"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={statusActionQuotation !== null} onOpenChange={(open) => !open && setStatusActionQuotation(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{statusActionQuotation?.type === "cancel" ? "Cancelar orçamento?" : "Restaurar status anterior?"}</AlertDialogTitle>
+            <AlertDialogDescription>{statusActionQuotation?.type === "cancel" ? `O orçamento ${statusActionQuotation.quotation.quotationNumber} será marcado como cancelado. Esta ação poderá ser desfeita posteriormente.` : `O orçamento ${statusActionQuotation?.quotation.quotationNumber} voltará ao status que possuía antes do cancelamento.`}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateStatus.isPending || restoreCancelledStatus.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className={statusActionQuotation?.type === "cancel" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} disabled={updateStatus.isPending || restoreCancelledStatus.isPending} onClick={(event) => { event.preventDefault(); if (!statusActionQuotation) return; if (statusActionQuotation.type === "cancel") updateStatus.mutate({ id: statusActionQuotation.quotation.id, status: "cancelado" }); else restoreCancelledStatus.mutate({ id: statusActionQuotation.quotation.id }); }}>
+              {statusActionQuotation?.type === "cancel" ? (updateStatus.isPending ? "Cancelando..." : "Confirmar cancelamento") : (restoreCancelledStatus.isPending ? "Restaurando..." : "Confirmar restauração")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
