@@ -2712,3 +2712,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Inserir na documentação a política de prazo estimado da transportadora e suporte em atrasos externos
 - [x] Alinhar Foto Principal e organizar visualmente Fotos Adicionais no modal de Editar Produto
 - [x] Reposicionar lixeira e ação Trocar nas miniaturas da galeria de edição
+- [x] Substituir o texto Trocar por ícone com a mesma cor da lixeira nas miniaturas
