@@ -25,6 +25,7 @@ import {
   fiscalNotes,
   orderPayments,
   emailHistory,
+  deletedReceivedAccounts,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
 
@@ -279,6 +280,7 @@ export const financeiroRouter = router({
       periodo: z.enum(["dia", "semana", "mes", "ano"]).default("mes"),
       startDate: z.number().optional(),
       endDate: z.number().optional(),
+      search: z.string().trim().max(255).optional(),
     }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -296,11 +298,23 @@ export const financeiroRouter = router({
       const startDate = input.startDate ? new Date(input.startDate) : start;
       const endDate = input.endDate ? new Date(input.endDate) : now;
 
-      const whereClause = and(
+      const deletedRows = await db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts);
+      const deletedOrderIds = deletedRows.map((row) => row.orderId);
+      const conditions: any[] = [
         eq(orders.paymentStatus, "pago"),
         gte(orders.createdAt, startDate),
-        lte(orders.createdAt, endDate)
-      );
+        lte(orders.createdAt, endDate),
+      ];
+      if (input.search) {
+        conditions.push(or(
+          like(orders.orderNumber, `%${input.search}%`),
+          like(orders.guestName, `%${input.search}%`),
+          like(orders.deliveryFullName, `%${input.search}%`),
+          like(orders.guestEmail, `%${input.search}%`),
+        ));
+      }
+      if (deletedOrderIds.length) conditions.push(sql`${orders.id} NOT IN (${sql.join(deletedOrderIds.map((id) => sql`${id}`), sql`, `)})`);
+      const whereClause = and(...conditions);
       const offset = (input.page - 1) * input.limit;
       const [summary] = await db
         .select({
@@ -326,9 +340,8 @@ export const financeiroRouter = router({
       };
     }),
 
-  // Exclusão permanente de um recebimento: autorizada somente para Superadmin.
-  // A listagem é derivada do pedido; por isso, a operação remove o pedido e seus registros dependentes.
-  deleteContaRecebida: adminOrManusAuthProcedure
+  // Move um recebimento para a lixeira sem apagar o pedido ou suas dependências.
+  moveContaRecebidaToTrash: adminOrManusAuthProcedure
     .input(z.object({ orderId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const adminUser = (ctx as any).adminUser;
@@ -342,29 +355,87 @@ export const financeiroRouter = router({
       const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
       if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Recebimento não encontrado." });
       if (order.paymentStatus !== "pago") {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente recebimentos confirmados podem ser excluídos nesta tela." });
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente recebimentos confirmados podem ser movidos para a lixeira nesta tela." });
       }
 
-      await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
-      await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId));
-      await db.delete(productionJobs).where(eq(productionJobs.orderId, input.orderId));
-      await db.delete(financialRecords).where(eq(financialRecords.orderId, input.orderId));
-      await db.delete(fileValidations).where(eq(fileValidations.orderId, input.orderId));
-      await db.delete(automationLogs).where(eq(automationLogs.orderId, input.orderId));
-      await db.delete(shipments).where(eq(shipments.orderId, input.orderId));
-      await db.delete(fiscalNotes).where(eq(fiscalNotes.orderId, input.orderId));
-      await db.delete(orderPayments).where(eq(orderPayments.orderId, input.orderId));
-      await db.delete(emailHistory).where(eq(emailHistory.orderId, input.orderId));
-      await db.delete(orderItems).where(eq(orderItems.orderId, input.orderId));
-      await db.delete(orders).where(eq(orders.id, input.orderId));
+      const existingTrashItem = await db.select({ id: deletedReceivedAccounts.id })
+        .from(deletedReceivedAccounts)
+        .where(eq(deletedReceivedAccounts.orderId, input.orderId))
+        .limit(1);
+      if (existingTrashItem.length) {
+        throw new TRPCError({ code: "CONFLICT", message: "Este recebimento já está na lixeira." });
+      }
+
+      await db.insert(deletedReceivedAccounts).values({
+        orderId: input.orderId,
+        deletedByAdminId: adminUser.adminId,
+        deletedByAdminName: adminUser.name,
+        deletedAt: Date.now(),
+      });
 
       await logAudit({
         adminId: adminUser.adminId,
         adminName: adminUser.name,
-        action: "delete_received_account",
-        entity: "orders",
+        action: "move_received_account_to_trash",
+        entity: "deletedReceivedAccounts",
         entityId: String(input.orderId),
         before: { orderNumber: order.orderNumber, totalPrice: order.totalPrice, paymentStatus: order.paymentStatus },
+        ipAddress: ctx.req.ip,
+      });
+
+      return { success: true };
+    }),
+
+  listDeletedContasRecebidas: adminOrManusAuthProcedure
+    .query(async ({ ctx }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode acessar a lixeira de contas recebidas." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const rows = await db.select({
+        trashId: deletedReceivedAccounts.id,
+        orderId: orders.id,
+        orderNumber: orders.orderNumber,
+        cliente: orders.guestName,
+        deliveryFullName: orders.deliveryFullName,
+        valor: orders.totalPrice,
+        deletedAt: deletedReceivedAccounts.deletedAt,
+        deletedByAdminName: deletedReceivedAccounts.deletedByAdminName,
+      })
+        .from(deletedReceivedAccounts)
+        .innerJoin(orders, eq(deletedReceivedAccounts.orderId, orders.id))
+        .orderBy(desc(deletedReceivedAccounts.deletedAt));
+
+      return rows.map((row) => ({ ...row, cliente: row.cliente || row.deliveryFullName || "Cliente" }));
+    }),
+
+  restoreContaRecebida: adminOrManusAuthProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const adminUser = (ctx as any).adminUser;
+      if (adminUser?.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode restaurar uma conta recebida." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const [trashItem] = await db.select().from(deletedReceivedAccounts)
+        .where(eq(deletedReceivedAccounts.orderId, input.orderId))
+        .limit(1);
+      if (!trashItem) throw new TRPCError({ code: "NOT_FOUND", message: "Este recebimento não está na lixeira." });
+
+      await db.delete(deletedReceivedAccounts).where(eq(deletedReceivedAccounts.orderId, input.orderId));
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "restore_received_account",
+        entity: "deletedReceivedAccounts",
+        entityId: String(input.orderId),
+        before: { deletedAt: trashItem.deletedAt },
+        after: { restoredAt: Date.now() },
         ipAddress: ctx.req.ip,
       });
 

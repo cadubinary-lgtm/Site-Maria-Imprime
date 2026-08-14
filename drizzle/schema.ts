@@ -202,6 +202,21 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
 
 /**
+ * Lixeira reversível de Contas Recebidas. Mantém o pedido intacto e apenas
+ * o oculta das consultas financeiras até que um Superadmin o restaure.
+ */
+export const deletedReceivedAccounts = mysqlTable("deletedReceivedAccounts", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().unique(),
+  deletedByAdminId: int("deletedByAdminId"),
+  deletedByAdminName: varchar("deletedByAdminName", { length: 255 }),
+  deletedAt: bigint("deletedAt", { mode: "number" }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DeletedReceivedAccount = typeof deletedReceivedAccounts.$inferSelect;
+
+/**
  * Order items - itens dentro de cada pedido
  */
 export const orderItems = mysqlTable("orderItems", {
