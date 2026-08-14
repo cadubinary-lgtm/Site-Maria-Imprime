@@ -2685,3 +2685,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar arrastar e soltar e validação amigável de tipo e tamanho no envio de artes
 - [x] Exibir animação e confirmação de sucesso após o envio completo das artes
 - [x] Adicionar botão Limpar todos para os arquivos de arte selecionados
+- [x] Diagnosticar e restabelecer a autenticação OAuth2 do Melhor Envio
+- [x] Validar o cálculo de frete do Melhor Envio no checkout
+- [x] Corrigir a validação OAuth2 do Melhor Envio para Produção
+- [x] Configurar o callback OAuth2 oficial do Melhor Envio para mariaimprime.com.br
+- [x] Desativar o Sandbox e forçar Produção na configuração do Melhor Envio
+- [x] Confirmar que o frete usa exclusivamente o Token Bearer e e-mail persistidos nas configurações de Produção
+- [x] Preparar checkpoint para publicar a integração do Melhor Envio em Produção

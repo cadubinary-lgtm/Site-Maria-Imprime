@@ -27,6 +27,10 @@ import {
   type MeCartItem,
 } from "./melhorenvio-api";
 
+// A conta oficial da Maria Imprime utiliza somente o ambiente de Produção.
+// Nunca reutilizar o valor persistido de sandbox nas chamadas à API.
+const MELHOR_ENVIO_SANDBOX = false;
+
 // Middleware: apenas admin pode acessar o módulo de logística
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "admin") {
@@ -117,7 +121,7 @@ const settingsRouter = router({
         senderDistrict: input.senderDistrict ?? existing?.senderDistrict ?? null,
         senderCity: input.senderCity ?? existing?.senderCity ?? null,
         senderStateAbbr: input.senderStateAbbr ?? existing?.senderStateAbbr ?? null,
-        sandbox: input.sandbox ?? existing?.sandbox ?? true,
+        sandbox: MELHOR_ENVIO_SANDBOX,
         cutoffTime: input.cutoffTime ?? existing?.cutoffTime ?? "13:00",
       };
 
@@ -133,11 +137,11 @@ const settingsRouter = router({
   testConnection: adminProcedure.mutation(async () => {
     const s = await requireSettings();
     try {
-      const profile = await getMeProfile(s.accessToken!, s.sandbox);
+      const profile = await getMeProfile(s.accessToken!, MELHOR_ENVIO_SANDBOX);
       return {
         success: true,
         user: `${profile.firstname} ${profile.lastname} (${profile.email})`,
-        sandbox: s.sandbox,
+        sandbox: MELHOR_ENVIO_SANDBOX,
       };
     } catch (err: any) {
       throw new TRPCError({
@@ -161,7 +165,7 @@ const carriersRouter = router({
   sync: adminProcedure.mutation(async () => {
     const db = await requireDb();
     const s = await requireSettings();
-    const companies = await listShipmentCompanies(s.accessToken!, s.sandbox);
+    const companies = await listShipmentCompanies(s.accessToken!, MELHOR_ENVIO_SANDBOX);
 
     let created = 0;
     let updated = 0;
@@ -328,7 +332,7 @@ const shippingRouter = router({
               own_hand: false,
             },
           };
-          const quotes = await calculateShipping(settings.accessToken, settings.sandbox, payload);
+          const quotes = await calculateShipping(settings.accessToken, MELHOR_ENVIO_SANDBOX, payload);
           for (const q of quotes) {
             // Filtrar apenas transportadoras ativas
             if (!q.error && activeCarrierMap.has(q.company.id)) {
@@ -699,7 +703,7 @@ const shipmentsRouter = router({
         },
       };
 
-      const cartResponse = await addToCart(s.accessToken!, s.sandbox, cartItem);
+      const cartResponse = await addToCart(s.accessToken!, MELHOR_ENVIO_SANDBOX, cartItem);
 
       const [inserted] = await db.insert(shipments).values({
         orderId: input.orderId,
@@ -739,7 +743,7 @@ const shipmentsRouter = router({
           message: "Esta expedição não tem um pedido no Melhor Envio.",
         });
       }
-      const checkoutResult = await checkoutShipment(s.accessToken!, s.sandbox, [
+      const checkoutResult = await checkoutShipment(s.accessToken!, MELHOR_ENVIO_SANDBOX, [
         shipment.meOrderId,
       ]);
 
@@ -758,7 +762,7 @@ const shipmentsRouter = router({
               // Aguarda 2s entre tentativas
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
-            const printResult = await printLabel(s.accessToken!, s.sandbox, [shipment.meOrderId]);
+            const printResult = await printLabel(s.accessToken!, MELHOR_ENVIO_SANDBOX, [shipment.meOrderId]);
             if (printResult.url) {
               labelUrl = printResult.url;
               break;
@@ -804,7 +808,7 @@ const shipmentsRouter = router({
       if (!shipment.meOrderId) return { labelUrl: null };
       if (shipment.labelUrl) return { labelUrl: shipment.labelUrl };
       try {
-        const printResult = await printLabel(s.accessToken!, s.sandbox, [shipment.meOrderId]);
+        const printResult = await printLabel(s.accessToken!, MELHOR_ENVIO_SANDBOX, [shipment.meOrderId]);
         await db
           .update(shipments)
           .set({ labelUrl: printResult.url })
@@ -825,7 +829,7 @@ const trackingRouter = router({
     .input(z.object({ trackingCode: z.string() }))
     .query(async ({ input }) => {
       const s = await requireSettings();
-      return trackShipment(s.accessToken!, s.sandbox, input.trackingCode);
+      return trackShipment(s.accessToken!, MELHOR_ENVIO_SANDBOX, input.trackingCode);
     }),
 });
 
