@@ -320,11 +320,11 @@ export function ProductImageUploader({
                 onDrop={(e) => handleDrop(e, slot)}
                 onDragEnd={handleDragEnd}
                 className={[
-                  "relative border-2 border-dashed rounded-lg overflow-hidden transition-all",
-                  url ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
-                  isDragging ? "opacity-40 scale-95 border-orange-400" : "",
-                  isDragOver && dragIndex !== slot ? "border-orange-500 bg-orange-50 scale-105 shadow-md" : "border-gray-300 bg-gray-50",
-                  !isDragging && !isDragOver ? "hover:border-orange-400" : "",
+                  "relative min-w-0 transition-all",
+                  url ? "cursor-grab active:cursor-grabbing" : "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50",
+                  isDragging ? "opacity-40 scale-95 ring-2 ring-orange-400" : "",
+                  isDragOver && dragIndex !== slot ? "scale-105 rounded-lg bg-orange-50 ring-2 ring-orange-500 shadow-md" : "",
+                  !url && !isDragging && !isDragOver ? "hover:border-orange-400" : "",
                 ].join(" ")}
                 style={{ height: compact ? 56 : 80 }}
                 onClick={() => !isUploading && !uploadingGallery && (url ? setPreviewUrl(url) : openGalleryPicker(slot))}
