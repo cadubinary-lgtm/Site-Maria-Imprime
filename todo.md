@@ -2670,3 +2670,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar Contas a Receber com lixeira reversível, Superadmin e motivo obrigatório
 - [x] Exibir a Lixeira de Contas a Receber com restauração e auditoria para Superadmin
 - [x] Adicionar exclusão permanente individual confirmada nas lixeiras de Contas a Receber e Contas Recebidas
+- [x] Aplicar lixeira protegida, restauração e exclusão individual em Todos os Pedidos

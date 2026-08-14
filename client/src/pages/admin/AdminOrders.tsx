@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "wouter";
-import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2 } from "lucide-react";
+import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import AdminAbandonedCarts from "./AdminAbandonedCarts";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -44,22 +46,46 @@ export default function AdminOrders() {
   const [search, setSearch]       = useState("");
   const [filter, setFilter]       = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [showTrash, setShowTrash] = useState(false);
+  const [orderToTrash, setOrderToTrash] = useState<any | null>(null);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [orderToRestore, setOrderToRestore] = useState<any | null>(null);
+  const [orderToPermanentlyDelete, setOrderToPermanentlyDelete] = useState<any | null>(null);
   const utils = trpc.useUtils();
+  const { adminUser } = useAdminAuth();
+  const canManageTrash = adminUser?.role === "superadmin";
 
-  const deleteOrderMutation = trpc.admin.deleteOrder.useMutation({
-    onSuccess: () => {
-      toast.success("Pedido excluído com sucesso");
-      setConfirmDeleteId(null);
-      utils.checkout.getAllOrders.invalidate();
+  const moveToTrashMutation = trpc.ordersTrash.moveToTrash.useMutation({
+    onSuccess: async () => {
+      toast.success("Pedido movido para a lixeira.");
+      setOrderToTrash(null);
+      setDeletionReason("");
+      await utils.checkout.getAllOrders.invalidate();
+      await utils.ordersTrash.list.invalidate();
     },
-    onError: (err) => {
-      toast.error(err.message || "Erro ao excluir pedido");
-      setConfirmDeleteId(null);
+    onError: (err) => toast.error(err.message || "Erro ao mover pedido para a lixeira."),
+  });
+  const restoreOrderMutation = trpc.ordersTrash.restore.useMutation({
+    onSuccess: async () => {
+      toast.success("Pedido restaurado com sucesso.");
+      setOrderToRestore(null);
+      await utils.checkout.getAllOrders.invalidate();
+      await utils.ordersTrash.list.invalidate();
     },
+    onError: (err) => toast.error(err.message || "Erro ao restaurar pedido."),
+  });
+  const permanentlyDeleteOrderMutation = trpc.ordersTrash.permanentlyDelete.useMutation({
+    onSuccess: async () => {
+      toast.success("Pedido removido permanentemente da lixeira.");
+      setOrderToPermanentlyDelete(null);
+      await utils.checkout.getAllOrders.invalidate();
+      await utils.ordersTrash.list.invalidate();
+    },
+    onError: (err) => toast.error(err.message || "Erro ao excluir pedido permanentemente."),
   });
 
   const { data: allOrders, isLoading } = trpc.checkout.getAllOrders.useQuery();
+  const { data: trashedOrders = [], isLoading: isLoadingTrash } = trpc.ordersTrash.list.useQuery(undefined, { enabled: canManageTrash && showTrash });
 
   const filtered = useMemo(() => {
     if (!allOrders) return [];
@@ -110,9 +136,12 @@ export default function AdminOrders() {
             </h1>
             <p className="text-gray-500 mt-1">Acompanhe e gerencie todos os pedidos operacionais</p>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/admin">← Voltar ao Admin</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {canManageTrash && <Button variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : ""}><Trash2 className="w-4 h-4 mr-1" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin">← Voltar ao Admin</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Busca e Filtros */}
@@ -219,35 +248,7 @@ export default function AdminOrders() {
                                   Ver <ChevronRight className="w-4 h-4 ml-1" />
                                 </Link>
                               </Button>
-                              {confirmDeleteId === order.id ? (
-                                <div className="flex items-center gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => deleteOrderMutation.mutate({ orderId: order.id })}
-                                    disabled={deleteOrderMutation.isPending}
-                                  >
-                                    {deleteOrderMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirmar"}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setConfirmDeleteId(null)}
-                                    disabled={deleteOrderMutation.isPending}
-                                  >
-                                    Cancelar
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => setConfirmDeleteId(order.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
+                              {canManageTrash && <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50" title={`Mover o pedido ${order.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setOrderToTrash(order); }}><Trash2 className="w-4 h-4" /></Button>}
                             </div>
                           </td>
                         </tr>
@@ -259,6 +260,27 @@ export default function AdminOrders() {
             )}
           </CardContent>
         </Card>
+
+        {canManageTrash && showTrash && (
+          <Card className="mt-6 border border-pink-200 shadow-sm">
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Trash2 className="w-4 h-4 text-pink-600" />Lixeira de Todos os Pedidos</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              {isLoadingTrash ? <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-pink-600" /></div> : !trashedOrders.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhum pedido na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-y bg-gray-50 text-gray-600"><th className="px-4 py-3 text-left font-semibold">Pedido</th><th className="px-4 py-3 text-left font-semibold">Cliente</th><th className="px-4 py-3 text-right font-semibold">Valor</th><th className="px-4 py-3 text-left font-semibold">Motivo</th><th className="px-4 py-3 text-left font-semibold">Excluído em</th><th className="px-4 py-3 text-left font-semibold">Usuário</th><th className="px-4 py-3 text-center font-semibold">Ação</th></tr></thead><tbody>{trashedOrders.map((order: any) => <tr key={order.trashId} className="border-b"><td className="px-4 py-3 font-mono font-semibold text-pink-600">{order.orderNumber}</td><td className="px-4 py-3 font-medium">{order.cliente || "Cliente não informado"}</td><td className="px-4 py-3 text-right font-semibold">{fmt(Number(order.valor))}</td><td className="max-w-60 px-4 py-3 text-xs text-gray-600">{order.deletionReason || "Motivo não informado"}</td><td className="px-4 py-3 whitespace-nowrap text-xs text-gray-600">{new Date(order.deletedAt).toLocaleString("pt-BR")}</td><td className="px-4 py-3 text-xs text-gray-600">{order.deletedByAdminName || "Usuário não informado"}</td><td className="px-4 py-3"><div className="flex justify-center gap-1"><Button variant="outline" size="sm" className="h-8 gap-1 text-xs" disabled={restoreOrderMutation.isPending} onClick={() => setOrderToRestore(order)}><RotateCcw className="w-3.5 h-3.5" />Restaurar</Button><Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" disabled={permanentlyDeleteOrderMutation.isPending} title={`Excluir permanentemente ${order.orderNumber}`} onClick={() => setOrderToPermanentlyDelete(order)}><Trash2 className="w-3.5 h-3.5" /></Button></div></td></tr>)}</tbody></table></div>}
+            </CardContent>
+          </Card>
+        )}
+
+        <Dialog open={Boolean(orderToTrash)} onOpenChange={(open) => { if (!open) { setOrderToTrash(null); setDeletionReason(""); } }}>
+          <DialogContent><DialogHeader><DialogTitle className="text-red-600">Mover pedido para a lixeira</DialogTitle></DialogHeader><p className="text-sm text-gray-600">O pedido {orderToTrash?.orderNumber} será ocultado da lista ativa e poderá ser restaurado posteriormente por um Superadmin.</p><div className="space-y-2"><label htmlFor="order-deletion-reason" className="text-sm font-medium">Motivo da exclusão <span className="text-red-600">*</span></label><textarea id="order-deletion-reason" value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} placeholder="Descreva o motivo da exclusão" maxLength={1000} className="min-h-24 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100" /><p className="text-xs text-gray-500">O motivo ficará registrado na lixeira e na auditoria.</p></div><DialogFooter><Button variant="outline" onClick={() => setOrderToTrash(null)}>Cancelar</Button><Button variant="destructive" disabled={moveToTrashMutation.isPending || deletionReason.trim().length < 3} onClick={() => { if (orderToTrash?.id && deletionReason.trim().length >= 3) moveToTrashMutation.mutate({ orderId: orderToTrash.id, reason: deletionReason.trim() }); }}>{moveToTrashMutation.isPending ? "Movendo..." : "Mover para lixeira"}</Button></DialogFooter></DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(orderToRestore)} onOpenChange={(open) => !open && setOrderToRestore(null)}>
+          <DialogContent><DialogHeader><DialogTitle>Restaurar este pedido?</DialogTitle></DialogHeader><p className="text-sm text-gray-600">O pedido {orderToRestore?.orderNumber} voltará imediatamente para a lista ativa de Todos os Pedidos.</p><DialogFooter><Button variant="outline" onClick={() => setOrderToRestore(null)}>Cancelar</Button><Button className="bg-green-600 hover:bg-green-700 text-white" disabled={restoreOrderMutation.isPending} onClick={() => { if (orderToRestore?.orderId) restoreOrderMutation.mutate({ orderId: orderToRestore.orderId }); }}>{restoreOrderMutation.isPending ? "Restaurando..." : "Confirmar restauração"}</Button></DialogFooter></DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(orderToPermanentlyDelete)} onOpenChange={(open) => !open && setOrderToPermanentlyDelete(null)}>
+          <DialogContent><DialogHeader><DialogTitle className="text-red-600">Excluir pedido permanentemente?</DialogTitle></DialogHeader><p className="text-sm text-gray-600">O pedido {orderToPermanentlyDelete?.orderNumber} e seus registros vinculados serão removidos definitivamente. Esta ação não poderá ser desfeita.</p><DialogFooter><Button variant="outline" onClick={() => setOrderToPermanentlyDelete(null)}>Cancelar</Button><Button variant="destructive" disabled={permanentlyDeleteOrderMutation.isPending} onClick={() => { if (orderToPermanentlyDelete?.orderId) permanentlyDeleteOrderMutation.mutate({ orderId: orderToPermanentlyDelete.orderId }); }}>{permanentlyDeleteOrderMutation.isPending ? "Excluindo..." : "Excluir permanentemente"}</Button></DialogFooter></DialogContent>
+        </Dialog>
       </div>
     </div>
     </AdminLayout>
