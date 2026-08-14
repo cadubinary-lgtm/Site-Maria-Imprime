@@ -695,7 +695,7 @@ export const financeiroRouter = router({
 
       // Entradas automáticas vêm do registro financeiro confirmado, que possui
       // a data de pagamento real e evita distorções pela data de criação do pedido.
-      const [paidRecords, paidRecordsBeforeStart, manualEntries, manualEntriesBeforeStart] = await Promise.all([
+      const [paidRecords, paidRecordsBeforeStart, manualEntries, manualEntriesBeforeStart, trashedReceivedAccounts] = await Promise.all([
         db.select().from(financeiro).where(and(
           eq(financeiro.status, "pago"),
           isNotNull(financeiro.dataPagamento),
@@ -711,16 +711,21 @@ export const financeiroRouter = router({
           .where(and(gte(cashFlowEntries.entryDate, start), lte(cashFlowEntries.entryDate, end)))
           .orderBy(desc(cashFlowEntries.entryDate)),
         db.select().from(cashFlowEntries).where(lt(cashFlowEntries.entryDate, start)),
+        db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts),
       ]);
 
-      const openingIncome = paidRecordsBeforeStart.reduce((total, record) => total + parseFloat(record.valor || "0"), 0)
+      const trashedOrderIds = new Set(trashedReceivedAccounts.map((item) => item.orderId));
+      const visiblePaidRecords = paidRecords.filter((record) => !record.pedidoId || !trashedOrderIds.has(record.pedidoId));
+      const visiblePaidRecordsBeforeStart = paidRecordsBeforeStart.filter((record) => !record.pedidoId || !trashedOrderIds.has(record.pedidoId));
+
+      const openingIncome = visiblePaidRecordsBeforeStart.reduce((total, record) => total + parseFloat(record.valor || "0"), 0)
         + manualEntriesBeforeStart.filter((entry) => entry.entryType === "income").reduce((total, entry) => total + parseFloat(entry.amount || "0"), 0);
       const openingExpense = manualEntriesBeforeStart.filter((entry) => entry.entryType === "expense").reduce((total, entry) => total + parseFloat(entry.amount || "0"), 0);
       const openingBalance = openingIncome - openingExpense;
 
       const dateMap: Record<string, { income: number; expense: number; entries: any[] }> = {};
 
-      for (const record of paidRecords) {
+      for (const record of visiblePaidRecords) {
         const receivedAt = record.dataPagamento!;
         const date = new Date(receivedAt).toISOString().split("T")[0];
         if (!dateMap[date]) dateMap[date] = { income: 0, expense: 0, entries: [] };
