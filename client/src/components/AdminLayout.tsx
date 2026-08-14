@@ -16,6 +16,7 @@ import { trpc } from "@/lib/trpc";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
+import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 const SIDEBAR_SCROLL_KEY = "admin_sidebar_scroll";
 
@@ -452,7 +453,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SidebarScrollContext.Provider value={{ navRef, searchQuery }}>
-      <div className="flex h-screen bg-gray-100 overflow-hidden">
+      <div className={`${ADMIN_VISUAL_SYSTEM.root} flex h-screen bg-gray-100 overflow-hidden`}>
         {/* Sidebar */}
         <aside
           className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}

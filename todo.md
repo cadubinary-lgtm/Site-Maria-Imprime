@@ -2715,3 +2715,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o texto Trocar por ícone com a mesma cor da lixeira nas miniaturas
 - [x] Substituir alerta nativo de saída por diálogo com Salvar, Descartar e Continuar editando
 - [x] Remover contornos das miniaturas e manter imagens arredondadas na galeria de edição
+- [x] Padronizar cores de campos, ícones e estados interativos em todo o painel administrativo com referência em Orçamentos
