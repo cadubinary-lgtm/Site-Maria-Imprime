@@ -212,7 +212,11 @@ export default function AdminProducts() {
         tagPosition: (editForm as any).tagPosition || "top-right",
       });
       await updateSegmentsMutation.mutateAsync({ productId: editingId, segmentIds: editForm.segmentIds });
-      toast.success("Produto atualizado com sucesso!");
+      toast.success("Produto atualizado com sucesso!", {
+        description: "As alterações foram salvas e já estão refletidas no catálogo.",
+        position: "top-right",
+        duration: 3500,
+      });
       setEditingId(null);
       refetch();
     } catch (error) {
@@ -608,6 +612,8 @@ export default function AdminProducts() {
                             onClick={handleSave}
                             className="w-full bg-orange-500 hover:bg-orange-600"
                             disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                            aria-busy={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                            aria-live="polite"
                           >
                             {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
                               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
