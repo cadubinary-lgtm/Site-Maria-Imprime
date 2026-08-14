@@ -6,5 +6,7 @@ describe("layout compacto das fotos de produto", () => {
     expect(PRODUCT_IMAGE_LAYOUT.compactColumns).toContain("xl:items-start");
     expect(PRODUCT_IMAGE_LAYOUT.galleryPanel).toContain("rounded-xl");
     expect(PRODUCT_IMAGE_LAYOUT.sectionHeader).toContain("justify-between");
+    expect(PRODUCT_IMAGE_LAYOUT.thumbnailImage).toContain("right-8");
+    expect(PRODUCT_IMAGE_LAYOUT.thumbnailActions).toContain("justify-between");
   });
 });
