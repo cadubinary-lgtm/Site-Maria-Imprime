@@ -2679,3 +2679,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir apuração de aprovações, conversões e valores no dashboard de Orçamentos
 - [x] Permitir restaurar o status anterior de um orçamento cancelado
 - [x] Exigir confirmação antes de cancelar, restaurar status e mover orçamentos para a lixeira
+- [x] Permitir múltiplos arquivos de arte com lista removível no configurador de produto

@@ -260,6 +260,7 @@ export const orderItems = mysqlTable("orderItems", {
   variationSnapshot: longtext("variationSnapshot"), // JSON array [{name, value}] snapshot das variações
   customDimensions: varchar("customDimensions", { length: 100 }), // Ex: "1x2" (largura x altura em metros)
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
+  artFileUrls: longtext("artFileUrls"), // JSON com todas as URLs de arte enviadas
   notes: longtext("notes"), // Observações do cliente
   prazoName: varchar("prazoName", { length: 100 }), // Nome do prazo de produção
   prazoHours: int("prazoHours").default(0), // Prazo de produção em horas
@@ -1112,6 +1113,7 @@ export const cartItems = mysqlTable("cartItems", {
   customDimensions: varchar("customDimensions", { length: 255 }), // Ex: "2.5x1.5" para m²
   priceAtCart: decimal("priceAtCart", { precision: 10, scale: 2 }).notNull(), // Preço no momento da adição
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
+  artFileUrls: longtext("artFileUrls"), // JSON com todas as URLs de arte enviadas
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3
   notes: longtext("notes"), // Observações do cliente
   shippingMethod: varchar("shippingMethod", { length: 50 }).default("retirada"), // Método de frete pré-selecionado

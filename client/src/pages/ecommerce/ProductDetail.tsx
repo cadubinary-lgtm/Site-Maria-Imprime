@@ -38,6 +38,12 @@ interface ShippingQuote {
   fixedType?: string;
 }
 
+interface SelectedArtFile {
+  id: string;
+  file: File;
+  preview: string | null;
+}
+
 const PRODUCT_FEATURES = [
   { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
@@ -130,8 +136,7 @@ export default function ProductDetail() {
 
   // Configuração
   const [quantity, setQuantity] = useState(1);
-  const [artFile, setArtFile] = useState<File | null>(null);
-  const [artFilePreview, setArtFilePreview] = useState<string | null>(null);
+  const [artFiles, setArtFiles] = useState<SelectedArtFile[]>([]);
   const [artLink, setArtLink] = useState("");
   const [fileMode, setFileMode] = useState<"upload" | "link">("upload");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -422,7 +427,7 @@ export default function ProductDetail() {
     if (isM2 && area === 0) missing.push({ id: "dimensions", message: "Informe as medidas (Largura e Altura)" });
     
     // 4. Arquivo
-    if (fileMode === "upload" && !artFile) missing.push({ id: "file-upload", message: "Envie um arquivo de arte" });
+    if (fileMode === "upload" && artFiles.length === 0) missing.push({ id: "file-upload", message: "Envie ao menos um arquivo de arte" });
     if (fileMode === "link" && !artLink) missing.push({ id: "file-link", message: "Informe o link do arquivo" });
     
     // 5. Prazo de produção
@@ -432,7 +437,7 @@ export default function ProductDetail() {
     if (!acceptedTerms) missing.push({ id: "terms", message: "Aceite os termos e condições" });
     
     return missing;
-  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFile, artLink, selectedDeliveryOption, acceptedTerms]);
+  }, [variationTypes, selectedVariations, visibleAttributes, selectedAttributes, isM2, area, fileMode, artFiles, artLink, selectedDeliveryOption, acceptedTerms]);
 
   const canAddToCart = missingFields.length === 0;
 
@@ -477,18 +482,33 @@ export default function ProductDetail() {
   }, [dimWidth, dimHeight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Arquivo ─────────────────────────────────────────────────────────────
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 100 * 1024 * 1024) { toast.error("Arquivo muito grande (máx 100MB)"); return; }
-    setArtFile(file);
-    if (file.type.startsWith("image/")) {
-      const r = new FileReader();
-      r.onload = ev => setArtFilePreview(ev.target?.result as string);
-      r.readAsDataURL(file);
-    } else setArtFilePreview(null);
-    // Avança automaticamente para o próximo step após selecionar arquivo
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? []);
+    if (!selected.length) return;
+    const validFiles = selected.filter((file) => file.size <= 100 * 1024 * 1024);
+    if (validFiles.length !== selected.length) toast.error("Alguns arquivos foram ignorados por excederem 100MB.");
+    const filesWithPreview = await Promise.all(validFiles.map(async (file): Promise<SelectedArtFile> => {
+      const preview = file.type.startsWith("image/")
+        ? await new Promise<string | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target?.result as string);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          })
+        : null;
+      return { id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`, file, preview };
+    }));
+    setArtFiles((current) => {
+      const existing = new Set(current.map((item) => `${item.file.name}-${item.file.size}-${item.file.lastModified}`));
+      return [...current, ...filesWithPreview.filter((item) => !existing.has(`${item.file.name}-${item.file.size}-${item.file.lastModified}`))];
+    });
+    e.target.value = "";
     setOpenSteps(prev => ({ ...prev, [fileStepIdx]: false, [prazoStepIdx]: true }));
+  };
+
+  const removeArtFile = (fileId: string) => {
+    setArtFiles((current) => current.filter((item) => item.id !== fileId));
+    resetUpload();
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
@@ -664,6 +684,7 @@ export default function ProductDetail() {
           customDimensions: customDimensions ?? null,
           priceAtCart: String(effectivePrice),
           artFileUrl: fileMode === "link" ? artLink || null : null,
+          artFileUrls: fileMode === "link" && artLink ? JSON.stringify([artLink]) : null,
           notes: combinedNotes ?? null,
           productName: product.name,
           productImage: product.imageUrl ?? null,
@@ -684,18 +705,22 @@ export default function ProductDetail() {
       optimisticItemAdded = true;
       openCart();
 
-      let artUrl: string | undefined = fileMode === "link" ? artLink || undefined : undefined;
-      if (artFile && fileMode === "upload") {
+      let artUrls: string[] = fileMode === "link" && artLink ? [artLink] : [];
+      if (artFiles.length && fileMode === "upload") {
         try {
-          const { url } = await doChunkedUpload(artFile);
-          artUrl = url;
+          for (const art of artFiles) {
+            const { url } = await doChunkedUpload(art.file);
+            artUrls.push(url);
+          }
         } catch (uploadErr: any) {
           if (uploadErr?.message === "CANCELLED") { removeOptimisticItem(); setIsProcessing(false); return; }
           console.error('[upload-art] catch:', uploadErr?.message);
           toast.error(uploadErr?.message ?? "Erro ao enviar o arquivo", { duration: 8000 });
-          artUrl = undefined;
+          removeOptimisticItem();
+          return;
         }
       }
+      const artUrl = artUrls[0];
       const addedItem = await addToCartMutation.mutateAsync({
         productId, quantity,
         selectedAttributes: attrsJson,
@@ -703,6 +728,7 @@ export default function ProductDetail() {
         priceAtCart: effectivePrice,
         notes: combinedNotes,
         artFileUrl: artUrl,
+        artFileUrls: artUrls.length ? JSON.stringify(artUrls) : undefined,
         shippingMethod: shippingId,
         shippingPrice,
         shippingLabel,
@@ -1131,7 +1157,7 @@ export default function ProductDetail() {
               title="Enviar Arquivo"
               isOpen={!!openSteps[fileStepIdx]}
               onToggle={() => toggleStep(fileStepIdx)}
-              summary={artFile ? artFile.name : (artLink ? 'Link enviado' : undefined)}
+              summary={artFiles.length ? (artFiles.length === 1 ? artFiles[0].file.name : `${artFiles.length} arquivos selecionados`) : (artLink ? 'Link enviado' : undefined)}
             >
               <div className="mt-3 space-y-3">
                 {/* Tabs */}
@@ -1146,8 +1172,8 @@ export default function ProductDetail() {
                     }`}
                   >
                     <Upload className="w-4 h-4" />
-                    Upload de arquivo
-                    <span className="text-xs text-gray-400 block leading-tight">Envie do seu dispositivo</span>
+                    Upload de arquivos
+                    <span className="text-xs text-gray-400 block leading-tight">Envie um ou mais arquivos do seu dispositivo</span>
                   </button>
                   <button
                     type="button"
@@ -1173,7 +1199,7 @@ export default function ProductDetail() {
                       <div className="flex items-center justify-center gap-3">
                         <Upload className="w-6 h-6 text-gray-400 flex-shrink-0" />
                         <div className="text-left">
-                          <p className="text-sm text-gray-600 font-medium">Clique para selecionar ou arraste aqui</p>
+                          <p className="text-sm text-gray-600 font-medium">Clique para selecionar um ou mais arquivos</p>
                           <p className="text-xs text-gray-400">PDF, PNG, JPG, TIFF, AI, CDR — máx 100MB</p>
                         </div>
                         <span className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition flex-shrink-0">
@@ -1187,26 +1213,25 @@ export default function ProductDetail() {
                       type="file"
                       className="hidden"
                       accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.jpeg,.png,.tiff,.tif,.svg"
+                      multiple
                       onChange={handleFileChange}
                     />
 
-                    {artFile && (
-                      <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
-                        {artFilePreview
-                          ? <img src={artFilePreview} alt="Preview" className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-green-200" />
-                          : <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-8 h-8 text-green-600" />
+                    {artFiles.length > 0 && (
+                      <div className="space-y-2">
+                        {artFiles.map((art) => (
+                          <div key={art.id} className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
+                            {art.preview
+                              ? <img src={art.preview} alt={`Prévia de ${art.file.name}`} className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-green-200" />
+                              : <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-8 h-8 text-green-600" /></div>}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-green-800 truncate">{art.file.name}</p>
+                              <p className="text-xs text-green-600 mt-0.5">{(art.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                              <div className="flex items-center gap-1 mt-1"><CheckCircle2 className="w-3.5 h-3.5 text-green-600" /><span className="text-xs text-green-700 font-medium">Arquivo selecionado</span></div>
                             </div>
-                        }
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-green-800 truncate">{artFile.name}</p>
-                          <p className="text-xs text-green-600 mt-0.5">{(artFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                            <span className="text-xs text-green-700 font-medium">Arquivo selecionado</span>
+                            <button type="button" onClick={() => removeArtFile(art.id)} className="text-gray-400 hover:text-red-500" aria-label={`Remover ${art.file.name}`}>✕</button>
                           </div>
-                        </div>
-                        <button type="button" onClick={() => { setArtFile(null); setArtFilePreview(null); resetUpload(); }} className="text-gray-400 hover:text-red-500">✕</button>
+                        ))}
                       </div>
                     )}
                     {uploadState.isUploading && (
