@@ -4,13 +4,14 @@ import { readFileSync } from "node:fs";
 describe("lista Todos os Clientes", () => {
   it("reproduz as sete colunas enxutas da referência e preserva a tag de tipo", () => {
     const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
+    const generalCustomerTable = page.slice(page.indexOf("{/* Lista de clientes */}"), page.indexOf("<CustomerDetailsDialog"));
     ["Cliente", "Contato", "E-mail", "Status", "Cadastro", "Retirada", "Ações"].forEach((column) => {
-      expect(page).toContain(`>${column}</th>`);
+      expect(generalCustomerTable).toContain(`>${column}</th>`);
     });
     ["Compras", "Produtos", "Última compra", "Situação"].forEach((column) => {
-      expect(page).not.toContain(`>${column}</th>`);
+      expect(generalCustomerTable).not.toContain(`>${column}</th>`);
     });
-    expect(page).not.toContain(">Tabela de Preços</th>");
+    expect(generalCustomerTable).not.toContain(">Tabela de Preços</th>");
     expect(page).toContain("TYPE_LABELS[client.clientType]");
   });
 
@@ -47,6 +48,13 @@ describe("lista Todos os Clientes", () => {
     expect(page).toContain("ChevronDown");
     expect(page).toContain("text-gray-400 hover:bg-transparent hover:text-pink-600");
     expect(page).toContain("{isActionExpanded && <>");
+  });
+
+  it("inclui no Dashboard de Clientes o ranking dos 30 maiores compradores recentes", () => {
+    const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
+    expect(page).toContain("getTopCustomersLastTwoMonths.useQuery");
+    expect(page).toContain("30 clientes que mais compraram nos últimos dois meses");
+    expect(page).toContain("Total no período");
   });
 
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {

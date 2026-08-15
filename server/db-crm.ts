@@ -1,7 +1,8 @@
 import { getDb } from "./db";
 import { clients, customerAccounts, orders, orderItems } from "../drizzle/schema";
-import { eq, desc, sql, and, like, or, inArray, ne } from "drizzle-orm";
+import { eq, desc, sql, and, like, or, inArray, ne, gte, isNotNull } from "drizzle-orm";
 import { aggregateCrmDashboardClients, summarizeCrmDashboard, toSiteDashboardClients } from "./crm-dashboard";
+import { getTwoMonthsAgo, rankTopCustomersLastTwoMonths } from "./crm-top-customers";
 
 /**
  * Criar novo cliente
@@ -189,6 +190,72 @@ export async function getOperationalCrmDashboard(options: {
     return (left.daysWithoutPurchase ?? -1) - (right.daysWithoutPurchase ?? -1);
   });
   return { clients: dashboardClients, metrics: summarizeCrmDashboard(dashboardClients) };
+}
+
+/** Lista os clientes com maior valor de pedidos não cancelados nos dois meses anteriores. */
+export async function getTopCustomersLastTwoMonths(limit = 30) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const cutoff = getTwoMonthsAgo();
+  const recentOrderCondition = (foreignKey: typeof orders.clientId | typeof orders.customerId) => and(
+    isNotNull(foreignKey),
+    ne(orders.status, "cancelado"),
+    gte(orders.createdAt, cutoff),
+  );
+
+  const [legacyOrders, storeOrders] = await Promise.all([
+    db.select({ clientId: orders.clientId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
+      .from(orders)
+      .where(recentOrderCondition(orders.clientId)),
+    db.select({ customerId: orders.customerId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
+      .from(orders)
+      .where(recentOrderCondition(orders.customerId)),
+  ]);
+
+  const legacyIds = legacyOrders.flatMap((order) => order.clientId ? [order.clientId] : []);
+  const customerIds = storeOrders.flatMap((order) => order.customerId ? [order.customerId] : []);
+  const [legacyCustomers, storeCustomers] = await Promise.all([
+    legacyIds.length ? db.select().from(clients).where(inArray(clients.id, legacyIds)) : [],
+    customerIds.length ? db.select({
+      id: customerAccounts.id,
+      firstName: customerAccounts.firstName,
+      lastName: customerAccounts.lastName,
+      email: customerAccounts.email,
+      phone: customerAccounts.phone,
+      accountType: customerAccounts.accountType,
+    }).from(customerAccounts).where(inArray(customerAccounts.id, customerIds)) : [],
+  ]);
+
+  const normalizedLegacyCustomers = legacyCustomers.map((customer) => ({
+    key: `crm:${customer.id}`,
+    id: customer.id,
+    source: "crm" as const,
+    name: customer.name,
+    clientType: customer.clientType === "revendedor" || customer.clientType === "agencia" ? customer.clientType : "balcao" as const,
+    email: customer.email,
+    phone: customer.phone || customer.whatsapp,
+  }));
+  const normalizedStoreCustomers = storeCustomers.map((customer) => ({
+    key: `site:${customer.id}`,
+    id: -customer.id,
+    externalId: customer.id,
+    source: "site" as const,
+    name: `${customer.firstName} ${customer.lastName}`.trim(),
+    clientType: customer.accountType === "reseller" ? "revendedor" as const : customer.accountType === "agency" ? "agencia" as const : "site" as const,
+    email: customer.email,
+    phone: customer.phone,
+  }));
+
+  const recentOrders = [
+    ...legacyOrders.flatMap((order) => order.clientId ? [{ customerKey: `crm:${order.clientId}`, totalPrice: order.totalPrice, createdAt: order.createdAt }] : []),
+    ...storeOrders.flatMap((order) => order.customerId ? [{ customerKey: `site:${order.customerId}`, totalPrice: order.totalPrice, createdAt: order.createdAt }] : []),
+  ];
+
+  return {
+    cutoff,
+    customers: rankTopCustomersLastTwoMonths([...normalizedLegacyCustomers, ...normalizedStoreCustomers], recentOrders, { limit }),
+  };
 }
 
 /**

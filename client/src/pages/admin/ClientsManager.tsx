@@ -181,6 +181,10 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     offset: 0,
     clientType: filterType || undefined,
   });
+  const { data: topCustomersData, isLoading: isLoadingTopCustomers } = trpc.crm.getTopCustomersLastTwoMonths.useQuery(
+    { limit: 30 },
+    { enabled: isDashboardView },
+  );
 
   // Mutations
   const createClientMutation = trpc.crm.createClient.useMutation({
@@ -326,6 +330,49 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
             <Card className="border-gray-200 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Sem compras</span><Clock3 className="h-4 w-4 text-gray-500" /></div><p className="mt-2 text-2xl font-bold text-gray-900">{metrics?.clientsWithoutPurchases ?? 0}</p><p className="text-xs text-gray-500">Clientes a ativar</p></CardContent></Card>
             <Card className="col-span-2 border-gray-200 shadow-sm lg:col-span-1"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Volume comprado</span><WalletCards className="h-4 w-4 text-pink-600" /></div><p className="mt-2 text-xl font-bold text-gray-900">{formatCurrency(metrics?.totalVolume)}</p><p className="text-xs text-gray-500">Pedidos não cancelados</p></CardContent></Card>
           </div>
+        )}
+
+        {isDashboardView && (
+          <Card className="mb-6 border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-gray-900">30 clientes que mais compraram nos últimos dois meses</CardTitle>
+              <CardDescription>Ranking por valor total de pedidos não cancelados no período.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {isLoadingTopCustomers ? (
+                <div className="py-8 text-center text-sm text-gray-500">Carregando ranking comercial...</div>
+              ) : topCustomersData?.customers?.length ? (
+                <div className="overflow-x-auto">
+                  <table className="customer-list-standard w-full text-sm">
+                    <thead>
+                      <tr className="border-y bg-gray-50">
+                        <th className="text-left font-medium text-gray-600">Pos.</th>
+                        <th className="text-left font-medium text-gray-600">Cliente</th>
+                        <th className="text-left font-medium text-gray-600">Tipo</th>
+                        <th className="text-left font-medium text-gray-600">Pedidos</th>
+                        <th className="text-left font-medium text-gray-600">Última compra</th>
+                        <th className="text-left font-medium text-gray-600">Total no período</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {topCustomersData.customers.map((customer, index) => (
+                        <tr key={customer.key} className="hover:bg-gray-50">
+                          <td className="font-semibold text-gray-500">{index + 1}</td>
+                          <td><p className="font-medium text-gray-900">{customer.name}</p><p className="text-xs text-gray-500">{customer.email || customer.phone || "Sem contato informado"}</p></td>
+                          <td><span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${TYPE_LABELS[customer.clientType]?.color ?? "bg-gray-100 text-gray-700"}`}>{TYPE_LABELS[customer.clientType]?.label ?? customer.clientType}</span></td>
+                          <td className="text-gray-700">{customer.totalOrders}</td>
+                          <td className="text-gray-700">{formatDate(customer.lastPurchase)}</td>
+                          <td className="font-semibold text-gray-900">{formatCurrency(customer.totalVolume)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-sm text-gray-500">Não há compras não canceladas nos últimos dois meses.</div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {/* Barra de busca e filtros */}

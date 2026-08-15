@@ -10,6 +10,7 @@ import {
   getTopClients,
   getClientsByType,
   getOperationalCrmDashboard,
+  getTopCustomersLastTwoMonths,
   updateClientStats,
 } from "./db-crm";
 import { getDb } from "./db";
@@ -74,6 +75,12 @@ export const crmRouter = router({
     )
     .query(async ({ input }) => {
       return await getOperationalCrmDashboard(input);
+    }),
+
+  getTopCustomersLastTwoMonths: adminProcedure
+    .input(z.object({ limit: z.number().min(1).max(30).default(30) }))
+    .query(async ({ input }) => {
+      return await getTopCustomersLastTwoMonths(input.limit);
     }),
 
   /**
