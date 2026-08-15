@@ -196,6 +196,45 @@ export const crmRouter = router({
       return { client, orders: orderRows };
     }),
 
+  adminUpdateBalcaoClient: adminProcedure
+    .input(z.object({
+      clientId: z.number(),
+      name: z.string().min(2),
+      email: z.string().email().optional().or(z.literal("")),
+      phone: z.string().optional(),
+      whatsapp: z.string().optional(),
+      cpfCnpj: z.string().optional(),
+      priceTier: z.enum(["final", "reseller"]),
+      addressZipCode: z.string().optional(),
+      addressStreet: z.string().optional(),
+      addressNumber: z.string().optional(),
+      addressComplement: z.string().optional(),
+      addressNeighborhood: z.string().optional(),
+      addressCity: z.string().optional(),
+      addressState: z.string().max(2).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { clients } = await import("../drizzle/schema.js");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
+      await db.update(clients).set({
+        name: input.name.trim(),
+        email: input.email?.trim().toLowerCase() || null,
+        phone: input.phone?.trim() || null,
+        whatsapp: input.whatsapp?.trim() || null,
+        cpfCnpj: input.cpfCnpj?.replace(/\D/g, "") || null,
+        priceTier: input.priceTier,
+        addressZipCode: input.addressZipCode?.replace(/\D/g, "") || null,
+        addressStreet: input.addressStreet?.trim() || null,
+        addressNumber: input.addressNumber?.trim() || null,
+        addressComplement: input.addressComplement?.trim() || null,
+        addressNeighborhood: input.addressNeighborhood?.trim() || null,
+        addressCity: input.addressCity?.trim() || null,
+        addressState: input.addressState?.trim().toUpperCase() || null,
+      } as any).where(eq(clients.id, input.clientId));
+      return { success: true };
+    }),
+
   adminDeleteBalcaoClient: adminProcedure
     .input(z.object({ clientId: z.number() }))
     .mutation(async ({ input }) => {

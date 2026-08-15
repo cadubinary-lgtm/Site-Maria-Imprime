@@ -2777,3 +2777,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar Editar Cliente em Dados Pessoais, Tabela de Preços e Endereço de Entrega com rótulos claros
 - [x] Pré-preencher todos os campos de edição com os dados cadastrados do cliente
 - [x] Identificar cada campo de edição e permitir alterar a Tabela de Preços do cliente
+- [x] Padronizar Clientes Balcão, Revendedores e Agências com a tabela, edição e ações de Clientes Site
