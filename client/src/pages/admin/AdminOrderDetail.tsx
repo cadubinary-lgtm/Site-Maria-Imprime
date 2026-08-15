@@ -1406,6 +1406,12 @@ export function OrderDetailContent({
                             variationSnapshot={item.variationSnapshot}
                             selectedAttributes={item.selectedAttributes}
                             notes={item.notes}
+                            prazoName={item.prazoName}
+                            urgencyRate={item.urgencyRate}
+                            urgencyMultiplier={item.urgencyMultiplier}
+                            urgencyUnit={item.urgencyUnit}
+                            urgencySurcharge={item.urgencySurcharge}
+                            quantity={item.quantity}
                           />
                           {!item.customDimensions && !item.variationSnapshot && !item.selectedAttributes && !item.notes && (
                             <p className="text-xs text-gray-400 italic">Sem especificações adicionais</p>

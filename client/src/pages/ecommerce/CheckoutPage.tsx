@@ -1222,6 +1222,11 @@ export default function CheckoutPage() {
                                     artFileUrl={item.artFileUrl}
                                     notes={item.notes}
                                     prazoName={item.prazoName}
+                                    urgencyRate={item.urgencyRate}
+                                    urgencyMultiplier={item.urgencyMultiplier}
+                                    urgencyUnit={item.urgencyUnit}
+                                    urgencySurcharge={item.urgencySurcharge}
+                                    quantity={item.quantity}
                                     forecastLabel={item.forecastLabel}
                                     shippingLabel={item.shippingLabel}
                                     shippingPrice={item.shippingPrice}
