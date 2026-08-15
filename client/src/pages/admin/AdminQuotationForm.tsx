@@ -1818,9 +1818,12 @@ export default function AdminQuotationForm() {
                     </Tooltip>
                   </div>
                   {hasManualTotal && (
-                    <button type="button" aria-label="Limpar Acerto Total" className="text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600" onClick={clearManualTotal}>
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button type="button" className="text-xs text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600" onClick={clearManualTotal}>Limpar</button>
+                      <button type="button" aria-label="Limpar Acerto Total" className="text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600" onClick={clearManualTotal}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
                 <Input
