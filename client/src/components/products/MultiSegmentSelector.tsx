@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface MultiSegmentSelectorProps {
   productId: number;
@@ -60,20 +60,24 @@ export default function MultiSegmentSelector({
     <div className="space-y-4">
       {/* Segmentos Selecionados */}
       {selectedSegments.length > 0 && (
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="border-gray-200 bg-white">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Segmentos Selecionados</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {selectedSegments.map((segment) => (
-                <Badge
-                  key={segment.id}
-                  className="bg-blue-600 text-white cursor-pointer hover:bg-blue-700 flex items-center gap-1"
-                  onClick={() => handleRemoveSegment(segment.id)}
-                >
-                  {segment.name}
-                  <X className="w-3 h-3" />
+                <Badge key={segment.id} className="flex items-center gap-1.5 bg-gray-100 text-gray-700">
+                  <span>{segment.name}</span>
+                  <button
+                    type="button"
+                    className="rounded p-0.5 text-gray-400 transition-colors hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600 focus-visible:outline-none"
+                    onClick={() => handleRemoveSegment(segment.id)}
+                    title={`Excluir segmento ${segment.name}`}
+                    aria-label={`Excluir segmento ${segment.name}`}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
