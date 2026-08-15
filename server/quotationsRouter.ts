@@ -139,6 +139,7 @@ export const quotationsRouter = router({
         kpis: {
           rascunhos: Number(kpi.rascunhos ?? 0),
           enviados: Number(kpi.enviados ?? 0),
+          emNegociacao: Number(kpi.emNegociacao ?? 0),
           aprovados: Number(kpi.aprovados ?? 0),
           expirados: Number(kpi.expirados ?? 0),
           valorNegociacao: Number(kpi.valorNegociacao ?? 0),
