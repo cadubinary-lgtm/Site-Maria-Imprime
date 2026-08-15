@@ -47,6 +47,8 @@ O processo de compra poderá envolver escolha do produto, medidas, material, aca
 
 A produção será iniciada após a confirmação do pagamento e o cumprimento das demais condições necessárias ao pedido. Caso o pagamento não seja aprovado, o pedido poderá permanecer aguardando regularização ou ser cancelado conforme as condições aplicáveis.
 
+As formas de pagamento, bandeiras, parcelamentos, limites e demais condições exibidos no checkout dependem da disponibilidade e das regras do processador de pagamentos homologado, bem como das análises e autorizações realizadas por ele e, quando aplicável, pela instituição financeira do cliente. A Maria Imprime poderá disponibilizar, restringir ou substituir modalidades de pagamento conforme essa disponibilidade, apresentando no checkout as opções efetivamente habilitadas para cada pedido. O cliente não deverá considerar como garantida uma modalidade que não esteja disponível ou aprovada no momento da conclusão da compra, sem prejuízo dos direitos previstos na legislação aplicável.
+
 8. Envio da Arte
 
 O cliente poderá enviar sua arte pelos meios disponibilizados na página do produto. O arquivo deverá estar íntegro, acessível e em condições adequadas para produção. Arquivos corrompidos, incompletos, protegidos por senha ou inacessíveis poderão impedir ou atrasar a produção.
