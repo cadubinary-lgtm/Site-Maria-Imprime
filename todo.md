@@ -2733,3 +2733,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar lixeira padrão para remover apenas o ícone de um segmento em edição
 - [x] Reorganizar o Dashboard de Linha de Produção para leitura compacta e ações operacionais claras
 - [x] Adicionar busca, filtros e ordenação no Dashboard de Linha de Produção
+- [x] Adicionar paginação à fila do Dashboard de Linha de Produção

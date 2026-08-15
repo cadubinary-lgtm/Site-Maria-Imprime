@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { getProductionDashboardSummary, isProductionPriority } from "@/lib/production-dashboard";
 import { filterAndSortProductionOrders, type ProductionDashboardSort } from "@/lib/production-dashboard-filters";
-import { AlertTriangle, ArrowRight, ClipboardCheck, Loader2, PackageCheck, Printer, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
+import { paginateProductionDashboardItems } from "@/lib/production-dashboard-pagination";
+import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, ClipboardCheck, Loader2, PackageCheck, Printer, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import { Link } from "wouter";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -21,19 +22,32 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const LANE_ICONS = [ClipboardCheck, Printer, PackageCheck, AlertTriangle];
+const PRIORITY_PAGE_SIZE = 8;
 
 export default function ProductionDashboard() {
   const { data: orders = [], isLoading, isFetching, refetch } = trpc.admin.getAllOrders.useQuery();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sort, setSort] = useState<ProductionDashboardSort>("newest");
+  const [priorityPage, setPriorityPage] = useState(1);
   const filteredOrders = useMemo(
     () => filterAndSortProductionOrders(orders, { query, status: statusFilter, sort }),
     [orders, query, statusFilter, sort]
   );
   const lanes = getProductionDashboardSummary(filteredOrders);
-  const priorityOrders = filteredOrders.filter((order) => isProductionPriority(order.status)).slice(0, 8);
+  const priorityOrders = filteredOrders.filter((order) => isProductionPriority(order.status));
+  const paginatedPriorityOrders = paginateProductionDashboardItems(priorityOrders, priorityPage, PRIORITY_PAGE_SIZE);
   const hasActiveFilters = query.length > 0 || statusFilter !== "all" || sort !== "newest";
+
+  useEffect(() => {
+    setPriorityPage(1);
+  }, [query, statusFilter, sort]);
+
+  useEffect(() => {
+    if (priorityPage !== paginatedPriorityOrders.currentPage) {
+      setPriorityPage(paginatedPriorityOrders.currentPage);
+    }
+  }, [paginatedPriorityOrders.currentPage, priorityPage]);
 
   const clearFilters = () => {
     setQuery("");
@@ -123,7 +137,7 @@ export default function ProductionDashboard() {
                   <div className="px-4 py-8 text-center text-sm text-gray-500">Não há pedidos prioritários para os filtros selecionados.</div>
                 ) : (
                   <div className="divide-y divide-gray-100">
-                    {priorityOrders.map((order) => (
+                    {paginatedPriorityOrders.items.map((order) => (
                       <div key={order.id} className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-gray-900">{order.orderNumber}</p>
@@ -137,6 +151,19 @@ export default function ProductionDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                {priorityOrders.length > PRIORITY_PAGE_SIZE && (
+                  <div className="flex flex-col gap-2 border-t border-gray-100 px-4 py-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                    <span>Página {paginatedPriorityOrders.currentPage} de {paginatedPriorityOrders.totalPages} · {paginatedPriorityOrders.totalItems} pedidos</span>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setPriorityPage((page) => page - 1)} disabled={paginatedPriorityOrders.currentPage === 1}>
+                        <ChevronLeft className="mr-1 h-3.5 w-3.5" />Anterior
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setPriorityPage((page) => page + 1)} disabled={paginatedPriorityOrders.currentPage === paginatedPriorityOrders.totalPages}>
+                        Próxima<ChevronRight className="ml-1 h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </section>
