@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { getProductionDashboardSummary, isProductionPriority } from "@/lib/production-dashboard";
 import { filterAndSortProductionOrders, type ProductionDashboardSort } from "@/lib/production-dashboard-filters";
 import { paginateProductionDashboardItems } from "@/lib/production-dashboard-pagination";
-import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, ClipboardCheck, Loader2, PackageCheck, Printer, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
+import { getProductionDashboardDateRange, type ProductionDashboardPeriod } from "@/lib/production-dashboard-period";
+import { AlertTriangle, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, Loader2, PackageCheck, Printer, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import { Link } from "wouter";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -29,19 +30,23 @@ export default function ProductionDashboard() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sort, setSort] = useState<ProductionDashboardSort>("newest");
+  const [period, setPeriod] = useState<ProductionDashboardPeriod>("all");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [priorityPage, setPriorityPage] = useState(1);
+  const dateRange = useMemo(() => getProductionDashboardDateRange(period, new Date(), customFrom, customTo), [period, customFrom, customTo]);
   const filteredOrders = useMemo(
-    () => filterAndSortProductionOrders(orders, { query, status: statusFilter, sort }),
-    [orders, query, statusFilter, sort]
+    () => filterAndSortProductionOrders(orders, { query, status: statusFilter, sort, ...dateRange }),
+    [orders, query, statusFilter, sort, dateRange]
   );
   const lanes = getProductionDashboardSummary(filteredOrders);
   const priorityOrders = filteredOrders.filter((order) => isProductionPriority(order.status));
   const paginatedPriorityOrders = paginateProductionDashboardItems(priorityOrders, priorityPage, PRIORITY_PAGE_SIZE);
-  const hasActiveFilters = query.length > 0 || statusFilter !== "all" || sort !== "newest";
+  const hasActiveFilters = query.length > 0 || statusFilter !== "all" || sort !== "newest" || period !== "all";
 
   useEffect(() => {
     setPriorityPage(1);
-  }, [query, statusFilter, sort]);
+  }, [query, statusFilter, sort, period, customFrom, customTo]);
 
   useEffect(() => {
     if (priorityPage !== paginatedPriorityOrders.currentPage) {
@@ -53,6 +58,9 @@ export default function ProductionDashboard() {
     setQuery("");
     setStatusFilter("all");
     setSort("newest");
+    setPeriod("all");
+    setCustomFrom("");
+    setCustomTo("");
   };
 
   return (
@@ -78,6 +86,27 @@ export default function ProductionDashboard() {
           ) : (
             <>
               <section className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+                <div className="mb-3 flex flex-col gap-2 border-b border-gray-100 pb-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                    <CalendarDays className="h-4 w-4 shrink-0 text-pink-600" />
+                    {([
+                      ["all", "Todo período"],
+                      ["this_month", "Este mês"],
+                      ["last_month", "Mês passado"],
+                      ["custom", "Personalizado"],
+                    ] as const).map(([value, label]) => (
+                      <Button key={value} size="sm" variant={period === value ? "default" : "outline"} onClick={() => setPeriod(value)} className="shrink-0">
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                  {period === "custom" && (
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <input aria-label="Data inicial" type="date" value={customFrom} onChange={(event) => setCustomFrom(event.target.value)} className="h-9 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+                      <input aria-label="Data final" type="date" value={customTo} onChange={(event) => setCustomTo(event.target.value)} className="h-9 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
                   <label className="relative block flex-1">
                     <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600"><Search className="h-3.5 w-3.5" />Buscar pedido</span>

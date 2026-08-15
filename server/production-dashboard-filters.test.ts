@@ -15,4 +15,15 @@ describe("filtros do dashboard de produção", () => {
   it("ordena por maior valor sem alterar a fila selecionada", () => {
     expect(filterAndSortProductionOrders(orders, { query: "", status: "analisando", sort: "highest_value" }).map((order) => order.orderNumber)).toEqual(["PD-300", "PD-100"]);
   });
+
+  it("respeita o intervalo de datas junto com os demais filtros", () => {
+    const result = filterAndSortProductionOrders(orders, {
+      query: "",
+      status: "all",
+      sort: "newest",
+      from: new Date("2026-08-02T00:00:00"),
+      to: new Date("2026-08-02T23:59:59"),
+    });
+    expect(result.map((order) => order.orderNumber)).toEqual(["PD-300"]);
+  });
 });
