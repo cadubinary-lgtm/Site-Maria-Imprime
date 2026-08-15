@@ -52,4 +52,14 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('SiGoogle');
     expect(footer).toContain('SSL / TLS');
   });
+
+  it("abre os canais sociais em nova aba e confirma visualmente a newsletter", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('target="_blank"');
+    expect(footer).toContain('rel="noopener noreferrer"');
+    expect(footer).toContain('window.open(`mailto:${company.supportEmail}');
+    expect(footer).toContain('setNewsletterStatus("success")');
+    expect(footer).toContain('CheckCircle2');
+    expect(footer).toContain('Tudo certo! Abrimos seu e-mail para confirmar o cadastro.');
+  });
 });

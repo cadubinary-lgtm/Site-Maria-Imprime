@@ -2,12 +2,12 @@ import { useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
+  CheckCircle2,
   CreditCard,
   FileText,
   Flag,
   Facebook,
   Instagram,
-  Landmark,
   LockKeyhole,
   Mail,
   MapPin,
@@ -92,6 +92,7 @@ export function Footer() {
   const { company } = useCompanySettings();
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "error" | "success">("idle");
   const phoneHref = `tel:${company.commercialPhone.replace(/\D/g, "")}`;
   const showWhatsApp = useWhatsAppButtonVisibility(company);
   const whatsappHref = getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company));
@@ -106,13 +107,16 @@ export function Footer() {
     const email = newsletterEmail.trim();
     if (!email) {
       setNewsletterMessage("Informe um e-mail válido para continuar.");
+      setNewsletterStatus("error");
       return;
     }
 
-    setNewsletterMessage("Abriremos seu aplicativo de e-mail para confirmar o cadastro.");
+    setNewsletterMessage("Tudo certo! Abrimos seu e-mail para confirmar o cadastro.");
+    setNewsletterStatus("success");
+    setNewsletterEmail("");
     const subject = encodeURIComponent("Quero receber novidades da Maria Imprime");
     const body = encodeURIComponent(`Olá! Quero receber novidades e promoções da Maria Imprime.\n\nE-mail para cadastro: ${email}`);
-    window.location.href = `mailto:${company.supportEmail}?subject=${subject}&body=${body}`;
+    window.open(`mailto:${company.supportEmail}?subject=${subject}&body=${body}`, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -161,9 +165,9 @@ export function Footer() {
             <p className="mt-3 text-sm leading-6 text-slate-600">Receba novidades, promoções e dicas exclusivas da Maria Imprime.</p>
             <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
               <label className="sr-only" htmlFor="newsletter-email">Seu melhor e-mail</label>
-              <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} placeholder="Seu melhor e-mail" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+              <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => { setNewsletterEmail(event.target.value); setNewsletterStatus("idle"); setNewsletterMessage(""); }} placeholder="Seu melhor e-mail" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
               <button type="submit" className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-pink-600 px-4 text-sm font-bold text-white transition hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">Quero receber <Send className="h-4 w-4" /></button>
-              <p className="min-h-5 text-xs text-slate-500" aria-live="polite">{newsletterMessage}</p>
+              <p className={`flex min-h-5 items-center gap-1.5 text-xs ${newsletterStatus === "success" ? "text-emerald-700" : newsletterStatus === "error" ? "text-red-600" : "text-slate-500"}`} aria-live="polite">{newsletterStatus === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" />}{newsletterMessage}</p>
             </form>
           </section>
         </div>
