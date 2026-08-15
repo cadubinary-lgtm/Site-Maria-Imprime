@@ -40,7 +40,10 @@ describe("lista Todos os Clientes", () => {
     ];
 
     files.forEach((file) => {
-      expect(readFileSync(file, "utf8")).toContain("customer-list-standard");
+      const page = readFileSync(file, "utf8");
+      expect(page).toContain("customer-list-standard");
+      expect(page).toContain(">Tabela de Preços</th>");
+      expect(page).toContain("priceTier");
     });
 
     const styles = readFileSync("client/src/index.css", "utf8");

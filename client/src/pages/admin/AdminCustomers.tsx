@@ -468,6 +468,10 @@ export default function AdminCustomers() {
     },
     onError: (err) => toast.error(err.message),
   });
+  const updatePriceTier = trpc.customerAuth.adminUpdateCustomerPriceTier.useMutation({
+    onSuccess: () => { toast.success("Tabela de preços atualizada"); refetch(); },
+    onError: (err) => toast.error(err.message),
+  });
 
   const createPartner = trpc.customerAuth.adminCreatePartnerAccount.useMutation({
     onSuccess: () => {
@@ -615,6 +619,7 @@ export default function AdminCustomers() {
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Cadastro</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600">Tabela de Preços</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Retirada</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Ações</th>
                       </tr>
@@ -663,6 +668,12 @@ export default function AdminCustomers() {
                                 Último login: {new Date(customer.lastLogin).toLocaleDateString("pt-BR")}
                               </div>
                             )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Select value={customer.priceTier || "final"} onValueChange={(priceTier: "final" | "reseller") => updatePriceTier.mutate({ customerId: customer.id, priceTier })} disabled={updatePriceTier.isPending}>
+                              <SelectTrigger className="h-8 min-w-28 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent>
+                            </Select>
                           </td>
                           <td className="px-4 py-3">
                             {customer.allowStorePickup ? (

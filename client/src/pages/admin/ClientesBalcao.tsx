@@ -270,6 +270,29 @@ export default function ClientesBalcao() {
     },
     onError: (err) => toast.error(err.message),
   });
+  const updatePriceTier = trpc.crm.adminUpdateBalcaoClient.useMutation({
+    onSuccess: () => { toast.success("Tabela de preços atualizada"); refetch(); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handlePriceTierChange = (client: any, priceTier: "final" | "reseller") => {
+    updatePriceTier.mutate({
+      clientId: client.id,
+      name: client.name,
+      email: client.email || "",
+      phone: client.phone || "",
+      whatsapp: client.whatsapp || "",
+      cpfCnpj: client.cpfCnpj || "",
+      priceTier,
+      addressZipCode: client.addressZipCode || "",
+      addressStreet: client.addressStreet || "",
+      addressNumber: client.addressNumber || "",
+      addressComplement: client.addressComplement || "",
+      addressNeighborhood: client.addressNeighborhood || "",
+      addressCity: client.addressCity || "",
+      addressState: client.addressState || "",
+    });
+  };
 
   const clients = data?.clients ?? [];
   const total = data?.total ?? 0;
@@ -366,6 +389,7 @@ export default function ClientesBalcao() {
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Cadastro</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600">Tabela de Preços</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Retirada</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Ações</th>
                       </tr>
@@ -399,6 +423,12 @@ export default function ClientesBalcao() {
                           </td>
                           <td className="px-4 py-3 text-gray-500 text-xs">
                             {new Date(client.createdAt).toLocaleDateString("pt-BR")}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Select value={client.priceTier === "reseller" ? "reseller" : "final"} onValueChange={(priceTier: "final" | "reseller") => handlePriceTierChange(client, priceTier)} disabled={updatePriceTier.isPending}>
+                              <SelectTrigger className="h-8 min-w-28 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent>
+                            </Select>
                           </td>
                           <td className="px-4 py-3">
                             {client.allowStorePickup ? (
