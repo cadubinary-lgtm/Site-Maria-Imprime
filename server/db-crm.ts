@@ -118,6 +118,8 @@ export async function getOperationalCrmDashboard(options: {
         phone: customerAccounts.phone,
         cpfCnpj: customerAccounts.cpfCnpj,
         status: customerAccounts.status,
+        accountType: customerAccounts.accountType,
+        allowStorePickup: customerAccounts.allowStorePickup,
         createdAt: customerAccounts.createdAt,
       })
       .from(customerAccounts)
@@ -126,7 +128,7 @@ export async function getOperationalCrmDashboard(options: {
     : [];
 
   const clientRows = [
-    ...legacyClientRows.map((client) => ({ ...client, source: "crm" })),
+    ...legacyClientRows.map((client) => ({ ...client, source: "crm", accountStatus: client.isActive ? "active" : "inactive", allowStorePickup: false })),
     ...toSiteDashboardClients(siteAccountRows),
   ];
 
