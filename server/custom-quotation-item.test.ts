@@ -26,7 +26,12 @@ describe("itens personalizados em Orçamentos", () => {
     expect(formSource).toContain("const addCustomItemToQuote");
     expect(formSource).toContain("const openCustomItemNameStep");
     expect(formSource).toContain("const confirmCustomItemName");
+    expect(formSource).toContain("const cancelCustomItemName");
     expect(formSource).toContain('Informe o nome do Produto / Serviço.');
+    expect(formSource).toContain("const CUSTOM_ITEM_NAME_MAX_LENGTH = 80;");
+    expect(formSource).toContain("maxLength={CUSTOM_ITEM_NAME_MAX_LENGTH}");
+    expect(formSource).toContain("O nome pode ter no máximo ${CUSTOM_ITEM_NAME_MAX_LENGTH} caracteres.");
+    expect(formSource).toContain('onClick={cancelCustomItemName}>Cancelar</Button>');
     expect(formSource).toContain('id="custom-item-name"');
     expect(formSource).toContain('productName,');
     expect(formSource).toContain('itemType: "custom"');

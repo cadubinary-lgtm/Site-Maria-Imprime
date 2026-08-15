@@ -2803,3 +2803,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar o layout linear de Itens personalizados e alinhar ícone e descrição ao título
 - [x] Igualar alinhamento, cor e tipografia de Itens personalizados ao cabeçalho Produtos / Serviços
 - [x] Solicitar nome do Produto / Serviço antes de criar e expandir item personalizado
+- [x] Adicionar Cancelar e limitar o nome do item personalizado antes da criação
