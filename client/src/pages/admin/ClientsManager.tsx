@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { ArrowLeft, Plus, Trash2, Edit2, Users, RefreshCw, PackageSearch, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -40,6 +40,12 @@ const formatCurrency = (value: unknown) => currencyFormatter.format(Number(value
 const formatDate = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("pt-BR") : "Sem compras";
 
 export default function ClientsManager({ defaultType, title, ..._ }: { defaultType?: string; title?: string; [k: string]: any } = {}) {
+  const searchParams = useSearch();
+  const isDashboardView = new URLSearchParams(searchParams).get("view") === "dashboard";
+  const pageTitle = title ?? (isDashboardView ? "Dashboard de Clientes" : "Todos os Clientes");
+  const pageDescription = isDashboardView
+    ? "Visão operacional para priorizar clientes ativos, reativações e oportunidades de atendimento."
+    : "Consulta e gerenciamento completo dos cadastros de clientes.";
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
@@ -160,8 +166,8 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{title ?? "Gestão de Clientes (CRM)"}</h1>
-          <p className="text-gray-600 mt-2">Priorize clientes ativos, reativações e oportunidades de atendimento.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{pageTitle}</h1>
+          <p className="text-gray-600 mt-2">{pageDescription}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6 lg:grid-cols-5">
@@ -213,7 +219,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         </div>
 
         {/* Formulário */}
-        {showForm && (
+        {!isDashboardView && showForm && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>{editingId ? "Editar Cliente" : "Novo Cliente"}</CardTitle>
@@ -299,7 +305,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         )}
 
         {/* Botão para criar novo cliente */}
-        {!showForm && filterType !== "site" && (
+        {!isDashboardView && !showForm && filterType !== "site" && (
           <div className="mb-6">
             <Button onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -367,7 +373,11 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                           <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
                         </td>
                         <td className="py-3 px-4">
-                          {client.source === "site" ? (
+                          {isDashboardView ? (
+                            <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)}>
+                              <PackageSearch className="mr-1 h-4 w-4" /> Detalhes
+                            </Button>
+                          ) : client.source === "site" ? (
                             <Link href="/admin/clientes-loja" className="inline-flex items-center text-xs font-medium text-pink-600 hover:text-pink-700">
                               <Users className="mr-1 h-4 w-4" /> Ver cadastro
                             </Link>

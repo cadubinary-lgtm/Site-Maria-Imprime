@@ -2755,3 +2755,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar Salvar alterações e Descartar alterações na mesma linha do modal de saída da edição de produto
 - [x] Corrigir o salvamento do nome e da remoção de ícone individual em Segmentos
 - [x] Confirmar a exclusão de segmento e a remoção de ícone em modais internos
+- [x] Separar a rota Dashboard de Clientes da listagem Todos os Clientes no menu CRM
