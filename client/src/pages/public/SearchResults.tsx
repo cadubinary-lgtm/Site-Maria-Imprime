@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Package, Grid3x3, Layers } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
 import { Link } from "wouter";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 export default function SearchResults() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { customer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
 
   // Extrair query da URL
   useEffect(() => {
@@ -87,7 +90,7 @@ export default function SearchResults() {
                           </p>
                           <div className="flex items-center justify-between pt-4 border-t">
                             <span className="text-2xl font-bold text-orange-500">
-                              {formatProductPrice(product)}
+                              {formatProductPrice(product, priceAudience)}
                             </span>
                             <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                               Ver Detalhes

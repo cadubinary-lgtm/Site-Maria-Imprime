@@ -2742,3 +2742,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Priorizar indicadores operacionais e ações rápidas no Dashboard de CRM sem alterar fluxos existentes
 - [x] Incluir clientes da loja no filtro Site do Dashboard de CRM sem duplicar cadastros
 - [x] Consolidar pedidos e produtos dos clientes da loja pelas chaves reais de pedido
+- [x] Adicionar preços de revendedor para Unidade, Pacote, m² e Metro Linear no cadastro de produto
+- [x] Exibir preço final e preço de revendedor nas páginas Novo Produto e Editar Produto conforme o tipo de cobrança
+- [x] Aplicar preço final a Site/Loja e Balcão, e preço de revendedor ao perfil Revendedor autenticado
+- [x] Preservar cálculo técnico de medidas, quantidade, variações, frete e pedidos ao selecionar a tabela de preços

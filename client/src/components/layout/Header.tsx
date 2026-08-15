@@ -42,6 +42,7 @@ export default function Header() {
   const isAuthenticated = isManus ? isManusAuth : !!adminUser;
   const user = isManus ? manusUser : (adminUser ? { name: adminUser.name, email: adminUser.email } : null);
   const { customer, isAuthenticated: isCustomerAuth, refetch: refetchCustomer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -183,7 +184,7 @@ export default function Header() {
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 transition text-sm"
                           >
                             <div className="font-medium text-gray-900">{product.name}</div>
-                            <div className="text-gray-600 text-xs">{formatProductPrice(product)}</div>
+                            <div className="text-gray-600 text-xs">{formatProductPrice(product, priceAudience)}</div>
                           </button>
                         ))}
                       </div>

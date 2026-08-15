@@ -9,15 +9,27 @@ export interface ProductPriceInfo {
   suffix: string;      // Ex: "/m²", "/ml", ""
 }
 
-export function getProductPrice(product: {
+export type ProductPriceAudience = "final" | "reseller";
+
+type PriceAwareProduct = {
   price: string | number;
+  resellerPrice?: string | number | null;
   pricePerM2?: string | number | null;
+  resellerPricePerM2?: string | number | null;
   calculationType?: string | null;
-}): ProductPriceInfo {
+};
+
+function resolvePrice(finalPrice: unknown, resellerPrice: unknown, audience: ProductPriceAudience) {
+  const standard = parseFloat((finalPrice as any) ?? 0) || 0;
+  const reseller = parseFloat((resellerPrice as any) ?? 0) || 0;
+  return audience === "reseller" && reseller > 0 ? reseller : standard;
+}
+
+export function getProductPrice(product: PriceAwareProduct, audience: ProductPriceAudience = "final"): ProductPriceInfo {
   const type = product.calculationType || "unidade";
 
   if (type === "m2") {
-    const val = parseFloat((product.pricePerM2 as any) ?? 0) || 0;
+    const val = resolvePrice(product.pricePerM2, product.resellerPricePerM2, audience);
     return {
       value: val,
       label: `R$ ${val.toFixed(2)}/m²`,
@@ -26,7 +38,7 @@ export function getProductPrice(product: {
   }
 
   if (type === "metro_linear") {
-    const val = parseFloat((product.pricePerM2 as any) ?? 0) || 0;
+    const val = resolvePrice(product.pricePerM2, product.resellerPricePerM2, audience);
     return {
       value: val,
       label: `R$ ${val.toFixed(2)}/ml`,
@@ -35,7 +47,7 @@ export function getProductPrice(product: {
   }
 
   // unidade, pacote ou qualquer outro
-  const val = parseFloat((product.price as any) ?? 0) || 0;
+  const val = resolvePrice(product.price, product.resellerPrice, audience);
   return {
     value: val,
     label: `R$ ${val.toFixed(2)}`,
@@ -44,10 +56,6 @@ export function getProductPrice(product: {
 }
 
 /** Retorna apenas o texto formatado do preço para uso simples */
-export function formatProductPrice(product: {
-  price: string | number;
-  pricePerM2?: string | number | null;
-  calculationType?: string | null;
-}): string {
-  return getProductPrice(product).label;
+export function formatProductPrice(product: PriceAwareProduct, audience: ProductPriceAudience = "final"): string {
+  return getProductPrice(product, audience).label;
 }

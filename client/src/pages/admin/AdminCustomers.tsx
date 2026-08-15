@@ -68,7 +68,7 @@ function CustomerDetailModal({
   const [newPassword, setNewPassword] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
-  const { data, isLoading } = trpc.customerAuth.adminGetCustomerDetail.useQuery(
+  const { data, isLoading, refetch: refetchDetail } = trpc.customerAuth.adminGetCustomerDetail.useQuery(
     { customerId: customerId! },
     { enabled: !!customerId && open }
   );
@@ -78,6 +78,15 @@ function CustomerDetailModal({
       toast.success("Senha redefinida com sucesso!");
       setNewPassword("");
       setShowPasswordForm(false);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const updatePriceTier = trpc.customerAuth.adminUpdateCustomerPriceTier.useMutation({
+    onSuccess: async () => {
+      await refetchDetail();
+      onRefetch();
+      toast.success("Tabela de preços atualizada");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -173,6 +182,20 @@ function CustomerDetailModal({
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${customer.allowStorePickup ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
                     {customer.allowStorePickup ? "Liberado" : "Não liberado"}
                   </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5">Tabela de Preços</p>
+                  <Select
+                    value={customer.priceTier || "final"}
+                    onValueChange={(priceTier) => updatePriceTier.mutate({ customerId: customer.id, priceTier: priceTier as "final" | "reseller" })}
+                    disabled={updatePriceTier.isPending}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="final">Cliente final</SelectItem>
+                      <SelectItem value="reseller">Revendedor</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

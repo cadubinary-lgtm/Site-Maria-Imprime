@@ -276,12 +276,14 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
+        resellerPrice: z.string().optional(),
         segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
         galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
+        resellerPricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
@@ -310,12 +312,14 @@ export const appRouter = router({
             name: input.name,
             description: input.description,
             price: effectivePrice as any,
+            resellerPrice: input.resellerPrice ? input.resellerPrice as any : null,
             segment: input.segment as any,
             imageUrl: input.imageUrl,
             imageKey: input.imageKey,
             galleryUrls: input.galleryUrls || null,
             calculationType: (input.calculationType || "unidade") as any,
             pricePerM2: input.pricePerM2 ? input.pricePerM2 as any : null,
+            resellerPricePerM2: input.resellerPricePerM2 ? input.resellerPricePerM2 as any : null,
             minWidth: input.minWidth ? input.minWidth as any : null,
             maxWidth: input.maxWidth ? input.maxWidth as any : null,
             minHeight: input.minHeight ? input.minHeight as any : null,
@@ -520,12 +524,14 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
+        resellerPrice: z.string().optional(),
         segment: z.string(),
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
         galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
+        resellerPricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
         maxWidth: z.string().optional(),
         minHeight: z.string().optional(),
@@ -548,6 +554,7 @@ export const appRouter = router({
           name: input.name,
           description: input.description,
           price: input.price as any,
+          resellerPrice: input.resellerPrice !== undefined ? (input.resellerPrice ? parseFloat(input.resellerPrice) : null) : undefined,
           segment: input.segment as any,
           imageUrl: input.imageUrl,
           imageKey: input.imageKey,
@@ -557,6 +564,7 @@ export const appRouter = router({
         // Adicionar campos de m² se fornecidos
         if (input.calculationType) updateData.calculationType = input.calculationType;
         if (input.pricePerM2) updateData.pricePerM2 = parseFloat(input.pricePerM2);
+        if (input.resellerPricePerM2 !== undefined) updateData.resellerPricePerM2 = input.resellerPricePerM2 ? parseFloat(input.resellerPricePerM2) : null;
         if (input.minWidth) updateData.minWidth = parseFloat(input.minWidth);
         if (input.maxWidth) updateData.maxWidth = parseFloat(input.maxWidth);
         if (input.minHeight) updateData.minHeight = parseFloat(input.minHeight);

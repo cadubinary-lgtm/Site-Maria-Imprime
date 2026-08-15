@@ -32,12 +32,14 @@ export default function AdminNewProduct() {
     name: "",
     description: "",
     price: "",
+    resellerPrice: "",
     segment: "",
     imageUrl: "",
     imageKey: "",
     galleryUrls: [] as string[],
     calculationType: "unidade",
     pricePerM2: "",
+    resellerPricePerM2: "",
     minWidth: "",
     maxWidth: "",
     minHeight: "",
@@ -68,7 +70,8 @@ export default function AdminNewProduct() {
     e.preventDefault();
 
     if (!createForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
-    if (createForm.calculationType !== "m2" && createForm.calculationType !== "metro_linear") {
+    const isMeasureBased = createForm.calculationType === "m2" || createForm.calculationType === "metro_linear";
+    if (!isMeasureBased) {
       if (!createForm.price || parseFloat(createForm.price) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
     }
     if (!createForm.calculationType) { toast.error("Tipo de cobrança é obrigatório"); return; }
@@ -76,8 +79,8 @@ export default function AdminNewProduct() {
     // Normalizar segment: se vazio, usar "geral" como fallback
     const effectiveSegment = createForm.segment?.trim() || "geral";
 
-    if (createForm.calculationType === "m2") {
-      if (!createForm.pricePerM2 || parseFloat(createForm.pricePerM2) <= 0) { toast.error("Preço por m² é obrigatório"); return; }
+    if (isMeasureBased) {
+      if (!createForm.pricePerM2 || parseFloat(createForm.pricePerM2) <= 0) { toast.error(`Preço por ${createForm.calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
       if (!createForm.minWidth || parseFloat(createForm.minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
       if (!createForm.maxWidth || parseFloat(createForm.maxWidth) <= 0) { toast.error("Largura máxima é obrigatória"); return; }
       if (!createForm.minHeight || parseFloat(createForm.minHeight) <= 0) { toast.error("Altura mínima é obrigatória"); return; }
@@ -91,16 +94,18 @@ export default function AdminNewProduct() {
         name: createForm.name,
         description: createForm.description,
         price: createForm.price,
+        resellerPrice: createForm.resellerPrice || undefined,
         segment: effectiveSegment,
         imageUrl: createForm.imageUrl,
         imageKey: createForm.imageKey || undefined,
         galleryUrls: createForm.galleryUrls.length > 0 ? JSON.stringify(createForm.galleryUrls) : undefined,
         calculationType: createForm.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
-        pricePerM2: createForm.calculationType === "m2" ? createForm.pricePerM2 : undefined,
-        minWidth: createForm.calculationType === "m2" ? createForm.minWidth : undefined,
-        maxWidth: createForm.calculationType === "m2" ? createForm.maxWidth : undefined,
-        minHeight: createForm.calculationType === "m2" ? createForm.minHeight : undefined,
-        maxHeight: createForm.calculationType === "m2" ? createForm.maxHeight : undefined,
+        pricePerM2: isMeasureBased ? createForm.pricePerM2 : undefined,
+        resellerPricePerM2: isMeasureBased ? createForm.resellerPricePerM2 || undefined : undefined,
+        minWidth: isMeasureBased ? createForm.minWidth : undefined,
+        maxWidth: isMeasureBased ? createForm.maxWidth : undefined,
+        minHeight: isMeasureBased ? createForm.minHeight : undefined,
+        maxHeight: isMeasureBased ? createForm.maxHeight : undefined,
         weight: createLogistics.weight ? parseFloat(createLogistics.weight) : undefined,
         logisticsWidth: createLogistics.width ? parseFloat(createLogistics.width) : undefined,
         logisticsHeight: createLogistics.height ? parseFloat(createLogistics.height) : undefined,
@@ -142,8 +147,8 @@ export default function AdminNewProduct() {
 
       // Resetar formulário
       setCreateForm({
-        name: "", description: "", price: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
-        calculationType: "unidade", pricePerM2: "", minWidth: "", maxWidth: "",
+        name: "", description: "", price: "", resellerPrice: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
+        calculationType: "unidade", pricePerM2: "", resellerPricePerM2: "", minWidth: "", maxWidth: "",
         minHeight: "", maxHeight: "", segmentIds: [], specifications: [], tags: [], tagPosition: "top-right",
       });
       setCreateDeliveryOptions([]);
@@ -212,7 +217,7 @@ export default function AdminNewProduct() {
                 </div>
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
                   <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
-                    <Label htmlFor="create-price">Preço Base (R$) *</Label>
+                    <Label htmlFor="create-price">Preço Cliente Final (R$) *</Label>
                     <Input
                       id="create-price"
                       type="number"
@@ -222,6 +227,12 @@ export default function AdminNewProduct() {
                       placeholder="0.00"
                       required
                     />
+                  </div>
+                )}
+                {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
+                  <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
+                    <Label htmlFor="create-resellerPrice">Preço Revendedor (R$)</Label>
+                    <Input id="create-resellerPrice" type="number" step="0.01" value={createForm.resellerPrice} onChange={(e) => setCreateForm({ ...createForm, resellerPrice: e.target.value })} placeholder="Opcional" />
                   </div>
                 )}
                 <div className={NEW_PRODUCT_FIELD_LAYOUT.description}>
@@ -242,18 +253,19 @@ export default function AdminNewProduct() {
                   <p className="text-sm font-medium text-gray-700">
                     {createForm.calculationType === "metro_linear" ? "Configurações de Metro Linear" : "Configurações de m²"}
                   </p>
-                  <div>
-                    <Label htmlFor="create-pricePerM2">
-                      {createForm.calculationType === "metro_linear" ? "Preço por Metro Linear (R$)" : "Preço por m² (R$)"}
-                    </Label>
-                    <Input
-                      id="create-pricePerM2"
-                      type="number"
-                      step="0.01"
-                      value={createForm.pricePerM2}
-                      onChange={(e) => setCreateForm({ ...createForm, pricePerM2: e.target.value })}
-                      placeholder="45.00"
-                    />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="create-pricePerM2">
+                        {createForm.calculationType === "metro_linear" ? "Preço Cliente Final por Metro Linear (R$)" : "Preço Cliente Final por m² (R$)"}
+                      </Label>
+                      <Input id="create-pricePerM2" type="number" step="0.01" value={createForm.pricePerM2} onChange={(e) => setCreateForm({ ...createForm, pricePerM2: e.target.value })} placeholder="45.00" />
+                    </div>
+                    <div>
+                      <Label htmlFor="create-resellerPricePerM2">
+                        {createForm.calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
+                      </Label>
+                      <Input id="create-resellerPricePerM2" type="number" step="0.01" value={createForm.resellerPricePerM2} onChange={(e) => setCreateForm({ ...createForm, resellerPricePerM2: e.target.value })} placeholder="Opcional" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>

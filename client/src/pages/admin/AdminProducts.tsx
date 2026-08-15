@@ -41,12 +41,14 @@ export default function AdminProducts() {
     name: "",
     description: "",
     price: "",
+    resellerPrice: "",
     imageUrl: "",
     imageKey: "",
     galleryUrls: [] as string[],
     segmentIds: [] as number[],
     calculationType: "unidade",
     pricePerM2: "",
+    resellerPricePerM2: "",
     minWidth: "",
     maxWidth: "",
     minHeight: "",
@@ -159,11 +161,13 @@ export default function AdminProducts() {
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
+      resellerPrice: product.resellerPrice ? product.resellerPrice.toString() : "",
       imageUrl: product.imageUrl || "",
       imageKey: product.imageKey || "",
       galleryUrls: parsedGallery,
       calculationType: product.calculationType || "unidade",
       pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
+      resellerPricePerM2: product.resellerPricePerM2 ? product.resellerPricePerM2.toString() : "",
       minWidth: product.minWidth ? product.minWidth.toString() : "",
       maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
       minHeight: product.minHeight ? product.minHeight.toString() : "",
@@ -250,8 +254,8 @@ export default function AdminProducts() {
       if (!editForm.price || parseFloat(editForm.price as any) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
     }
 
-    if ((editForm as any).calculationType === "m2") {
-      if (!(editForm as any).pricePerM2 || parseFloat((editForm as any).pricePerM2) <= 0) { toast.error("Preço por m² é obrigatório"); return; }
+    if (isMeasureBased((editForm as any).calculationType)) {
+      if (!(editForm as any).pricePerM2 || parseFloat((editForm as any).pricePerM2) <= 0) { toast.error(`Preço por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
       if (!(editForm as any).minWidth || parseFloat((editForm as any).minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
       if (!(editForm as any).maxWidth || parseFloat((editForm as any).maxWidth) <= 0) { toast.error("Largura máxima é obrigatória"); return; }
       if (!(editForm as any).minHeight || parseFloat((editForm as any).minHeight) <= 0) { toast.error("Altura mínima é obrigatória"); return; }
@@ -266,16 +270,18 @@ export default function AdminProducts() {
         name: editForm.name,
         description: editForm.description,
         price: editForm.price,
+        resellerPrice: (editForm as any).resellerPrice || "",
         segment: "alimentacao",
         imageUrl: editForm.imageUrl,
         imageKey: (editForm as any).imageKey || undefined,
         galleryUrls: (editForm as any).galleryUrls?.length > 0 ? JSON.stringify((editForm as any).galleryUrls) : undefined,
         calculationType: (editForm as any).calculationType,
-        pricePerM2: (editForm as any).calculationType === "m2" ? (editForm as any).pricePerM2 : undefined,
-        minWidth: (editForm as any).calculationType === "m2" ? (editForm as any).minWidth : undefined,
-        maxWidth: (editForm as any).calculationType === "m2" ? (editForm as any).maxWidth : undefined,
-        minHeight: (editForm as any).calculationType === "m2" ? (editForm as any).minHeight : undefined,
-        maxHeight: (editForm as any).calculationType === "m2" ? (editForm as any).maxHeight : undefined,
+        pricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pricePerM2 : undefined,
+        resellerPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).resellerPricePerM2 || "" : undefined,
+        minWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).minWidth : undefined,
+        maxWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).maxWidth : undefined,
+        minHeight: isMeasureBased((editForm as any).calculationType) ? (editForm as any).minHeight : undefined,
+        maxHeight: isMeasureBased((editForm as any).calculationType) ? (editForm as any).maxHeight : undefined,
         specifications: (editForm as any).specifications?.length > 0 ? JSON.stringify((editForm as any).specifications) : undefined,
         tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
         tagPosition: (editForm as any).tagPosition || "top-right",
@@ -522,19 +528,31 @@ export default function AdminProducts() {
                             {/* Preço Base: visível APENAS para Unidade e Pacote */}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
-                                <Label htmlFor="edit-price">Preço Base (R$)</Label>
+                                <Label htmlFor="edit-price">Preço Cliente Final (R$)</Label>
                                 <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} placeholder="0.00" />
+                              </div>
+                            )}
+                            {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
+                              <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
+                                <Label htmlFor="edit-resellerPrice">Preço Revendedor (R$)</Label>
+                                <Input id="edit-resellerPrice" type="number" step="0.01" value={(editForm as any).resellerPrice || ""} onChange={(e) => setEditForm({ ...editForm, resellerPrice: e.target.value } as any)} placeholder="Opcional" />
                               </div>
                             )}
                           </div>
 
                           {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
-                              <div className="sm:col-span-2 xl:col-span-2">
+                              <div className="sm:col-span-1 xl:col-span-1">
                                 <Label htmlFor="edit-pricePerM2">
-                                  {(editForm as any).calculationType === "metro_linear" ? "Preço por Metro Linear (R$)" : "Preço por m² (R$)"}
+                                  {(editForm as any).calculationType === "metro_linear" ? "Preço Cliente Final por Metro Linear (R$)" : "Preço Cliente Final por m² (R$)"}
                                 </Label>
                                 <Input id="edit-pricePerM2" type="number" step="0.01" value={(editForm as any).pricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pricePerM2: e.target.value } as any)} />
+                              </div>
+                              <div className="sm:col-span-1 xl:col-span-1">
+                                <Label htmlFor="edit-resellerPricePerM2">
+                                  {(editForm as any).calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
+                                </Label>
+                                <Input id="edit-resellerPricePerM2" type="number" step="0.01" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} placeholder="Opcional" />
                               </div>
                               <div className="grid grid-cols-2 gap-2 xl:col-span-2">
                                 <div>

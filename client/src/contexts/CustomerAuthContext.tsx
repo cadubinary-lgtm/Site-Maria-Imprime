@@ -10,6 +10,7 @@ interface Customer {
   cpfCnpj: string | null;
   emailVerified: boolean;
   status: string;
+  priceTier: "final" | "reseller";
   createdAt: number;
 }
 

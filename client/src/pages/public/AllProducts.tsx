@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { formatProductPrice } from "@/lib/productPrice";
+import { formatProductPrice, getProductPrice } from "@/lib/productPrice";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
+  const { customer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
 
   // Rolar para o topo ao montar a página
   useEffect(() => {
@@ -53,13 +56,13 @@ export default function AllProducts() {
 
     // Sort
     if (sortBy === 'price') {
-      filtered = [...filtered].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+      filtered = [...filtered].sort((a, b) => getProductPrice(a, priceAudience).value - getProductPrice(b, priceAudience).value);
     } else {
       filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
     }
 
     return filtered;
-  }, [products, searchTerm, selectedSegment, sortBy]);
+  }, [products, searchTerm, selectedSegment, sortBy, priceAudience]);
 
 
 
@@ -183,7 +186,7 @@ export default function AllProducts() {
                     </p>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-orange-500">
-                        {formatProductPrice(product)}
+                        {formatProductPrice(product, priceAudience)}
                       </span>
                       <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                         Ver
