@@ -505,4 +505,36 @@
       max-width: 1280px;
     }
   }
+
+  .customer-list-standard {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .customer-list-standard th,
+  .customer-list-standard td {
+    min-width: 0;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .customer-list-standard th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1rem;
+  }
+
+  .customer-list-standard td {
+    padding: 0.75rem 0.5rem;
+    line-height: 1.2rem;
+  }
+
+  .customer-list-standard [data-customer-actions] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }

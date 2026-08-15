@@ -2770,3 +2770,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter as colunas atuais e acrescentar Status, Cadastro, Retirada e Ações em Todos os Clientes
 - [x] Consolidar em Todos os Clientes os dados operacionais disponíveis por origem do cliente
 - [x] Remover a rolagem horizontal da tabela Todos os Clientes sem ocultar informações
+- [x] Unificar o layout de Todos os Clientes, Clientes Site, Balcão, Revendedores e Agências
+- [x] Manter filtros e dados específicos de cada origem no padrão único de clientes
+- [x] Garantir colunas responsivas e informações sem sobreposição no padrão único
