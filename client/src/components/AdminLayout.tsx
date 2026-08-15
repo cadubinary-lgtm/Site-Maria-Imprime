@@ -409,11 +409,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <Users className="w-4 h-4" />,
         children: [
           { ...ADMIN_DASHBOARD_LINKS.customers, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.customersWithOrders || undefined },
+          { label: "Todos os Clientes", href: "/admin/clientes" },
           { label: "Clientes Site", href: "/admin/clientes-loja" },
           { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
           { label: "Revendedores", href: "/admin/clientes-loja?tipo=revendedor" },
           { label: "Agências", href: "/admin/clientes-loja?tipo=agencia" },
-          { label: "Todos os Clientes", href: "/admin/clientes" },
         ],
       },
     },

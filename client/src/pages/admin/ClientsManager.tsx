@@ -21,8 +21,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  balcao:      { label: "Balcão",      color: "bg-blue-100 text-blue-800" },
-  site:        { label: "Site",        color: "bg-green-100 text-green-800" },
+  balcao:      { label: "Cliente Balcão", color: "bg-blue-100 text-blue-800" },
+  site:        { label: "Cliente Site", color: "bg-green-100 text-green-800" },
   revendedor:  { label: "Revendedor",  color: "bg-purple-100 text-purple-800" },
   agencia:     { label: "Agência",     color: "bg-orange-100 text-orange-800" },
 };
