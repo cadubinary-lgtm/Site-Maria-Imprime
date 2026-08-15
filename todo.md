@@ -2760,3 +2760,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir que administradores criem acessos de Revendedor e Agência com convite ou redefinição segura
 - [x] Permitir reenvio de acesso pelo administrador sem expor senhas armazenadas
 - [x] Exibir recuperação de senha para e-mail já cadastrado durante o registro de cliente
+- [x] Exibir tags de Cliente Site, Cliente Balcão, Revendedor e Agência na lista Todos os Clientes
+- [x] Reposicionar Todos os Clientes logo abaixo de Dashboard de Clientes no menu CRM
