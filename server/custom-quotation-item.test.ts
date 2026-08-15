@@ -81,9 +81,10 @@ describe("itens personalizados em Orçamentos", () => {
 
   it("padroniza Itens personalizados com o cabeçalho e ícone de Produtos / Serviços", () => {
     expect(formSource).toContain('className="space-y-2"');
-    expect(formSource).toContain('h-px flex-1 bg-gray-200');
-    expect(formSource).toContain('<Package className="h-3.5 w-3.5 shrink-0 text-pink-600" />');
-    expect(formSource).toContain('Itens personalizados <span className="normal-case font-normal text-gray-400">— produto ou serviço fora do catálogo</span>');
+    expect(formSource).toContain('className="flex items-center gap-2 border-t border-gray-200 pt-4"');
+    expect(formSource).toContain('<Package className="h-4 w-4 shrink-0 text-pink-600" />');
+    expect(formSource).toContain('<h2 className="font-semibold text-gray-800">Itens personalizados</h2>');
+    expect(formSource).toContain('<span className="text-xs text-gray-400">— produto ou serviço fora do catálogo</span>');
   });
 
   it("alinha a ação de exclusão na coluna final do catálogo", () => {
