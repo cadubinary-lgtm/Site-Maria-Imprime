@@ -40,6 +40,22 @@ export function getProductionDashboardSummary<T extends ProductionDashboardOrder
   }));
 }
 
+export function getProductionDashboardOverview<T extends ProductionDashboardOrder>(orders: T[] = []) {
+  const lanes = getProductionDashboardSummary(orders);
+  const analysis = lanes.find((lane) => lane.id === "analysis")?.count || 0;
+  const production = lanes.find((lane) => lane.id === "production")?.count || 0;
+  const ready = lanes.find((lane) => lane.id === "dispatch")?.count || 0;
+  const awaitingRelease = lanes.find((lane) => lane.id === "attention")?.count || 0;
+  const issues = orders.filter((order) => order.status === "com_problemas").length;
+
+  return {
+    total: orders.length,
+    inOperation: analysis + production,
+    ready,
+    needsAttention: awaitingRelease + issues,
+  };
+}
+
 export function isProductionPriority(status?: string | null) {
   return ["analisando", "com_problemas", "em_producao"].includes(status || "");
 }

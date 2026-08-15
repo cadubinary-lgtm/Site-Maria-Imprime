@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getProductionDashboardSummary, isProductionPriority } from "@/lib/production-dashboard";
+import { getProductionDashboardOverview, getProductionDashboardSummary, isProductionPriority } from "@/lib/production-dashboard";
 import { filterAndSortProductionOrders, type ProductionDashboardSort } from "@/lib/production-dashboard-filters";
 import { paginateProductionDashboardItems } from "@/lib/production-dashboard-pagination";
 import { getProductionDashboardDateRange, type ProductionDashboardPeriod } from "@/lib/production-dashboard-period";
@@ -40,6 +40,7 @@ export default function ProductionDashboard() {
     [orders, query, statusFilter, sort, dateRange]
   );
   const lanes = getProductionDashboardSummary(filteredOrders);
+  const overview = getProductionDashboardOverview(filteredOrders);
   const priorityOrders = filteredOrders.filter((order) => isProductionPriority(order.status));
   const paginatedPriorityOrders = paginateProductionDashboardItems(priorityOrders, priorityPage, PRIORITY_PAGE_SIZE);
   const hasActiveFilters = query.length > 0 || statusFilter !== "all" || sort !== "newest" || period !== "all";
@@ -131,6 +132,26 @@ export default function ProductionDashboard() {
                   {hasActiveFilters && <Button variant="ghost" onClick={clearFilters} className="text-gray-500 hover:text-pink-600"><X className="mr-1.5 h-4 w-4" />Limpar</Button>}
                 </div>
                 <p className="mt-3 text-xs text-gray-500">{filteredOrders.length} pedido{filteredOrders.length !== 1 ? "s" : ""} encontrado{filteredOrders.length !== 1 ? "s" : ""}.</p>
+              </section>
+
+              <section className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                {[
+                  { label: "Total de itens", value: overview.total, detail: "No período selecionado", Icon: ClipboardCheck, tone: "text-gray-700" },
+                  { label: "Em operação", value: overview.inOperation, detail: "Análise e produção", Icon: Printer, tone: "text-blue-600" },
+                  { label: "Prontos", value: overview.ready, detail: "Entrega ou retirada", Icon: PackageCheck, tone: "text-emerald-600" },
+                  { label: "Atenção necessária", value: overview.needsAttention, detail: "Pendências e liberações", Icon: AlertTriangle, tone: "text-amber-600" },
+                ].map(({ label, value, detail, Icon, tone }) => (
+                  <Card key={label} className="border-gray-200">
+                    <CardContent className="flex items-center gap-3 p-3">
+                      <div className={`rounded-lg bg-gray-50 p-2 ${tone}`}><Icon className="h-4 w-4" /></div>
+                      <div className="min-w-0">
+                        <p className="text-lg font-semibold leading-none text-gray-900">{value}</p>
+                        <p className="mt-1 truncate text-xs font-medium text-gray-700">{label}</p>
+                        <p className="mt-0.5 truncate text-[11px] text-gray-500">{detail}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </section>
 
               <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
