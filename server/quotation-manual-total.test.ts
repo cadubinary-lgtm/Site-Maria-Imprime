@@ -1,0 +1,21 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const formSource = readFileSync(resolve(process.cwd(), "client/src/pages/admin/AdminQuotationForm.tsx"), "utf8");
+const routerSource = readFileSync(resolve(process.cwd(), "server/quotationsRouter.ts"), "utf8");
+
+describe("total manual de orçamento", () => {
+  it("permite editar o total diretamente no resumo superior", () => {
+    expect(formSource).toContain('aria-label="Total do orçamento"');
+    expect(formSource).toContain("setAcertoTotal(event.target.value)");
+    expect(formSource).toContain("const hasManualTotal = acertoTotal.trim() !== \"\";");
+  });
+
+  it("envia e persiste o total manual na criação e atualização", () => {
+    expect(formSource).toContain("manualTotal: hasManualTotal ? acertoValue : null");
+    expect(routerSource).toContain("manualTotal: z.number().min(0).nullable().optional()");
+    expect(routerSource).toContain("manualTotal: input.manualTotal?.toFixed(2) ?? null");
+    expect(routerSource).toContain("const total = input.manualTotal ?? calculatedTotal;");
+  });
+});

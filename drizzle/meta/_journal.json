@@ -323,6 +323,13 @@
       "when": 1786578936000,
       "tag": "0045_create_automation_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "5",
+      "when": 1786808363059,
+      "tag": "0046_add_manual_total_to_quotations",
+      "breakpoints": true
     }
   ]
 }

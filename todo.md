@@ -2804,3 +2804,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Igualar alinhamento, cor e tipografia de Itens personalizados ao cabeçalho Produtos / Serviços
 - [x] Solicitar nome do Produto / Serviço antes de criar e expandir item personalizado
 - [x] Adicionar Cancelar e limitar o nome do item personalizado antes da criação
+- [x] Tornar editável e funcional o campo superior de Total do orçamento
