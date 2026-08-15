@@ -21,6 +21,17 @@ describe("lista Todos os Clientes", () => {
     expect(dataSource).toContain("toSiteDashboardClients(siteAccountRows)");
   });
 
+  it("mantém detalhes completos e ações de bloquear e excluir para todas as origens", () => {
+    const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
+    expect(page).toContain("CustomerDetailsDialog");
+    expect(page).toContain("adminGetCustomerDetail");
+    expect(page).toContain("adminGetBalcaoClientDetail");
+    expect(page).toContain("handleToggleBlock");
+    expect(page).toContain("Bloquear");
+    expect(page).toContain("Desbloquear");
+    expect(page).toContain("Excluir");
+  });
+
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {
     const files = [
       "client/src/pages/admin/ClientsManager.tsx",

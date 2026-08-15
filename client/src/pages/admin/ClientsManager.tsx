@@ -14,10 +14,11 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link, useLocation, useSearch } from "wouter";
-import { ArrowLeft, Plus, Trash2, Edit2, Eye, Users, RefreshCw, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Eye, Users, RefreshCw, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle, Ban, UserCheck, Loader2, Mail, Phone, MapPin, Calendar, Lock, ShoppingBag, CheckCircle, AlertCircle, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -37,6 +38,118 @@ const OPERATIONAL_STATUS_STYLES: Record<string, string> = {
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const formatCurrency = (value: unknown) => currencyFormatter.format(Number(value) || 0);
 const formatDate = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("pt-BR") : "Sem compras";
+
+function CustomerDetailsDialog({ selectedClient, open, onClose, onRefetch }: { selectedClient: any | null; open: boolean; onClose: () => void; onRefetch: () => void }) {
+  const isStoreAccount = selectedClient?.source === "site";
+  const { data: storeDetail, isLoading: isLoadingStoreDetail } = trpc.customerAuth.adminGetCustomerDetail.useQuery(
+    { customerId: selectedClient?.externalId ?? 0 },
+    { enabled: open && isStoreAccount && Boolean(selectedClient?.externalId) },
+  );
+  const { data: legacyDetail, isLoading: isLoadingLegacyDetail } = trpc.crm.adminGetBalcaoClientDetail.useQuery(
+    { clientId: selectedClient?.id ?? 0 },
+    { enabled: open && !isStoreAccount && Boolean(selectedClient?.id) },
+  );
+  const [newPassword, setNewPassword] = useState("");
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const setPassword = trpc.customerAuth.adminSetCustomerPassword.useMutation({
+    onSuccess: () => { toast.success("Senha redefinida com sucesso!"); setNewPassword(""); setShowPasswordForm(false); },
+    onError: (error) => toast.error(error.message),
+  });
+  const updateStorePriceTier = trpc.customerAuth.adminUpdateCustomerPriceTier.useMutation({
+    onSuccess: () => { toast.success("Tabela de preços atualizada"); onRefetch(); },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const rawCustomer: any = isStoreAccount ? storeDetail?.customer : legacyDetail?.client;
+  const orders = isStoreAccount ? storeDetail?.orders ?? [] : legacyDetail?.orders ?? [];
+  const isLoading = isStoreAccount ? isLoadingStoreDetail : isLoadingLegacyDetail;
+  const customer = rawCustomer && {
+    name: isStoreAccount ? `${rawCustomer.firstName} ${rawCustomer.lastName}`.trim() : rawCustomer.name,
+    cpfCnpj: rawCustomer.cpfCnpj,
+    email: rawCustomer.email,
+    emailVerified: rawCustomer.emailVerified,
+    phone: rawCustomer.phone || rawCustomer.whatsapp,
+    status: isStoreAccount ? rawCustomer.status : rawCustomer.isActive ? "active" : "inactive",
+    allowStorePickup: rawCustomer.allowStorePickup,
+    priceTier: rawCustomer.priceTier === "reseller" ? "reseller" : "final",
+    createdAt: rawCustomer.createdAt,
+    updatedAt: rawCustomer.updatedAt,
+    lastLogin: rawCustomer.lastLogin,
+    loginAttempts: rawCustomer.loginAttempts,
+    addressZipCode: rawCustomer.addressZipCode,
+    addressStreet: rawCustomer.addressStreet,
+    addressNumber: rawCustomer.addressNumber,
+    addressComplement: rawCustomer.addressComplement,
+    addressNeighborhood: rawCustomer.addressNeighborhood,
+    addressCity: rawCustomer.addressCity,
+    addressState: rawCustomer.addressState,
+  };
+
+  const handleSetPassword = () => {
+    if (!selectedClient?.externalId) return;
+    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      toast.error("A senha deve ter 8 caracteres, uma letra maiúscula e um número.");
+      return;
+    }
+    setPassword.mutate({ customerId: selectedClient.externalId, newPassword });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
+      <DialogContent className="admin-visual-system max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg text-pink-600"><Users className="h-5 w-5" />Detalhes do Cliente</DialogTitle>
+          <DialogDescription>Informações completas e histórico de pedidos</DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-pink-600" /></div>
+        ) : !customer ? (
+          <div className="py-8 text-center text-gray-500">Cliente não encontrado</div>
+        ) : (
+          <div className="space-y-5 pt-2">
+            <section>
+              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-pink-600"><UserCheck className="h-4 w-4" />Informações Pessoais</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><p className="mb-0.5 text-xs text-gray-500">Nome Completo</p><p className="font-medium text-gray-900">{customer.name}</p></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">CPF / CNPJ</p><p className="font-medium text-gray-900">{customer.cpfCnpj || "Não informado"}</p></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">E-mail</p><div className="flex items-center gap-1.5 text-gray-900"><Mail className="h-3.5 w-3.5 text-gray-400" /><span>{customer.email || "Não informado"}</span>{isStoreAccount && (customer.emailVerified ? <CheckCircle className="h-3.5 w-3.5 text-green-500" /> : <AlertCircle className="h-3.5 w-3.5 text-yellow-500" />)}</div></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Telefone / WhatsApp</p><div className="flex items-center gap-1.5 text-gray-900"><Phone className="h-3.5 w-3.5 text-gray-400" /><span>{customer.phone || "Não informado"}</span></div></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Status</p><Badge variant="outline" className={customer.status === "blocked" ? "border-red-200 bg-red-50 text-red-700" : customer.status === "inactive" ? "border-gray-200 bg-gray-100 text-gray-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}>{customer.status === "blocked" ? "Bloqueado" : customer.status === "inactive" ? "Inativo" : "Ativo"}</Badge></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Retirada na Loja</p><Badge variant="outline" className={customer.allowStorePickup ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-gray-100 text-gray-700"}>{customer.allowStorePickup ? "Liberado" : "Não liberado"}</Badge></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Tabela de Preços</p>{isStoreAccount ? <Select value={customer.priceTier} onValueChange={(priceTier: "final" | "reseller") => updateStorePriceTier.mutate({ customerId: selectedClient.externalId, priceTier })} disabled={updateStorePriceTier.isPending}><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select> : <Badge variant="outline" className="border-gray-200 bg-gray-50 text-gray-700">{customer.priceTier === "reseller" ? "Revendedor" : "Cliente final"}</Badge>}</div>
+              </div>
+            </section>
+            <Separator />
+            <section>
+              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-pink-600"><Calendar className="h-4 w-4" />Datas e Acesso</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><p className="mb-0.5 text-xs text-gray-500">Membro desde</p><p className="text-gray-900">{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "—"}</p></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Último Login</p><p className="text-gray-900">{customer.lastLogin ? new Date(customer.lastLogin).toLocaleString("pt-BR") : "Nunca"}</p></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Última Atualização</p><p className="text-gray-900">{customer.updatedAt ? new Date(customer.updatedAt).toLocaleString("pt-BR") : "—"}</p></div>
+                <div><p className="mb-0.5 text-xs text-gray-500">Tentativas de Login Falhas</p><p className="text-gray-900">{isStoreAccount ? customer.loginAttempts || 0 : "Não aplicável"}</p></div>
+              </div>
+            </section>
+            <Separator />
+            <section>
+              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-pink-600"><MapPin className="h-4 w-4" />Endereço de Entrega</h3>
+              {customer.addressStreet ? <div className="grid grid-cols-2 gap-3 text-sm"><div><p className="mb-0.5 text-xs text-gray-500">CEP</p><p className="text-gray-900">{customer.addressZipCode || "—"}</p></div><div><p className="mb-0.5 text-xs text-gray-500">Rua / Avenida</p><p className="text-gray-900">{customer.addressStreet}, {customer.addressNumber || "s/n"}</p></div>{customer.addressComplement && <div><p className="mb-0.5 text-xs text-gray-500">Complemento</p><p className="text-gray-900">{customer.addressComplement}</p></div>}<div><p className="mb-0.5 text-xs text-gray-500">Bairro</p><p className="text-gray-900">{customer.addressNeighborhood || "—"}</p></div><div><p className="mb-0.5 text-xs text-gray-500">Cidade / UF</p><p className="text-gray-900">{customer.addressCity || "—"}{customer.addressState ? ` — ${customer.addressState}` : ""}</p></div></div> : <p className="text-sm italic text-gray-400">Endereço não cadastrado</p>}
+            </section>
+            <Separator />
+            <section>
+              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-pink-600"><Lock className="h-4 w-4" />Segurança</h3>
+              {isStoreAccount ? !showPasswordForm ? <Button variant="outline" size="sm" className={ADMIN_VISUAL_SYSTEM.iconAction} onClick={() => setShowPasswordForm(true)}><Lock className="mr-1.5 h-3.5 w-3.5" />Redefinir Senha do Cliente</Button> : <div className="flex items-start gap-2"><div className="flex-1"><Input value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Nova senha (mín. 8 caracteres, 1 maiúscula, 1 número)" /><p className="mt-1 text-xs text-gray-400">Mínimo 8 caracteres, uma letra maiúscula e um número.</p></div><Button size="sm" disabled={setPassword.isPending} onClick={handleSetPassword}>{setPassword.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}</Button><Button variant="ghost" size="sm" onClick={() => { setShowPasswordForm(false); setNewPassword(""); }}>Cancelar</Button></div> : <p className="text-sm italic text-gray-400">Cliente cadastrado no balcão não possui senha de acesso.</p>}
+            </section>
+            <Separator />
+            <section>
+              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-pink-600"><ShoppingBag className="h-4 w-4" />Histórico de Pedidos ({orders.length})</h3>
+              {orders.length === 0 ? <p className="text-sm italic text-gray-400">Nenhum pedido encontrado</p> : <div className="space-y-2">{orders.map((order: any) => <div key={order.id} className="flex items-center justify-between rounded-lg bg-gray-50 p-3 text-sm"><div><p className="font-medium text-gray-900">#{order.orderNumber || order.id}</p><p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString("pt-BR")}{order.paymentMethod && ` · ${order.paymentMethod.toUpperCase()}`}</p></div><div className="flex items-center gap-3"><Badge variant="outline" className="border-gray-200 bg-white text-gray-700">{order.status}</Badge><span className="font-semibold text-gray-900">{formatCurrency(order.totalPrice)}</span></div></div>)}</div>}
+            </section>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function ClientsManager({ defaultType, title, ..._ }: { defaultType?: string; title?: string; [k: string]: any } = {}) {
   const searchParams = useSearch();
@@ -103,6 +216,19 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     },
   });
 
+  const updateStoreAccountStatus = trpc.customerAuth.adminUpdateCustomerStatus.useMutation({
+    onSuccess: () => { toast.success("Status atualizado com sucesso!"); refetch(); },
+    onError: (error) => toast.error(error.message),
+  });
+  const deleteStoreAccount = trpc.customerAuth.adminDeleteCustomer.useMutation({
+    onSuccess: () => { toast.success("Cliente excluído com sucesso!"); refetch(); },
+    onError: (error) => toast.error(error.message),
+  });
+  const updateLegacyStatus = trpc.crm.updateClient.useMutation({
+    onSuccess: () => { toast.success("Status atualizado com sucesso!"); refetch(); },
+    onError: (error) => toast.error(error.message),
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -133,8 +259,20 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     setShowForm(true);
   };
 
-  const handleDelete = (clientId: number) => {
-    deleteClientMutation.mutate({ clientId });
+  const handleDelete = (client: any) => {
+    if (client.source === "site") {
+      deleteStoreAccount.mutate({ customerId: client.externalId });
+      return;
+    }
+    deleteClientMutation.mutate({ clientId: client.id });
+  };
+
+  const handleToggleBlock = (client: any) => {
+    if (client.source === "site") {
+      updateStoreAccountStatus.mutate({ customerId: client.externalId, status: client.accountStatus === "blocked" ? "active" : "blocked" });
+      return;
+    }
+    updateLegacyStatus.mutate({ clientId: client.id, data: { isActive: !client.isActive } });
   };
 
   const handleCancel = () => {
@@ -395,16 +533,24 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                               <Edit2 className="w-4 h-4" /> Editar
                             </Button>
                             )}
-                            {client.source !== "site" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className={ADMIN_VISUAL_SYSTEM.iconAction}
+                              onClick={() => handleToggleBlock(client)}
+                              disabled={updateStoreAccountStatus.isPending || updateLegacyStatus.isPending}
+                            >
+                              {client.source === "site" && client.accountStatus === "blocked" || client.source !== "site" && !client.isActive ? <><UserCheck className="w-4 h-4" /> Desbloquear</> : <><Ban className="w-4 h-4" /> Bloquear</>}
+                            </Button>
                             <Button
                               size="sm"
                               variant="ghost"
                               className={ADMIN_VISUAL_SYSTEM.iconAction}
                               onClick={() => setPendingDeleteClient(client)}
+                              disabled={deleteStoreAccount.isPending || deleteClientMutation.isPending}
                             >
                               <Trash2 className="w-4 h-4" /> Excluir
                             </Button>
-                            )}
                           </div>
                         </td>
                       </tr>
@@ -420,27 +566,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
           </CardContent>
         </Card>
 
-        <Dialog open={selectedClient !== null} onOpenChange={(open) => !open && setSelectedClient(null)}>
-          <DialogContent className="max-w-xl">
-            <DialogHeader>
-              <DialogTitle>Produtos comprados — {selectedClient?.name}</DialogTitle>
-              <DialogDescription>Resumo calculado somente com pedidos vinculados a este cliente.</DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-3 gap-3 rounded-lg bg-gray-50 p-3 text-sm">
-              <div><p className="text-xs text-gray-500">Valor acumulado</p><p className="font-semibold">{formatCurrency(selectedClient?.totalVolume)}</p></div>
-              <div><p className="text-xs text-gray-500">Pedidos</p><p className="font-semibold">{selectedClient?.totalOrders ?? 0}</p></div>
-              <div><p className="text-xs text-gray-500">Última compra</p><p className="font-semibold">{formatDate(selectedClient?.lastPurchase)}</p></div>
-            </div>
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-              {selectedClient?.products?.length ? selectedClient.products.map((product: any) => (
-                <div key={product.name} className="flex items-center justify-between rounded-md border border-gray-100 px-3 py-2">
-                  <span className="text-sm font-medium text-gray-800">{product.name}</span>
-                  <span className="text-sm text-gray-500">{product.totalQuantity} unidade(s)</span>
-                </div>
-              )) : <p className="py-6 text-center text-sm text-gray-500">Nenhum item de produto vinculado aos pedidos deste cliente.</p>}
-            </div>
-          </DialogContent>
-        </Dialog>
+        <CustomerDetailsDialog selectedClient={selectedClient} open={selectedClient !== null} onClose={() => setSelectedClient(null)} onRefetch={refetch} />
 
         <AlertDialog open={pendingDeleteClient !== null} onOpenChange={(open) => !open && setPendingDeleteClient(null)}>
           <AlertDialogContent>
@@ -452,7 +578,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
-                  if (pendingDeleteClient) handleDelete(pendingDeleteClient.id);
+                  if (pendingDeleteClient) handleDelete(pendingDeleteClient);
                   setPendingDeleteClient(null);
                 }}
               >
