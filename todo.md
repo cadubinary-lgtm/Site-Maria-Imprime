@@ -2746,3 +2746,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir preço final e preço de revendedor nas páginas Novo Produto e Editar Produto conforme o tipo de cobrança
 - [x] Aplicar preço final a Site/Loja e Balcão, e preço de revendedor ao perfil Revendedor autenticado
 - [x] Preservar cálculo técnico de medidas, quantidade, variações, frete e pedidos ao selecionar a tabela de preços
+- [x] Exibir no Novo Pedido o perfil de preço ativo do cliente selecionado
+- [x] Mostrar uma única tag de Perfil do Cliente: Cliente Final ou Cliente Revendedor

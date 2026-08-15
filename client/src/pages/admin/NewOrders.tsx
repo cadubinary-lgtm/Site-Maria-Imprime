@@ -33,6 +33,11 @@ const SHIPPING_LABELS: Record<string, string> = {
   moto_express: "Moto Express",
 };
 
+const PRICE_TIER_CONFIG = {
+  final: { label: "Cliente Final", className: "bg-slate-100 text-slate-700 border-slate-200" },
+  reseller: { label: "Cliente Revendedor", className: "bg-pink-100 text-pink-700 border-pink-200" },
+} as const;
+
 function formatCurrency(v: any) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v) || 0);
 }
@@ -159,6 +164,8 @@ export default function NewOrders() {
               const clientPhone = order.deliveryPhone || "-";
               const paymentLabel = PAYMENT_METHOD_LABELS[order.paymentMethod ?? ""] || order.paymentMethod || "-";
               const shippingLabel = SHIPPING_LABELS[order.shippingMethod ?? ""] || order.shippingMethod || "Entrega";
+              const priceTier = order.customerPriceTier === "reseller" ? "reseller" : "final";
+              const priceTierConfig = PRICE_TIER_CONFIG[priceTier];
 
               return (
                 <Card key={order.id} className="hover:shadow-md transition-all border-l-4 border-l-orange-400">
@@ -170,6 +177,9 @@ export default function NewOrders() {
                           <span className="font-bold text-gray-900 text-base">#{order.orderNumber}</span>
                           <Badge className={`text-xs border ${statusCfg.color}`}>
                             {statusCfg.icon} {statusCfg.label}
+                          </Badge>
+                          <Badge className={`text-xs border ${priceTierConfig.className}`}>
+                            {priceTierConfig.label}
                           </Badge>
                           {isPickup && (
                             <Badge className="text-xs bg-cyan-100 text-cyan-800 border-cyan-200 border">
