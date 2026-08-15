@@ -33,6 +33,13 @@ describe("lista Todos os Clientes", () => {
     expect(page).toContain("Excluir");
   });
 
+  it("exibe indicadores operacionais somente no Dashboard de Clientes", () => {
+    const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
+    expect(page).toContain("{isDashboardView && (");
+    expect(page).toContain("Clientes ativos");
+    expect(page).toContain("Volume comprado");
+  });
+
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {
     const files = [
       "client/src/pages/admin/AdminCustomers.tsx",
