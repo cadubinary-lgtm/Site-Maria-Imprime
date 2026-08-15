@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { ADMIN_MENU_GROUP_ICON_CLASS, getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
+import { shouldShowAdminMenuItemIcon } from "@/lib/admin-menu-item-visibility";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
@@ -190,7 +191,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
         }
       }}
     >
-      {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
+      {item.icon && shouldShowAdminMenuItemIcon(item.label) && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
       <span className="flex-1">{item.label}</span>
       {item.badge ? <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
     </Link>
