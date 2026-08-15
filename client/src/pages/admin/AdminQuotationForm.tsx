@@ -122,6 +122,8 @@ export default function AdminQuotationForm() {
   const [cepLoading, setCepLoading] = useState(false);
   const [manualAddress, setManualAddress] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [showCustomItemNameStep, setShowCustomItemNameStep] = useState(false);
+  const [customItemName, setCustomItemName] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   // Estado para opções dinâmicas por produto (productId -> { variations, attributes })
   const [productOptionsCache, setProductOptionsCache] = useState<Record<number, any>>({});
@@ -437,10 +439,10 @@ export default function AdminQuotationForm() {
     }
   };
 
-  const addCustomItemToQuote = () => {
+  const addCustomItemToQuote = (productName: string) => {
     const newItem: QuotationItem = {
       productId: null,
-      productName: "",
+      productName,
       specifications: JSON.stringify({ itemType: "custom" }),
       quantity: 1,
       unitPrice: 0,
@@ -452,6 +454,22 @@ export default function AdminQuotationForm() {
     setExpandedItems((prev) => { const next = new Set(prev); next.add(items.length); return next; });
     setShowAddProduct(false);
     setProductSearch("");
+    setShowCustomItemNameStep(false);
+    setCustomItemName("");
+  };
+
+  const openCustomItemNameStep = () => {
+    setCustomItemName("");
+    setShowCustomItemNameStep(true);
+  };
+
+  const confirmCustomItemName = () => {
+    const name = customItemName.trim();
+    if (!name) {
+      toast.error("Informe o nome do Produto / Serviço.");
+      return;
+    }
+    addCustomItemToQuote(name);
   };
 
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
@@ -1566,7 +1584,7 @@ export default function AdminQuotationForm() {
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
                     <div className="pt-1">
-                      <Button type="button" variant="outline" size="sm" onClick={addCustomItemToQuote} className="gap-1.5 border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800">
+                      <Button type="button" variant="outline" size="sm" onClick={openCustomItemNameStep} className="gap-1.5 border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800">
                         <Plus className="h-3.5 w-3.5" /> Adicionar novo item
                       </Button>
                     </div>
@@ -1830,15 +1848,35 @@ export default function AdminQuotationForm() {
       </div>
 
       {/* Modal: Adicionar produto */}
-      <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
+      <Dialog open={showAddProduct} onOpenChange={(open) => { setShowAddProduct(open); if (!open) { setShowCustomItemNameStep(false); setCustomItemName(""); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Adicionar Produto ao Orçamento</DialogTitle>
+            <DialogTitle>{showCustomItemNameStep ? "Nome do item personalizado" : "Adicionar Produto ao Orçamento"}</DialogTitle>
           </DialogHeader>
+          {showCustomItemNameStep ? (
+            <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); confirmCustomItemName(); }}>
+              <div>
+                <label htmlFor="custom-item-name" className="text-sm font-medium text-gray-800">Produto / Serviço</label>
+                <p className="mt-1 text-xs text-gray-500">Informe o nome para que o item já seja criado identificado no orçamento.</p>
+                <Input
+                  id="custom-item-name"
+                  autoFocus
+                  value={customItemName}
+                  onChange={(event) => setCustomItemName(event.target.value)}
+                  placeholder="Ex.: Instalação de fachada, mão de obra ou estrutura metálica"
+                  className="mt-3"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowCustomItemNameStep(false)}>Voltar</Button>
+                <Button type="submit" className="bg-pink-600 hover:bg-pink-700">Continuar</Button>
+              </div>
+            </form>
+          ) : <>
           <button
             type="button"
             className="w-full flex items-center gap-3 p-3 rounded-lg border border-pink-200 bg-pink-50/50 text-left hover:bg-pink-50 transition-colors"
-            onClick={addCustomItemToQuote}
+            onClick={openCustomItemNameStep}
           >
             <div className="w-10 h-10 rounded bg-pink-100 flex items-center justify-center">
               <Plus className="w-5 h-5 text-pink-600" />
@@ -1881,6 +1919,7 @@ export default function AdminQuotationForm() {
               </button>
             ))}
           </div>
+          </>}
         </DialogContent>
       </Dialog>
 

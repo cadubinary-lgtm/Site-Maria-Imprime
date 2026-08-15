@@ -24,6 +24,11 @@ describe("itens personalizados em Orçamentos", () => {
 
   it("cria um item personalizado em card editável", () => {
     expect(formSource).toContain("const addCustomItemToQuote");
+    expect(formSource).toContain("const openCustomItemNameStep");
+    expect(formSource).toContain("const confirmCustomItemName");
+    expect(formSource).toContain('Informe o nome do Produto / Serviço.');
+    expect(formSource).toContain('id="custom-item-name"');
+    expect(formSource).toContain('productName,');
     expect(formSource).toContain('itemType: "custom"');
     expect(formSource).toContain('aria-label="Nome do item personalizado"');
     expect(formSource).toContain("const renderCustomItemCard");
