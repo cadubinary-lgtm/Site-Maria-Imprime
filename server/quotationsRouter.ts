@@ -7,6 +7,7 @@ import { eq, desc, like, and, or, sql, gte, lte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendQuotationEmail } from "./emailService";
 import { logAudit } from "./admin-auth";
+import { extractQuotationKpiRow } from "./quotation-kpi-result";
 
 const adminAnyProcedure = adminOrManusAuthProcedure;
 
@@ -128,7 +129,7 @@ export const quotationsRouter = router({
         WHERE NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = q.id)
       `);
 
-      const kpi = (kpiRows as any)[0] ?? {};
+      const kpi = extractQuotationKpiRow(kpiRows);
       const propostasEnviadas = Number(kpi.propostasEnviadas ?? 0);
       const taxaConversao = propostasEnviadas > 0
         ? Math.round((Number(kpi.convertidos ?? 0) / propostasEnviadas) * 100)
