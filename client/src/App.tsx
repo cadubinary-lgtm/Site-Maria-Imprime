@@ -43,6 +43,7 @@ import OrderTracking from "./pages/cliente/OrderTracking";
 // ─── Páginas Administrativas ─────────────────────────────────────────────────
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminProductsDashboard from "./pages/admin/AdminProductsDashboard";
 import AdminNewProduct from "./pages/admin/AdminNewProduct";
 import AdminVariations from "./pages/admin/AdminVariations";
 import AdminVariationsOffset from "./pages/admin/AdminVariationsOffset";
@@ -149,6 +150,7 @@ function AdminRoutes() {
  * Usa useAuth do Manus OAuth para autenticação.
  */
 function AdminProtectedRoutesManus() {
+  // Rotas específicas do ambiente de prévia
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -165,10 +167,12 @@ function AdminProtectedRoutesManus() {
     return null;
   }
 
+  // Rotas protegidas do ambiente de prévia
   return (
     <Switch>
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
       <Route path="/admin/produtos" component={AdminProducts} />
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />
@@ -244,6 +248,7 @@ function AdminProtectedRoutesManus() {
  * quando a rota NÃO é /admin/login ou /admin/setup.
  */
 function AdminProtectedRoutes() {
+  // Rotas específicas do domínio oficial
   const { adminUser, isLoading } = useAdminAuth();
 
   if (isLoading) {
@@ -260,10 +265,12 @@ function AdminProtectedRoutes() {
     return null;
   }
 
+  // Rotas protegidas do domínio oficial
   return (
     <Switch>
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
       <Route path="/admin/produtos" component={AdminProducts} />
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />

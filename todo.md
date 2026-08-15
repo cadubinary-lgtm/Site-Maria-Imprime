@@ -2727,3 +2727,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar rosa aos nomes e ícones dos grupos principais do menu lateral administrativo
 - [x] Manter nomes em rosa e aplicar ícones brancos aos grupos principais do menu lateral
 - [x] Remover ícones dos itens de Dashboard no menu lateral administrativo
+- [x] Corrigir o atalho do Dashboard de Produtos para abrir os indicadores de produtos
