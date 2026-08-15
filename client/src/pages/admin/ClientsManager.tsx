@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { ArrowLeft, Plus, Trash2, Edit2, Search, Users, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   balcao:      { label: "Balcão",      color: "bg-blue-100 text-blue-800" },
@@ -30,6 +32,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>(defaultType ?? "");
+  const [pendingDeleteClient, setPendingDeleteClient] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -111,9 +114,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   };
 
   const handleDelete = (clientId: number) => {
-    if (confirm("Tem certeza que deseja deletar este cliente?")) {
-      deleteClientMutation.mutate({ clientId });
-    }
+    deleteClientMutation.mutate({ clientId });
   };
 
   const handleCancel = () => {
@@ -336,8 +337,9 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                             </Button>
                             <Button
                               size="sm"
-                              variant="destructive"
-                              onClick={() => handleDelete(client.id)}
+                              variant="outline"
+                              className={ADMIN_VISUAL_SYSTEM.iconAction}
+                              onClick={() => setPendingDeleteClient(client)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -355,6 +357,26 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={pendingDeleteClient !== null} onOpenChange={(open) => !open && setPendingDeleteClient(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+              <AlertDialogDescription>O cliente “{pendingDeleteClient?.name}” será removido permanentemente.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (pendingDeleteClient) handleDelete(pendingDeleteClient.id);
+                  setPendingDeleteClient(null);
+                }}
+              >
+                Excluir cliente
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
     </AdminLayout>
