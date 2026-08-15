@@ -19,6 +19,7 @@
  */
 
 import { FileText } from "lucide-react";
+import { formatProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,12 @@ export interface OrderItemSpecsProps {
   shippingLabel?: string | null;
   /** Preço do frete (0 = Grátis) */
   shippingPrice?: number | string | null;
+  /** Composição persistida da taxa de urgência escolhida. */
+  urgencyRate?: number | string | null;
+  urgencyMultiplier?: number | string | null;
+  urgencyUnit?: string | null;
+  urgencySurcharge?: number | string | null;
+  quantity?: number | string | null;
   /** Modo compacto (sem bloco cinza, apenas linhas) — usado no CartPage */
   compact?: boolean;
 }
@@ -131,11 +138,23 @@ export function OrderItemSpecs({
   forecastLabel,
   shippingLabel,
   shippingPrice,
+  urgencyRate,
+  urgencyMultiplier,
+  urgencyUnit,
+  urgencySurcharge,
+  quantity,
   compact = false,
 }: OrderItemSpecsProps) {
   const { largura, altura } = parseDimensions(customDimensions);
   const variations = parseVariations(variationSnapshot);
   const attrObj = parseAttrObj(selectedAttributes);
+  const urgencyBreakdown = formatProductionDeadlineSurcharge({
+    rate: urgencyRate,
+    multiplier: urgencyMultiplier,
+    unit: urgencyUnit,
+    surcharge: urgencySurcharge,
+    quantity,
+  });
 
   // Variações agrupadas (sem dimensionais)
   const grouped = groupVariations(variations);
@@ -155,7 +174,7 @@ export function OrderItemSpecs({
     }
   }
 
-  const hasContent = largura || altura || allSpecs.length > 0 || artFileUrl || notes || prazoName || forecastLabel || shippingLabel;
+  const hasContent = largura || altura || allSpecs.length > 0 || artFileUrl || notes || prazoName || forecastLabel || shippingLabel || urgencyBreakdown;
   if (!hasContent) return null;
 
   // ── Bloco de especificação em layout vertical (rótulo acima do valor) ──────
@@ -196,6 +215,7 @@ export function OrderItemSpecs({
         )}
         {notes && <SpecLine label="Obs" value={notes} />}
         {prazoName && <SpecLine label="Prazo" value={prazoName} />}
+        {urgencyBreakdown && <SpecLine label="Urgência" value={urgencyBreakdown} />}
         {forecastLabel && (
           <p className="text-xs text-gray-700 leading-relaxed">{forecastLabel}</p>
         )}
@@ -243,6 +263,8 @@ export function OrderItemSpecs({
 
       {/* Prazo */}
       {prazoName && <SpecBlock label="Prazo" value={prazoName} />}
+
+      {urgencyBreakdown && <SpecBlock label="Urgência" value={urgencyBreakdown} />}
 
       {/* Previsão */}
       {forecastLabel && (

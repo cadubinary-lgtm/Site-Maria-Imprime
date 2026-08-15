@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getCompanyAddressLine, getCompanyLocationLine, useCompanySettings } from "@/hooks/useCompanySettings";
 import { QRCodeSVG } from "qrcode.react";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
+import { formatProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 import {
   Printer, ArrowLeft, Loader2, AlertCircle, FileText,
   Phone, MapPin, Package, DollarSign,
@@ -488,6 +489,13 @@ export default function AdminOSPrint() {
                   const specs = parseSpecifications(item);
                   const dims = item.customDimensions || "";
                   const artFileName = firstFile ? fileNameFromUrl(firstFile.artFileUrl) : null;
+                  const urgencyBreakdown = formatProductionDeadlineSurcharge({
+                    rate: item.urgencyRate,
+                    multiplier: item.urgencyMultiplier,
+                    unit: item.urgencyUnit,
+                    surcharge: item.urgencySurcharge,
+                    quantity: item.quantity,
+                  });
 
                   return (
                     <tr key={i} style={{
@@ -578,6 +586,12 @@ export default function AdminOSPrint() {
                             <div style={{ marginTop: "2px" }}>
                               <span style={{ color: "#6b7280", fontSize: "9px" }}>Arte:</span>{" "}
                               <span style={{ fontSize: "8px", color: "#374151", wordBreak: "break-all" }}>{artFileName}</span>
+                            </div>
+                          )}
+                          {urgencyBreakdown && (
+                            <div style={{ marginTop: "2px" }}>
+                              <span style={{ color: "#6b7280", fontSize: "9px" }}>Urgência:</span>{" "}
+                              <strong style={{ fontSize: "8px", color: "#374151" }}>{urgencyBreakdown}</strong>
                             </div>
                           )}
                         </div>

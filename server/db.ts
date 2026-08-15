@@ -924,7 +924,7 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
           ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
           ci.artFileUrl, ci.artFileUrls, ci.notes, ci.createdAt, ci.updatedAt,
           ci.shippingMethod, ci.shippingPrice, ci.shippingLabel,
-          ci.variationSnapshot, ci.prazoName, ci.prazoHours,
+          ci.variationSnapshot, ci.prazoName, ci.prazoHours, ci.urgencyRate, ci.urgencyMultiplier, ci.urgencyUnit, ci.urgencySurcharge,
           ci.forecastDate, ci.forecastLabel, ci.cepDestino,
           p.name as productName, p.imageUrl as productImage,
           p.calculationType, p.unit
@@ -942,7 +942,7 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
           ci.selectedAttributes, ci.customDimensions, ci.priceAtCart,
           ci.artFileUrl, ci.artFileUrls, ci.notes, ci.createdAt, ci.updatedAt,
           ci.shippingMethod, ci.shippingPrice, ci.shippingLabel,
-          ci.variationSnapshot, ci.prazoName, ci.prazoHours,
+          ci.variationSnapshot, ci.prazoName, ci.prazoHours, ci.urgencyRate, ci.urgencyMultiplier, ci.urgencyUnit, ci.urgencySurcharge,
           ci.forecastDate, ci.forecastLabel, ci.cepDestino,
           p.name as productName, p.imageUrl as productImage,
           p.calculationType, p.unit
@@ -975,6 +975,10 @@ export async function addToCart(data: {
   variationSnapshot?: string;
   prazoName?: string;
   prazoHours?: number;
+  urgencyRate?: number;
+  urgencyMultiplier?: number;
+  urgencyUnit?: string;
+  urgencySurcharge?: number;
   forecastDate?: string;
   forecastLabel?: string;
   cepDestino?: string;
@@ -986,7 +990,7 @@ export async function addToCart(data: {
       INSERT INTO cartItems (
         userId, sessionId, productId, quantity, selectedAttributes, customDimensions,
         priceAtCart, artFileUrl, artFileUrls, notes, shippingMethod, shippingPrice, shippingLabel,
-        variationSnapshot, prazoName, prazoHours, forecastDate, forecastLabel, cepDestino
+        variationSnapshot, prazoName, prazoHours, urgencyRate, urgencyMultiplier, urgencyUnit, urgencySurcharge, forecastDate, forecastLabel, cepDestino
       )
       VALUES (
         ${data.userId ?? null}, ${data.sessionId ?? null}, ${data.productId}, ${data.quantity},
@@ -994,6 +998,7 @@ export async function addToCart(data: {
         ${data.priceAtCart}, ${data.artFileUrl ?? null}, ${data.artFileUrls ?? null}, ${data.notes ?? null},
         ${data.shippingMethod ?? "retirada"}, ${data.shippingPrice ?? 0}, ${data.shippingLabel ?? null},
         ${data.variationSnapshot ?? null}, ${data.prazoName ?? null}, ${data.prazoHours ?? 0},
+        ${data.urgencyRate ?? null}, ${data.urgencyMultiplier ?? null}, ${data.urgencyUnit ?? null}, ${data.urgencySurcharge ?? null},
         ${data.forecastDate ?? null}, ${data.forecastLabel ?? null}, ${data.cepDestino ?? null}
       )
     `
@@ -1475,6 +1480,10 @@ export async function createOrderFromCart(data: {
     notes?: string;
     prazoName?: string | null;
     prazoHours?: number | null;
+    urgencyRate?: number | null;
+    urgencyMultiplier?: number | null;
+    urgencyUnit?: string | null;
+    urgencySurcharge?: number | null;
     forecastDate?: string | null;
     forecastLabel?: string | null;
     shippingMethod?: string | null;
@@ -1539,10 +1548,10 @@ export async function createOrderFromCart(data: {
       const productIdVal = item.productId ? Number(item.productId) : null;
       const itemResult = await db.execute(
         sql`
-          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, artFileUrls, notes, prazoName, prazoHours, forecastDate, forecastLabel, shippingMethod, shippingPrice, shippingLabel, cepDestino)
+          INSERT INTO orderItems (orderId, productId, productName, quantity, priceAtOrder, selectedAttributes, variationSnapshot, customDimensions, artFileUrl, artFileUrls, notes, prazoName, prazoHours, urgencyRate, urgencyMultiplier, urgencyUnit, urgencySurcharge, forecastDate, forecastLabel, shippingMethod, shippingPrice, shippingLabel, cepDestino)
           VALUES (${orderId}, ${productIdVal}, ${item.productName ?? 'Produto'}, ${item.quantity}, ${item.priceAtCart},
             ${item.selectedAttributes ?? null}, ${item.variationSnapshot ?? null}, ${item.customDimensions ?? null}, ${item.artFileUrl ?? null}, ${item.artFileUrls ?? null}, ${item.notes ?? null},
-            ${item.prazoName ?? null}, ${item.prazoHours ?? 0}, ${item.forecastDate ?? null}, ${item.forecastLabel ?? null},
+            ${item.prazoName ?? null}, ${item.prazoHours ?? 0}, ${item.urgencyRate ?? null}, ${item.urgencyMultiplier ?? null}, ${item.urgencyUnit ?? null}, ${item.urgencySurcharge ?? null}, ${item.forecastDate ?? null}, ${item.forecastLabel ?? null},
             ${item.shippingMethod ?? null}, ${item.shippingPrice ?? 0}, ${item.shippingLabel ?? null}, ${item.cepDestino ?? null})
         `
       );

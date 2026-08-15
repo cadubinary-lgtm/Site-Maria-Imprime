@@ -935,7 +935,7 @@ export const customerAuthRouter = router({
           SELECT oi.productId, oi.quantity, oi.priceAtOrder,
             oi.selectedAttributes, oi.artFileUrl, oi.notes,
             oi.variationSnapshot, oi.customDimensions,
-            oi.prazoName, oi.prazoHours, oi.forecastDate, oi.forecastLabel,
+            oi.prazoName, oi.prazoHours, oi.urgencyRate, oi.urgencyMultiplier, oi.urgencyUnit, oi.urgencySurcharge, oi.forecastDate, oi.forecastLabel,
             oi.shippingMethod, oi.shippingPrice, oi.shippingLabel, oi.cepDestino
           FROM orderItems oi
           INNER JOIN orders o ON o.id = oi.orderId
@@ -960,6 +960,10 @@ export const customerAuthRouter = router({
           customDimensions: item.customDimensions ?? undefined,
           prazoName: item.prazoName ?? undefined,
           prazoHours: item.prazoHours ?? undefined,
+          urgencyRate: item.urgencyRate ? parseFloat(item.urgencyRate) : undefined,
+          urgencyMultiplier: item.urgencyMultiplier ? parseFloat(item.urgencyMultiplier) : undefined,
+          urgencyUnit: item.urgencyUnit ?? undefined,
+          urgencySurcharge: item.urgencySurcharge ? parseFloat(item.urgencySurcharge) : undefined,
           forecastDate: item.forecastDate ?? undefined,
           forecastLabel: item.forecastLabel ?? undefined,
           shippingMethod: item.shippingMethod ?? undefined,

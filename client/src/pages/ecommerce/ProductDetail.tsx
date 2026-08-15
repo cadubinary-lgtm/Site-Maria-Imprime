@@ -30,7 +30,7 @@ import { getProductPrice } from "@/lib/productPrice";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
-import { getProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
+import { formatProductionDeadlineSurcharge, getProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -740,6 +740,12 @@ export default function ProductDetail() {
       const prazoHours = selectedDeliveryOption
         ? (selectedDeliveryOption.daysToDeliver === 1 ? 24 : (selectedDeliveryOption.daysToDeliver ?? 0) * 24)
         : 0;
+      const urgencyMultiplier = selectedDeliveryOption
+        ? (isM2 ? deadlineBilledArea : isMetroLinear ? deadlineLinearMeters : 1)
+        : 0;
+      const urgencyUnit = isM2 ? "m²" : isMetroLinear ? "metro linear" : product.calculationType === "pacote" ? "pacote" : "unidade";
+      const urgencyRate = selectedDeliveryOption ? Number(selectedDeliveryOption.pricePerM2 ?? 0) : 0;
+      const urgencySurcharge = deliveryTax;
 
       // Previsão de entrega
       const forecastDate = deliveryForecast ? deliveryForecast.date.toLocaleDateString('pt-BR') : undefined;
@@ -780,6 +786,10 @@ export default function ProductDetail() {
           variationSnapshot: variationSnapshotJson ?? null,
           prazoName: prazoName ?? null,
           prazoHours,
+          urgencyRate,
+          urgencyMultiplier,
+          urgencyUnit,
+          urgencySurcharge,
           forecastDate: forecastDate ?? null,
           forecastLabel: forecastLabel ?? null,
           cepDestino: cepDestinoVal ?? null,
@@ -827,6 +837,10 @@ export default function ProductDetail() {
         variationSnapshot: variationSnapshotJson,
         prazoName,
         prazoHours,
+        urgencyRate,
+        urgencyMultiplier,
+        urgencyUnit,
+        urgencySurcharge,
         forecastDate,
         forecastLabel,
         cepDestino: cepDestinoVal,
@@ -1909,9 +1923,17 @@ export default function ProductDetail() {
                     <span className="font-medium">R$ {subtotal.toFixed(2)}</span>
                   </div>
                   {deliveryTax > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Acréscimos</span>
-                      <span className="font-medium text-green-600">+R$ {deliveryTax.toFixed(2)}</span>
+                    <div className="flex justify-between gap-3 text-sm">
+                      <span className="text-gray-600">Urgência</span>
+                      <span className="font-medium text-green-600 text-right">
+                        {formatProductionDeadlineSurcharge({
+                          rate: selectedDeliveryOption?.pricePerM2,
+                          multiplier: isM2 ? deadlineBilledArea : isMetroLinear ? deadlineLinearMeters : 1,
+                          unit: isM2 ? "m²" : isMetroLinear ? "metro linear" : product?.calculationType === "pacote" ? "pacote" : "unidade",
+                          surcharge: deliveryTax,
+                          quantity,
+                        })}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">

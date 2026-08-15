@@ -895,6 +895,12 @@ export default function OrderDetailPage() {
                             variationSnapshot={item.variationSnapshot}
                             selectedAttributes={item.selectedAttributes}
                             notes={item.notes}
+                            prazoName={item.prazoName}
+                            urgencyRate={item.urgencyRate}
+                            urgencyMultiplier={item.urgencyMultiplier}
+                            urgencyUnit={item.urgencyUnit}
+                            urgencySurcharge={item.urgencySurcharge}
+                            quantity={item.quantity}
                           />
 
                           {/* Bloco de prévia/correção: exclusão mútua entre prova pendente e arte aprovada */}

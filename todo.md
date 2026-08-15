@@ -2750,3 +2750,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mostrar uma única tag de Perfil do Cliente: Cliente Final ou Cliente Revendedor
 - [x] Cobrar taxa de urgência proporcional à quantidade, área faturável ou metragem linear conforme o tipo de cobrança
 - [x] Manter a configuração de prazos consistente em Novo Produto e Editar Produto sem alterar o layout
+- [x] Registrar a base, a taxa e o total da urgência no item do carrinho e pedido
+- [x] Exibir o detalhamento da urgência no resumo do produto, checkout e Ordem de Serviço

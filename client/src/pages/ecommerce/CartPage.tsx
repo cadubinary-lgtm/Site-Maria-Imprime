@@ -41,6 +41,10 @@ interface CartItem {
   variationSnapshot: string | null;
   prazoName: string | null;
   prazoHours: number | null;
+  urgencyRate: string | null;
+  urgencyMultiplier: string | null;
+  urgencyUnit: string | null;
+  urgencySurcharge: string | null;
   forecastDate: string | null;
   forecastLabel: string | null;
   cepDestino: string | null;
@@ -112,6 +116,11 @@ function CartItemCard({
             artFileUrl={item.artFileUrl}
             notes={item.notes}
             prazoName={item.prazoName}
+            urgencyRate={item.urgencyRate}
+            urgencyMultiplier={item.urgencyMultiplier}
+            urgencyUnit={item.urgencyUnit}
+            urgencySurcharge={item.urgencySurcharge}
+            quantity={item.quantity}
             forecastLabel={item.forecastLabel}
             shippingLabel={item.shippingLabel}
             shippingPrice={item.shippingPrice}

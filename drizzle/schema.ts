@@ -266,6 +266,10 @@ export const orderItems = mysqlTable("orderItems", {
   notes: longtext("notes"), // Observações do cliente
   prazoName: varchar("prazoName", { length: 100 }), // Nome do prazo de produção
   prazoHours: int("prazoHours").default(0), // Prazo de produção em horas
+  urgencyRate: decimal("urgencyRate", { precision: 10, scale: 2 }), // Taxa configurada por unidade comercial
+  urgencyMultiplier: decimal("urgencyMultiplier", { precision: 10, scale: 3 }), // Área, metragem ou quantidade usada na taxa
+  urgencyUnit: varchar("urgencyUnit", { length: 30 }), // m², metro linear, unidade ou pacote
+  urgencySurcharge: decimal("urgencySurcharge", { precision: 10, scale: 2 }), // Acréscimo por item já calculado
   forecastDate: varchar("forecastDate", { length: 50 }), // Data prevista de entrega/retirada
   forecastLabel: varchar("forecastLabel", { length: 255 }), // Texto da previsão de entrega
   shippingMethod: varchar("shippingMethod", { length: 50 }), // Método de frete
@@ -1124,6 +1128,10 @@ export const cartItems = mysqlTable("cartItems", {
   variationSnapshot: longtext("variationSnapshot"), // JSON com variações selecionadas {name, value}
   prazoName: varchar("prazoName", { length: 100 }), // Nome do prazo de produção
   prazoHours: int("prazoHours").default(0), // Prazo de produção em horas
+  urgencyRate: decimal("urgencyRate", { precision: 10, scale: 2 }), // Taxa configurada por unidade comercial
+  urgencyMultiplier: decimal("urgencyMultiplier", { precision: 10, scale: 3 }), // Área, metragem ou quantidade usada na taxa
+  urgencyUnit: varchar("urgencyUnit", { length: 30 }), // m², metro linear, unidade ou pacote
+  urgencySurcharge: decimal("urgencySurcharge", { precision: 10, scale: 2 }), // Acréscimo por item já calculado
   forecastDate: varchar("forecastDate", { length: 50 }), // Data prevista de entrega/retirada
   forecastLabel: varchar("forecastLabel", { length: 255 }), // Texto da previsão de entrega
   cepDestino: varchar("cepDestino", { length: 10 }), // CEP de destino informado pelo cliente

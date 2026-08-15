@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatProductPrice, getProductPrice } from "../client/src/lib/productPrice";
+import { formatProductionDeadlineSurcharge } from "../client/src/lib/production-deadline-pricing";
 
 describe("tabelas comerciais de produto", () => {
   it("mantém o preço final para Unidade e seleciona o preço de revenda quando aplicável", () => {
@@ -21,5 +22,15 @@ describe("tabelas comerciais de produto", () => {
     const product = { price: "0", pricePerM2: "75.00", calculationType: "m2" };
 
     expect(formatProductPrice(product, "reseller")).toBe("R$ 75.00/m²");
+  });
+
+  it("expõe o detalhamento de urgência por metro quadrado", () => {
+    expect(formatProductionDeadlineSurcharge({
+      rate: 20,
+      multiplier: 3,
+      unit: "m²",
+      surcharge: 60,
+      quantity: 1,
+    })).toBe("R$ 20,00/m² × 3 m² = R$ 60,00");
   });
 });
