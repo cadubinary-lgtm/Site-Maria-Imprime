@@ -336,7 +336,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               </div>
             ) : filtered.length > 0 ? (
               <div className="w-full overflow-hidden">
-                <table className="w-full table-fixed text-[11px]">
+                <table className="customer-list-standard w-full text-[11px]">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 px-4 font-semibold">Cliente</th>
@@ -394,7 +394,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                               <Users className="mr-1 h-4 w-4" /> Ver cadastro
                             </Link>
                           ) : (
-                          <div className="flex flex-wrap gap-1">
+                          <div data-customer-actions>
                             <Button
                               size="sm"
                               variant="outline"

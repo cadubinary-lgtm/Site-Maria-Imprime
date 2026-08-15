@@ -8,4 +8,20 @@ describe("lista Todos os Clientes", () => {
       expect(page).toContain(`>${column}</th>`);
     });
   });
+
+  it("aplica o padrão de tabela legível às listas de todas as origens", () => {
+    const files = [
+      "client/src/pages/admin/ClientsManager.tsx",
+      "client/src/pages/admin/AdminCustomers.tsx",
+      "client/src/pages/admin/ClientesBalcao.tsx",
+    ];
+
+    files.forEach((file) => {
+      expect(readFileSync(file, "utf8")).toContain("customer-list-standard");
+    });
+
+    const styles = readFileSync("client/src/index.css", "utf8");
+    expect(styles).toContain("overflow-wrap: anywhere");
+    expect(styles).toContain("data-customer-actions");
+  });
 });

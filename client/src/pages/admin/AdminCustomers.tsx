@@ -552,7 +552,7 @@ export default function AdminCustomers() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="customer-list-standard w-full text-sm">
                     <thead>
                       <tr className="border-b bg-gray-50">
                         <th className="text-left px-4 py-3 font-medium text-gray-600">Cliente</th>
@@ -633,7 +633,7 @@ export default function AdminCustomers() {
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5">
+                            <div data-customer-actions>
                               {/* Ver Detalhes */}
                               <Button
                                 variant="outline" size="sm"
