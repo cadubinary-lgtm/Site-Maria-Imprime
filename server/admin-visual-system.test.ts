@@ -9,5 +9,6 @@ describe("sistema visual administrativo", () => {
     expect(ADMIN_VISUAL_GUIDELINES.iconRest).toBe("gray");
     expect(ADMIN_VISUAL_GUIDELINES.iconHover).toBe("pink");
     expect(ADMIN_VISUAL_GUIDELINES.fieldFocus).toBe("pink");
+    expect(ADMIN_VISUAL_GUIDELINES.mobileTouchTarget).toBe(44);
   });
 });

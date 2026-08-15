@@ -2718,3 +2718,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar cores de campos, ícones e estados interativos em todo o painel administrativo com referência em Orçamentos
 - [x] Estender o padrão cinza e rosa de campos e ícones a todos os subitens administrativos
 - [x] Padronizar botões principais de ação em todos os subitens administrativos
+- [x] Ajustar responsividade móvel de botões e ícones e padronizar campos e dropdowns administrativos
