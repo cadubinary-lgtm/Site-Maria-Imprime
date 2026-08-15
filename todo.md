@@ -2767,3 +2767,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir no Novo Cliente administrativo os dados pessoais, senha, confirmação e endereço completos
 - [x] Disponibilizar a gestão de senha no fluxo visível de Todos os Clientes para operador e admin
 - [x] Restringir o formulário administrativo de Novo Cliente a Balcão, Revendedor e Agência
+- [x] Manter as colunas atuais e acrescentar Status, Cadastro, Retirada e Ações em Todos os Clientes
