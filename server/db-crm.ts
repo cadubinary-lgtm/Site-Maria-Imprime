@@ -92,7 +92,7 @@ export async function getOperationalCrmDashboard(options: {
   clientType?: string;
   isActive?: boolean;
 }) {
-  const { limit = 100, offset = 0, clientType, isActive = true } = options;
+  const { limit = 100, offset = 0, clientType, isActive } = options;
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -108,7 +108,15 @@ export async function getOperationalCrmDashboard(options: {
     .limit(limit)
     .offset(offset);
 
-  const siteAccountRows = (!clientType || clientType === "site")
+  const accountTypeByClientType: Record<string, "customer" | "reseller" | "agency"> = {
+    site: "customer",
+    revendedor: "reseller",
+    agencia: "agency",
+  };
+  const requestedAccountType = clientType ? accountTypeByClientType[clientType] : undefined;
+  const shouldLoadAccounts = !clientType || Boolean(requestedAccountType);
+
+  const siteAccountRows = shouldLoadAccounts
     ? await db
       .select({
         id: customerAccounts.id,
@@ -123,7 +131,7 @@ export async function getOperationalCrmDashboard(options: {
         createdAt: customerAccounts.createdAt,
       })
       .from(customerAccounts)
-      .where(eq(customerAccounts.status, "active"))
+      .where(requestedAccountType ? eq(customerAccounts.accountType, requestedAccountType) : undefined)
       .orderBy(desc(customerAccounts.createdAt))
     : [];
 

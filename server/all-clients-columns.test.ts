@@ -4,9 +4,17 @@ import { readFileSync } from "node:fs";
 describe("lista Todos os Clientes", () => {
   it("preserva as colunas comerciais e acrescenta as colunas operacionais", () => {
     const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
-    ["Compras", "Produtos", "Última compra", "Situação", "Status", "Cadastro", "Retirada", "Ações"].forEach((column) => {
+    ["Contato", "E-mail", "Compras", "Produtos", "Última compra", "Situação", "Status", "Cadastro", "Retirada", "Ações"].forEach((column) => {
       expect(page).toContain(`>${column}</th>`);
     });
+  });
+
+  it("consulta na lista geral as contas de Cliente Site, Revendedor e Agência", () => {
+    const dataSource = readFileSync("server/db-crm.ts", "utf8");
+    expect(dataSource).toContain('site: "customer"');
+    expect(dataSource).toContain('revendedor: "reseller"');
+    expect(dataSource).toContain('agencia: "agency"');
+    expect(dataSource).toContain("toSiteDashboardClients(siteAccountRows)");
   });
 
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {

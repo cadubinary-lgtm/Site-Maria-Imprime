@@ -2779,3 +2779,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Identificar cada campo de edição e permitir alterar a Tabela de Preços do cliente
 - [x] Padronizar Clientes Balcão, Revendedores e Agências com a tabela, edição e ações de Clientes Site
 - [x] Adicionar bloquear e desbloquear à lista de Clientes Balcão
+- [x] Confirmar e alinhar Revendedores e Agências ao padrão completo de Clientes Site
+- [x] Padronizar Todos os Clientes com a experiência completa de Clientes Site
+- [x] Consolidar Cliente Site, Balcão, Revendedor e Agência na lista geral de clientes
