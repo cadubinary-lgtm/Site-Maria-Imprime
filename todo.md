@@ -2787,3 +2787,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir a coluna Tabela de Preços ao lado de Cadastro em Todas as listas do CRM
 - [x] Remover Tabela de Preços somente da lista Todos os Clientes
 - [x] Remover os cards operacionais da página Todos os Clientes e mantê-los apenas no Dashboard de Clientes
+- [x] Adicionar seta cinza com hover rosa para expandir e recolher ações secundárias em Todos os Clientes

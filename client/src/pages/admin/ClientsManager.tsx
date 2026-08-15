@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link, useLocation, useSearch } from "wouter";
-import { ArrowLeft, Plus, Trash2, Edit2, Eye, Users, RefreshCw, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle, Ban, UserCheck, Loader2, Mail, Phone, MapPin, Calendar, Lock, ShoppingBag, CheckCircle, AlertCircle, Store } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Eye, ChevronDown, Users, RefreshCw, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle, Ban, UserCheck, Loader2, Mail, Phone, MapPin, Calendar, Lock, ShoppingBag, CheckCircle, AlertCircle, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -166,6 +166,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   const [activityFilter, setActivityFilter] = useState("todos");
   const [pendingDeleteClient, setPendingDeleteClient] = useState<any | null>(null);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [expandedActionClientIds, setExpandedActionClientIds] = useState<Set<number>>(() => new Set());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -273,6 +274,14 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
       return;
     }
     updateLegacyStatus.mutate({ clientId: client.id, data: { isActive: !client.isActive } });
+  };
+
+  const toggleActionExpansion = (clientId: number) => {
+    setExpandedActionClientIds((current) => {
+      const next = new Set(current);
+      next.has(clientId) ? next.delete(clientId) : next.add(clientId);
+      return next;
+    });
   };
 
 
@@ -490,7 +499,9 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((client: any) => (
+                    {filtered.map((client: any) => {
+                      const isActionExpanded = expandedActionClientIds.has(client.id);
+                      return (
                       <tr key={client.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <p className="font-medium text-gray-900">{client.name}</p>
@@ -522,6 +533,17 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                             >
                               <Eye className="w-4 h-4" /> Ver
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              aria-label={isActionExpanded ? `Recolher ações de ${client.name}` : `Expandir ações de ${client.name}`}
+                              title={isActionExpanded ? "Recolher ações" : "Expandir ações"}
+                              className={`${ADMIN_VISUAL_SYSTEM.iconAction} text-gray-400 hover:bg-transparent hover:text-pink-600`}
+                              onClick={() => toggleActionExpansion(client.id)}
+                            >
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isActionExpanded ? "rotate-180" : ""}`} />
+                            </Button>
+                            {isActionExpanded && <>
                             {client.source === "site" ? (
                               <Link href="/admin/clientes-loja" className="inline-flex h-8 items-center gap-2 text-xs font-medium text-gray-600 transition-colors hover:text-pink-600">
                                 <Edit2 className="w-4 h-4" /> Editar
@@ -554,10 +576,11 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                             >
                               <Trash2 className="w-4 h-4" /> Excluir
                             </Button>
+                            </>}
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>
