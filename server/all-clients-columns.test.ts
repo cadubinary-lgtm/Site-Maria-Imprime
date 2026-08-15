@@ -10,6 +10,7 @@ describe("lista Todos os Clientes", () => {
     ["Compras", "Produtos", "Última compra", "Situação"].forEach((column) => {
       expect(page).not.toContain(`>${column}</th>`);
     });
+    expect(page).not.toContain(">Tabela de Preços</th>");
     expect(page).toContain("TYPE_LABELS[client.clientType]");
   });
 
@@ -34,7 +35,6 @@ describe("lista Todos os Clientes", () => {
 
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {
     const files = [
-      "client/src/pages/admin/ClientsManager.tsx",
       "client/src/pages/admin/AdminCustomers.tsx",
       "client/src/pages/admin/ClientesBalcao.tsx",
     ];

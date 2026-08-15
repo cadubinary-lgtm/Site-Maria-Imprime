@@ -2785,3 +2785,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ajustar Todos os Clientes para as sete colunas da referência, mantendo somente a tag de tipo no cliente
 - [x] Padronizar Ver, Bloquear/Desbloquear e Excluir de Todos os Clientes com Clientes Site em todas as origens
 - [x] Exibir a coluna Tabela de Preços ao lado de Cadastro em Todas as listas do CRM
+- [x] Remover Tabela de Preços somente da lista Todos os Clientes
