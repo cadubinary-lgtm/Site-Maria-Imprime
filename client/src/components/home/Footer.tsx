@@ -20,6 +20,7 @@ import {
   Tag,
   Youtube,
 } from "lucide-react";
+import { SiGoogle, SiMastercard, SiPix, SiVisa } from "react-icons/si";
 import {
   getCompanyAddressLine,
   getCompanyLocationLine,
@@ -171,16 +172,16 @@ export function Footer() {
           <div className="p-6">
             <h2 className="text-sm font-bold text-slate-900">Formas de pagamento</h2>
             <div className="mt-4 flex flex-wrap gap-3">
-              <PaymentBadge><Landmark className="mr-1.5 h-5 w-5 text-cyan-500" />PIX</PaymentBadge>
-              <PaymentBadge><span className="text-blue-700">VISA</span></PaymentBadge>
-              <PaymentBadge><span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] text-yellow-300">MC</span></PaymentBadge>
+              <PaymentBadge><SiPix aria-label="PIX" title="PIX" className="h-7 w-12 text-[#32BCAD]" /></PaymentBadge>
+              <PaymentBadge><SiVisa aria-label="Visa" title="Visa" className="h-7 w-12 text-[#1434CB]" /></PaymentBadge>
+              <PaymentBadge><SiMastercard aria-label="Mastercard" title="Mastercard" className="h-8 w-12 text-[#EB001B]" /></PaymentBadge>
             </div>
           </div>
           <div className="border-t border-slate-200 p-6 lg:border-l lg:border-t-0">
             <h2 className="text-sm font-bold text-slate-900">Segurança e proteção</h2>
             <div className="mt-4 flex flex-wrap gap-3">
-              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><ShieldCheck className="h-6 w-6 text-emerald-600" />Google Safe Browsing</div>
-              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><LockKeyhole className="h-6 w-6 text-emerald-600" />SSL</div>
+              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><SiGoogle aria-label="Google" title="Google" className="h-6 w-6 text-[#4285F4]" />Google Safe Browsing</div>
+              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><ShieldCheck className="h-6 w-6 text-emerald-600" />SSL / TLS</div>
             </div>
           </div>
           <div className="flex gap-4 border-t border-slate-200 p-6 lg:border-l lg:border-t-0">

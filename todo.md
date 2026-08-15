@@ -2796,3 +2796,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reconstruir o rodapé em blocos responsivos com dados, links, pagamentos e segurança reais da Maria Imprime
 - [x] Adicionar no rodapé atalhos diretos para todos os documentos da Central de Documentação
 - [x] Remover o espaço em branco excedente abaixo do rodapé público
+- [x] Substituir os ícones ilustrativos de pagamento e segurança por marcas oficiais no rodapé

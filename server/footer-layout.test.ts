@@ -42,4 +42,14 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(home).toContain('<div className="bg-white">');
     expect(home).not.toContain('min-h-screen bg-white');
   });
+
+  it("usa marcas oficiais nos meios de pagamento e no selo Google", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('from "react-icons/si"');
+    expect(footer).toContain('SiPix');
+    expect(footer).toContain('SiVisa');
+    expect(footer).toContain('SiMastercard');
+    expect(footer).toContain('SiGoogle');
+    expect(footer).toContain('SSL / TLS');
+  });
 });
