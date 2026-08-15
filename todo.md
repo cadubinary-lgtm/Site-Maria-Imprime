@@ -2800,3 +2800,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Conectar ícones sociais aos canais configurados em nova aba e exibir sucesso no envio da newsletter
 - [x] Validar o formato do e-mail da newsletter antes da confirmação de sucesso
 - [x] Padronizar Itens personalizados com ícone, cabeçalho e colunas de Produtos / Serviços
+- [x] Restaurar o layout linear de Itens personalizados e alinhar ícone e descrição ao título

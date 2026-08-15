@@ -58,7 +58,7 @@ describe("itens personalizados em Orçamentos", () => {
   });
 
   it("resume o item personalizado fechado no mesmo padrão do catálogo", () => {
-    expect(formSource).toContain("Produto ou serviço fora do catálogo");
+    expect(formSource).toContain("produto ou serviço fora do catálogo");
     expect(formSource).toContain('className="col-span-3 flex min-w-0 items-center gap-1"');
     expect(formSource).toContain('alt={`Arte de ${item.productName || "item personalizado"}`}');
     expect(formSource).toContain('title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}');
@@ -80,10 +80,10 @@ describe("itens personalizados em Orçamentos", () => {
   });
 
   it("padroniza Itens personalizados com o cabeçalho e ícone de Produtos / Serviços", () => {
-    expect(formSource).toContain('className="space-y-2 rounded-lg border border-gray-200 bg-white p-4"');
-    expect(formSource).toContain('<Package className="h-4 w-4 text-pink-600" />');
-    expect(formSource).toContain('<h2 className="font-semibold text-gray-800">Itens personalizados</h2>');
-    expect(formSource).toContain('Produto ou serviço fora do catálogo');
+    expect(formSource).toContain('className="space-y-2"');
+    expect(formSource).toContain('h-px flex-1 bg-gray-200');
+    expect(formSource).toContain('<Package className="h-3.5 w-3.5 shrink-0 text-pink-600" />');
+    expect(formSource).toContain('Itens personalizados <span className="normal-case font-normal text-gray-400">— produto ou serviço fora do catálogo</span>');
   });
 
   it("alinha a ação de exclusão na coluna final do catálogo", () => {
