@@ -9,6 +9,7 @@ import {
   getClientStats,
   getTopClients,
   getClientsByType,
+  getOperationalCrmDashboard,
   updateClientStats,
 } from "./db-crm";
 import { getDb } from "./db";
@@ -63,6 +64,18 @@ export const crmRouter = router({
       return await listClients(input);
     }),
 
+  getOperationalDashboard: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().default(100),
+        offset: z.number().default(0),
+        clientType: z.string().optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await getOperationalCrmDashboard(input);
+    }),
+
   /**
    * Atualizar cliente (admin only)
    */
@@ -75,7 +88,7 @@ export const crmRouter = router({
           email: z.string().email().optional(),
           phone: z.string().optional(),
           whatsapp: z.string().optional(),
-          clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo"]).optional(),
+          clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo", "site"]).optional(),
           notes: z.string().optional(),
           isActive: z.boolean().optional(),
         }),

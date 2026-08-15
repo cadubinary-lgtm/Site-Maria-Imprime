@@ -1,6 +1,7 @@
 import { getDb } from "./db";
-import { clients, orders } from "../drizzle/schema";
-import { eq, desc, sql, and, like, or } from "drizzle-orm";
+import { clients, orders, orderItems } from "../drizzle/schema";
+import { eq, desc, sql, and, like, or, inArray, ne } from "drizzle-orm";
+import { aggregateCrmDashboardClients, summarizeCrmDashboard } from "./crm-dashboard";
 
 /**
  * Criar novo cliente
@@ -79,6 +80,59 @@ export async function listClients(options: {
     .offset(offset);
 
   return result;
+}
+
+/**
+ * Consolida o CRM por cliente usando os vínculos reais orders.clientId e orderItems.orderId.
+ * Pedidos cancelados não compõem valor, recorrência ou produtos adquiridos.
+ */
+export async function getOperationalCrmDashboard(options: {
+  limit?: number;
+  offset?: number;
+  clientType?: string;
+  isActive?: boolean;
+}) {
+  const { limit = 100, offset = 0, clientType, isActive = true } = options;
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const conditions: any[] = [];
+  if (isActive !== undefined) conditions.push(eq(clients.isActive, isActive));
+  if (clientType) conditions.push(eq(clients.clientType, clientType as any));
+
+  const clientRows = await db
+    .select()
+    .from(clients)
+    .where(conditions.length > 1 ? and(...conditions) : conditions.length === 1 ? conditions[0] : undefined)
+    .orderBy(desc(clients.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  if (clientRows.length === 0) {
+    return { clients: [], metrics: summarizeCrmDashboard([]) };
+  }
+
+  const clientIds = clientRows.map((client) => client.id);
+  const activeOrderCondition = and(inArray(orders.clientId, clientIds), ne(orders.status, "cancelado"));
+
+  const orderRows = await db
+    .select({ clientId: orders.clientId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
+    .from(orders)
+    .where(activeOrderCondition);
+
+  const productRows = await db
+    .select({ clientId: orders.clientId, productName: orderItems.productName, quantity: orderItems.quantity })
+    .from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(activeOrderCondition);
+
+  const operationalPriority: Record<string, number> = { atencao: 0, reativar: 1, sem_compras: 2, ativo: 3 };
+  const dashboardClients = aggregateCrmDashboardClients(clientRows, orderRows, productRows).sort((left, right) => {
+    const priorityDifference = operationalPriority[left.operationalStatus] - operationalPriority[right.operationalStatus];
+    if (priorityDifference !== 0) return priorityDifference;
+    return (left.daysWithoutPurchase ?? -1) - (right.daysWithoutPurchase ?? -1);
+  });
+  return { clients: dashboardClients, metrics: summarizeCrmDashboard(dashboardClients) };
 }
 
 /**

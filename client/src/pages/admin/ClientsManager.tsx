@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { ArrowLeft, Plus, Trash2, Edit2, Search, Users, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Users, RefreshCw, PackageSearch, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -27,12 +28,25 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   corporativo: { label: "Corporativo", color: "bg-pink-100 text-pink-800" },
 };
 
+const OPERATIONAL_STATUS_STYLES: Record<string, string> = {
+  ativo: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  reativar: "bg-amber-50 text-amber-700 border-amber-200",
+  atencao: "bg-rose-50 text-rose-700 border-rose-200",
+  sem_compras: "bg-gray-100 text-gray-700 border-gray-200",
+};
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const formatCurrency = (value: unknown) => currencyFormatter.format(Number(value) || 0);
+const formatDate = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("pt-BR") : "Sem compras";
+
 export default function ClientsManager({ defaultType, title, ..._ }: { defaultType?: string; title?: string; [k: string]: any } = {}) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>(defaultType ?? "");
+  const [activityFilter, setActivityFilter] = useState("todos");
   const [pendingDeleteClient, setPendingDeleteClient] = useState<any | null>(null);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,7 +56,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   });
 
   // Queries
-  const { data: clients, isLoading, refetch } = trpc.crm.listClients.useQuery({
+  const { data: dashboard, isLoading, refetch } = trpc.crm.getOperationalDashboard.useQuery({
     limit: 100,
     offset: 0,
     clientType: filterType || undefined,
@@ -124,16 +138,15 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   };
 
   // Filtro local por busca de texto
-  const filtered = (clients ?? []).filter((c: any) => {
+  const clients = dashboard?.clients ?? [];
+  const metrics = dashboard?.metrics;
+  const filtered = useMemo(() => clients.filter((c: any) => {
+    const matchesActivity = activityFilter === "todos" || c.operationalStatus === activityFilter;
+    if (!matchesActivity) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
-    return (
-      c.name?.toLowerCase().includes(q) ||
-      c.email?.toLowerCase().includes(q) ||
-      c.phone?.includes(q) ||
-      c.whatsapp?.includes(q)
-    );
-  });
+    return c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q) || c.whatsapp?.includes(q);
+  }), [activityFilter, clients, search]);
 
   return (
     <AdminLayout>
@@ -148,7 +161,15 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">{title ?? "Gestão de Clientes (CRM)"}</h1>
-          <p className="text-gray-600 mt-2">Gerencie clientes, histórico de pedidos e estatísticas</p>
+          <p className="text-gray-600 mt-2">Priorize clientes ativos, reativações e oportunidades de atendimento.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-6 lg:grid-cols-5">
+          <Card className="border-gray-200 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Clientes ativos</span><UserRoundCheck className="h-4 w-4 text-pink-600" /></div><p className="mt-2 text-2xl font-bold text-gray-900">{metrics?.activeClients ?? 0}</p><p className="text-xs text-gray-500">Compra nos últimos 30 dias</p></CardContent></Card>
+          <Card className="border-gray-200 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Reativar</span><RotateCcw className="h-4 w-4 text-amber-600" /></div><p className="mt-2 text-2xl font-bold text-gray-900">{metrics?.reactivationQueue ?? 0}</p><p className="text-xs text-gray-500">31 a 90 dias sem comprar</p></CardContent></Card>
+          <Card className="border-gray-200 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Atenção</span><AlertTriangle className="h-4 w-4 text-rose-600" /></div><p className="mt-2 text-2xl font-bold text-gray-900">{metrics?.attentionQueue ?? 0}</p><p className="text-xs text-gray-500">Mais de 90 dias sem comprar</p></CardContent></Card>
+          <Card className="border-gray-200 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Sem compras</span><Clock3 className="h-4 w-4 text-gray-500" /></div><p className="mt-2 text-2xl font-bold text-gray-900">{metrics?.clientsWithoutPurchases ?? 0}</p><p className="text-xs text-gray-500">Clientes a ativar</p></CardContent></Card>
+          <Card className="col-span-2 border-gray-200 shadow-sm lg:col-span-1"><CardContent className="p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium text-gray-500">Volume comprado</span><WalletCards className="h-4 w-4 text-pink-600" /></div><p className="mt-2 text-xl font-bold text-gray-900">{formatCurrency(metrics?.totalVolume)}</p><p className="text-xs text-gray-500">Pedidos não cancelados</p></CardContent></Card>
         </div>
 
         {/* Barra de busca e filtros */}
@@ -179,6 +200,16 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               </SelectContent>
             </Select>
           )}
+          <Select value={activityFilter} onValueChange={setActivityFilter}>
+            <SelectTrigger className="w-44"><SelectValue placeholder="Situação" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas as situações</SelectItem>
+              <SelectItem value="ativo">Ativos (até 30 dias)</SelectItem>
+              <SelectItem value="reativar">Reativar (31 a 90 dias)</SelectItem>
+              <SelectItem value="atencao">Atenção (+90 dias)</SelectItem>
+              <SelectItem value="sem_compras">Sem compras</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Formulário */}
@@ -297,36 +328,45 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               <div className="text-center py-8">
                 <p className="text-gray-500">Carregando clientes...</p>
               </div>
-            ) : clients && clients.length > 0 ? (
+            ) : filtered.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2 px-4 font-semibold">Nome</th>
-                      <th className="text-left py-2 px-4 font-semibold">Email</th>
-                      <th className="text-left py-2 px-4 font-semibold">Telefone</th>
-                      <th className="text-left py-2 px-4 font-semibold">Tipo</th>
-                      <th className="text-left py-2 px-4 font-semibold">Volume</th>
-                      <th className="text-left py-2 px-4 font-semibold">Pedidos</th>
+                      <th className="text-left py-2 px-4 font-semibold">Cliente</th>
+                      <th className="text-left py-2 px-4 font-semibold">Compras</th>
+                      <th className="text-left py-2 px-4 font-semibold">Produtos</th>
+                      <th className="text-left py-2 px-4 font-semibold">Última compra</th>
+                      <th className="text-left py-2 px-4 font-semibold">Situação</th>
                       <th className="text-left py-2 px-4 font-semibold">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((client: any) => (
                       <tr key={client.id} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-4">{client.name}</td>
-                        <td className="py-2 px-4 text-sm text-gray-600">{client.email || "-"}</td>
-                        <td className="py-2 px-4 text-sm text-gray-600">{client.phone || "-"}</td>
-                        <td className="py-2 px-4">
-                          <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${TYPE_LABELS[client.clientType]?.color ?? "bg-gray-100 text-gray-700"}`}>
-                            {TYPE_LABELS[client.clientType]?.label ?? client.clientType}
-                          </span>
+                        <td className="py-3 px-4">
+                          <p className="font-medium text-gray-900">{client.name}</p>
+                          <p className="text-xs text-gray-500">{client.email || client.phone || client.whatsapp || "Sem contato informado"}</p>
+                          <span className={`mt-1 inline-block px-2 py-0.5 text-[11px] font-semibold rounded ${TYPE_LABELS[client.clientType]?.color ?? "bg-gray-100 text-gray-700"}`}>{TYPE_LABELS[client.clientType]?.label ?? client.clientType}</span>
                         </td>
-                        <td className="py-2 px-4 font-semibold">
-                          R$ {parseFloat(client.totalVolume).toFixed(2)}
+                        <td className="py-3 px-4">
+                          <p className="font-semibold text-gray-900">{formatCurrency(client.totalVolume)}</p>
+                          <p className="text-xs text-gray-500">{client.totalOrders} pedido(s) · Ticket {formatCurrency(client.averageTicket)}</p>
                         </td>
-                        <td className="py-2 px-4">{client.totalOrders}</td>
-                        <td className="py-2 px-4">
+                        <td className="py-3 px-4">
+                          <p className="text-sm text-gray-800">{client.totalProducts} unidade(s)</p>
+                          <Button variant="link" size="sm" className="h-auto p-0 text-pink-600 hover:text-pink-700" onClick={() => setSelectedClient(client)}>
+                            <PackageSearch className="mr-1 h-3.5 w-3.5" /> Ver produtos ({client.products?.length ?? 0})
+                          </Button>
+                        </td>
+                        <td className="py-3 px-4">
+                          <p className="text-sm text-gray-800">{formatDate(client.lastPurchase)}</p>
+                          <p className="text-xs text-gray-500">{client.daysWithoutPurchase === null ? "Ainda não comprou" : `${client.daysWithoutPurchase} dia(s) sem comprar`}</p>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
+                        </td>
+                        <td className="py-3 px-4">
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -357,6 +397,28 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={selectedClient !== null} onOpenChange={(open) => !open && setSelectedClient(null)}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Produtos comprados — {selectedClient?.name}</DialogTitle>
+              <DialogDescription>Resumo calculado somente com pedidos vinculados a este cliente.</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-3 gap-3 rounded-lg bg-gray-50 p-3 text-sm">
+              <div><p className="text-xs text-gray-500">Valor acumulado</p><p className="font-semibold">{formatCurrency(selectedClient?.totalVolume)}</p></div>
+              <div><p className="text-xs text-gray-500">Pedidos</p><p className="font-semibold">{selectedClient?.totalOrders ?? 0}</p></div>
+              <div><p className="text-xs text-gray-500">Última compra</p><p className="font-semibold">{formatDate(selectedClient?.lastPurchase)}</p></div>
+            </div>
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+              {selectedClient?.products?.length ? selectedClient.products.map((product: any) => (
+                <div key={product.name} className="flex items-center justify-between rounded-md border border-gray-100 px-3 py-2">
+                  <span className="text-sm font-medium text-gray-800">{product.name}</span>
+                  <span className="text-sm text-gray-500">{product.totalQuantity} unidade(s)</span>
+                </div>
+              )) : <p className="py-6 text-center text-sm text-gray-500">Nenhum item de produto vinculado aos pedidos deste cliente.</p>}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <AlertDialog open={pendingDeleteClient !== null} onOpenChange={(open) => !open && setPendingDeleteClient(null)}>
           <AlertDialogContent>

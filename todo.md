@@ -2737,3 +2737,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar filtros de período e intervalo personalizado ao Dashboard de Linha de Produção
 - [x] Adicionar cards de resumo de volume e situação geral ao Dashboard de Linha de Produção
 - [x] Remover o seletor de Segmento duplicado nos dados básicos de Novo Produto
+- [x] Corrigir o Dashboard de CRM para consolidar pedidos por cliente sem misturar históricos
+- [x] Exibir por cliente produtos comprados, valor total, última compra e tempo sem comprar
+- [x] Priorizar indicadores operacionais e ações rápidas no Dashboard de CRM sem alterar fluxos existentes
