@@ -401,11 +401,11 @@ function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen min-h-0 overflow-hidden">
       {/* Coluna principal: 70% quando carrinho aberto, 100% quando fechado */}
-      <div className={`flex flex-col min-w-0 transition-all duration-300 ${isOpen ? "w-[70%]" : "w-full"}`}>
+      <div className={`flex min-h-0 min-w-0 flex-col transition-all duration-300 ${isOpen ? "w-[70%]" : "w-full"}`}>
         <Header />
-        <div id="public-site-scroll-container" className="flex-1 overflow-y-auto">
+        <div id="public-site-scroll-container" className="min-h-0 flex-1 overflow-y-auto">
           <Router />
         </div>
         <FloatingWhatsAppButton />
