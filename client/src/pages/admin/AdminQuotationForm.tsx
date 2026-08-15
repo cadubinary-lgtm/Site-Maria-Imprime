@@ -74,7 +74,13 @@ function parseManualTotal(value: string) {
 }
 
 function formatManualTotal(value: number) {
-  return value.toFixed(2).replace(".", ",");
+  return fmt(value);
+}
+
+function formatManualTotalInput(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  return fmt(Number.parseInt(digits, 10) / 100);
 }
 
 const specificationLabels: Record<string, string> = {
@@ -155,6 +161,8 @@ export default function AdminQuotationForm() {
   // Acerto Total (override do total calculado)
   const [acertoTotal, setAcertoTotal] = useState<string>("");
   const [isEditingManualTotal, setIsEditingManualTotal] = useState(false);
+  const acertoTotalInputRef = useRef<HTMLInputElement | null>(null);
+  const acertoTotalAdvanceTimerRef = useRef<number | null>(null);
 
   // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
   useEffect(() => {
@@ -204,7 +212,7 @@ export default function AdminQuotationForm() {
     setDiscountType((q.discountType as any) ?? "fixo");
     setDiscountValue(Number(q.discountValue ?? 0));
     setShippingPrice(Number(q.shippingPrice ?? 0));
-    setAcertoTotal(q.manualTotal !== null && q.manualTotal !== undefined ? String(q.manualTotal) : "");
+    setAcertoTotal(q.manualTotal !== null && q.manualTotal !== undefined ? formatManualTotal(Number(q.manualTotal)) : "");
     setShippingMethod(q.shippingMethod ?? "pickup");
     setShippingLabel(q.shippingLabel ?? "Retirada na loja");
     setShippingEstimatedDays(q.shippingEstimatedDays ?? 0);
@@ -500,6 +508,28 @@ export default function AdminQuotationForm() {
   const clearManualTotal = () => {
     setAcertoTotal("");
     setIsEditingManualTotal(false);
+    if (acertoTotalAdvanceTimerRef.current !== null) window.clearTimeout(acertoTotalAdvanceTimerRef.current);
+  };
+
+  const commitManualTotal = () => {
+    if (acertoTotalAdvanceTimerRef.current !== null) {
+      window.clearTimeout(acertoTotalAdvanceTimerRef.current);
+      acertoTotalAdvanceTimerRef.current = null;
+    }
+    if (acertoTotal.trim() !== "") setAcertoTotal(formatManualTotal(parseManualTotal(acertoTotal)));
+    setIsEditingManualTotal(false);
+  };
+
+  const handleManualTotalChange = (value: string, shouldAdvance = false) => {
+    const formattedValue = formatManualTotalInput(value);
+    setAcertoTotal(formattedValue);
+
+    if (!shouldAdvance) return;
+    if (acertoTotalAdvanceTimerRef.current !== null) window.clearTimeout(acertoTotalAdvanceTimerRef.current);
+    if (!formattedValue) return;
+    acertoTotalAdvanceTimerRef.current = window.setTimeout(() => {
+      acertoTotalInputRef.current?.blur();
+    }, 1100);
   };
 
   const cancelCustomItemName = () => {
@@ -1827,15 +1857,18 @@ export default function AdminQuotationForm() {
                   )}
                 </div>
                 <Input
+                  ref={acertoTotalInputRef}
                   aria-label="Acerto Total"
                   type="text"
                   inputMode="decimal"
                   min={0}
                   value={acertoTotal}
-                  onChange={(e) => setAcertoTotal(e.target.value)}
-                  onBlur={() => {
-                    if (acertoTotal.trim() !== "") setAcertoTotal(formatManualTotal(parseManualTotal(acertoTotal)));
+                  onFocus={() => setIsEditingManualTotal(true)}
+                  onChange={(e) => handleManualTotalChange(e.target.value, true)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") event.currentTarget.blur();
                   }}
+                  onBlur={commitManualTotal}
                   className="h-8 text-sm"
                   placeholder={`Calculado: ${fmt(calculatedTotal)}`}
                 />
@@ -1845,28 +1878,12 @@ export default function AdminQuotationForm() {
               </div>
 
               <div className="border-t border-gray-100 pt-3">
-                <div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3">
-                  <span className="font-semibold">TOTAL</span>
+                <div className={`flex justify-between items-center rounded-lg px-4 py-3 text-white transition-colors ${hasManualTotal ? "bg-amber-500" : "bg-pink-600"}`}>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">R$</span>
-                    <Input
-                      aria-label="Total do orçamento"
-                      type="text"
-                      inputMode="decimal"
-                      min={0}
-                      value={hasManualTotal || isEditingManualTotal ? acertoTotal : formatManualTotal(calculatedTotal)}
-                      onFocus={() => {
-                        if (!hasManualTotal) setAcertoTotal("");
-                        setIsEditingManualTotal(true);
-                      }}
-                      onChange={(event) => setAcertoTotal(event.target.value)}
-                      onBlur={() => {
-                        setIsEditingManualTotal(false);
-                        if (acertoTotal.trim() !== "") setAcertoTotal(formatManualTotal(parseManualTotal(acertoTotal)));
-                      }}
-                      className="h-9 w-28 border-white/50 bg-white text-right text-base font-bold text-pink-700 placeholder:text-pink-300"
-                    />
+                    <span className="font-semibold">{hasManualTotal ? "TOTAL AJUSTADO" : "TOTAL"}</span>
+                    {hasManualTotal && <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">Manual</span>}
                   </div>
+                  <span className="text-xl font-bold">{fmt(total)}</span>
                 </div>
               </div>
             </div>

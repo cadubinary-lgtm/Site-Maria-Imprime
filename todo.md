@@ -2809,3 +2809,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar Acerto Total como substituição direta do total calculado no resumo financeiro
 - [x] Restaurar cálculo ao limpar Acerto Total, adicionar tooltip e lixeira padrão
 - [x] Manter a ação textual Limpar junto da lixeira padrão no Acerto Total
+- [x] Formatar Acerto Total como moeda, destacar total manual e encerrar foco após confirmação
