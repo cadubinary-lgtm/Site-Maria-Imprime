@@ -1550,11 +1550,10 @@ export default function AdminQuotationForm() {
                 )}
                 {items.some((item) => item.isCustom) && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 pt-1">
-                      <div className="h-px flex-1 bg-gray-200" />
-                      <Package className="h-3.5 w-3.5 shrink-0 text-pink-600" />
-                      <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-gray-500">Itens personalizados <span className="normal-case font-normal text-gray-400">— produto ou serviço fora do catálogo</span></span>
-                      <div className="h-px flex-1 bg-gray-200" />
+                    <div className="flex items-center gap-2 border-t border-gray-200 pt-4">
+                      <Package className="h-4 w-4 shrink-0 text-pink-600" />
+                      <h2 className="font-semibold text-gray-800">Itens personalizados</h2>
+                      <span className="text-xs text-gray-400">— produto ou serviço fora do catálogo</span>
                     </div>
                     <div className="grid grid-cols-12 gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
                       <div className="col-span-1">Img</div>

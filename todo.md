@@ -2801,3 +2801,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar o formato do e-mail da newsletter antes da confirmação de sucesso
 - [x] Padronizar Itens personalizados com ícone, cabeçalho e colunas de Produtos / Serviços
 - [x] Restaurar o layout linear de Itens personalizados e alinhar ícone e descrição ao título
+- [x] Igualar alinhamento, cor e tipografia de Itens personalizados ao cabeçalho Produtos / Serviços
