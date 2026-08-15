@@ -32,6 +32,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { SEGMENTS_PAGE_CONTENT_CLASS } from '@/lib/segments-page-layout';
 import { canExecuteConfirmedDelete } from '@/lib/admin-delete-confirmation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { clearSegmentIconDraft } from '@/lib/segment-icon-draft';
 
 // Tipo local para o segmento
 type SegmentItem = {
@@ -60,6 +61,7 @@ function SortableRow({
   onNameChange,
   onSlugChange,
   onIconFileChange,
+  onRemoveIcon,
 }: {
   segment: SegmentItem;
   index: number;
@@ -76,6 +78,7 @@ function SortableRow({
   onNameChange: (v: string) => void;
   onSlugChange: (v: string) => void;
   onIconFileChange: (f: File) => void;
+  onRemoveIcon: (segment: SegmentItem) => void;
 }) {
   const {
     attributes,
@@ -141,11 +144,16 @@ function SortableRow({
               className="flex-1 h-8"
             />
             {(editingIconFile || editingIcon) && (
-              <img
-                src={editingIconFile ? URL.createObjectURL(editingIconFile) : editingIcon}
-                alt="preview"
-                className="w-8 h-8 object-contain"
-              />
+              <div className="flex items-center gap-1">
+                <img
+                  src={editingIconFile ? URL.createObjectURL(editingIconFile) : editingIcon}
+                  alt="preview"
+                  className="w-8 h-8 object-contain"
+                />
+                <Button size="icon" variant="ghost" type="button" onClick={() => onRemoveIcon(segment)} className="h-8 w-8 text-gray-400 hover:bg-pink-50 hover:text-pink-600" aria-label={`Remover ícone de ${segment.name}`} title="Remover ícone">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             )}
           </div>
         ) : segment.icon ? (
@@ -213,6 +221,7 @@ export default function SegmentsManager() {
   const [localOrder, setLocalOrder] = useState<number[] | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [segmentPendingDeletion, setSegmentPendingDeletion] = useState<SegmentItem | null>(null);
+  const [segmentIconPendingRemoval, setSegmentIconPendingRemoval] = useState<SegmentItem | null>(null);
 
   const { data: segments, isLoading, refetch } = trpc.segments.getAll.useQuery();
 
@@ -326,6 +335,14 @@ export default function SegmentsManager() {
     if (!canExecuteConfirmedDelete(segmentPendingDeletion)) return;
     await deleteSegmentMutation.mutateAsync({ id: segmentPendingDeletion.id });
     setSegmentPendingDeletion(null);
+  };
+
+  const handleRemoveSegmentIcon = () => {
+    if (!canExecuteConfirmedDelete(segmentIconPendingRemoval)) return;
+    const draft = clearSegmentIconDraft();
+    setEditingIcon(draft.icon);
+    setEditingIconFile(draft.iconFile);
+    setSegmentIconPendingRemoval(null);
   };
 
   // Montar lista ordenada
@@ -508,6 +525,7 @@ export default function SegmentsManager() {
                         onNameChange={setEditingName}
                         onSlugChange={setEditingSlug}
                         onIconFileChange={setEditingIconFile}
+                        onRemoveIcon={setSegmentIconPendingRemoval}
                       />
                     ))}
                   </tbody>
@@ -527,6 +545,18 @@ export default function SegmentsManager() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteSegment} className="bg-pink-600 text-white hover:bg-pink-700">Excluir segmento</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={Boolean(segmentIconPendingRemoval)} onOpenChange={(open) => !open && setSegmentIconPendingRemoval(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover ícone do segmento?</AlertDialogTitle>
+            <AlertDialogDescription>O ícone de {segmentIconPendingRemoval?.name ? <strong>“{segmentIconPendingRemoval.name}”</strong> : "este segmento"} será removido. O segmento continuará cadastrado e a alteração será aplicada ao salvar a edição.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveSegmentIcon} className="bg-pink-600 text-white hover:bg-pink-700">Remover ícone</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
