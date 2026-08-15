@@ -2773,3 +2773,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Unificar o layout de Todos os Clientes, Clientes Site, Balcão, Revendedores e Agências
 - [x] Manter filtros e dados específicos de cada origem no padrão único de clientes
 - [x] Garantir colunas responsivas e informações sem sobreposição no padrão único
+- [x] Adicionar botão Editar e formulário de atualização na lista de Clientes Site

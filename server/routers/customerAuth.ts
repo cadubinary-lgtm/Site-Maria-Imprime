@@ -667,6 +667,64 @@ export const customerAuthRouter = router({
       return { success: true };
     }),
 
+  /** Atualizar dados cadastrais de um cliente pelo painel administrativo. */
+  adminUpdateCustomer: publicProcedure
+    .input(z.object({
+      customerId: z.number(),
+      firstName: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
+      lastName: z.string().min(2, "Sobrenome deve ter ao menos 2 caracteres"),
+      email: z.string().email("E-mail inválido"),
+      phone: z.string().optional(),
+      cpfCnpj: z.string().optional(),
+      addressZipCode: z.string().optional(),
+      addressStreet: z.string().optional(),
+      addressNumber: z.string().optional(),
+      addressComplement: z.string().optional(),
+      addressNeighborhood: z.string().optional(),
+      addressCity: z.string().optional(),
+      addressState: z.string().max(2).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireCustomerAdmin(ctx);
+      const db = await requireDb();
+      const [current] = await db.select().from(customerAccounts).where(eq(customerAccounts.id, input.customerId)).limit(1);
+      if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Cliente não encontrado." });
+
+      const email = input.email.toLowerCase().trim();
+      if (email !== current.email) {
+        const duplicated = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.email, email)).limit(1);
+        if (duplicated.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Este e-mail já está cadastrado." });
+      }
+
+      const emailChanged = email !== current.email;
+      const verificationToken = emailChanged ? nanoid(64) : null;
+      const now = Date.now();
+      await db.update(customerAccounts).set({
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        email,
+        phone: input.phone?.trim() || null,
+        cpfCnpj: input.cpfCnpj?.replace(/\D/g, "") || null,
+        addressZipCode: input.addressZipCode?.replace(/\D/g, "") || null,
+        addressStreet: input.addressStreet?.trim() || null,
+        addressNumber: input.addressNumber?.trim() || null,
+        addressComplement: input.addressComplement?.trim() || null,
+        addressNeighborhood: input.addressNeighborhood?.trim() || null,
+        addressCity: input.addressCity?.trim() || null,
+        addressState: input.addressState?.trim().toUpperCase() || null,
+        ...(emailChanged ? {
+          emailVerified: false,
+          emailVerificationToken: verificationToken,
+          emailVerificationExpires: now + VERIFICATION_EXPIRES_MS,
+        } : {}),
+        updatedAt: now,
+      }).where(eq(customerAccounts.id, current.id));
+
+      if (emailChanged && verificationToken) await sendVerificationEmail(email, input.firstName.trim(), verificationToken);
+      await logAudit({ adminId: admin.adminId, adminName: admin.name, action: "customer_updated", entity: "customerAccounts", entityId: String(current.id), after: { email } });
+      return { success: true, emailVerificationSent: emailChanged };
+    }),
+
   /**
    * Bloquear/desbloquear cliente (admin)
    */
