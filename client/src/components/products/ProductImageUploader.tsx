@@ -3,10 +3,12 @@ import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight,
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { getPreviewImageLabel, getPreviewImages } from "@/lib/product-image-preview";
 import { getAvailableGallerySlots, placeGalleryImages } from "@/lib/product-gallery-drop";
 import { PRODUCT_IMAGE_LAYOUT } from "@/lib/product-image-layout";
+import { canExecuteConfirmedDelete } from "@/lib/admin-delete-confirmation";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -40,6 +42,7 @@ export function ProductImageUploader({
   const [isGalleryFileDropActive, setIsGalleryFileDropActive] = useState(false);
   const [isDroppingGalleryFiles, setIsDroppingGalleryFiles] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [galleryDeleteSlot, setGalleryDeleteSlot] = useState<number | null>(null);
   const previewImages = useMemo(() => getPreviewImages(mainImageUrl, galleryUrls), [mainImageUrl, galleryUrls]);
   const previewIndex = previewUrl ? previewImages.indexOf(previewUrl) : -1;
 
@@ -226,7 +229,7 @@ export function ProductImageUploader({
             <span className="text-[11px] font-medium text-pink-600">Capa do produto</span>
           </div>
           <div
-            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors bg-gray-50 ${isMainDragOver ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-orange-400"}`}
+            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors bg-gray-50 ${isMainDragOver ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-pink-400"}`}
             style={{ height: compact ? 132 : 180 }}
             onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
             onDragOver={(event) => {
@@ -259,7 +262,7 @@ export function ProductImageUploader({
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
                 {uploadingMain ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                  <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
                 ) : (
                   <>
                     <ImageIcon className="w-10 h-10" />
@@ -270,7 +273,7 @@ export function ProductImageUploader({
             )}
             {uploadingMain && (
               <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
               </div>
             )}
           </div>
@@ -322,9 +325,9 @@ export function ProductImageUploader({
                 className={[
                   "relative min-w-0 transition-all",
                   url ? "cursor-grab active:cursor-grabbing" : "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50",
-                  isDragging ? "opacity-40 scale-95 ring-2 ring-orange-400" : "",
-                  isDragOver && dragIndex !== slot ? "scale-105 rounded-lg bg-orange-50 ring-2 ring-orange-500 shadow-md" : "",
-                  !url && !isDragging && !isDragOver ? "hover:border-orange-400" : "",
+                  isDragging ? "opacity-40 scale-95 ring-2 ring-pink-400" : "",
+                  isDragOver && dragIndex !== slot ? "scale-105 rounded-lg bg-pink-50 ring-2 ring-pink-500 shadow-md" : "",
+                  !url && !isDragging && !isDragOver ? "hover:border-pink-400" : "",
                 ].join(" ")}
                 style={{ height: compact ? 56 : 80 }}
                 onClick={() => !isUploading && !uploadingGallery && (url ? setPreviewUrl(url) : openGalleryPicker(slot))}
@@ -345,7 +348,7 @@ export function ProductImageUploader({
                       <button
                         type="button"
                         className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
-                        onClick={(e) => { e.stopPropagation(); handleRemoveGallery(slot); }}
+                        onClick={(e) => { e.stopPropagation(); setGalleryDeleteSlot(slot); }}
                         title={`Excluir foto ${slot + 2}`}
                         aria-label={`Excluir foto ${slot + 2}`}
                       >
@@ -365,7 +368,7 @@ export function ProductImageUploader({
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full gap-1 text-gray-400">
                     {isUploading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                      <Loader2 className="w-5 h-5 animate-spin text-pink-500" />
                     ) : (
                       <>
                         <Upload className="w-5 h-5" />
@@ -429,6 +432,26 @@ export function ProductImageUploader({
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={galleryDeleteSlot !== null} onOpenChange={(open) => !open && setGalleryDeleteSlot(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir foto adicional?</AlertDialogTitle>
+            <AlertDialogDescription>Esta foto será removida da galeria do produto. Você poderá adicioná-la novamente depois, se necessário.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (canExecuteConfirmedDelete(galleryDeleteSlot)) handleRemoveGallery(galleryDeleteSlot);
+                setGalleryDeleteSlot(null);
+              }}
+            >
+              Excluir foto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

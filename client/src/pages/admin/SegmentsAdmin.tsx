@@ -3,11 +3,13 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Edit2 } from "lucide-react";
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
 
 export default function SegmentsAdmin() {
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: number; name: string } | null>(null);
   const [formData, setFormData] = useState({ name: "", slug: "", icon: "" });
 
   const { data: segments, isLoading, refetch } = trpc.segments.list.useQuery();
@@ -70,13 +72,11 @@ export default function SegmentsAdmin() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Tem certeza que deseja deletar este segmento?")) {
-      try {
-        await deleteMutation.mutateAsync({ id });
-      } catch (error) {
-        console.error("Erro ao deletar:", error);
-        alert("Erro ao deletar segmento");
-      }
+    try {
+      await deleteMutation.mutateAsync({ id });
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      alert("Erro ao deletar segmento");
     }
   };
 
@@ -174,7 +174,7 @@ export default function SegmentsAdmin() {
                   size="sm"
                   variant="outline"
                   className={ADMIN_VISUAL_SYSTEM.iconAction}
-                  onClick={() => handleDelete(segment.id)}
+                  onClick={() => setPendingDelete({ id: segment.id, name: segment.name })}
                   title={`Excluir segmento ${segment.name}`}
                   aria-label={`Excluir segmento ${segment.name}`}
                 >
@@ -185,6 +185,26 @@ export default function SegmentsAdmin() {
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={pendingDelete !== null} onOpenChange={(open) => !open && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir categoria?</AlertDialogTitle>
+            <AlertDialogDescription>A categoria “{pendingDelete?.name}” será removida permanentemente.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) handleDelete(pendingDelete.id);
+                setPendingDelete(null);
+              }}
+            >
+              Excluir categoria
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

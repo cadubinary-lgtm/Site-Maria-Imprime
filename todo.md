@@ -2721,3 +2721,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ajustar responsividade móvel de botões e ícones e padronizar campos e dropdowns administrativos
 - [x] Aplicar a camada visual de campos, dropdowns, botões e ícones às telas administrativas restantes, incluindo Novo Produto e Editar Produto
 - [x] Corrigir exclusões remanescentes: lixeira cinza/rosa em Novo Produto e substituir X por lixeira em Segmentos
+- [x] Adicionar confirmação a exclusões por lixeira e revisar o padrão visual de Categorias e Clientes

@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import { canExecuteConfirmedDelete } from "@/lib/admin-delete-confirmation";
 
 interface MultiSegmentSelectorProps {
   productId: number;
@@ -20,6 +22,7 @@ export default function MultiSegmentSelector({
 }: MultiSegmentSelectorProps) {
   const { data: allSegments, isLoading } = trpc.productSegments.getAllSegments.useQuery();
   const [localSelected, setLocalSelected] = useState<number[]>(selectedSegmentIds);
+  const [pendingRemoval, setPendingRemoval] = useState<{ id: number; name: string } | null>(null);
   const prevSelectedRef = useRef<number[]>(selectedSegmentIds);
 
   // Sincronizar quando selectedSegmentIds muda externamente
@@ -72,7 +75,7 @@ export default function MultiSegmentSelector({
                   <button
                     type="button"
                     className="rounded p-0.5 text-gray-400 transition-colors hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600 focus-visible:outline-none"
-                    onClick={() => handleRemoveSegment(segment.id)}
+                    onClick={() => setPendingRemoval({ id: segment.id, name: segment.name })}
                     title={`Excluir segmento ${segment.name}`}
                     aria-label={`Excluir segmento ${segment.name}`}
                   >
@@ -86,7 +89,7 @@ export default function MultiSegmentSelector({
       )}
 
       {/* Segmentos Disponíveis */}
-      <Card>
+      <Card className="border-gray-200 bg-white">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">Adicionar Segmentos</CardTitle>
         </CardHeader>
@@ -114,6 +117,26 @@ export default function MultiSegmentSelector({
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir segmento?</AlertDialogTitle>
+            <AlertDialogDescription>O segmento “{pendingRemoval?.name}” será removido deste produto.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (canExecuteConfirmedDelete(pendingRemoval)) handleRemoveSegment(pendingRemoval.id);
+                setPendingRemoval(null);
+              }}
+            >
+              Excluir segmento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
