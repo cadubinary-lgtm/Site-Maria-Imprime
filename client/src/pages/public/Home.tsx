@@ -11,7 +11,7 @@ import { Footer } from "@/components/home/Footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Hero Section */}
       <HeroSection />
 

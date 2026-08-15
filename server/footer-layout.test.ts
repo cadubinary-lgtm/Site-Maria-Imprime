@@ -33,4 +33,13 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(terms).toContain('get("document")');
     expect(terms).toContain("setDocumentationOpen");
   });
+
+  it("mantém a rolagem pública contida sem criar espaço após o rodapé", () => {
+    const app = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
+    const home = readFileSync(resolve(root, "client/src/pages/public/Home.tsx"), "utf8");
+    expect(app).toContain('id="public-site-scroll-container" className="min-h-0 flex-1 overflow-y-auto"');
+    expect(app).toContain('flex h-screen min-h-0 overflow-hidden');
+    expect(home).toContain('<div className="bg-white">');
+    expect(home).not.toContain('min-h-screen bg-white');
+  });
 });
