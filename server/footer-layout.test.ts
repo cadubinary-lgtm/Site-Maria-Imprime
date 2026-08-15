@@ -62,4 +62,12 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('CheckCircle2');
     expect(footer).toContain('Tudo certo! Abrimos seu e-mail para confirmar o cadastro.');
   });
+
+  it("valida o formato de e-mail antes de exibir sucesso na newsletter", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;');
+    expect(footer).toContain('if (!emailPattern.test(email))');
+    expect(footer).toContain('Digite um endereço de e-mail válido para continuar.');
+    expect(footer).toContain('aria-invalid={newsletterStatus === "error"}');
+  });
 });

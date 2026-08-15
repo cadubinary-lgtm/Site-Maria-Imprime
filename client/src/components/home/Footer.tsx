@@ -32,6 +32,7 @@ import {
 } from "@/hooks/useCompanySettings";
 
 const documentationUrl = (documentId?: string) => `/produto/1200001${documentId ? `?document=${documentId}` : ""}#terms`;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const institutionalLinks = [
   { label: "Início", href: "/" },
@@ -105,8 +106,8 @@ export function Footer() {
   const handleNewsletterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const email = newsletterEmail.trim();
-    if (!email) {
-      setNewsletterMessage("Informe um e-mail válido para continuar.");
+    if (!emailPattern.test(email)) {
+      setNewsletterMessage("Digite um endereço de e-mail válido para continuar.");
       setNewsletterStatus("error");
       return;
     }
@@ -165,7 +166,7 @@ export function Footer() {
             <p className="mt-3 text-sm leading-6 text-slate-600">Receba novidades, promoções e dicas exclusivas da Maria Imprime.</p>
             <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
               <label className="sr-only" htmlFor="newsletter-email">Seu melhor e-mail</label>
-              <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => { setNewsletterEmail(event.target.value); setNewsletterStatus("idle"); setNewsletterMessage(""); }} placeholder="Seu melhor e-mail" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+              <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => { setNewsletterEmail(event.target.value); setNewsletterStatus("idle"); setNewsletterMessage(""); }} aria-invalid={newsletterStatus === "error"} placeholder="Seu melhor e-mail" className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition focus:ring-2 ${newsletterStatus === "error" ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-slate-200 focus:border-pink-500 focus:ring-pink-100"}`} />
               <button type="submit" className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-pink-600 px-4 text-sm font-bold text-white transition hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">Quero receber <Send className="h-4 w-4" /></button>
               <p className={`flex min-h-5 items-center gap-1.5 text-xs ${newsletterStatus === "success" ? "text-emerald-700" : newsletterStatus === "error" ? "text-red-600" : "text-slate-500"}`} aria-live="polite">{newsletterStatus === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" />}{newsletterMessage}</p>
             </form>
