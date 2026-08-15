@@ -30,6 +30,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import AdminLayout from '@/components/AdminLayout';
 import { SEGMENTS_PAGE_CONTENT_CLASS } from '@/lib/segments-page-layout';
+import { canExecuteConfirmedDelete } from '@/lib/admin-delete-confirmation';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 // Tipo local para o segmento
 type SegmentItem = {
@@ -70,7 +72,7 @@ function SortableRow({
   onEdit: (segment: SegmentItem) => void;
   onSave: (id: number) => void;
   onCancel: () => void;
-  onDelete: (id: number) => void;
+  onDelete: (segment: SegmentItem) => void;
   onNameChange: (v: string) => void;
   onSlugChange: (v: string) => void;
   onIconFileChange: (f: File) => void;
@@ -187,7 +189,7 @@ function SortableRow({
             <Button size="sm" variant="ghost" onClick={() => onEdit(segment)}>
               <Edit2 className="w-4 h-4" />
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => onDelete(segment.id)}>
+            <Button size="icon" variant="ghost" onClick={() => onDelete(segment)} className="h-8 w-8 text-gray-400 hover:bg-pink-50 hover:text-pink-600" aria-label={`Excluir segmento ${segment.name}`} title="Excluir segmento">
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
@@ -210,6 +212,7 @@ export default function SegmentsManager() {
   const [newSegmentIconFile, setNewSegmentIconFile] = useState<File | null>(null);
   const [localOrder, setLocalOrder] = useState<number[] | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [segmentPendingDeletion, setSegmentPendingDeletion] = useState<SegmentItem | null>(null);
 
   const { data: segments, isLoading, refetch } = trpc.segments.getAll.useQuery();
 
@@ -319,10 +322,10 @@ export default function SegmentsManager() {
     await createSegmentMutation.mutateAsync({ name: newSegmentForm.name, icon: iconUrl || undefined, slug: newSegmentForm.slug });
   };
 
-  const handleDeleteSegment = async (segmentId: number) => {
-    if (confirm('Tem certeza que deseja deletar este segmento?')) {
-      await deleteSegmentMutation.mutateAsync({ id: segmentId });
-    }
+  const handleDeleteSegment = async () => {
+    if (!canExecuteConfirmedDelete(segmentPendingDeletion)) return;
+    await deleteSegmentMutation.mutateAsync({ id: segmentPendingDeletion.id });
+    setSegmentPendingDeletion(null);
   };
 
   // Montar lista ordenada
@@ -501,7 +504,7 @@ export default function SegmentsManager() {
                         onEdit={handleEditClick}
                         onSave={handleSaveSegment}
                         onCancel={handleCancel}
-                        onDelete={handleDeleteSegment}
+                        onDelete={setSegmentPendingDeletion}
                         onNameChange={setEditingName}
                         onSlugChange={setEditingSlug}
                         onIconFileChange={setEditingIconFile}
@@ -514,7 +517,19 @@ export default function SegmentsManager() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+      <AlertDialog open={Boolean(segmentPendingDeletion)} onOpenChange={(open) => !open && setSegmentPendingDeletion(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir segmento?</AlertDialogTitle>
+            <AlertDialogDescription>O segmento {segmentPendingDeletion?.name ? <strong>“{segmentPendingDeletion.name}”</strong> : "selecionado"} será removido do catálogo. Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSegment} className="bg-pink-600 text-white hover:bg-pink-700">Excluir segmento</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

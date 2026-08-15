@@ -2729,3 +2729,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover ícones dos itens de Dashboard no menu lateral administrativo
 - [x] Corrigir o atalho do Dashboard de Produtos para abrir os indicadores de produtos
 - [x] Restaurar a barra lateral administrativa na página de Segmentos
+- [x] Corrigir a lixeira e a confirmação de exclusão na página de Segmentos
