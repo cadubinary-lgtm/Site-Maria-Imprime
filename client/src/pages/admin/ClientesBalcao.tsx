@@ -263,6 +263,14 @@ export default function ClientesBalcao() {
     onError: (err) => toast.error(err.message),
   });
 
+  const toggleBlocked = trpc.crm.updateClient.useMutation({
+    onSuccess: (_, variables) => {
+      toast.success(variables.data.isActive ? "Cliente desbloqueado!" : "Cliente bloqueado!");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const clients = data?.clients ?? [];
   const total = data?.total ?? 0;
   const activeCount = clients.filter((c: any) => c.isActive).length;
@@ -424,6 +432,15 @@ export default function ClientesBalcao() {
                               </Button>
                               <Button variant="outline" size="sm" className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs" onClick={() => setEditingClient(client)}>
                                 <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-500 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                                onClick={() => toggleBlocked.mutate({ clientId: client.id, data: { isActive: !client.isActive } })}
+                                disabled={toggleBlocked.isPending}
+                              >
+                                {client.isActive ? <><Ban className="w-3.5 h-3.5 mr-1" /> Bloquear</> : <><UserCheck className="w-3.5 h-3.5 mr-1" /> Desbloquear</>}
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
