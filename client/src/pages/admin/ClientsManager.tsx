@@ -344,6 +344,9 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                       <th className="text-left py-2 px-4 font-semibold">Produtos</th>
                       <th className="text-left py-2 px-4 font-semibold">Última compra</th>
                       <th className="text-left py-2 px-4 font-semibold">Situação</th>
+                      <th className="text-left py-2 px-4 font-semibold">Status</th>
+                      <th className="text-left py-2 px-4 font-semibold">Cadastro</th>
+                      <th className="text-left py-2 px-4 font-semibold">Retirada</th>
                       <th className="text-left py-2 px-4 font-semibold">Ações</th>
                     </tr>
                   </thead>
@@ -371,6 +374,15 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                         </td>
                         <td className="py-3 px-4">
                           <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">Ativo</Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {client.createdAt ? formatDate(client.createdAt) : "—"}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {client.allowStorePickup ? "Liberado" : "Não informado"}
                         </td>
                         <td className="py-3 px-4">
                           {isDashboardView ? (
