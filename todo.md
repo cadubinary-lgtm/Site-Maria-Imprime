@@ -2735,3 +2735,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar busca, filtros e ordenação no Dashboard de Linha de Produção
 - [x] Adicionar paginação à fila do Dashboard de Linha de Produção
 - [x] Adicionar filtros de período e intervalo personalizado ao Dashboard de Linha de Produção
+- [x] Adicionar cards de resumo de volume e situação geral ao Dashboard de Linha de Produção
