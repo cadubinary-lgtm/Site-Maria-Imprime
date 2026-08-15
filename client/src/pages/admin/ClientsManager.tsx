@@ -25,7 +25,6 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   site:        { label: "Site",        color: "bg-green-100 text-green-800" },
   revendedor:  { label: "Revendedor",  color: "bg-purple-100 text-purple-800" },
   agencia:     { label: "Agência",     color: "bg-orange-100 text-orange-800" },
-  corporativo: { label: "Corporativo", color: "bg-pink-100 text-pink-800" },
 };
 
 const OPERATIONAL_STATUS_STYLES: Record<string, string> = {
@@ -202,7 +201,6 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                 <SelectItem value="site">Site</SelectItem>
                 <SelectItem value="revendedor">Revendedor</SelectItem>
                 <SelectItem value="agencia">Agência</SelectItem>
-                <SelectItem value="corporativo">Corporativo</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -284,7 +282,6 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                         <SelectItem value="balcao">Balcão</SelectItem>
                         <SelectItem value="revendedor">Revendedor</SelectItem>
                         <SelectItem value="agencia">Agência</SelectItem>
-                        <SelectItem value="corporativo">Corporativo</SelectItem>
                         <SelectItem value="site">Site</SelectItem>
                       </SelectContent>
                     </Select>

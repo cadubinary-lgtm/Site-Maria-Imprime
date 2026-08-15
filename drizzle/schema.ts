@@ -1209,6 +1209,7 @@ export const customerAccounts = mysqlTable("customer_accounts", {
   resetPasswordExpires: bigint("resetPasswordExpires", { mode: "number" }),
   status: mysqlEnum("status", ["active", "inactive", "blocked"]).default("inactive").notNull(),
   priceTier: mysqlEnum("priceTier", ["final", "reseller"]).default("final").notNull(),
+  accountType: mysqlEnum("accountType", ["customer", "reseller", "agency"]).default("customer").notNull(),
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
   lockedUntil: bigint("lockedUntil", { mode: "number" }),

@@ -2756,3 +2756,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o salvamento do nome e da remoção de ícone individual em Segmentos
 - [x] Confirmar a exclusão de segmento e a remoção de ícone em modais internos
 - [x] Separar a rota Dashboard de Clientes da listagem Todos os Clientes no menu CRM
+- [x] Criar áreas de CRM para Revendedores e Agências e remover Corporativo do fluxo administrativo
+- [x] Permitir que administradores criem acessos de Revendedor e Agência com convite ou redefinição segura
+- [x] Permitir reenvio de acesso pelo administrador sem expor senhas armazenadas
+- [x] Exibir recuperação de senha para e-mail já cadastrado durante o registro de cliente

@@ -24,6 +24,7 @@ import {
   sendVerificationEmail,
 } from "../emailService";
 import { getSessionCookieOptions } from "../_core/cookies";
+import { authenticateAdminRequest, logAudit } from "../admin-auth";
 
 const SALT_ROUNDS = 12;
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
@@ -57,6 +58,15 @@ async function requireDb() {
   const db = await getDb();
   if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
   return db;
+}
+
+async function requireCustomerAdmin(ctx: { user?: { role?: string } | null; req: unknown }) {
+  if (ctx.user?.role === "admin") return { name: "Administrador", adminId: undefined };
+  const admin = await authenticateAdminRequest(ctx.req as Request);
+  if (!admin || (admin.role !== "admin" && admin.role !== "superadmin")) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem gerenciar acessos de clientes." });
+  }
+  return { name: admin.name, adminId: admin.adminId };
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
@@ -558,6 +568,7 @@ export const customerAuthRouter = router({
       z.object({
         search: z.string().optional(),
         status: z.enum(["all", "active", "inactive", "blocked"]).optional(),
+        accountType: z.enum(["customer", "reseller", "agency"]).optional(),
         limit: z.number().default(50),
         offset: z.number().default(0),
       })
@@ -581,6 +592,7 @@ export const customerAuthRouter = router({
           emailVerified: customerAccounts.emailVerified,
           status: customerAccounts.status,
           priceTier: customerAccounts.priceTier,
+          accountType: customerAccounts.accountType,
           lastLogin: customerAccounts.lastLogin,
           createdAt: customerAccounts.createdAt,
           allowStorePickup: customerAccounts.allowStorePickup,
@@ -603,11 +615,51 @@ export const customerAuthRouter = router({
       if (input.status && input.status !== "all") {
         filtered = filtered.filter((c) => c.status === input.status);
       }
+      if (input.accountType) filtered = filtered.filter((c) => c.accountType === input.accountType);
 
       const total = filtered.length;
       const paginated = filtered.slice(input.offset, input.offset + input.limit);
 
       return { customers: paginated, total };
+    }),
+
+  adminCreatePartnerAccount: publicProcedure
+    .input(z.object({
+      firstName: z.string().min(2), lastName: z.string().min(2), email: z.string().email(),
+      phone: z.string().optional(), cpfCnpj: z.string().optional(), accountType: z.enum(["reseller", "agency"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireCustomerAdmin(ctx);
+      const db = await requireDb();
+      const email = input.email.toLowerCase().trim();
+      const [existing] = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.email, email)).limit(1);
+      if (existing) throw new TRPCError({ code: "CONFLICT", message: "Este e-mail já está cadastrado. Reenvie o acesso ou use a recuperação de senha." });
+      const now = Date.now();
+      const resetToken = nanoid(64);
+      await db.insert(customerAccounts).values({
+        firstName: input.firstName.trim(), lastName: input.lastName.trim(), email,
+        phone: input.phone?.trim() || null, cpfCnpj: input.cpfCnpj?.replace(/\D/g, "") || null,
+        passwordHash: await bcrypt.hash(nanoid(48), SALT_ROUNDS), emailVerified: true, status: "active",
+        priceTier: "reseller", accountType: input.accountType, resetPasswordToken: resetToken,
+        resetPasswordExpires: now + RESET_EXPIRES_MS, loginAttempts: 0, createdAt: now, updatedAt: now,
+      });
+      await sendPasswordResetEmail(email, input.firstName.trim(), resetToken);
+      await logAudit({ adminId: admin.adminId, adminName: admin.name, action: "partner_access_created", entity: "customerAccounts", after: { email, accountType: input.accountType } });
+      return { success: true, message: "Acesso criado. O parceiro recebeu um link temporário para definir a senha." };
+    }),
+
+  adminResendPartnerInvite: publicProcedure
+    .input(z.object({ customerId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireCustomerAdmin(ctx);
+      const db = await requireDb();
+      const [customer] = await db.select().from(customerAccounts).where(eq(customerAccounts.id, input.customerId)).limit(1);
+      if (!customer || customer.accountType === "customer") throw new TRPCError({ code: "NOT_FOUND", message: "Parceiro não encontrado." });
+      const resetToken = nanoid(64);
+      await db.update(customerAccounts).set({ resetPasswordToken: resetToken, resetPasswordExpires: Date.now() + RESET_EXPIRES_MS, updatedAt: Date.now() }).where(eq(customerAccounts.id, customer.id));
+      await sendPasswordResetEmail(customer.email, customer.firstName, resetToken);
+      await logAudit({ adminId: admin.adminId, adminName: admin.name, action: "partner_access_resent", entity: "customerAccounts", entityId: String(customer.id) });
+      return { success: true };
     }),
 
   /**
