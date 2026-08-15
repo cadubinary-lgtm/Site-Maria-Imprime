@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
@@ -155,13 +156,13 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
             toggleOpen();
           }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-            ${isGroupActive ? "bg-gray-800 text-white" : isActive ? "bg-orange-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
+            ${getAdminMenuGroupColors(isGroupActive, isActive)}
           `}
           style={{ paddingLeft: `${12 + depth * 12}px` }}
         >
           {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
           <span className="flex-1 text-left">{item.label}</span>
-          {item.badge ? <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
+          {item.badge ? <Badge className="bg-pink-600 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
           {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
         </button>
         {open && (

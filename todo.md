@@ -2724,3 +2724,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar confirmação a exclusões por lixeira e revisar o padrão visual de Categorias e Clientes
 - [x] Simplificar indicadores de Orçamentos e sincronizá-los aos status e procedimentos operacionais
 - [x] Corrigir a apuração dos indicadores para refletir os registros exibidos em Orçamentos
+- [x] Aplicar rosa aos nomes e ícones dos grupos principais do menu lateral administrativo
