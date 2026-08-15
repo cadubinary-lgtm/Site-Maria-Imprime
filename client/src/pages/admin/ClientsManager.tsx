@@ -335,8 +335,8 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                 <p className="text-gray-500">Carregando clientes...</p>
               </div>
             ) : filtered.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="w-full overflow-hidden">
+                <table className="w-full table-fixed text-[11px]">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 px-4 font-semibold">Cliente</th>
@@ -376,7 +376,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                           <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
                         </td>
                         <td className="py-3 px-4">
-                          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">Ativo</Badge>
+                          <Badge variant="outline" className={client.accountStatus === "blocked" ? "border-red-200 bg-red-50 text-red-700" : client.accountStatus === "inactive" ? "border-gray-200 bg-gray-100 text-gray-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}>{client.accountStatus === "blocked" ? "Bloqueado" : client.accountStatus === "inactive" ? "Inativo" : "Ativo"}</Badge>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">
                           {client.createdAt ? formatDate(client.createdAt) : "—"}
@@ -394,7 +394,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                               <Users className="mr-1 h-4 w-4" /> Ver cadastro
                             </Link>
                           ) : (
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-1">
                             <Button
                               size="sm"
                               variant="outline"
