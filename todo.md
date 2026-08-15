@@ -2774,3 +2774,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter filtros e dados específicos de cada origem no padrão único de clientes
 - [x] Garantir colunas responsivas e informações sem sobreposição no padrão único
 - [x] Adicionar botão Editar e formulário de atualização na lista de Clientes Site
+- [x] Reorganizar Editar Cliente em Dados Pessoais, Tabela de Preços e Endereço de Entrega com rótulos claros
+- [x] Pré-preencher todos os campos de edição com os dados cadastrados do cliente
+- [x] Identificar cada campo de edição e permitir alterar a Tabela de Preços do cliente

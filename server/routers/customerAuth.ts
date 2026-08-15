@@ -683,6 +683,14 @@ export const customerAuthRouter = router({
       addressNeighborhood: z.string().optional(),
       addressCity: z.string().optional(),
       addressState: z.string().max(2).optional(),
+      priceTier: z.enum(["final", "reseller"]),
+      newPassword: z
+        .string()
+        .min(8, "Senha deve ter ao menos 8 caracteres")
+        .regex(/[A-Z]/, "Senha deve conter ao menos uma letra maiúscula")
+        .regex(/[0-9]/, "Senha deve conter ao menos um número")
+        .optional()
+        .or(z.literal("")),
     }))
     .mutation(async ({ input, ctx }) => {
       const admin = await requireCustomerAdmin(ctx);
@@ -699,6 +707,7 @@ export const customerAuthRouter = router({
       const emailChanged = email !== current.email;
       const verificationToken = emailChanged ? nanoid(64) : null;
       const now = Date.now();
+      const passwordHash = input.newPassword ? await bcrypt.hash(input.newPassword, SALT_ROUNDS) : undefined;
       await db.update(customerAccounts).set({
         firstName: input.firstName.trim(),
         lastName: input.lastName.trim(),
@@ -712,6 +721,8 @@ export const customerAuthRouter = router({
         addressNeighborhood: input.addressNeighborhood?.trim() || null,
         addressCity: input.addressCity?.trim() || null,
         addressState: input.addressState?.trim().toUpperCase() || null,
+        priceTier: input.priceTier,
+        ...(passwordHash ? { passwordHash } : {}),
         ...(emailChanged ? {
           emailVerified: false,
           emailVerificationToken: verificationToken,

@@ -10,5 +10,8 @@ describe("edição administrativa de Clientes Site", () => {
     expect(router).toContain("await requireCustomerAdmin(ctx)");
     expect(page).toContain("Editar Cliente");
     expect(page).toContain("adminUpdateCustomer.useMutation");
+    expect(page).toContain("Tabela de Preços");
+    expect(page).toContain("Dados Pessoais");
+    expect(page).toContain("Endereço de Entrega");
   });
 });

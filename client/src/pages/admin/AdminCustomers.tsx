@@ -372,7 +372,7 @@ function CustomerDetailModal({
 }
 
 function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: any | null; open: boolean; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", newPassword: "", confirmPassword: "", priceTier: "final" as "final" | "reseller", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
   const updateCustomer = trpc.customerAuth.adminUpdateCustomer.useMutation({
     onSuccess: (result) => {
       toast.success(result.emailVerificationSent ? "Cliente atualizado. Uma confirmação foi enviada ao novo e-mail." : "Cliente atualizado com sucesso.");
@@ -385,25 +385,40 @@ function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: an
   useEffect(() => {
     if (!customer) return;
     setForm({
-      firstName: customer.firstName || "", lastName: customer.lastName || "", email: customer.email || "", phone: customer.phone || "", cpfCnpj: customer.cpfCnpj || "",
+      firstName: customer.firstName || "", lastName: customer.lastName || "", email: customer.email || "", phone: customer.phone || "", cpfCnpj: customer.cpfCnpj || "", newPassword: "", confirmPassword: "", priceTier: customer.priceTier === "reseller" ? "reseller" : "final",
       addressZipCode: customer.addressZipCode || "", addressStreet: customer.addressStreet || "", addressNumber: customer.addressNumber || "", addressComplement: customer.addressComplement || "", addressNeighborhood: customer.addressNeighborhood || "", addressCity: customer.addressCity || "", addressState: customer.addressState || "",
     });
   }, [customer]);
 
-  const field = (key: keyof typeof form, placeholder: string, className = "") => (
-    <Input className={className} placeholder={placeholder} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
+  const field = (key: keyof typeof form, label: string, placeholder: string, className = "", type = "text") => (
+    <label className={`grid gap-1.5 text-sm font-medium text-gray-700 ${className}`}>
+      <span>{label}</span>
+      <Input type={type} placeholder={placeholder} value={form[key] as string} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
+    </label>
   );
 
   return (
     <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Editar Cliente</DialogTitle><DialogDescription>Atualize os dados cadastrais sem alterar o acesso do cliente.</DialogDescription></DialogHeader>
-        <form className="grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={(event) => { event.preventDefault(); if (customer) updateCustomer.mutate({ customerId: customer.id, ...form }); }}>
-          {field("firstName", "Nome")}{field("lastName", "Sobrenome")}
-          {field("email", "E-mail", "md:col-span-2")}{field("phone", "Telefone / WhatsApp")}{field("cpfCnpj", "CPF / CNPJ")}
-          {field("addressZipCode", "CEP")}{field("addressStreet", "Rua / Avenida")}{field("addressNumber", "Número")}{field("addressComplement", "Complemento")}
-          {field("addressNeighborhood", "Bairro")}{field("addressCity", "Cidade")}{field("addressState", "UF")}
-          <div className="flex gap-2 md:col-span-2"><Button type="submit" disabled={updateCustomer.isPending}>Salvar alterações</Button><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></div>
+        <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); if (form.newPassword && form.newPassword !== form.confirmPassword) { toast.error("As senhas não coincidem."); return; } if (customer) { const { confirmPassword, ...payload } = form; updateCustomer.mutate({ customerId: customer.id, ...payload }); } }}>
+          <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-4"><h3 className="font-semibold text-gray-900">Dados Pessoais</h3><p className="text-xs text-gray-500">Dados cadastrados e informações de acesso do cliente.</p></div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {field("firstName", "Nome *", "Nome")}{field("lastName", "Sobrenome *", "Sobrenome")}
+              {field("email", "E-mail *", "email@exemplo.com", "md:col-span-2", "email")}{field("phone", "Telefone / WhatsApp", "(00) 00000-0000")}{field("cpfCnpj", "CPF / CNPJ", "000.000.000-00")}
+              {field("newPassword", "Nova senha (opcional)", "Deixe em branco para manter a atual", "", "password")}{field("confirmPassword", "Confirmar nova senha", "Repita a nova senha", "", "password")}
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700 md:col-span-2"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
+            </div>
+          </section>
+          <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-4"><h3 className="font-semibold text-gray-900">Endereço de Entrega</h3><p className="text-xs text-gray-500">Usado para preencher o checkout quando disponível.</p></div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {field("addressZipCode", "CEP", "00000-000", "md:col-span-2")}{field("addressStreet", "Rua / Avenida", "Nome da rua")}{field("addressNumber", "Número", "123")}
+              {field("addressComplement", "Complemento", "Apto, sala, bloco...", "md:col-span-2")}{field("addressNeighborhood", "Bairro", "Bairro", "md:col-span-2")}{field("addressCity", "Cidade", "Cidade")}{field("addressState", "UF", "SP")}
+            </div>
+          </section>
+          <div className="flex gap-2"><Button type="submit" disabled={updateCustomer.isPending}>Salvar alterações</Button><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></div>
         </form>
       </DialogContent>
     </Dialog>
