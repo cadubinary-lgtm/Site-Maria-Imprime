@@ -40,6 +40,15 @@ describe("lista Todos os Clientes", () => {
     expect(page).toContain("Volume comprado");
   });
 
+  it("recolhe as ações secundárias por cliente sob uma seta cinza com hover rosa", () => {
+    const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
+    expect(page).toContain("expandedActionClientIds");
+    expect(page).toContain("toggleActionExpansion");
+    expect(page).toContain("ChevronDown");
+    expect(page).toContain("text-gray-400 hover:bg-transparent hover:text-pink-600");
+    expect(page).toContain("{isActionExpanded && <>");
+  });
+
   it("aplica o padrão de tabela legível às listas de todas as origens", () => {
     const files = [
       "client/src/pages/admin/AdminCustomers.tsx",
