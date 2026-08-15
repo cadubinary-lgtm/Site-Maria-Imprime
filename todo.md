@@ -2805,3 +2805,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Solicitar nome do Produto / Serviço antes de criar e expandir item personalizado
 - [x] Adicionar Cancelar e limitar o nome do item personalizado antes da criação
 - [x] Tornar editável e funcional o campo superior de Total do orçamento
+- [x] Corrigir a digitação manual no campo superior de Total do orçamento

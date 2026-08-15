@@ -138,6 +138,7 @@ export default function AdminQuotationForm() {
   const artPasteRefs = useRef<(HTMLDivElement | null)[]>([]);
   // Acerto Total (override do total calculado)
   const [acertoTotal, setAcertoTotal] = useState<string>("");
+  const [isEditingManualTotal, setIsEditingManualTotal] = useState(false);
 
   // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
   useEffect(() => {
@@ -1786,7 +1787,7 @@ export default function AdminQuotationForm() {
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs text-gray-500 font-medium">Acerto Total</label>
                   {acertoValue > 0 && (
-                    <button className="text-xs text-gray-400 hover:text-red-500 underline" onClick={() => setAcertoTotal("")}>
+                    <button className="text-xs text-gray-400 hover:text-red-500 underline" onClick={() => { setAcertoTotal(""); setIsEditingManualTotal(false); }}>
                       Limpar
                     </button>
                   )}
@@ -1815,8 +1816,13 @@ export default function AdminQuotationForm() {
                       type="number"
                       min={0}
                       step={0.01}
-                      value={hasManualTotal ? acertoTotal : calculatedTotal.toFixed(2)}
+                      value={hasManualTotal || isEditingManualTotal ? acertoTotal : calculatedTotal.toFixed(2)}
+                      onFocus={() => {
+                        if (!hasManualTotal) setAcertoTotal("");
+                        setIsEditingManualTotal(true);
+                      }}
                       onChange={(event) => setAcertoTotal(event.target.value)}
+                      onBlur={() => setIsEditingManualTotal(false)}
                       className="h-9 w-28 border-white/50 bg-white text-right text-base font-bold text-pink-700 placeholder:text-pink-300"
                     />
                   </div>
