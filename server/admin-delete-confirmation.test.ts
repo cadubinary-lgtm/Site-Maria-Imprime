@@ -8,4 +8,10 @@ describe("confirmação de exclusão administrativa", () => {
     expect(canExecuteConfirmedDelete(0)).toBe(true);
     expect(canExecuteConfirmedDelete({ id: 7 })).toBe(true);
   });
+
+  it("permite reter o segmento selecionado até o usuário confirmar a exclusão", () => {
+    const segment = { id: 12, name: "Banners" };
+    expect(canExecuteConfirmedDelete(segment)).toBe(true);
+    expect(segment.id).toBe(12);
+  });
 });
