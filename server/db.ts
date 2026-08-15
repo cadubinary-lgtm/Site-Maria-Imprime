@@ -5,7 +5,7 @@ import { productSegments } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq, sql, asc, and } from 'drizzle-orm';
+import { isNull, desc, eq, sql, asc, and, getTableColumns } from 'drizzle-orm';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -286,7 +286,14 @@ export async function getAllOrders() {
   const db = await getDb();
   if (!db) return [];
 
-  const result = await db.select().from(orders).limit(1000);
+  const result = await db
+    .select({
+      ...getTableColumns(orders),
+      customerPriceTier: customerAccounts.priceTier,
+    })
+    .from(orders)
+    .leftJoin(customerAccounts, eq(orders.customerId, customerAccounts.id))
+    .limit(1000);
   return result;
 }
 
