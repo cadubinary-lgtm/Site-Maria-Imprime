@@ -627,6 +627,7 @@ export const customerAuthRouter = router({
     .input(z.object({
       firstName: z.string().min(2), lastName: z.string().min(2), email: z.string().email(),
       phone: z.string().optional(), cpfCnpj: z.string().optional(), accountType: z.enum(["reseller", "agency"]),
+      password: z.string().min(8, "A senha temporária deve ter ao menos 8 caracteres"),
     }))
     .mutation(async ({ input, ctx }) => {
       const admin = await requireCustomerAdmin(ctx);
@@ -639,7 +640,7 @@ export const customerAuthRouter = router({
       await db.insert(customerAccounts).values({
         firstName: input.firstName.trim(), lastName: input.lastName.trim(), email,
         phone: input.phone?.trim() || null, cpfCnpj: input.cpfCnpj?.replace(/\D/g, "") || null,
-        passwordHash: await bcrypt.hash(nanoid(48), SALT_ROUNDS), emailVerified: true, status: "active",
+        passwordHash: await bcrypt.hash(input.password, SALT_ROUNDS), emailVerified: true, status: "active",
         priceTier: "reseller", accountType: input.accountType, resetPasswordToken: resetToken,
         resetPasswordExpires: now + RESET_EXPIRES_MS, loginAttempts: 0, createdAt: now, updatedAt: now,
       });

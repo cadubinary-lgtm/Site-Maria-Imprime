@@ -9,5 +9,7 @@ describe("acesso seguro de parceiros", () => {
     expect(router).toContain("adminCreatePartnerAccount");
     expect(router).toContain("adminResendPartnerInvite");
     expect(router).toContain("sendPasswordResetEmail(email");
+    expect(router).toContain('password: z.string().min(8, "A senha temporária deve ter ao menos 8 caracteres")');
+    expect(router).toContain("bcrypt.hash(input.password, SALT_ROUNDS)");
   });
 });
