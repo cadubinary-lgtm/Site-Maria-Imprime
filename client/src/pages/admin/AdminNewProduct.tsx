@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
 import { NEW_PRODUCT_FIELD_LAYOUT } from "@/lib/new-product-layout";
+import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
 
 export default function AdminNewProduct() {
   const [, navigate] = useLocation();
@@ -47,16 +48,8 @@ export default function AdminNewProduct() {
     tagPosition: "top-right" as string,
   });
 
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData } = trpc.segments.getAll.useQuery();
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
-
-  const SEGMENTS = useMemo(() => {
-    if (!segmentsData || segmentsData.length === 0) return [];
-    return segmentsData.map((seg: any) => ({
-      id: seg.slug,
-      label: `${seg.icon || "📦"} ${seg.name}`,
-    }));
-  }, [segmentsData]);
 
   const createProductMutation = trpc.admin.createProduct.useMutation();
   const createDeliveryOptionMutation = trpc.deliveryOptions.create.useMutation();
@@ -64,8 +57,12 @@ export default function AdminNewProduct() {
   const utils = trpc.useUtils();
 
   const handleCreateSegmentsChange = useCallback((segmentIds: number[]) => {
-    setCreateForm((prev) => ({ ...prev, segmentIds }));
-  }, []);
+    setCreateForm((prev) => ({
+      ...prev,
+      segmentIds,
+      segment: getLegacySegmentFromSelection(segmentIds, segmentsData || []),
+    }));
+  }, [segmentsData]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,25 +224,6 @@ export default function AdminNewProduct() {
                     />
                   </div>
                 )}
-                <div className={NEW_PRODUCT_FIELD_LAYOUT.segment}>
-                  <Label htmlFor="create-segment">Segmento</Label>
-                  <Select
-                    value={createForm.segment}
-                    onValueChange={(value) => setCreateForm({ ...createForm, segment: value })}
-                    disabled={segmentsLoading}
-                  >
-                    <SelectTrigger id="create-segment">
-                      <SelectValue placeholder={segmentsLoading ? "Carregando..." : "Selecione um segmento"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SEGMENTS.map((seg) => (
-                        <SelectItem key={seg.id} value={seg.id}>
-                          {seg.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className={NEW_PRODUCT_FIELD_LAYOUT.description}>
                   <Label htmlFor="create-description">Descrição</Label>
                   <Textarea
