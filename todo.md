@@ -2731,3 +2731,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a barra lateral administrativa na página de Segmentos
 - [x] Corrigir a lixeira e a confirmação de exclusão na página de Segmentos
 - [x] Adicionar lixeira padrão para remover apenas o ícone de um segmento em edição
+- [x] Reorganizar o Dashboard de Linha de Produção para leitura compacta e ações operacionais claras

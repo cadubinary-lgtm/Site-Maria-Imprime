@@ -1,162 +1,105 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { getProductionDashboardSummary, isProductionPriority } from "@/lib/production-dashboard";
+import { AlertTriangle, ArrowRight, ClipboardCheck, Loader2, PackageCheck, Printer, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
-import { Loader2, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
 
-const STATUSES = ["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "entregue", "cancelado"];
-
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-50 border-green-200" },
-  pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-50 border-blue-200" },
-  analisando:          { label: "Analisando",             color: "bg-orange-50 border-orange-200" },
-  com_problemas:       { label: "Com Problemas",          color: "bg-red-50 border-red-200" },
-  em_producao:         { label: "Em Produção",            color: "bg-orange-50 border-orange-200" },
-  pronto_entrega:      { label: "Pronto para Entrega",    color: "bg-teal-50 border-teal-200" },
-  pronto_retirada:     { label: "Pronto para Retirada",   color: "bg-cyan-50 border-cyan-200" },
-  entregue:            { label: "Entregue",               color: "bg-emerald-50 border-emerald-200" },
-  cancelado:           { label: "Cancelado",              color: "bg-red-50 border-red-200" },
+const STATUS_LABELS: Record<string, string> = {
+  analisando: "Analisando",
+  com_problemas: "Com problema",
+  em_producao: "Em produção",
+  pronto_entrega: "Pronto para entrega",
+  pronto_retirada: "Pronto para retirada",
+  pagamento_aprovado: "Pagamento aprovado",
+  pagamento_retirada: "Pagamento na retirada",
 };
 
+const LANE_ICONS = [ClipboardCheck, Printer, PackageCheck, AlertTriangle];
+
 export default function ProductionDashboard() {
-  const { data: orders, isLoading, refetch } = trpc.admin.getAllOrders.useQuery();
-  const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation();
-
-  const handleStatusChange = async (orderId: number, newStatus: string) => {
-    try {
-      await updateStatusMutation.mutateAsync({
-        orderId,
-        newStatus: newStatus as "pagamento_aprovado" | "pagamento_retirada" | "analisando" | "com_problemas" | "em_producao" | "pronto_entrega" | "pronto_retirada" | "entregue" | "cancelado",
-      });
-      
-      const statusLabel = STATUS_CONFIG[newStatus as keyof typeof STATUS_CONFIG]?.label || newStatus;
-      toast.success(`Pedido atualizado para: ${statusLabel}`);
-      refetch();
-    } catch (error) {
-      toast.error("Erro ao atualizar status");
-      console.error(error);
-    }
-  };
-
-  const getNextStatus = (currentStatus: string) => {
-    const currentIndex = STATUSES.indexOf(currentStatus);
-    return currentIndex < STATUSES.length - 1 ? STATUSES[currentIndex + 1] : null;
-  };
-
-  const getOrdersByStatus = (status: string) => {
-    return orders?.filter((order) => order.status === status) || [];
-  };
+  const { data: orders = [], isLoading, isFetching, refetch } = trpc.admin.getAllOrders.useQuery();
+  const lanes = getProductionDashboardSummary(orders);
+  const priorityOrders = orders.filter((order) => isProductionPriority(order.status)).slice(0, 8);
 
   return (
     <AdminLayout>
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">PR</span>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Painel de Produção</h1>
+      <div className="min-h-full bg-gray-50 p-4 sm:p-6 lg:p-8 admin-visual-system">
+        <div className="mx-auto max-w-7xl space-y-5">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-pink-600">Linha de Produção</p>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">Acompanhamento operacional</h1>
+              <p className="mt-1 text-sm text-gray-500">Visualize as filas prioritárias e avance pelo procedimento correto em cada área.</p>
             </div>
-          </div>
-        </div>
-      </header>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="self-start">
+              <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              Atualizar
+            </Button>
+          </header>
 
-      {/* Main Content */}
-      <main className="max-w-full mx-auto px-4 py-12">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto">
-            {STATUSES.map((status) => {
-              const statusOrders = getOrdersByStatus(status);
-              const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
+          {isLoading ? (
+            <div className="flex min-h-52 items-center justify-center rounded-xl border bg-white">
+              <Loader2 className="h-7 w-7 animate-spin text-pink-600" />
+            </div>
+          ) : (
+            <>
+              <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {lanes.map((lane, index) => {
+                  const Icon = LANE_ICONS[index];
+                  return (
+                    <Link key={lane.id} href={lane.href} className="group">
+                      <Card className="h-full border-gray-200 transition-all hover:-translate-y-0.5 hover:border-pink-200 hover:shadow-sm">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="rounded-lg bg-pink-50 p-2 text-pink-600"><Icon className="h-4 w-4" /></div>
+                            <span className="text-2xl font-semibold leading-none text-gray-900">{lane.count}</span>
+                          </div>
+                          <p className="mt-3 text-sm font-semibold text-gray-800">{lane.label}</p>
+                          <p className="mt-1 text-xs leading-4 text-gray-500">{lane.description}</p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </section>
 
-              return (
-                <div key={status} className="min-w-[300px]">
-                  <div className={`rounded-lg border-2 p-4 ${config.color}`}>
-                    <h3 className="font-bold text-lg mb-2 capitalize">{config.label}</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {statusOrders.length} pedido{statusOrders.length !== 1 ? "s" : ""}
-                    </p>
-
-                    <div className="space-y-3">
-                      {statusOrders.length > 0 ? (
-                        statusOrders.map((order) => {
-                          const nextStatus = getNextStatus(status);
-
-                          return (
-                            <Card key={order.id} className="cursor-move hover:shadow-md transition-shadow">
-                              <CardHeader className="pb-3">
-                                <CardTitle className="text-sm">{order.orderNumber}</CardTitle>
-                                <CardDescription className="text-xs">
-                                  Cliente #{order.clientId}
-                                </CardDescription>
-                              </CardHeader>
-                              <CardContent className="pb-3">
-                                <div className="mb-3 space-y-1">
-                                  <p className="text-xs text-gray-600">
-                                    <span className="font-semibold">Valor:</span> R$ {parseFloat(order.totalPrice.toString()).toFixed(2)}
-                                  </p>
-                                  <p className="text-xs text-gray-600">
-                                    <span className="font-semibold">Data:</span> {new Date(order.createdAt).toLocaleDateString("pt-BR")}
-                                  </p>
-                                </div>
-
-                                {nextStatus && (
-                                  <Button
-                                    size="sm"
-                                    className="w-full"
-                                    onClick={() => handleStatusChange(order.id, nextStatus)}
-                                    disabled={updateStatusMutation.isPending}
-                                  >
-                                    {updateStatusMutation.isPending ? (
-                                      <>
-                                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                        Atualizando...
-                                      </>
-                                    ) : (
-                                      `Avançar para ${STATUS_CONFIG[nextStatus as keyof typeof STATUS_CONFIG].label}`
-                                    )}
-                                  </Button>
-                                )}
-
-                                {status === "entregue" && (
-                                  <Badge className="w-full justify-center mt-2 bg-green-600">
-                                    ✓ Concluído
-                                  </Badge>
-                                )}
-                              </CardContent>
-                            </Card>
-                          );
-                        })
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <p className="text-sm">Nenhum pedido</p>
-                        </div>
-                      )}
-                    </div>
+              <section className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <div className="flex flex-col gap-2 border-b border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-sm font-semibold text-gray-900">Fila prioritária</h2>
+                    <p className="text-xs text-gray-500">Pedidos que exigem análise ou atuação da produção.</p>
                   </div>
+                  <Badge variant="secondary" className="w-fit bg-pink-50 text-pink-700">{priorityOrders.length} em acompanhamento</Badge>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+
+                {priorityOrders.length === 0 ? (
+                  <div className="px-4 py-8 text-center text-sm text-gray-500">Não há pedidos prioritários neste momento.</div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {priorityOrders.map((order) => (
+                      <div key={order.id} className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-gray-900">{order.orderNumber}</p>
+                          <p className="mt-0.5 text-xs text-gray-500">Criado em {new Date(order.createdAt).toLocaleDateString("pt-BR")} · R$ {Number(order.totalPrice).toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-700">{STATUS_LABELS[order.status] || order.status}</Badge>
+                          <Link href={`/admin/pedidos/${order.id}`}>
+                            <Button size="sm" variant="outline">Abrir pedido <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+        </div>
+      </div>
     </AdminLayout>
   );
 }
