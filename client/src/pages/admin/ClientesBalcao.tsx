@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import AdminLayout from "@/components/AdminLayout";
@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Users, UserCheck, AlertCircle, Ban,
   RefreshCw, Mail, Phone, Trash2, Eye, MapPin, ShoppingBag,
-  Calendar, Plus, Store, StoreIcon,
+  Calendar, Plus, Store, StoreIcon, Pencil,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -188,11 +189,59 @@ function ClientDetailModal({ clientId, open, onClose }: { clientId: number | nul
   );
 }
 
+function BalcaoEditDialog({ client, open, onClose, onSaved }: { client: any | null; open: boolean; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", cpfCnpj: "", priceTier: "final" as "final" | "reseller", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const updateClient = trpc.crm.adminUpdateBalcaoClient.useMutation({
+    onSuccess: () => { toast.success("Cliente atualizado com sucesso!"); onSaved(); onClose(); },
+    onError: (error) => toast.error(error.message),
+  });
+
+  useEffect(() => {
+    if (!client) return;
+    setForm({
+      name: client.name || "", email: client.email || "", phone: client.phone || "", whatsapp: client.whatsapp || "", cpfCnpj: client.cpfCnpj || "", priceTier: client.priceTier === "reseller" ? "reseller" : "final",
+      addressZipCode: client.addressZipCode || "", addressStreet: client.addressStreet || "", addressNumber: client.addressNumber || "", addressComplement: client.addressComplement || "", addressNeighborhood: client.addressNeighborhood || "", addressCity: client.addressCity || "", addressState: client.addressState || "",
+    });
+  }, [client]);
+
+  const field = (key: keyof typeof form, label: string, placeholder: string, className = "", type = "text") => (
+    <label className={`grid gap-1.5 text-sm font-medium text-gray-700 ${className}`}>
+      <span>{label}</span>
+      <Input type={type} placeholder={placeholder} value={form[key] as string} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
+    </label>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
+      <DialogContent className="admin-visual-system max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Editar Cliente Balcão</DialogTitle><p className="text-sm text-gray-500">Atualize os dados cadastrados e a tabela comercial.</p></DialogHeader>
+        <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); if (client) updateClient.mutate({ clientId: client.id, ...form }); }}>
+          <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-4"><h3 className="font-semibold text-gray-900">Dados Pessoais</h3><p className="text-xs text-gray-500">Informações de atendimento e contato do cliente.</p></div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {field("name", "Nome completo *", "Nome do cliente", "md:col-span-2")}{field("email", "E-mail", "email@exemplo.com", "md:col-span-2", "email")}{field("phone", "Telefone", "(00) 00000-0000")}{field("whatsapp", "WhatsApp", "(00) 00000-0000")}{field("cpfCnpj", "CPF / CNPJ", "000.000.000-00")}
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
+            </div>
+          </section>
+          <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-4"><h3 className="font-semibold text-gray-900">Endereço de Entrega</h3><p className="text-xs text-gray-500">Preenchido automaticamente no checkout quando disponível.</p></div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {field("addressZipCode", "CEP", "00000-000", "md:col-span-2")}{field("addressStreet", "Rua / Avenida", "Nome da rua")}{field("addressNumber", "Número", "123")}{field("addressComplement", "Complemento", "Apto, sala, bloco...", "md:col-span-2")}{field("addressNeighborhood", "Bairro", "Bairro", "md:col-span-2")}{field("addressCity", "Cidade", "Cidade")}{field("addressState", "UF", "SP")}
+            </div>
+          </section>
+          <div className="flex gap-2"><Button type="submit" disabled={updateClient.isPending}>Salvar alterações</Button><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function ClientesBalcao() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<any | null>(null);
 
   const { data, isLoading, refetch } = trpc.crm.adminListBalcaoClients.useQuery({
     search: search || undefined,
@@ -373,6 +422,9 @@ export default function ClientesBalcao() {
                               >
                                 <Eye className="w-3.5 h-3.5 mr-1" /> Ver
                               </Button>
+                              <Button variant="outline" size="sm" className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs" onClick={() => setEditingClient(client)}>
+                                <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
+                              </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
@@ -418,6 +470,7 @@ export default function ClientesBalcao() {
         open={detailOpen}
         onClose={() => { setDetailOpen(false); setSelectedClientId(null); }}
       />
+      <BalcaoEditDialog client={editingClient} open={!!editingClient} onClose={() => setEditingClient(null)} onSaved={refetch} />
     </AdminLayout>
   );
 }
