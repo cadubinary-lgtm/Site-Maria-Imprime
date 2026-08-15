@@ -5,6 +5,7 @@ describe("sistema visual administrativo", () => {
   it("centraliza o padrão cinza e rosa para ações e campos", () => {
     expect(ADMIN_VISUAL_SYSTEM.root).toBe("admin-visual-system");
     expect(ADMIN_VISUAL_SYSTEM.iconAction).toBe("admin-icon-action");
+    expect(ADMIN_VISUAL_SYSTEM.primaryAction).toBe("admin-primary-action");
     expect(ADMIN_VISUAL_GUIDELINES.iconRest).toBe("gray");
     expect(ADMIN_VISUAL_GUIDELINES.iconHover).toBe("pink");
     expect(ADMIN_VISUAL_GUIDELINES.fieldFocus).toBe("pink");
