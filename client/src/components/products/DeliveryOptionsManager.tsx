@@ -45,11 +45,19 @@ export function DeliveryOptionsManager({
   compact = false,
 }: DeliveryOptionsManagerProps) {
   const isOfflineMode = !productId;
-  // Determinar se é cobrança por m² ou por unidade
+  // Determinar a unidade comercial usada para multiplicar a taxa de urgência.
   const isM2 = !calculationType || calculationType === "m2";
+  const isLinear = calculationType === "metro_linear";
+  const isPackage = calculationType === "pacote";
   // Rótulo do campo de valor adicional
-  const priceLabel = isM2 ? "Valor Adicional por m² (R$)" : "Valor Adicional por Unidade (R$)";
-  const priceSuffix = isM2 ? "/m²" : "/unid.";
+  const priceLabel = isM2
+    ? "Valor Adicional por m² (R$)"
+    : isLinear
+      ? "Valor Adicional por Metro Linear (R$)"
+      : isPackage
+        ? "Valor Adicional por Pacote (R$)"
+        : "Valor Adicional por Unidade (R$)";
+  const priceSuffix = isM2 ? "/m²" : isLinear ? "/ml" : isPackage ? "/pacote" : "/unid.";
 
   const [options, setOptions] = useState<DeliveryOptionData[]>(() => {
     if (isOfflineMode) {
@@ -276,8 +284,12 @@ export function DeliveryOptionsManager({
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   {isM2
-                    ? "Valor extra cobrado por m² quando este prazo é selecionado."
-                    : "Valor extra cobrado por unidade quando este prazo é selecionado."}
+                    ? "Valor extra cobrado por m² faturável quando este prazo é selecionado."
+                    : isLinear
+                      ? "Valor extra cobrado por metro linear faturável quando este prazo é selecionado."
+                      : isPackage
+                        ? "Valor extra cobrado por pacote quando este prazo é selecionado."
+                        : "Valor extra cobrado por unidade quando este prazo é selecionado."}
                 </p>
               </div>
               <div className="flex items-center space-x-2">

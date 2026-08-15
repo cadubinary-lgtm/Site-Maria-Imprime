@@ -2748,3 +2748,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preservar cálculo técnico de medidas, quantidade, variações, frete e pedidos ao selecionar a tabela de preços
 - [x] Exibir no Novo Pedido o perfil de preço ativo do cliente selecionado
 - [x] Mostrar uma única tag de Perfil do Cliente: Cliente Final ou Cliente Revendedor
+- [x] Cobrar taxa de urgência proporcional à quantidade, área faturável ou metragem linear conforme o tipo de cobrança
+- [x] Manter a configuração de prazos consistente em Novo Produto e Editar Produto sem alterar o layout
