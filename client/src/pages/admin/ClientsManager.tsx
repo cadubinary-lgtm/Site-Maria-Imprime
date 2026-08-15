@@ -340,6 +340,8 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 px-4 font-semibold">Cliente</th>
+                      <th className="text-left py-2 px-4 font-semibold">Contato</th>
+                      <th className="text-left py-2 px-4 font-semibold">E-mail</th>
                       <th className="text-left py-2 px-4 font-semibold">Compras</th>
                       <th className="text-left py-2 px-4 font-semibold">Produtos</th>
                       <th className="text-left py-2 px-4 font-semibold">Última compra</th>
@@ -355,8 +357,14 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                       <tr key={client.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <p className="font-medium text-gray-900">{client.name}</p>
-                          <p className="text-xs text-gray-500">{client.email || client.phone || client.whatsapp || "Sem contato informado"}</p>
+                          {client.cpfCnpj && <p className="text-xs text-gray-500">{client.cpfCnpj}</p>}
                           <span className={`mt-1 inline-block px-2 py-0.5 text-[11px] font-semibold rounded ${TYPE_LABELS[client.clientType]?.color ?? "bg-gray-100 text-gray-700"}`}>{TYPE_LABELS[client.clientType]?.label ?? client.clientType}</span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {client.phone || client.whatsapp || "Não informado"}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {client.email || "Não informado"}
                         </td>
                         <td className="py-3 px-4">
                           <p className="font-semibold text-gray-900">{formatCurrency(client.totalVolume)}</p>
