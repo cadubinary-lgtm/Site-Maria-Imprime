@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link, useSearch } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { ArrowLeft, Plus, Trash2, Edit2, Users, RefreshCw, PackageSearch, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -40,6 +40,7 @@ const formatDate = (value: Date | string | null | undefined) => value ? new Date
 
 export default function ClientsManager({ defaultType, title, ..._ }: { defaultType?: string; title?: string; [k: string]: any } = {}) {
   const searchParams = useSearch();
+  const [, setLocation] = useLocation();
   const isDashboardView = new URLSearchParams(searchParams).get("view") === "dashboard";
   const pageTitle = title ?? (isDashboardView ? "Dashboard de Clientes" : "Todos os Clientes");
   const pageDescription = isDashboardView
@@ -282,7 +283,6 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                         <SelectItem value="balcao">Balcão</SelectItem>
                         <SelectItem value="revendedor">Revendedor</SelectItem>
                         <SelectItem value="agencia">Agência</SelectItem>
-                        <SelectItem value="site">Site</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -303,10 +303,13 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
 
         {/* Botão para criar novo cliente */}
         {!isDashboardView && !showForm && filterType !== "site" && (
-          <div className="mb-6">
-            <Button onClick={() => setShowForm(true)}>
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Button onClick={() => setLocation("/admin/clientes-loja?novo=cliente")}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Cliente
+            </Button>
+            <Button variant="outline" onClick={() => setLocation("/admin/clientes-loja")}>
+              Gerenciar acessos e senhas
             </Button>
           </div>
         )}
