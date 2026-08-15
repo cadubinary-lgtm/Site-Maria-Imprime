@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link, useLocation, useSearch } from "wouter";
-import { ArrowLeft, Plus, Trash2, Edit2, Users, RefreshCw, PackageSearch, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Eye, Users, RefreshCw, Clock3, WalletCards, UserRoundCheck, RotateCcw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -342,10 +342,6 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                       <th className="text-left py-2 px-4 font-semibold">Cliente</th>
                       <th className="text-left py-2 px-4 font-semibold">Contato</th>
                       <th className="text-left py-2 px-4 font-semibold">E-mail</th>
-                      <th className="text-left py-2 px-4 font-semibold">Compras</th>
-                      <th className="text-left py-2 px-4 font-semibold">Produtos</th>
-                      <th className="text-left py-2 px-4 font-semibold">Última compra</th>
-                      <th className="text-left py-2 px-4 font-semibold">Situação</th>
                       <th className="text-left py-2 px-4 font-semibold">Status</th>
                       <th className="text-left py-2 px-4 font-semibold">Cadastro</th>
                       <th className="text-left py-2 px-4 font-semibold">Retirada</th>
@@ -367,23 +363,6 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                           {client.email || "Não informado"}
                         </td>
                         <td className="py-3 px-4">
-                          <p className="font-semibold text-gray-900">{formatCurrency(client.totalVolume)}</p>
-                          <p className="text-xs text-gray-500">{client.totalOrders} pedido(s) · Ticket {formatCurrency(client.averageTicket)}</p>
-                        </td>
-                        <td className="py-3 px-4">
-                          <p className="text-sm text-gray-800">{client.totalProducts} unidade(s)</p>
-                          <Button variant="link" size="sm" className="h-auto p-0 text-pink-600 hover:text-pink-700" onClick={() => setSelectedClient(client)}>
-                            <PackageSearch className="mr-1 h-3.5 w-3.5" /> Ver produtos ({client.products?.length ?? 0})
-                          </Button>
-                        </td>
-                        <td className="py-3 px-4">
-                          <p className="text-sm text-gray-800">{formatDate(client.lastPurchase)}</p>
-                          <p className="text-xs text-gray-500">{client.daysWithoutPurchase === null ? "Ainda não comprou" : `${client.daysWithoutPurchase} dia(s) sem comprar`}</p>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
-                        </td>
-                        <td className="py-3 px-4">
                           <Badge variant="outline" className={client.accountStatus === "blocked" ? "border-red-200 bg-red-50 text-red-700" : client.accountStatus === "inactive" ? "border-gray-200 bg-gray-100 text-gray-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}>{client.accountStatus === "blocked" ? "Bloqueado" : client.accountStatus === "inactive" ? "Inativo" : "Ativo"}</Badge>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">
@@ -393,33 +372,40 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                           {client.allowStorePickup ? "Liberado" : "Não informado"}
                         </td>
                         <td className="py-3 px-4">
-                          {isDashboardView ? (
-                            <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)}>
-                              <PackageSearch className="mr-1 h-4 w-4" /> Detalhes
-                            </Button>
-                          ) : client.source === "site" ? (
-                            <Link href="/admin/clientes-loja" className="inline-flex items-center text-xs font-medium text-pink-600 hover:text-pink-700">
-                              <Users className="mr-1 h-4 w-4" /> Ver cadastro
-                            </Link>
-                          ) : (
                           <div data-customer-actions>
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(client)}
+                              variant="ghost"
+                              className={ADMIN_VISUAL_SYSTEM.iconAction}
+                              onClick={() => setSelectedClient(client)}
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Eye className="w-4 h-4" /> Ver
                             </Button>
+                            {client.source === "site" ? (
+                              <Link href="/admin/clientes-loja" className="inline-flex h-8 items-center gap-2 text-xs font-medium text-gray-600 transition-colors hover:text-pink-600">
+                                <Edit2 className="w-4 h-4" /> Editar
+                              </Link>
+                            ) : (
                             <Button
                               size="sm"
-                              variant="outline"
+                              variant="ghost"
+                              className={ADMIN_VISUAL_SYSTEM.iconAction}
+                              onClick={() => handleEdit(client)}
+                            >
+                              <Edit2 className="w-4 h-4" /> Editar
+                            </Button>
+                            )}
+                            {client.source !== "site" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
                               className={ADMIN_VISUAL_SYSTEM.iconAction}
                               onClick={() => setPendingDeleteClient(client)}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" /> Excluir
                             </Button>
+                            )}
                           </div>
-                          )}
                         </td>
                       </tr>
                     ))}

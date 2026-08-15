@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
 describe("lista Todos os Clientes", () => {
-  it("preserva as colunas comerciais e acrescenta as colunas operacionais", () => {
+  it("reproduz as sete colunas enxutas da referência e preserva a tag de tipo", () => {
     const page = readFileSync("client/src/pages/admin/ClientsManager.tsx", "utf8");
-    ["Contato", "E-mail", "Compras", "Produtos", "Última compra", "Situação", "Status", "Cadastro", "Retirada", "Ações"].forEach((column) => {
+    ["Cliente", "Contato", "E-mail", "Status", "Cadastro", "Retirada", "Ações"].forEach((column) => {
       expect(page).toContain(`>${column}</th>`);
     });
+    ["Compras", "Produtos", "Última compra", "Situação"].forEach((column) => {
+      expect(page).not.toContain(`>${column}</th>`);
+    });
+    expect(page).toContain("TYPE_LABELS[client.clientType]");
   });
 
   it("consulta na lista geral as contas de Cliente Site, Revendedor e Agência", () => {
