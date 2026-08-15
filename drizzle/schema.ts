@@ -1714,6 +1714,7 @@ export const quotations = mysqlTable("quotations", {
   discountValue: decimal("discountValue", { precision: 10, scale: 2 }).default("0"),
   discountAmount: decimal("discountAmount", { precision: 10, scale: 2 }).default("0"), // Valor final do desconto aplicado
   shippingPrice: decimal("shippingPrice", { precision: 10, scale: 2 }).default("0"),
+  manualTotal: decimal("manualTotal", { precision: 10, scale: 2 }), // Ajuste comercial opcional aplicado ao total final
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   
   // Entrega

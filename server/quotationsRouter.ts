@@ -174,6 +174,7 @@ export const quotationsRouter = router({
           discountValue: quotations.discountValue,
           discountAmount: quotations.discountAmount,
           shippingPrice: quotations.shippingPrice,
+          manualTotal: quotations.manualTotal,
           shippingMethod: quotations.shippingMethod,
           shippingLabel: quotations.shippingLabel,
           shippingEstimatedDays: quotations.shippingEstimatedDays,
@@ -261,6 +262,7 @@ export const quotationsRouter = router({
       discountType: z.enum(["percentual", "fixo"]).default("fixo"),
       discountValue: z.number().min(0).default(0),
       shippingPrice: z.number().min(0).default(0),
+      manualTotal: z.number().min(0).nullable().optional(),
       shippingMethod: z.string().optional(),
       shippingLabel: z.string().optional(),
       shippingEstimatedDays: z.number().default(0),
@@ -281,7 +283,8 @@ export const quotationsRouter = router({
 
       const subtotal = input.items.reduce((acc, i) => acc + i.totalPrice, 0);
       const discountAmount = calcDiscount(subtotal, input.discountType, input.discountValue);
-      const total = Math.max(0, subtotal - discountAmount + input.shippingPrice);
+      const calculatedTotal = Math.max(0, subtotal - discountAmount + input.shippingPrice);
+      const total = input.manualTotal ?? calculatedTotal;
 
       // Calcular expiresAt
       const expiresAt = new Date(Date.now() + input.quotationValidity * 24 * 60 * 60 * 1000);
@@ -296,6 +299,7 @@ export const quotationsRouter = router({
         discountValue: input.discountValue.toFixed(2) as any,
         discountAmount: discountAmount.toFixed(2) as any,
         shippingPrice: input.shippingPrice.toFixed(2) as any,
+        manualTotal: input.manualTotal?.toFixed(2) ?? null,
         total: total.toFixed(2) as any,
         shippingMethod: input.shippingMethod,
         shippingLabel: input.shippingLabel,
@@ -350,6 +354,7 @@ export const quotationsRouter = router({
       discountType: z.enum(["percentual", "fixo"]).optional(),
       discountValue: z.number().min(0).optional(),
       shippingPrice: z.number().min(0).optional(),
+      manualTotal: z.number().min(0).nullable().optional(),
       shippingMethod: z.string().optional(),
       shippingLabel: z.string().optional(),
       shippingEstimatedDays: z.number().optional(),
@@ -369,6 +374,7 @@ export const quotationsRouter = router({
       const updates: Record<string, any> = {};
       if (input.clientId !== undefined) updates.clientId = input.clientId;
       if (input.discountType !== undefined) updates.discountType = input.discountType;
+      if (input.manualTotal !== undefined) updates.manualTotal = input.manualTotal?.toFixed(2) ?? null;
       if (input.shippingMethod !== undefined) updates.shippingMethod = input.shippingMethod;
       if (input.shippingLabel !== undefined) updates.shippingLabel = input.shippingLabel;
       if (input.shippingEstimatedDays !== undefined) updates.shippingEstimatedDays = input.shippingEstimatedDays;
@@ -387,7 +393,8 @@ export const quotationsRouter = router({
         const discountValue = input.discountValue ?? 0;
         const discountAmount = calcDiscount(subtotal, discountType, discountValue);
         const shippingPrice = input.shippingPrice ?? 0;
-        const total = Math.max(0, subtotal - discountAmount + shippingPrice);
+        const calculatedTotal = Math.max(0, subtotal - discountAmount + shippingPrice);
+        const total = input.manualTotal ?? calculatedTotal;
 
         updates.subtotal = subtotal.toFixed(2);
         updates.discountValue = discountValue.toFixed(2);

@@ -187,6 +187,7 @@ export default function AdminQuotationForm() {
     setDiscountType((q.discountType as any) ?? "fixo");
     setDiscountValue(Number(q.discountValue ?? 0));
     setShippingPrice(Number(q.shippingPrice ?? 0));
+    setAcertoTotal(q.manualTotal !== null && q.manualTotal !== undefined ? String(q.manualTotal) : "");
     setShippingMethod(q.shippingMethod ?? "pickup");
     setShippingLabel(q.shippingLabel ?? "Retirada na loja");
     setShippingEstimatedDays(q.shippingEstimatedDays ?? 0);
@@ -357,8 +358,9 @@ export default function AdminQuotationForm() {
     ? Math.round((subtotal * discountValue) / 100 * 100) / 100
     : Math.min(discountValue, subtotal);
   const calculatedTotal = Math.max(0, subtotal - discountAmount + shippingPrice);
-  const acertoValue = parseFloat(acertoTotal.replace(",", ".")) || 0;
-  const total = acertoValue > 0 ? acertoValue : calculatedTotal;
+  const hasManualTotal = acertoTotal.trim() !== "";
+  const acertoValue = Math.max(0, parseFloat(acertoTotal.replace(",", ".")) || 0);
+  const total = hasManualTotal ? acertoValue : calculatedTotal;
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const createMutation = trpc.quotations.create.useMutation({
@@ -394,6 +396,7 @@ export default function AdminQuotationForm() {
     discountType,
     discountValue,
     shippingPrice,
+    manualTotal: hasManualTotal ? acertoValue : null,
     shippingMethod,
     shippingLabel,
     shippingEstimatedDays,
@@ -1805,7 +1808,18 @@ export default function AdminQuotationForm() {
               <div className="border-t border-gray-100 pt-3">
                 <div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-4 py-3">
                   <span className="font-semibold">TOTAL</span>
-                  <span className="text-xl font-bold">{fmt(total)}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">R$</span>
+                    <Input
+                      aria-label="Total do orçamento"
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={hasManualTotal ? acertoTotal : calculatedTotal.toFixed(2)}
+                      onChange={(event) => setAcertoTotal(event.target.value)}
+                      className="h-9 w-28 border-white/50 bg-white text-right text-base font-bold text-pink-700 placeholder:text-pink-300"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
