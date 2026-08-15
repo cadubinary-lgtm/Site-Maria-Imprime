@@ -22,6 +22,14 @@ describe("total manual de orçamento", () => {
     expect(formSource).toContain("formatManualTotal(parseManualTotal(acertoTotal))");
   });
 
+  it("restaura o cálculo e explica o ajuste ao limpar o Acerto Total", () => {
+    expect(formSource).toContain("const clearManualTotal = () => {");
+    expect(formSource).toContain('aria-label="Limpar Acerto Total"');
+    expect(formSource).toContain('aria-label="Como funciona o Acerto Total"');
+    expect(formSource).toContain("Substitui o valor final calculado do orçamento.");
+    expect(formSource).toContain("onClick={clearManualTotal}");
+  });
+
   it("envia e persiste o total manual na criação e atualização", () => {
     expect(formSource).toContain("manualTotal: hasManualTotal ? acertoValue : null");
     expect(routerSource).toContain("manualTotal: z.number().min(0).nullable().optional()");
