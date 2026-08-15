@@ -2753,3 +2753,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Registrar a base, a taxa e o total da urgência no item do carrinho e pedido
 - [x] Exibir o detalhamento da urgência no resumo do produto, checkout e Ordem de Serviço
 - [x] Alinhar Salvar alterações e Descartar alterações na mesma linha do modal de saída da edição de produto
+- [x] Corrigir o salvamento do nome e da remoção de ícone individual em Segmentos
