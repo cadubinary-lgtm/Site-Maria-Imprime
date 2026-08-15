@@ -12,6 +12,9 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(source).toContain("Google Safe Browsing");
     expect(source).toContain("Ambiente protegido");
     expect(source).toContain("Navegação segura e proteção dos seus dados.");
+    expect(source).toContain('documentationUrl("termos-venda")');
+    expect(source).toContain('documentationUrl("privacidade-lgpd")');
+    expect(source).toContain('documentationUrl("faq")');
   });
 
   it("usa dados reais da empresa e mantém layout responsivo", () => {
@@ -21,5 +24,13 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(source).toContain("company.cnpj");
     expect(source).toContain("lg:grid-cols");
     expect(source).toContain("md:grid-cols-3");
+  });
+
+  it("permite abrir cada documento específico da Central pelo rodapé", () => {
+    const terms = readFileSync(resolve(root, "client/src/components/TermsAcceptance.tsx"), "utf8");
+    expect(terms).toContain('id: "aprovacao-arte"');
+    expect(terms).toContain('id: "trocas-reembolsos"');
+    expect(terms).toContain('get("document")');
+    expect(terms).toContain("setDocumentationOpen");
   });
 });

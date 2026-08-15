@@ -2,6 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useState } from "react";
 
 export const TERMS_OF_SALE_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
 
@@ -636,26 +637,30 @@ Todos os documentos estão disponíveis na Central de Documentação da Maria Im
 Não. O processo de compra deverá apresentar um único aceite: “Aceito os termos e condições”. O link “Ler” permite consultar todos os documentos antes da conclusão da compra.`;
 
 const DOCUMENTS = [
-  { title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
-  { title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
-  { title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
-  { title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
-  { title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
-  { title: "Política de Cookies", content: COOKIES_POLICY_CONTENT },
-  { title: "Termo de Uso do Site", content: SITE_USE_TERMS_CONTENT },
-  { title: "Perguntas Frequentes (FAQ)", content: FAQ_CONTENT },
+  { id: "termos-venda", title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
+  { id: "aprovacao-arte", title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
+  { id: "producao-prazos", title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
+  { id: "trocas-reembolsos", title: "Política de Trocas, Cancelamentos e Reembolsos", content: RETURNS_CANCELLATIONS_CONTENT },
+  { id: "privacidade-lgpd", title: "Política de Privacidade (LGPD)", content: PRIVACY_POLICY_CONTENT },
+  { id: "cookies", title: "Política de Cookies", content: COOKIES_POLICY_CONTENT },
+  { id: "uso-site", title: "Termo de Uso do Site", content: SITE_USE_TERMS_CONTENT },
+  { id: "faq", title: "Perguntas Frequentes (FAQ)", content: FAQ_CONTENT },
 ];
 
 export const TERMS_VERSION = "2026-08-12-v2";
 
 export function TermsAcceptance({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+  const requestedDocumentId = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("document");
+  const requestedDocument = DOCUMENTS.find((document) => document.id === requestedDocumentId);
+  const [documentationOpen, setDocumentationOpen] = useState(Boolean(requestedDocument));
+
   return <div id="terms" className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
     <div className="flex items-center gap-2">
       <Checkbox id="terms-checkbox" checked={checked} onCheckedChange={value => onCheckedChange(value === true)} />
       <Label htmlFor="terms-checkbox" className="text-sm cursor-pointer text-gray-700">Aceito os termos e condições</Label>
-      <Dialog><DialogTrigger asChild><button type="button" className="text-sm font-semibold text-pink-600 hover:text-pink-700 underline underline-offset-2">Ler</button></DialogTrigger>
+      <Dialog open={documentationOpen} onOpenChange={setDocumentationOpen}><DialogTrigger asChild><button type="button" className="text-sm font-semibold text-pink-600 hover:text-pink-700 underline underline-offset-2">Ler</button></DialogTrigger>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle>DOCUMENTAÇÃO DA MARIA IMPRIME</DialogTitle><DialogDescription>Para sua segurança e transparência, disponibilizamos os documentos que regulamentam compras, produção, impressão, arquivos, prazos, trocas, privacidade e utilização do site.</DialogDescription></DialogHeader>
-          <Accordion type="single" collapsible className="w-full">{DOCUMENTS.map((document, index) => <AccordionItem key={document.title} value={`document-${index}`}><AccordionTrigger>{document.title}</AccordionTrigger><AccordionContent><p className="whitespace-pre-line text-sm leading-6 text-gray-600">{document.content}</p></AccordionContent></AccordionItem>)}</Accordion>
+          <Accordion type="single" collapsible defaultValue={requestedDocument ? `document-${requestedDocument.id}` : undefined} className="w-full">{DOCUMENTS.map((document) => <AccordionItem key={document.id} value={`document-${document.id}`}><AccordionTrigger>{document.title}</AccordionTrigger><AccordionContent><p className="whitespace-pre-line text-sm leading-6 text-gray-600">{document.content}</p></AccordionContent></AccordionItem>)}</Accordion>
         </DialogContent>
       </Dialog>
     </div>

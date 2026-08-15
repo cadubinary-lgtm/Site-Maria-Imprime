@@ -30,21 +30,26 @@ import {
   useWhatsAppButtonVisibility,
 } from "@/hooks/useCompanySettings";
 
-const documentationUrl = "/produto/1200001#terms";
+const documentationUrl = (documentId?: string) => `/produto/1200001${documentId ? `?document=${documentId}` : ""}#terms`;
 
 const institutionalLinks = [
   { label: "Início", href: "/" },
   { label: "Nossos produtos", href: "/catalogo" },
-  { label: "Central de documentação", href: documentationUrl },
+  { label: "Central de documentação", href: documentationUrl() },
+  { label: "Termos e condições de venda", href: documentationUrl("termos-venda") },
+  { label: "Termo de uso do site", href: documentationUrl("uso-site") },
+  { label: "Política de privacidade (LGPD)", href: documentationUrl("privacidade-lgpd") },
+  { label: "Política de cookies", href: documentationUrl("cookies") },
   { label: "Minha conta", href: "/minha-conta" },
 ];
 
 const supportLinks = [
-  { label: "Dúvidas frequentes", href: documentationUrl },
-  { label: "Prazos de produção", href: documentationUrl },
-  { label: "Formas de pagamento", href: documentationUrl },
-  { label: "Entrega e retirada", href: documentationUrl },
-  { label: "Trocas e devoluções", href: documentationUrl },
+  { label: "Dúvidas frequentes", href: documentationUrl("faq") },
+  { label: "Termo de aprovação de arte", href: documentationUrl("aprovacao-arte") },
+  { label: "Prazos de produção", href: documentationUrl("producao-prazos") },
+  { label: "Formas de pagamento", href: documentationUrl("termos-venda") },
+  { label: "Entrega e retirada", href: documentationUrl("termos-venda") },
+  { label: "Trocas e devoluções", href: documentationUrl("trocas-reembolsos") },
 ];
 
 const productLinks = [
