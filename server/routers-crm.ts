@@ -16,6 +16,7 @@ import {
 import { getDb } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 
 /**
  * CRM Router - Gestão de Clientes
@@ -65,7 +66,7 @@ export const crmRouter = router({
       return await listClients(input);
     }),
 
-  getOperationalDashboard: protectedProcedure
+  getOperationalDashboard: adminOrManusAuthProcedure
     .input(
       z.object({
         limit: z.number().default(100),
@@ -77,7 +78,7 @@ export const crmRouter = router({
       return await getOperationalCrmDashboard(input);
     }),
 
-  getTopCustomersLastTwoMonths: adminProcedure
+  getTopCustomersLastTwoMonths: adminOrManusAuthProcedure
     .input(z.object({ limit: z.number().min(1).max(30).default(30) }))
     .query(async ({ input }) => {
       return await getTopCustomersLastTwoMonths(input.limit);
