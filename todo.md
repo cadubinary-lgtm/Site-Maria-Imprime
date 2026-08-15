@@ -2797,3 +2797,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar no rodapé atalhos diretos para todos os documentos da Central de Documentação
 - [x] Remover o espaço em branco excedente abaixo do rodapé público
 - [x] Substituir os ícones ilustrativos de pagamento e segurança por marcas oficiais no rodapé
+- [x] Conectar ícones sociais aos canais configurados em nova aba e exibir sucesso no envio da newsletter
