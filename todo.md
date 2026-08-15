@@ -2723,3 +2723,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir exclusões remanescentes: lixeira cinza/rosa em Novo Produto e substituir X por lixeira em Segmentos
 - [x] Adicionar confirmação a exclusões por lixeira e revisar o padrão visual de Categorias e Clientes
 - [x] Simplificar indicadores de Orçamentos e sincronizá-los aos status e procedimentos operacionais
+- [x] Corrigir a apuração dos indicadores para refletir os registros exibidos em Orçamentos
