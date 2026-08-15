@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aggregateCrmDashboardClients, summarizeCrmDashboard } from "./crm-dashboard";
+import { aggregateCrmDashboardClients, summarizeCrmDashboard, toSiteDashboardClients } from "./crm-dashboard";
 
 describe("consolidação operacional do Dashboard de CRM", () => {
   const now = new Date("2026-08-15T12:00:00.000Z");
@@ -45,5 +45,28 @@ describe("consolidação operacional do Dashboard de CRM", () => {
       clientsWithoutPurchases: 1,
       totalVolume: 150,
     });
+  });
+
+  it("inclui Clientes Site usando customerId sem colidir com IDs do CRM legado", () => {
+    const siteClients = toSiteDashboardClients([{
+      id: 150001,
+      firstName: "Carlos",
+      lastName: "Cliente Site",
+      email: "carlos@site.test",
+      phone: null,
+      cpfCnpj: null,
+      status: "active",
+      createdAt: now.getTime(),
+    }]);
+
+    const result = aggregateCrmDashboardClients(
+      siteClients,
+      [{ clientId: -150001, totalPrice: 266, createdAt: new Date("2026-08-14T10:00:00.000Z") }],
+      [{ clientId: -150001, productName: "Banner", quantity: 2 }],
+      now,
+    );
+
+    expect(result[0]).toMatchObject({ source: "site", externalId: 150001, totalOrders: 1, totalVolume: 266 });
+    expect(result[0].products).toEqual([{ name: "Banner", totalQuantity: 2 }]);
   });
 });

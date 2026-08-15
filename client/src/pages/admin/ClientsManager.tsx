@@ -299,7 +299,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         )}
 
         {/* Botão para criar novo cliente */}
-        {!showForm && (
+        {!showForm && filterType !== "site" && (
           <div className="mb-6">
             <Button onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -367,6 +367,11 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                           <Badge variant="outline" className={OPERATIONAL_STATUS_STYLES[client.operationalStatus] ?? OPERATIONAL_STATUS_STYLES.sem_compras}>{client.operationalStatusLabel}</Badge>
                         </td>
                         <td className="py-3 px-4">
+                          {client.source === "site" ? (
+                            <Link href="/admin/clientes-loja" className="inline-flex items-center text-xs font-medium text-pink-600 hover:text-pink-700">
+                              <Users className="mr-1 h-4 w-4" /> Ver cadastro
+                            </Link>
+                          ) : (
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -384,6 +389,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
+                          )}
                         </td>
                       </tr>
                     ))}

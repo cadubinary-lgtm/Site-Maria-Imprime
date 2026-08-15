@@ -18,6 +18,34 @@ type CrmProductRow = {
   quantity: number;
 };
 
+export type SiteCustomerAccountRow = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  cpfCnpj: string | null;
+  status: string;
+  createdAt: number;
+};
+
+/** Cria chaves internas negativas para não colidir com IDs do CRM legado. */
+export function toSiteDashboardClients(accounts: SiteCustomerAccountRow[]): CrmClientBase[] {
+  return accounts.map((account) => ({
+    id: -account.id,
+    externalId: account.id,
+    source: "site",
+    name: `${account.firstName} ${account.lastName}`.trim(),
+    email: account.email,
+    phone: account.phone,
+    cpfCnpj: account.cpfCnpj,
+    accountStatus: account.status,
+    clientType: "site",
+    isActive: account.status === "active",
+    createdAt: new Date(account.createdAt),
+  }));
+}
+
 export function getDaysWithoutPurchase(lastPurchase: Date | null, now = new Date()) {
   if (!lastPurchase) return null;
   return Math.max(0, Math.floor((now.getTime() - lastPurchase.getTime()) / 86_400_000));
