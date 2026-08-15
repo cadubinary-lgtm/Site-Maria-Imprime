@@ -2762,3 +2762,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir recuperação de senha para e-mail já cadastrado durante o registro de cliente
 - [x] Exibir tags de Cliente Site, Cliente Balcão, Revendedor e Agência na lista Todos os Clientes
 - [x] Reposicionar Todos os Clientes logo abaixo de Dashboard de Clientes no menu CRM
+- [x] Adicionar campo de senha temporária no cadastro administrativo de Cliente, Revendedor e Agência
+- [x] Permitir que o administrador defina uma nova senha no detalhe de qualquer cliente sem expor a senha já armazenada

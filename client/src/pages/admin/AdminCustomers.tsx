@@ -384,7 +384,7 @@ export default function AdminCustomers() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [showPartnerForm, setShowPartnerForm] = useState(false);
-  const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "" });
+  const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "" });
 
   const { data, isLoading, refetch } = trpc.customerAuth.adminListCustomers.useQuery({
     search: search || undefined,
@@ -415,7 +415,7 @@ export default function AdminCustomers() {
   const createPartner = trpc.customerAuth.adminCreatePartnerAccount.useMutation({
     onSuccess: () => {
       toast.success("Acesso criado e link para definir senha enviado por e-mail.");
-      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "" });
+      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "" });
       setShowPartnerForm(false);
       refetch();
     },
@@ -466,7 +466,8 @@ export default function AdminCustomers() {
               <Input className="md:col-span-2" type="email" placeholder="E-mail" value={partnerForm.email} onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })} />
               <Input placeholder="Telefone" value={partnerForm.phone} onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })} />
               <Input placeholder="CPF/CNPJ" value={partnerForm.cpfCnpj} onChange={(e) => setPartnerForm({ ...partnerForm, cpfCnpj: e.target.value })} />
-              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || createPartner.isPending} onClick={() => createPartner.mutate({ ...partnerForm, accountType: partnerType })}>Criar e enviar acesso</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
+              <Input className="md:col-span-2" type="password" placeholder="Senha temporária (mínimo 8 caracteres)" value={partnerForm.password} onChange={(e) => setPartnerForm({ ...partnerForm, password: e.target.value })} />
+              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || partnerForm.password.length < 8 || createPartner.isPending} onClick={() => createPartner.mutate({ ...partnerForm, accountType: partnerType })}>Criar e enviar acesso</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
             </CardContent></Card>
           )}
 
