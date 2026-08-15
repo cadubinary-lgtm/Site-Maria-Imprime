@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { getOperationalQuotationCards, getQuotationProcedure } from "@/lib/quotation-dashboard";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -82,6 +83,13 @@ function getMonthRange(offset: number) {
   const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
   return { startDate: toDateInput(start), endDate: toDateInput(end) };
 }
+
+const OPERATIONAL_CARD_TONES = {
+  gray: "text-gray-600",
+  blue: "text-blue-600",
+  green: "text-green-600",
+  amber: "text-amber-600",
+} as const;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotations() {
@@ -149,12 +157,7 @@ export default function AdminQuotations() {
 
   const kpis = data?.kpis;
   const rows = data?.rows ?? [];
-  const dashboardTotal = (kpis?.ativos ?? 0) + (kpis?.convertidos ?? 0) + (kpis?.pendentes ?? 0);
-  const distribution = kpis ? [
-    { label: "Ativos", value: kpis.ativos, color: "bg-emerald-500", text: "text-emerald-700", detail: "Aprovados e prontos para conversão" },
-    { label: "Convertidos", value: kpis.convertidos, color: "bg-violet-500", text: "text-violet-700", detail: "Já transformados em pedidos" },
-    { label: "Pendentes", value: kpis.pendentes, color: "bg-amber-500", text: "text-amber-700", detail: "Rascunhos, enviados e em negociação" },
-  ] : [];
+  const operationalCards = kpis ? getOperationalQuotationCards(kpis) : [];
 
   return (
     <AdminLayout>
@@ -171,46 +174,22 @@ export default function AdminQuotations() {
         </div>
       </div>
 
-      {/* Dashboard comercial */}
+      {/* Dashboard operacional */}
       {kpis && (
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-            <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-pink-600" /><div><p className="text-sm font-semibold text-gray-800">Período do dashboard</p><p className="text-xs text-gray-500">Aprovações e conversões são apuradas na data em que ocorreram.</p></div></div>
+            <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-pink-600" /><div><p className="text-sm font-semibold text-gray-800">Acompanhamento operacional</p><p className="text-xs text-gray-500">Os cards mostram a próxima ação necessária em cada etapa do orçamento.</p></div></div>
             <div className="flex flex-wrap items-center gap-2">
               {[{ value: "all", label: "Todo período" }, { value: "this_month", label: "Este mês" }, { value: "last_month", label: "Mês passado" }].map((item) => <Button key={item.value} variant={period === item.value ? "default" : "outline"} size="sm" className={period === item.value ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod(item.value as typeof period)}>{item.label}</Button>)}
               <Button variant={period === "custom" ? "default" : "outline"} size="sm" className={period === "custom" ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod("custom")}>Personalizado</Button>
               {period === "custom" && <><Input type="date" value={customStartDate} onChange={(event) => setCustomStartDate(event.target.value)} className="h-8 w-36 text-xs" /><Input type="date" value={customEndDate} onChange={(event) => setCustomEndDate(event.target.value)} className="h-8 w-36 text-xs" /></>}
             </div>
           </div>
-          <div className="grid gap-3 lg:grid-cols-[1fr_1.4fr]">
-            <div className="grid grid-cols-3 gap-3">
-              {distribution.map((item) => <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-xs font-medium text-gray-500">{item.label}</p><p className={`mt-1 text-2xl font-bold ${item.text}`}>{item.value}</p><p className="mt-1 text-[11px] leading-tight text-gray-400">{item.detail}</p></div>)}
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold text-gray-800">Distribuição do funil de orçamentos</h2><p className="text-xs text-gray-500">Visão dos orçamentos que demandam acompanhamento comercial</p></div><span className="text-xs text-gray-500">{dashboardTotal} registro(s)</span></div>
-              {dashboardTotal > 0 ? <><div className="mt-5 flex h-4 overflow-hidden rounded-full bg-gray-100">{distribution.map((item) => item.value > 0 && <div key={item.label} className={`${item.color} transition-all`} style={{ width: `${(item.value / dashboardTotal) * 100}%` }} title={`${item.label}: ${item.value}`} />)}</div><div className="mt-4 grid grid-cols-3 gap-3">{distribution.map((item) => <div key={item.label} className="flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${item.color}`} /><span className="text-xs text-gray-600">{item.label}</span><span className="ml-auto text-xs font-semibold text-gray-800">{item.value}</span></div>)}</div></> : <div className="mt-5 rounded-md bg-gray-50 px-4 py-5 text-center text-sm text-gray-400">Ainda não há dados suficientes para distribuição.</div>}
-            </div>
-          </div>
-          <p className="px-1 text-xs text-gray-400">Orçamentos recusados, expirados e cancelados permanecem fora da distribuição para não distorcer o funil ativo.</p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
-          {[
-            { label: "Rascunhos",      value: kpis.rascunhos,      icon: FileText,    cls: "text-gray-600" },
-            { label: "Enviados",       value: kpis.enviados,        icon: Send,        cls: "text-blue-600" },
-            { label: "Aprovados",      value: kpis.aprovados,       icon: CheckCircle, cls: "text-green-600" },
-            { label: "Expirados",      value: kpis.expirados,       icon: Clock,       cls: "text-orange-600" },
-            { label: "Em Negociação",  value: fmt(kpis.valorNegociacao), icon: TrendingUp, cls: "text-amber-600", isValue: true },
-            { label: "Valor Aprovado", value: fmt(kpis.valorAprovado),   icon: DollarSign, cls: "text-green-600", isValue: true },
-            { label: "Valor Convertido", value: fmt(kpis.valorConvertido), icon: ArrowRight, cls: "text-purple-600", isValue: true },
-            { label: "Taxa Conversão", value: `${kpis.taxaConversao}%`,  icon: Percent,    cls: "text-pink-600",  isValue: true },
-          ].map((k) => (
-            <div key={k.label} className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <k.icon className={`w-4 h-4 ${k.cls}`} />
-                <span className="text-xs text-gray-500">{k.label}</span>
-              </div>
-              <p className={`font-bold ${k.isValue ? "text-sm" : "text-xl"} ${k.cls}`}>{k.value}</p>
-            </div>
-          ))}
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {operationalCards.map((card) => {
+              const Icon = card.icon;
+              return <div key={card.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${OPERATIONAL_CARD_TONES[card.tone]}`} /><p className="text-xs font-medium text-gray-500">{card.label}</p></div><p className={`mt-2 text-2xl font-bold ${OPERATIONAL_CARD_TONES[card.tone]}`}>{card.value}</p><p className="mt-1 text-xs text-gray-400">{card.detail}</p></div>;
+            })}
           </div>
         </div>
       )}
@@ -254,7 +233,7 @@ export default function AdminQuotations() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {["Nº", "Cliente", "Data", "Validade", "Valor", "Status", "Ações"].map((h) => (
+                  {["Nº", "Cliente", "Data", "Validade", "Valor", "Status", "Próximo procedimento", "Ações"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -287,6 +266,9 @@ export default function AdminQuotations() {
                             Convertido
                           </span>
                         )}
+                      </td>
+                      <td className="hidden px-4 py-3 text-xs text-gray-500 xl:table-cell">
+                        {getQuotationProcedure(row.status, row.convertedOrderId)}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
