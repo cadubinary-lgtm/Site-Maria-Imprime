@@ -2726,3 +2726,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a apuração dos indicadores para refletir os registros exibidos em Orçamentos
 - [x] Aplicar rosa aos nomes e ícones dos grupos principais do menu lateral administrativo
 - [x] Manter nomes em rosa e aplicar ícones brancos aos grupos principais do menu lateral
+- [x] Remover ícones dos itens de Dashboard no menu lateral administrativo
