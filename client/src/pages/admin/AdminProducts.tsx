@@ -725,29 +725,31 @@ export default function AdminProducts() {
                               Você fez alterações neste produto. Salve agora para manter as informações atualizadas ou descarte apenas se não quiser conservar esta edição.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="sm:flex-row sm:flex-wrap sm:justify-end">
+                          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:space-x-0">
                             <AlertDialogCancel disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}>
                               Continuar editando
                             </AlertDialogCancel>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                              onClick={closeEditSession}
-                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                            >
-                              Descartar alterações
-                            </Button>
-                            <Button
-                              type="button"
-                              className="bg-orange-500 hover:bg-orange-600"
-                              onClick={handleSave}
-                              disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                            >
-                              {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
-                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>
-                              ) : "Salvar alterações"}
-                            </Button>
+                            <div className="flex w-full gap-2 sm:w-auto">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 sm:flex-none"
+                                onClick={closeEditSession}
+                                disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                              >
+                                Descartar alterações
+                              </Button>
+                              <Button
+                                type="button"
+                                className="flex-1 bg-orange-500 hover:bg-orange-600 sm:flex-none"
+                                onClick={handleSave}
+                                disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
+                              >
+                                {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
+                                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>
+                                ) : "Salvar alterações"}
+                              </Button>
+                            </div>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
