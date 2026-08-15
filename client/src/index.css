@@ -364,6 +364,61 @@
     outline: none;
   }
 
+  /* ─── PAINEL ADMINISTRATIVO — ergonomia móvel ────────────────────── */
+  @media (max-width: 640px) {
+    .admin-visual-system input:not([type="checkbox"]):not([type="radio"]),
+    .admin-visual-system textarea,
+    .admin-visual-system [data-slot="select-trigger"] {
+      width: 100%;
+      min-height: 44px;
+      font-size: 16px;
+    }
+
+    .admin-visual-system textarea {
+      min-height: 96px;
+    }
+
+    .admin-visual-system .grid-cols-2,
+    .admin-visual-system .grid-cols-3,
+    .admin-visual-system .grid-cols-4 {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .admin-visual-system .admin-primary-action,
+    .admin-visual-system button[class*="bg-blue-"],
+    .admin-visual-system button[class*="bg-green-"],
+    .admin-visual-system button[class*="bg-orange-"] {
+      min-height: 44px;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    .admin-visual-system .admin-icon-action,
+    .admin-visual-system button:has(> svg:only-child):not([data-admin-keep-color="true"]) {
+      min-inline-size: 44px;
+      min-block-size: 44px;
+    }
+
+    .admin-visual-system .flex > button,
+    .admin-visual-system .flex > [role="button"] {
+      flex-shrink: 0;
+    }
+
+    .admin-visual-system > main > .p-6 {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .admin-visual-system[data-admin-sidebar-open="true"] > aside {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 60;
+      width: min(16rem, calc(100vw - 3rem)) !important;
+      box-shadow: 14px 0 32px oklch(0 0 0 / 24%);
+    }
+  }
+
   .container {
     width: 100%;
     margin-left: auto;

@@ -453,7 +453,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SidebarScrollContext.Provider value={{ navRef, searchQuery }}>
-      <div className={`${ADMIN_VISUAL_SYSTEM.root} flex h-screen bg-gray-100 overflow-hidden`}>
+      <div
+        className={`${ADMIN_VISUAL_SYSTEM.root} flex h-screen bg-gray-100 overflow-hidden`}
+        data-admin-sidebar-open={sidebarOpen}
+      >
         {/* Sidebar */}
         <aside
           className={`flex flex-col bg-gray-900 transition-all duration-300 flex-shrink-0 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}

@@ -10,4 +10,5 @@ export const ADMIN_VISUAL_GUIDELINES = {
   iconHover: "pink",
   fieldBorder: "gray",
   fieldFocus: "pink",
+  mobileTouchTarget: 44,
 } as const;
