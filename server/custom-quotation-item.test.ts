@@ -58,8 +58,8 @@ describe("itens personalizados em Orçamentos", () => {
   });
 
   it("resume o item personalizado fechado no mesmo padrão do catálogo", () => {
-    expect(formSource).toContain("— produto ou serviço fora do catálogo");
-    expect(formSource).toContain('className="col-span-3 min-w-0 text-left text-sm font-medium text-gray-800 hover:text-pink-600"');
+    expect(formSource).toContain("Produto ou serviço fora do catálogo");
+    expect(formSource).toContain('className="col-span-3 flex min-w-0 items-center gap-1"');
     expect(formSource).toContain('alt={`Arte de ${item.productName || "item personalizado"}`}');
     expect(formSource).toContain('title={isExpanded ? "Recolher item personalizado" : "Expandir item personalizado"}');
   });
@@ -74,14 +74,20 @@ describe("itens personalizados em Orçamentos", () => {
   });
 
   it("usa o mesmo acabamento neutro e a ação de arte dos itens de catálogo", () => {
-    expect(formSource).toContain('className="overflow-hidden rounded-lg border border-gray-100 bg-white"');
+    expect(formSource).toContain('overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity');
     expect(formSource).toContain('grid grid-cols-12 items-center gap-2 bg-gray-50 px-2 py-2');
     expect(formSource).toContain('title="Anexar arte"');
-    expect(formSource).toContain('h-px flex-1 bg-gray-200');
+  });
+
+  it("padroniza Itens personalizados com o cabeçalho e ícone de Produtos / Serviços", () => {
+    expect(formSource).toContain('className="space-y-2 rounded-lg border border-gray-200 bg-white p-4"');
+    expect(formSource).toContain('<Package className="h-4 w-4 text-pink-600" />');
+    expect(formSource).toContain('<h2 className="font-semibold text-gray-800">Itens personalizados</h2>');
+    expect(formSource).toContain('Produto ou serviço fora do catálogo');
   });
 
   it("alinha a ação de exclusão na coluna final do catálogo", () => {
-    expect(formSource).toContain('className="col-span-1 flex justify-end"');
+    expect(formSource).toContain('className="col-span-1 flex justify-end gap-1"');
     expect(formSource).toContain('title="Remover item"');
   });
 

@@ -2799,3 +2799,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir os ícones ilustrativos de pagamento e segurança por marcas oficiais no rodapé
 - [x] Conectar ícones sociais aos canais configurados em nova aba e exibir sucesso no envio da newsletter
 - [x] Validar o formato do e-mail da newsletter antes da confirmação de sucesso
+- [x] Padronizar Itens personalizados com ícone, cabeçalho e colunas de Produtos / Serviços
