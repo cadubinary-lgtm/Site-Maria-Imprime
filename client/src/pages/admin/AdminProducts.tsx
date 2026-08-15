@@ -341,7 +341,7 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout>
-    <div className="space-y-6">
+    <div className="admin-visual-system space-y-6">
       {/* Cabeçalho da página */}
       <div className="flex items-center justify-between">
         <div>
@@ -478,7 +478,7 @@ export default function AdminProducts() {
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className={EDIT_PRODUCT_MODAL_LAYOUT.dialog}>
+                      <DialogContent className={`${EDIT_PRODUCT_MODAL_LAYOUT.dialog} admin-visual-system`}>
                         <DialogHeader className="sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                           <div>
                             <DialogTitle>Editar Produto</DialogTitle>

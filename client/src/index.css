@@ -364,6 +364,46 @@
     outline: none;
   }
 
+  /* Dialogs de shadcn são renderizados em um portal fora do AdminLayout.
+   * Este escopo mantém campos, ícones e ações internas no mesmo padrão. */
+  body:has(.admin-visual-system) [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+  body:has(.admin-visual-system) [data-slot="dialog-content"] textarea,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] [data-slot="select-trigger"] {
+    border-color: oklch(0.87 0.002 0);
+    background-color: white;
+  }
+
+  body:has(.admin-visual-system) [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]):focus,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] textarea:focus,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] [data-slot="select-trigger"]:focus-visible {
+    border-color: oklch(0.591 0.236 10.2) !important;
+    box-shadow: 0 0 0 3px oklch(0.94 0.05 10.2) !important;
+    outline: none;
+  }
+
+  body:has(.admin-visual-system) [data-slot="dialog-content"] .admin-icon-action,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] button:has(> svg:only-child):not([data-admin-keep-color="true"]) {
+    color: oklch(0.58 0.005 0) !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+
+  body:has(.admin-visual-system) [data-slot="dialog-content"] .admin-icon-action:hover,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] button:has(> svg:only-child):not([data-admin-keep-color="true"]):hover {
+    color: oklch(0.591 0.236 10.2) !important;
+    background-color: oklch(0.97 0.02 10.2) !important;
+    border-color: oklch(0.94 0.05 10.2) !important;
+  }
+
+  body:has(.admin-visual-system) [data-slot="dialog-content"] .admin-primary-action,
+  body:has(.admin-visual-system) [data-slot="dialog-content"] button[class*="bg-blue-"],
+  body:has(.admin-visual-system) [data-slot="dialog-content"] button[class*="bg-green-"],
+  body:has(.admin-visual-system) [data-slot="dialog-content"] button[class*="bg-orange-"] {
+    background-color: oklch(0.591 0.236 10.2) !important;
+    color: white !important;
+    border-color: oklch(0.591 0.236 10.2) !important;
+  }
+
   /* ─── PAINEL ADMINISTRATIVO — ergonomia móvel ────────────────────── */
   @media (max-width: 640px) {
     .admin-visual-system input:not([type="checkbox"]):not([type="radio"]),
@@ -376,6 +416,25 @@
 
     .admin-visual-system textarea {
       min-height: 96px;
+    }
+
+    body:has(.admin-visual-system) [data-slot="dialog-content"] input:not([type="checkbox"]):not([type="radio"]),
+    body:has(.admin-visual-system) [data-slot="dialog-content"] textarea,
+    body:has(.admin-visual-system) [data-slot="dialog-content"] [data-slot="select-trigger"] {
+      width: 100%;
+      min-height: 44px;
+      font-size: 16px;
+    }
+
+    body:has(.admin-visual-system) [data-slot="dialog-content"] .grid-cols-2,
+    body:has(.admin-visual-system) [data-slot="dialog-content"] .grid-cols-3,
+    body:has(.admin-visual-system) [data-slot="dialog-content"] .grid-cols-4 {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body:has(.admin-visual-system) [data-slot="dialog-content"] button:has(> svg:only-child):not([data-admin-keep-color="true"]) {
+      min-inline-size: 44px;
+      min-block-size: 44px;
     }
 
     .admin-visual-system .grid-cols-2,
