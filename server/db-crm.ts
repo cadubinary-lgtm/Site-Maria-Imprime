@@ -1,6 +1,6 @@
 import { getDb } from "./db";
 import { clients, customerAccounts, orders, orderItems } from "../drizzle/schema";
-import { eq, desc, sql, and, like, or, inArray, ne, isNull } from "drizzle-orm";
+import { eq, desc, sql, and, like, or, inArray, ne } from "drizzle-orm";
 import { aggregateCrmDashboardClients, summarizeCrmDashboard, toSiteDashboardClients } from "./crm-dashboard";
 
 /**
@@ -142,9 +142,6 @@ export async function getOperationalCrmDashboard(options: {
   const siteOrderCondition = siteCustomerIds.length > 0
     ? and(inArray(orders.customerId, siteCustomerIds), ne(orders.status, "cancelado"))
     : undefined;
-  const siteLegacyOrderCondition = siteCustomerIds.length > 0
-    ? and(inArray(orders.clientId, siteCustomerIds), isNull(orders.customerId), ne(orders.status, "cancelado"))
-    : undefined;
 
   const legacyOrderRows = legacyOrderCondition ? await db
     .select({ clientId: orders.clientId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
@@ -154,10 +151,6 @@ export async function getOperationalCrmDashboard(options: {
     .select({ customerId: orders.customerId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
     .from(orders)
     .where(siteOrderCondition) : [];
-  const siteLegacyOrderRows = siteLegacyOrderCondition ? await db
-    .select({ clientId: orders.clientId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
-    .from(orders)
-    .where(siteLegacyOrderCondition) : [];
 
   const legacyProductRows = legacyOrderCondition ? await db
     .select({ clientId: orders.clientId, productName: orderItems.productName, quantity: orderItems.quantity })
@@ -169,21 +162,14 @@ export async function getOperationalCrmDashboard(options: {
     .from(orderItems)
     .innerJoin(orders, eq(orderItems.orderId, orders.id))
     .where(siteOrderCondition) : [];
-  const siteLegacyProductRows = siteLegacyOrderCondition ? await db
-    .select({ clientId: orders.clientId, productName: orderItems.productName, quantity: orderItems.quantity })
-    .from(orderItems)
-    .innerJoin(orders, eq(orderItems.orderId, orders.id))
-    .where(siteLegacyOrderCondition) : [];
 
   const orderRows = [
     ...legacyOrderRows,
     ...siteOrderRows.flatMap((order) => order.customerId ? [{ clientId: -order.customerId, totalPrice: order.totalPrice, createdAt: order.createdAt }] : []),
-    ...siteLegacyOrderRows.flatMap((order) => order.clientId ? [{ clientId: -order.clientId, totalPrice: order.totalPrice, createdAt: order.createdAt }] : []),
   ];
   const productRows = [
     ...legacyProductRows,
     ...siteProductRows.flatMap((item) => item.customerId ? [{ clientId: -item.customerId, productName: item.productName, quantity: item.quantity }] : []),
-    ...siteLegacyProductRows.flatMap((item) => item.clientId ? [{ clientId: -item.clientId, productName: item.productName, quantity: item.quantity }] : []),
   ];
 
   const operationalPriority: Record<string, number> = { atencao: 0, reativar: 1, sem_compras: 2, ativo: 3 };
