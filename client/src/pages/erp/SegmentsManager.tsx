@@ -28,6 +28,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import AdminLayout from '@/components/AdminLayout';
+import { SEGMENTS_PAGE_CONTENT_CLASS } from '@/lib/segments-page-layout';
 
 // Tipo local para o segmento
 type SegmentItem = {
@@ -372,7 +374,8 @@ export default function SegmentsManager() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <AdminLayout>
+    <div className={SEGMENTS_PAGE_CONTENT_CLASS}>
       {/* Notification */}
       {notification && (
         <div className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 z-50 shadow-lg ${
@@ -512,5 +515,6 @@ export default function SegmentsManager() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
