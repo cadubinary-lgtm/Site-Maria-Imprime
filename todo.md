@@ -2764,3 +2764,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reposicionar Todos os Clientes logo abaixo de Dashboard de Clientes no menu CRM
 - [x] Adicionar campo de senha temporária no cadastro administrativo de Cliente, Revendedor e Agência
 - [x] Permitir que o administrador defina uma nova senha no detalhe de qualquer cliente sem expor a senha já armazenada
+- [x] Exibir no Novo Cliente administrativo os dados pessoais, senha, confirmação e endereço completos
+- [x] Disponibilizar a gestão de senha no fluxo visível de Todos os Clientes para operador e admin
+- [x] Restringir o formulário administrativo de Novo Cliente a Balcão, Revendedor e Agência

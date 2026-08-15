@@ -378,13 +378,15 @@ export default function AdminCustomers() {
     : new URLSearchParams(searchParams).get("tipo") === "agencia"
       ? "agency"
       : undefined;
+  const newCustomerMode = new URLSearchParams(searchParams).get("novo") === "cliente";
+  const creationType = partnerType ?? "customer";
   const pageTitle = partnerType === "reseller" ? "Revendedores" : partnerType === "agency" ? "Agências" : "Clientes Cadastrados";
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "blocked">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [showPartnerForm, setShowPartnerForm] = useState(false);
-  const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "" });
+  const [showPartnerForm, setShowPartnerForm] = useState(newCustomerMode);
+  const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
 
   const { data, isLoading, refetch } = trpc.customerAuth.adminListCustomers.useQuery({
     search: search || undefined,
@@ -415,7 +417,7 @@ export default function AdminCustomers() {
   const createPartner = trpc.customerAuth.adminCreatePartnerAccount.useMutation({
     onSuccess: () => {
       toast.success("Acesso criado e link para definir senha enviado por e-mail.");
-      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "" });
+      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
       setShowPartnerForm(false);
       refetch();
     },
@@ -454,20 +456,28 @@ export default function AdminCustomers() {
               </div>
             </div>
             <div className="flex gap-2">
-              {partnerType && <Button size="sm" onClick={() => setShowPartnerForm((open) => !open)}><Plus className="w-4 h-4 mr-2" />Novo</Button>}
+              <Button size="sm" onClick={() => setShowPartnerForm((open) => !open)}><Plus className="w-4 h-4 mr-2" />Novo Cliente</Button>
               <Button variant="outline" size="sm" onClick={() => refetch()}><RefreshCw className="w-4 h-4 mr-2" />Atualizar</Button>
             </div>
           </div>
 
-          {partnerType && showPartnerForm && (
+          {showPartnerForm && (
             <Card className="mb-6"><CardContent className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
               <Input placeholder="Nome" value={partnerForm.firstName} onChange={(e) => setPartnerForm({ ...partnerForm, firstName: e.target.value })} />
               <Input placeholder="Sobrenome" value={partnerForm.lastName} onChange={(e) => setPartnerForm({ ...partnerForm, lastName: e.target.value })} />
               <Input className="md:col-span-2" type="email" placeholder="E-mail" value={partnerForm.email} onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })} />
               <Input placeholder="Telefone" value={partnerForm.phone} onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })} />
               <Input placeholder="CPF/CNPJ" value={partnerForm.cpfCnpj} onChange={(e) => setPartnerForm({ ...partnerForm, cpfCnpj: e.target.value })} />
-              <Input className="md:col-span-2" type="password" placeholder="Senha temporária (mínimo 8 caracteres)" value={partnerForm.password} onChange={(e) => setPartnerForm({ ...partnerForm, password: e.target.value })} />
-              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || partnerForm.password.length < 8 || createPartner.isPending} onClick={() => createPartner.mutate({ ...partnerForm, accountType: partnerType })}>Criar e enviar acesso</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
+              <Input type="password" placeholder="Senha temporária (mínimo 8 caracteres)" value={partnerForm.password} onChange={(e) => setPartnerForm({ ...partnerForm, password: e.target.value })} />
+              <Input type="password" placeholder="Confirmar senha temporária" value={partnerForm.confirmPassword} onChange={(e) => setPartnerForm({ ...partnerForm, confirmPassword: e.target.value })} />
+              <Input placeholder="CEP" value={partnerForm.addressZipCode} onChange={(e) => setPartnerForm({ ...partnerForm, addressZipCode: e.target.value })} />
+              <Input placeholder="Rua / Avenida" value={partnerForm.addressStreet} onChange={(e) => setPartnerForm({ ...partnerForm, addressStreet: e.target.value })} />
+              <Input placeholder="Número" value={partnerForm.addressNumber} onChange={(e) => setPartnerForm({ ...partnerForm, addressNumber: e.target.value })} />
+              <Input placeholder="Complemento" value={partnerForm.addressComplement} onChange={(e) => setPartnerForm({ ...partnerForm, addressComplement: e.target.value })} />
+              <Input placeholder="Bairro" value={partnerForm.addressNeighborhood} onChange={(e) => setPartnerForm({ ...partnerForm, addressNeighborhood: e.target.value })} />
+              <Input placeholder="Cidade" value={partnerForm.addressCity} onChange={(e) => setPartnerForm({ ...partnerForm, addressCity: e.target.value })} />
+              <Input placeholder="UF" value={partnerForm.addressState} onChange={(e) => setPartnerForm({ ...partnerForm, addressState: e.target.value })} />
+              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || partnerForm.password.length < 8 || partnerForm.password !== partnerForm.confirmPassword || createPartner.isPending} onClick={() => { const { confirmPassword, ...payload } = partnerForm; createPartner.mutate({ ...payload, accountType: creationType }); }}>{creationType === "customer" ? "Criar Cliente" : "Criar e enviar acesso"}</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
             </CardContent></Card>
           )}
 
