@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Search, Users, CheckCircle, AlertCircle, Ban, UserCheck,
   Loader2, RefreshCw, Mail, Phone, Trash2, Store, StoreIcon, Eye, Plus,
-  MapPin, CreditCard, ShoppingBag, Lock, Calendar, Clock, Shield,
+  MapPin, CreditCard, ShoppingBag, Lock, Calendar, Clock, Shield, Pencil,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -371,6 +371,45 @@ function CustomerDetailModal({
   );
 }
 
+function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: any | null; open: boolean; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const updateCustomer = trpc.customerAuth.adminUpdateCustomer.useMutation({
+    onSuccess: (result) => {
+      toast.success(result.emailVerificationSent ? "Cliente atualizado. Uma confirmação foi enviada ao novo e-mail." : "Cliente atualizado com sucesso.");
+      onSaved();
+      onClose();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  useEffect(() => {
+    if (!customer) return;
+    setForm({
+      firstName: customer.firstName || "", lastName: customer.lastName || "", email: customer.email || "", phone: customer.phone || "", cpfCnpj: customer.cpfCnpj || "",
+      addressZipCode: customer.addressZipCode || "", addressStreet: customer.addressStreet || "", addressNumber: customer.addressNumber || "", addressComplement: customer.addressComplement || "", addressNeighborhood: customer.addressNeighborhood || "", addressCity: customer.addressCity || "", addressState: customer.addressState || "",
+    });
+  }, [customer]);
+
+  const field = (key: keyof typeof form, placeholder: string, className = "") => (
+    <Input className={className} placeholder={placeholder} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Editar Cliente</DialogTitle><DialogDescription>Atualize os dados cadastrais sem alterar o acesso do cliente.</DialogDescription></DialogHeader>
+        <form className="grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={(event) => { event.preventDefault(); if (customer) updateCustomer.mutate({ customerId: customer.id, ...form }); }}>
+          {field("firstName", "Nome")}{field("lastName", "Sobrenome")}
+          {field("email", "E-mail", "md:col-span-2")}{field("phone", "Telefone / WhatsApp")}{field("cpfCnpj", "CPF / CNPJ")}
+          {field("addressZipCode", "CEP")}{field("addressStreet", "Rua / Avenida")}{field("addressNumber", "Número")}{field("addressComplement", "Complemento")}
+          {field("addressNeighborhood", "Bairro")}{field("addressCity", "Cidade")}{field("addressState", "UF")}
+          <div className="flex gap-2 md:col-span-2"><Button type="submit" disabled={updateCustomer.isPending}>Salvar alterações</Button><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function AdminCustomers() {
   const searchParams = useSearch();
   const partnerType = new URLSearchParams(searchParams).get("tipo") === "revendedor"
@@ -385,6 +424,7 @@ export default function AdminCustomers() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "blocked">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
   const [showPartnerForm, setShowPartnerForm] = useState(newCustomerMode);
   const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
 
@@ -643,6 +683,13 @@ export default function AdminCustomers() {
                                 <Eye className="w-3.5 h-3.5 mr-1" />
                                 Ver
                               </Button>
+                              <Button
+                                variant="outline" size="sm"
+                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                onClick={() => setEditingCustomer(customer)}
+                              >
+                                <Pencil className="w-3.5 h-3.5 mr-1" />Editar
+                              </Button>
                               {partnerType && (
                                 <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs" onClick={() => resendPartnerInvite.mutate({ customerId: customer.id })} disabled={resendPartnerInvite.isPending}>
                                   <Mail className="w-3.5 h-3.5 mr-1" />Reenviar acesso
@@ -724,6 +771,7 @@ export default function AdminCustomers() {
         onClose={() => { setDetailOpen(false); setSelectedCustomerId(null); }}
         onRefetch={refetch}
       />
+      <CustomerEditDialog customer={editingCustomer} open={!!editingCustomer} onClose={() => setEditingCustomer(null)} onSaved={refetch} />
     </AdminLayout>
   );
 }
