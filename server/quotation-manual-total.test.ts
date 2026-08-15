@@ -11,8 +11,15 @@ describe("total manual de orçamento", () => {
     expect(formSource).toContain("setAcertoTotal(event.target.value)");
     expect(formSource).toContain("const hasManualTotal = acertoTotal.trim() !== \"\";");
     expect(formSource).toContain("const [isEditingManualTotal, setIsEditingManualTotal] = useState(false);");
-    expect(formSource).toContain("value={hasManualTotal || isEditingManualTotal ? acertoTotal : calculatedTotal.toFixed(2)}");
-    expect(formSource).toContain("if (!hasManualTotal) setAcertoTotal(\"\");");
+    expect(formSource).toContain("value={hasManualTotal || isEditingManualTotal ? acertoTotal : formatManualTotal(calculatedTotal)}");
+    expect(formSource).toContain('if (!hasManualTotal) setAcertoTotal("");');
+  });
+
+  it("substitui o total calculado pelo Acerto Total informado em formato brasileiro", () => {
+    expect(formSource).toContain('aria-label="Acerto Total"');
+    expect(formSource).toContain("function parseManualTotal(value: string)");
+    expect(formSource).toContain("const total = hasManualTotal ? acertoValue : calculatedTotal;");
+    expect(formSource).toContain("formatManualTotal(parseManualTotal(acertoTotal))");
   });
 
   it("envia e persiste o total manual na criação e atualização", () => {

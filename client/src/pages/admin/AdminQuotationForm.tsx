@@ -61,6 +61,20 @@ function fmt(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function parseManualTotal(value: string) {
+  const sanitized = value.replace(/[R$\s]/g, "").trim();
+  if (!sanitized) return 0;
+  const normalized = sanitized.includes(",")
+    ? sanitized.replace(/\./g, "").replace(",", ".")
+    : sanitized;
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+}
+
+function formatManualTotal(value: number) {
+  return value.toFixed(2).replace(".", ",");
+}
+
 const specificationLabels: Record<string, string> = {
   width: "Largura",
   height: "Altura",
@@ -360,7 +374,7 @@ export default function AdminQuotationForm() {
     : Math.min(discountValue, subtotal);
   const calculatedTotal = Math.max(0, subtotal - discountAmount + shippingPrice);
   const hasManualTotal = acertoTotal.trim() !== "";
-  const acertoValue = Math.max(0, parseFloat(acertoTotal.replace(",", ".")) || 0);
+  const acertoValue = parseManualTotal(acertoTotal);
   const total = hasManualTotal ? acertoValue : calculatedTotal;
 
   // ── Mutations ─────────────────────────────────────────────────────────────
@@ -1793,11 +1807,15 @@ export default function AdminQuotationForm() {
                   )}
                 </div>
                 <Input
-                  type="number"
+                  aria-label="Acerto Total"
+                  type="text"
+                  inputMode="decimal"
                   min={0}
-                  step={0.01}
                   value={acertoTotal}
                   onChange={(e) => setAcertoTotal(e.target.value)}
+                  onBlur={() => {
+                    if (acertoTotal.trim() !== "") setAcertoTotal(formatManualTotal(parseManualTotal(acertoTotal)));
+                  }}
                   className="h-8 text-sm"
                   placeholder={`Calculado: ${fmt(calculatedTotal)}`}
                 />
@@ -1813,16 +1831,19 @@ export default function AdminQuotationForm() {
                     <span className="text-sm font-medium">R$</span>
                     <Input
                       aria-label="Total do orçamento"
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       min={0}
-                      step={0.01}
-                      value={hasManualTotal || isEditingManualTotal ? acertoTotal : calculatedTotal.toFixed(2)}
+                      value={hasManualTotal || isEditingManualTotal ? acertoTotal : formatManualTotal(calculatedTotal)}
                       onFocus={() => {
                         if (!hasManualTotal) setAcertoTotal("");
                         setIsEditingManualTotal(true);
                       }}
                       onChange={(event) => setAcertoTotal(event.target.value)}
-                      onBlur={() => setIsEditingManualTotal(false)}
+                      onBlur={() => {
+                        setIsEditingManualTotal(false);
+                        if (acertoTotal.trim() !== "") setAcertoTotal(formatManualTotal(parseManualTotal(acertoTotal)));
+                      }}
                       className="h-9 w-28 border-white/50 bg-white text-right text-base font-bold text-pink-700 placeholder:text-pink-300"
                     />
                   </div>
