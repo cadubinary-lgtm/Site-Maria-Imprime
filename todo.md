@@ -2788,3 +2788,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover Tabela de Preços somente da lista Todos os Clientes
 - [x] Remover os cards operacionais da página Todos os Clientes e mantê-los apenas no Dashboard de Clientes
 - [x] Adicionar seta cinza com hover rosa para expandir e recolher ações secundárias em Todos os Clientes
+- [x] Exibir no Dashboard de Clientes os 30 clientes com maior valor comprado nos últimos dois meses
