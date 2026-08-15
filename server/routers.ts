@@ -207,7 +207,7 @@ export const appRouter = router({
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(({ input }) => getSegmentBySlug(input.slug)),
-    create: adminProcedure
+    create: adminAnyProcedure
       .input(z.object({
         name: z.string(),
         icon: z.string().optional(),
@@ -216,7 +216,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return createSegment(input.name, input.icon || '', input.slug);
       }),
-    update: adminProcedure
+    update: adminAnyProcedure
       .input(z.object({
         id: z.number(),
         name: z.string(),
@@ -226,12 +226,12 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return updateSegment(input.id, input.name, input.icon || '', input.slug);
       }),
-    delete: adminProcedure
+    delete: adminAnyProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return deleteSegment(input.id);
       }),
-    reorder: adminProcedure
+    reorder: adminAnyProcedure
       .input(z.object({
         id: z.number(),
         direction: z.enum(['up', 'down']),
