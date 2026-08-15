@@ -69,4 +69,33 @@ describe("consolidação operacional do Dashboard de CRM", () => {
     expect(result[0]).toMatchObject({ source: "site", externalId: 150001, totalOrders: 1, totalVolume: 266 });
     expect(result[0].products).toEqual([{ name: "Banner", totalQuantity: 2 }]);
   });
+
+  it("soma pedidos atuais e históricos da mesma conta da loja na visão Todos", () => {
+    const siteClients = toSiteDashboardClients([{
+      id: 150001,
+      firstName: "Carlos",
+      lastName: "Cliente Site",
+      email: "carlos@site.test",
+      phone: null,
+      cpfCnpj: null,
+      status: "active",
+      createdAt: now.getTime(),
+    }]);
+
+    const result = aggregateCrmDashboardClients(
+      siteClients,
+      [
+        { clientId: -150001, totalPrice: 90, createdAt: new Date("2026-08-11T10:00:00.000Z") },
+        { clientId: -150001, totalPrice: 85, createdAt: new Date("2026-08-14T10:00:00.000Z") },
+      ],
+      [
+        { clientId: -150001, productName: "Banner", quantity: 2 },
+        { clientId: -150001, productName: "Banner", quantity: 1 },
+      ],
+      now,
+    );
+
+    expect(result[0]).toMatchObject({ totalOrders: 2, totalVolume: 175, totalProducts: 3 });
+    expect(result[0].products).toEqual([{ name: "Banner", totalQuantity: 3 }]);
+  });
 });
