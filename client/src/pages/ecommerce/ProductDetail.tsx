@@ -24,7 +24,9 @@ import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
+import { getProductPrice } from "@/lib/productPrice";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
@@ -130,6 +132,7 @@ function AccordionStep({
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function ProductDetail() {
   const { user } = useAuth();
+  const { customer } = useCustomerAuth();
   const { company } = useCompanySettings();
   const showWhatsApp = useWhatsAppButtonVisibility(company);
   const isOperator = user?.role === "admin";
@@ -190,6 +193,11 @@ export default function ProductDetail() {
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 }, { enabled: !!productId }
   );
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
+  const commercialProductPrice = useMemo(
+    () => product ? getProductPrice(product as any, priceAudience).value : 0,
+    [product, priceAudience],
+  );
   const productRating = useMemo(
     () => getProductRatingDisplay({ rating: (product as any)?.rating, reviewCount: (product as any)?.reviewCount }),
     [product],
@@ -247,7 +255,7 @@ export default function ProductDetail() {
     // Para m² e metro_linear, o preço base vem de pricePerM2 (calculado em effectivePrice)
     // Aqui só calculamos os modificadores de variações/atributos/prazo para não-m2
     const isM2Type = product.calculationType === "m2" || product.calculationType === "metro_linear";
-    let total = isM2Type ? 0 : parseFloat(product.price);
+    let total = isM2Type ? 0 : commercialProductPrice;
     // Modificadores de variações (variationTypes/variationOptions)
     // O cálculo depende do calculationType da opção:
     // - unit: valor fixo por unidade (multiplicado pela quantidade no subtotal)
@@ -284,7 +292,7 @@ export default function ProductDetail() {
     // Modificadores de prazo
     if (selectedDeliveryOption) total += deliveryTax;
     return Math.max(0, total);
-  }, [product, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
+  }, [product, commercialProductPrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
   const area = useMemo(() => {
     const w = parseFloat(dimWidth.replace(",", "."));
@@ -300,10 +308,10 @@ export default function ProductDetail() {
   const effectivePrice = useMemo(() => {
     if (!product) return 0;
     // Metro Linear: preço = pricePerM2 * largura (em metros)
-    if (isMetroLinear && product?.pricePerM2) {
+    if (isMetroLinear && commercialProductPrice > 0) {
       const w = parseFloat(dimWidth.replace(",", ".")) || 0;
       const linearM = w > 0 ? w : 1; // metros lineares (largura em cm / 100 se necessário)
-      const productBase = parseFloat(product.pricePerM2 as any) * linearM;
+      const productBase = commercialProductPrice * linearM;
       let varModifiers = 0;
       Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
         const vtype = (variationTypes as any[])?.find((vt: any) => vt.id === Number(vtypeId));
@@ -323,9 +331,9 @@ export default function ProductDetail() {
       const prazoMod = selectedDeliveryOption ? deliveryTax : 0;
       return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
     }
-    if (isM2 && billedArea > 0 && product?.pricePerM2) {
+    if (isM2 && billedArea > 0 && commercialProductPrice > 0) {
       // Preço base do produto (m² * preço/m²)
-      const productBase = parseFloat(product.pricePerM2 as any) * billedArea;
+      const productBase = commercialProductPrice * billedArea;
       // Modificadores de variações (calculados separadamente para não duplicar)
       let varModifiers = 0;
       Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {
@@ -360,7 +368,7 @@ export default function ProductDetail() {
       return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
     }
     return basePrice;
-  }, [isM2, isMetroLinear, billedArea, product, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
+  }, [isM2, isMetroLinear, billedArea, commercialProductPrice, basePrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
   const shippingSummary = getShippingSummary({ selectedShipping, shippingCalculated });
   const fretePrice = shippingSummary.amount;
@@ -833,7 +841,7 @@ export default function ProductDetail() {
       await exportBudgetPDFWithValidation({
         productName: product.name,
         productDescription: product.description || undefined,
-        basePrice: parseFloat(product.price),
+        basePrice: commercialProductPrice,
         selectedAttributes: selectedAttrsForSummary,
         quantity,
         finalPrice: total,

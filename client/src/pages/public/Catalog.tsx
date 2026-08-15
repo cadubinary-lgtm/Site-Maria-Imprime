@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatProductPrice } from "@/lib/productPrice";
+import { formatProductPrice, getProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 const ITEMS_PER_PAGE = 12;
 
 export default function Catalog() {
+  const { customer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
   // Ler segmentId da URL (ex: /catalogo?segmentId=3)
   const urlSegmentId = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -66,14 +69,14 @@ export default function Catalog() {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     return products.filter((p) => {
-      const price = parseFloat(p.price);
+      const price = getProductPrice(p, priceAudience).value;
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
       const matchesSearch =
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
       return matchesPrice && matchesSearch && p.isActive;
     });
-  }, [products, priceRange, searchTerm]);
+  }, [products, priceRange, searchTerm, priceAudience]);
 
   // Paginação
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -274,7 +277,7 @@ export default function Catalog() {
                         {/* Preço e Botões */}
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-xl font-bold text-pink-600">
-                            {formatProductPrice(product)}
+                            {formatProductPrice(product, priceAudience)}
                           </span>
                         </div>
 

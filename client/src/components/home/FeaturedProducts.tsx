@@ -5,9 +5,12 @@ import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { formatProductPrice } from "@/lib/productPrice";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 export function FeaturedProducts() {
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
+  const { customer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
 
   if (isLoading) {
     return (
@@ -57,7 +60,7 @@ export function FeaturedProducts() {
                 <CardContent className="px-4 pt-4 pb-4">
                   <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">{product.name}</h3>
                   <p className="text-xs text-gray-600 line-clamp-2 mb-4 font-light">{product.description}</p>
-                  <p className="text-xl font-bold text-pink-600 mb-4">{formatProductPrice(product)}</p>
+                  <p className="text-xl font-bold text-pink-600 mb-4">{formatProductPrice(product, priceAudience)}</p>
 
                   <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full font-semibold text-sm h-9 transition-all shadow-sm hover:shadow-md">
                     Ver opções

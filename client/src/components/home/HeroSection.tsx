@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { formatProductPrice } from "@/lib/productPrice";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 const ICON_RAPIDA    = "/manus-storage/icone6_2b9ca331.png";
 const ICON_ATENCIOSA = "/manus-storage/icone7_ddf5047c.png";
@@ -21,6 +22,8 @@ const pilares = [
 
 export function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { customer } = useCustomerAuth();
+  const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
   const [showProductResults, setShowProductResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
@@ -225,7 +228,7 @@ export function HeroSection() {
                         )}
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium text-gray-900">{product.name}</span>
-                          <span className="mt-0.5 block text-xs text-gray-600">{formatProductPrice(product)}</span>
+                          <span className="mt-0.5 block text-xs text-gray-600">{formatProductPrice(product, priceAudience)}</span>
                         </span>
                       </button>
                     ))}

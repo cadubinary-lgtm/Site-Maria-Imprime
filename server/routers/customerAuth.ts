@@ -359,6 +359,7 @@ export const customerAuthRouter = router({
         cpfCnpj: customerAccounts.cpfCnpj,
         emailVerified: customerAccounts.emailVerified,
         status: customerAccounts.status,
+        priceTier: customerAccounts.priceTier,
         createdAt: customerAccounts.createdAt,
       })
       .from(customerAccounts)
@@ -579,6 +580,7 @@ export const customerAuthRouter = router({
           cpfCnpj: customerAccounts.cpfCnpj,
           emailVerified: customerAccounts.emailVerified,
           status: customerAccounts.status,
+          priceTier: customerAccounts.priceTier,
           lastLogin: customerAccounts.lastLogin,
           createdAt: customerAccounts.createdAt,
           allowStorePickup: customerAccounts.allowStorePickup,
@@ -628,6 +630,24 @@ export const customerAuthRouter = router({
       await db
         .update(customerAccounts)
         .set({ status: input.status as any, updatedAt: Date.now() })
+        .where(eq(customerAccounts.id, input.customerId));
+
+      return { success: true };
+    }),
+
+  /** Define a tabela comercial aplicada ao cliente autenticado da loja. */
+  adminUpdateCustomerPriceTier: publicProcedure
+    .input(z.object({ customerId: z.number(), priceTier: z.enum(["final", "reseller"]) }))
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.user;
+      if (!user || user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
+      }
+
+      const db = await requireDb();
+      await db
+        .update(customerAccounts)
+        .set({ priceTier: input.priceTier as any, updatedAt: Date.now() })
         .where(eq(customerAccounts.id, input.customerId));
 
       return { success: true };
@@ -1009,6 +1029,7 @@ export const customerAuthRouter = router({
           cpfCnpj: customerAccounts.cpfCnpj,
           emailVerified: customerAccounts.emailVerified,
           status: customerAccounts.status,
+          priceTier: customerAccounts.priceTier,
           lastLogin: customerAccounts.lastLogin,
           createdAt: customerAccounts.createdAt,
           updatedAt: customerAccounts.updatedAt,

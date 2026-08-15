@@ -28,6 +28,7 @@ export const products = mysqlTable("products", {
   name: varchar("name", { length: 255 }).notNull(),
   description: longtext("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  resellerPrice: decimal("resellerPrice", { precision: 10, scale: 2 }), // Preço para revendedores em unidade ou pacote
   segment: varchar("segment", { length: 100 }).notNull().default("geral"),
   category: varchar("category", { length: 255 }), // Categoria do produto
   subcategory: varchar("subcategory", { length: 255 }), // Subcategoria do produto
@@ -37,6 +38,7 @@ export const products = mysqlTable("products", {
   calculationType: mysqlEnum("calculationType", ["m2", "metro_linear", "pacote", "unidade"]).default("pacote").notNull(), // Tipo de cálculo
   unit: varchar("unit", { length: 50 }).default("pacote").notNull(), // Unidade (m², metro linear, pacote, unidade)
   pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }), // Preço por metro quadrado
+  resellerPricePerM2: decimal("resellerPricePerM2", { precision: 10, scale: 2 }), // Preço de revenda por m² ou metro linear
   minWidth: decimal("minWidth", { precision: 10, scale: 2 }), // Largura mínima em metros
   maxWidth: decimal("maxWidth", { precision: 10, scale: 2 }), // Largura máxima em metros
   minHeight: decimal("minHeight", { precision: 10, scale: 2 }), // Altura mínima em metros
@@ -1198,6 +1200,7 @@ export const customerAccounts = mysqlTable("customer_accounts", {
   resetPasswordToken: varchar("resetPasswordToken", { length: 255 }),
   resetPasswordExpires: bigint("resetPasswordExpires", { mode: "number" }),
   status: mysqlEnum("status", ["active", "inactive", "blocked"]).default("inactive").notNull(),
+  priceTier: mysqlEnum("priceTier", ["final", "reseller"]).default("final").notNull(),
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
   lockedUntil: bigint("lockedUntil", { mode: "number" }),

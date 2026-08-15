@@ -2,12 +2,14 @@ export type ProductEditSnapshot = {
   name: string;
   description: string;
   price: string;
+  resellerPrice: string;
   imageUrl: string;
   imageKey: string;
   galleryUrls: string[];
   segmentIds: number[];
   calculationType: string;
   pricePerM2: string;
+  resellerPricePerM2: string;
   minWidth: string;
   maxWidth: string;
   minHeight: string;
