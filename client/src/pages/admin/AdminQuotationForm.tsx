@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ import {
   Copy,
   GripVertical,
   X,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAdminReturnTarget } from "@/lib/adminNavigation";
@@ -493,6 +495,11 @@ export default function AdminQuotationForm() {
       return;
     }
     addCustomItemToQuote(name);
+  };
+
+  const clearManualTotal = () => {
+    setAcertoTotal("");
+    setIsEditingManualTotal(false);
   };
 
   const cancelCustomItemName = () => {
@@ -1799,10 +1806,20 @@ export default function AdminQuotationForm() {
               {/* Acerto Total (override comercial) */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs text-gray-500 font-medium">Acerto Total</label>
-                  {acertoValue > 0 && (
-                    <button className="text-xs text-gray-400 hover:text-red-500 underline" onClick={() => { setAcertoTotal(""); setIsEditingManualTotal(false); }}>
-                      Limpar
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs text-gray-500 font-medium">Acerto Total</label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" aria-label="Como funciona o Acerto Total" className="text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600">
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={6}>Substitui o valor final calculado do orçamento.</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {hasManualTotal && (
+                    <button type="button" aria-label="Limpar Acerto Total" className="text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600" onClick={clearManualTotal}>
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -1819,7 +1836,7 @@ export default function AdminQuotationForm() {
                   className="h-8 text-sm"
                   placeholder={`Calculado: ${fmt(calculatedTotal)}`}
                 />
-                {acertoValue > 0 && (
+                {hasManualTotal && (
                   <p className="text-xs text-amber-600 mt-0.5">⚠ Valor manual sobrepõe o cálculo automático</p>
                 )}
               </div>
