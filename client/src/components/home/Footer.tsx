@@ -1,7 +1,91 @@
-import { getCompanyAddressLine, getCompanyLocationLine, getCompanyWhatsAppMessage, getValidSocialUrl, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
+import { useState } from "react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  CreditCard,
+  FileText,
+  Flag,
+  Facebook,
+  Instagram,
+  Landmark,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Package,
+  Phone,
+  Send,
+  ShieldCheck,
+  ShoppingBag,
+  Tag,
+  Youtube,
+} from "lucide-react";
+import {
+  getCompanyAddressLine,
+  getCompanyLocationLine,
+  getCompanyWhatsAppMessage,
+  getValidSocialUrl,
+  getWhatsAppUrl,
+  useCompanySettings,
+  useWhatsAppButtonVisibility,
+} from "@/hooks/useCompanySettings";
+
+const documentationUrl = "/produto/1200001#terms";
+
+const institutionalLinks = [
+  { label: "Início", href: "/" },
+  { label: "Nossos produtos", href: "/catalogo" },
+  { label: "Central de documentação", href: documentationUrl },
+  { label: "Minha conta", href: "/minha-conta" },
+];
+
+const supportLinks = [
+  { label: "Dúvidas frequentes", href: documentationUrl },
+  { label: "Prazos de produção", href: documentationUrl },
+  { label: "Formas de pagamento", href: documentationUrl },
+  { label: "Entrega e retirada", href: documentationUrl },
+  { label: "Trocas e devoluções", href: documentationUrl },
+];
+
+const productLinks = [
+  { label: "Cartões de visita", icon: CreditCard },
+  { label: "Panfletos e folders", icon: FileText },
+  { label: "Banners e faixas", icon: Flag },
+  { label: "Adesivos e etiquetas", icon: Tag },
+  { label: "Embalagens", icon: Package },
+];
+
+function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h2 className="mb-4 inline-flex border-b-2 border-pink-500 pb-2 text-sm font-bold text-slate-900">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      aria-label={label}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-50 text-slate-500 transition-colors hover:bg-pink-100 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+    >
+      {children}
+    </a>
+  );
+}
+
+function PaymentBadge({ children }: { children: React.ReactNode }) {
+  return <div className="flex h-14 min-w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm">{children}</div>;
+}
 
 export function Footer() {
   const { company } = useCompanySettings();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterMessage, setNewsletterMessage] = useState("");
   const phoneHref = `tel:${company.commercialPhone.replace(/\D/g, "")}`;
   const showWhatsApp = useWhatsAppButtonVisibility(company);
   const whatsappHref = getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company));
@@ -9,99 +93,119 @@ export function Footer() {
   const facebookHref = getValidSocialUrl(company.facebookUrl, company.facebookActive);
   const youtubeHref = getValidSocialUrl(company.youtubeUrl, company.youtubeActive);
   const otherSocialHref = getValidSocialUrl(company.otherSocialUrl, company.otherSocialActive);
+  const currentYear = new Date().getFullYear();
+
+  const handleNewsletterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!email) {
+      setNewsletterMessage("Informe um e-mail válido para continuar.");
+      return;
+    }
+
+    setNewsletterMessage("Abriremos seu aplicativo de e-mail para confirmar o cadastro.");
+    const subject = encodeURIComponent("Quero receber novidades da Maria Imprime");
+    const body = encodeURIComponent(`Olá! Quero receber novidades e promoções da Maria Imprime.\n\nE-mail para cadastro: ${email}`);
+    window.location.href = `mailto:${company.supportEmail}?subject=${subject}&body=${body}`;
+  };
 
   return (
-    <footer className="bg-gray-900 text-gray-400 py-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Main footer content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Institucional */}
-          <div>
-            <h3 className="font-semibold text-white mb-4 text-sm">Institucional</h3>
-            <ul className="space-y-2 text-xs">
-              <li><a href="/produto/1200001#terms" className="hover:text-pink-600 transition-colors font-light">Central de Documentação</a></li>
-              <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Sobre a Maria Imprime</a></li>
-              <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Política de Privacidade</a></li>
-              <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Termos de Uso</a></li>
-              <li><a href="#" className="hover:text-pink-600 transition-colors font-light">Blog</a></li>
-            </ul>
-          </div>
+    <footer id="site-footer" className="border-t-2 border-pink-200 bg-white text-slate-700">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-2 xl:grid-cols-[1.25fr_.72fr_.9fr_.9fr_1.14fr] xl:gap-8">
+          <section className="max-w-sm" aria-label="Apresentação da Maria Imprime">
+            <a href="/" aria-label="Página inicial da Maria Imprime" className="inline-flex">
+              <img src={company.printLogoUrl || "/manus-storage/logo-maria-imprime_acc5585b.webp"} alt="Maria Imprime" className="h-16 w-auto object-contain sm:h-20" />
+            </a>
+            <p className="mt-5 text-sm leading-7 text-slate-600">
+              A Maria Imprime transforma suas ideias em comunicação visual com atenção aos detalhes, praticidade e qualidade em cada pedido.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {instagramHref && <SocialLink href={instagramHref} label="Instagram da Maria Imprime"><Instagram className="h-5 w-5" /></SocialLink>}
+              {facebookHref && <SocialLink href={facebookHref} label="Facebook da Maria Imprime"><Facebook className="h-5 w-5" /></SocialLink>}
+              {showWhatsApp && <SocialLink href={whatsappHref} label="WhatsApp da Maria Imprime"><MessageCircle className="h-5 w-5" /></SocialLink>}
+              <a href={`mailto:${company.supportEmail}`} aria-label="Enviar e-mail para a Maria Imprime" className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-50 text-slate-500 transition-colors hover:bg-pink-100 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"><Mail className="h-5 w-5" /></a>
+              {youtubeHref && <SocialLink href={youtubeHref} label="YouTube da Maria Imprime"><Youtube className="h-5 w-5" /></SocialLink>}
+              {otherSocialHref && <SocialLink href={otherSocialHref} label="Outro canal oficial da Maria Imprime"><ArrowRight className="h-5 w-5" /></SocialLink>}
+            </div>
+          </section>
 
-          {/* Atendimento */}
-          <div>
-            <h3 className="font-semibold text-white mb-4 text-sm">Atendimento</h3>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <a href={phoneHref} className="hover:text-pink-600 transition-colors font-light">
-                  📞 {company.commercialPhone}
-                </a>
-              </li>
-              <li>
-                <a href={`mailto:${company.supportEmail}`} className="hover:text-pink-600 transition-colors font-light">
-                  ✉️ {company.supportEmail}
-                </a>
-              </li>
-              <li className="text-xs">
-                <p className="font-semibold text-white mt-2 mb-1 text-xs">Horário de Atendimento:</p>
-                <p className="font-light">Seg-Sex: 09:00 - 12:00 e 13:30 - 17:00</p>
-                <p className="font-light">Sábado e Domingo: Fechada</p>
-              </li>
+          <FooterColumn title="Institucional">
+            <ul className="space-y-3 text-sm">
+              {institutionalLinks.map((link) => <li key={link.label}><a href={link.href} className="transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600">{link.label}</a></li>)}
             </ul>
-          </div>
+          </FooterColumn>
 
-          {/* Formas de Pagamento */}
-          <div>
-            <h3 className="font-semibold text-white mb-4 text-sm">Formas de Pagamento</h3>
-            <div className="flex gap-3 flex-wrap">
-              <div className="bg-gray-800 p-2 rounded flex items-center justify-center w-12 h-8">
-                <span className="text-xs font-bold">VISA</span>
-              </div>
-              <div className="bg-gray-800 p-2 rounded flex items-center justify-center w-12 h-8">
-                <span className="text-xs font-bold">MC</span>
-              </div>
-              <div className="bg-gray-800 p-2 rounded flex items-center justify-center w-12 h-8">
-                <span className="text-xs font-bold">PIX</span>
-              </div>
+          <FooterColumn title="Ajuda e suporte">
+            <ul className="space-y-3 text-sm">
+              {supportLinks.map((link) => <li key={link.label}><a href={link.href} className="transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600">{link.label}</a></li>)}
+              <li><a href={showWhatsApp ? whatsappHref : `mailto:${company.supportEmail}`} className="font-medium text-pink-600 transition-colors hover:text-pink-700">Fale conosco</a></li>
+            </ul>
+          </FooterColumn>
+
+          <FooterColumn title="Produtos">
+            <ul className="space-y-3 text-sm">
+              {productLinks.map(({ label, icon: Icon }) => <li key={label}><a href="/catalogo" className="flex items-center gap-2.5 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600"><Icon className="h-4 w-4 text-pink-500" />{label}</a></li>)}
+            </ul>
+            <a href="/catalogo" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-pink-600 transition-colors hover:text-pink-700">Ver todos os produtos <ArrowRight className="h-4 w-4" /></a>
+          </FooterColumn>
+
+          <section className="rounded-2xl border border-pink-200 bg-pink-50/70 p-6 shadow-sm" aria-labelledby="newsletter-title">
+            <h2 id="newsletter-title" className="text-xl font-bold text-pink-600">Fique por dentro!</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Receba novidades, promoções e dicas exclusivas da Maria Imprime.</p>
+            <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
+              <label className="sr-only" htmlFor="newsletter-email">Seu melhor e-mail</label>
+              <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} placeholder="Seu melhor e-mail" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100" />
+              <button type="submit" className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-pink-600 px-4 text-sm font-bold text-white transition hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">Quero receber <Send className="h-4 w-4" /></button>
+              <p className="min-h-5 text-xs text-slate-500" aria-live="polite">{newsletterMessage}</p>
+            </form>
+          </section>
+        </div>
+
+        <section className="mt-12 grid overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 lg:grid-cols-[1.08fr_1fr_1.12fr]" aria-label="Pagamentos e segurança">
+          <div className="p-6">
+            <h2 className="text-sm font-bold text-slate-900">Formas de pagamento</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <PaymentBadge><Landmark className="mr-1.5 h-5 w-5 text-cyan-500" />PIX</PaymentBadge>
+              <PaymentBadge><span className="text-blue-700">VISA</span></PaymentBadge>
+              <PaymentBadge><span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] text-yellow-300">MC</span></PaymentBadge>
             </div>
           </div>
-
-          {/* Siga a Maria */}
-          <div>
-            <h3 className="font-semibold text-white mb-4 text-sm">Siga a Maria</h3>
-            <div className="flex gap-4">
-              {instagramHref && <a href={instagramHref} aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="text-white hover:text-pink-300 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-4.771-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.322a1.44 1.44 0 110-2.88 1.44 1.44 0 010 2.88z" /></svg></a>}
-              {facebookHref && <a href={facebookHref} aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="text-white hover:text-pink-300 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg></a>}
-              {youtubeHref && <a href={youtubeHref} aria-label="YouTube" target="_blank" rel="noopener noreferrer" className="text-white hover:text-pink-300 transition-colors"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a2.995 2.995 0 0 0-2.108-2.12C19.524 3.5 12 3.5 12 3.5s-7.524 0-9.39.566A2.995 2.995 0 0 0 .502 6.186C0 8.067 0 12 0 12s0 3.933.502 5.814a2.995 2.995 0 0 0 2.108 2.12C4.476 20.5 12 20.5 12 20.5s7.524 0 9.39-.566a2.995 2.995 0 0 0 2.108-2.12C24 15.933 24 12 24 12s0-3.933-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></a>}
-              {otherSocialHref && <a href={otherSocialHref} aria-label="Outro link social" target="_blank" rel="noopener noreferrer" className="text-white hover:text-pink-300 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.14 1.14" /><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.14-1.14" /></svg></a>}
-              {showWhatsApp && (
-                <a href={whatsappHref} aria-label="WhatsApp" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-110">
-                  <img src="/manus-storage/whastapp-branco_ab9ddb70.webp" alt="WhatsApp" className="w-5 h-5 object-contain" />
-                </a>
-              )}
+          <div className="border-t border-slate-200 p-6 lg:border-l lg:border-t-0">
+            <h2 className="text-sm font-bold text-slate-900">Segurança e proteção</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><ShieldCheck className="h-6 w-6 text-emerald-600" />Google Safe Browsing</div>
+              <div className="flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><LockKeyhole className="h-6 w-6 text-emerald-600" />SSL</div>
             </div>
           </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-700 my-8" />
-
-        {/* Company info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 text-xs font-light">
-          <div>
-            <p className="font-semibold text-white mb-2 text-xs">{company.legalName}</p>
-            <p>CNPJ: {company.cnpj}</p>
-            {company.stateRegistration && <p>IE: {company.stateRegistration}</p>}
-            <p>{getCompanyAddressLine(company)}</p>
-            <p>{getCompanyLocationLine(company)}</p>
-            <p>CEP: {company.zipCode}</p>
+          <div className="flex gap-4 border-t border-slate-200 p-6 lg:border-l lg:border-t-0">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pink-100 text-pink-600"><BadgeCheck className="h-7 w-7" /></div>
+            <div><h2 className="font-bold text-slate-900">Ambiente protegido</h2><p className="mt-1 text-sm leading-6 text-slate-600">Navegação segura e proteção dos seus dados.</p></div>
           </div>
-        </div>
+        </section>
 
-        {/* Copyright */}
-        <div className="text-center text-xs text-gray-600 border-t border-gray-700 pt-8 font-light">
-          <p>© 2026 Maria Imprime / Gráfica Ponto Digital. Todos os direitos reservados.</p>
-          <p className="mt-2">Site protegido (SSL)</p>
-        </div>
+        <section className="mt-10 grid gap-8 border-t border-pink-200 pt-8 text-sm md:grid-cols-3" aria-label="Dados de atendimento e empresa">
+          <div>
+            <h2 className="font-bold text-slate-900">Atendimento</h2>
+            <div className="mt-4 space-y-2.5 text-slate-600">
+              <a href={phoneHref} className="flex items-center gap-2.5 hover:text-pink-600"><Phone className="h-4 w-4 text-pink-500" />{company.commercialPhone}</a>
+              <a href={`mailto:${company.supportEmail}`} className="flex items-center gap-2.5 hover:text-pink-600"><Mail className="h-4 w-4 text-pink-500" />{company.supportEmail}</a>
+              <p className="flex items-start gap-2.5"><ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" /><span>Seg–Sex: 09:00 – 12:00 e 13:30 – 17:00<br />Sábado e domingo: fechado</span></p>
+            </div>
+          </div>
+          <div className="border-t border-slate-200 pt-8 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+            <h2 className="font-bold text-slate-900">{company.legalName}</h2>
+            <div className="mt-4 space-y-2.5 text-slate-600">
+              <p className="flex items-center gap-2.5"><FileText className="h-4 w-4 text-pink-500" />CNPJ: {company.cnpj}</p>
+              <p className="flex items-start gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" /><span>{getCompanyAddressLine(company)}<br />{getCompanyLocationLine(company)}<br />CEP: {company.zipCode}</span></p>
+            </div>
+          </div>
+          <div className="border-t border-slate-200 pt-8 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+            <h2 className="font-bold text-slate-900">Todos os direitos reservados</h2>
+            <p className="mt-4 leading-6 text-slate-600">© {currentYear} Maria Imprime / Gráfica Ponto Digital. Todos os direitos reservados.</p>
+            <p className="mt-2 flex items-center gap-2 text-slate-600"><LockKeyhole className="h-4 w-4 text-pink-500" />Site protegido (SSL)</p>
+          </div>
+        </section>
       </div>
     </footer>
   );

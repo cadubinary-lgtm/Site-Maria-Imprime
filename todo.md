@@ -2793,3 +2793,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [ ] Diagnosticar a discrepância entre a versão publicada e o domínio oficial
 - [x] Corrigir o carregamento zerado de clientes e compras no Dashboard de Clientes em produção
 - [x] Inserir nos termos comerciais a disponibilidade variável dos meios de pagamento pelo processador homologado
+- [x] Reconstruir o rodapé em blocos responsivos com dados, links, pagamentos e segurança reais da Maria Imprime
