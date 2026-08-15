@@ -228,6 +228,14 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     onSuccess: () => { toast.success("Status atualizado com sucesso!"); refetch(); },
     onError: (error) => toast.error(error.message),
   });
+  const updateStorePriceTier = trpc.customerAuth.adminUpdateCustomerPriceTier.useMutation({
+    onSuccess: () => { toast.success("Tabela de preços atualizada"); refetch(); },
+    onError: (error) => toast.error(error.message),
+  });
+  const updateLegacyPriceTier = trpc.crm.adminUpdateBalcaoClient.useMutation({
+    onSuccess: () => { toast.success("Tabela de preços atualizada"); refetch(); },
+    onError: (error) => toast.error(error.message),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,6 +281,29 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
       return;
     }
     updateLegacyStatus.mutate({ clientId: client.id, data: { isActive: !client.isActive } });
+  };
+
+  const handlePriceTierChange = (client: any, priceTier: "final" | "reseller") => {
+    if (client.source === "site") {
+      updateStorePriceTier.mutate({ customerId: client.externalId, priceTier });
+      return;
+    }
+    updateLegacyPriceTier.mutate({
+      clientId: client.id,
+      name: client.name,
+      email: client.email || "",
+      phone: client.phone || "",
+      whatsapp: client.whatsapp || "",
+      cpfCnpj: client.cpfCnpj || "",
+      priceTier,
+      addressZipCode: client.addressZipCode || "",
+      addressStreet: client.addressStreet || "",
+      addressNumber: client.addressNumber || "",
+      addressComplement: client.addressComplement || "",
+      addressNeighborhood: client.addressNeighborhood || "",
+      addressCity: client.addressCity || "",
+      addressState: client.addressState || "",
+    });
   };
 
   const handleCancel = () => {
@@ -482,6 +513,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                       <th className="text-left py-2 px-4 font-semibold">E-mail</th>
                       <th className="text-left py-2 px-4 font-semibold">Status</th>
                       <th className="text-left py-2 px-4 font-semibold">Cadastro</th>
+                      <th className="text-left py-2 px-4 font-semibold">Tabela de Preços</th>
                       <th className="text-left py-2 px-4 font-semibold">Retirada</th>
                       <th className="text-left py-2 px-4 font-semibold">Ações</th>
                     </tr>
@@ -505,6 +537,12 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">
                           {client.createdAt ? formatDate(client.createdAt) : "—"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Select value={client.priceTier === "reseller" ? "reseller" : "final"} onValueChange={(priceTier: "final" | "reseller") => handlePriceTierChange(client, priceTier)} disabled={updateStorePriceTier.isPending || updateLegacyPriceTier.isPending}>
+                            <SelectTrigger className="h-8 min-w-28 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent>
+                          </Select>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">
                           {client.allowStorePickup ? "Liberado" : "Não informado"}
