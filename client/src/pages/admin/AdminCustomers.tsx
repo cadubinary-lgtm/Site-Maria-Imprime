@@ -1,6 +1,6 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Users, CheckCircle, AlertCircle, Ban, UserCheck,
-  Loader2, RefreshCw, Mail, Phone, Trash2, Store, StoreIcon, Eye,
+  Loader2, RefreshCw, Mail, Phone, Trash2, Store, StoreIcon, Eye, Plus,
   MapPin, CreditCard, ShoppingBag, Lock, Calendar, Clock, Shield,
 } from "lucide-react";
 import {
@@ -372,14 +372,24 @@ function CustomerDetailModal({
 }
 
 export default function AdminCustomers() {
+  const searchParams = useSearch();
+  const partnerType = new URLSearchParams(searchParams).get("tipo") === "revendedor"
+    ? "reseller"
+    : new URLSearchParams(searchParams).get("tipo") === "agencia"
+      ? "agency"
+      : undefined;
+  const pageTitle = partnerType === "reseller" ? "Revendedores" : partnerType === "agency" ? "Agências" : "Clientes Cadastrados";
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "blocked">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [showPartnerForm, setShowPartnerForm] = useState(false);
+  const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "" });
 
   const { data, isLoading, refetch } = trpc.customerAuth.adminListCustomers.useQuery({
     search: search || undefined,
     status: statusFilter,
+    accountType: partnerType,
     limit: 100,
     offset: 0,
   });
@@ -399,6 +409,20 @@ export default function AdminCustomers() {
       toast.success(vars.allow ? "Retirada na loja liberada!" : "Retirada na loja revogada!");
       refetch();
     },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const createPartner = trpc.customerAuth.adminCreatePartnerAccount.useMutation({
+    onSuccess: () => {
+      toast.success("Acesso criado e link para definir senha enviado por e-mail.");
+      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "" });
+      setShowPartnerForm(false);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const resendPartnerInvite = trpc.customerAuth.adminResendPartnerInvite.useMutation({
+    onSuccess: () => toast.success("Novo link para definição de senha enviado por e-mail."),
     onError: (err) => toast.error(err.message),
   });
 
@@ -424,16 +448,27 @@ export default function AdminCustomers() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <Users className="w-6 h-6 text-orange-500" />
-                  Clientes Cadastrados
+                  {pageTitle}
                 </h1>
-                <p className="text-gray-500 text-sm mt-0.5">Gerenciamento de contas de clientes da loja</p>
+                <p className="text-gray-500 text-sm mt-0.5">{partnerType ? `Gerenciamento de contas de ${partnerType === "reseller" ? "revendedores" : "agências"}` : "Gerenciamento de contas de clientes da loja"}</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Atualizar
-            </Button>
+            <div className="flex gap-2">
+              {partnerType && <Button size="sm" onClick={() => setShowPartnerForm((open) => !open)}><Plus className="w-4 h-4 mr-2" />Novo</Button>}
+              <Button variant="outline" size="sm" onClick={() => refetch()}><RefreshCw className="w-4 h-4 mr-2" />Atualizar</Button>
+            </div>
           </div>
+
+          {partnerType && showPartnerForm && (
+            <Card className="mb-6"><CardContent className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
+              <Input placeholder="Nome" value={partnerForm.firstName} onChange={(e) => setPartnerForm({ ...partnerForm, firstName: e.target.value })} />
+              <Input placeholder="Sobrenome" value={partnerForm.lastName} onChange={(e) => setPartnerForm({ ...partnerForm, lastName: e.target.value })} />
+              <Input className="md:col-span-2" type="email" placeholder="E-mail" value={partnerForm.email} onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })} />
+              <Input placeholder="Telefone" value={partnerForm.phone} onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })} />
+              <Input placeholder="CPF/CNPJ" value={partnerForm.cpfCnpj} onChange={(e) => setPartnerForm({ ...partnerForm, cpfCnpj: e.target.value })} />
+              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || createPartner.isPending} onClick={() => createPartner.mutate({ ...partnerForm, accountType: partnerType })}>Criar e enviar acesso</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
+            </CardContent></Card>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -597,6 +632,11 @@ export default function AdminCustomers() {
                                 <Eye className="w-3.5 h-3.5 mr-1" />
                                 Ver
                               </Button>
+                              {partnerType && (
+                                <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs" onClick={() => resendPartnerInvite.mutate({ customerId: customer.id })} disabled={resendPartnerInvite.isPending}>
+                                  <Mail className="w-3.5 h-3.5 mr-1" />Reenviar acesso
+                                </Button>
+                              )}
 
                               {/* Bloquear / Ativar */}
                               {customer.status !== "blocked" ? (
