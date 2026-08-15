@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Package } from "lucide-react";
+import { Loader2, Plus, Package, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -458,10 +458,12 @@ export default function AdminNewProduct() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="text-red-500 hover:text-red-700 px-2"
+                      className="h-9 w-9 p-0 text-gray-400 hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600"
                       onClick={() => setCreateForm((prev) => ({ ...prev, specifications: prev.specifications.filter((_, i) => i !== idx) }))}
+                      title="Excluir especificação"
+                      aria-label="Excluir especificação"
                     >
-                      ✕
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}

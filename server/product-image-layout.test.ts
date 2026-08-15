@@ -9,6 +9,7 @@ describe("layout compacto das fotos de produto", () => {
     expect(PRODUCT_IMAGE_LAYOUT.thumbnailImage).toContain("right-8");
     expect(PRODUCT_IMAGE_LAYOUT.thumbnailImage).toContain("rounded-lg");
     expect(PRODUCT_IMAGE_LAYOUT.thumbnailActions).toContain("justify-between");
-    expect(PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon).toContain("text-red-500");
+    expect(PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon).toContain("text-gray-400");
+    expect(PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon).toContain("hover:text-pink-600");
   });
 });
