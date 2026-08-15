@@ -293,7 +293,7 @@ export default function AdminUsuarios() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="admin-visual-system min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -450,7 +450,7 @@ export default function AdminUsuarios() {
 
       {/* Dialog: Criar Operador */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="admin-visual-system max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-pink-600">
               <UserPlus className="w-5 h-5" /> Novo Operador
@@ -535,7 +535,7 @@ export default function AdminUsuarios() {
 
       {/* Dialog: Editar Operador */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="admin-visual-system max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-gray-800">
               <Pencil className="w-5 h-5 text-pink-500" /> Editar Operador
@@ -601,7 +601,7 @@ export default function AdminUsuarios() {
         </DialogContent>
       </Dialog>
 
-        <DialogContent className="max-w-md">
+        <DialogContent className="admin-visual-system max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-pink-600">
               <Lock className="w-5 h-5" /> Permissões — {permTarget?.name}
@@ -627,7 +627,7 @@ export default function AdminUsuarios() {
 
       {/* Dialog: Reset Senha */}
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="admin-visual-system max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-blue-600">
               <KeyRound className="w-5 h-5" /> Redefinir Senha — {resetTarget?.name}

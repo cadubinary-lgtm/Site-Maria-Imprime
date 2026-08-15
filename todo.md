@@ -2719,3 +2719,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Estender o padrão cinza e rosa de campos e ícones a todos os subitens administrativos
 - [x] Padronizar botões principais de ação em todos os subitens administrativos
 - [x] Ajustar responsividade móvel de botões e ícones e padronizar campos e dropdowns administrativos
+- [x] Aplicar a camada visual de campos, dropdowns, botões e ícones às telas administrativas restantes, incluindo Novo Produto e Editar Produto

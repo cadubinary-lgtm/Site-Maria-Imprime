@@ -43,7 +43,7 @@ function ClientDetailModal({ clientId, open, onClose }: { clientId: number | nul
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="admin-visual-system max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-pink-600">
             <Users className="w-5 h-5" />
@@ -220,7 +220,7 @@ export default function ClientesBalcao() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="admin-visual-system min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">

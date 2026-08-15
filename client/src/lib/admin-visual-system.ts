@@ -11,4 +11,5 @@ export const ADMIN_VISUAL_GUIDELINES = {
   fieldBorder: "gray",
   fieldFocus: "pink",
   mobileTouchTarget: 44,
+  portalDialogCoverage: true,
 } as const;
