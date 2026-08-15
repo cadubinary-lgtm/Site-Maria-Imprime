@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
+import { ADMIN_MENU_GROUP_ICON_CLASS, getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
 import { rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
@@ -160,7 +160,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
           `}
           style={{ paddingLeft: `${12 + depth * 12}px` }}
         >
-          {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
+          {item.icon && <span className={`w-4 h-4 flex-shrink-0 ${ADMIN_MENU_GROUP_ICON_CLASS}`}>{item.icon}</span>}
           <span className="flex-1 text-left">{item.label}</span>
           {item.badge ? <Badge className="bg-pink-600 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
           {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
