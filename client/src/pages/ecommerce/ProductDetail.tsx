@@ -30,6 +30,7 @@ import { getProductPrice } from "@/lib/productPrice";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
+import { getProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -161,7 +162,6 @@ export default function ProductDetail() {
   const [isExporting, setIsExporting] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
-  const [deliveryTax, setDeliveryTax] = useState(0);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Medidas
@@ -250,6 +250,19 @@ export default function ProductDetail() {
   }, [productAttributes, attributeState]);
 
   // ─── Preço ───────────────────────────────────────────────────────────────
+  const deadlineWidth = parseFloat(dimWidth.replace(",", ".")) || 0;
+  const deadlineHeight = parseFloat(dimHeight.replace(",", ".")) || 0;
+  const deadlineBilledArea = deadlineWidth > 0 && deadlineHeight > 0
+    ? Math.max(deadlineWidth * deadlineHeight, 1)
+    : 0;
+  const deadlineLinearMeters = deadlineWidth > 0 ? deadlineWidth : 0;
+  const deliveryTax = getProductionDeadlineSurcharge({
+    rate: selectedDeliveryOption?.pricePerM2,
+    calculationType: product?.calculationType,
+    billedArea: deadlineBilledArea,
+    linearMeters: deadlineLinearMeters,
+  });
+
   const basePrice = useMemo(() => {
     if (!product) return 0;
     // Para m² e metro_linear, o preço base vem de pricePerM2 (calculado em effectivePrice)
@@ -290,7 +303,7 @@ export default function ProductDetail() {
       });
     });
     // Modificadores de prazo
-    if (selectedDeliveryOption) total += deliveryTax;
+    if (selectedDeliveryOption && !isM2Type) total += deliveryTax;
     return Math.max(0, total);
   }, [product, commercialProductPrice, selectedVariations, variationTypes, selectedAttributes, productAttributes, selectedDeliveryOption, deliveryTax, dimWidth, dimHeight]);
 
@@ -1426,10 +1439,6 @@ export default function ProductDetail() {
                       type="button"
                       onClick={() => {
                         setSelectedDeliveryOption(opt);
-                        const extra = isM2 && area > 0
-                          ? (opt.pricePerM2 ?? 0) * billedArea
-                          : (opt.pricePerM2 ?? 0);
-                        setDeliveryTax(extra);
                         setOpenSteps(prev => ({ ...prev, [prazoStepIdx]: false, [deliveryStepIdx]: true }));
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all duration-800 ${
@@ -1459,7 +1468,12 @@ export default function ProductDetail() {
                       </div>
                       {(opt.pricePerM2 ?? 0) > 0 && (
                         <span className="text-green-600 font-semibold text-xs flex-shrink-0">
-                          +R$ {((isM2 && billedArea > 0 ? billedArea : 1) * (opt.pricePerM2 ?? 0)).toFixed(2)}
+                          +R$ {getProductionDeadlineSurcharge({
+                            rate: opt.pricePerM2,
+                            calculationType: product?.calculationType,
+                            billedArea: deadlineBilledArea,
+                            linearMeters: deadlineLinearMeters,
+                          }).toFixed(2)}
                         </span>
                       )}
                     </button>
