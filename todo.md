@@ -2782,3 +2782,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Confirmar e alinhar Revendedores e Agências ao padrão completo de Clientes Site
 - [x] Padronizar Todos os Clientes com a experiência completa de Clientes Site
 - [x] Consolidar Cliente Site, Balcão, Revendedor e Agência na lista geral de clientes
+- [x] Ajustar Todos os Clientes para as sete colunas da referência, mantendo somente a tag de tipo no cliente
