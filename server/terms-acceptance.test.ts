@@ -10,6 +10,8 @@ describe("aceite global de termos", () => {
     expect(source).toContain("Aceito os termos e condições");
     expect(source).toContain("DOCUMENTAÇÃO DA MARIA IMPRIME");
     expect(source).toContain("Termos e Condições de Venda");
+    expect(source).toContain("processador de pagamentos homologado");
+    expect(source).toContain("opções efetivamente habilitadas para cada pedido");
   });
 
   it("exige e registra a versão de termos no pedido", () => {
