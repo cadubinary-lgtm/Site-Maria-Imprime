@@ -2740,3 +2740,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o Dashboard de CRM para consolidar pedidos por cliente sem misturar históricos
 - [x] Exibir por cliente produtos comprados, valor total, última compra e tempo sem comprar
 - [x] Priorizar indicadores operacionais e ações rápidas no Dashboard de CRM sem alterar fluxos existentes
+- [x] Incluir clientes da loja no filtro Site do Dashboard de CRM sem duplicar cadastros
+- [x] Consolidar pedidos e produtos dos clientes da loja pelas chaves reais de pedido

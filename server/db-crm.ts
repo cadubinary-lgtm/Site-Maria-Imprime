@@ -1,7 +1,7 @@
 import { getDb } from "./db";
-import { clients, orders, orderItems } from "../drizzle/schema";
+import { clients, customerAccounts, orders, orderItems } from "../drizzle/schema";
 import { eq, desc, sql, and, like, or, inArray, ne } from "drizzle-orm";
-import { aggregateCrmDashboardClients, summarizeCrmDashboard } from "./crm-dashboard";
+import { aggregateCrmDashboardClients, summarizeCrmDashboard, toSiteDashboardClients } from "./crm-dashboard";
 
 /**
  * Criar novo cliente
@@ -100,7 +100,7 @@ export async function getOperationalCrmDashboard(options: {
   if (isActive !== undefined) conditions.push(eq(clients.isActive, isActive));
   if (clientType) conditions.push(eq(clients.clientType, clientType as any));
 
-  const clientRows = await db
+  const legacyClientRows = await db
     .select()
     .from(clients)
     .where(conditions.length > 1 ? and(...conditions) : conditions.length === 1 ? conditions[0] : undefined)
@@ -108,23 +108,69 @@ export async function getOperationalCrmDashboard(options: {
     .limit(limit)
     .offset(offset);
 
+  const siteAccountRows = (!clientType || clientType === "site")
+    ? await db
+      .select({
+        id: customerAccounts.id,
+        firstName: customerAccounts.firstName,
+        lastName: customerAccounts.lastName,
+        email: customerAccounts.email,
+        phone: customerAccounts.phone,
+        cpfCnpj: customerAccounts.cpfCnpj,
+        status: customerAccounts.status,
+        createdAt: customerAccounts.createdAt,
+      })
+      .from(customerAccounts)
+      .where(eq(customerAccounts.status, "active"))
+      .orderBy(desc(customerAccounts.createdAt))
+    : [];
+
+  const clientRows = [
+    ...legacyClientRows.map((client) => ({ ...client, source: "crm" })),
+    ...toSiteDashboardClients(siteAccountRows),
+  ];
+
   if (clientRows.length === 0) {
     return { clients: [], metrics: summarizeCrmDashboard([]) };
   }
 
-  const clientIds = clientRows.map((client) => client.id);
-  const activeOrderCondition = and(inArray(orders.clientId, clientIds), ne(orders.status, "cancelado"));
+  const legacyClientIds = legacyClientRows.map((client) => client.id);
+  const siteCustomerIds = siteAccountRows.map((account) => account.id);
+  const legacyOrderCondition = legacyClientIds.length > 0
+    ? and(inArray(orders.clientId, legacyClientIds), ne(orders.status, "cancelado"))
+    : undefined;
+  const siteOrderCondition = siteCustomerIds.length > 0
+    ? and(inArray(orders.customerId, siteCustomerIds), ne(orders.status, "cancelado"))
+    : undefined;
 
-  const orderRows = await db
+  const legacyOrderRows = legacyOrderCondition ? await db
     .select({ clientId: orders.clientId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
     .from(orders)
-    .where(activeOrderCondition);
+    .where(legacyOrderCondition) : [];
+  const siteOrderRows = siteOrderCondition ? await db
+    .select({ customerId: orders.customerId, totalPrice: orders.totalPrice, createdAt: orders.createdAt })
+    .from(orders)
+    .where(siteOrderCondition) : [];
 
-  const productRows = await db
+  const legacyProductRows = legacyOrderCondition ? await db
     .select({ clientId: orders.clientId, productName: orderItems.productName, quantity: orderItems.quantity })
     .from(orderItems)
     .innerJoin(orders, eq(orderItems.orderId, orders.id))
-    .where(activeOrderCondition);
+    .where(legacyOrderCondition) : [];
+  const siteProductRows = siteOrderCondition ? await db
+    .select({ customerId: orders.customerId, productName: orderItems.productName, quantity: orderItems.quantity })
+    .from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(siteOrderCondition) : [];
+
+  const orderRows = [
+    ...legacyOrderRows,
+    ...siteOrderRows.flatMap((order) => order.customerId ? [{ clientId: -order.customerId, totalPrice: order.totalPrice, createdAt: order.createdAt }] : []),
+  ];
+  const productRows = [
+    ...legacyProductRows,
+    ...siteProductRows.flatMap((item) => item.customerId ? [{ clientId: -item.customerId, productName: item.productName, quantity: item.quantity }] : []),
+  ];
 
   const operationalPriority: Record<string, number> = { atencao: 0, reativar: 1, sem_compras: 2, ativo: 3 };
   const dashboardClients = aggregateCrmDashboardClients(clientRows, orderRows, productRows).sort((left, right) => {
