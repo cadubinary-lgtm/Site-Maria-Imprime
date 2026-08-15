@@ -69,6 +69,7 @@ const specificationLabels: Record<string, string> = {
   thickness: "Tipo de espessura",
   finish: "Tipo de acabamento",
 };
+const CUSTOM_ITEM_NAME_MAX_LENGTH = 80;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
@@ -469,7 +470,17 @@ export default function AdminQuotationForm() {
       toast.error("Informe o nome do Produto / Serviço.");
       return;
     }
+    if (name.length > CUSTOM_ITEM_NAME_MAX_LENGTH) {
+      toast.error(`O nome pode ter no máximo ${CUSTOM_ITEM_NAME_MAX_LENGTH} caracteres.`);
+      return;
+    }
     addCustomItemToQuote(name);
+  };
+
+  const cancelCustomItemName = () => {
+    setShowCustomItemNameStep(false);
+    setCustomItemName("");
+    setShowAddProduct(false);
   };
 
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
@@ -1863,12 +1874,14 @@ export default function AdminQuotationForm() {
                   autoFocus
                   value={customItemName}
                   onChange={(event) => setCustomItemName(event.target.value)}
+                  maxLength={CUSTOM_ITEM_NAME_MAX_LENGTH}
                   placeholder="Ex.: Instalação de fachada, mão de obra ou estrutura metálica"
                   className="mt-3"
                 />
+                <p className="mt-2 text-right text-xs text-gray-400">{customItemName.length}/{CUSTOM_ITEM_NAME_MAX_LENGTH}</p>
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowCustomItemNameStep(false)}>Voltar</Button>
+                <Button type="button" variant="outline" onClick={cancelCustomItemName}>Cancelar</Button>
                 <Button type="submit" className="bg-pink-600 hover:bg-pink-700">Continuar</Button>
               </div>
             </form>
