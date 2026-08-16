@@ -774,17 +774,9 @@ export default function AdminProducts() {
                           </Card>
 
                           <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
-                          {editingId && (
-                            <div className="xl:col-start-2 xl:row-start-1">
-                              <DeliveryOptionsManager
-                                productId={editingId}
-                                calculationType={(editForm as any).calculationType || "m2"}
-                                compact
-                              />
-                            </div>
-                          )}
+                          <div className="flex flex-col gap-4">
 
-                          <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-1 xl:row-start-2 self-start`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} order-2 self-start`}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
                               <MultiSegmentSelector
@@ -796,7 +788,7 @@ export default function AdminProducts() {
                           </Card>
 
                           {/* Upload de Fotos */}
-                          <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-1 xl:row-start-1`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} order-1`}>
                             <CardContent className="px-4">
                               <ProductImageUploader
                                 mainImageUrl={editForm.imageUrl}
@@ -808,9 +800,20 @@ export default function AdminProducts() {
                             </CardContent>
                           </Card>
 
+                          </div>
+
+                          <div className="flex flex-col gap-4">
+                          {editingId && (
+                            <DeliveryOptionsManager
+                              productId={editingId}
+                              calculationType={(editForm as any).calculationType || "m2"}
+                              compact
+                            />
+                          )}
+
                           {/* Aba Logística */}
                           {editingId && (
-                            <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-2 xl:row-start-2`}>
+                            <Card className={PRODUCT_FORM_PANEL.card}>
                               <CardContent className={PRODUCT_FORM_PANEL.content}>
                                 <h3 className={PRODUCT_FORM_PANEL.title}>Logística</h3>
                                 <ProductLogisticsTab productId={editingId} />
@@ -820,7 +823,7 @@ export default function AdminProducts() {
 
                           {/* Especificações Técnicas */}
                           {/* Tags do Produto */}
-                          <div className={`${PRODUCT_FORM_PANEL.inner} xl:col-start-2`}>
+                          <div className={PRODUCT_FORM_PANEL.inner}>
                             <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
                             <p className="text-sm text-gray-500 mb-3">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -863,7 +866,7 @@ export default function AdminProducts() {
                               </div>
                             )}
                           </div>
-                          <div className={`${PRODUCT_FORM_PANEL.inner} xl:col-start-2`}>
+                          <div className={PRODUCT_FORM_PANEL.inner}>
                             <div className="flex items-center justify-between mb-3">
                               <h3 className={PRODUCT_FORM_PANEL.title}>Especificações Técnicas</h3>
                               <Button
@@ -901,6 +904,7 @@ export default function AdminProducts() {
                                 </Button>
                               </div>
                             ))}
+                          </div>
                           </div>
                           </div>
 
