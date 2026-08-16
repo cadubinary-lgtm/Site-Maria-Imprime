@@ -2848,3 +2848,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar largura e altura mínima e máxima em uma linha inferior no editor de produto
 - [x] Aplicar ao painel de fotos do produto o mesmo contêiner visual dos blocos operacionais
 - [x] Refinar a hierarquia e o espaçamento interno do painel Fotos do Produto
+- [x] Padronizar todos os blocos de informação de Novo Produto e Editar Produto em painéis retangulares

@@ -19,7 +19,7 @@ import { ProductLogisticsTab } from "@/components/products/ProductLogisticsTab";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
-import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
+import { EDIT_PRODUCT_MODAL_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
 import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 import { formatProductPriceInput, normalizeProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
@@ -679,7 +679,10 @@ export default function AdminProducts() {
                         </DialogHeader>
 
                         <div className="space-y-4 xl:space-y-3">
-                          <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
+                          <Card className={PRODUCT_FORM_PANEL.card}>
+                            <CardContent className={PRODUCT_FORM_PANEL.content}>
+                              <h3 className={PRODUCT_FORM_PANEL.title}>Dados comerciais</h3>
+                              <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.name}>
                               <Label htmlFor="edit-name">Nome</Label>
                               <Input id="edit-name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
@@ -725,9 +728,9 @@ export default function AdminProducts() {
                                 <Input id="edit-resellerPrice" type="text" inputMode="decimal" value={(editForm as any).resellerPrice || ""} onChange={(e) => setEditForm({ ...editForm, resellerPrice: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPrice")} placeholder="Opcional" />
                               </div>
                             )}
-                          </div>
+                              </div>
 
-                          {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
+                              {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
                               <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-pixPricePerM2">
@@ -766,7 +769,9 @@ export default function AdminProducts() {
                                 </div>
                               </div>
                             </div>
-                          )}
+                              )}
+                            </CardContent>
+                          </Card>
 
                           <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                           {editingId && (
@@ -779,17 +784,19 @@ export default function AdminProducts() {
                             </div>
                           )}
 
-                          <div className="xl:col-start-1 xl:row-start-2 self-start">
-                            <Label>Segmentos</Label>
-                            <MultiSegmentSelector
-                              productId={editingId || 0}
-                              selectedSegmentIds={editForm.segmentIds}
-                              onSegmentsChange={handleSegmentsChange}
-                            />
-                          </div>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-1 xl:row-start-2 self-start`}>
+                            <CardContent className={PRODUCT_FORM_PANEL.content}>
+                              <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
+                              <MultiSegmentSelector
+                                productId={editingId || 0}
+                                selectedSegmentIds={editForm.segmentIds}
+                                onSegmentsChange={handleSegmentsChange}
+                              />
+                            </CardContent>
+                          </Card>
 
                           {/* Upload de Fotos */}
-                          <Card className="gap-0 py-4 xl:col-start-1 xl:row-start-1">
+                          <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-1 xl:row-start-1`}>
                             <CardContent className="px-4">
                               <ProductImageUploader
                                 mainImageUrl={editForm.imageUrl}
@@ -803,16 +810,18 @@ export default function AdminProducts() {
 
                           {/* Aba Logística */}
                           {editingId && (
-                            <div className="border-t pt-4 xl:col-start-2 xl:row-start-2">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-4">Logística</h3>
-                              <ProductLogisticsTab productId={editingId} />
-                            </div>
+                            <Card className={`${PRODUCT_FORM_PANEL.card} xl:col-start-2 xl:row-start-2`}>
+                              <CardContent className={PRODUCT_FORM_PANEL.content}>
+                                <h3 className={PRODUCT_FORM_PANEL.title}>Logística</h3>
+                                <ProductLogisticsTab productId={editingId} />
+                              </CardContent>
+                            </Card>
                           )}
 
                           {/* Especificações Técnicas */}
                           {/* Tags do Produto */}
-                          <div className="border border-gray-200 rounded-lg p-4 space-y-3 xl:col-start-2">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Tags do Produto</h3>
+                          <div className={`${PRODUCT_FORM_PANEL.inner} xl:col-start-2`}>
+                            <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
                             <p className="text-sm text-gray-500 mb-3">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
@@ -854,9 +863,9 @@ export default function AdminProducts() {
                               </div>
                             )}
                           </div>
-                          <div className="border border-gray-200 rounded-lg p-4 space-y-3 xl:col-start-2">
+                          <div className={`${PRODUCT_FORM_PANEL.inner} xl:col-start-2`}>
                             <div className="flex items-center justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900">Especificações Técnicas</h3>
+                              <h3 className={PRODUCT_FORM_PANEL.title}>Especificações Técnicas</h3>
                               <Button
                                 type="button"
                                 variant="outline"

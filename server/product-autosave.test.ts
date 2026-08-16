@@ -19,7 +19,7 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("finalizeEditPrice");
     expect(source).toContain("normalizeProductPriceInput");
     expect(source).toContain("xl:col-span-6 xl:grid-cols-4");
-    expect(source).toContain('Card className="gap-0 py-4 xl:col-start-1 xl:row-start-1"');
+    expect(source).toContain("PRODUCT_FORM_PANEL.card");
     expect(source).not.toContain("Salvar Alterações");
     expect(source).not.toContain("Salvar alterações antes de sair?");
   });

@@ -14,7 +14,7 @@ import { useLocation } from "wouter";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
-import { NEW_PRODUCT_FIELD_LAYOUT } from "@/lib/new-product-layout";
+import { NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
 import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
 
 export default function AdminNewProduct() {
@@ -217,7 +217,7 @@ export default function AdminNewProduct() {
           </div>
         </div>
 
-        <Card className="border-orange-200 bg-orange-50/30">
+        <Card className={`${PRODUCT_FORM_PANEL.card} border-orange-200 bg-orange-50/30`}>
           <CardHeader className="px-5 py-4">
             <CardTitle className="flex items-center gap-2 text-orange-700">
               <Plus className="w-4 h-4" />
@@ -295,7 +295,7 @@ export default function AdminNewProduct() {
               </div>
               {/* Campos condicionais para m² e metro linear */}
               {(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && (
-                <div className="space-y-3 p-4 bg-white rounded-lg border border-orange-100">
+                <div className={PRODUCT_FORM_PANEL.inner}>
                   <p className="text-sm font-medium text-gray-700">
                     {createForm.calculationType === "metro_linear" ? "Configurações de Metro Linear" : "Configurações de m²"}
                   </p>
@@ -344,22 +344,28 @@ export default function AdminNewProduct() {
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start">
                 <div className="space-y-4">
                   {/* Upload de Fotos */}
-                  <ProductImageUploader
-                    mainImageUrl={createForm.imageUrl}
-                    galleryUrls={createForm.galleryUrls}
-                    onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
-                    onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
-                    compact
-                  />
+                  <Card className={PRODUCT_FORM_PANEL.card}>
+                    <CardContent className="px-4">
+                      <ProductImageUploader
+                        mainImageUrl={createForm.imageUrl}
+                        galleryUrls={createForm.galleryUrls}
+                        onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
+                        onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
+                        compact
+                      />
+                    </CardContent>
+                  </Card>
                   {/* Segmentos */}
-                  <div className={NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}>
-                    <Label>Segmentos</Label>
-                    <MultiSegmentSelector
-                      productId={autoCreatedProductId || 0}
-                      selectedSegmentIds={createForm.segmentIds}
-                      onSegmentsChange={handleCreateSegmentsChange}
-                    />
-                  </div>
+                  <Card className={`${PRODUCT_FORM_PANEL.card} ${NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}`}>
+                    <CardContent className={PRODUCT_FORM_PANEL.content}>
+                      <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
+                      <MultiSegmentSelector
+                        productId={autoCreatedProductId || 0}
+                        selectedSegmentIds={createForm.segmentIds}
+                        onSegmentsChange={handleCreateSegmentsChange}
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
                 <div className="space-y-4">
                   {/* Prazos de Produção */}
@@ -372,12 +378,13 @@ export default function AdminNewProduct() {
                     compact
                   />
               {/* Logística */}
-              <div className="border-t pt-4 space-y-4">
-                <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Package className="w-4 h-4 text-orange-500" />
-                  Logística
-                </h3>
-                <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-3">
+              <Card className={PRODUCT_FORM_PANEL.card}>
+                <CardContent className={PRODUCT_FORM_PANEL.content}>
+                  <h3 className={`${PRODUCT_FORM_PANEL.title} flex items-center gap-2`}>
+                    <Package className="w-4 h-4 text-orange-500" />
+                    Logística
+                  </h3>
+                <div className={PRODUCT_FORM_PANEL.inner}>
                   <p className="text-sm font-medium text-gray-700">Dimensões e Peso da Embalagem</p>
                   <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     <div>
@@ -398,7 +405,7 @@ export default function AdminNewProduct() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 bg-white rounded-lg border border-gray-100 space-y-2">
+                <div className={PRODUCT_FORM_PANEL.inner}>
                   <p className="text-sm font-medium text-gray-700">Transportadoras Permitidas</p>
                   {carriersData && (carriersData as any[]).length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -426,10 +433,11 @@ export default function AdminNewProduct() {
                     <p className="text-sm text-gray-400">Nenhuma transportadora cadastrada</p>
                   )}
                 </div>
-              </div>
+                </CardContent>
+              </Card>
               {/* Tags do Produto */}
-              <div className="border border-gray-200 rounded-lg p-4 space-y-3">
-                <h3 className="font-semibold text-gray-900">Tags do Produto</h3>
+              <div className={PRODUCT_FORM_PANEL.inner}>
+                <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
                 <p className="text-sm text-gray-500">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                   {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
@@ -472,9 +480,9 @@ export default function AdminNewProduct() {
                 )}
               </div>
               {/* Especificações Técnicas */}
-              <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <div className={PRODUCT_FORM_PANEL.inner}>
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">Especificações Técnicas</h3>
+                  <h3 className={PRODUCT_FORM_PANEL.title}>Especificações Técnicas</h3>
                   <Button
                     type="button"
                     variant="outline"
