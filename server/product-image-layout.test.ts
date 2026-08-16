@@ -19,6 +19,8 @@ describe("layout compacto das fotos de produto", () => {
 
   it("organiza a Foto Principal sem contorno pontilhado e com ações no padrão da galeria", () => {
     expect(uploaderSource).not.toContain('relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer');
+    expect(uploaderSource).toContain('style={{ gridTemplateColumns: `${compact ? 132 : 180}px minmax(0, 1fr)` }}');
+    expect(uploaderSource).toContain('justify-self-start text-[11px] font-medium text-pink-600');
     expect(uploaderSource).toContain('Foto de capa');
     expect(uploaderSource).toContain('aria-label="Substituir foto principal"');
     expect(uploaderSource).toContain('aria-label="Excluir foto principal"');
