@@ -2836,3 +2836,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar preços independentes de Pix e cartão de crédito aos produtos, com migração compatível
 - [x] Exibir os valores de Pix e cartão com transparência na página pública do produto
 - [x] Aplicar no carrinho e checkout o preço correspondente à forma de pagamento escolhida
+- [x] Exibir selo de desconto no Pix nas imagens das vitrines inicial e de categorias
+- [x] Destacar visualmente o preço Pix na página pública do produto
+- [x] Permitir aplicar percentual padrão de desconto Pix em lote pelo painel administrativo

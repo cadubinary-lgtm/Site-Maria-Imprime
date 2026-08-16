@@ -91,3 +91,16 @@ export function getProductPaymentPrices(product: PriceAwareProduct, audience: Pr
     card: getProductPrice(product, audience, "card"),
   };
 }
+
+export function getPixDiscountInfo(product: PriceAwareProduct, audience: ProductPriceAudience = "final") {
+  const { pix, card } = getProductPaymentPrices(product, audience);
+  const savings = Math.max(0, card.value - pix.value);
+  const percentage = card.value > 0 ? Math.round((savings / card.value) * 100) : 0;
+
+  return {
+    eligible: savings > 0.004 && percentage > 0,
+    savings,
+    percentage,
+    label: percentage > 0 ? `${percentage}% OFF no Pix` : "Desconto no Pix",
+  };
+}

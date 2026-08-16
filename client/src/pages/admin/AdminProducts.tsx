@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
@@ -37,6 +37,8 @@ export default function AdminProducts() {
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
+  const [pixDiscountPercent, setPixDiscountPercent] = useState("");
+  const [isPixDiscountConfirmOpen, setIsPixDiscountConfirmOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -89,6 +91,7 @@ export default function AdminProducts() {
   const deleteMultipleProductsMutation = trpc.admin.deleteMultipleProducts.useMutation({
     onSuccess: () => { utils.products.getAll.invalidate(); },
   });
+  const applyPixDiscountMutation = trpc.productPaymentPricing.applyPixDiscount.useMutation();
 
   // ─── Sincronizar segmentos ao editar ─────────────────────────────────────
   useEffect(() => {
@@ -352,6 +355,35 @@ export default function AdminProducts() {
     } catch (error) { toast.error("Erro ao remover produtos"); }
   };
 
+  const handleOpenPixDiscountConfirm = () => {
+    const parsedPercent = Number(pixDiscountPercent.replace(",", "."));
+    if (!Number.isFinite(parsedPercent) || parsedPercent < 0 || parsedPercent >= 100) {
+      toast.error("Informe um percentual entre 0% e 99,99%");
+      return;
+    }
+    setIsPixDiscountConfirmOpen(true);
+  };
+
+  const handleApplyPixDiscount = async () => {
+    const parsedPercent = Number(pixDiscountPercent.replace(",", "."));
+    try {
+      const result = await applyPixDiscountMutation.mutateAsync({
+        discountPercent: parsedPercent,
+        productIds: selectedProducts.size > 0 ? Array.from(selectedProducts) : undefined,
+      });
+      await utils.products.getAll.invalidate();
+      await refetch();
+      toast.success("Desconto Pix aplicado", {
+        description: `${result.updatedCount} produto(s) atualizado(s) com ${result.discountPercent}% de desconto sobre o valor do cartão.`,
+        position: "top-right",
+      });
+      setIsPixDiscountConfirmOpen(false);
+      setSelectedProducts(new Set());
+    } catch (error) {
+      toast.error("Não foi possível aplicar o desconto Pix", { position: "top-right" });
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("Tem certeza que deseja remover este produto?")) return;
     try {
@@ -428,15 +460,32 @@ export default function AdminProducts() {
                 className="w-5 h-5 rounded border-gray-300 cursor-pointer"
               />
               <span className="text-sm text-gray-600">
-                {selectedProducts.size > 0 ? `${selectedProducts.size} produto(s) selecionado(s)` : "Selecionar produtos"}
+                {selectedProducts.size > 0 ? `${selectedProducts.size} produto(s) selecionado(s)` : "Sem seleção: aplicar em todos os produtos ativos"}
               </span>
             </div>
-            {selectedProducts.size > 0 && (
-              <Button variant="destructive" onClick={handleDeleteMultiple} disabled={deleteMultipleProductsMutation.isPending}>
-                <Trash2 className="w-4 h-4 mr-2" />
-                {deleteMultipleProductsMutation.isPending ? "Removendo..." : `Remover ${selectedProducts.size}`}
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <Input
+                type="number"
+                min="0"
+                max="99.99"
+                step="0.01"
+                value={pixDiscountPercent}
+                onChange={(event) => setPixDiscountPercent(event.target.value)}
+                placeholder="Desconto Pix (%)"
+                className="h-9 w-36 bg-white"
+                aria-label="Percentual padrão de desconto no Pix"
+              />
+              <Button variant="outline" onClick={handleOpenPixDiscountConfirm} disabled={applyPixDiscountMutation.isPending}>
+                {applyPixDiscountMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Aplicar no Pix
               </Button>
-            )}
+              {selectedProducts.size > 0 && (
+                <Button variant="destructive" onClick={handleDeleteMultiple} disabled={deleteMultipleProductsMutation.isPending}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {deleteMultipleProductsMutation.isPending ? "Removendo..." : `Remover ${selectedProducts.size}`}
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -870,6 +919,23 @@ export default function AdminProducts() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={isPixDiscountConfirmOpen} onOpenChange={setIsPixDiscountConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aplicar desconto padrão no Pix?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O sistema calculará {pixDiscountPercent || "0"}% de desconto sobre o preço de cartão e atualizará o preço Pix de {selectedProducts.size > 0 ? `${selectedProducts.size} produto(s) selecionado(s)` : "todos os produtos ativos"}. Os preços de cartão e de revenda não serão alterados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={applyPixDiscountMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={(event) => { event.preventDefault(); handleApplyPixDiscount(); }} disabled={applyPixDiscountMutation.isPending}>
+              {applyPixDiscountMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Aplicando...</> : "Confirmar desconto"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </AdminLayout>
   );

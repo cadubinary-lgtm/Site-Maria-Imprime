@@ -5,7 +5,8 @@ import { productSegments } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { isNull, desc, eq, sql, asc, and, getTableColumns } from 'drizzle-orm';
+import { isNull, desc, eq, sql, asc, and, inArray, getTableColumns } from 'drizzle-orm';
+import { calculatePixDiscountedPrice } from "./product-payment-pricing";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -139,6 +140,35 @@ export async function getProductByName(name: string) {
     sql`SELECT * FROM products WHERE name = ${name} LIMIT 1`
   ) as any;
   return result[0]?.[0];
+}
+
+export async function applyPixDiscountToProducts(discountPercent: number, productIds?: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+
+  const normalizedPercent = Math.max(0, Math.min(99.99, Number(discountPercent)));
+  const scope = productIds && productIds.length > 0
+    ? inArray(products.id, productIds)
+    : eq(products.isActive, true);
+  const selectedProducts = await db.select().from(products).where(scope);
+
+  const toNumber = (value: unknown) => Number.parseFloat(String(value ?? 0)) || 0;
+
+  for (const product of selectedProducts) {
+    const cardPrice = toNumber(product.cardPrice) || toNumber(product.price);
+    const cardPricePerM2 = toNumber(product.cardPricePerM2) || toNumber(product.pricePerM2);
+    const updateData: Record<string, number | null> = {
+      pixPrice: calculatePixDiscountedPrice(cardPrice, normalizedPercent),
+    };
+
+    if (product.calculationType === "m2" || product.calculationType === "metro_linear") {
+      updateData.pixPricePerM2 = calculatePixDiscountedPrice(cardPricePerM2, normalizedPercent);
+    }
+
+    await db.update(products).set(updateData as any).where(eq(products.id, product.id));
+  }
+
+  return { updatedCount: selectedProducts.length, discountPercent: normalizedPercent };
 }
 
 // Segments queries
