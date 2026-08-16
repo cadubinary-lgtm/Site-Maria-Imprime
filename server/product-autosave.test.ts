@@ -12,6 +12,8 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("await handleSave(true)");
     expect(source).toContain("Salvando automaticamente...");
     expect(source).toContain("Falha ao salvar: rascunho preservado");
+    expect(source).toContain("handleUndoLastAutoSave");
+    expect(source).toContain("Desfazer");
     expect(source).not.toContain("Salvar Alterações");
     expect(source).not.toContain("Salvar alterações antes de sair?");
   });

@@ -65,6 +65,8 @@ export default function AdminProducts() {
     tags: [] as string[],
     tagPosition: "top-right" as string,
   });
+  const lastCommittedEditFormRef = useRef<typeof editForm | null>(null);
+  const [undoEditForm, setUndoEditForm] = useState<typeof editForm | null>(null);
 
   // ─── Queries & Mutations ──────────────────────────────────────────────────
   const { data: products, isLoading, refetch } = trpc.products.getAll.useQuery();
@@ -103,6 +105,7 @@ export default function AdminProducts() {
       ...editForm,
       segmentIds: productSegments.map((segment) => segment.id),
     };
+    const committedForm = nextForm;
     const baselineSignature = createProductEditSignature(nextForm);
     const draft = typeof window !== "undefined"
       ? parseProductEditDraft(window.localStorage.getItem(getProductEditDraftKey(productId)))
@@ -122,6 +125,8 @@ export default function AdminProducts() {
 
     setEditForm(nextForm);
     setEditBaselineSignature(baselineSignature);
+    lastCommittedEditFormRef.current = committedForm;
+    setUndoEditForm(null);
     setWaitingInitialSegments(false);
   }, [editingId, productSegments, waitingInitialSegments]);
 
@@ -172,6 +177,8 @@ export default function AdminProducts() {
     setWaitingInitialSegments(true);
     setDraftSavedAt(null);
     setEditAutoSaveState("idle");
+    lastCommittedEditFormRef.current = null;
+    setUndoEditForm(null);
     let parsedGallery: string[] = [];
     try {
       if (product.galleryUrls) parsedGallery = JSON.parse(product.galleryUrls);
@@ -219,10 +226,24 @@ export default function AdminProducts() {
     setWaitingInitialSegments(false);
     setDraftSavedAt(null);
     setEditAutoSaveState("idle");
+    lastCommittedEditFormRef.current = null;
+    setUndoEditForm(null);
   };
 
   const requestEditClose = () => {
     closeEditSession();
+  };
+
+  const handleUndoLastAutoSave = () => {
+    if (!undoEditForm || editAutoSaveState !== "saved") return;
+
+    setUndoEditForm(null);
+    setEditForm(undoEditForm);
+    setEditAutoSaveState("waiting");
+    toast.info("Revertendo a última alteração", {
+      description: "A versão anterior será salva automaticamente em instantes.",
+      position: "top-right",
+    });
   };
 
   const isMeasureBased = (calculationType: string) =>
@@ -296,6 +317,7 @@ export default function AdminProducts() {
       if (parseFloat((editForm as any).minHeight) >= parseFloat((editForm as any).maxHeight)) { toast.error("Altura máxima deve ser maior que a mínima"); return; }
     }
 
+    const previouslyCommittedForm = lastCommittedEditFormRef.current;
     try {
       await updateProductMutation.mutateAsync({
         id: editingId,
@@ -328,6 +350,10 @@ export default function AdminProducts() {
       });
       const signature = createProductEditSignature(editForm);
       setEditBaselineSignature(signature);
+      if (automatic && previouslyCommittedForm && createProductEditSignature(previouslyCommittedForm) !== signature) {
+        setUndoEditForm(previouslyCommittedForm);
+      }
+      lastCommittedEditFormRef.current = editForm;
       window.localStorage.removeItem(getProductEditDraftKey(editingId));
       setDraftSavedAt(null);
       setEditAutoSaveState("saved");
@@ -606,11 +632,23 @@ export default function AdminProducts() {
                             <DialogDescription>Atualize as informações do produto</DialogDescription>
                           </div>
                           {editAutoSaveState !== "idle" && (
-                            <span className={`mt-2 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-medium sm:mt-0 ${
-                              editAutoSaveState === "error" ? "bg-red-50 text-red-700" : editAutoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
-                            }`} aria-live="polite">
-                              {editAutoSaveState === "saving" ? "Salvando automaticamente..." : editAutoSaveState === "saved" ? "Salvo automaticamente" : editAutoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : "Aguardando dados obrigatórios"}
-                            </span>
+                            <div className="mt-2 flex w-fit items-center gap-2 sm:mt-0">
+                              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                                editAutoSaveState === "error" ? "bg-red-50 text-red-700" : editAutoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
+                              }`} aria-live="polite">
+                                {editAutoSaveState === "saving" ? "Salvando automaticamente..." : editAutoSaveState === "saved" ? "Salvo automaticamente" : editAutoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : "Aguardando dados obrigatórios"}
+                              </span>
+                              {editAutoSaveState === "saved" && undoEditForm && (
+                                <button
+                                  type="button"
+                                  onClick={handleUndoLastAutoSave}
+                                  className="text-xs font-medium text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-pink-600 hover:decoration-pink-300 focus:outline-none focus-visible:text-pink-600"
+                                  aria-label="Desfazer última alteração salva"
+                                >
+                                  Desfazer
+                                </button>
+                              )}
+                            </div>
                           )}
                         </DialogHeader>
 
