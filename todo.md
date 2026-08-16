@@ -2847,3 +2847,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o fechamento por X pela ação Voltar com ícone no editor de produto
 - [x] Reorganizar largura e altura mínima e máxima em uma linha inferior no editor de produto
 - [x] Aplicar ao painel de fotos do produto o mesmo contêiner visual dos blocos operacionais
+- [x] Refinar a hierarquia e o espaçamento interno do painel Fotos do Produto
