@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createProductEditSignature, getProductEditExitAction, hasUnsavedProductChanges, shouldInitializeProductEditSession, type ProductEditSnapshot } from "../client/src/lib/product-edit-guard";
+import { formatProductPriceInput, normalizeProductPriceInput } from "../client/src/lib/product-price-input";
 
 const form: ProductEditSnapshot = {
   name: "Lona impressa",
@@ -32,6 +33,14 @@ describe("proteção de edição de produto", () => {
 
     expect(hasUnsavedProductChanges(baseline, { ...form, segmentIds: [1, 2], tags: ["Destaque", "Novo"] })).toBe(false);
     expect(hasUnsavedProductChanges(baseline, { ...form, name: "Lona frontlight" })).toBe(true);
+  });
+
+  it("não cria uma alteração nova ao completar os centavos do valor informado", () => {
+    const baseline = createProductEditSignature(form);
+
+    expect(formatProductPriceInput("60")).toBe("60,00");
+    expect(normalizeProductPriceInput("60,00")).toBe("60.00");
+    expect(hasUnsavedProductChanges(baseline, { ...form, pixPrice: "90,00", cardPrice: "100,00" })).toBe(false);
   });
 
   it("inicializa segmentos somente uma vez por sessão de edição", () => {

@@ -14,6 +14,10 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("Falha ao salvar: rascunho preservado");
     expect(source).toContain("handleUndoLastAutoSave");
     expect(source).toContain("Desfazer");
+    expect(source).toContain("showCloseButton={false}");
+    expect(source).toContain("Voltar");
+    expect(source).toContain("finalizeEditPrice");
+    expect(source).toContain("normalizeProductPriceInput");
     expect(source).not.toContain("Salvar Alterações");
     expect(source).not.toContain("Salvar alterações antes de sair?");
   });

@@ -1,3 +1,5 @@
+import { normalizeProductPriceInput } from "./product-price-input";
+
 export type ProductEditSnapshot = {
   name: string;
   description: string;
@@ -27,6 +29,14 @@ export type ProductEditSnapshot = {
 export function createProductEditSignature(form: ProductEditSnapshot): string {
   return JSON.stringify({
     ...form,
+    price: normalizeProductPriceInput(form.price),
+    pixPrice: normalizeProductPriceInput(form.pixPrice),
+    cardPrice: normalizeProductPriceInput(form.cardPrice),
+    resellerPrice: normalizeProductPriceInput(form.resellerPrice),
+    pricePerM2: normalizeProductPriceInput(form.pricePerM2),
+    pixPricePerM2: normalizeProductPriceInput(form.pixPricePerM2),
+    cardPricePerM2: normalizeProductPriceInput(form.cardPricePerM2),
+    resellerPricePerM2: normalizeProductPriceInput(form.resellerPricePerM2),
     galleryUrls: [...form.galleryUrls],
     segmentIds: [...form.segmentIds].sort((a, b) => a - b),
     specifications: form.specifications.map((spec) => ({ ...spec })),
