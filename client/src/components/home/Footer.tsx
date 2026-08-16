@@ -193,9 +193,9 @@ export function Footer() {
           </div>
           <div className="border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Segurança e proteção</h2>
-            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
-              <div className="flex h-16 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/google-safe-browsing_eb47c169.png" alt="Google Safe Browsing" className="h-10 w-full object-contain" /></div>
-              <div className="flex h-16 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/ssl-certificado_6ff35a41.png" alt="SSL Certificado" className="h-11 w-full object-contain" /></div>
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:gap-3">
+              <div className="flex h-20 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/google-safe-browsing-large_347d2bfd.png" alt="Google Safe Browsing" className="h-16 w-full object-contain" /></div>
+              <div className="flex h-20 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/ssl-certificado_6ff35a41.png" alt="SSL Certificado" className="h-16 w-full object-contain" /></div>
             </div>
           </div>
           <div className="flex items-center gap-5 border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
