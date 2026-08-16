@@ -2825,3 +2825,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar a faixa de pagamentos, segurança e ambiente protegido do rodapé conforme referência
 - [x] Incluir PIX, Visa, Mastercard, Elo, Hipercard, Boleto e selos ampliados no rodapé
 - [x] Substituir a faixa por Visa, Mastercard, Elo, Hipercard, American Express, Cabal e Diners Club, conforme a integração Mercado Pago
+- [x] Atualizar os selos Google Safe Browsing e SSL Certificado com as referências enviadas
+- [x] Exibir o nome da bandeira ao passar o mouse sobre cada cartão de crédito
+- [x] Inserir o aviso de juros de parcelamento e de emissão de nota fiscal abaixo das formas de pagamento

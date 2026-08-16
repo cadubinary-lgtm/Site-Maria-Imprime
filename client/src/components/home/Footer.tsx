@@ -15,7 +15,6 @@ import {
   Package,
   Phone,
   Send,
-  ShieldCheck,
   ShoppingBag,
   Tag,
   Youtube,
@@ -85,8 +84,13 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
   );
 }
 
-function PaymentBadge({ children }: { children: React.ReactNode }) {
-  return <div className="flex h-16 w-full min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-sm font-bold text-slate-700 shadow-sm">{children}</div>;
+function PaymentBadge({ children, label }: { children: React.ReactNode; label: string }) {
+  return (
+    <div role="img" aria-label={label} title={label} tabIndex={0} className="group relative flex h-16 w-full min-w-0 cursor-default items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-sm font-bold text-slate-700 shadow-sm transition-colors hover:border-pink-300 hover:bg-pink-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">
+      {children}
+      <span role="tooltip" className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{label}</span>
+    </div>
+  );
 }
 
 export function Footer() {
@@ -177,20 +181,21 @@ export function Footer() {
           <div className="p-6 sm:p-7">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Formas de pagamento</h2>
             <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7">
-              <PaymentBadge><SiVisa aria-label="Visa" title="Visa" className="h-7 w-12 text-[#1434CB]" /></PaymentBadge>
-              <PaymentBadge><SiMastercard aria-label="Mastercard" title="Mastercard" className="h-8 w-12 text-[#EB001B]" /></PaymentBadge>
-              <PaymentBadge><img src="/manus-storage/elo_78934248.png" alt="Elo" className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge><img src="/manus-storage/hipercard_0e7a4bf3.png" alt="Hipercard" className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge><SiAmericanexpress aria-label="American Express" title="American Express" className="h-9 w-12 text-[#2E77BC]" /></PaymentBadge>
-              <PaymentBadge><img src="/manus-storage/cabal_27d82c64.png" alt="Cabal" className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge><SiDinersclub aria-label="Diners Club" title="Diners Club" className="h-9 w-12 text-[#0079BE]" /></PaymentBadge>
+              <PaymentBadge label="Visa"><SiVisa aria-hidden className="h-7 w-12 text-[#1434CB]" /></PaymentBadge>
+              <PaymentBadge label="Mastercard"><SiMastercard aria-hidden className="h-8 w-12 text-[#EB001B]" /></PaymentBadge>
+              <PaymentBadge label="Elo"><img src="/manus-storage/elo_78934248.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge label="Hipercard"><img src="/manus-storage/hipercard_0e7a4bf3.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge label="American Express"><SiAmericanexpress aria-hidden className="h-9 w-12 text-[#2E77BC]" /></PaymentBadge>
+              <PaymentBadge label="Cabal"><img src="/manus-storage/cabal_27d82c64.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge label="Diners Club"><SiDinersclub aria-hidden className="h-9 w-12 text-[#0079BE]" /></PaymentBadge>
             </div>
+            <p className="mt-4 text-xs leading-5 text-slate-500">Pagamentos parcelados terão acréscimo de juros da operadora. Nota fiscal sujeita a emissão de acordo com prestador de serviço, conforme legislação pertinente.</p>
           </div>
           <div className="border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Segurança e proteção</h2>
             <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
-              <div className="flex h-16 min-w-0 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold leading-4 text-slate-700 shadow-sm"><ShieldCheck className="h-7 w-7 shrink-0 text-emerald-600" />Google Safe Browsing</div>
-              <div className="flex h-16 min-w-0 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold leading-4 text-slate-700 shadow-sm"><LockKeyhole className="h-7 w-7 shrink-0 text-emerald-600" />SSL Certificado</div>
+              <div className="flex h-16 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/google-safe-browsing_eb47c169.png" alt="Google Safe Browsing" className="h-10 w-full object-contain" /></div>
+              <div className="flex h-16 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><img src="/manus-storage/ssl-certificado_6ff35a41.png" alt="SSL Certificado" className="h-11 w-full object-contain" /></div>
             </div>
           </div>
           <div className="flex items-center gap-5 border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
