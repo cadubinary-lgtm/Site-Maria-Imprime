@@ -2843,3 +2843,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Implementar salvamento automático no cadastro de novos produtos quando os dados mínimos estiverem válidos
 - [x] Remover a confirmação de saída após sincronização e exibir o estado de salvamento
 - [x] Permitir desfazer a última alteração salva automaticamente na edição de produto
+- [x] Completar automaticamente os centavos dos valores digitados no editor de produto
+- [x] Substituir o fechamento por X pela ação Voltar com ícone no editor de produto

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
+import { ArrowLeft, Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -22,6 +22,9 @@ import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/pr
 import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
 import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
+import { formatProductPriceInput, normalizeProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
+
+type EditPriceField = "price" | "pixPrice" | "cardPrice" | "resellerPrice" | "pricePerM2" | "pixPricePerM2" | "cardPricePerM2" | "resellerPricePerM2";
 
 export default function AdminProducts() {
   const [, navigate] = useLocation();
@@ -154,15 +157,27 @@ export default function AdminProducts() {
     setEditForm((prev) => ({ ...prev, segmentIds }));
   }, []);
 
+  const finalizeEditPrice = useCallback((field: EditPriceField, syncBasePrice = false) => {
+    setEditForm((prev) => {
+      const formatted = formatProductPriceInput(prev[field]);
+      if (formatted === prev[field]) return prev;
+      return {
+        ...prev,
+        [field]: formatted,
+        ...(syncBasePrice ? { price: formatted } : {}),
+      };
+    });
+  }, []);
+
   const isEditFormReadyForAutoSave = useCallback(() => {
     if (!editForm.name.trim()) return false;
     const measureBased = isMeasureBased(editForm.calculationType);
     if (!measureBased) {
-      return parseFloat(editForm.pixPrice) > 0 && parseFloat(editForm.cardPrice) > 0;
+      return parseProductPriceInput(editForm.pixPrice) > 0 && parseProductPriceInput(editForm.cardPrice) > 0;
     }
     const widthValid = parseFloat(editForm.minWidth) > 0 && parseFloat(editForm.maxWidth) > parseFloat(editForm.minWidth);
     const heightValid = parseFloat(editForm.minHeight) > 0 && parseFloat(editForm.maxHeight) > parseFloat(editForm.minHeight);
-    return parseFloat(editForm.pixPricePerM2) > 0 && parseFloat(editForm.cardPricePerM2) > 0 && widthValid && heightValid;
+    return parseProductPriceInput(editForm.pixPricePerM2) > 0 && parseProductPriceInput(editForm.cardPricePerM2) > 0 && widthValid && heightValid;
   }, [editForm]);
 
   // ─── Editar produto ───────────────────────────────────────────────────────
@@ -187,19 +202,19 @@ export default function AdminProducts() {
       ...prev,
       name: product.name,
       description: product.description || "",
-      price: product.price.toString(),
-      pixPrice: product.pixPrice ? product.pixPrice.toString() : product.price.toString(),
-      cardPrice: product.cardPrice ? product.cardPrice.toString() : product.price.toString(),
-      resellerPrice: product.resellerPrice ? product.resellerPrice.toString() : "",
+      price: formatProductPriceInput(product.price.toString()),
+      pixPrice: formatProductPriceInput(product.pixPrice ? product.pixPrice.toString() : product.price.toString()),
+      cardPrice: formatProductPriceInput(product.cardPrice ? product.cardPrice.toString() : product.price.toString()),
+      resellerPrice: product.resellerPrice ? formatProductPriceInput(product.resellerPrice.toString()) : "",
       imageUrl: product.imageUrl || "",
       imageKey: product.imageKey || "",
       galleryUrls: parsedGallery,
       segment: product.segment || "geral",
       calculationType: product.calculationType || "unidade",
-      pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
-      pixPricePerM2: product.pixPricePerM2 ? product.pixPricePerM2.toString() : (product.pricePerM2 ? product.pricePerM2.toString() : ""),
-      cardPricePerM2: product.cardPricePerM2 ? product.cardPricePerM2.toString() : (product.pricePerM2 ? product.pricePerM2.toString() : ""),
-      resellerPricePerM2: product.resellerPricePerM2 ? product.resellerPricePerM2.toString() : "",
+      pricePerM2: product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : "",
+      pixPricePerM2: product.pixPricePerM2 ? formatProductPriceInput(product.pixPricePerM2.toString()) : (product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : ""),
+      cardPricePerM2: product.cardPricePerM2 ? formatProductPriceInput(product.cardPricePerM2.toString()) : (product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : ""),
+      resellerPricePerM2: product.resellerPricePerM2 ? formatProductPriceInput(product.resellerPricePerM2.toString()) : "",
       minWidth: product.minWidth ? product.minWidth.toString() : "",
       maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
       minHeight: product.minHeight ? product.minHeight.toString() : "",
@@ -302,13 +317,13 @@ export default function AdminProducts() {
     if (!editingId) return;
     if (!editForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
     if ((editForm as any).calculationType !== "m2" && (editForm as any).calculationType !== "metro_linear") {
-      if (!(editForm as any).pixPrice || parseFloat((editForm as any).pixPrice) <= 0) { toast.error("Preço via Pix é obrigatório e deve ser maior que 0"); return; }
-      if (!(editForm as any).cardPrice || parseFloat((editForm as any).cardPrice) <= 0) { toast.error("Preço via cartão é obrigatório e deve ser maior que 0"); return; }
+      if (!(editForm as any).pixPrice || parseProductPriceInput((editForm as any).pixPrice) <= 0) { toast.error("Preço via Pix é obrigatório e deve ser maior que 0"); return; }
+      if (!(editForm as any).cardPrice || parseProductPriceInput((editForm as any).cardPrice) <= 0) { toast.error("Preço via cartão é obrigatório e deve ser maior que 0"); return; }
     }
 
     if (isMeasureBased((editForm as any).calculationType)) {
-      if (!(editForm as any).pixPricePerM2 || parseFloat((editForm as any).pixPricePerM2) <= 0) { toast.error(`Preço via Pix por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
-      if (!(editForm as any).cardPricePerM2 || parseFloat((editForm as any).cardPricePerM2) <= 0) { toast.error(`Preço via cartão por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
+      if (!(editForm as any).pixPricePerM2 || parseProductPriceInput((editForm as any).pixPricePerM2) <= 0) { toast.error(`Preço via Pix por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
+      if (!(editForm as any).cardPricePerM2 || parseProductPriceInput((editForm as any).cardPricePerM2) <= 0) { toast.error(`Preço via cartão por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
       if (!(editForm as any).minWidth || parseFloat((editForm as any).minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
       if (!(editForm as any).maxWidth || parseFloat((editForm as any).maxWidth) <= 0) { toast.error("Largura máxima é obrigatória"); return; }
       if (!(editForm as any).minHeight || parseFloat((editForm as any).minHeight) <= 0) { toast.error("Altura mínima é obrigatória"); return; }
@@ -323,19 +338,19 @@ export default function AdminProducts() {
         id: editingId,
         name: editForm.name,
         description: editForm.description,
-        price: isMeasureBased((editForm as any).calculationType) ? editForm.price : (editForm as any).pixPrice,
-        pixPrice: (editForm as any).pixPrice,
-        cardPrice: (editForm as any).cardPrice,
-        resellerPrice: (editForm as any).resellerPrice || "",
+        price: normalizeProductPriceInput(isMeasureBased((editForm as any).calculationType) ? editForm.price : (editForm as any).pixPrice),
+        pixPrice: normalizeProductPriceInput((editForm as any).pixPrice),
+        cardPrice: normalizeProductPriceInput((editForm as any).cardPrice),
+        resellerPrice: normalizeProductPriceInput((editForm as any).resellerPrice),
         segment: editForm.segment || "geral",
         imageUrl: editForm.imageUrl,
         imageKey: (editForm as any).imageKey || undefined,
         galleryUrls: (editForm as any).galleryUrls?.length > 0 ? JSON.stringify((editForm as any).galleryUrls) : undefined,
         calculationType: (editForm as any).calculationType,
-        pricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pixPricePerM2 : undefined,
-        pixPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pixPricePerM2 : undefined,
-        cardPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).cardPricePerM2 : undefined,
-        resellerPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).resellerPricePerM2 || "" : undefined,
+        pricePerM2: isMeasureBased((editForm as any).calculationType) ? normalizeProductPriceInput((editForm as any).pixPricePerM2) : undefined,
+        pixPricePerM2: isMeasureBased((editForm as any).calculationType) ? normalizeProductPriceInput((editForm as any).pixPricePerM2) : undefined,
+        cardPricePerM2: isMeasureBased((editForm as any).calculationType) ? normalizeProductPriceInput((editForm as any).cardPricePerM2) : undefined,
+        resellerPricePerM2: isMeasureBased((editForm as any).calculationType) ? normalizeProductPriceInput((editForm as any).resellerPricePerM2) || "" : undefined,
         minWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).minWidth : undefined,
         maxWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).maxWidth : undefined,
         minHeight: isMeasureBased((editForm as any).calculationType) ? (editForm as any).minHeight : undefined,
@@ -625,14 +640,15 @@ export default function AdminProducts() {
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className={`${EDIT_PRODUCT_MODAL_LAYOUT.dialog} admin-visual-system`}>
+                      <DialogContent showCloseButton={false} className={`${EDIT_PRODUCT_MODAL_LAYOUT.dialog} admin-visual-system`}>
                         <DialogHeader className="sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                           <div>
                             <DialogTitle>Editar Produto</DialogTitle>
                             <DialogDescription>Atualize as informações do produto</DialogDescription>
                           </div>
-                          {editAutoSaveState !== "idle" && (
-                            <div className="mt-2 flex w-fit items-center gap-2 sm:mt-0">
+                          <div className="mt-2 flex w-fit items-center gap-3 sm:mt-0">
+                            {editAutoSaveState !== "idle" && (
+                              <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                                 editAutoSaveState === "error" ? "bg-red-50 text-red-700" : editAutoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
                               }`} aria-live="polite">
@@ -648,8 +664,18 @@ export default function AdminProducts() {
                                   Desfazer
                                 </button>
                               )}
-                            </div>
-                          )}
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={requestEditClose}
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 transition-colors hover:text-pink-600 focus:outline-none focus-visible:text-pink-600"
+                              aria-label="Voltar para a lista de produtos"
+                            >
+                              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                              Voltar
+                            </button>
+                          </div>
                         </DialogHeader>
 
                         <div className="space-y-4 xl:space-y-3">
@@ -684,19 +710,19 @@ export default function AdminProducts() {
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-pixPrice">Preço via Pix (R$)</Label>
-                                <Input id="edit-pixPrice" type="number" step="0.01" value={(editForm as any).pixPrice} onChange={(e) => setEditForm({ ...editForm, pixPrice: e.target.value, price: e.target.value } as any)} placeholder="0.00" />
+                                <Input id="edit-pixPrice" type="text" inputMode="decimal" value={(editForm as any).pixPrice} onChange={(e) => setEditForm({ ...editForm, pixPrice: e.target.value, price: e.target.value } as any)} onBlur={() => finalizeEditPrice("pixPrice", true)} placeholder="0,00" />
                               </div>
                             )}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-cardPrice">Preço via Cartão (R$)</Label>
-                                <Input id="edit-cardPrice" type="number" step="0.01" value={(editForm as any).cardPrice} onChange={(e) => setEditForm({ ...editForm, cardPrice: e.target.value } as any)} placeholder="0.00" />
+                                <Input id="edit-cardPrice" type="text" inputMode="decimal" value={(editForm as any).cardPrice} onChange={(e) => setEditForm({ ...editForm, cardPrice: e.target.value } as any)} onBlur={() => finalizeEditPrice("cardPrice")} placeholder="0,00" />
                               </div>
                             )}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-resellerPrice">Preço Revendedor (R$)</Label>
-                                <Input id="edit-resellerPrice" type="number" step="0.01" value={(editForm as any).resellerPrice || ""} onChange={(e) => setEditForm({ ...editForm, resellerPrice: e.target.value } as any)} placeholder="Opcional" />
+                                <Input id="edit-resellerPrice" type="text" inputMode="decimal" value={(editForm as any).resellerPrice || ""} onChange={(e) => setEditForm({ ...editForm, resellerPrice: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPrice")} placeholder="Opcional" />
                               </div>
                             )}
                           </div>
@@ -707,19 +733,19 @@ export default function AdminProducts() {
                                 <Label htmlFor="edit-pixPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                                 </Label>
-                                <Input id="edit-pixPricePerM2" type="number" step="0.01" value={(editForm as any).pixPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any)} />
+                                <Input id="edit-pixPricePerM2" type="text" inputMode="decimal" value={(editForm as any).pixPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("pixPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="sm:col-span-1 xl:col-span-1">
                                 <Label htmlFor="edit-cardPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
                                 </Label>
-                                <Input id="edit-cardPricePerM2" type="number" step="0.01" value={(editForm as any).cardPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any)} />
+                                <Input id="edit-cardPricePerM2" type="text" inputMode="decimal" value={(editForm as any).cardPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("cardPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="sm:col-span-1 xl:col-span-1">
                                 <Label htmlFor="edit-resellerPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
                                 </Label>
-                                <Input id="edit-resellerPricePerM2" type="number" step="0.01" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} placeholder="Opcional" />
+                                <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="Opcional" />
                               </div>
                               <div className="grid grid-cols-2 gap-2 xl:col-span-2">
                                 <div>
