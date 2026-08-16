@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
-import { ProductTagBadges } from "@/components/products/ProductTagBadges";
-import { formatProductPrice, getPixDiscountInfo } from "@/lib/productPrice";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { PublicProductCard } from "@/components/products/PublicProductCard";
 
 export function FeaturedProducts() {
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
@@ -34,52 +32,9 @@ export function FeaturedProducts() {
         <p className="text-center text-gray-600 text-sm mb-12">Confira os favoritos dos nossos clientes</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {featured.map((product: any, idx: number) => {
-            const pixDiscount = getPixDiscountInfo(product, priceAudience);
-            return (
-            <Link key={product.id} href={`/produto/${product.id}`} className="group">
-              <Card className="cursor-pointer hover:shadow-md transition-all h-full border border-gray-100 shadow-sm overflow-hidden p-0">
-                {/* Product image - sangrada no topo, cancela py-6/px-6 do Card */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl">
-                  <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
-                  {pixDiscount.eligible && (
-                    <span className="absolute left-2 top-2 z-20 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                      Desconto no Pix
-                    </span>
-                  )}
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">
-                      {product.segment === "varejo" && "📦"}
-                      {product.segment === "servicos" && "🔧"}
-                      {product.segment === "alimentacao" && "🍔"}
-                      {product.segment === "beleza" && "💄"}
-                      {!["varejo", "servicos", "alimentacao", "beleza"].includes(product.segment) && "📄"}
-                    </div>
-                  )}
-                </div>
-
-                <CardContent className="px-4 pt-4 pb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">{product.name}</h3>
-                  <p className="text-xs text-gray-600 line-clamp-2 mb-4 font-light">{product.description}</p>
-                  <div className="mb-4">
-                    <p className="text-xl font-bold text-emerald-600">{formatProductPrice(product, priceAudience)}</p>
-                    <p className="mt-0.5 text-xs font-medium text-emerald-700">no Pix</p>
-                  </div>
-
-                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full font-semibold text-sm h-9 transition-all shadow-sm hover:shadow-md">
-                    Ver opções
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
-            );
-          })}
+          {featured.map((product: any) => (
+            <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
+          ))}
         </div>
 
         <div className="text-center">
