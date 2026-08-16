@@ -217,22 +217,23 @@ export function ProductImageUploader({
   };
 
   return (
-    <div className={compact ? "space-y-2" : "space-y-4"}>
-      <Label className="text-sm font-semibold text-gray-700">Fotos do Produto</Label>
-      <p className="text-xs text-gray-500">
-        1 foto principal + até 6 fotos adicionais · JPG, PNG, WEBP · <span className="font-medium text-orange-600">máx. 2MB cada</span>
-      </p>
+    <div className={compact ? "space-y-4" : "space-y-4"}>
+      <div className="space-y-1">
+        <Label className="text-sm font-semibold text-gray-700">Fotos do Produto</Label>
+        <p className="text-xs leading-5 text-gray-500">
+          1 foto principal + até 6 fotos adicionais · JPG, PNG, WEBP · <span className="font-medium text-pink-600">máx. 2MB cada</span>
+        </p>
+      </div>
       <div className={compact ? PRODUCT_IMAGE_LAYOUT.compactColumns : "space-y-4"}>
         {/* ── Foto Principal ───────────────────────────────────────────────── */}
-        <div>
+        <div className={compact ? "border-b border-gray-100 pb-4" : ""}>
           <div
-            className="mb-2 grid items-center gap-3"
-            style={{ gridTemplateColumns: `${compact ? 132 : 180}px minmax(0, 1fr)` }}
+            className={`mb-3 grid items-center gap-x-3 gap-y-1 ${compact ? "sm:grid-cols-[132px_minmax(0,1fr)]" : "sm:grid-cols-[180px_minmax(0,1fr)]"}`}
           >
             <p className="text-xs font-medium text-gray-600">Foto Principal</p>
             <span className="justify-self-start text-[11px] font-medium text-pink-600">Capa do produto</span>
           </div>
-          <div className="flex min-w-0 gap-3">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
             <button
               type="button"
               className={`group relative shrink-0 overflow-hidden rounded-xl bg-gray-50 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 ${isMainDragOver ? "ring-2 ring-pink-400 ring-offset-2" : "hover:ring-2 hover:ring-pink-200"}`}
