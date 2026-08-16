@@ -37,8 +37,13 @@ describe("rodapé institucional da Maria Imprime", () => {
   it("mantém a rolagem pública contida sem criar espaço após o rodapé", () => {
     const app = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
     const home = readFileSync(resolve(root, "client/src/pages/public/Home.tsx"), "utf8");
-    expect(app).toContain('id="public-site-scroll-container" className="min-h-0 flex-1 overflow-y-auto"');
-    expect(app).toContain('flex h-screen min-h-0 overflow-hidden');
+    const header = readFileSync(resolve(root, "client/src/components/layout/Header.tsx"), "utf8");
+    expect(app).toContain('id="public-site-scroll-container" className="flex-1"');
+    expect(app).toContain('className="min-h-screen"');
+    expect(app).not.toContain('flex h-screen min-h-0 overflow-hidden');
+    expect(app).not.toContain('overflow-y-auto');
+    expect(header).toContain('window.scrollTo({ top: 0, left: 0, behavior: "smooth" })');
+    expect(header).not.toContain('publicScrollContainer?.scrollTo');
     expect(home).toContain('<div className="bg-white">');
     expect(home).not.toContain('min-h-screen bg-white');
   });
