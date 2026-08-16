@@ -20,7 +20,7 @@ import {
   Tag,
   Youtube,
 } from "lucide-react";
-import { SiGoogle, SiMastercard, SiPix, SiVisa } from "react-icons/si";
+import { SiAmericanexpress, SiDinersclub, SiMastercard, SiVisa } from "react-icons/si";
 import {
   getCompanyAddressLine,
   getCompanyLocationLine,
@@ -86,7 +86,7 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
 }
 
 function PaymentBadge({ children }: { children: React.ReactNode }) {
-  return <div className="flex h-16 min-w-[6.75rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm">{children}</div>;
+  return <div className="flex h-16 w-full min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-sm font-bold text-slate-700 shadow-sm">{children}</div>;
 }
 
 export function Footer() {
@@ -173,20 +173,24 @@ export function Footer() {
           </section>
         </div>
 
-        <section className="mt-12 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[1.42fr_1fr_1.15fr]" aria-label="Pagamentos e segurança">
+        <section className="mt-12 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[1.72fr_1fr_1.12fr]" aria-label="Pagamentos e segurança">
           <div className="p-6 sm:p-7">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Formas de pagamento</h2>
-            <div className="mt-4 flex flex-wrap gap-2.5 sm:gap-3">
-              <PaymentBadge><SiPix aria-label="PIX" title="PIX" className="h-7 w-12 text-[#32BCAD]" /></PaymentBadge>
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7">
               <PaymentBadge><SiVisa aria-label="Visa" title="Visa" className="h-7 w-12 text-[#1434CB]" /></PaymentBadge>
               <PaymentBadge><SiMastercard aria-label="Mastercard" title="Mastercard" className="h-8 w-12 text-[#EB001B]" /></PaymentBadge>
+              <PaymentBadge><img src="/manus-storage/elo_78934248.png" alt="Elo" className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge><img src="/manus-storage/hipercard_0e7a4bf3.png" alt="Hipercard" className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge><SiAmericanexpress aria-label="American Express" title="American Express" className="h-9 w-12 text-[#2E77BC]" /></PaymentBadge>
+              <PaymentBadge><img src="/manus-storage/cabal_27d82c64.png" alt="Cabal" className="h-8 w-full object-contain" /></PaymentBadge>
+              <PaymentBadge><SiDinersclub aria-label="Diners Club" title="Diners Club" className="h-9 w-12 text-[#0079BE]" /></PaymentBadge>
             </div>
           </div>
           <div className="border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Segurança e proteção</h2>
-            <div className="mt-4 flex flex-nowrap gap-2.5 sm:gap-3">
-              <div className="flex h-16 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><SiGoogle aria-label="Google" title="Google" className="h-7 w-7 shrink-0 text-[#4285F4]" />Google Safe Browsing</div>
-              <div className="flex h-16 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm"><ShieldCheck className="h-7 w-7 shrink-0 text-emerald-600" />SSL / TLS</div>
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div className="flex h-16 min-w-0 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold leading-4 text-slate-700 shadow-sm"><ShieldCheck className="h-7 w-7 shrink-0 text-emerald-600" />Google Safe Browsing</div>
+              <div className="flex h-16 min-w-0 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold leading-4 text-slate-700 shadow-sm"><LockKeyhole className="h-7 w-7 shrink-0 text-emerald-600" />SSL Certificado</div>
             </div>
           </div>
           <div className="flex items-center gap-5 border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
