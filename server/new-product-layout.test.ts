@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT } from "../client/src/lib/new-product-layout";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "../client/src/lib/new-product-layout";
+
+const root = resolve(import.meta.dirname, "..");
+const newProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
+const editProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
 
 describe("layout horizontal de Novo Produto", () => {
   it("mantém os campos essenciais distribuídos nas doze colunas de tela larga", () => {
@@ -25,5 +31,17 @@ describe("layout de Editar Produto", () => {
     expect(EDIT_PRODUCT_MODAL_LAYOUT.dialog).toContain("xl:max-w-[1480px]");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.details).toContain("xl:grid-cols-12");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.secondary).toContain("xl:grid-cols-");
+  });
+});
+
+describe("padrão de painéis dos formulários de produto", () => {
+  it("centraliza o acabamento retangular reutilizado pelos dois fluxos", () => {
+    expect(PRODUCT_FORM_PANEL.card).toContain("rounded-xl");
+    expect(PRODUCT_FORM_PANEL.card).toContain("border");
+    expect(PRODUCT_FORM_PANEL.inner).toContain("shadow-sm");
+    expect(newProductSource).toContain("PRODUCT_FORM_PANEL.card");
+    expect(newProductSource).toContain("PRODUCT_FORM_PANEL.inner");
+    expect(editProductSource).toContain("Dados comerciais");
+    expect(editProductSource).toContain("PRODUCT_FORM_PANEL.card");
   });
 });

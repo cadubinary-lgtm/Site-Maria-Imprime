@@ -18,3 +18,10 @@ export const EDIT_PRODUCT_MODAL_LAYOUT = {
   measureFields: "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6",
   secondary: "grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start",
 } as const;
+
+export const PRODUCT_FORM_PANEL = {
+  card: "gap-0 rounded-xl border border-gray-200 bg-white py-4 shadow-sm",
+  content: "space-y-4 px-4",
+  title: "text-base font-semibold text-gray-900",
+  inner: "space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm",
+} as const;
