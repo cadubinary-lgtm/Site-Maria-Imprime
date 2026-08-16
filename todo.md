@@ -2811,3 +2811,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter a ação textual Limpar junto da lixeira padrão no Acerto Total
 - [x] Formatar Acerto Total como moeda, destacar total manual e encerrar foco após confirmação
 - [x] Reorganizar a Foto Principal no modal de edição conforme o padrão de Fotos Adicionais
+- [x] Alinhar Capa do produto diretamente com Foto de capa no bloco de imagem principal

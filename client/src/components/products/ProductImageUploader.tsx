@@ -225,9 +225,12 @@ export function ProductImageUploader({
       <div className={compact ? PRODUCT_IMAGE_LAYOUT.compactColumns : "space-y-4"}>
         {/* ── Foto Principal ───────────────────────────────────────────────── */}
         <div>
-          <div className={`${PRODUCT_IMAGE_LAYOUT.sectionHeader} mb-2`}>
+          <div
+            className="mb-2 grid items-center gap-3"
+            style={{ gridTemplateColumns: `${compact ? 132 : 180}px minmax(0, 1fr)` }}
+          >
             <p className="text-xs font-medium text-gray-600">Foto Principal</p>
-            <span className="text-[11px] font-medium text-pink-600">Capa do produto</span>
+            <span className="justify-self-start text-[11px] font-medium text-pink-600">Capa do produto</span>
           </div>
           <div className="flex min-w-0 gap-3">
             <button
