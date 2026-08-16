@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2, Star, Trash2, RefreshCw } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, GripVertical, ChevronLeft, ChevronRight, Maximize2, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -224,20 +224,15 @@ export function ProductImageUploader({
           1 foto principal + até 6 fotos adicionais · JPG, PNG, WEBP · <span className="font-medium text-pink-600">máx. 2MB cada</span>
         </p>
       </div>
-      <div className={compact ? PRODUCT_IMAGE_LAYOUT.compactColumns : "space-y-4"}>
+      <div className={compact ? PRODUCT_IMAGE_LAYOUT.compactColumns : "grid gap-5 sm:grid-cols-[180px_minmax(0,1fr)]"}>
         {/* ── Foto Principal ───────────────────────────────────────────────── */}
-        <div className={compact ? "border-b border-gray-100 pb-4" : ""}>
-          <div
-            className={`mb-3 grid items-center gap-x-3 gap-y-1 ${compact ? "sm:grid-cols-[132px_minmax(0,1fr)]" : "sm:grid-cols-[180px_minmax(0,1fr)]"}`}
-          >
-            <p className="text-xs font-medium text-gray-600">Foto Principal</p>
-            <span className="justify-self-start text-[11px] font-medium text-pink-600">Capa do produto</span>
-          </div>
-          <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
+        <div className="min-w-0">
+          <p className="mb-2 text-xs font-medium text-gray-600">Foto Principal</p>
+          <div className="flex min-w-0 flex-col gap-2">
             <button
               type="button"
               className={`group relative shrink-0 overflow-hidden rounded-xl bg-gray-50 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 ${isMainDragOver ? "ring-2 ring-pink-400 ring-offset-2" : "hover:ring-2 hover:ring-pink-200"}`}
-              style={{ height: compact ? 132 : 180, width: compact ? 132 : 180 }}
+              style={{ height: compact ? 132 : 180, width: "100%" }}
               onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
               aria-label={mainImageUrl ? "Ampliar foto principal" : "Adicionar foto principal"}
               title={mainImageUrl ? "Clique para ampliar" : "Adicionar foto principal"}
@@ -264,7 +259,7 @@ export function ProductImageUploader({
                 ) : (
                   <>
                     <ImageIcon className="w-10 h-10" />
-                    <p className="text-sm">Clique para adicionar foto principal</p>
+                    <p className="px-3 text-center text-sm">Clique para adicionar foto principal</p>
                   </>
                 )}
               </div>
@@ -276,40 +271,29 @@ export function ProductImageUploader({
             )}
             </button>
 
-            <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
-              <div>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-600">
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  Foto de capa
-                </span>
-                <p className="mt-1 text-xs leading-5 text-gray-500">
-                  {mainImageUrl ? "Imagem exibida como capa no catálogo." : "Defina a imagem que será exibida como capa no catálogo."}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-1">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className={`${PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon} inline-flex items-center gap-1.5 px-1.5 text-xs font-medium`}
+                onClick={() => mainInputRef.current?.click()}
+                title={mainImageUrl ? "Substituir foto principal" : "Adicionar foto principal"}
+                aria-label="Adicionar ou substituir foto principal"
+                disabled={uploadingMain}
+              >
+                <Upload className="h-3.5 w-3.5" />
+                <span>{mainImageUrl ? "Substituir" : "Adicionar"}</span>
+              </button>
+              {mainImageUrl && (
                 <button
                   type="button"
-                  className={`${PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon} inline-flex items-center gap-1.5 px-1.5 text-xs font-medium`}
-                  onClick={() => mainInputRef.current?.click()}
-                  title={mainImageUrl ? "Substituir foto de capa" : "Adicionar foto de capa"}
-                  aria-label="Substituir foto principal"
-                  disabled={uploadingMain}
+                  className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
+                  onClick={() => setIsMainImageDeleteConfirmOpen(true)}
+                  title="Excluir foto principal"
+                  aria-label="Excluir foto principal"
                 >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  <span>{mainImageUrl ? "Substituir" : "Adicionar"}</span>
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
-                {mainImageUrl && (
-                  <button
-                    type="button"
-                    className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
-                    onClick={() => setIsMainImageDeleteConfirmOpen(true)}
-                    title="Excluir foto principal"
-                    aria-label="Excluir foto principal"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
           <input
@@ -338,9 +322,6 @@ export function ProductImageUploader({
         >
           <div className={`${PRODUCT_IMAGE_LAYOUT.sectionHeader} mb-2`}>
             <p className="text-xs font-medium text-gray-600">Fotos Adicionais (até 6)</p>
-            <span className="text-[11px] text-gray-400 flex items-center gap-1 whitespace-nowrap">
-              <GripVertical className="w-3 h-3" /> arraste para reordenar
-            </span>
           </div>
           <div className={PRODUCT_IMAGE_LAYOUT.galleryPanel}>
           {[0, 1, 2, 3, 4, 5].map((slot) => {
@@ -423,6 +404,10 @@ export function ProductImageUploader({
             className="hidden"
             onChange={handleGalleryUpload}
           />
+          <p className="mt-2 flex items-center gap-1 text-[11px] text-gray-400">
+            <GripVertical className="h-3 w-3" aria-hidden="true" />
+            Arraste para reordenar
+          </p>
           <p className={PRODUCT_IMAGE_LAYOUT.galleryHint} aria-live="polite">
             {isDroppingGalleryFiles
               ? "Enviando imagens para a galeria..."
@@ -472,7 +457,7 @@ export function ProductImageUploader({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir foto principal?</AlertDialogTitle>
-            <AlertDialogDescription>O produto ficará sem foto de capa até que uma nova imagem seja adicionada.</AlertDialogDescription>
+            <AlertDialogDescription>O produto ficará sem foto principal até que uma nova imagem seja adicionada.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
