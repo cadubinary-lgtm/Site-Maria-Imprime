@@ -37,7 +37,9 @@ export default function AdminProducts() {
   const [editAutoSaveState, setEditAutoSaveState] = useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
   const editAutoSaveTimerRef = useRef<number | null>(null);
   const [quickEditingId, setQuickEditingId] = useState<number | null>(null);
-  const [quickPrice, setQuickPrice] = useState("");
+  const [quickPixPrice, setQuickPixPrice] = useState("");
+  const [quickCardPrice, setQuickCardPrice] = useState("");
+  const [quickResellerPrice, setQuickResellerPrice] = useState("");
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
@@ -266,20 +268,33 @@ export default function AdminProducts() {
 
   const startQuickEdit = (product: any) => {
     const calculationType = product.calculationType || "unidade";
+    const measureBased = isMeasureBased(calculationType);
     setQuickEditingId(product.id);
     setQuickCalculationType(calculationType);
-    setQuickPrice(
-      isMeasureBased(calculationType)
-        ? String(product.pricePerM2 ?? "")
-        : String(product.price ?? "")
-    );
+    setQuickPixPrice(String(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 ?? "" : product.pixPrice ?? product.price ?? ""));
+    setQuickCardPrice(String(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 ?? "" : product.cardPrice ?? product.price ?? ""));
+    setQuickResellerPrice(String(measureBased ? product.resellerPricePerM2 ?? "" : product.resellerPrice ?? ""));
   };
 
   const handleQuickPricingSave = async (product: any) => {
-    const normalizedPrice = quickPrice.replace(",", ".").trim();
-    const numericPrice = Number.parseFloat(normalizedPrice);
-    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-      toast.error("Informe um preço-base maior que R$ 0,00");
+    const normalizePrice = (value: string) => value.replace(",", ".").trim();
+    const normalizedPixPrice = normalizePrice(quickPixPrice);
+    const normalizedCardPrice = normalizePrice(quickCardPrice);
+    const normalizedResellerPrice = normalizePrice(quickResellerPrice);
+    const numericPixPrice = Number.parseFloat(normalizedPixPrice);
+    const numericCardPrice = Number.parseFloat(normalizedCardPrice);
+    const numericResellerPrice = normalizedResellerPrice ? Number.parseFloat(normalizedResellerPrice) : null;
+
+    if (!Number.isFinite(numericPixPrice) || numericPixPrice <= 0) {
+      toast.error("Informe um preço via Pix maior que R$ 0,00");
+      return;
+    }
+    if (!Number.isFinite(numericCardPrice) || numericCardPrice <= 0) {
+      toast.error("Informe um preço via cartão maior que R$ 0,00");
+      return;
+    }
+    if (numericResellerPrice !== null && (!Number.isFinite(numericResellerPrice) || numericResellerPrice <= 0)) {
+      toast.error("O preço revendedor deve ser maior que R$ 0,00 ou ficar em branco");
       return;
     }
 
@@ -289,15 +304,17 @@ export default function AdminProducts() {
         id: product.id,
         name: product.name,
         description: product.description || undefined,
-        price: measureBased ? String(product.price ?? "0") : normalizedPrice,
-        pixPrice: measureBased ? String(product.pixPrice ?? product.price ?? "0") : normalizedPrice,
-        cardPrice: measureBased ? String(product.cardPrice ?? product.price ?? "0") : normalizedPrice,
+        price: measureBased ? String(product.price ?? "0") : normalizedPixPrice,
+        pixPrice: measureBased ? String(product.pixPrice ?? product.price ?? "0") : normalizedPixPrice,
+        cardPrice: measureBased ? String(product.cardPrice ?? product.price ?? "0") : normalizedCardPrice,
+        resellerPrice: measureBased ? undefined : normalizedResellerPrice,
         segment: product.segment || "geral",
         imageUrl: product.imageUrl || undefined,
         calculationType: quickCalculationType as "m2" | "metro_linear" | "pacote" | "unidade",
-        pricePerM2: measureBased ? normalizedPrice : undefined,
-        pixPricePerM2: measureBased ? normalizedPrice : undefined,
-        cardPricePerM2: measureBased ? normalizedPrice : undefined,
+        pricePerM2: measureBased ? normalizedPixPrice : undefined,
+        pixPricePerM2: measureBased ? normalizedPixPrice : undefined,
+        cardPricePerM2: measureBased ? normalizedCardPrice : undefined,
+        resellerPricePerM2: measureBased ? normalizedResellerPrice : undefined,
       });
       await utils.products.getAll.invalidate();
       setQuickEditingId(null);
@@ -928,8 +945,8 @@ export default function AdminProducts() {
 
                 {quickEditingId === product.id && (
                   <div className="mt-5 rounded-lg border border-orange-200 bg-orange-50/60 p-4">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-end">
-                      <div className="flex-1 min-w-0">
+                    <div className="grid gap-4 md:grid-cols-4 md:items-end">
+                      <div className="min-w-0">
                         <Label className="text-sm font-semibold text-gray-900">Unidade de cobrança</Label>
                         <Select value={quickCalculationType} onValueChange={setQuickCalculationType}>
                           <SelectTrigger className="mt-1 bg-white">
@@ -943,20 +960,20 @@ export default function AdminProducts() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0">
                         <Label className="text-sm font-semibold text-gray-900">
                           {quickCalculationType === "m2"
-                            ? "Preço-base por m² (R$)"
+                            ? "Preço via Pix por m² (R$)"
                             : quickCalculationType === "metro_linear"
-                              ? "Preço-base por metro linear (R$)"
-                              : "Preço-base (R$)"}
+                              ? "Preço via Pix por metro linear (R$)"
+                              : "Preço via Pix (R$)"}
                         </Label>
                         <Input
                           type="number"
                           min="0.01"
                           step="0.01"
-                          value={quickPrice}
-                          onChange={(event) => setQuickPrice(event.target.value)}
+                          value={quickPixPrice}
+                          onChange={(event) => setQuickPixPrice(event.target.value)}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
@@ -964,7 +981,49 @@ export default function AdminProducts() {
                           placeholder="0,00"
                         />
                       </div>
-                      <div className="flex gap-2">
+                      <div className="min-w-0">
+                        <Label className="text-sm font-semibold text-gray-900">
+                          {quickCalculationType === "m2"
+                            ? "Preço via Cartão por m² (R$)"
+                            : quickCalculationType === "metro_linear"
+                              ? "Preço via Cartão por metro linear (R$)"
+                              : "Preço via Cartão (R$)"}
+                        </Label>
+                        <Input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={quickCardPrice}
+                          onChange={(event) => setQuickCardPrice(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") handleQuickPricingSave(product);
+                          }}
+                          className="mt-1 bg-white"
+                          placeholder="0,00"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <Label className="text-sm font-semibold text-gray-900">
+                          {quickCalculationType === "m2"
+                            ? "Preço Revendedor por m² (R$)"
+                            : quickCalculationType === "metro_linear"
+                              ? "Preço Revendedor por metro linear (R$)"
+                              : "Preço Revendedor (R$)"}
+                        </Label>
+                        <Input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={quickResellerPrice}
+                          onChange={(event) => setQuickResellerPrice(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") handleQuickPricingSave(product);
+                          }}
+                          className="mt-1 bg-white"
+                          placeholder="Opcional"
+                        />
+                      </div>
+                      <div className="flex gap-2 md:col-span-4 md:justify-end">
                         <Button
                           variant="outline"
                           size="sm"
