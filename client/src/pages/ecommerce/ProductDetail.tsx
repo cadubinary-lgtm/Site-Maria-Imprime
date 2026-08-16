@@ -344,9 +344,12 @@ export default function ProductDetail() {
       const prazoMod = selectedDeliveryOption ? deliveryTax : 0;
       return Math.max(0, productBase + varModifiers + attrModifiers + prazoMod);
     }
-    if (isM2 && billedArea > 0 && commercialProductPrice > 0) {
+    if (isM2 && commercialProductPrice > 0) {
+      // Antes de informar medidas, exibe o preço mínimo faturável de 1 m².
+      // A validação continua exigindo largura e altura para permitir a compra.
+      const chargeableArea = billedArea > 0 ? billedArea : 1;
       // Preço base do produto (m² * preço/m²)
-      const productBase = commercialProductPrice * billedArea;
+      const productBase = commercialProductPrice * chargeableArea;
       // Modificadores de variações (calculados separadamente para não duplicar)
       let varModifiers = 0;
       Object.entries(selectedVariations).forEach(([vtypeId, optId]) => {

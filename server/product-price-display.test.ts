@@ -40,7 +40,7 @@ describe("Preço de exibição da vitrine", () => {
     const featuredProducts = readFileSync("client/src/components/home/FeaturedProducts.tsx", "utf8");
     const header = readFileSync("client/src/components/layout/Header.tsx", "utf8");
 
-    expect(featuredProducts).toContain('formatProductPrice(product)');
-    expect(header).toContain('formatProductPrice(product)');
+    expect(featuredProducts).toContain('formatProductPrice(product, priceAudience)');
+    expect(header).toContain('formatProductPrice(product, priceAudience)');
   });
 });
