@@ -22,6 +22,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("flex-nowrap");
     expect(publicCardSource).toContain("whitespace-nowrap");
     expect(publicCardSource).toContain("text-[9px]");
+    expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");
+    expect(publicCardSource).not.toContain("group-hover:bg-pink-700");
   });
 
   it("mantém o mesmo card na home, catálogo segmentado e listagem pública", () => {

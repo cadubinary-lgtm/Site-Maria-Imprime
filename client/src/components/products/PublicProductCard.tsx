@@ -134,7 +134,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           </div>
         )}
 
-        <span className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-pink-600 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-pink-700 group-hover:shadow-md">
+        <span className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-pink-600 text-sm font-semibold text-white shadow-sm transition-all hover:bg-pink-700 hover:shadow-md">
           Ver opções
         </span>
       </CardContent>
