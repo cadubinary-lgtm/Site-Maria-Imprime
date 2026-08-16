@@ -2861,3 +2861,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Incluir preços Pix, cartão e revendedor no formulário Preço rápido de Todos os Produtos
 - [x] Adicionar barra lateral de segmentos à esquerda em Todos os Produtos com filtro dinâmico
 - [x] Confirmar checkpoint publicável da barra lateral de segmentos
+- [x] Adicionar barra lateral de segmentos à esquerda em Produtos → Todos os Produtos no painel administrativo
