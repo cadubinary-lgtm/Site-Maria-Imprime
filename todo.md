@@ -2864,3 +2864,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar barra lateral de segmentos à esquerda em Produtos → Todos os Produtos no painel administrativo
 - [x] Remover em todo o site os ícones automáticos de segmentos sem ícone cadastrado
 - [x] Manter o aviso de produção no mesmo dia e taxa de urgência em uma única linha nos cards públicos
+- [x] Aplicar e validar o hover independente no botão Ver opções dos cards públicos
