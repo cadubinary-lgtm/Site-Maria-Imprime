@@ -10,14 +10,15 @@ const allProductsSource = readFileSync(resolve(root, "client/src/pages/public/Al
 const segmentQuerySource = readFileSync(resolve(root, "server/db-product-segments.ts"), "utf8");
 
 describe("cards públicos informativos", () => {
-  it("exibe apenas fatos configurados no produto e não inventa alcance de entrega", () => {
+  it("mantém a composição compacta e só exibe urgência de m² quando ela estiver configurada", () => {
     expect(publicCardSource).toContain("getProductPaymentPrices(product, priceAudience)");
     expect(publicCardSource).toContain("getPixDiscountInfo(product, priceAudience)");
     expect(publicCardSource).toContain("parseSpecifications(product.specifications)");
-    expect(publicCardSource).toContain("getProductionLabel(deliveryOptions");
-    expect(publicCardSource).toContain("product.allowPickup");
-    expect(publicCardSource).toContain("hasAllowedCarriers(product.allowedCarriers)");
-    expect(publicCardSource).not.toContain("Envio para todo o Brasil");
+    expect(publicCardSource).toContain("object-cover");
+    expect(publicCardSource).not.toContain("product.description &&");
+    expect(publicCardSource).not.toContain("operationalFacts");
+    expect(publicCardSource).toContain("sameDayUrgency");
+    expect(publicCardSource).toContain("Produção no mesmo dia");
   });
 
   it("mantém o mesmo card na home, catálogo segmentado e listagem pública", () => {

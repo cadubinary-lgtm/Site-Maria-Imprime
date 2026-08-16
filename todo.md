@@ -2856,3 +2856,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a composição visual de Novo Produto conforme Editar Produto
 - [x] Exibir benefícios, preços por forma de pagamento e dados operacionais nos cards públicos de produto
 - [x] Aplicar o card informativo com dados reais também ao Cartão de Visita
+- [x] Corrigir efetivamente o card público compacto: imagem ampliada, sem descrição e sem blocos operacionais
+- [x] Exibir produção no mesmo dia com taxa de urgência apenas em produtos por m² com prazo configurado

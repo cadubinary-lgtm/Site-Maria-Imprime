@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { trpc } from "@/lib/trpc";
 import { getPixDiscountInfo, getProductPaymentPrices, type ProductPriceAudience } from "@/lib/productPrice";
-import { Award, Box, Clock3, Maximize2, Package, Store, Tag, Truck } from "lucide-react";
+import { Award, Box, Store, Tag, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 type ProductCardData = {
@@ -31,7 +31,9 @@ type ProductCardData = {
 };
 
 type ProductDeliveryOption = {
+  name?: string | null;
   daysToDeliver?: number | string | null;
+  pricePerM2?: number | string | null;
   isActive?: boolean | null;
 };
 
@@ -57,65 +59,23 @@ function parseSpecifications(specifications?: string | null): RealSpecification[
   }
 }
 
-function getProductionLabel(options: ProductDeliveryOption[]) {
-  const days = options
-    .filter((option) => option.isActive !== false)
-    .map((option) => Number(option.daysToDeliver))
-    .filter((value) => Number.isFinite(value) && value > 0);
-
-  if (!days.length) return null;
-
-  const first = Math.min(...days);
-  const last = Math.max(...days);
-  if (first === last) return `${first} ${first === 1 ? "dia útil" : "dias úteis"}`;
-  return `${first} a ${last} dias úteis`;
-}
-
-function getMinimumArea(product: ProductCardData) {
-  const width = Number(product.minWidth);
-  const height = Number(product.minHeight);
-  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
-  return width * height;
-}
-
-function hasAllowedCarriers(value?: string | null) {
-  if (!value) return false;
-  try {
-    return Array.isArray(JSON.parse(value)) && JSON.parse(value).length > 0;
-  } catch {
-    return false;
-  }
-}
-
 export function PublicProductCard({ product, priceAudience = "final" }: { product: ProductCardData; priceAudience?: ProductPriceAudience }) {
   const { data: deliveryOptions = [] } = trpc.deliveryOptions.getByProduct.useQuery({ productId: product.id });
   const paymentPrices = getProductPaymentPrices(product, priceAudience);
   const pixDiscount = getPixDiscountInfo(product, priceAudience);
   const specifications = parseSpecifications(product.specifications);
-  const productionLabel = getProductionLabel(deliveryOptions as ProductDeliveryOption[]);
-  const minimumArea = getMinimumArea(product);
   const calculationType = product.calculationType || "unidade";
   const pricingSuffix = paymentPrices.pix.suffix;
   const isReseller = priceAudience === "reseller";
-  const logisticsLabel = product.allowPickup
-    ? "Retirada disponível"
-    : product.allowMotoExpress
-      ? "Moto express disponível"
-      : hasAllowedCarriers(product.allowedCarriers)
-        ? "Transportadoras disponíveis"
-        : null;
-
-  const operationalFacts = [
-    calculationType === "m2" || calculationType === "metro_linear"
-      ? { icon: Maximize2, label: "Cobrança", value: minimumArea ? `Área mín. ${minimumArea.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} m²` : calculationType === "m2" ? "Por m²" : "Por metro linear" }
-      : { icon: Package, label: "Cobrança", value: calculationType === "pacote" ? "Por pacote" : "Por unidade" },
-    productionLabel ? { icon: Clock3, label: "Produção", value: productionLabel } : null,
-    logisticsLabel ? { icon: Truck, label: "Entrega", value: logisticsLabel } : null,
-  ].filter(Boolean) as Array<{ icon: typeof Box; label: string; value: string }>;
+  const sameDayUrgency = calculationType === "m2"
+    ? (deliveryOptions as ProductDeliveryOption[]).find((option) =>
+        option.isActive !== false && Number(option.daysToDeliver) === 0 && Number(option.pricePerM2) > 0
+      )
+    : null;
 
   return (
-    <Link href={`/produto/${product.id}`} className="group block h-full">
-    <Card className="h-full overflow-hidden border border-gray-200 bg-white p-0 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+    <Link href={`/produto/${product.id}`} className="group block">
+    <Card className="overflow-hidden border border-gray-200 bg-white p-0 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <ProductTagBadges tags={product.tags} tagPosition={product.tagPosition} />
         {pixDiscount.eligible && (
@@ -127,19 +87,18 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">Sem imagem</div>
         )}
       </div>
 
-      <CardContent className="flex h-full flex-col px-4 pb-4 pt-4">
+      <CardContent className="px-4 pb-4 pt-3">
         <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{product.name}</h3>
-        {product.description && <p className="mt-1 line-clamp-2 text-sm text-gray-600">{product.description}</p>}
 
         {specifications.length > 0 && (
-          <div className="mt-4 grid grid-cols-2 border-y border-gray-100 py-3 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 border-y border-gray-100 py-2 sm:grid-cols-4">
             {specifications.map((specification, index) => {
               const SpecIcon = [Award, Tag, Box, Store][index] ?? Tag;
               return (
@@ -153,36 +112,29 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           </div>
         )}
 
-        <div className={`mt-4 grid gap-3 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
+        <div className={`mt-3 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
-            <p className="mt-0.5 truncate text-xl font-bold text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
-            {!isReseller && <p className="text-[11px] font-semibold text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
+            <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
+            <p className="mt-0.5 truncate text-2xl font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
+            {!isReseller && <p className="mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
           </div>
           {!isReseller && (
-            <div className="min-w-0 border-l border-gray-200 pl-3">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
-              <p className="mt-0.5 truncate text-xl font-bold text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
-              <p className="text-[11px] font-medium text-gray-500">no Cartão de Crédito</p>
+            <div className="min-w-0 border-l border-gray-200 pl-2">
+              <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
+              <p className="mt-0.5 truncate text-lg font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
+              <p className="mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão de Crédito</p>
             </div>
           )}
         </div>
 
-        {operationalFacts.length > 0 && (
-          <div className="mt-4 grid grid-cols-1 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {operationalFacts.map((fact) => {
-              const FactIcon = fact.icon;
-              return (
-                <div key={fact.label} className="flex items-center gap-2 px-2 py-2 sm:px-1">
-                  <FactIcon className="h-4 w-4 shrink-0 text-gray-700" aria-hidden="true" />
-                  <span className="min-w-0 text-[11px] leading-tight text-gray-600"><strong className="block text-gray-800">{fact.label}</strong>{fact.value}</span>
-                </div>
-              );
-            })}
+        {sameDayUrgency && (
+          <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold leading-tight text-pink-700">
+            <Zap className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency.pricePerM2), "/m²")}
           </div>
         )}
 
-        <span className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full bg-pink-600 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-pink-700 group-hover:shadow-md">
+        <span className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-pink-600 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-pink-700 group-hover:shadow-md">
           Ver opções
         </span>
       </CardContent>
