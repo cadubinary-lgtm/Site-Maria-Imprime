@@ -43,23 +43,30 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(home).not.toContain('min-h-screen bg-white');
   });
 
-  it("usa marcas oficiais nos meios de pagamento e no selo Google", () => {
+  it("usa as marcas de pagamento e os selos solicitados no rodapé", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
     expect(footer).toContain('from "react-icons/si"');
-    expect(footer).toContain('SiPix');
     expect(footer).toContain('SiVisa');
     expect(footer).toContain('SiMastercard');
-    expect(footer).toContain('SiGoogle');
-    expect(footer).toContain('SSL / TLS');
+    expect(footer).toContain('SiAmericanexpress');
+    expect(footer).toContain('SiDinersclub');
+    expect(footer).toContain('/manus-storage/elo_78934248.png');
+    expect(footer).toContain('/manus-storage/hipercard_0e7a4bf3.png');
+    expect(footer).toContain('/manus-storage/cabal_27d82c64.png');
+    expect(footer).not.toContain('SiPix');
+    expect(footer).not.toContain('/manus-storage/boleto_d74f05f4.jpg');
+    expect(footer).toContain('Google Safe Browsing');
+    expect(footer).toContain('SSL Certificado');
   });
 
   it("organiza a faixa em três blocos proporcionais com selos ampliados", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
-    expect(footer).toContain('lg:grid-cols-[1.42fr_1fr_1.15fr]');
-    expect(footer).toContain('h-16 min-w-[6.75rem]');
+    expect(footer).toContain('lg:grid-cols-[1.72fr_1fr_1.12fr]');
+    expect(footer).toContain('grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7');
+    expect(footer).toContain('h-16 w-full min-w-0');
     expect(footer).toContain('h-16 w-16');
-    expect(footer).toContain('flex flex-nowrap gap-2.5 sm:gap-3');
-    expect(footer).toContain('h-16 min-w-0 flex-1');
+    expect(footer).toContain('grid grid-cols-2 gap-2.5 sm:gap-3');
+    expect(footer).toContain('h-16 min-w-0 items-center');
     expect(footer).toContain('lg:border-l lg:border-t-0');
     expect(footer).toContain('sm:p-7');
   });

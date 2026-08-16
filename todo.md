@@ -2823,3 +2823,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover depoimentos não verificáveis da página pública e substituir por conteúdo institucional
 - [x] Ocultar da vitrine pública os produtos de teste sem pedidos vinculados
 - [x] Reorganizar a faixa de pagamentos, segurança e ambiente protegido do rodapé conforme referência
+- [x] Incluir PIX, Visa, Mastercard, Elo, Hipercard, Boleto e selos ampliados no rodapé
+- [x] Substituir a faixa por Visa, Mastercard, Elo, Hipercard, American Express, Cabal e Diners Club, conforme a integração Mercado Pago
