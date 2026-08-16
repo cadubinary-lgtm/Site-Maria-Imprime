@@ -32,7 +32,7 @@ describe("layout de Editar Produto", () => {
     expect(EDIT_PRODUCT_MODAL_LAYOUT.details).toContain("xl:grid-cols-12");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.secondary).toContain("xl:grid-cols-");
     expect(editProductSource).toContain('className="flex flex-col gap-4"');
-    expect(editProductSource).toContain('order-2 self-start');
+    expect(editProductSource).toContain('sm:col-start-1 sm:row-start-2 self-start');
   });
 });
 
@@ -45,7 +45,11 @@ describe("padrão de painéis dos formulários de produto", () => {
     expect(PRODUCT_FORM_PANEL.inner).toContain("space-y-4");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.card");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.inner");
+    expect(newProductSource).toContain("sm:grid-cols-2 sm:items-start");
     expect(editProductSource).toContain("Dados comerciais");
     expect(editProductSource).toContain("PRODUCT_FORM_PANEL.card");
+    expect(editProductSource).toContain("sm:grid-cols-2 sm:items-start");
+    expect(newProductSource.match(/Tags do Produto/g)).toHaveLength(1);
+    expect(editProductSource.match(/Tags do Produto/g)).toHaveLength(1);
   });
 });
