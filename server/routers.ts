@@ -276,6 +276,8 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
+        pixPrice: z.string().optional(),
+        cardPrice: z.string().optional(),
         resellerPrice: z.string().optional(),
         segment: z.string(),
         imageUrl: z.string().optional(),
@@ -283,6 +285,8 @@ export const appRouter = router({
         galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
+        pixPricePerM2: z.string().optional(),
+        cardPricePerM2: z.string().optional(),
         resellerPricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
         maxWidth: z.string().optional(),
@@ -312,6 +316,8 @@ export const appRouter = router({
             name: input.name,
             description: input.description,
             price: effectivePrice as any,
+            pixPrice: input.pixPrice ? input.pixPrice as any : effectivePrice as any,
+            cardPrice: input.cardPrice ? input.cardPrice as any : effectivePrice as any,
             resellerPrice: input.resellerPrice ? input.resellerPrice as any : null,
             segment: input.segment as any,
             imageUrl: input.imageUrl,
@@ -319,6 +325,8 @@ export const appRouter = router({
             galleryUrls: input.galleryUrls || null,
             calculationType: (input.calculationType || "unidade") as any,
             pricePerM2: input.pricePerM2 ? input.pricePerM2 as any : null,
+            pixPricePerM2: input.pixPricePerM2 ? input.pixPricePerM2 as any : (input.pricePerM2 ? input.pricePerM2 as any : null),
+            cardPricePerM2: input.cardPricePerM2 ? input.cardPricePerM2 as any : (input.pricePerM2 ? input.pricePerM2 as any : null),
             resellerPricePerM2: input.resellerPricePerM2 ? input.resellerPricePerM2 as any : null,
             minWidth: input.minWidth ? input.minWidth as any : null,
             maxWidth: input.maxWidth ? input.maxWidth as any : null,
@@ -524,6 +532,8 @@ export const appRouter = router({
         name: z.string(),
         description: z.string().optional(),
         price: z.string(),
+        pixPrice: z.string().optional(),
+        cardPrice: z.string().optional(),
         resellerPrice: z.string().optional(),
         segment: z.string(),
         imageUrl: z.string().optional(),
@@ -531,6 +541,8 @@ export const appRouter = router({
         galleryUrls: z.string().optional(), // JSON array de URLs
         calculationType: z.enum(["m2", "metro_linear", "pacote", "unidade"]).optional(),
         pricePerM2: z.string().optional(),
+        pixPricePerM2: z.string().optional(),
+        cardPricePerM2: z.string().optional(),
         resellerPricePerM2: z.string().optional(),
         minWidth: z.string().optional(),
         maxWidth: z.string().optional(),
@@ -554,6 +566,8 @@ export const appRouter = router({
           name: input.name,
           description: input.description,
           price: input.price as any,
+          pixPrice: input.pixPrice !== undefined ? (input.pixPrice ? parseFloat(input.pixPrice) : null) : undefined,
+          cardPrice: input.cardPrice !== undefined ? (input.cardPrice ? parseFloat(input.cardPrice) : null) : undefined,
           resellerPrice: input.resellerPrice !== undefined ? (input.resellerPrice ? parseFloat(input.resellerPrice) : null) : undefined,
           segment: input.segment as any,
           imageUrl: input.imageUrl,
@@ -564,6 +578,8 @@ export const appRouter = router({
         // Adicionar campos de m² se fornecidos
         if (input.calculationType) updateData.calculationType = input.calculationType;
         if (input.pricePerM2) updateData.pricePerM2 = parseFloat(input.pricePerM2);
+        if (input.pixPricePerM2 !== undefined) updateData.pixPricePerM2 = input.pixPricePerM2 ? parseFloat(input.pixPricePerM2) : null;
+        if (input.cardPricePerM2 !== undefined) updateData.cardPricePerM2 = input.cardPricePerM2 ? parseFloat(input.cardPricePerM2) : null;
         if (input.resellerPricePerM2 !== undefined) updateData.resellerPricePerM2 = input.resellerPricePerM2 ? parseFloat(input.resellerPricePerM2) : null;
         if (input.minWidth) updateData.minWidth = parseFloat(input.minWidth);
         if (input.maxWidth) updateData.maxWidth = parseFloat(input.maxWidth);
@@ -946,6 +962,8 @@ export const appRouter = router({
         selectedAttributes: z.string().optional(),
         customDimensions: z.string().optional(),
         priceAtCart: z.number(),
+        pixPriceAtCart: z.number().nonnegative().optional(),
+        cardPriceAtCart: z.number().nonnegative().optional(),
         artFileUrl: z.string().optional(),
         artFileUrls: z.string().optional(),
         notes: z.string().optional(),
@@ -1230,11 +1248,14 @@ export const appRouter = router({
           throw new TRPCError({ code: "BAD_REQUEST", message: "Carrinho vazio" });
         }
 
-        // 2. Calcular total (incluindo frete do primeiro item)
-        const subtotal = cartItems.reduce(
-          (sum: number, item: any) => sum + (parseFloat(item.priceAtCart) * item.quantity),
-          0
-        );
+        // 2. Calcular total com o snapshot correspondente à forma de pagamento escolhida.
+        const isCardPayment = input.paymentMethod === "cartao_credito";
+        const subtotal = cartItems.reduce((sum: number, item: any) => {
+          const selectedPrice = isCardPayment
+            ? parseFloat(item.cardPriceAtCart ?? item.priceAtCart)
+            : parseFloat(item.pixPriceAtCart ?? item.priceAtCart);
+          return sum + (selectedPrice * item.quantity);
+        }, 0);
         const shippingPrice = cartItems[0]?.shippingPrice ? parseFloat(cartItems[0].shippingPrice) : 0;
         const totalPrice = subtotal + shippingPrice;
 
@@ -1370,7 +1391,9 @@ export const appRouter = router({
             productId: item.productId,
             productName: item.productName ?? "Produto",
             quantity: item.quantity,
-            priceAtCart: parseFloat(item.priceAtCart),
+            priceAtCart: isCardPayment
+              ? parseFloat(item.cardPriceAtCart ?? item.priceAtCart)
+              : parseFloat(item.pixPriceAtCart ?? item.priceAtCart),
             selectedAttributes: item.selectedAttributes ?? undefined,
             variationSnapshot: item.variationSnapshot ?? undefined,
             customDimensions: item.customDimensions ?? undefined,

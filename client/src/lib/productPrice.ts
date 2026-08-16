@@ -10,26 +10,51 @@ export interface ProductPriceInfo {
 }
 
 export type ProductPriceAudience = "final" | "reseller";
+export type ProductPaymentMethod = "pix" | "card";
 
 type PriceAwareProduct = {
   price: string | number;
+  pixPrice?: string | number | null;
+  cardPrice?: string | number | null;
   resellerPrice?: string | number | null;
   pricePerM2?: string | number | null;
+  pixPricePerM2?: string | number | null;
+  cardPricePerM2?: string | number | null;
   resellerPricePerM2?: string | number | null;
   calculationType?: string | null;
 };
 
-function resolvePrice(finalPrice: unknown, resellerPrice: unknown, audience: ProductPriceAudience) {
-  const standard = parseFloat((finalPrice as any) ?? 0) || 0;
-  const reseller = parseFloat((resellerPrice as any) ?? 0) || 0;
-  return audience === "reseller" && reseller > 0 ? reseller : standard;
+function toPositivePrice(value: unknown) {
+  return parseFloat((value as any) ?? 0) || 0;
 }
 
-export function getProductPrice(product: PriceAwareProduct, audience: ProductPriceAudience = "final"): ProductPriceInfo {
+function resolvePrice(
+  pixPrice: unknown,
+  cardPrice: unknown,
+  legacyPrice: unknown,
+  resellerPrice: unknown,
+  audience: ProductPriceAudience,
+  paymentMethod: ProductPaymentMethod,
+) {
+  const pix = toPositivePrice(pixPrice);
+  const card = toPositivePrice(cardPrice);
+  const legacy = toPositivePrice(legacyPrice);
+  const reseller = parseFloat((resellerPrice as any) ?? 0) || 0;
+  if (audience === "reseller" && reseller > 0) return reseller;
+  if (paymentMethod === "card" && card > 0) return card;
+  if (paymentMethod === "pix" && pix > 0) return pix;
+  return legacy;
+}
+
+export function getProductPrice(
+  product: PriceAwareProduct,
+  audience: ProductPriceAudience = "final",
+  paymentMethod: ProductPaymentMethod = "pix",
+): ProductPriceInfo {
   const type = product.calculationType || "unidade";
 
   if (type === "m2") {
-    const val = resolvePrice(product.pricePerM2, product.resellerPricePerM2, audience);
+    const val = resolvePrice(product.pixPricePerM2, product.cardPricePerM2, product.pricePerM2, product.resellerPricePerM2, audience, paymentMethod);
     return {
       value: val,
       label: `R$ ${val.toFixed(2)}/m²`,
@@ -38,7 +63,7 @@ export function getProductPrice(product: PriceAwareProduct, audience: ProductPri
   }
 
   if (type === "metro_linear") {
-    const val = resolvePrice(product.pricePerM2, product.resellerPricePerM2, audience);
+    const val = resolvePrice(product.pixPricePerM2, product.cardPricePerM2, product.pricePerM2, product.resellerPricePerM2, audience, paymentMethod);
     return {
       value: val,
       label: `R$ ${val.toFixed(2)}/ml`,
@@ -47,7 +72,7 @@ export function getProductPrice(product: PriceAwareProduct, audience: ProductPri
   }
 
   // unidade, pacote ou qualquer outro
-  const val = resolvePrice(product.price, product.resellerPrice, audience);
+  const val = resolvePrice(product.pixPrice, product.cardPrice, product.price, product.resellerPrice, audience, paymentMethod);
   return {
     value: val,
     label: `R$ ${val.toFixed(2)}`,
@@ -58,4 +83,11 @@ export function getProductPrice(product: PriceAwareProduct, audience: ProductPri
 /** Retorna apenas o texto formatado do preço para uso simples */
 export function formatProductPrice(product: PriceAwareProduct, audience: ProductPriceAudience = "final"): string {
   return getProductPrice(product, audience).label;
+}
+
+export function getProductPaymentPrices(product: PriceAwareProduct, audience: ProductPriceAudience = "final") {
+  return {
+    pix: getProductPrice(product, audience, "pix"),
+    card: getProductPrice(product, audience, "card"),
+  };
 }
