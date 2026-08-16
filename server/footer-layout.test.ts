@@ -53,6 +53,17 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('SSL / TLS');
   });
 
+  it("organiza a faixa em três blocos proporcionais com selos ampliados", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('lg:grid-cols-[1.42fr_1fr_1.15fr]');
+    expect(footer).toContain('h-16 min-w-[6.75rem]');
+    expect(footer).toContain('h-16 w-16');
+    expect(footer).toContain('flex flex-nowrap gap-2.5 sm:gap-3');
+    expect(footer).toContain('h-16 min-w-0 flex-1');
+    expect(footer).toContain('lg:border-l lg:border-t-0');
+    expect(footer).toContain('sm:p-7');
+  });
+
   it("abre os canais sociais em nova aba e confirma visualmente a newsletter", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
     expect(footer).toContain('target="_blank"');
