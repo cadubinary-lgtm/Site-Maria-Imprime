@@ -42,6 +42,7 @@ export default function AdminProducts() {
   const [quickResellerPrice, setQuickResellerPrice] = useState("");
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [pixDiscountPercent, setPixDiscountPercent] = useState("");
   const [isPixDiscountConfirmOpen, setIsPixDiscountConfirmOpen] = useState(false);
@@ -79,16 +80,25 @@ export default function AdminProducts() {
     editingId || 0,
     { enabled: !!editingId }
   );
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: availableSegments, isLoading: availableSegmentsLoading } = trpc.productSegments.getAllSegments.useQuery();
+  const { data: selectedSegmentProducts, isLoading: selectedSegmentProductsLoading } = trpc.productSegments.getProductsBySegment.useQuery(
+    selectedSegmentId || 0,
+    { enabled: selectedSegmentId !== null },
+  );
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
 
-  const SEGMENTS = useMemo(() => {
-    if (!segmentsData || segmentsData.length === 0) return [];
-    return segmentsData.map((seg: any) => ({
-      id: seg.slug,
+  const adminSegments = useMemo(() => {
+    if (!availableSegments || availableSegments.length === 0) return [];
+    return availableSegments.map((seg: any) => ({
+      id: seg.id,
       label: `${seg.icon || "📦"} ${seg.name}`,
     }));
-  }, [segmentsData]);
+  }, [availableSegments]);
+
+  const selectedSegmentProductIds = useMemo(
+    () => new Set((selectedSegmentProducts || []).map((product: any) => product.id)),
+    [selectedSegmentProducts],
+  );
 
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
   const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
@@ -184,9 +194,10 @@ export default function AdminProducts() {
 
   // ─── Editar produto ───────────────────────────────────────────────────────
   // ─── Filtro ───────────────────────────────────────────────────────────────
-  const filteredProducts = products?.filter((product: any) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredProducts = (selectedSegmentId === null
+    ? products
+    : products?.filter((product: any) => selectedSegmentProductIds.has(product.id))
+  )?.filter((product: any) => product.name.toLowerCase().includes(searchQuery.toLowerCase())) || [];
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
@@ -493,7 +504,7 @@ export default function AdminProducts() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || (selectedSegmentId !== null && selectedSegmentProductsLoading)) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
@@ -525,6 +536,51 @@ export default function AdminProducts() {
           </Button>
                 </div>
       </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[12.5rem_minmax(0,1fr)]">
+        <aside className="xl:sticky xl:top-4 xl:self-start">
+          <Card className="border-gray-200 shadow-sm">
+            <CardContent className="p-4">
+              <div className="mb-3">
+                <h2 className="text-sm font-semibold text-gray-900">Segmentos</h2>
+                <p className="mt-1 text-xs text-gray-500">Filtre a listagem por categoria.</p>
+              </div>
+              <nav aria-label="Filtrar produtos administrativos por segmento" className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-1">
+                <Button
+                  type="button"
+                  variant={selectedSegmentId === null ? "default" : "outline"}
+                  onClick={() => {
+                    setSelectedSegmentId(null);
+                    setSelectedProducts(new Set());
+                  }}
+                  className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === null ? "bg-pink-600 hover:bg-pink-700" : "border-gray-200 text-gray-700 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"}`}
+                >
+                  Todos os segmentos
+                </Button>
+                {availableSegmentsLoading ? (
+                  <div className="col-span-full flex items-center gap-2 px-2 py-3 text-sm text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Carregando segmentos...
+                  </div>
+                ) : adminSegments.map((segment) => (
+                  <Button
+                    key={segment.id}
+                    type="button"
+                    variant={selectedSegmentId === segment.id ? "default" : "outline"}
+                    onClick={() => {
+                      setSelectedSegmentId(segment.id);
+                      setSelectedProducts(new Set());
+                    }}
+                    className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === segment.id ? "bg-pink-600 hover:bg-pink-700" : "border-gray-200 text-gray-700 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"}`}
+                  >
+                    {segment.label}
+                  </Button>
+                ))}
+              </nav>
+            </CardContent>
+          </Card>
+        </aside>
+
+        <div className="min-w-0 space-y-6">
       {/* ─── Barra de busca e ações em lote ──────────────────────────────── */}
       <div className="space-y-4">
         <div className="relative">
@@ -1049,6 +1105,8 @@ export default function AdminProducts() {
           ))}
         </div>
       )}
+        </div>
+      </div>
 
       <AlertDialog open={isPixDiscountConfirmOpen} onOpenChange={setIsPixDiscountConfirmOpen}>
         <AlertDialogContent>
