@@ -43,6 +43,7 @@ export function ProductImageUploader({
   const [isDroppingGalleryFiles, setIsDroppingGalleryFiles] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [galleryDeleteSlot, setGalleryDeleteSlot] = useState<number | null>(null);
+  const [isMainImageDeleteConfirmOpen, setIsMainImageDeleteConfirmOpen] = useState(false);
   const previewImages = useMemo(() => getPreviewImages(mainImageUrl, galleryUrls), [mainImageUrl, galleryUrls]);
   const previewIndex = previewUrl ? previewImages.indexOf(previewUrl) : -1;
 
@@ -228,10 +229,14 @@ export function ProductImageUploader({
             <p className="text-xs font-medium text-gray-600">Foto Principal</p>
             <span className="text-[11px] font-medium text-pink-600">Capa do produto</span>
           </div>
-          <div
-            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors bg-gray-50 ${isMainDragOver ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-pink-400"}`}
-            style={{ height: compact ? 132 : 180 }}
-            onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
+          <div className="flex min-w-0 gap-3">
+            <button
+              type="button"
+              className={`group relative shrink-0 overflow-hidden rounded-xl bg-gray-50 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 ${isMainDragOver ? "ring-2 ring-pink-400 ring-offset-2" : "hover:ring-2 hover:ring-pink-200"}`}
+              style={{ height: compact ? 132 : 180, width: compact ? 132 : 180 }}
+              onClick={() => !uploadingMain && (mainImageUrl ? setPreviewUrl(mainImageUrl) : mainInputRef.current?.click())}
+              aria-label={mainImageUrl ? "Ampliar foto principal" : "Adicionar foto principal"}
+              title={mainImageUrl ? "Clique para ampliar" : "Adicionar foto principal"}
             onDragOver={(event) => {
               if (dragIndex !== null) {
                 event.preventDefault();
@@ -244,19 +249,8 @@ export function ProductImageUploader({
             {mainImageUrl ? (
               <>
                 <img src={mainImageUrl} alt="Foto principal" className="w-full h-full object-contain" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <p className="text-white text-sm font-medium">Clique para ampliar ou solte aqui para tornar principal</p>
-                </div>
-                <button
-                  type="button"
-                  className="absolute right-2 bottom-2 z-10 rounded-md bg-black/70 px-2 py-1 text-xs font-medium text-white hover:bg-black/85"
-                  onClick={(event) => { event.stopPropagation(); mainInputRef.current?.click(); }}
-                >
-                  substituir
-                </button>
-                <div className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-pink-600 px-2 py-1 text-[11px] font-semibold text-white shadow-sm">
-                  <Star className="h-3 w-3 fill-current" />
-                  Foto de capa
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Maximize2 className="h-5 w-5 text-white" />
                 </div>
               </>
             ) : (
@@ -276,6 +270,43 @@ export function ProductImageUploader({
                 <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
               </div>
             )}
+            </button>
+
+            <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-600">
+                  <Star className="h-3.5 w-3.5 fill-current" />
+                  Foto de capa
+                </span>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  {mainImageUrl ? "Imagem exibida como capa no catálogo." : "Defina a imagem que será exibida como capa no catálogo."}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-1">
+                <button
+                  type="button"
+                  className={`${PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon} inline-flex items-center gap-1.5 px-1.5 text-xs font-medium`}
+                  onClick={() => mainInputRef.current?.click()}
+                  title={mainImageUrl ? "Substituir foto de capa" : "Adicionar foto de capa"}
+                  aria-label="Substituir foto principal"
+                  disabled={uploadingMain}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>{mainImageUrl ? "Substituir" : "Adicionar"}</span>
+                </button>
+                {mainImageUrl && (
+                  <button
+                    type="button"
+                    className={PRODUCT_IMAGE_LAYOUT.thumbnailActionIcon}
+                    onClick={() => setIsMainImageDeleteConfirmOpen(true)}
+                    title="Excluir foto principal"
+                    aria-label="Excluir foto principal"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           <input
             ref={mainInputRef}
@@ -432,6 +463,26 @@ export function ProductImageUploader({
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isMainImageDeleteConfirmOpen} onOpenChange={setIsMainImageDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir foto principal?</AlertDialogTitle>
+            <AlertDialogDescription>O produto ficará sem foto de capa até que uma nova imagem seja adicionada.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (canExecuteConfirmedDelete(mainImageUrl)) onMainImageChange("", "");
+                setIsMainImageDeleteConfirmOpen(false);
+              }}
+            >
+              Excluir foto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={galleryDeleteSlot !== null} onOpenChange={(open) => !open && setGalleryDeleteSlot(null)}>
         <AlertDialogContent>
