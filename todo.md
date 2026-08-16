@@ -2859,3 +2859,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir efetivamente o card público compacto: imagem ampliada, sem descrição e sem blocos operacionais
 - [x] Exibir produção no mesmo dia com taxa de urgência apenas em produtos por m² com prazo configurado
 - [x] Incluir preços Pix, cartão e revendedor no formulário Preço rápido de Todos os Produtos
+- [x] Adicionar barra lateral de segmentos à esquerda em Todos os Produtos com filtro dinâmico

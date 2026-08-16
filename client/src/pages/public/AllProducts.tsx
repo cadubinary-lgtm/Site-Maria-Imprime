@@ -9,7 +9,7 @@ import { PublicProductCard } from "@/components/products/PublicProductCard";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
   const { customer } = useCustomerAuth();
   const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
@@ -20,23 +20,28 @@ export default function AllProducts() {
   }, []);
 
   // Carregar segmentos dinamicamente da API
-  const { data: segmentsData, isLoading: segmentsLoading } = trpc.segments.getAll.useQuery();
+  const { data: segmentsData, isLoading: segmentsLoading } = trpc.productSegments.getAllSegments.useQuery();
 
   // Mapear segmentos para formato esperado
   const segments = useMemo(() => {
     if (!segmentsData || segmentsData.length === 0) return [];
     return segmentsData.map((seg: any) => ({
-      value: seg.slug,
+      id: seg.id,
       label: `${seg.icon || '📦'} ${seg.name}`,
     }));
   }, [segmentsData]);
 
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
+  const { data: segmentProducts, isLoading: segmentProductsLoading } = trpc.productSegments.getProductsBySegment.useQuery(
+    selectedSegmentId || 0,
+    { enabled: selectedSegmentId !== null },
+  );
 
   const filteredAndSortedProducts = useMemo(() => {
-    if (!products) return [];
+    const productsToFilter = selectedSegmentId === null ? products : segmentProducts;
+    if (!productsToFilter) return [];
 
-    let filtered = products.filter((product) => Boolean(product.isActive));
+    let filtered = productsToFilter.filter((product) => Boolean(product.isActive));
 
     // Filter by search term
     if (searchTerm) {
@@ -48,11 +53,6 @@ export default function AllProducts() {
       );
     }
 
-    // Filter by segment
-    if (selectedSegment) {
-      filtered = filtered.filter((p) => p.segment === selectedSegment);
-    }
-
     // Sort
     if (sortBy === 'price') {
       filtered = [...filtered].sort((a, b) => getProductPrice(a, priceAudience).value - getProductPrice(b, priceAudience).value);
@@ -61,11 +61,11 @@ export default function AllProducts() {
     }
 
     return filtered;
-  }, [products, searchTerm, selectedSegment, sortBy, priceAudience]);
+  }, [products, segmentProducts, searchTerm, selectedSegmentId, sortBy, priceAudience]);
 
 
 
-  if (isLoading) {
+  if (isLoading || (selectedSegmentId !== null && segmentProductsLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -84,103 +84,99 @@ export default function AllProducts() {
           Encontre a solução perfeita para seu negócio
         </p>
 
-        {/* Filters */}
-        <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Buscar
-              </label>
-              <Input
-                placeholder="Nome ou descrição..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-background border-border"
-              />
-            </div>
-
-            {/* Segment Filter */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Segmento
-              </label>
-              <select
-                value={selectedSegment || ''}
-                onChange={(e) => setSelectedSegment(e.target.value || null)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground"
-              >
-                <option value="">Todos os segmentos</option>
-                {segments.map((seg) => (
-                  <option key={seg.value} value={seg.value}>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
+          <aside className="lg:sticky lg:top-4 lg:self-start">
+            <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+              <div className="mb-3">
+                <h2 className="text-sm font-semibold text-foreground">Buscar por segmento</h2>
+                <p className="mt-1 text-xs text-gray-400">Escolha uma categoria para filtrar os produtos.</p>
+              </div>
+              <nav aria-label="Filtrar produtos por segmento" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                <Button
+                  type="button"
+                  variant={selectedSegmentId === null ? 'default' : 'outline'}
+                  onClick={() => setSelectedSegmentId(null)}
+                  className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === null ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
+                >
+                  Todos os segmentos
+                </Button>
+                {segmentsLoading ? (
+                  <div className="col-span-full flex items-center gap-2 px-2 py-3 text-sm text-gray-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Carregando segmentos...
+                  </div>
+                ) : segments.map((seg) => (
+                  <Button
+                    key={seg.id}
+                    type="button"
+                    variant={selectedSegmentId === seg.id ? 'default' : 'outline'}
+                    onClick={() => setSelectedSegmentId(seg.id)}
+                    className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === seg.id ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
+                  >
                     {seg.label}
-                  </option>
+                  </Button>
                 ))}
-              </select>
+              </nav>
+            </div>
+          </aside>
+
+          <div className="min-w-0">
+            <div className="mb-6 rounded-lg border border-border bg-card p-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Buscar
+                  </label>
+                  <Input
+                    placeholder="Nome ou descrição..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-background border-border"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Ordenar por
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'name' | 'price')}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground"
+                  >
+                    <option value="name">Nome</option>
+                    <option value="price">Preço</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            {/* Sort */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Ordenar por
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'name' | 'price')}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground"
-              >
-                <option value="name">Nome</option>
-                <option value="price">Preço</option>
-              </select>
+            <div className="mb-6 text-sm text-gray-400">
+              Mostrando {filteredAndSortedProducts.length} de {products?.length || 0} produtos
             </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            {segments.map((seg) => (
-              <Button
-                key={seg.value}
-                variant={selectedSegment === seg.value ? 'default' : 'outline'}
-                onClick={() =>
-                  setSelectedSegment(selectedSegment === seg.value ? null : seg.value)
-                }
-                className={
-                  selectedSegment === seg.value
-                    ? 'bg-orange-500 hover:bg-orange-600'
-                    : ''
-                }
-              >
-                {seg.label}
-              </Button>
-            ))}
+            {filteredAndSortedProducts.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {filteredAndSortedProducts.map((product) => (
+                  <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <p className="mb-4 text-gray-400">Nenhum produto encontrado</p>
+                <Button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedSegmentId(null);
+                  }}
+                  variant="outline"
+                >
+                  Limpar filtros
+                </Button>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Results Info */}
-        <div className="mb-6 text-sm text-gray-400">
-          Mostrando {filteredAndSortedProducts.length} de {products?.length || 0} produtos
-        </div>
-
-        {/* Products Grid */}
-        {filteredAndSortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAndSortedProducts.map((product) => (
-              <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-400 mb-4">Nenhum produto encontrado</p>
-            <Button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedSegment(null);
-              }}
-              variant="outline"
-            >
-              Limpar filtros
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
