@@ -31,6 +31,8 @@ describe("layout de Editar Produto", () => {
     expect(EDIT_PRODUCT_MODAL_LAYOUT.dialog).toContain("xl:max-w-[1480px]");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.details).toContain("xl:grid-cols-12");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.secondary).toContain("xl:grid-cols-");
+    expect(editProductSource).toContain('className="flex flex-col gap-4"');
+    expect(editProductSource).toContain('order-2 self-start');
   });
 });
 
