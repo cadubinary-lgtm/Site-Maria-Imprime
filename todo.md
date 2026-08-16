@@ -2865,3 +2865,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover em todo o site os ícones automáticos de segmentos sem ícone cadastrado
 - [x] Manter o aviso de produção no mesmo dia e taxa de urgência em uma única linha nos cards públicos
 - [x] Aplicar e validar o hover independente no botão Ver opções dos cards públicos
+- [x] Reorganizar foto principal e até seis fotos adicionais em Novo Produto e Editar Produto
