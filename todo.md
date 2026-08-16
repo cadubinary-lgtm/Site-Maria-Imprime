@@ -2822,3 +2822,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Auditar e alinhar as divergências entre a prévia atual e o domínio oficial
 - [x] Remover depoimentos não verificáveis da página pública e substituir por conteúdo institucional
 - [x] Ocultar da vitrine pública os produtos de teste sem pedidos vinculados
+- [x] Reorganizar a faixa de pagamentos, segurança e ambiente protegido do rodapé conforme referência
