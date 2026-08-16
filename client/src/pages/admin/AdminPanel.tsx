@@ -33,20 +33,20 @@ import { formatProductPrice } from '@/lib/productPrice';
 import { DeliveryOptionsManager, type DeliveryOptionData } from '@/components/products/DeliveryOptionsManager';
 
 const SEGMENT_LABELS: Record<string, string> = {
-  alimentacao: '🍔 Alimentação',
-  beleza: '💄 Beleza & Saúde',
-  saude: '💄 Beleza & Saúde',
-  varejo: '🛍️ Varejo',
-  servicos: '🔧 Serviços',
+  alimentacao: 'Alimentação',
+  beleza: 'Beleza & Saúde',
+  saude: 'Beleza & Saúde',
+  varejo: 'Varejo',
+  servicos: 'Serviços',
 };
 
 // Segmentos padrão como fallback
 const DEFAULT_SEGMENTS = [
-  { value: 'alimentacao', label: '🍔 Alimentação' },
-  { value: 'beleza', label: '💄 Beleza & Saúde' },
-  { value: 'varejo', label: '🛍️ Varejo' },
-  { value: 'servicos', label: '🔧 Serviços' },
-  { value: 'revendedores', label: '🏭 REVENDEDORES' },
+  { value: 'alimentacao', label: 'Alimentação' },
+  { value: 'beleza', label: 'Beleza & Saúde' },
+  { value: 'varejo', label: 'Varejo' },
+  { value: 'servicos', label: 'Serviços' },
+  { value: 'revendedores', label: 'REVENDEDORES' },
 ];
 
 export default function AdminPanel() {
@@ -100,7 +100,7 @@ export default function AdminPanel() {
     if (segmentsData && segmentsData.length > 0) {
       const mapped = segmentsData.map((seg: any) => ({
         value: seg.slug,
-        label: `${seg.icon || '📦'} ${seg.name}`,
+        label: typeof seg.icon === 'string' && seg.icon.trim() ? `${seg.icon} ${seg.name}` : seg.name,
       }));
       console.log('Mapped SEGMENTS:', mapped);
       return mapped;

@@ -91,7 +91,8 @@ export default function AdminProducts() {
     if (!availableSegments || availableSegments.length === 0) return [];
     return availableSegments.map((seg: any) => ({
       id: seg.id,
-      label: `${seg.icon || "📦"} ${seg.name}`,
+      name: seg.name,
+      icon: typeof seg.icon === "string" && seg.icon.trim() ? seg.icon : null,
     }));
   }, [availableSegments]);
 
@@ -572,7 +573,8 @@ export default function AdminProducts() {
                     }}
                     className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === segment.id ? "bg-pink-600 hover:bg-pink-700" : "border-gray-200 text-gray-700 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"}`}
                   >
-                    {segment.label}
+                    {segment.icon ? <span aria-hidden="true">{segment.icon}</span> : null}
+                    <span>{segment.name}</span>
                   </Button>
                 ))}
               </nav>
