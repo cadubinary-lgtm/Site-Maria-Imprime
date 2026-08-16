@@ -37,7 +37,7 @@ export default function AllProducts() {
   const filteredAndSortedProducts = useMemo(() => {
     if (!products) return [];
 
-    let filtered = products;
+    let filtered = products.filter((product) => Boolean(product.isActive));
 
     // Filter by search term
     if (searchTerm) {

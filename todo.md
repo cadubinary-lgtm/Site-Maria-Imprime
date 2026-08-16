@@ -2821,3 +2821,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar habilidade reutilizável para corrigir preço inicial por m² no configurador
 - [ ] Auditar e alinhar as divergências entre a prévia atual e o domínio oficial
 - [x] Remover depoimentos não verificáveis da página pública e substituir por conteúdo institucional
+- [x] Ocultar da vitrine pública os produtos de teste sem pedidos vinculados

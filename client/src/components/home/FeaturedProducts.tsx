@@ -24,8 +24,8 @@ export function FeaturedProducts() {
     );
   }
 
-  // Pega 7 produtos aleatórios
-  const featured = products?.slice(0, 7) || [];
+  // Exibe somente produtos ativos na vitrine pública.
+  const featured = (products ?? []).filter((product: any) => Boolean(product.isActive)).slice(0, 7);
 
   return (
     <section className="bg-white py-20 px-4" style={{paddingTop: '24px'}}>
