@@ -2817,3 +2817,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a falha persistente ao salvar produto no domínio oficial
 - [x] Criar habilidade reutilizável para corrigir falhas de salvamento administrativo em produção
 - [x] Corrigir erro falso e limpar rascunho após salvar produto no domínio oficial
+- [x] Corrigir preço inicial de produtos por m² no configurador público
