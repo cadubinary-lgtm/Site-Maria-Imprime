@@ -6,6 +6,7 @@ import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL
 const root = resolve(import.meta.dirname, "..");
 const newProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
 const editProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
+const globalStyles = readFileSync(resolve(root, "client/src/index.css"), "utf8");
 
 describe("layout horizontal de Novo Produto", () => {
   it("mantém os campos essenciais distribuídos nas doze colunas de tela larga", () => {
@@ -51,5 +52,13 @@ describe("padrão de painéis dos formulários de produto", () => {
     expect(editProductSource).toContain("sm:grid-cols-2 sm:items-start");
     expect(newProductSource.match(/Tags do Produto/g)).toHaveLength(1);
     expect(editProductSource.match(/Tags do Produto/g)).toHaveLength(1);
+  });
+});
+
+describe("rolagem do painel administrativo", () => {
+  it("mantém a página Novo Produto em uma única área de rolagem", () => {
+    expect(globalStyles).toContain("body:has(.admin-visual-system)");
+    expect(globalStyles).toContain("#root:has(.admin-visual-system)");
+    expect(globalStyles).toContain("overflow: hidden;");
   });
 });
