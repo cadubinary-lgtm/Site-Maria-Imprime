@@ -86,6 +86,16 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('Pagamentos parcelados terão acréscimo de juros da operadora. Nota fiscal sujeita a emissão de acordo com prestador de serviço, conforme legislação pertinente.');
   });
 
+  it("permite validar os dois selos de segurança e explica o status no hover", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('function SecuritySealLink');
+    expect(footer).toContain('https://transparencyreport.google.com/safe-browsing/search?url=mariaimprime.com.br');
+    expect(footer).toContain('https://www.sslshopper.com/ssl-checker.html#hostname=mariaimprime.com.br');
+    expect(footer).toContain('target="_blank" rel="noopener noreferrer"');
+    expect(footer).toContain('Site 100% seguro e verificado');
+    expect(footer).toContain('SecuritySealLink href=');
+  });
+
   it("abre os canais sociais em nova aba e confirma visualmente a newsletter", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
     expect(footer).toContain('target="_blank"');

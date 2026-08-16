@@ -9,3 +9,7 @@ Na prévia, os dois selos carregaram a partir dos ativos permanentes do projeto.
 A inspeção visual confirmou que os selos foram centralizados nos cards de segurança, o aviso permanece legível abaixo das bandeiras e o bloco Ambiente protegido manteve seu arranjo original.
 
 Após a solicitação de ampliação, o selo Google Safe Browsing foi substituído pela imagem horizontal enviada e ambos os selos passaram a ocupar cards individuais mais altos, o que aumentou sua legibilidade sem alterar os demais blocos do rodapé.
+
+Os destinos externos enviados foram verificados: o selo Google direcionará à consulta de status do domínio no Google Safe Browsing, e o selo SSL abrirá o verificador SSL com referência ao domínio mariaimprime.com.br.
+
+Os dois selos foram convertidos em links que abrem em nova aba, com rótulos acessíveis. O tooltip "Site 100% seguro e verificado" aparece tanto por hover quanto por foco via teclado.
