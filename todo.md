@@ -2831,3 +2831,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ampliar os selos de Google Safe Browsing e SSL Certificado no bloco de segurança do rodapé
 - [x] Adicionar tooltip e link de verificação do Google Safe Browsing no selo correspondente
 - [x] Adicionar tooltip e link de verificação SSL no selo correspondente
+- [x] Adicionar transição suave de escala aos selos de segurança no hover

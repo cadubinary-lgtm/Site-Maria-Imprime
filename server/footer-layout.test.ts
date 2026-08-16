@@ -96,6 +96,14 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('SecuritySealLink href=');
   });
 
+  it("amplia suavemente os selos de segurança no hover e no foco", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('transition duration-200 ease-out');
+    expect(footer).toContain('hover:scale-[1.03]');
+    expect(footer).toContain('focus-visible:scale-[1.03]');
+    expect(footer).toContain('motion-reduce:hover:scale-100');
+  });
+
   it("abre os canais sociais em nova aba e confirma visualmente a newsletter", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
     expect(footer).toContain('target="_blank"');
