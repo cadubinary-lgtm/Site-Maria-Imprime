@@ -2828,3 +2828,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar os selos Google Safe Browsing e SSL Certificado com as referências enviadas
 - [x] Exibir o nome da bandeira ao passar o mouse sobre cada cartão de crédito
 - [x] Inserir o aviso de juros de parcelamento e de emissão de nota fiscal abaixo das formas de pagamento
+- [x] Ampliar os selos de Google Safe Browsing e SSL Certificado no bloco de segurança do rodapé

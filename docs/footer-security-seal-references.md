@@ -7,3 +7,5 @@ O primeiro endereço fornecido apresenta o selo horizontal de Google Safe Browsi
 Na prévia, os dois selos carregaram a partir dos ativos permanentes do projeto. Também foram confirmados o aviso sobre juros no parcelamento e emissão de nota fiscal e as sete bandeiras homologadas.
 
 A inspeção visual confirmou que os selos foram centralizados nos cards de segurança, o aviso permanece legível abaixo das bandeiras e o bloco Ambiente protegido manteve seu arranjo original.
+
+Após a solicitação de ampliação, o selo Google Safe Browsing foi substituído pela imagem horizontal enviada e ambos os selos passaram a ocupar cards individuais mais altos, o que aumentou sua legibilidade sem alterar os demais blocos do rodapé.

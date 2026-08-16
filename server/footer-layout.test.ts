@@ -57,7 +57,7 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).not.toContain('/manus-storage/boleto_d74f05f4.jpg');
     expect(footer).toContain('Google Safe Browsing');
     expect(footer).toContain('SSL Certificado');
-    expect(footer).toContain('/manus-storage/google-safe-browsing_eb47c169.png');
+    expect(footer).toContain('/manus-storage/google-safe-browsing-large_347d2bfd.png');
     expect(footer).toContain('/manus-storage/ssl-certificado_6ff35a41.png');
   });
 
@@ -67,8 +67,9 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7');
     expect(footer).toContain('h-16 w-full min-w-0');
     expect(footer).toContain('h-16 w-16');
-    expect(footer).toContain('grid grid-cols-2 gap-2.5 sm:gap-3');
-    expect(footer).toContain('h-16 min-w-0 items-center');
+    expect(footer).toContain('grid grid-cols-1 gap-2.5 sm:gap-3');
+    expect(footer).toContain('h-20 min-w-0 items-center');
+    expect(footer).toContain('h-16 w-full object-contain');
     expect(footer).toContain('lg:border-l lg:border-t-0');
     expect(footer).toContain('sm:p-7');
   });
