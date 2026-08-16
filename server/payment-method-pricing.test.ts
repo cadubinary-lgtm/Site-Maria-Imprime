@@ -37,7 +37,7 @@ describe("preços por forma de pagamento", () => {
     const routers = readFileSync(resolve(root, "server/routers.ts"), "utf8");
 
     expect(productDetail).toContain("no Pix");
-    expect(productDetail).toContain("no cartão de crédito");
+    expect(productDetail).toContain("No cartão de crédito");
     expect(productDetail).toContain("pixPriceAtCart: effectivePrice");
     expect(productDetail).toContain("cardPriceAtCart: cardEffectivePrice");
     expect(checkout).toContain('paymentMethod === "cartao"');

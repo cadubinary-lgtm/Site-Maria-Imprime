@@ -1962,14 +1962,17 @@ export default function ProductDetail() {
                       {shippingSummary.label}
                     </span>
                   </div>
-                  <div className="space-y-1.5 pt-2 border-t border-gray-200">
-                    <div className="flex justify-between items-baseline gap-3">
-                      <span className="text-lg font-bold text-gray-900">R$ {total.toFixed(2)} no Pix</span>
-                      <span className="text-xs font-semibold text-green-600">à vista</span>
+                  <div className="space-y-2 pt-3 border-t border-gray-200">
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold uppercase tracking-wide text-emerald-700">Preço especial no Pix</span>
+                        <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">à vista</span>
+                      </div>
+                      <p className="mt-1 text-3xl font-extrabold tracking-tight text-emerald-700">R$ {total.toFixed(2)}</p>
                     </div>
-                    <div className="flex justify-between items-baseline gap-3 text-sm">
-                      <span className="font-medium text-gray-700">ou R$ {cardTotal.toFixed(2)} no cartão de crédito</span>
-                      <CreditCard className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+                    <div className="flex justify-between items-baseline gap-3 px-1 text-sm">
+                      <span className="font-medium text-gray-600">No cartão de crédito</span>
+                      <span className="inline-flex items-center gap-1 font-semibold text-gray-800">R$ {cardTotal.toFixed(2)} <CreditCard className="h-4 w-4 text-gray-400" aria-hidden /></span>
                     </div>
                   </div>
                 </div>

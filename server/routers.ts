@@ -100,6 +100,7 @@ import { companySettingsRouter } from "./companySettingsRouter";
 import { abandonedCartsRouter } from "./abandonedCartsRouter";
 import { preImpressaoHistoryRouter } from "./preImpressaoHistoryRouter";
 import { ordersTrashRouter } from "./ordersTrashRouter";
+import { productPaymentPricingRouter } from "./routers-product-payment-pricing";
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
 // Usado em todas as procedures do checkout/erp que o painel admin consome
@@ -135,6 +136,7 @@ export const appRouter = router({
   abandonedCarts: abandonedCartsRouter,
   preImpressaoHistory: preImpressaoHistoryRouter,
   ordersTrash: ordersTrashRouter,
+  productPaymentPricing: productPaymentPricingRouter,
   gerenciadorFinanceiro: gerenciadorFinanceiroRouter,
   gestaoFiscal: gestaoFiscalRouter,
   financeiro: financeiroRouter,

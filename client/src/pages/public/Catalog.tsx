@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatProductPrice, getProductPrice } from "@/lib/productPrice";
+import { formatProductPrice, getPixDiscountInfo, getProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
@@ -228,12 +228,19 @@ export default function Catalog() {
               <>
                 {/* Grid de Produtos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {paginatedProducts.map((product) => (
+                  {paginatedProducts.map((product) => {
+                    const pixDiscount = getPixDiscountInfo(product, priceAudience);
+                    return (
                     <Card key={product.id} className="group hover:shadow-lg transition border-gray-200 overflow-hidden p-0">
                       <Link href={`/produto/${product.id}`}>
                         {/* Imagem sangrada no topo */}
                         <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl">
                           <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
+                          {pixDiscount.eligible && (
+                            <span className="absolute left-2 top-2 z-20 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                              Desconto no Pix
+                            </span>
+                          )}
                           {product.imageUrl ? (
                             <img
                               src={product.imageUrl}
@@ -276,9 +283,10 @@ export default function Catalog() {
 
                         {/* Preço e Botões */}
                         <div className="flex items-center justify-between mb-4">
-                          <span className="text-xl font-bold text-pink-600">
-                            {formatProductPrice(product, priceAudience)}
-                          </span>
+                          <div>
+                            <span className="text-xl font-bold text-emerald-600">{formatProductPrice(product, priceAudience)}</span>
+                            <p className="text-xs font-medium text-emerald-700">no Pix</p>
+                          </div>
                         </div>
 
                         {/* Botões */}
@@ -299,7 +307,8 @@ export default function Catalog() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Paginação */}

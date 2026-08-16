@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatProductPrice, getProductPaymentPrices, getProductPrice } from "./productPrice";
+import { formatProductPrice, getPixDiscountInfo, getProductPaymentPrices, getProductPrice } from "./productPrice";
 
 describe("productPrice", () => {
   it("usa pricePerM2 para produtos calculados por metro quadrado", () => {
@@ -49,6 +49,15 @@ describe("productPrice", () => {
     expect(getProductPrice(lonaImpressa, "final", "pix")).toMatchObject({ value: 70, suffix: "/m²" });
     expect(getProductPrice(lonaImpressa, "final", "card")).toMatchObject({ value: 75, suffix: "/m²" });
     expect(getProductPrice(lonaImpressa, "reseller", "card")).toMatchObject({ value: 54, suffix: "/m²" });
+  });
+
+  it("identifica desconto real no Pix sem sinalizar preços iguais", () => {
+    expect(getPixDiscountInfo({ price: "100", pixPrice: "90", cardPrice: "100" })).toMatchObject({
+      eligible: true,
+      percentage: 10,
+      label: "10% OFF no Pix",
+    });
+    expect(getPixDiscountInfo({ price: "100", pixPrice: "100", cardPrice: "100" }).eligible).toBe(false);
   });
 
   it("usa a tabela de revenda por unidade quando ela estiver configurada", () => {
