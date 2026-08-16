@@ -38,7 +38,9 @@ describe("padrão de painéis dos formulários de produto", () => {
   it("centraliza o acabamento retangular reutilizado pelos dois fluxos", () => {
     expect(PRODUCT_FORM_PANEL.card).toContain("rounded-xl");
     expect(PRODUCT_FORM_PANEL.card).toContain("border");
+    expect(PRODUCT_FORM_PANEL.content).toContain("space-y-4");
     expect(PRODUCT_FORM_PANEL.inner).toContain("shadow-sm");
+    expect(PRODUCT_FORM_PANEL.inner).toContain("space-y-4");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.card");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.inner");
     expect(editProductSource).toContain("Dados comerciais");

@@ -678,7 +678,7 @@ export default function AdminProducts() {
                           </div>
                         </DialogHeader>
 
-                        <div className="space-y-4 xl:space-y-3">
+                        <div className="space-y-4">
                           <Card className={PRODUCT_FORM_PANEL.card}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Dados comerciais</h3>
@@ -750,7 +750,7 @@ export default function AdminProducts() {
                                 </Label>
                                 <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="Opcional" />
                               </div>
-                              <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
+                              <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                                 <div>
                                   <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
                                   <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => setEditForm({ ...editForm, minWidth: e.target.value } as any)} />

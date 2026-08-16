@@ -2849,3 +2849,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar ao painel de fotos do produto o mesmo contêiner visual dos blocos operacionais
 - [x] Refinar a hierarquia e o espaçamento interno do painel Fotos do Produto
 - [x] Padronizar todos os blocos de informação de Novo Produto e Editar Produto em painéis retangulares
+- [x] Uniformizar os espaçamentos internos e entre painéis de Novo Produto e Editar Produto

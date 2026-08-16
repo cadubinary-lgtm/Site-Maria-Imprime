@@ -23,5 +23,5 @@ export const PRODUCT_FORM_PANEL = {
   card: "gap-0 rounded-xl border border-gray-200 bg-white py-4 shadow-sm",
   content: "space-y-4 px-4",
   title: "text-base font-semibold text-gray-900",
-  inner: "space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm",
+  inner: "space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm",
 } as const;
