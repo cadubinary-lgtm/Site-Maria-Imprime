@@ -14,7 +14,7 @@ import { useLocation } from "wouter";
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
-import { NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
+import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
 import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
 
 export default function AdminNewProduct() {
@@ -217,19 +217,13 @@ export default function AdminNewProduct() {
           </div>
         </div>
 
-        <Card className={`${PRODUCT_FORM_PANEL.card} border-orange-200 bg-orange-50/30`}>
-          <CardHeader className="px-5 py-4">
-            <CardTitle className="flex items-center gap-2 text-orange-700">
-              <Plus className="w-4 h-4" />
-              Dados do Produto
-            </CardTitle>
-            <CardDescription>Preencha os dados para criar um novo produto no catálogo</CardDescription>
-          </CardHeader>
+        <Card className={PRODUCT_FORM_PANEL.card}>
           <CardContent className={PRODUCT_FORM_PANEL.content}>
+            <h3 className={PRODUCT_FORM_PANEL.title}>Dados comerciais</h3>
             <form onSubmit={(event) => event.preventDefault()} className="space-y-4">
-              <div className={NEW_PRODUCT_FIELD_LAYOUT.grid}>
-                <div className={NEW_PRODUCT_FIELD_LAYOUT.name}>
-                  <Label htmlFor="create-name">Nome do Produto *</Label>
+              <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
+                <div className={EDIT_PRODUCT_MODAL_LAYOUT.name}>
+                  <Label htmlFor="create-name">Nome</Label>
                   <Input
                     id="create-name"
                     value={createForm.name}
@@ -238,7 +232,20 @@ export default function AdminNewProduct() {
                     required
                   />
                 </div>
-                <div className={NEW_PRODUCT_FIELD_LAYOUT.calculation}>
+
+                <div className={EDIT_PRODUCT_MODAL_LAYOUT.description}>
+                  <Label htmlFor="create-description">Descrição</Label>
+                  <Textarea
+                    id="create-description"
+                    value={createForm.description}
+                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                    placeholder="Descreva o produto"
+                    rows={2}
+                    className="min-h-[68px]"
+                  />
+                </div>
+
+                <div className={EDIT_PRODUCT_MODAL_LAYOUT.calculation}>
                   <Label htmlFor="create-calculationType">Tipo de Cobrança *</Label>
                   <Select
                     value={createForm.calculationType}
@@ -256,7 +263,7 @@ export default function AdminNewProduct() {
                   </Select>
                 </div>
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
-                  <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
+                  <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                     <Label htmlFor="create-pixPrice">Preço via Pix (R$) *</Label>
                     <Input
                       id="create-pixPrice"
@@ -270,56 +277,40 @@ export default function AdminNewProduct() {
                   </div>
                 )}
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
-                  <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
+                  <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                     <Label htmlFor="create-cardPrice">Preço via Cartão (R$) *</Label>
                     <Input id="create-cardPrice" type="number" step="0.01" value={createForm.cardPrice} onChange={(e) => setCreateForm({ ...createForm, cardPrice: e.target.value })} placeholder="0.00" required />
                   </div>
                 )}
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
-                  <div className={NEW_PRODUCT_FIELD_LAYOUT.price}>
+                  <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                     <Label htmlFor="create-resellerPrice">Preço Revendedor (R$)</Label>
                     <Input id="create-resellerPrice" type="number" step="0.01" value={createForm.resellerPrice} onChange={(e) => setCreateForm({ ...createForm, resellerPrice: e.target.value })} placeholder="Opcional" />
                   </div>
                 )}
-                <div className={NEW_PRODUCT_FIELD_LAYOUT.description}>
-                  <Label htmlFor="create-description">Descrição</Label>
-                  <Textarea
-                    id="create-description"
-                    value={createForm.description}
-                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                    placeholder="Descreva o produto"
-                    rows={2}
-                    className="min-h-[68px]"
-                  />
-                </div>
               </div>
               {/* Campos condicionais para m² e metro linear */}
               {(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && (
-                <div className={PRODUCT_FORM_PANEL.inner}>
-                  <p className="text-sm font-medium text-gray-700">
-                    {createForm.calculationType === "metro_linear" ? "Configurações de Metro Linear" : "Configurações de m²"}
-                  </p>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
+                <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
+                    <div className="sm:col-span-1 xl:col-span-2">
                       <Label htmlFor="create-pixPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                       </Label>
                       <Input id="create-pixPricePerM2" type="number" step="0.01" value={createForm.pixPricePerM2} onChange={(e) => setCreateForm({ ...createForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value })} placeholder="45.00" />
                     </div>
-                    <div>
+                    <div className="sm:col-span-1 xl:col-span-2">
                       <Label htmlFor="create-cardPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
                       </Label>
                       <Input id="create-cardPricePerM2" type="number" step="0.01" value={createForm.cardPricePerM2} onChange={(e) => setCreateForm({ ...createForm, cardPricePerM2: e.target.value })} placeholder="45.00" />
                     </div>
-                    <div>
+                    <div className="sm:col-span-1 xl:col-span-2">
                       <Label htmlFor="create-resellerPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
                       </Label>
                       <Input id="create-resellerPricePerM2" type="number" step="0.01" value={createForm.resellerPricePerM2} onChange={(e) => setCreateForm({ ...createForm, resellerPricePerM2: e.target.value })} placeholder="Opcional" />
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                     <div>
                       <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
                       <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => setCreateForm({ ...createForm, minWidth: e.target.value })} placeholder="0.10" />
@@ -328,8 +319,6 @@ export default function AdminNewProduct() {
                       <Label htmlFor="create-maxWidth">Largura Máxima (m)</Label>
                       <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => setCreateForm({ ...createForm, maxWidth: e.target.value })} placeholder="5.00" />
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="create-minHeight">Altura Mínima (m)</Label>
                       <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => setCreateForm({ ...createForm, minHeight: e.target.value })} placeholder="0.10" />
@@ -341,7 +330,7 @@ export default function AdminNewProduct() {
                   </div>
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start">
+              <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                 <div className="space-y-4">
                   {/* Upload de Fotos */}
                   <Card className={PRODUCT_FORM_PANEL.card}>
@@ -357,7 +346,7 @@ export default function AdminNewProduct() {
                   </Card>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
                   {/* Segmentos */}
-                  <Card className={`${PRODUCT_FORM_PANEL.card} ${NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}`}>
+                  <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
                       <MultiSegmentSelector
