@@ -45,6 +45,7 @@ export default function AdminProducts() {
     imageUrl: "",
     imageKey: "",
     galleryUrls: [] as string[],
+    segment: "geral",
     segmentIds: [] as number[],
     calculationType: "unidade",
     pricePerM2: "",
@@ -165,6 +166,7 @@ export default function AdminProducts() {
       imageUrl: product.imageUrl || "",
       imageKey: product.imageKey || "",
       galleryUrls: parsedGallery,
+      segment: product.segment || "geral",
       calculationType: product.calculationType || "unidade",
       pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
       resellerPricePerM2: product.resellerPricePerM2 ? product.resellerPricePerM2.toString() : "",
@@ -271,7 +273,7 @@ export default function AdminProducts() {
         description: editForm.description,
         price: editForm.price,
         resellerPrice: (editForm as any).resellerPrice || "",
-        segment: "alimentacao",
+        segment: editForm.segment || "geral",
         imageUrl: editForm.imageUrl,
         imageKey: (editForm as any).imageKey || undefined,
         galleryUrls: (editForm as any).galleryUrls?.length > 0 ? JSON.stringify((editForm as any).galleryUrls) : undefined,
@@ -286,7 +288,10 @@ export default function AdminProducts() {
         tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
         tagPosition: (editForm as any).tagPosition || "top-right",
       });
-      await updateSegmentsMutation.mutateAsync({ productId: editingId, segmentIds: editForm.segmentIds });
+      await updateSegmentsMutation.mutateAsync({
+        productId: editingId,
+        segmentIds: Array.from(new Set(editForm.segmentIds)).filter(Number.isFinite),
+      });
       toast.success("Produto atualizado com sucesso!", {
         description: "As alterações foram salvas e já estão refletidas no catálogo.",
         position: "top-right",
@@ -295,8 +300,12 @@ export default function AdminProducts() {
       closeEditSession();
       refetch();
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Erro ao atualizar produto");
+      console.error("Erro ao atualizar produto:", error);
+      const detail = error instanceof Error ? error.message : "Não foi possível concluir o salvamento.";
+      toast.error("Erro ao atualizar produto", {
+        description: detail,
+        position: "top-right",
+      });
     }
   };
 

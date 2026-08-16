@@ -12,6 +12,7 @@ const draft = {
     imageUrl: "",
     imageKey: "",
     galleryUrls: [],
+    segment: "lonas",
     segmentIds: [],
     calculationType: "unidade",
     pricePerM2: "",

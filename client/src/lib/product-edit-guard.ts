@@ -6,6 +6,7 @@ export type ProductEditSnapshot = {
   imageUrl: string;
   imageKey: string;
   galleryUrls: string[];
+  segment: string;
   segmentIds: number[];
   calculationType: string;
   pricePerM2: string;
