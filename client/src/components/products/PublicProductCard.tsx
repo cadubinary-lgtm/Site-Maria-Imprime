@@ -128,9 +128,9 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         </div>
 
         {sameDayUrgency && (
-          <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold leading-tight text-pink-700">
-            <Zap className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency.pricePerM2), "/m²")}
+          <div className="mt-2 flex flex-nowrap items-center gap-1 whitespace-nowrap text-[9px] font-semibold leading-none tracking-[-0.015em] text-pink-700">
+            <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span>Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency.pricePerM2), "/m²")}</span>
           </div>
         )}
 

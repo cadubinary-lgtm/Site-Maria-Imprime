@@ -19,6 +19,9 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).not.toContain("operationalFacts");
     expect(publicCardSource).toContain("sameDayUrgency");
     expect(publicCardSource).toContain("Produção no mesmo dia");
+    expect(publicCardSource).toContain("flex-nowrap");
+    expect(publicCardSource).toContain("whitespace-nowrap");
+    expect(publicCardSource).toContain("text-[9px]");
   });
 
   it("mantém o mesmo card na home, catálogo segmentado e listagem pública", () => {
