@@ -2815,3 +2815,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o erro ao salvar alterações no modal de edição de produto
 - [x] Verificar a divergência entre a prévia do projeto e o domínio oficial publicado
 - [x] Corrigir a falha persistente ao salvar produto no domínio oficial
+- [x] Criar habilidade reutilizável para corrigir falhas de salvamento administrativo em produção
