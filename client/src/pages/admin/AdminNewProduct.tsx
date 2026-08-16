@@ -225,8 +225,8 @@ export default function AdminNewProduct() {
             </CardTitle>
             <CardDescription>Preencha os dados para criar um novo produto no catálogo</CardDescription>
           </CardHeader>
-          <CardContent className="px-5 pb-5 pt-0">
-            <form onSubmit={(event) => event.preventDefault()} className="space-y-3">
+          <CardContent className={PRODUCT_FORM_PANEL.content}>
+            <form onSubmit={(event) => event.preventDefault()} className="space-y-4">
               <div className={NEW_PRODUCT_FIELD_LAYOUT.grid}>
                 <div className={NEW_PRODUCT_FIELD_LAYOUT.name}>
                   <Label htmlFor="create-name">Nome do Produto *</Label>
@@ -319,7 +319,7 @@ export default function AdminNewProduct() {
                       <Input id="create-resellerPricePerM2" type="number" step="0.01" value={createForm.resellerPricePerM2} onChange={(e) => setCreateForm({ ...createForm, resellerPricePerM2: e.target.value })} placeholder="Opcional" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
                       <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => setCreateForm({ ...createForm, minWidth: e.target.value })} placeholder="0.10" />
@@ -329,7 +329,7 @@ export default function AdminNewProduct() {
                       <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => setCreateForm({ ...createForm, maxWidth: e.target.value })} placeholder="5.00" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="create-minHeight">Altura Mínima (m)</Label>
                       <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => setCreateForm({ ...createForm, minHeight: e.target.value })} placeholder="0.10" />
