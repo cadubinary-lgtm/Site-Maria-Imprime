@@ -27,7 +27,8 @@ export default function AllProducts() {
     if (!segmentsData || segmentsData.length === 0) return [];
     return segmentsData.map((seg: any) => ({
       id: seg.id,
-      label: `${seg.icon || '📦'} ${seg.name}`,
+      name: seg.name,
+      icon: typeof seg.icon === 'string' && seg.icon.trim() ? seg.icon : null,
     }));
   }, [segmentsData]);
 
@@ -111,9 +112,10 @@ export default function AllProducts() {
                     type="button"
                     variant={selectedSegmentId === seg.id ? 'default' : 'outline'}
                     onClick={() => setSelectedSegmentId(seg.id)}
-                    className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === seg.id ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
-                  >
-                    {seg.label}
+                  className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === seg.id ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
+                >
+                    {seg.icon ? <span aria-hidden="true">{seg.icon}</span> : null}
+                    <span>{seg.name}</span>
                   </Button>
                 ))}
               </nav>

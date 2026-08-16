@@ -2862,3 +2862,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar barra lateral de segmentos à esquerda em Todos os Produtos com filtro dinâmico
 - [x] Confirmar checkpoint publicável da barra lateral de segmentos
 - [x] Adicionar barra lateral de segmentos à esquerda em Produtos → Todos os Produtos no painel administrativo
+- [x] Remover em todo o site os ícones automáticos de segmentos sem ícone cadastrado
