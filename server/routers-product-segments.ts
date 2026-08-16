@@ -1,4 +1,5 @@
-import { router, publicProcedure, adminProcedure } from "./_core/trpc";
+import { router, publicProcedure } from "./_core/trpc";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { z } from "zod";
 import {
   addSegmentToProduct,
@@ -8,6 +9,8 @@ import {
   getAllSegments,
   getProductsBySegment,
 } from "./db-product-segments";
+
+const adminAnyProcedure = adminOrManusAuthProcedure;
 
 export const productSegmentsRouter = router({
   // Obter todos os segmentos disponíveis (PÚBLICO - catálogo)
@@ -23,7 +26,7 @@ export const productSegmentsRouter = router({
     }),
 
   // Adicionar segmento a um produto (ADMIN)
-  addSegment: adminProcedure
+  addSegment: adminAnyProcedure
     .input(
       z.object({
         productId: z.number(),
@@ -35,7 +38,7 @@ export const productSegmentsRouter = router({
     }),
 
   // Remover segmento de um produto (ADMIN)
-  removeSegment: adminProcedure
+  removeSegment: adminAnyProcedure
     .input(
       z.object({
         productId: z.number(),
@@ -47,7 +50,7 @@ export const productSegmentsRouter = router({
     }),
 
   // Atualizar múltiplos segmentos de um produto (ADMIN)
-  updateSegments: adminProcedure
+  updateSegments: adminAnyProcedure
     .input(
       z.object({
         productId: z.number(),

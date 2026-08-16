@@ -2816,3 +2816,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar a divergência entre a prévia do projeto e o domínio oficial publicado
 - [x] Corrigir a falha persistente ao salvar produto no domínio oficial
 - [x] Criar habilidade reutilizável para corrigir falhas de salvamento administrativo em produção
+- [x] Corrigir erro falso e limpar rascunho após salvar produto no domínio oficial
