@@ -41,6 +41,8 @@ export default function AdminProducts() {
     name: "",
     description: "",
     price: "",
+    pixPrice: "",
+    cardPrice: "",
     resellerPrice: "",
     imageUrl: "",
     imageKey: "",
@@ -49,6 +51,8 @@ export default function AdminProducts() {
     segmentIds: [] as number[],
     calculationType: "unidade",
     pricePerM2: "",
+    pixPricePerM2: "",
+    cardPricePerM2: "",
     resellerPricePerM2: "",
     minWidth: "",
     maxWidth: "",
@@ -162,6 +166,8 @@ export default function AdminProducts() {
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
+      pixPrice: product.pixPrice ? product.pixPrice.toString() : product.price.toString(),
+      cardPrice: product.cardPrice ? product.cardPrice.toString() : product.price.toString(),
       resellerPrice: product.resellerPrice ? product.resellerPrice.toString() : "",
       imageUrl: product.imageUrl || "",
       imageKey: product.imageKey || "",
@@ -169,6 +175,8 @@ export default function AdminProducts() {
       segment: product.segment || "geral",
       calculationType: product.calculationType || "unidade",
       pricePerM2: product.pricePerM2 ? product.pricePerM2.toString() : "",
+      pixPricePerM2: product.pixPricePerM2 ? product.pixPricePerM2.toString() : (product.pricePerM2 ? product.pricePerM2.toString() : ""),
+      cardPricePerM2: product.cardPricePerM2 ? product.cardPricePerM2.toString() : (product.pricePerM2 ? product.pricePerM2.toString() : ""),
       resellerPricePerM2: product.resellerPricePerM2 ? product.resellerPricePerM2.toString() : "",
       minWidth: product.minWidth ? product.minWidth.toString() : "",
       maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
@@ -230,10 +238,14 @@ export default function AdminProducts() {
         name: product.name,
         description: product.description || undefined,
         price: measureBased ? String(product.price ?? "0") : normalizedPrice,
+        pixPrice: measureBased ? String(product.pixPrice ?? product.price ?? "0") : normalizedPrice,
+        cardPrice: measureBased ? String(product.cardPrice ?? product.price ?? "0") : normalizedPrice,
         segment: product.segment || "geral",
         imageUrl: product.imageUrl || undefined,
         calculationType: quickCalculationType as "m2" | "metro_linear" | "pacote" | "unidade",
         pricePerM2: measureBased ? normalizedPrice : undefined,
+        pixPricePerM2: measureBased ? normalizedPrice : undefined,
+        cardPricePerM2: measureBased ? normalizedPrice : undefined,
       });
       await utils.products.getAll.invalidate();
       setQuickEditingId(null);
@@ -253,11 +265,13 @@ export default function AdminProducts() {
     if (!editingId) return;
     if (!editForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
     if ((editForm as any).calculationType !== "m2" && (editForm as any).calculationType !== "metro_linear") {
-      if (!editForm.price || parseFloat(editForm.price as any) <= 0) { toast.error("Preço é obrigatório e deve ser maior que 0"); return; }
+      if (!(editForm as any).pixPrice || parseFloat((editForm as any).pixPrice) <= 0) { toast.error("Preço via Pix é obrigatório e deve ser maior que 0"); return; }
+      if (!(editForm as any).cardPrice || parseFloat((editForm as any).cardPrice) <= 0) { toast.error("Preço via cartão é obrigatório e deve ser maior que 0"); return; }
     }
 
     if (isMeasureBased((editForm as any).calculationType)) {
-      if (!(editForm as any).pricePerM2 || parseFloat((editForm as any).pricePerM2) <= 0) { toast.error(`Preço por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
+      if (!(editForm as any).pixPricePerM2 || parseFloat((editForm as any).pixPricePerM2) <= 0) { toast.error(`Preço via Pix por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
+      if (!(editForm as any).cardPricePerM2 || parseFloat((editForm as any).cardPricePerM2) <= 0) { toast.error(`Preço via cartão por ${(editForm as any).calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
       if (!(editForm as any).minWidth || parseFloat((editForm as any).minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
       if (!(editForm as any).maxWidth || parseFloat((editForm as any).maxWidth) <= 0) { toast.error("Largura máxima é obrigatória"); return; }
       if (!(editForm as any).minHeight || parseFloat((editForm as any).minHeight) <= 0) { toast.error("Altura mínima é obrigatória"); return; }
@@ -271,14 +285,18 @@ export default function AdminProducts() {
         id: editingId,
         name: editForm.name,
         description: editForm.description,
-        price: editForm.price,
+        price: isMeasureBased((editForm as any).calculationType) ? editForm.price : (editForm as any).pixPrice,
+        pixPrice: (editForm as any).pixPrice,
+        cardPrice: (editForm as any).cardPrice,
         resellerPrice: (editForm as any).resellerPrice || "",
         segment: editForm.segment || "geral",
         imageUrl: editForm.imageUrl,
         imageKey: (editForm as any).imageKey || undefined,
         galleryUrls: (editForm as any).galleryUrls?.length > 0 ? JSON.stringify((editForm as any).galleryUrls) : undefined,
         calculationType: (editForm as any).calculationType,
-        pricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pricePerM2 : undefined,
+        pricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pixPricePerM2 : undefined,
+        pixPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).pixPricePerM2 : undefined,
+        cardPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).cardPricePerM2 : undefined,
         resellerPricePerM2: isMeasureBased((editForm as any).calculationType) ? (editForm as any).resellerPricePerM2 || "" : undefined,
         minWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).minWidth : undefined,
         maxWidth: isMeasureBased((editForm as any).calculationType) ? (editForm as any).maxWidth : undefined,
@@ -537,8 +555,14 @@ export default function AdminProducts() {
                             {/* Preço Base: visível APENAS para Unidade e Pacote */}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
-                                <Label htmlFor="edit-price">Preço Cliente Final (R$)</Label>
-                                <Input id="edit-price" type="number" step="0.01" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} placeholder="0.00" />
+                                <Label htmlFor="edit-pixPrice">Preço via Pix (R$)</Label>
+                                <Input id="edit-pixPrice" type="number" step="0.01" value={(editForm as any).pixPrice} onChange={(e) => setEditForm({ ...editForm, pixPrice: e.target.value, price: e.target.value } as any)} placeholder="0.00" />
+                              </div>
+                            )}
+                            {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
+                              <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
+                                <Label htmlFor="edit-cardPrice">Preço via Cartão (R$)</Label>
+                                <Input id="edit-cardPrice" type="number" step="0.01" value={(editForm as any).cardPrice} onChange={(e) => setEditForm({ ...editForm, cardPrice: e.target.value } as any)} placeholder="0.00" />
                               </div>
                             )}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
@@ -552,10 +576,16 @@ export default function AdminProducts() {
                           {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
                               <div className="sm:col-span-1 xl:col-span-1">
-                                <Label htmlFor="edit-pricePerM2">
-                                  {(editForm as any).calculationType === "metro_linear" ? "Preço Cliente Final por Metro Linear (R$)" : "Preço Cliente Final por m² (R$)"}
+                                <Label htmlFor="edit-pixPricePerM2">
+                                  {(editForm as any).calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                                 </Label>
-                                <Input id="edit-pricePerM2" type="number" step="0.01" value={(editForm as any).pricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pricePerM2: e.target.value } as any)} />
+                                <Input id="edit-pixPricePerM2" type="number" step="0.01" value={(editForm as any).pixPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any)} />
+                              </div>
+                              <div className="sm:col-span-1 xl:col-span-1">
+                                <Label htmlFor="edit-cardPricePerM2">
+                                  {(editForm as any).calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
+                                </Label>
+                                <Input id="edit-cardPricePerM2" type="number" step="0.01" value={(editForm as any).cardPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any)} />
                               </div>
                               <div className="sm:col-span-1 xl:col-span-1">
                                 <Label htmlFor="edit-resellerPricePerM2">

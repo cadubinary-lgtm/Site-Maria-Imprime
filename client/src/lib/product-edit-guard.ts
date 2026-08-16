@@ -2,6 +2,8 @@ export type ProductEditSnapshot = {
   name: string;
   description: string;
   price: string;
+  pixPrice: string;
+  cardPrice: string;
   resellerPrice: string;
   imageUrl: string;
   imageKey: string;
@@ -10,6 +12,8 @@ export type ProductEditSnapshot = {
   segmentIds: number[];
   calculationType: string;
   pricePerM2: string;
+  pixPricePerM2: string;
+  cardPricePerM2: string;
   resellerPricePerM2: string;
   minWidth: string;
   maxWidth: string;

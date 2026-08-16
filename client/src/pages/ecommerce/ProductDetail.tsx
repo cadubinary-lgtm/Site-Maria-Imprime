@@ -26,7 +26,7 @@ import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhats
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
-import { getProductPrice } from "@/lib/productPrice";
+import { getProductPaymentPrices } from "@/lib/productPrice";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
@@ -194,10 +194,12 @@ export default function ProductDetail() {
     { id: productId || 0 }, { enabled: !!productId }
   );
   const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
-  const commercialProductPrice = useMemo(
-    () => product ? getProductPrice(product as any, priceAudience).value : 0,
+  const paymentProductPrices = useMemo(
+    () => product ? getProductPaymentPrices(product as any, priceAudience) : { pix: { value: 0, label: "R$ 0.00", suffix: "" }, card: { value: 0, label: "R$ 0.00", suffix: "" } },
     [product, priceAudience],
   );
+  const commercialProductPrice = paymentProductPrices.pix.value;
+  const commercialCardPrice = paymentProductPrices.card.value;
   const productRating = useMemo(
     () => getProductRatingDisplay({ rating: (product as any)?.rating, reviewCount: (product as any)?.reviewCount }),
     [product],
@@ -390,6 +392,17 @@ export default function ProductDetail() {
   const fretePrice = shippingSummary.amount;
   const subtotal = effectivePrice * quantity;
   const total = getOrderTotal(subtotal, fretePrice);
+  const paymentPriceMultiplier = useMemo(() => {
+    if (isM2) return billedArea > 0 ? billedArea : 1;
+    if (isMetroLinear) {
+      const linearMeters = parseFloat(dimWidth.replace(",", ".")) || 0;
+      return linearMeters > 0 ? linearMeters : 1;
+    }
+    return 1;
+  }, [billedArea, dimWidth, isM2, isMetroLinear]);
+  const cardEffectivePrice = Math.max(0, effectivePrice + (commercialCardPrice - commercialProductPrice) * paymentPriceMultiplier);
+  const cardSubtotal = cardEffectivePrice * quantity;
+  const cardTotal = getOrderTotal(cardSubtotal, fretePrice);
 
   // ─── Previsão de Entrega ─────────────────────────────────────────────
   const deliveryForecast = useMemo(() => {
@@ -776,6 +789,8 @@ export default function ProductDetail() {
           selectedAttributes: attrsJson ?? null,
           customDimensions: customDimensions ?? null,
           priceAtCart: String(effectivePrice),
+          pixPriceAtCart: String(effectivePrice),
+          cardPriceAtCart: String(cardEffectivePrice),
           artFileUrl: fileMode === "link" ? artLink || null : null,
           artFileUrls: fileMode === "link" && artLink ? JSON.stringify([artLink]) : null,
           notes: combinedNotes ?? null,
@@ -831,6 +846,8 @@ export default function ProductDetail() {
         selectedAttributes: attrsJson,
         customDimensions,
         priceAtCart: effectivePrice,
+        pixPriceAtCart: effectivePrice,
+        cardPriceAtCart: cardEffectivePrice,
         notes: combinedNotes,
         artFileUrl: artUrl,
         artFileUrls: artUrls.length ? JSON.stringify(artUrls) : undefined,
@@ -1945,9 +1962,15 @@ export default function ProductDetail() {
                       {shippingSummary.label}
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline pt-2 border-t border-gray-200">
-                    <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-orange-600">R$ {total.toFixed(2)}</span>
+                  <div className="space-y-1.5 pt-2 border-t border-gray-200">
+                    <div className="flex justify-between items-baseline gap-3">
+                      <span className="text-lg font-bold text-gray-900">R$ {total.toFixed(2)} no Pix</span>
+                      <span className="text-xs font-semibold text-green-600">à vista</span>
+                    </div>
+                    <div className="flex justify-between items-baseline gap-3 text-sm">
+                      <span className="font-medium text-gray-700">ou R$ {cardTotal.toFixed(2)} no cartão de crédito</span>
+                      <CreditCard className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+                    </div>
                   </div>
                 </div>
 

@@ -28,6 +28,8 @@ export const products = mysqlTable("products", {
   name: varchar("name", { length: 255 }).notNull(),
   description: longtext("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  pixPrice: decimal("pixPrice", { precision: 10, scale: 2 }), // Preço cliente final para pagamento via Pix
+  cardPrice: decimal("cardPrice", { precision: 10, scale: 2 }), // Preço cliente final para pagamento via cartão
   resellerPrice: decimal("resellerPrice", { precision: 10, scale: 2 }), // Preço para revendedores em unidade ou pacote
   segment: varchar("segment", { length: 100 }).notNull().default("geral"),
   category: varchar("category", { length: 255 }), // Categoria do produto
@@ -38,6 +40,8 @@ export const products = mysqlTable("products", {
   calculationType: mysqlEnum("calculationType", ["m2", "metro_linear", "pacote", "unidade"]).default("pacote").notNull(), // Tipo de cálculo
   unit: varchar("unit", { length: 50 }).default("pacote").notNull(), // Unidade (m², metro linear, pacote, unidade)
   pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }), // Preço por metro quadrado
+  pixPricePerM2: decimal("pixPricePerM2", { precision: 10, scale: 2 }), // Preço Pix por m² ou metro linear
+  cardPricePerM2: decimal("cardPricePerM2", { precision: 10, scale: 2 }), // Preço cartão por m² ou metro linear
   resellerPricePerM2: decimal("resellerPricePerM2", { precision: 10, scale: 2 }), // Preço de revenda por m² ou metro linear
   minWidth: decimal("minWidth", { precision: 10, scale: 2 }), // Largura mínima em metros
   maxWidth: decimal("maxWidth", { precision: 10, scale: 2 }), // Largura máxima em metros
@@ -1118,6 +1122,8 @@ export const cartItems = mysqlTable("cartItems", {
   selectedAttributes: longtext("selectedAttributes"), // JSON com atributos selecionados
   customDimensions: varchar("customDimensions", { length: 255 }), // Ex: "2.5x1.5" para m²
   priceAtCart: decimal("priceAtCart", { precision: 10, scale: 2 }).notNull(), // Preço no momento da adição
+  pixPriceAtCart: decimal("pixPriceAtCart", { precision: 10, scale: 2 }), // Snapshot do valor unitário/configurado no Pix
+  cardPriceAtCart: decimal("cardPriceAtCart", { precision: 10, scale: 2 }), // Snapshot do valor unitário/configurado no cartão
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   artFileUrls: longtext("artFileUrls"), // JSON com todas as URLs de arte enviadas
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3

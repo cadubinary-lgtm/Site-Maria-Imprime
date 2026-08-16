@@ -210,9 +210,13 @@ export default function CheckoutPage() {
     if (addressState) setStateUF(addressState);
   }, [customerProfile]);
 
+  const getSelectedItemUnitPrice = (item: any) => paymentMethod === "cartao"
+      ? Number(item.cardPriceAtCart ?? item.priceAtCart)
+      : Number(item.pixPriceAtCart ?? item.priceAtCart);
+
   const subtotal = cartItems?.reduce(
-    (sum: number, item: any) => sum + parseFloat(item.priceAtCart) * item.quantity,
-    0
+    (sum: number, item: any) => sum + getSelectedItemUnitPrice(item) * item.quantity,
+    0,
   ) ?? 0;
 
   // Usa frete selecionado na etapa Entrega, ou frete já salvo no carrinho (selecionado na página do produto)
@@ -1210,7 +1214,7 @@ export default function CheckoutPage() {
                                     <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
                                   </div>
                                   <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                                    {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
+                                    {formatCurrency(getSelectedItemUnitPrice(item) * item.quantity)}
                                   </p>
                                 </div>
                                 {/* Especificações recolhidas por padrão */}
@@ -1290,7 +1294,7 @@ export default function CheckoutPage() {
                       {item.productName} × {item.quantity}
                     </span>
                     <span className="font-medium whitespace-nowrap">
-                      {formatCurrency(parseFloat(item.priceAtCart) * item.quantity)}
+                      {formatCurrency(getSelectedItemUnitPrice(item) * item.quantity)}
                     </span>
                   </div>
                 ))}

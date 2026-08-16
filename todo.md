@@ -2833,3 +2833,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar tooltip e link de verificação SSL no selo correspondente
 - [x] Adicionar transição suave de escala aos selos de segurança no hover
 - [x] Eliminar a rolagem duplicada e o espaço branco após o rodapé público
+- [x] Adicionar preços independentes de Pix e cartão de crédito aos produtos, com migração compatível
+- [x] Exibir os valores de Pix e cartão com transparência na página pública do produto
+- [x] Aplicar no carrinho e checkout o preço correspondente à forma de pagamento escolhida
