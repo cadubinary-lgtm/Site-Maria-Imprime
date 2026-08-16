@@ -2839,3 +2839,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir selo de desconto no Pix nas imagens das vitrines inicial e de categorias
 - [x] Destacar visualmente o preço Pix na página pública do produto
 - [x] Permitir aplicar percentual padrão de desconto Pix em lote pelo painel administrativo
+- [x] Implementar salvamento automático com espera controlada na edição de produtos
+- [x] Implementar salvamento automático no cadastro de novos produtos quando os dados mínimos estiverem válidos
+- [x] Remover a confirmação de saída após sincronização e exibir o estado de salvamento
