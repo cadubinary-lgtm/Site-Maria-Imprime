@@ -238,6 +238,13 @@
 }
 
 @layer base {
+  html:has(.admin-visual-system),
+  body:has(.admin-visual-system),
+  #root:has(.admin-visual-system) {
+    height: 100%;
+    overflow: hidden;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

@@ -2852,3 +2852,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Uniformizar os espaçamentos internos e entre painéis de Novo Produto e Editar Produto
 - [x] Reduzir o espaçamento vertical entre prazos, logística e tags na segunda coluna do editor
 - [x] Posicionar Tags do Produto ao lado de Segmentos no editor, mantendo ambos em formato vertical
+- [x] Remover a rolagem interna e a faixa branca no final da página Novo Produto
