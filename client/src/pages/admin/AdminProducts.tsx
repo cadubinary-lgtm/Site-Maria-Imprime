@@ -729,25 +729,25 @@ export default function AdminProducts() {
 
                           {((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && (
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
-                              <div className="sm:col-span-1 xl:col-span-1">
+                              <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-pixPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                                 </Label>
                                 <Input id="edit-pixPricePerM2" type="text" inputMode="decimal" value={(editForm as any).pixPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("pixPricePerM2")} placeholder="0,00" />
                               </div>
-                              <div className="sm:col-span-1 xl:col-span-1">
+                              <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-cardPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
                                 </Label>
                                 <Input id="edit-cardPricePerM2" type="text" inputMode="decimal" value={(editForm as any).cardPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("cardPricePerM2")} placeholder="0,00" />
                               </div>
-                              <div className="sm:col-span-1 xl:col-span-1">
+                              <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-resellerPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
                                 </Label>
                                 <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="Opcional" />
                               </div>
-                              <div className="grid grid-cols-2 gap-2 xl:col-span-2">
+                              <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                                 <div>
                                   <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
                                   <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => setEditForm({ ...editForm, minWidth: e.target.value } as any)} />
@@ -756,8 +756,6 @@ export default function AdminProducts() {
                                   <Label htmlFor="edit-maxWidth">Largura Máx (m)</Label>
                                   <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => setEditForm({ ...editForm, maxWidth: e.target.value } as any)} />
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 xl:col-span-2">
                                 <div>
                                   <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
                                   <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => setEditForm({ ...editForm, minHeight: e.target.value } as any)} />
@@ -791,15 +789,17 @@ export default function AdminProducts() {
                           </div>
 
                           {/* Upload de Fotos */}
-                          <div className="xl:col-start-1 xl:row-start-1">
-                            <ProductImageUploader
-                              mainImageUrl={editForm.imageUrl}
-                              galleryUrls={(editForm as any).galleryUrls || []}
-                              onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
-                              onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
-                              compact
-                            />
-                          </div>
+                          <Card className="gap-0 py-4 xl:col-start-1 xl:row-start-1">
+                            <CardContent className="px-4">
+                              <ProductImageUploader
+                                mainImageUrl={editForm.imageUrl}
+                                galleryUrls={(editForm as any).galleryUrls || []}
+                                onMainImageChange={(url, key) => setEditForm({ ...editForm, imageUrl: url, imageKey: key || "" } as any)}
+                                onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
+                                compact
+                              />
+                            </CardContent>
+                          </Card>
 
                           {/* Aba Logística */}
                           {editingId && (
