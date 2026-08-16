@@ -9,7 +9,7 @@ const editProductSource = readFileSync(resolve(root, "client/src/pages/admin/Adm
 const globalStyles = readFileSync(resolve(root, "client/src/index.css"), "utf8");
 
 describe("layout horizontal de Novo Produto", () => {
-  it("mantém os campos essenciais distribuídos nas doze colunas de tela larga", () => {
+  it("reutiliza a composição comercial e secundária do editor", () => {
     expect(NEW_PRODUCT_FIELD_LAYOUT.grid).toContain("xl:grid-cols-12");
     expect([
       NEW_PRODUCT_FIELD_LAYOUT.name,
@@ -24,6 +24,10 @@ describe("layout horizontal de Novo Produto", () => {
     ]);
     expect(NEW_PRODUCT_FIELD_LAYOUT.description).toBe("xl:col-span-12");
     expect(NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment).toBe("xl:pt-[86px]");
+    expect(newProductSource).toContain("EDIT_PRODUCT_MODAL_LAYOUT.details");
+    expect(newProductSource).toContain("EDIT_PRODUCT_MODAL_LAYOUT.measureFields");
+    expect(newProductSource).toContain("EDIT_PRODUCT_MODAL_LAYOUT.secondary");
+    expect(newProductSource).not.toContain("${NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}");
   });
 });
 
