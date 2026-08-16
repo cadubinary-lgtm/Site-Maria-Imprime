@@ -57,6 +57,8 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).not.toContain('/manus-storage/boleto_d74f05f4.jpg');
     expect(footer).toContain('Google Safe Browsing');
     expect(footer).toContain('SSL Certificado');
+    expect(footer).toContain('/manus-storage/google-safe-browsing_eb47c169.png');
+    expect(footer).toContain('/manus-storage/ssl-certificado_6ff35a41.png');
   });
 
   it("organiza a faixa em três blocos proporcionais com selos ampliados", () => {
@@ -69,6 +71,18 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('h-16 min-w-0 items-center');
     expect(footer).toContain('lg:border-l lg:border-t-0');
     expect(footer).toContain('sm:p-7');
+  });
+
+  it("explica as bandeiras no hover e informa as condições de pagamento", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+    expect(footer).toContain('title={label}');
+    expect(footer).toContain('role="tooltip"');
+    expect(footer).toContain('group-hover:opacity-100');
+    expect(footer).toContain('group-focus-visible:opacity-100');
+    expect(footer).toContain('PaymentBadge label="Visa"');
+    expect(footer).toContain('PaymentBadge label="American Express"');
+    expect(footer).toContain('PaymentBadge label="Diners Club"');
+    expect(footer).toContain('Pagamentos parcelados terão acréscimo de juros da operadora. Nota fiscal sujeita a emissão de acordo com prestador de serviço, conforme legislação pertinente.');
   });
 
   it("abre os canais sociais em nova aba e confirma visualmente a newsletter", () => {
