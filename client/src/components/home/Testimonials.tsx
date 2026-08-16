@@ -1,34 +1,26 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { FileCheck2, Headphones, ShieldCheck, Truck } from "lucide-react";
 
-const TESTIMONIALS = [
+const SERVICE_COMMITMENTS = [
   {
-    name: "João Silva",
-    profession: "Restaurante",
-    text: "Qualidade excelente e produto chegou rápido. Recomendo muito a Maria Imprime.",
-    rating: 5,
-    avatar: "👨",
+    title: "Atendimento próximo",
+    description: "Conte com orientação para escolher o produto e preparar o seu pedido.",
+    Icon: Headphones,
   },
   {
-    name: "Maria Santos",
-    profession: "Loja de Roupas",
-    text: "Ficou exatamente como eu queria. Entrega rápida e atendimento perfeito!",
-    rating: 5,
-    avatar: "👩",
+    title: "Arquivo em conferência",
+    description: "Sua arte passa pela conferência antes de seguir para o fluxo de produção.",
+    Icon: FileCheck2,
   },
   {
-    name: "Carlos Oliveira",
-    profession: "Clínica Odontológica",
-    text: "Já é a terceira vez que faço pedido. Qualidade consistente e confiável.",
-    rating: 5,
-    avatar: "👨",
+    title: "Produção organizada",
+    description: "Acompanhe o andamento do seu pedido com mais clareza em cada etapa.",
+    Icon: ShieldCheck,
   },
   {
-    name: "Ana Costa",
-    profession: "Estúdio de Beleza",
-    text: "Quantidade excelente e o atendimento da Maria foi muito atencioso!",
-    rating: 5,
-    avatar: "👩",
+    title: "Entrega ou retirada",
+    description: "Escolha a modalidade disponível que seja mais conveniente para você.",
+    Icon: Truck,
   },
 ];
 
@@ -36,30 +28,22 @@ export function Testimonials() {
   return (
     <section className="bg-white py-20 px-4" style={{paddingTop: '39px'}}>
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Quem já pediu, aprovou! ❤️</h2>
+        <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Como cuidamos do seu pedido</h2>
+        <p className="text-center text-gray-600 text-sm">Um processo claro, do primeiro contato à entrega.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-          {TESTIMONIALS.map((testimonial, idx) => (
-            <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-all bg-white" style={{paddingTop: '3px'}}>
+          {SERVICE_COMMITMENTS.map(({ title, description, Icon }) => (
+            <Card key={title} className="border-0 shadow-sm hover:shadow-md transition-all bg-white" style={{paddingTop: '3px'}}>
               <CardContent className="pt-6">
-                {/* Stars */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-
-                {/* Text */}
-                <p className="text-gray-700 text-xs mb-4 italic leading-relaxed font-light">"{testimonial.text}"</p>
-
-                {/* Author */}
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl">{testimonial.avatar}</div>
+                  <div className="w-9 h-9 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center">
+                    <Icon className="w-4 h-4" />
+                  </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-xs">{testimonial.name}</p>
-                    <p className="text-xs text-gray-600 font-light">{testimonial.profession}</p>
+                    <p className="font-semibold text-gray-900 text-sm">{title}</p>
                   </div>
                 </div>
+                <p className="text-gray-600 text-xs mt-4 leading-relaxed font-light">{description}</p>
               </CardContent>
             </Card>
           ))}
