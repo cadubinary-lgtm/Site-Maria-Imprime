@@ -2819,6 +2819,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir erro falso e limpar rascunho após salvar produto no domínio oficial
 - [x] Corrigir preço inicial de produtos por m² no configurador público
 - [x] Criar habilidade reutilizável para corrigir preço inicial por m² no configurador
-- [ ] Auditar e alinhar as divergências entre a prévia atual e o domínio oficial
+- [x] Auditar e alinhar as divergências entre a prévia atual e o domínio oficial
 - [x] Remover depoimentos não verificáveis da página pública e substituir por conteúdo institucional
 - [x] Ocultar da vitrine pública os produtos de teste sem pedidos vinculados
