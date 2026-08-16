@@ -774,9 +774,9 @@ export default function AdminProducts() {
                           </Card>
 
                           <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
-                          <div className="flex flex-col gap-4">
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
 
-                          <Card className={`${PRODUCT_FORM_PANEL.card} order-2 self-start`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-1 sm:row-start-2 self-start`}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
                               <MultiSegmentSelector
@@ -788,7 +788,7 @@ export default function AdminProducts() {
                           </Card>
 
                           {/* Upload de Fotos */}
-                          <Card className={`${PRODUCT_FORM_PANEL.card} order-1`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-span-2 sm:row-start-1`}>
                             <CardContent className="px-4">
                               <ProductImageUploader
                                 mainImageUrl={editForm.imageUrl}
@@ -797,6 +797,52 @@ export default function AdminProducts() {
                                 onGalleryChange={(urls) => setEditForm({ ...editForm, galleryUrls: urls } as any)}
                                 compact
                               />
+                            </CardContent>
+                          </Card>
+
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-2 sm:row-start-2`}>
+                            <CardContent className={PRODUCT_FORM_PANEL.content}>
+                              <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
+                              <p className="text-sm text-gray-500">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
+                              <div className="grid grid-cols-1 gap-3">
+                                {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
+                                  <label key={tag} className="flex items-center gap-2 cursor-pointer select-none">
+                                    <Checkbox
+                                      checked={((editForm as any).tags || []).includes(tag)}
+                                      onCheckedChange={(checked) => {
+                                        setEditForm((prev) => ({
+                                          ...prev,
+                                          tags: checked
+                                            ? [...((prev as any).tags || []), tag]
+                                            : ((prev as any).tags || []).filter((t: string) => t !== tag),
+                                        } as any));
+                                      }}
+                                    />
+                                    <span className="text-sm text-gray-700">{tag}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              {((editForm as any).tags || []).length > 0 && (
+                                <div className="space-y-1">
+                                  <Label className="text-sm font-medium text-gray-700">Posição das Tags no Card</Label>
+                                  <Select
+                                    value={(editForm as any).tagPosition || "top-right"}
+                                    onValueChange={(val) => setEditForm((prev) => ({ ...prev, tagPosition: val } as any))}
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Selecione a posição" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="top-left">Canto Superior Esquerdo</SelectItem>
+                                      <SelectItem value="top-right">Canto Superior Direito (padrão)</SelectItem>
+                                      <SelectItem value="bottom-left">Canto Inferior Esquerdo</SelectItem>
+                                      <SelectItem value="bottom-right">Canto Inferior Direito</SelectItem>
+                                      <SelectItem value="top-center">Centro Superior</SelectItem>
+                                      <SelectItem value="bottom-center">Centro Inferior</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
 
@@ -822,50 +868,6 @@ export default function AdminProducts() {
                           )}
 
                           {/* Especificações Técnicas */}
-                          {/* Tags do Produto */}
-                          <div className={PRODUCT_FORM_PANEL.inner}>
-                            <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
-                            <p className="text-sm text-gray-500 mb-3">Selecione as tags que aparecerão sobre a imagem do produto no catálogo.</p>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              {["Mais vendido", "Promoção", "Destaque", "Novo"].map((tag) => (
-                                <label key={tag} className="flex items-center gap-2 cursor-pointer select-none">
-                                  <Checkbox
-                                    checked={((editForm as any).tags || []).includes(tag)}
-                                    onCheckedChange={(checked) => {
-                                      setEditForm((prev) => ({
-                                        ...prev,
-                                        tags: checked
-                                          ? [...((prev as any).tags || []), tag]
-                                          : ((prev as any).tags || []).filter((t: string) => t !== tag),
-                                      } as any));
-                                    }}
-                                  />
-                                  <span className="text-sm text-gray-700">{tag}</span>
-                                </label>
-                              ))}
-                            </div>
-                            {((editForm as any).tags || []).length > 0 && (
-                              <div className="space-y-1">
-                                <Label className="text-sm font-medium text-gray-700">Posição das Tags no Card</Label>
-                                <Select
-                                  value={(editForm as any).tagPosition || "top-right"}
-                                  onValueChange={(val) => setEditForm((prev) => ({ ...prev, tagPosition: val } as any))}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Selecione a posição" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="top-left">Canto Superior Esquerdo</SelectItem>
-                                    <SelectItem value="top-right">Canto Superior Direito (padrão)</SelectItem>
-                                    <SelectItem value="bottom-left">Canto Inferior Esquerdo</SelectItem>
-                                    <SelectItem value="bottom-right">Canto Inferior Direito</SelectItem>
-                                    <SelectItem value="top-center">Centro Superior</SelectItem>
-                                    <SelectItem value="bottom-center">Centro Inferior</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            )}
-                          </div>
                           <div className={PRODUCT_FORM_PANEL.inner}>
                             <div className="flex items-center justify-between mb-3">
                               <h3 className={PRODUCT_FORM_PANEL.title}>Especificações Técnicas</h3>
