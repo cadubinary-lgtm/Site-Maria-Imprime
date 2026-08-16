@@ -518,7 +518,7 @@ export const appRouter = router({
         }
         return { success: true };
       }),
-    updateProduct: adminProcedure
+    updateProduct: adminAnyProcedure
       .input(z.object({
         id: z.number(),
         name: z.string(),

@@ -2813,3 +2813,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar a Foto Principal no modal de edição conforme o padrão de Fotos Adicionais
 - [x] Alinhar Capa do produto diretamente com Foto de capa no bloco de imagem principal
 - [x] Corrigir o erro ao salvar alterações no modal de edição de produto
+- [x] Verificar a divergência entre a prévia do projeto e o domínio oficial publicado
+- [x] Corrigir a falha persistente ao salvar produto no domínio oficial
