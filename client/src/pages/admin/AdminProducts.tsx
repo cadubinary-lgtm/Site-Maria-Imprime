@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { ProductImageUploader } from "@/components/products/ProductImageUploader
 import MultiSegmentSelector from "@/components/MultiSegmentSelector";
 import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/products/DeliveryOptionsManager";
 import { EDIT_PRODUCT_MODAL_LAYOUT } from "@/lib/new-product-layout";
-import { createProductEditSignature, getProductEditExitAction, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
+import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 
 export default function AdminProducts() {
@@ -31,7 +31,8 @@ export default function AdminProducts() {
   const [editBaselineSignature, setEditBaselineSignature] = useState<string | null>(null);
   const [waitingInitialSegments, setWaitingInitialSegments] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
-  const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false);
+  const [editAutoSaveState, setEditAutoSaveState] = useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
+  const editAutoSaveTimerRef = useRef<number | null>(null);
   const [quickEditingId, setQuickEditingId] = useState<number | null>(null);
   const [quickPrice, setQuickPrice] = useState("");
   const [quickCalculationType, setQuickCalculationType] = useState("unidade");
@@ -148,6 +149,17 @@ export default function AdminProducts() {
     setEditForm((prev) => ({ ...prev, segmentIds }));
   }, []);
 
+  const isEditFormReadyForAutoSave = useCallback(() => {
+    if (!editForm.name.trim()) return false;
+    const measureBased = isMeasureBased(editForm.calculationType);
+    if (!measureBased) {
+      return parseFloat(editForm.pixPrice) > 0 && parseFloat(editForm.cardPrice) > 0;
+    }
+    const widthValid = parseFloat(editForm.minWidth) > 0 && parseFloat(editForm.maxWidth) > parseFloat(editForm.minWidth);
+    const heightValid = parseFloat(editForm.minHeight) > 0 && parseFloat(editForm.maxHeight) > parseFloat(editForm.minHeight);
+    return parseFloat(editForm.pixPricePerM2) > 0 && parseFloat(editForm.cardPricePerM2) > 0 && widthValid && heightValid;
+  }, [editForm]);
+
   // ─── Editar produto ───────────────────────────────────────────────────────
   // ─── Filtro ───────────────────────────────────────────────────────────────
   const filteredProducts = products?.filter((product: any) =>
@@ -156,10 +168,10 @@ export default function AdminProducts() {
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
-    setIsExitConfirmOpen(false);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(true);
     setDraftSavedAt(null);
+    setEditAutoSaveState("idle");
     let parsedGallery: string[] = [];
     try {
       if (product.galleryUrls) parsedGallery = JSON.parse(product.galleryUrls);
@@ -196,19 +208,20 @@ export default function AdminProducts() {
   };
 
   const closeEditSession = () => {
-    if (editingId) window.localStorage.removeItem(getProductEditDraftKey(editingId));
+    if (editingId && editBaselineSignature && hasUnsavedProductChanges(editBaselineSignature, editForm)) {
+      const savedAt = Date.now();
+      window.localStorage.setItem(getProductEditDraftKey(editingId), serializeProductEditDraft({ version: 1, savedAt, baselineSignature: editBaselineSignature, form: editForm }));
+    } else if (editingId) {
+      window.localStorage.removeItem(getProductEditDraftKey(editingId));
+    }
     setEditingId(null);
     setEditBaselineSignature(null);
     setWaitingInitialSegments(false);
     setDraftSavedAt(null);
-    setIsExitConfirmOpen(false);
+    setEditAutoSaveState("idle");
   };
 
   const requestEditClose = () => {
-    if (getProductEditExitAction(editBaselineSignature, editForm) === "confirm") {
-      setIsExitConfirmOpen(true);
-      return;
-    }
     closeEditSession();
   };
 
@@ -264,7 +277,7 @@ export default function AdminProducts() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (automatic = false) => {
     if (!editingId) return;
     if (!editForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
     if ((editForm as any).calculationType !== "m2" && (editForm as any).calculationType !== "metro_linear") {
@@ -313,22 +326,48 @@ export default function AdminProducts() {
         productId: editingId,
         segmentIds: Array.from(new Set(editForm.segmentIds)).filter(Number.isFinite),
       });
-      toast.success("Produto atualizado com sucesso!", {
-        description: "As alterações foram salvas e já estão refletidas no catálogo.",
-        position: "top-right",
-        duration: 3500,
-      });
-      closeEditSession();
-      refetch();
+      const signature = createProductEditSignature(editForm);
+      setEditBaselineSignature(signature);
+      window.localStorage.removeItem(getProductEditDraftKey(editingId));
+      setDraftSavedAt(null);
+      setEditAutoSaveState("saved");
+      await utils.products.getAll.invalidate();
+      await refetch();
+      if (!automatic) {
+        toast.success("Produto atualizado com sucesso!", {
+          description: "As alterações foram salvas e já estão refletidas no catálogo.",
+          position: "top-right",
+          duration: 3500,
+        });
+      }
+      return true;
     } catch (error) {
       console.error("Erro ao atualizar produto:", error);
       const detail = error instanceof Error ? error.message : "Não foi possível concluir o salvamento.";
-      toast.error("Erro ao atualizar produto", {
-        description: detail,
-        position: "top-right",
-      });
+      setEditAutoSaveState("error");
+      if (!automatic) toast.error("Erro ao atualizar produto", { description: detail, position: "top-right" });
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!editingId || !editBaselineSignature || !hasUnsavedProductChanges(editBaselineSignature, editForm)) return;
+    if (!isEditFormReadyForAutoSave()) {
+      setEditAutoSaveState("waiting");
+      return;
+    }
+
+    setEditAutoSaveState("waiting");
+    if (editAutoSaveTimerRef.current) window.clearTimeout(editAutoSaveTimerRef.current);
+    editAutoSaveTimerRef.current = window.setTimeout(async () => {
+      setEditAutoSaveState("saving");
+      await handleSave(true);
+    }, 900);
+
+    return () => {
+      if (editAutoSaveTimerRef.current) window.clearTimeout(editAutoSaveTimerRef.current);
+    };
+  }, [editingId, editBaselineSignature, editForm, isEditFormReadyForAutoSave]);
 
   // ─── Seleção múltipla ─────────────────────────────────────────────────────
   const handleToggleProduct = (id: number) => {
@@ -566,9 +605,11 @@ export default function AdminProducts() {
                             <DialogTitle>Editar Produto</DialogTitle>
                             <DialogDescription>Atualize as informações do produto</DialogDescription>
                           </div>
-                          {draftSavedAt && (
-                            <span className="mt-2 inline-flex w-fit items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 sm:mt-0" aria-live="polite">
-                              Rascunho salvo automaticamente
+                          {editAutoSaveState !== "idle" && (
+                            <span className={`mt-2 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-medium sm:mt-0 ${
+                              editAutoSaveState === "error" ? "bg-red-50 text-red-700" : editAutoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
+                            }`} aria-live="polite">
+                              {editAutoSaveState === "saving" ? "Salvando automaticamente..." : editAutoSaveState === "saved" ? "Salvo automaticamente" : editAutoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : "Aguardando dados obrigatórios"}
                             </span>
                           )}
                         </DialogHeader>
@@ -790,57 +831,8 @@ export default function AdminProducts() {
                           </div>
                           </div>
 
-                          <Button
-                            onClick={handleSave}
-                            className="w-full bg-orange-500 hover:bg-orange-600"
-                            disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                            aria-busy={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                            aria-live="polite"
-                          >
-                            {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
-                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
-                            ) : (
-                              "Salvar Alterações"
-                            )}
-                          </Button>
                         </div>
                       </DialogContent>
-                      <AlertDialog open={editingId === product.id && isExitConfirmOpen} onOpenChange={setIsExitConfirmOpen}>
-                        <AlertDialogContent className="max-w-md">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Salvar alterações antes de sair?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Você fez alterações neste produto. Salve agora para manter as informações atualizadas ou descarte apenas se não quiser conservar esta edição.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:space-x-0">
-                            <AlertDialogCancel disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}>
-                              Continuar editando
-                            </AlertDialogCancel>
-                            <div className="flex w-full gap-2 sm:w-auto">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 sm:flex-none"
-                                onClick={closeEditSession}
-                                disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                              >
-                                Descartar alterações
-                              </Button>
-                              <Button
-                                type="button"
-                                className="flex-1 bg-orange-500 hover:bg-orange-600 sm:flex-none"
-                                onClick={handleSave}
-                                disabled={updateProductMutation.isPending || updateSegmentsMutation.isPending}
-                              >
-                                {updateProductMutation.isPending || updateSegmentsMutation.isPending ? (
-                                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>
-                                ) : "Salvar alterações"}
-                              </Button>
-                            </div>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </Dialog>
 
                     <Button

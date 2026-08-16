@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,12 @@ export default function AdminNewProduct() {
   const [, navigate] = useLocation();
 
   const [createDeliveryOptions, setCreateDeliveryOptions] = useState<DeliveryOptionData[]>([]);
+  const [autoCreatedProductId, setAutoCreatedProductId] = useState<number | null>(null);
+  const [autoSaveState, setAutoSaveState] = useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
+  const [lastSyncedSignature, setLastSyncedSignature] = useState("");
+  const [autoSaveRevision, setAutoSaveRevision] = useState(0);
+  const isAutoSaveInFlightRef = useRef(false);
+  const autoSaveTimerRef = useRef<number | null>(null);
   const [createLogistics, setCreateLogistics] = useState({
     weight: "",
     width: "",
@@ -58,9 +64,27 @@ export default function AdminNewProduct() {
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
 
   const createProductMutation = trpc.admin.createProduct.useMutation();
+  const updateProductMutation = trpc.admin.updateProduct.useMutation();
   const createDeliveryOptionMutation = trpc.deliveryOptions.create.useMutation();
   const updateSegmentsMutation = trpc.productSegments.updateSegments.useMutation();
   const utils = trpc.useUtils();
+
+  useEffect(() => {
+    const rawDraft = window.localStorage.getItem("maria-imprime-new-product-autosave");
+    if (!rawDraft) return;
+    try {
+      const draft = JSON.parse(rawDraft);
+      if (draft?.createForm?.name) {
+        setCreateForm((current) => ({ ...current, ...draft.createForm }));
+        if (draft.createLogistics) setCreateLogistics((current) => ({ ...current, ...draft.createLogistics }));
+        if (Array.isArray(draft.createDeliveryOptions)) setCreateDeliveryOptions(draft.createDeliveryOptions);
+        setAutoSaveState("waiting");
+        toast.info("Rascunho recuperado", { description: "O novo produto será salvo automaticamente quando os dados obrigatórios estiverem completos." });
+      }
+    } catch {
+      window.localStorage.removeItem("maria-imprime-new-product-autosave");
+    }
+  }, []);
 
   const handleCreateSegmentsChange = useCallback((segmentIds: number[]) => {
     setCreateForm((prev) => ({
@@ -70,121 +94,127 @@ export default function AdminNewProduct() {
     }));
   }, [segmentsData]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!createForm.name.trim()) { toast.error("Nome do produto é obrigatório"); return; }
+  const isCreateFormReadyForAutoSave = useCallback(() => {
+    if (!createForm.name.trim()) return false;
     const isMeasureBased = createForm.calculationType === "m2" || createForm.calculationType === "metro_linear";
-    if (!isMeasureBased) {
-      if (!createForm.pixPrice || parseFloat(createForm.pixPrice) <= 0) { toast.error("Preço via Pix é obrigatório e deve ser maior que 0"); return; }
-      if (!createForm.cardPrice || parseFloat(createForm.cardPrice) <= 0) { toast.error("Preço via cartão é obrigatório e deve ser maior que 0"); return; }
-    }
-    if (!createForm.calculationType) { toast.error("Tipo de cobrança é obrigatório"); return; }
+    if (!isMeasureBased) return parseFloat(createForm.pixPrice) > 0 && parseFloat(createForm.cardPrice) > 0;
+    return parseFloat(createForm.pixPricePerM2) > 0
+      && parseFloat(createForm.cardPricePerM2) > 0
+      && parseFloat(createForm.minWidth) > 0
+      && parseFloat(createForm.maxWidth) > parseFloat(createForm.minWidth)
+      && parseFloat(createForm.minHeight) > 0
+      && parseFloat(createForm.maxHeight) > parseFloat(createForm.minHeight);
+  }, [createForm]);
 
-    // Normalizar segment: se vazio, usar "geral" como fallback
-    const effectiveSegment = createForm.segment?.trim() || "geral";
+  const getCreatePayload = useCallback(() => {
+    const isMeasureBased = createForm.calculationType === "m2" || createForm.calculationType === "metro_linear";
+    return {
+      name: createForm.name,
+      description: createForm.description,
+      price: isMeasureBased ? (createForm.price || createForm.pixPricePerM2) : createForm.pixPrice,
+      pixPrice: createForm.pixPrice,
+      cardPrice: createForm.cardPrice,
+      resellerPrice: createForm.resellerPrice || undefined,
+      segment: createForm.segment?.trim() || "geral",
+      imageUrl: createForm.imageUrl,
+      imageKey: createForm.imageKey || undefined,
+      galleryUrls: createForm.galleryUrls.length > 0 ? JSON.stringify(createForm.galleryUrls) : undefined,
+      calculationType: createForm.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
+      pricePerM2: isMeasureBased ? createForm.pixPricePerM2 : undefined,
+      pixPricePerM2: isMeasureBased ? createForm.pixPricePerM2 : undefined,
+      cardPricePerM2: isMeasureBased ? createForm.cardPricePerM2 : undefined,
+      resellerPricePerM2: isMeasureBased ? createForm.resellerPricePerM2 || undefined : undefined,
+      minWidth: isMeasureBased ? createForm.minWidth : undefined,
+      maxWidth: isMeasureBased ? createForm.maxWidth : undefined,
+      minHeight: isMeasureBased ? createForm.minHeight : undefined,
+      maxHeight: isMeasureBased ? createForm.maxHeight : undefined,
+      weight: createLogistics.weight ? parseFloat(createLogistics.weight) : undefined,
+      logisticsWidth: createLogistics.width ? parseFloat(createLogistics.width) : undefined,
+      logisticsHeight: createLogistics.height ? parseFloat(createLogistics.height) : undefined,
+      logisticsLength: createLogistics.length ? parseFloat(createLogistics.length) : undefined,
+      allowedCarrierIds: createLogistics.allowedCarrierIds,
+      specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
+      tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
+      tagPosition: createForm.tagPosition || "top-right",
+    };
+  }, [createForm, createLogistics]);
 
-    if (isMeasureBased) {
-      if (!createForm.pixPricePerM2 || parseFloat(createForm.pixPricePerM2) <= 0) { toast.error(`Preço via Pix por ${createForm.calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
-      if (!createForm.cardPricePerM2 || parseFloat(createForm.cardPricePerM2) <= 0) { toast.error(`Preço via cartão por ${createForm.calculationType === "metro_linear" ? "metro linear" : "m²"} é obrigatório`); return; }
-      if (!createForm.minWidth || parseFloat(createForm.minWidth) <= 0) { toast.error("Largura mínima é obrigatória"); return; }
-      if (!createForm.maxWidth || parseFloat(createForm.maxWidth) <= 0) { toast.error("Largura máxima é obrigatória"); return; }
-      if (!createForm.minHeight || parseFloat(createForm.minHeight) <= 0) { toast.error("Altura mínima é obrigatória"); return; }
-      if (!createForm.maxHeight || parseFloat(createForm.maxHeight) <= 0) { toast.error("Altura máxima é obrigatória"); return; }
-      if (parseFloat(createForm.minWidth) >= parseFloat(createForm.maxWidth)) { toast.error("Largura máxima deve ser maior que a mínima"); return; }
-      if (parseFloat(createForm.minHeight) >= parseFloat(createForm.maxHeight)) { toast.error("Altura máxima deve ser maior que a mínima"); return; }
-    }
+  const getNewProductSignature = useCallback(() => JSON.stringify({ createForm, createLogistics, createDeliveryOptions }), [createForm, createDeliveryOptions, createLogistics]);
 
+  const synchronizeNewProduct = useCallback(async () => {
+    if (isAutoSaveInFlightRef.current || !isCreateFormReadyForAutoSave()) return;
+    const signatureAtStart = getNewProductSignature();
+    isAutoSaveInFlightRef.current = true;
+    setAutoSaveState("saving");
     try {
-      const result = await createProductMutation.mutateAsync({
-        name: createForm.name,
-        description: createForm.description,
-        price: isMeasureBased ? createForm.price : createForm.pixPrice,
-        pixPrice: isMeasureBased ? createForm.pixPrice : createForm.pixPrice,
-        cardPrice: isMeasureBased ? createForm.cardPrice : createForm.cardPrice,
-        resellerPrice: createForm.resellerPrice || undefined,
-        segment: effectiveSegment,
-        imageUrl: createForm.imageUrl,
-        imageKey: createForm.imageKey || undefined,
-        galleryUrls: createForm.galleryUrls.length > 0 ? JSON.stringify(createForm.galleryUrls) : undefined,
-        calculationType: createForm.calculationType as "m2" | "metro_linear" | "pacote" | "unidade",
-        pricePerM2: isMeasureBased ? createForm.pixPricePerM2 : undefined,
-        pixPricePerM2: isMeasureBased ? createForm.pixPricePerM2 : undefined,
-        cardPricePerM2: isMeasureBased ? createForm.cardPricePerM2 : undefined,
-        resellerPricePerM2: isMeasureBased ? createForm.resellerPricePerM2 || undefined : undefined,
-        minWidth: isMeasureBased ? createForm.minWidth : undefined,
-        maxWidth: isMeasureBased ? createForm.maxWidth : undefined,
-        minHeight: isMeasureBased ? createForm.minHeight : undefined,
-        maxHeight: isMeasureBased ? createForm.maxHeight : undefined,
-        weight: createLogistics.weight ? parseFloat(createLogistics.weight) : undefined,
-        logisticsWidth: createLogistics.width ? parseFloat(createLogistics.width) : undefined,
-        logisticsHeight: createLogistics.height ? parseFloat(createLogistics.height) : undefined,
-        logisticsLength: createLogistics.length ? parseFloat(createLogistics.length) : undefined,
-        allowedCarrierIds: createLogistics.allowedCarrierIds.length > 0 ? createLogistics.allowedCarrierIds : undefined,
-        specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
-        tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
-        tagPosition: createForm.tagPosition || "top-right",
-      });
-
-      const newProductId = (result as any)?.id;
-
-      if (newProductId && createForm.segmentIds.length > 0) {
-        try {
-          await updateSegmentsMutation.mutateAsync({ productId: newProductId, segmentIds: createForm.segmentIds });
-        } catch (e) { console.warn("Erro ao vincular segmentos:", e); }
+      const payload = getCreatePayload();
+      let productId = autoCreatedProductId;
+      if (productId) {
+        await updateProductMutation.mutateAsync({ id: productId, ...payload });
+      } else {
+        const result = await createProductMutation.mutateAsync(payload);
+        productId = (result as any)?.id;
+        if (!productId) throw new Error("O produto não retornou um identificador");
+        setAutoCreatedProductId(productId);
+        const activeOptions = createDeliveryOptions.filter((opt) => opt.isActive);
+        await Promise.all(activeOptions.map((opt, index) => createDeliveryOptionMutation.mutateAsync({
+          productId: productId!, name: opt.name, daysToDeliver: opt.daysToDeliver, pricePerM2: opt.pricePerM2, isActive: true, order: index,
+        })));
       }
-
-      const activeOptions = createDeliveryOptions.filter((opt) => opt.isActive);
-      if (activeOptions.length > 0 && newProductId) {
-        try {
-          await Promise.all(
-            activeOptions.map((opt, idx) =>
-              createDeliveryOptionMutation.mutateAsync({
-                productId: newProductId,
-                name: opt.name,
-                daysToDeliver: opt.daysToDeliver,
-                pricePerM2: opt.pricePerM2,
-                isActive: true,
-                order: idx,
-              })
-            )
-          );
-        } catch (e) { console.warn("Erro ao criar prazos:", e); }
-      }
-
-      toast.success("Produto criado com sucesso!");
-      utils.products.getAll.invalidate();
-
-      // Resetar formulário
-      setCreateForm({
-        name: "", description: "", price: "", pixPrice: "", cardPrice: "", resellerPrice: "", segment: "", imageUrl: "", imageKey: "", galleryUrls: [],
-        calculationType: "unidade", pricePerM2: "", pixPricePerM2: "", cardPricePerM2: "", resellerPricePerM2: "", minWidth: "", maxWidth: "",
-        minHeight: "", maxHeight: "", segmentIds: [], specifications: [], tags: [], tagPosition: "top-right",
-      });
-      setCreateDeliveryOptions([]);
-      setCreateLogistics({ weight: "", width: "", height: "", length: "", allowedCarrierIds: [] });
-
-      // Redirecionar para lista de produtos
-      navigate("/admin/produtos");
+      await updateSegmentsMutation.mutateAsync({ productId, segmentIds: createForm.segmentIds });
+      await utils.products.getAll.invalidate();
+      setLastSyncedSignature(signatureAtStart);
+      window.localStorage.removeItem("maria-imprime-new-product-autosave");
+      setAutoSaveState("saved");
     } catch (error) {
-      const msg = (error as any)?.message ?? "Erro desconhecido";
-      toast.error(`Erro ao criar produto: ${msg}`);
-      console.error("[createProduct]", error);
+      console.error("[new-product-autosave]", error);
+      window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
+      setLastSyncedSignature(signatureAtStart);
+      setAutoSaveState("error");
+      toast.error("Falha ao salvar automaticamente: rascunho preservado no navegador");
+    } finally {
+      isAutoSaveInFlightRef.current = false;
+      setAutoSaveRevision((revision) => revision + 1);
     }
-  };
+  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateProductMutation, updateSegmentsMutation, utils]);
+
+  useEffect(() => {
+    const signature = getNewProductSignature();
+    if (signature === lastSyncedSignature) return;
+    window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
+    if (!isCreateFormReadyForAutoSave()) {
+      setAutoSaveState("waiting");
+      return;
+    }
+    setAutoSaveState("waiting");
+    if (autoSaveTimerRef.current) window.clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = window.setTimeout(() => synchronizeNewProduct(), 900);
+    return () => {
+      if (autoSaveTimerRef.current) window.clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [autoSaveRevision, createDeliveryOptions, createForm, createLogistics, getNewProductSignature, isCreateFormReadyForAutoSave, lastSyncedSignature, synchronizeNewProduct]);
 
   return (
     <AdminLayout>
       <div className="admin-visual-system space-y-4 xl:space-y-5">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Novo Produto</h1>
             <p className="text-sm text-gray-500 mt-1">Preencha os dados para criar um novo produto no catálogo</p>
           </div>
-          <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
-            ← Voltar para Produtos
-          </Button>
+          <div className="flex items-center gap-2">
+            {autoSaveState !== "idle" && (
+              <span className={`hidden sm:inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                autoSaveState === "error" ? "bg-red-50 text-red-700" : autoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
+              }`} aria-live="polite">
+                {autoSaveState === "saving" ? "Salvando automaticamente..." : autoSaveState === "saved" ? "Salvo automaticamente" : autoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : "Aguardando dados obrigatórios"}
+              </span>
+            )}
+            <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
+              ← Voltar para Produtos
+            </Button>
+          </div>
         </div>
 
         <Card className="border-orange-200 bg-orange-50/30">
@@ -196,7 +226,7 @@ export default function AdminNewProduct() {
             <CardDescription>Preencha os dados para criar um novo produto no catálogo</CardDescription>
           </CardHeader>
           <CardContent className="px-5 pb-5 pt-0">
-            <form onSubmit={handleCreate} className="space-y-3">
+            <form onSubmit={(event) => event.preventDefault()} className="space-y-3">
               <div className={NEW_PRODUCT_FIELD_LAYOUT.grid}>
                 <div className={NEW_PRODUCT_FIELD_LAYOUT.name}>
                   <Label htmlFor="create-name">Nome do Produto *</Label>
@@ -325,7 +355,7 @@ export default function AdminNewProduct() {
                   <div className={NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}>
                     <Label>Segmentos</Label>
                     <MultiSegmentSelector
-                      productId={0}
+                      productId={autoCreatedProductId || 0}
                       selectedSegmentIds={createForm.segmentIds}
                       onSegmentsChange={handleCreateSegmentsChange}
                     />
@@ -334,8 +364,11 @@ export default function AdminNewProduct() {
                 <div className="space-y-4">
                   {/* Prazos de Produção */}
                   <DeliveryOptionsManager
+                    key={autoCreatedProductId || "new-product-draft"}
+                    productId={autoCreatedProductId || undefined}
                     calculationType={createForm.calculationType}
-                    onChange={setCreateDeliveryOptions}
+                    onChange={autoCreatedProductId ? undefined : setCreateDeliveryOptions}
+                    initialOptions={createDeliveryOptions}
                     compact
                   />
               {/* Logística */}
@@ -482,25 +515,9 @@ export default function AdminNewProduct() {
               </div>
                 </div>
               </div>
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 flex-1"
-                  disabled={createProductMutation.isPending}
-                >
-                  {createProductMutation.isPending ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Criando...</>
-                  ) : (
-                    "Criar Produto"
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/admin/produtos")}
-                >
-                  Cancelar
-                </Button>
+              <div className="flex items-center justify-between gap-3 pt-2 text-sm text-gray-500">
+                <p>As alterações são salvas automaticamente assim que os dados obrigatórios estiverem válidos.</p>
+                <Button type="button" variant="outline" onClick={() => navigate("/admin/produtos")}>Voltar</Button>
               </div>
             </form>
           </CardContent>
