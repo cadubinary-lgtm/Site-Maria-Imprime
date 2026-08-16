@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 const source = readFileSync(resolve(process.cwd(), "client/src/pages/admin/AdminProducts.tsx"), "utf8");
 const routerSource = readFileSync(resolve(process.cwd(), "server/routers.ts"), "utf8");
+const productSegmentsRouterSource = readFileSync(resolve(process.cwd(), "server/routers-product-segments.ts"), "utf8");
 
 describe("salvamento de edição de produto", () => {
   it("preserva o segmento real do produto em vez de sobrescrevê-lo", () => {
@@ -26,5 +27,12 @@ describe("salvamento de edição de produto", () => {
 
     expect(updateProductBlock).toContain("updateProduct: adminAnyProcedure");
     expect(updateProductBlock).not.toContain("updateProduct: adminProcedure");
+  });
+
+  it("também autoriza a atualização de segmentos concluída após o produto ser salvo", () => {
+    expect(productSegmentsRouterSource).toContain('import { adminOrManusAuthProcedure } from "./routers-admin-auth";');
+    expect(productSegmentsRouterSource).toContain("const adminAnyProcedure = adminOrManusAuthProcedure;");
+    expect(productSegmentsRouterSource).toContain("updateSegments: adminAnyProcedure");
+    expect(productSegmentsRouterSource).not.toContain("updateSegments: adminProcedure");
   });
 });
