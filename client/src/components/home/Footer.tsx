@@ -97,7 +97,7 @@ function SecuritySealLink({ href, label, src }: { href: string; label: string; s
   const tooltip = "Site 100% seguro e verificado";
 
   return (
-    <a href={href} aria-label={`${label}. ${tooltip}`} target="_blank" rel="noopener noreferrer" className="group relative flex h-20 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition-colors hover:border-pink-300 hover:bg-pink-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">
+    <a href={href} aria-label={`${label}. ${tooltip}`} target="_blank" rel="noopener noreferrer" className="group relative flex h-20 min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition duration-200 ease-out hover:scale-[1.03] hover:border-pink-300 hover:bg-pink-50/40 focus-visible:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100">
       <img src={src} alt="" aria-hidden className="h-16 w-full object-contain" />
       <span role="tooltip" className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{tooltip}</span>
     </a>
