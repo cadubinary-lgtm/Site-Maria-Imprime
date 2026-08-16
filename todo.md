@@ -2854,3 +2854,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Posicionar Tags do Produto ao lado de Segmentos no editor, mantendo ambos em formato vertical
 - [x] Remover a rolagem interna e a faixa branca no final da página Novo Produto
 - [x] Padronizar a composição visual de Novo Produto conforme Editar Produto
+- [x] Exibir benefícios, preços por forma de pagamento e dados operacionais nos cards públicos de produto
+- [x] Aplicar o card informativo com dados reais também ao Cartão de Visita

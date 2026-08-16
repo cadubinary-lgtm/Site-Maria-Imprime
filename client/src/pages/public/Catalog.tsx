@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatProductPrice, getPixDiscountInfo, getProductPrice } from "@/lib/productPrice";
+import { getProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
-import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { PublicProductCard } from "@/components/products/PublicProductCard";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -228,87 +228,9 @@ export default function Catalog() {
               <>
                 {/* Grid de Produtos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {paginatedProducts.map((product) => {
-                    const pixDiscount = getPixDiscountInfo(product, priceAudience);
-                    return (
-                    <Card key={product.id} className="group hover:shadow-lg transition border-gray-200 overflow-hidden p-0">
-                      <Link href={`/produto/${product.id}`}>
-                        {/* Imagem sangrada no topo */}
-                        <div className="relative aspect-square bg-gray-50 overflow-hidden rounded-t-xl">
-                          <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
-                          {pixDiscount.eligible && (
-                            <span className="absolute left-2 top-2 z-20 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                              Desconto no Pix
-                            </span>
-                          )}
-                          {product.imageUrl ? (
-                            <img
-                              src={product.imageUrl}
-                              alt={product.name}
-                              className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                              <span className="text-gray-400 text-sm">Sem imagem</span>
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-
-                      <CardContent className="p-4 px-4 pt-4">
-                        <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-2">
-                          {product.name}
-                        </h3>
-                        {product.category && (
-                          <p className="text-xs text-gray-500 mb-2">
-                            {product.category}
-                            {product.subcategory && ` • ${product.subcategory}`}
-                          </p>
-                        )}
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                          {product.description || "Sem descrição"}
-                        </p>
-
-                        {/* Tipo de Cálculo */}
-                        <div className="mb-3 p-2 bg-gray-50 rounded text-xs text-gray-600 border border-gray-100">
-                          <span className="font-semibold">Unidade:</span>{" "}
-                          {product.calculationType === "m2"
-                            ? "m²"
-                            : product.calculationType === "metro_linear"
-                              ? "Metro Linear"
-                              : product.calculationType === "pacote"
-                                ? "Pacote"
-                                : "Unidade"}
-                        </div>
-
-                        {/* Preço e Botões */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <span className="text-xl font-bold text-emerald-600">{formatProductPrice(product, priceAudience)}</span>
-                            <p className="text-xs font-medium text-emerald-700">no Pix</p>
-                          </div>
-                        </div>
-
-                        {/* Botões */}
-                        <div className="flex gap-2">
-                          <Link href={`/produto/${product.id}`} className="flex-1">
-                            <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
-                              Ver Detalhes
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleAddToCart(product.name)}
-                            className="border-pink-500 text-pink-500 hover:bg-pink-50"
-                          >
-                            <ShoppingCart className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    );
-                  })}
+                  {paginatedProducts.map((product) => (
+                    <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
+                  ))}
                 </div>
 
                 {/* Paginação */}

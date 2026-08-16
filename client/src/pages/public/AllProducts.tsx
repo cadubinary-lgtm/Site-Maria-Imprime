@@ -2,11 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Link } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { formatProductPrice, getProductPrice } from "@/lib/productPrice";
-import { ProductTagBadges } from "@/components/products/ProductTagBadges";
+import { getProductPrice } from "@/lib/productPrice";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { PublicProductCard } from "@/components/products/PublicProductCard";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -165,36 +164,7 @@ export default function AllProducts() {
         {filteredAndSortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedProducts.map((product) => (
-              <Link key={product.id} href={`/produto/${product.id}`} className="block group">
-                <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                  {product.imageUrl && (
-                    <div className="relative w-full aspect-square bg-gray-50 overflow-hidden rounded-t-lg">
-                      <ProductTagBadges tags={(product as any).tags} tagPosition={(product as any).tagPosition} />
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-orange-500">
-                        {formatProductPrice(product, priceAudience)}
-                      </span>
-                      <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                        Ver
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
             ))}
           </div>
         ) : (

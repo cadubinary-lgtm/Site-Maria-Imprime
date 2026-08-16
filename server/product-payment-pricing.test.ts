@@ -21,13 +21,15 @@ describe("desconto Pix em lote", () => {
     const admin = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
     const home = readFileSync(resolve(root, "client/src/components/home/FeaturedProducts.tsx"), "utf8");
     const catalog = readFileSync(resolve(root, "client/src/pages/public/Catalog.tsx"), "utf8");
+    const publicCard = readFileSync(resolve(root, "client/src/components/products/PublicProductCard.tsx"), "utf8");
     const detail = readFileSync(resolve(root, "client/src/pages/ecommerce/ProductDetail.tsx"), "utf8");
 
     expect(admin).toContain("productPaymentPricing.applyPixDiscount");
     expect(admin).toContain("Aplicar desconto padrão no Pix?");
     expect(admin).toContain("Os preços de cartão e de revenda não serão alterados.");
-    expect(home).toContain("Desconto no Pix");
-    expect(catalog).toContain("Desconto no Pix");
+    expect(home).toContain("<PublicProductCard");
+    expect(catalog).toContain("<PublicProductCard");
+    expect(publicCard).toContain("Desconto no Pix");
     expect(detail).toContain("Preço especial no Pix");
   });
 });
