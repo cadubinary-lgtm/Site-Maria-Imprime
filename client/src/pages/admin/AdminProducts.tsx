@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Edit2, Trash2, Plus, Search, X, Package, Copy } from "lucide-react";
-import { formatProductPrice } from "@/lib/productPrice";
+import { getProductPaymentPrices, getProductPrice } from "@/lib/productPrice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
@@ -28,7 +28,12 @@ import { formatProductPriceInput, normalizeProductPriceInput, parseProductPriceI
 type EditPriceField = "price" | "pixPrice" | "cardPrice" | "resellerPrice" | "pricePerM2" | "pixPricePerM2" | "cardPricePerM2" | "resellerPricePerM2";
 
 export default function AdminProducts() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const highlightedProductId = useMemo(() => {
+    const productId = Number(new URLSearchParams(location.split("?")[1] || "").get("destacar"));
+    return Number.isInteger(productId) && productId > 0 ? productId : null;
+  }, [location]);
+  const [recentlyCreatedProductId, setRecentlyCreatedProductId] = useState<number | null>(null);
 
   // ─── Estado de edição ─────────────────────────────────────────────────────
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -115,6 +120,16 @@ export default function AdminProducts() {
   });
   const applyPixDiscountMutation = trpc.productPaymentPricing.applyPixDiscount.useMutation();
   const removePixDiscountMutation = trpc.productPaymentPricing.removePixDiscount.useMutation();
+
+  useEffect(() => {
+    if (highlightedProductId === null) return;
+    setRecentlyCreatedProductId(highlightedProductId);
+    const timer = window.setTimeout(() => {
+      setRecentlyCreatedProductId(null);
+      navigate("/admin/produtos", { replace: true });
+    }, 9000);
+    return () => window.clearTimeout(timer);
+  }, [highlightedProductId, navigate]);
 
   // ─── Sincronizar segmentos ao editar ─────────────────────────────────────
   useEffect(() => {
@@ -291,6 +306,14 @@ export default function AdminProducts() {
     setQuickPixPrice(String(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 ?? "" : product.pixPrice ?? product.price ?? ""));
     setQuickCardPrice(String(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 ?? "" : product.cardPrice ?? product.price ?? ""));
     setQuickResellerPrice(String(measureBased ? product.resellerPricePerM2 ?? "" : product.resellerPrice ?? ""));
+  };
+
+  const toggleQuickEdit = (product: any) => {
+    if (quickEditingId === product.id) {
+      setQuickEditingId(null);
+      return;
+    }
+    startQuickEdit(product);
   };
 
   const handleQuickPricingSave = async (product: any) => {
@@ -699,10 +722,19 @@ export default function AdminProducts() {
         </Card>
       ) : (
         <div className="grid gap-6">
-          {filteredProducts.map((product: any) => (
-            <Card key={product.id} className={selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""}>
+          {filteredProducts.map((product: any) => {
+            const isRecentlyCreated = recentlyCreatedProductId === product.id;
+            const paymentPrices = getProductPaymentPrices(product);
+            const resellerPrice = getProductPrice(product, "reseller");
+            return (
+            <Card key={product.id} className={`${selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""} ${isRecentlyCreated ? "relative border-pink-400 bg-pink-50/70 ring-1 ring-pink-200" : ""}`}>
+              {isRecentlyCreated && (
+                <span className="absolute right-4 top-3 rounded-full bg-pink-600 px-2.5 py-1 text-xs font-semibold text-white">
+                  Produto recém-criado
+                </span>
+              )}
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[auto_9rem_minmax(0,1fr)_auto]">
                   {/* Checkbox */}
                   <div className="flex items-center">
                     <input
@@ -716,27 +748,36 @@ export default function AdminProducts() {
                   {/* Product Image */}
                   <div>
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="w-full h-32 object-cover rounded-lg" />
+                      <img src={product.imageUrl} alt={product.name} className="h-28 w-full rounded-lg object-cover md:w-36" />
                     ) : (
-                      <div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <div className="flex h-28 w-full items-center justify-center rounded-lg bg-gray-200 md:w-36">
                         <span className="text-gray-400">Sem imagem</span>
                       </div>
                     )}
                   </div>
 
                   {/* Product Info */}
-                  <div className="md:col-span-2">
+                  <div className="min-w-0">
                     <h3 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-                    <div className="flex gap-4">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formatProductPrice(product)}
+                    <p className="mb-3 text-sm text-gray-600">{product.description || "Sem descrição cadastrada."}</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                      <span className="inline-flex items-baseline gap-1.5 text-emerald-700">
+                        <span className="font-medium text-gray-500">Pix</span>
+                        <strong className="text-sm">{paymentPrices.pix.label}</strong>
+                      </span>
+                      <span className="inline-flex items-baseline gap-1.5 text-blue-700">
+                        <span className="font-medium text-gray-500">Cartão</span>
+                        <strong className="text-sm">{paymentPrices.card.label}</strong>
+                      </span>
+                      <span className="inline-flex items-baseline gap-1.5 text-violet-700">
+                        <span className="font-medium text-gray-500">Revendedor</span>
+                        <strong className="text-sm">{resellerPrice.label}</strong>
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 justify-end md:col-span-1">
+                  <div className="flex flex-wrap justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -745,7 +786,12 @@ export default function AdminProducts() {
                       <Copy className="w-4 h-4 mr-2" />
                       Duplicar
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => startQuickEdit(product)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleQuickEdit(product)}
+                      aria-expanded={quickEditingId === product.id}
+                    >
                       <Edit2 className="w-4 h-4 mr-2" />
                       Preço rápido
                     </Button>
@@ -1175,7 +1221,8 @@ export default function AdminProducts() {
                 )}
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
         </div>

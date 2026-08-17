@@ -2873,3 +2873,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exigir Criar produto antes do autosalvamento em Novo Produto para impedir duplicidades
 - [x] Adicionar toast de sucesso e botão Descartar Rascunho em Novo Produto
 - [x] Permitir duplicar um produto existente preenchendo Novo Produto automaticamente
+- [x] Adicionar Limpar imagens na duplicação e destacar o produto recém-criado na listagem
+- [x] Reorganizar card administrativo com imagem, descrição e preços Pix, cartão e revendedor visíveis
+- [x] Permitir recolher Preço rápido ao clicar novamente na mesma ação
