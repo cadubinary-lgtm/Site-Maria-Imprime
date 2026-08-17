@@ -70,4 +70,30 @@ describe("salvamento automático de produtos", () => {
     expect(newProductSource).toContain("Produto pronto para duplicação");
     expect(newProductSource).toContain('navigate("/admin/novo-produto", { replace: true })');
   });
+
+  it("permite limpar imagens da cópia e destaca o produto recém-criado na listagem", () => {
+    const newProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
+    const productsSource = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
+
+    expect(newProductSource).toContain("handleClearDuplicateImages");
+    expect(newProductSource).toContain("Limpar imagens");
+    expect(newProductSource).toContain("Limpar imagens da cópia?");
+    expect(newProductSource).toContain('navigate(`/admin/produtos?destacar=${productId}`)');
+    expect(productsSource).toContain("highlightedProductId");
+    expect(productsSource).toContain("recentlyCreatedProductId");
+    expect(productsSource).toContain("Produto recém-criado");
+  });
+
+  it("exibe preços lado a lado e recolhe Preço rápido ao clicar novamente", () => {
+    const productsSource = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
+
+    expect(productsSource).toContain("getProductPaymentPrices(product)");
+    expect(productsSource).toContain('getProductPrice(product, "reseller")');
+    expect(productsSource).toContain(">Pix<");
+    expect(productsSource).toContain(">Cartão<");
+    expect(productsSource).toContain(">Revendedor<");
+    expect(productsSource).toContain("toggleQuickEdit");
+    expect(productsSource).toContain("if (quickEditingId === product.id)");
+    expect(productsSource).toContain("aria-expanded={quickEditingId === product.id}");
+  });
 });

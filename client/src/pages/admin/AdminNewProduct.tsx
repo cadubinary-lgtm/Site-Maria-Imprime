@@ -77,6 +77,8 @@ export default function AdminNewProduct() {
   const [autoSaveRevision, setAutoSaveRevision] = useState(0);
   const [draftResetVersion, setDraftResetVersion] = useState(0);
   const [isDiscardDraftDialogOpen, setIsDiscardDraftDialogOpen] = useState(false);
+  const [isDuplicatingDraft, setIsDuplicatingDraft] = useState(false);
+  const [isClearDuplicateImagesDialogOpen, setIsClearDuplicateImagesDialogOpen] = useState(false);
   const isAutoSaveInFlightRef = useRef(false);
   const autoSaveTimerRef = useRef<number | null>(null);
   const duplicatedProductIdRef = useRef<number | null>(null);
@@ -191,6 +193,7 @@ export default function AdminNewProduct() {
     setCreateLogistics(duplicatedLogistics);
     setCreateDeliveryOptions(sourceDeliveryOptions);
     setAutoCreatedProductId(null);
+    setIsDuplicatingDraft(true);
     setLastSyncedSignature("");
     setAutoSaveState("waiting");
     setDraftResetVersion((version) => version + 1);
@@ -312,11 +315,16 @@ export default function AdminNewProduct() {
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
       setAutoSaveState("saved");
       toast.success("Produto criado com sucesso", {
-        description: `${createForm.name.trim()}: as próximas alterações serão salvas automaticamente.`,
+        description: isDuplicatingDraft
+          ? `${createForm.name.trim()}: a cópia foi criada e será destacada na lista de produtos.`
+          : `${createForm.name.trim()}: as próximas alterações serão salvas automaticamente.`,
         position: "top-right",
         duration: 3500,
         id: `new-product-created-${productId}`,
       });
+      if (isDuplicatingDraft) {
+        navigate(`/admin/produtos?destacar=${productId}`);
+      }
     } catch (error) {
       console.error("[new-product-create]", error);
       window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
@@ -325,7 +333,24 @@ export default function AdminNewProduct() {
     } finally {
       isAutoSaveInFlightRef.current = false;
     }
-  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm.segmentIds, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateSegmentsMutation, utils]);
+  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm.segmentIds, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, isDuplicatingDraft, navigate, updateSegmentsMutation, utils]);
+
+  const handleClearDuplicateImages = useCallback(() => {
+    if (!isDuplicatingDraft || autoCreatedProductId) return;
+    setCreateForm((current) => ({
+      ...current,
+      imageUrl: "",
+      imageKey: "",
+      galleryUrls: [],
+    }));
+    setIsClearDuplicateImagesDialogOpen(false);
+    toast.info("Imagens removidas", {
+      description: "Adicione as fotos do novo produto quando estiver pronto.",
+      position: "top-right",
+      duration: 3500,
+      id: "new-product-duplicate-images-cleared",
+    });
+  }, [autoCreatedProductId, isDuplicatingDraft]);
 
   const handleDiscardDraft = useCallback(() => {
     if (autoCreatedProductId || createProductMutation.isPending) return;
@@ -338,6 +363,8 @@ export default function AdminNewProduct() {
     setCreateLogistics(initialLogistics);
     setCreateDeliveryOptions(initialDeliveryOptions);
     setAutoCreatedProductId(null);
+    setIsDuplicatingDraft(false);
+    duplicatedProductIdRef.current = null;
     setLastSyncedSignature(JSON.stringify({
       createForm: initialForm,
       createLogistics: initialLogistics,
@@ -533,6 +560,21 @@ export default function AdminNewProduct() {
                   {/* Upload de Fotos */}
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className="px-4">
+                      {isDuplicatingDraft && !autoCreatedProductId && (
+                        <div className="flex justify-end pb-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!createForm.imageUrl && createForm.galleryUrls.length === 0}
+                            className="text-gray-500 hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600"
+                            onClick={() => setIsClearDuplicateImagesDialogOpen(true)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Limpar imagens
+                          </Button>
+                        </div>
+                      )}
                       <ProductImageUploader
                         mainImageUrl={createForm.imageUrl}
                         galleryUrls={createForm.galleryUrls}
@@ -764,6 +806,22 @@ export default function AdminNewProduct() {
             <AlertDialogCancel>Continuar editando</AlertDialogCancel>
             <AlertDialogAction onClick={handleDiscardDraft} className="bg-pink-600 text-white hover:bg-pink-700">
               Descartar rascunho
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={isClearDuplicateImagesDialogOpen} onOpenChange={setIsClearDuplicateImagesDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar imagens da cópia?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A foto principal e todas as fotos adicionais serão removidas somente deste novo rascunho.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Manter imagens</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearDuplicateImages} className="bg-pink-600 text-white hover:bg-pink-700">
+              Limpar imagens
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
