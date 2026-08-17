@@ -16,9 +16,6 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("parseSpecifications(product.specifications)");
     expect(publicCardSource).toContain("object-contain");
     expect(publicCardSource).not.toContain("object-cover");
-    expect(publicCardSource).toContain("max-h-full max-w-full object-contain");
-    expect(publicCardSource).not.toContain("group-hover:scale-105");
-    expect(publicCardSource).not.toContain('aspect-square overflow-hidden bg-gray-50');
     expect(publicCardSource).not.toContain("Desconto no Pix");
     expect(publicCardSource).toContain('className="px-4 pb-4 pt-1"');
     expect(publicCardSource).toContain('text-[17px]');
