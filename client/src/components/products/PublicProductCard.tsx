@@ -79,13 +79,13 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
   return (
     <Link href={`/produto/${product.id}`} className="group block">
     <Card className="overflow-hidden border border-gray-200 bg-white p-0 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="relative aspect-square bg-gray-50">
+      <div className="relative aspect-square overflow-hidden bg-gray-50">
         <ProductTagBadges tags={product.tags} tagPosition={product.tagPosition} />
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="max-h-full max-w-full object-contain"
+            className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">Sem imagem</div>
