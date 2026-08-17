@@ -131,8 +131,8 @@ export function HeroSection() {
             }}
             className="lg:text-left text-left"
           >
-            Aqui você encontra tudo o que precisa<br />
-            para divulgar, vender e crescer.
+            Materiais para sua empresa, eventos e negócios,<br />
+            com praticidade e qualidade.
           </p>
 
           {/* Barra de busca */}

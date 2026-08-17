@@ -15,6 +15,14 @@ describe("conteúdo do banner principal", () => {
     expect(source).not.toContain('Pedi pra{" "}');
   });
 
+  it("apresenta a nova mensagem institucional da Maria Imprime", () => {
+    const source = readFileSync(heroSectionPath, "utf8");
+
+    expect(source).toContain("Materiais para sua empresa, eventos e negócios,<br />");
+    expect(source).toContain("com praticidade e qualidade.");
+    expect(source).not.toContain("Aqui você encontra tudo o que precisa");
+  });
+
   it("conecta a barra de busca exclusivamente aos resultados de produtos", () => {
     const source = readFileSync(heroSectionPath, "utf8");
 

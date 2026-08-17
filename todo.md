@@ -2895,3 +2895,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar dados estruturados e metadados dinâmicos de SEO nas páginas de produto
 - [x] Atualizar a resolução mínima da lista de pré-impressão para 300 DPI
 - [x] Remover o bloco Nossos diferenciais do configurador de pedido
+- [x] Atualizar a mensagem institucional do banner principal
