@@ -1071,7 +1071,7 @@ export default function ProductDetail() {
                 </div>
               )}
               {product.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed line-clamp-5">{product.description}</p>
               )}
 
               <div className="space-y-3 pt-1">
@@ -2139,11 +2139,14 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            </div>
-
-            <MariaGuide />
           </div>
 
+        </div>
+
+        </div>
+
+        <div className="min-w-0 lg:col-span-2">
+          <MariaGuide />
         </div>
       </div>
     </div>

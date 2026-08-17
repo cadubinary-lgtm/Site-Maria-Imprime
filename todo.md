@@ -2941,3 +2941,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o espaço branco excedente entre a área superior do configurador e o Guia da Maria
 - [x] Reorganizar de forma responsiva as colunas de produto, opções e resumo do pedido
 - [x] Validar que o novo layout compacto preserva preço, carrinho, checkout e o Guia da Maria inferior
+- [x] Subir o Guia da Maria para eliminar o vão branco após o configurador
+- [x] Manter quatro cards do Guia da Maria legíveis, sem compressão de texto, na largura de referência
+- [x] Validar a proximidade vertical e a organização da grade sem alterar preço, carrinho ou checkout
+- [x] Corrigir a largura do Guia da Maria para que ele ocupe toda a área após o configurador, sem ficar restrito à coluna lateral
+- [x] Confirmar visualmente que o Guia da Maria ocupa toda a largura, inicia sem vão branco e mantém os quatro painéis legíveis
