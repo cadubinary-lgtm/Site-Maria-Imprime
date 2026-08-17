@@ -34,7 +34,24 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("Criar produto");
     expect(source).toContain("createProductMutation.mutateAsync(getCreatePayload())");
     expect(source).toContain("updateProductMutation.mutateAsync({ id: autoCreatedProductId, ...payload })");
-    expect(source).toContain("As próximas alterações serão salvas automaticamente.");
+    expect(source).toContain("as próximas alterações serão salvas automaticamente.");
     expect(source).toContain("Preencha os dados obrigatórios e clique em Criar produto para iniciar o autosalvamento.");
+  });
+
+  it("confirma a criação em toast e permite descartar o rascunho antes do cadastro", () => {
+    const source = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
+
+    expect(source).toContain('toast.success("Produto criado com sucesso"');
+    expect(source).toContain('position: "top-right"');
+    expect(source).toContain("duration: 3500");
+    expect(source).toContain("id: `new-product-created-${productId}`");
+    expect(source).toContain("handleDiscardDraft");
+    expect(source).toContain("Descartar Rascunho");
+    expect(source).toContain("Descartar rascunho?");
+    expect(source).toContain('window.localStorage.removeItem("maria-imprime-new-product-autosave")');
+    expect(source).toContain("setCreateForm(initialForm)");
+    expect(source).toContain("setCreateLogistics(initialLogistics)");
+    expect(source).toContain("setCreateDeliveryOptions(initialDeliveryOptions)");
+    expect(source).toContain('setAutoSaveState("idle")');
   });
 });
