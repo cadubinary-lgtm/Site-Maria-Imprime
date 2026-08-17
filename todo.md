@@ -2964,3 +2964,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover os subtítulos dos quatro cards superiores compactos, mantendo ícone e título
 - [x] Reduzir o preenchimento interno dos cards superiores ao mínimo legível
 - [x] Validar os cards enxutos sem alterar a abertura independente dos painéis técnicos
+- [x] Alterar os cards superiores do Guia da Maria para manter somente um painel técnico aberto por vez
+- [x] Recolher automaticamente o painel técnico anterior ao abrir outro card
+- [x] Validar os estados visuais e a expansão exclusiva dos quatro cards

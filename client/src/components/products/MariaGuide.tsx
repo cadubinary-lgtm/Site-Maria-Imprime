@@ -73,7 +73,7 @@ export function MariaGuide({ content, compact = false }: { content?: MariaGuideC
   const finishSection = getSection(guide, "acabamento");
   const deliverySection = getSection(guide, "entrega");
   const [highlightedId, setHighlightedId] = useState<MariaGuideSection["id"]>("impressao");
-  const [expandedPanels, setExpandedPanels] = useState<Set<MariaGuideSection["id"]>>(() => new Set<MariaGuideSection["id"]>(["impressao", "material", "acabamento", "entrega"]));
+  const [expandedPanels, setExpandedPanels] = useState<Set<MariaGuideSection["id"]>>(() => new Set<MariaGuideSection["id"]>(["impressao"]));
   const [openPrintId, setOpenPrintId] = useState<string | null>(null);
   const [openMaterialId, setOpenMaterialId] = useState<string | null>(null);
   const [openDeliveryId, setOpenDeliveryId] = useState<string | null>(null);
@@ -88,10 +88,7 @@ export function MariaGuide({ content, compact = false }: { content?: MariaGuideC
   const togglePanel = (section: MariaGuideSection) => {
     setHighlightedId(section.id);
     setExpandedPanels((current) => {
-      const next = new Set(current);
-      if (next.has(section.id)) next.delete(section.id);
-      else next.add(section.id);
-      return next;
+      return current.has(section.id) ? new Set() : new Set([section.id]);
     });
   };
   const expandedPanelCount = panels.filter((section) => expandedPanels.has(section.id)).length;

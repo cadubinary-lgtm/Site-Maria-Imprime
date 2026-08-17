@@ -53,6 +53,8 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("maria-guide-entrega");
     expect(guide).toContain("expandedPanels");
     expect(guide).toContain("togglePanel");
+    expect(guide).toContain('new Set<MariaGuideSection["id"]>(["impressao"])');
+    expect(guide).toContain("return current.has(section.id) ? new Set() : new Set([section.id])");
     expect(guide).toContain("aria-controls");
     expect(guide).toContain("aria-expanded");
     expect(guide).toContain("Escolha um dos quatro cards acima para expandir");
