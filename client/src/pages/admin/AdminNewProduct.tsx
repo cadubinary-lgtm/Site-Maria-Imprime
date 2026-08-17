@@ -16,6 +16,7 @@ import { DeliveryOptionsManager, type DeliveryOptionData } from "@/components/pr
 import { ProductImageUploader } from "@/components/products/ProductImageUploader";
 import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
 import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
+import { getCardDescriptionLines, PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH, updateCardDescriptionLine } from "@/lib/product-card-description";
 
 export default function AdminNewProduct() {
   const [, navigate] = useLocation();
@@ -402,18 +403,33 @@ export default function AdminNewProduct() {
                           </Select>
                         </div>
                       )}
-                      <div className="mt-4 border-t border-gray-100 pt-4">
-                        <Label htmlFor="create-card-description" className="text-sm font-medium text-gray-700">Descrição do Card</Label>
-                        <p className="mt-1 text-sm text-gray-500">Mensagem exibida abaixo dos preços no card público. Quando preenchida, substitui o aviso automático de urgência.</p>
-                        <Textarea
-                          id="create-card-description"
-                          value={createForm.cardDescription}
-                          onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: event.target.value.slice(0, 180) }))}
-                          placeholder="Ex.: Produção no mesmo dia · taxa de urgência de R$ 20,00/m²"
-                          maxLength={180}
-                          className="mt-3 min-h-20 resize-y"
-                        />
-                        <p className="mt-1 text-right text-xs text-gray-400">{createForm.cardDescription.length}/180</p>
+                    </CardContent>
+                  </Card>
+                  <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-2`}>
+                    <CardContent className={PRODUCT_FORM_PANEL.content}>
+                      <h3 className={PRODUCT_FORM_PANEL.title}>Descrição do Card</h3>
+                      <p className="text-sm text-gray-500">Defina até duas linhas exibidas abaixo dos preços. Quando preenchidas, substituem o aviso automático de urgência.</p>
+                      <div className="mt-4 space-y-3">
+                        <div className="space-y-1">
+                          <Label htmlFor="create-card-description-line-1" className="text-sm font-medium text-gray-700">Linha 1</Label>
+                          <Input
+                            id="create-card-description-line-1"
+                            value={getCardDescriptionLines(createForm.cardDescription)[0]}
+                            onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 0, event.target.value) }))}
+                            placeholder="Ex.: Produção no mesmo dia"
+                            maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="create-card-description-line-2" className="text-sm font-medium text-gray-700">Linha 2</Label>
+                          <Input
+                            id="create-card-description-line-2"
+                            value={getCardDescriptionLines(createForm.cardDescription)[1]}
+                            onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 1, event.target.value) }))}
+                            placeholder="Ex.: Taxa de urgência de R$ 20,00/m²"
+                            maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

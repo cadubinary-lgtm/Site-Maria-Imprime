@@ -17,10 +17,12 @@ describe("Descrição do Card de produto", () => {
     expect(editProductSource).toContain('cardDescription: (editForm as any).cardDescription?.trim() || ""');
   });
 
-  it("oferece o campo abaixo das tags e prioriza seu texto no card público", () => {
-    expect(newProductSource).toContain('htmlFor="create-card-description"');
-    expect(editProductSource).toContain('htmlFor="edit-card-description"');
-    expect(cardSource).toContain("const cardDescription = product.cardDescription?.trim()");
-    expect(cardSource).toContain("cardDescription || sameDayUrgency");
+  it("oferece um painel separado com duas linhas e prioriza seu texto no card público", () => {
+    expect(newProductSource).toContain('htmlFor="create-card-description-line-1"');
+    expect(newProductSource).toContain('htmlFor="create-card-description-line-2"');
+    expect(editProductSource).toContain('htmlFor="edit-card-description-line-1"');
+    expect(editProductSource).toContain('htmlFor="edit-card-description-line-2"');
+    expect(cardSource).toContain("getVisibleCardDescriptionLines(product.cardDescription)");
+    expect(cardSource).toContain("cardDescriptionLines.length > 0 || sameDayUrgency");
   });
 });
