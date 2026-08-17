@@ -1,7 +1,7 @@
 import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { z } from "zod";
-import { applyPixDiscountToProducts } from "./db";
+import { applyPixDiscountToProducts, removePixDiscountFromProducts } from "./db";
 
 const adminAnyProcedure = adminOrManusAuthProcedure;
 
@@ -13,5 +13,12 @@ export const productPaymentPricingRouter = router({
     }))
     .mutation(async ({ input }) => {
       return applyPixDiscountToProducts(input.discountPercent, input.productIds);
+    }),
+  removePixDiscount: adminAnyProcedure
+    .input(z.object({
+      productIds: z.array(z.number()).min(1).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      return removePixDiscountFromProducts(input.productIds);
     }),
 });

@@ -47,6 +47,7 @@ export default function AdminProducts() {
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [pixDiscountPercent, setPixDiscountPercent] = useState("");
   const [isPixDiscountConfirmOpen, setIsPixDiscountConfirmOpen] = useState(false);
+  const [isPixDiscountRemovalConfirmOpen, setIsPixDiscountRemovalConfirmOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -113,6 +114,7 @@ export default function AdminProducts() {
     onSuccess: () => { utils.products.getAll.invalidate(); },
   });
   const applyPixDiscountMutation = trpc.productPaymentPricing.applyPixDiscount.useMutation();
+  const removePixDiscountMutation = trpc.productPaymentPricing.removePixDiscount.useMutation();
 
   // ─── Sincronizar segmentos ao editar ─────────────────────────────────────
   useEffect(() => {
@@ -497,6 +499,24 @@ export default function AdminProducts() {
     }
   };
 
+  const handleRemovePixDiscount = async () => {
+    try {
+      const result = await removePixDiscountMutation.mutateAsync({
+        productIds: selectedProducts.size > 0 ? Array.from(selectedProducts) : undefined,
+      });
+      await utils.products.getAll.invalidate();
+      await refetch();
+      toast.success("Aplicação do Pix removida", {
+        description: `O valor Pix de ${result.updatedCount} produto(s) voltará a seguir o valor de cartão configurado.`,
+        position: "top-right",
+      });
+      setIsPixDiscountRemovalConfirmOpen(false);
+      setSelectedProducts(new Set());
+    } catch (error) {
+      toast.error("Não foi possível remover a aplicação do Pix", { position: "top-right" });
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("Tem certeza que deseja remover este produto?")) return;
     try {
@@ -637,6 +657,15 @@ export default function AdminProducts() {
               <Button variant="outline" onClick={handleOpenPixDiscountConfirm} disabled={applyPixDiscountMutation.isPending}>
                 {applyPixDiscountMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Aplicar no Pix
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsPixDiscountRemovalConfirmOpen(true)}
+                disabled={removePixDiscountMutation.isPending}
+                className="border-gray-200 text-gray-500 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-600"
+              >
+                {removePixDiscountMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                {removePixDiscountMutation.isPending ? "Removendo..." : "Remover aplicação do Pix"}
               </Button>
               {selectedProducts.size > 0 && (
                 <Button variant="destructive" onClick={handleDeleteMultiple} disabled={deleteMultipleProductsMutation.isPending}>
@@ -1156,6 +1185,27 @@ export default function AdminProducts() {
             <AlertDialogCancel disabled={applyPixDiscountMutation.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={(event) => { event.preventDefault(); handleApplyPixDiscount(); }} disabled={applyPixDiscountMutation.isPending}>
               {applyPixDiscountMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Aplicando...</> : "Confirmar desconto"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isPixDiscountRemovalConfirmOpen} onOpenChange={setIsPixDiscountRemovalConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover aplicação do Pix?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O preço Pix de {selectedProducts.size > 0 ? `${selectedProducts.size} produto(s) selecionado(s)` : "todos os produtos ativos"} voltará a seguir o valor de cartão configurado. Os preços de cartão e de revenda não serão alterados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removePixDiscountMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => { event.preventDefault(); handleRemovePixDiscount(); }}
+              disabled={removePixDiscountMutation.isPending}
+              className="bg-pink-600 hover:bg-pink-700"
+            >
+              {removePixDiscountMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Removendo...</> : <><Trash2 className="mr-2 h-4 w-4" />Remover aplicação</>}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
