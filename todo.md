@@ -2967,3 +2967,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alterar os cards superiores do Guia da Maria para manter somente um painel técnico aberto por vez
 - [x] Recolher automaticamente o painel técnico anterior ao abrir outro card
 - [x] Validar os estados visuais e a expansão exclusiva dos quatro cards
+- [x] Mapear os botões de ação da página inicial e preservar seus destinos atuais
+- [x] Padronizar o botão principal de contato com preenchimento rosa, ícone e sombra suave
+- [x] Padronizar os botões secundários de produtos com fundo branco e contorno rosa
+- [x] Validar os botões da página inicial em desktop e em tela estreita

@@ -1,4 +1,5 @@
 import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 export function FAQSupport() {
   const { company } = useCompanySettings();
@@ -54,7 +55,7 @@ export function FAQSupport() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 w-fit"
+                className={`${HOME_PRIMARY_ACTION_CLASS} w-fit`}
               >
                 <img src="/manus-storage/whastapp-branco_ab9ddb70.webp" alt="WhatsApp" className="w-5 h-5" />
                 <span>Falar com a Maria</span>
