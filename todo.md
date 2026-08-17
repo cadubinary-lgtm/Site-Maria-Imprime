@@ -2893,3 +2893,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Configurar favicon oficial e metadados de ícone para mecanismos de busca
 - [x] Otimizar meta tags de SEO e Open Graph para compartilhamentos no WhatsApp
 - [x] Adicionar dados estruturados e metadados dinâmicos de SEO nas páginas de produto
+- [x] Atualizar a resolução mínima da lista de pré-impressão para 300 DPI

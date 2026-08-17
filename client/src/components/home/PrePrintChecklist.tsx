@@ -3,7 +3,7 @@ const FUNDO   = "/manus-storage/fundorosa2_7ec48199.webp";
 const CHECK   = "/manus-storage/certo_54c281fc.png";
 
 const checks = [
-  "Resolução mínima de 150 DPI",
+  "Resolução mínima de 300 DPI",
   "Fontes convertidas em curvas",
   "Arquivo em CMYK ou RGB",
   "Cores e contrastes adequados",
