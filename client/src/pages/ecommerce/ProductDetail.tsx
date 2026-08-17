@@ -31,6 +31,7 @@ import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
 import { formatProductionDeadlineSurcharge, getProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
+import { getProductSeoMetadata, getProductSeoScript } from "@shared/productSeo";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -232,6 +233,60 @@ export default function ProductDetail() {
     } catch {}
     setGalleryImages(imgs);
     setCurrentImageIndex(0);
+  }, [product]);
+
+  useEffect(() => {
+    if (!product) return;
+
+    const seo = getProductSeoMetadata(product as any);
+    const originalTitle = document.title;
+    const restoreEntries: Array<{ node: Element; attribute: "content" | "href"; value: string | null }> = [];
+
+    const updateMeta = (selector: string, content: string) => {
+      const node = document.querySelector(selector);
+      if (!node) return;
+      restoreEntries.push({ node, attribute: "content", value: node.getAttribute("content") });
+      node.setAttribute("content", content);
+    };
+
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      restoreEntries.push({ node: canonical, attribute: "href", value: canonical.getAttribute("href") });
+      canonical.setAttribute("href", seo.url);
+    }
+
+    document.title = seo.title;
+    updateMeta('meta[name="description"]', seo.description);
+    updateMeta('meta[name="keywords"]', seo.keywords);
+    updateMeta('meta[property="og:type"]', "product");
+    updateMeta('meta[property="og:title"]', seo.title);
+    updateMeta('meta[property="og:description"]', seo.description);
+    updateMeta('meta[property="og:url"]', seo.url);
+    updateMeta('meta[property="og:image"]', seo.image);
+    updateMeta('meta[property="og:image:secure_url"]', seo.image);
+    updateMeta('meta[property="og:image:alt"]', seo.imageAlt);
+    updateMeta('meta[name="twitter:title"]', seo.title);
+    updateMeta('meta[name="twitter:description"]', seo.description);
+    updateMeta('meta[name="twitter:image"]', seo.image);
+    updateMeta('meta[name="twitter:image:alt"]', seo.imageAlt);
+
+    const previousStructuredData = document.getElementById("product-seo-jsonld");
+    const previousStructuredContent = previousStructuredData?.textContent ?? null;
+    const structuredData = previousStructuredData ?? document.createElement("script");
+    structuredData.id = "product-seo-jsonld";
+    structuredData.setAttribute("type", "application/ld+json");
+    structuredData.textContent = getProductSeoScript(seo.jsonLd);
+    if (!previousStructuredData) document.head.appendChild(structuredData);
+
+    return () => {
+      document.title = originalTitle;
+      restoreEntries.forEach(({ node, attribute, value }) => {
+        if (value === null) node.removeAttribute(attribute);
+        else node.setAttribute(attribute, value);
+      });
+      if (previousStructuredData) previousStructuredData.textContent = previousStructuredContent;
+      else structuredData.remove();
+    };
   }, [product]);
 
   // ─── Regras dinâmicas ────────────────────────────────────────────────────
