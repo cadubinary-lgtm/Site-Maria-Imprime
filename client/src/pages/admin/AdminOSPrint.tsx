@@ -202,7 +202,7 @@ export default function AdminOSPrint() {
 
   const paymentLabel =
     o.paymentMethod === "pix" ? "PIX" :
-    o.paymentMethod === "cartao" || o.paymentMethod === "cartao_credito" ? "Cartão de Crédito" :
+    o.paymentMethod === "cartao" || o.paymentMethod === "cartao_credito" ? "Cartão de débito/crédito" :
     o.paymentMethod === "dinheiro" ? "Dinheiro" :
     o.paymentMethod === "boleto" ? "Boleto" :
     o.paymentMethod === "pagar_na_retirada" ? "Pagamento na Retirada" :

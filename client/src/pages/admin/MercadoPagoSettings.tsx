@@ -230,7 +230,7 @@ export default function MercadoPagoSettings() {
               <div className="flex items-center gap-3">
                 <CreditCard className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Cartão de Crédito</p>
+                  <p className="text-sm font-medium text-gray-900">Cartão de débito/crédito</p>
                   <p className="text-xs text-gray-500">Checkout transparente — sem redirecionamento</p>
                 </div>
               </div>

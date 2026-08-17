@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   pix: "PIX",
-  cartao_credito: "Cartão de Crédito",
+  cartao_credito: "Cartão de débito/crédito",
   pagar_na_retirada: "Pagar na Retirada",
 };
 

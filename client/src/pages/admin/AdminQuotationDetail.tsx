@@ -53,8 +53,8 @@ const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
 const PAYMENT_LABELS: Record<string, string> = {
   pix: "PIX",
   dinheiro: "Dinheiro",
-  cartao_credito: "Cartão de Crédito",
-  cartao_debito: "Cartão de Débito",
+  cartao_credito: "Cartão de débito/crédito",
+  cartao_debito: "Cartão de débito/crédito",
   boleto: "Boleto",
   transferencia: "Transferência",
 };
