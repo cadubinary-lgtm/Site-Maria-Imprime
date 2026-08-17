@@ -2891,3 +2891,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar o bloco de pagamento seguro com identificação visual do Mercado Pago no configurador
 - [x] Padronizar referências a cartão como Cartão ou Cartão de débito/crédito em todo o site
 - [x] Configurar favicon oficial e metadados de ícone para mecanismos de busca
+- [x] Otimizar meta tags de SEO e Open Graph para compartilhamentos no WhatsApp
