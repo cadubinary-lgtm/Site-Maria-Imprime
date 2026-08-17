@@ -2868,3 +2868,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar foto principal e até seis fotos adicionais em Novo Produto e Editar Produto
 - [x] Adicionar Descrição do Card editável abaixo de Tags do Produto e exibi-la nos cards públicos
 - [x] Criar painel separado de Descrição do Card com Linha 1 e Linha 2 editáveis
+- [x] Aplicar o alinhamento vertical entre Tags do Produto e Descrição do Card nos dois formulários
