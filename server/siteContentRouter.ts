@@ -38,7 +38,7 @@ const guideItemInput = z.object({
   description: z.string().min(1).max(1500),
   bullets: z.array(z.string().min(1).max(160)).max(16),
   isActive: z.boolean(),
-  illustration: z.enum(["lona-ilhos", "lona-bastao", "adesivo-perfurado", "papel-gramatura", "placa", "laminacao", "meio-corte", "vinco-dobra", "entrega"]).optional(),
+  illustration: z.enum(["lona-ilhos", "lona-bastao", "lona-sanet", "adesivo-perfurado", "papel-gramatura", "placa", "laminacao", "meio-corte", "vinco-dobra", "entrega"]).optional(),
 });
 
 const guideCategoryInput = z.object({

@@ -2908,3 +2908,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar visualmente em desktop a inserção do Guia da Maria abaixo do configurador da Lona Impressa
 - [x] Validar a navegação entre os cards do Guia da Maria e a leitura técnica do conteúdo de impressão
 - [x] Validar a aba Material com categorias, itens e exemplo técnico reutilizável de lona com ilhós
+- [x] Reorganizar o Guia da Maria no layout técnico de quatro colunas inspirado na referência aprovada
+- [x] Adicionar Lona Ortofônica/Sanet como material global de lonas com ilustração de microperfurações
+- [x] Ajustar a ordem e os textos das lonas para evitar aplicações absolutas
+- [x] Validar visualmente o Guia da Maria em desktop e mobile após a nova organização
+- [x] Substituir a navegação de uma única aba pelo layout simultâneo de quatro painéis da referência
+- [x] Alinhar cards superiores, colunas técnicas, dicas e faixa final exatamente à hierarquia visual aprovada
+- [x] Validar visualmente a composição simultânea de quatro painéis no configurador da Lona Impressa
+- [x] Validar a abertura de Lonas com a Lona Ortofônica/Sanet como material global no painel Material
