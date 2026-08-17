@@ -44,11 +44,16 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('"meio-corte"');
     expect(guide).toContain('"lona-sanet"');
     expect(guide).toContain("md:grid-cols-2 xl:grid-cols-4");
-    expect(guide).toContain("mt-4 grid gap-3 xl:grid-cols-4");
+    expect(guide).toContain("mt-4 grid gap-3 ${panelGridClass}");
     expect(guide).toContain("maria-guide-impressao");
     expect(guide).toContain("maria-guide-material");
     expect(guide).toContain("maria-guide-acabamento");
     expect(guide).toContain("maria-guide-entrega");
+    expect(guide).toContain("expandedPanels");
+    expect(guide).toContain("togglePanel");
+    expect(guide).toContain("aria-controls");
+    expect(guide).toContain("aria-expanded");
+    expect(guide).toContain("Escolha um dos quatro cards acima para expandir");
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
