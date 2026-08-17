@@ -30,7 +30,7 @@ describe("Guia da Maria global", () => {
     const productDetail = readFileSync(resolve(root, "client/src/pages/ecommerce/ProductDetail.tsx"), "utf8");
     const guide = readFileSync(resolve(root, "client/src/components/products/MariaGuide.tsx"), "utf8");
 
-    expect(productDetail).toContain("<MariaGuide />");
+    expect(productDetail).toContain("<MariaGuide compact />");
     expect(productDetail).not.toContain("Qualidade garantida");
     expect(productDetail).not.toContain("Melhor prazo do mercado");
     expect(productDetail).not.toContain("Preço justo");
@@ -43,8 +43,9 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("laminacao:");
     expect(guide).toContain('"meio-corte"');
     expect(guide).toContain('"lona-sanet"');
-    expect(guide).toContain("md:grid-cols-2 xl:grid-cols-4");
-    expect(guide).toContain("mt-4 grid gap-3 ${panelGridClass}");
+    expect(guide).toContain("compact = false");
+    expect(guide).toContain("grid-cols-2 md:grid-cols-4");
+    expect(guide).toContain("responsivePanelGridClass");
     expect(guide).toContain("maria-guide-impressao");
     expect(guide).toContain("maria-guide-material");
     expect(guide).toContain("maria-guide-acabamento");
@@ -56,7 +57,7 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("Escolha um dos quatro cards acima para expandir");
     expect(guide).toContain("maria-material-${category.id}");
     expect(guide).toContain("openMaterialId === category.id &&");
-    expect(guide).toContain("grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-4");
+    expect(guide).toContain("mg-top-card");
     expect(guide).toContain("min-h-[104px]");
     expect(guide).toContain("const hasPinkBackground = isExpanded");
   });
