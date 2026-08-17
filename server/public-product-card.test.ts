@@ -19,7 +19,9 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).not.toContain("operationalFacts");
     expect(publicCardSource).toContain("sameDayUrgency");
     expect(publicCardSource).toContain("Produção no mesmo dia");
-    expect(publicCardSource).toContain("flex-nowrap");
+    expect(publicCardSource).toContain("cardDescriptionLines.length > 0 || sameDayUrgency");
+    expect(publicCardSource).toContain("flex-col gap-0.5");
+    expect(publicCardSource).toContain('className="truncate"');
     expect(publicCardSource).toContain("whitespace-nowrap");
     expect(publicCardSource).toContain("text-[9px]");
     expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");

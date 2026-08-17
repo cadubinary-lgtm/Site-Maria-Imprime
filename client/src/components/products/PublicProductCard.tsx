@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { trpc } from "@/lib/trpc";
 import { getPixDiscountInfo, getProductPaymentPrices, type ProductPriceAudience } from "@/lib/productPrice";
+import { getVisibleCardDescriptionLines } from "@/lib/product-card-description";
 import { Award, Box, Store, Tag, Zap } from "lucide-react";
 import { Link } from "wouter";
 
@@ -73,7 +74,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         option.isActive !== false && Number(option.daysToDeliver) === 0 && Number(option.pricePerM2) > 0
       )
     : null;
-  const cardDescription = product.cardDescription?.trim();
+  const cardDescriptionLines = getVisibleCardDescriptionLines(product.cardDescription);
 
   return (
     <Link href={`/produto/${product.id}`} className="group block">
@@ -129,10 +130,16 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           )}
         </div>
 
-        {(cardDescription || sameDayUrgency) && (
-          <div className="mt-2 flex flex-nowrap items-center gap-1 whitespace-nowrap text-[9px] font-semibold leading-none tracking-[-0.015em] text-pink-700">
+        {(cardDescriptionLines.length > 0 || sameDayUrgency) && (
+          <div className="mt-2 flex min-w-0 items-start gap-1 text-[9px] font-semibold leading-[1.2] tracking-[-0.015em] text-pink-700">
             <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span>{cardDescription || `Produção no mesmo dia · taxa de urgência de ${formatCurrency(Number(sameDayUrgency?.pricePerM2), "/m²")}`}</span>
+            {cardDescriptionLines.length > 0 ? (
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                {cardDescriptionLines.map((line, index) => <span key={`${line}-${index}`} className="truncate" title={line}>{line}</span>)}
+              </span>
+            ) : (
+              <span className="whitespace-nowrap">Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency?.pricePerM2), "/m²")}</span>
+            )}
           </div>
         )}
 
