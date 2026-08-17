@@ -2950,3 +2950,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir proporcionalmente o Guia da Maria para a largura disponível sem comprimir seus quatro cards
 - [x] Validar o novo encaixe sem alterar preços, carrinho, checkout ou os termos de condições
 - [x] Confirmar visualmente que o Guia da Maria inicia imediatamente após Aceito os termos e condições na coluna central
+- [x] Reduzir em cerca de metade a altura dos quatro cards superiores do Guia da Maria compacto
+- [x] Limitar os subtítulos dos cards superiores a duas linhas com tipografia menor e legível
+- [x] Validar visualmente que os quatro cards permanecem organizados e interativos
+- [x] Confirmar por estilos computados que os quatro cards têm 74px de altura e subtítulos limitados a duas linhas
