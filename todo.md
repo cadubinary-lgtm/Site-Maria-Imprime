@@ -2929,3 +2929,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Separar a animação dos painéis técnicos da linha fixa de cards superiores do Guia da Maria
 - [x] Validar visualmente que expandir e recolher não desloca, aumenta ou desalinha os cards superiores
 - [x] Confirmar visualmente que a linha superior permanece uniforme acima dos quatro painéis técnicos
+- [x] Aplicar fundo rosa suave aos quatro cards superiores quando todos estiverem simultaneamente abertos
+- [x] Preservar o destaque individual do card em foco quando um ou mais painéis forem recolhidos
+- [x] Validar visualmente os estados coletivo e individual dos cards superiores
+- [x] Confirmar visualmente o estado inicial com os quatro painéis abertos e destaque coletivo nos controles superiores
+- [x] Confirmar por estilos computados que os quatro cards abertos usam o mesmo fundo rosa suave e borda rosa
