@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const heroSectionPath = resolve(process.cwd(), "client/src/components/home/HeroSection.tsx");
+const prePrintChecklistPath = resolve(process.cwd(), "client/src/components/home/PrePrintChecklist.tsx");
 
 describe("conteúdo do banner principal", () => {
   it("mantém a chamada Pede pra Maria em uma segunda linha", () => {
@@ -31,7 +32,14 @@ describe("conteúdo do banner principal", () => {
     expect(source).toContain('aria-label="Buscando produtos"');
     expect(source).toContain("animate-spin");
     expect(source).toContain("product.imageUrl");
-    expect(source).toContain("formatProductPrice(product)");
+    expect(source).toContain("formatProductPrice(product, priceAudience)");
     expect(source).toContain("Nenhum produto encontrado para");
+  });
+
+  it("informa 300 DPI como resolução mínima na conferência de pré-impressão", () => {
+    const source = readFileSync(prePrintChecklistPath, "utf8");
+
+    expect(source).toContain("Resolução mínima de 300 DPI");
+    expect(source).not.toContain("Resolução mínima de 150 DPI");
   });
 });
