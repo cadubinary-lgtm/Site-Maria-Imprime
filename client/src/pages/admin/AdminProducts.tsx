@@ -727,7 +727,7 @@ export default function AdminProducts() {
             const paymentPrices = getProductPaymentPrices(product);
             const resellerPrice = getProductPrice(product, "reseller");
             return (
-            <Card key={product.id} className={`${selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""} ${isRecentlyCreated ? "relative border-pink-400 bg-pink-50/70 ring-1 ring-pink-200" : ""}`}>
+            <Card key={product.id} className={`${selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""} ${isRecentlyCreated ? "relative border-pink-400 bg-pink-50/70 ring-1 ring-pink-200" : ""}`} style={{paddingBottom: '0px', paddingTop: '0px'}}>
               {isRecentlyCreated && (
                 <span className="absolute right-4 top-3 rounded-full bg-pink-600 px-2.5 py-1 text-xs font-semibold text-white">
                   Produto recém-criado
@@ -757,7 +757,7 @@ export default function AdminProducts() {
                   </div>
 
                   {/* Product Info */}
-                  <div className="min-w-0">
+                  <div className="min-w-0" style={{paddingBottom: '2px', paddingRight: '20px'}}>
                     <h3 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h3>
                     <p className="mb-2 line-clamp-2 text-sm text-gray-600">{product.description || "Sem descrição cadastrada."}</p>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
