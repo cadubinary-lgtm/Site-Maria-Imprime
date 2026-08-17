@@ -2946,3 +2946,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar a proximidade vertical e a organização da grade sem alterar preço, carrinho ou checkout
 - [x] Corrigir a largura do Guia da Maria para que ele ocupe toda a área após o configurador, sem ficar restrito à coluna lateral
 - [x] Confirmar visualmente que o Guia da Maria ocupa toda a largura, inicia sem vão branco e mantém os quatro painéis legíveis
+- [x] Mover o Guia da Maria para imediatamente abaixo de Aceito os termos e condições na coluna do configurador
+- [x] Reduzir proporcionalmente o Guia da Maria para a largura disponível sem comprimir seus quatro cards
+- [x] Validar o novo encaixe sem alterar preços, carrinho, checkout ou os termos de condições
+- [x] Confirmar visualmente que o Guia da Maria inicia imediatamente após Aceito os termos e condições na coluna central

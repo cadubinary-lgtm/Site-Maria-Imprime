@@ -1814,6 +1814,7 @@ export default function ProductDetail() {
                   <p className="text-sm text-red-700">{validationError}</p>
                 </div>
               )}
+              <MariaGuide compact />
             </div>
 
           </div>
@@ -2143,10 +2144,6 @@ export default function ProductDetail() {
 
         </div>
 
-        </div>
-
-        <div className="min-w-0 lg:col-span-2">
-          <MariaGuide />
         </div>
       </div>
     </div>
