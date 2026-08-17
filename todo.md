@@ -2938,3 +2938,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter fundo rosa em cada card superior enquanto o respectivo painel permanecer aberto
 - [x] Validar a abertura sequencial de Impressão, Material e Acabamento com destaque rosa cumulativo
 - [x] Confirmar visualmente que, ao reabrir Impressão, os quatro cards abertos retomam o fundo rosa simultaneamente
+- [x] Remover o espaço branco excedente entre a área superior do configurador e o Guia da Maria
+- [x] Reorganizar de forma responsiva as colunas de produto, opções e resumo do pedido
+- [x] Validar que o novo layout compacto preserva preço, carrinho, checkout e o Guia da Maria inferior
