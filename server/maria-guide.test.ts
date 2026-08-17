@@ -66,6 +66,10 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('{!compact && <p className="mg-top-subtitle');
     expect(guide).toContain("min-h-[104px]");
     expect(guide).toContain("const hasPinkBackground = isExpanded");
+    expect(guide).toContain("HOME_SECONDARY_ACTION_CLASS");
+    expect(guide).toContain("HOME_PRIMARY_ACTION_CLASS");
+    expect(guide).toContain('href="/documentos"');
+    expect(guide).toContain('href="#maria-guide-entrega"');
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
