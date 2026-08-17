@@ -2925,3 +2925,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar visualmente a expansão dos subcards sem deslocar conteúdos para o fim da coluna
 - [x] Confirmar visualmente que Lonas abre seus detalhes imediatamente abaixo do próprio subcard
 - [x] Confirmar visualmente que a lista de Materiais e seus subcards está disponível no configurador após a correção
+- [x] Manter a altura e o alinhamento dos quatro cards superiores estáveis ao expandir ou recolher painéis
+- [x] Separar a animação dos painéis técnicos da linha fixa de cards superiores do Guia da Maria
+- [x] Validar visualmente que expandir e recolher não desloca, aumenta ou desalinha os cards superiores
+- [x] Confirmar visualmente que a linha superior permanece uniforme acima dos quatro painéis técnicos
