@@ -14,7 +14,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("getProductPaymentPrices(product, priceAudience)");
     expect(publicCardSource).toContain("getPixDiscountInfo(product, priceAudience)");
     expect(publicCardSource).toContain("parseSpecifications(product.specifications)");
-    expect(publicCardSource).toContain("object-cover");
+    expect(publicCardSource).toContain("object-contain");
+    expect(publicCardSource).not.toContain("object-cover");
     expect(publicCardSource).not.toContain("product.description &&");
     expect(publicCardSource).not.toContain("operationalFacts");
     expect(publicCardSource).toContain("sameDayUrgency");
