@@ -35,13 +35,22 @@ describe("preços por forma de pagamento", () => {
     const productDetail = readFileSync(resolve(root, "client/src/pages/ecommerce/ProductDetail.tsx"), "utf8");
     const checkout = readFileSync(resolve(root, "client/src/pages/ecommerce/CheckoutPage.tsx"), "utf8");
     const routers = readFileSync(resolve(root, "server/routers.ts"), "utf8");
+    const db = readFileSync(resolve(root, "server/db.ts"), "utf8");
+    const schema = readFileSync(resolve(root, "drizzle/schema.ts"), "utf8");
 
     expect(productDetail).toContain("no Pix");
     expect(productDetail).toContain("No cartão de crédito");
-    expect(productDetail).toContain("pixPriceAtCart: effectivePrice");
+    expect(productDetail).toContain('const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"pix" | "cartao">("pix");');
+    expect(productDetail).toContain('priceAtCart: selectedUnitPrice');
+    expect(productDetail).toContain('selectedPaymentMethod,');
     expect(productDetail).toContain("cardPriceAtCart: cardEffectivePrice");
+    expect(productDetail).toContain('role="radiogroup" aria-label="Forma de pagamento"');
     expect(checkout).toContain('paymentMethod === "cartao"');
     expect(checkout).toContain("item.cardPriceAtCart ?? item.priceAtCart");
+    expect(checkout).toContain('cartItems[0]?.selectedPaymentMethod === "cartao" ? "cartao" : "pix"');
+    expect(routers).toContain('selectedPaymentMethod: z.enum(["pix", "cartao"]).optional().default("pix")');
+    expect(db).toContain('selectedPaymentMethod?: "pix" | "cartao"');
+    expect(schema).toContain('selectedPaymentMethod: varchar("selectedPaymentMethod", { length: 20 }).default("pix")');
     expect(routers).toContain('input.paymentMethod === "cartao_credito"');
     expect(routers).toContain("item.cardPriceAtCart ?? item.priceAtCart");
   });

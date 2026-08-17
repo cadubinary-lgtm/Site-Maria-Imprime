@@ -160,6 +160,11 @@ export default function CheckoutPage() {
   );
   const trpcUtils = trpc.useUtils();
 
+  useEffect(() => {
+    if (paymentMethod || !cartItems?.length) return;
+    setPaymentMethod(cartItems[0]?.selectedPaymentMethod === "cartao" ? "cartao" : "pix");
+  }, [cartItems, paymentMethod]);
+
   const handleShippingMethodSelected = (method: any, zipCodeUsed: string) => {
     // Ignorar callback automático do ShippingMethodSelector durante reset de frete
     if (isResettingFreteRef.current) return;

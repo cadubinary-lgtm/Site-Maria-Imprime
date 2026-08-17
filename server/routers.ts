@@ -970,6 +970,7 @@ export const appRouter = router({
         priceAtCart: z.number(),
         pixPriceAtCart: z.number().nonnegative().optional(),
         cardPriceAtCart: z.number().nonnegative().optional(),
+        selectedPaymentMethod: z.enum(["pix", "cartao"]).optional().default("pix"),
         artFileUrl: z.string().optional(),
         artFileUrls: z.string().optional(),
         notes: z.string().optional(),

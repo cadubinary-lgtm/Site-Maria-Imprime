@@ -1125,6 +1125,7 @@ export const cartItems = mysqlTable("cartItems", {
   priceAtCart: decimal("priceAtCart", { precision: 10, scale: 2 }).notNull(), // Preço no momento da adição
   pixPriceAtCart: decimal("pixPriceAtCart", { precision: 10, scale: 2 }), // Snapshot do valor unitário/configurado no Pix
   cardPriceAtCart: decimal("cardPriceAtCart", { precision: 10, scale: 2 }), // Snapshot do valor unitário/configurado no cartão
+  selectedPaymentMethod: varchar("selectedPaymentMethod", { length: 20 }).default("pix"), // Preferência escolhida no configurador
   artFileUrl: text("artFileUrl"), // URL do arquivo de arte
   artFileUrls: longtext("artFileUrls"), // JSON com todas as URLs de arte enviadas
   artFileKey: varchar("artFileKey", { length: 255 }), // Chave para referência no S3

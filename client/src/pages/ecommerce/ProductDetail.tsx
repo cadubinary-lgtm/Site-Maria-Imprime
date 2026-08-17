@@ -158,6 +158,7 @@ export default function ProductDetail() {
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, { valueIds: number[]; customValue?: string }>>({})
   const [selectedVariations, setSelectedVariations] = useState<Record<number, number>>({}) // variationTypeId -> optionId;
   const [notes, setNotes] = useState("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"pix" | "cartao">("pix");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -390,8 +391,6 @@ export default function ProductDetail() {
 
   const shippingSummary = getShippingSummary({ selectedShipping, shippingCalculated });
   const fretePrice = shippingSummary.amount;
-  const subtotal = effectivePrice * quantity;
-  const total = getOrderTotal(subtotal, fretePrice);
   const paymentPriceMultiplier = useMemo(() => {
     if (isM2) return billedArea > 0 ? billedArea : 1;
     if (isMetroLinear) {
@@ -403,6 +402,9 @@ export default function ProductDetail() {
   const cardEffectivePrice = Math.max(0, effectivePrice + (commercialCardPrice - commercialProductPrice) * paymentPriceMultiplier);
   const cardSubtotal = cardEffectivePrice * quantity;
   const cardTotal = getOrderTotal(cardSubtotal, fretePrice);
+  const selectedUnitPrice = selectedPaymentMethod === "cartao" ? cardEffectivePrice : effectivePrice;
+  const subtotal = selectedUnitPrice * quantity;
+  const total = getOrderTotal(subtotal, fretePrice);
 
   // ─── Previsão de Entrega ─────────────────────────────────────────────
   const deliveryForecast = useMemo(() => {
@@ -788,9 +790,10 @@ export default function ProductDetail() {
           quantity,
           selectedAttributes: attrsJson ?? null,
           customDimensions: customDimensions ?? null,
-          priceAtCart: String(effectivePrice),
+          priceAtCart: String(selectedUnitPrice),
           pixPriceAtCart: String(effectivePrice),
           cardPriceAtCart: String(cardEffectivePrice),
+          selectedPaymentMethod,
           artFileUrl: fileMode === "link" ? artLink || null : null,
           artFileUrls: fileMode === "link" && artLink ? JSON.stringify([artLink]) : null,
           notes: combinedNotes ?? null,
@@ -845,9 +848,10 @@ export default function ProductDetail() {
         productId, quantity,
         selectedAttributes: attrsJson,
         customDimensions,
-        priceAtCart: effectivePrice,
+        priceAtCart: selectedUnitPrice,
         pixPriceAtCart: effectivePrice,
         cardPriceAtCart: cardEffectivePrice,
+        selectedPaymentMethod,
         notes: combinedNotes,
         artFileUrl: artUrl,
         artFileUrls: artUrls.length ? JSON.stringify(artUrls) : undefined,
@@ -1962,18 +1966,33 @@ export default function ProductDetail() {
                       {shippingSummary.label}
                     </span>
                   </div>
-                  <div className="space-y-2 pt-3 border-t border-gray-200">
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                  <div className="space-y-2 pt-3 border-t border-gray-200" role="radiogroup" aria-label="Forma de pagamento">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selectedPaymentMethod === "pix"}
+                      onClick={() => setSelectedPaymentMethod("pix")}
+                      className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${selectedPaymentMethod === "pix" ? "border-emerald-300 bg-emerald-50 ring-1 ring-emerald-200" : "border-gray-200 bg-gray-50 hover:border-emerald-200"}`}
+                    >
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-xs font-bold uppercase tracking-wide text-emerald-700">Preço especial no Pix</span>
                         <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">à vista</span>
                       </div>
-                      <p className="mt-1 text-3xl font-extrabold tracking-tight text-emerald-700">R$ {total.toFixed(2)}</p>
-                    </div>
-                    <div className="flex justify-between items-baseline gap-3 px-1 text-sm">
-                      <span className="font-medium text-gray-600">No cartão de crédito</span>
-                      <span className="inline-flex items-center gap-1 font-semibold text-gray-800">R$ {cardTotal.toFixed(2)} <CreditCard className="h-4 w-4 text-gray-400" aria-hidden /></span>
-                    </div>
+                      <p className={`mt-1 font-extrabold tracking-tight text-emerald-700 ${selectedPaymentMethod === "pix" ? "text-3xl" : "text-xl"}`}>R$ {getOrderTotal(effectivePrice * quantity, fretePrice).toFixed(2)}</p>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selectedPaymentMethod === "cartao"}
+                      onClick={() => setSelectedPaymentMethod("cartao")}
+                      className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${selectedPaymentMethod === "cartao" ? "border-pink-300 bg-pink-50 ring-1 ring-pink-200" : "border-gray-200 bg-gray-50 hover:border-pink-200"}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-700">No cartão de crédito</span>
+                        <CreditCard className={`h-4 w-4 ${selectedPaymentMethod === "cartao" ? "text-pink-600" : "text-gray-400"}`} aria-hidden />
+                      </div>
+                      <p className={`mt-1 font-extrabold tracking-tight text-gray-800 ${selectedPaymentMethod === "cartao" ? "text-3xl" : "text-xl"}`}>R$ {cardTotal.toFixed(2)}</p>
+                    </button>
                   </div>
                 </div>
 
@@ -2018,7 +2037,7 @@ export default function ProductDetail() {
                         productId: String(productId ?? ""),
                         productName: encodeURIComponent(product?.name ?? ""),
                         productImage: encodeURIComponent(product?.imageUrl ?? ""),
-                        unitPrice: String(totalPrice),
+                        unitPrice: String(total),
                         quantity: String(quantity),
                         specifications: encodeURIComponent(JSON.stringify(specs)),
                         artFileUrl: encodeURIComponent(artLink || ""),
