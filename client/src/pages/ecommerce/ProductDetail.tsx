@@ -12,7 +12,7 @@ import {
   Package, ChevronDown, ChevronUp, Link2, Search,
   ShoppingCart, FileText, MessageCircle,
   ShieldCheck, Droplets, Scissors, LayoutGrid,
-  Factory, Truck, CreditCard, HeadphonesIcon,
+  Truck, CreditCard,
   Home, Clock, Tag, ThumbsUp,
   Store, Zap, Lightbulb,
   AlertTriangle, CheckSquare
@@ -59,13 +59,6 @@ const PRODUCT_FEATURES = [
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
   { Icon: Scissors,   bg: "bg-orange-50", color: "text-orange-600", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
   { Icon: LayoutGrid, bg: "bg-orange-50", color: "text-orange-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
-];
-
-const COMPANY_DIFFERENTIALS = [
-  { Icon: Factory,         bg: "bg-orange-50", color: "text-orange-500", label: "Produção própria",        desc: "Qualidade garantida" },
-  { Icon: Truck,           bg: "bg-orange-50", color: "text-orange-500", label: "Entrega para todo Brasil", desc: "Enviamos para sua cidade" },
-  { Icon: CreditCard,      bg: "bg-orange-50", color: "text-orange-500", label: "Pagamento facilitado",    desc: "PIX, Boleto ou Cartão" },
-  { Icon: HeadphonesIcon,  bg: "bg-orange-50", color: "text-orange-500", label: "Atendimento humanizado",  desc: "Suporte rápido via WhatsApp" },
 ];
 
 const FOOTER_BADGES = [
@@ -2163,23 +2156,6 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Nossos Diferenciais */}
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-              <p className="text-sm font-bold text-gray-900 mb-3">Nossos diferenciais</p>
-              <div className="space-y-3">
-                {COMPANY_DIFFERENTIALS.map(({ Icon, bg, color, label, desc }) => (
-                  <div key={label} className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-4 h-4 ${color}`} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800">{label}</p>
-                      <p className="text-xs text-gray-500">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
         </div>
