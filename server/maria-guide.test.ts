@@ -59,9 +59,9 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("maria-material-${category.id}");
     expect(guide).toContain("openMaterialId === category.id &&");
     expect(guide).toContain("mg-top-card");
-    expect(guide).toContain("min-h-[52px]");
+    expect(guide).toContain("min-h-[40px]");
     expect(guide).toContain("mg-top-subtitle");
-    expect(guide).toContain("line-clamp-2");
+    expect(guide).toContain('{!compact && <p className="mg-top-subtitle');
     expect(guide).toContain("min-h-[104px]");
     expect(guide).toContain("const hasPinkBackground = isExpanded");
   });
