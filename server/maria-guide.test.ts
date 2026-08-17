@@ -58,8 +58,7 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("openMaterialId === category.id &&");
     expect(guide).toContain("grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-4");
     expect(guide).toContain("min-h-[104px]");
-    expect(guide).toContain("const allPanelsExpanded = expandedPanelCount === panels.length");
-    expect(guide).toContain("const hasPinkBackground = allPanelsExpanded || isHighlighted");
+    expect(guide).toContain("const hasPinkBackground = isExpanded");
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {

@@ -2934,3 +2934,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar visualmente os estados coletivo e individual dos cards superiores
 - [x] Confirmar visualmente o estado inicial com os quatro painéis abertos e destaque coletivo nos controles superiores
 - [x] Confirmar por estilos computados que os quatro cards abertos usam o mesmo fundo rosa suave e borda rosa
+- [x] Preparar sessão limpa do configurador para validar a abertura sequencial dos cards superiores
+- [x] Manter fundo rosa em cada card superior enquanto o respectivo painel permanecer aberto
+- [x] Validar a abertura sequencial de Impressão, Material e Acabamento com destaque rosa cumulativo
+- [x] Confirmar visualmente que, ao reabrir Impressão, os quatro cards abertos retomam o fundo rosa simultaneamente
