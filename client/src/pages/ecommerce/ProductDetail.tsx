@@ -1997,12 +1997,21 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Segurança */}
-                <div className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2.5">
-                  <Shield className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs font-semibold text-green-800">Compra 100% segura</p>
-                    <p className="text-xs text-green-600">Seus dados protegidos e compra garantida.</p>
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-green-50 px-3 py-2.5">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Shield className="h-5 w-5 flex-shrink-0 text-green-600" />
+                    <div>
+                      <p className="text-xs font-semibold text-green-800">Pagamento Seguro</p>
+                      <p className="text-xs text-green-600">Processado pelo Mercado Pago.</p>
+                    </div>
                   </div>
+                  <span className="h-7 w-20 flex-shrink-0 overflow-hidden rounded-sm" aria-hidden>
+                    <img
+                      src="/manus-storage/mercado-pago-logo_3e251139.png"
+                      alt="Mercado Pago"
+                      className="h-full w-full object-cover"
+                    />
+                  </span>
                 </div>
               </div>
 

@@ -17,7 +17,7 @@ describe("desconto Pix em lote", () => {
     expect(calculatePixDiscountedPrice("100", 150)).toBe(0.01);
   });
 
-  it("oferece confirmação administrativa e os selos Pix nas vitrines solicitadas", () => {
+  it("oferece confirmação administrativa e preços Pix nas vitrines solicitadas", () => {
     const admin = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
     const home = readFileSync(resolve(root, "client/src/components/home/FeaturedProducts.tsx"), "utf8");
     const catalog = readFileSync(resolve(root, "client/src/pages/public/Catalog.tsx"), "utf8");
@@ -29,7 +29,7 @@ describe("desconto Pix em lote", () => {
     expect(admin).toContain("Os preços de cartão e de revenda não serão alterados.");
     expect(home).toContain("<PublicProductCard");
     expect(catalog).toContain("<PublicProductCard");
-    expect(publicCard).toContain("Desconto no Pix");
+    expect(publicCard).not.toContain("Desconto no Pix");
     expect(detail).toContain("Preço especial no Pix");
   });
 
@@ -44,5 +44,14 @@ describe("desconto Pix em lote", () => {
     expect(database).toContain("removePixDiscountFromProducts");
     expect(database).toContain("set({ pixPrice: null, pixPricePerM2: null }");
     expect(router).toContain("removePixDiscount:");
+  });
+
+  it("identifica o processamento seguro pelo Mercado Pago no configurador", () => {
+    const detail = readFileSync(resolve(root, "client/src/pages/ecommerce/ProductDetail.tsx"), "utf8");
+
+    expect(detail).toContain("Pagamento Seguro");
+    expect(detail).toContain("Processado pelo Mercado Pago.");
+    expect(detail).toContain('src="/manus-storage/mercado-pago-logo_3e251139.png"');
+    expect(detail).toContain('alt="Mercado Pago"');
   });
 });
