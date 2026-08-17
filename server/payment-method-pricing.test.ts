@@ -39,7 +39,7 @@ describe("preços por forma de pagamento", () => {
     const schema = readFileSync(resolve(root, "drizzle/schema.ts"), "utf8");
 
     expect(productDetail).toContain("no Pix");
-    expect(productDetail).toContain("No cartão de crédito");
+    expect(productDetail).toContain("No cartão");
     expect(productDetail).toContain('const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"pix" | "cartao">("pix");');
     expect(productDetail).toContain('priceAtCart: selectedUnitPrice');
     expect(productDetail).toContain('selectedPaymentMethod,');
@@ -53,5 +53,26 @@ describe("preços por forma de pagamento", () => {
     expect(schema).toContain('selectedPaymentMethod: varchar("selectedPaymentMethod", { length: 20 }).default("pix")');
     expect(routers).toContain('input.paymentMethod === "cartao_credito"');
     expect(routers).toContain("item.cardPriceAtCart ?? item.priceAtCart");
+  });
+
+  it("usa uma nomenclatura de cartão inclusiva em todos os fluxos visíveis", () => {
+    const sources = [
+      "client/src/components/products/PublicProductCard.tsx",
+      "client/src/pages/ecommerce/ProductDetail.tsx",
+      "client/src/pages/admin/AdminOSPrint.tsx",
+      "client/src/pages/admin/AdminQuotationDetail.tsx",
+      "client/src/pages/admin/AdminQuotationForm.tsx",
+      "client/src/pages/admin/FinanceiroContasReceber.tsx",
+      "client/src/pages/admin/FinanceiroContasRecebidas.tsx",
+      "client/src/pages/admin/FinanceiroRelatorios.tsx",
+      "client/src/pages/admin/MercadoPagoSettings.tsx",
+      "client/src/pages/admin/NewOrders.tsx",
+    ].map((path) => readFileSync(resolve(root, path), "utf8"));
+
+    sources.forEach((source) => {
+      expect(source).not.toContain("Cartão de Crédito");
+      expect(source).not.toContain("Cartão Crédito");
+    });
+    expect(sources.join("\n")).toContain("Cartão de débito/crédito");
   });
 });

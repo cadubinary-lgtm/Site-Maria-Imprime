@@ -120,7 +120,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
             <div className="min-w-0 border-l border-gray-200 pl-2">
               <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
               <p className="mt-0.5 truncate text-lg font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
-              <p className="mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão de Crédito</p>
+              <p className="mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}
         </div>

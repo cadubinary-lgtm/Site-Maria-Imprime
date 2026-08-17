@@ -28,8 +28,8 @@ function formatDateTime(ts: any) {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  dinheiro: "Dinheiro", pix: "Pix", cartao_credito: "Cartão Crédito",
-  cartao_debito: "Cartão Débito", boleto: "Boleto", transferencia: "Transferência",
+  dinheiro: "Dinheiro", pix: "Pix", cartao_credito: "Cartão de débito/crédito",
+  cartao_debito: "Cartão de débito/crédito", boleto: "Boleto", transferencia: "Transferência",
   pagar_na_retirada: "Pagar na Retirada", outro: "Outro",
 };
 

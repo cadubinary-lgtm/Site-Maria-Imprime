@@ -1988,7 +1988,7 @@ export default function ProductDetail() {
                       className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${selectedPaymentMethod === "cartao" ? "border-pink-300 bg-pink-50 ring-1 ring-pink-200" : "border-gray-200 bg-gray-50 hover:border-pink-200"}`}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-bold uppercase tracking-wide text-gray-700">No cartão de crédito</span>
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-700">No cartão</span>
                         <CreditCard className={`h-4 w-4 ${selectedPaymentMethod === "cartao" ? "text-pink-600" : "text-gray-400"}`} aria-hidden />
                       </div>
                       <p className={`mt-1 font-extrabold tracking-tight text-gray-800 ${selectedPaymentMethod === "cartao" ? "text-3xl" : "text-xl"}`}>R$ {cardTotal.toFixed(2)}</p>

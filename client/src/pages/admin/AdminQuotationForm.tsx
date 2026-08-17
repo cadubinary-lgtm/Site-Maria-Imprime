@@ -1748,8 +1748,8 @@ export default function AdminQuotationForm() {
                   <SelectContent>
                     <SelectItem value="pix">PIX</SelectItem>
                     <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                    <SelectItem value="cartao_credito">Cartão de débito/crédito</SelectItem>
+                    <SelectItem value="cartao_debito">Cartão de débito</SelectItem>
                     <SelectItem value="boleto">Boleto</SelectItem>
                     <SelectItem value="transferencia">Transferência</SelectItem>
                   </SelectContent>
