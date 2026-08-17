@@ -113,6 +113,45 @@ export type CompanySettings = typeof companySettings.$inferSelect;
 export type InsertCompanySettings = typeof companySettings.$inferInsert;
 
 /**
+ * Conteúdo editorial do rodapé e da Central de Documentação.
+ * Mantém textos de apresentação em uma única configuração, sem misturar
+ * informações institucionais com catálogo, pedidos ou pagamentos.
+ */
+export const siteFooterSettings = mysqlTable("siteFooterSettings", {
+  id: int("id").primaryKey().notNull(),
+  introduction: text("introduction"),
+  newsletterTitle: varchar("newsletterTitle", { length: 120 }),
+  newsletterDescription: text("newsletterDescription"),
+  businessHours: text("businessHours"),
+  documentsTitle: varchar("documentsTitle", { length: 160 }),
+  documentsDescription: text("documentsDescription"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SiteFooterSettings = typeof siteFooterSettings.$inferSelect;
+export type InsertSiteFooterSettings = typeof siteFooterSettings.$inferInsert;
+
+/**
+ * Sobrescritas editoriais dos documentos públicos.
+ * Os conteúdos-padrão continuam disponíveis até que o administrador salve uma versão editada.
+ */
+export const siteDocuments = mysqlTable("siteDocuments", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 120 }).notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  summary: varchar("summary", { length: 500 }).notNull(),
+  content: longtext("content").notNull(),
+  position: int("position").notNull().default(0),
+  isPublished: boolean("isPublished").notNull().default(true),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SiteDocument = typeof siteDocuments.$inferSelect;
+export type InsertSiteDocument = typeof siteDocuments.$inferInsert;
+
+/**
  * Segments table - segmentos de negócio
  */
 export const segments = mysqlTable("segments", {

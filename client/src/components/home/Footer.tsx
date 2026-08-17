@@ -29,6 +29,8 @@ import {
   useCompanySettings,
   useWhatsAppButtonVisibility,
 } from "@/hooks/useCompanySettings";
+import { trpc } from "@/lib/trpc";
+import { mergeFooterContent } from "@/lib/siteContent";
 
 const documentationPath = (documentId?: string) => documentId ? `/documentos/${documentId}` : "/documentos";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -106,6 +108,8 @@ function SecuritySealLink({ href, label, src }: { href: string; label: string; s
 
 export function Footer() {
   const { company } = useCompanySettings();
+  const { data: savedFooterContent } = trpc.siteContent.getPublicFooter.useQuery(undefined, { staleTime: 60_000 });
+  const footerContent = mergeFooterContent(savedFooterContent);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "error" | "success">("idle");
@@ -144,7 +148,7 @@ export function Footer() {
               <img src={company.printLogoUrl || "/manus-storage/logo-maria-imprime_acc5585b.webp"} alt="Maria Imprime" className="h-16 w-auto object-contain sm:h-20" />
             </a>
             <p className="mt-5 text-sm leading-7 text-slate-600">
-              A Maria Imprime transforma suas ideias em comunicação visual com atenção aos detalhes, praticidade e qualidade em cada pedido.
+              {footerContent.introduction}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               {instagramHref && <SocialLink href={instagramHref} label="Instagram da Maria Imprime"><Instagram className="h-5 w-5" /></SocialLink>}
@@ -177,8 +181,8 @@ export function Footer() {
           </FooterColumn>
 
           <section className="rounded-2xl border border-pink-200 bg-pink-50/70 p-6 shadow-sm" aria-labelledby="newsletter-title">
-            <h2 id="newsletter-title" className="text-xl font-bold text-pink-600">Fique por dentro!</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Receba novidades, promoções e dicas exclusivas da Maria Imprime.</p>
+            <h2 id="newsletter-title" className="text-xl font-bold text-pink-600">{footerContent.newsletterTitle}</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{footerContent.newsletterDescription}</p>
             <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
               <label className="sr-only" htmlFor="newsletter-email">Seu melhor e-mail</label>
               <input id="newsletter-email" type="email" required value={newsletterEmail} onChange={(event) => { setNewsletterEmail(event.target.value); setNewsletterStatus("idle"); setNewsletterMessage(""); }} aria-invalid={newsletterStatus === "error"} placeholder="Seu melhor e-mail" className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition focus:ring-2 ${newsletterStatus === "error" ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-slate-200 focus:border-pink-500 focus:ring-pink-100"}`} />
@@ -221,7 +225,7 @@ export function Footer() {
             <div className="mt-4 space-y-2.5 text-slate-600">
               <a href={phoneHref} className="flex items-center gap-2.5 hover:text-pink-600"><Phone className="h-4 w-4 text-pink-500" />{company.commercialPhone}</a>
               <a href={`mailto:${company.supportEmail}`} className="flex items-center gap-2.5 hover:text-pink-600"><Mail className="h-4 w-4 text-pink-500" />{company.supportEmail}</a>
-              <p className="flex items-start gap-2.5"><ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" /><span>Seg–Sex: 09:00 – 12:00 e 13:30 – 17:00<br />Sábado e domingo: fechado</span></p>
+              <p className="flex items-start gap-2.5"><ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" /><span className="whitespace-pre-line">{footerContent.businessHours}</span></p>
             </div>
           </div>
           <div className="border-t border-slate-200 pt-8 md:border-l md:border-t-0 md:pl-8 md:pt-0">

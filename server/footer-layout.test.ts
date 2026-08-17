@@ -7,7 +7,9 @@ const root = resolve(import.meta.dirname, "..");
 describe("rodapé institucional da Maria Imprime", () => {
   it("organiza apresentação, navegação, newsletter, pagamentos e segurança", () => {
     const source = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
-    expect(source).toContain("Fique por dentro!");
+    expect(source).toContain("mergeFooterContent");
+    expect(source).toContain("footerContent.newsletterTitle");
+    expect(source).toContain("footerContent.newsletterDescription");
     expect(source).toContain("Formas de pagamento");
     expect(source).toContain("Google Safe Browsing");
     expect(source).toContain("Ambiente protegido");
