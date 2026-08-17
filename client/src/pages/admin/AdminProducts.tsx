@@ -733,8 +733,8 @@ export default function AdminProducts() {
                   Produto recém-criado
                 </span>
               )}
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[auto_9rem_minmax(0,1fr)_auto]">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[auto_7rem_minmax(0,1fr)_auto]">
                   {/* Checkbox */}
                   <div className="flex items-center">
                     <input
@@ -746,11 +746,11 @@ export default function AdminProducts() {
                   </div>
 
                   {/* Product Image */}
-                  <div>
+                  <div className="flex h-20 w-28 items-center justify-center rounded-lg bg-gray-50 p-1">
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="h-28 w-full rounded-lg object-cover md:w-36" />
+                      <img src={product.imageUrl} alt={product.name} className="max-h-full max-w-full rounded-md object-contain" />
                     ) : (
-                      <div className="flex h-28 w-full items-center justify-center rounded-lg bg-gray-200 md:w-36">
+                      <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-200">
                         <span className="text-gray-400">Sem imagem</span>
                       </div>
                     )}
@@ -759,8 +759,8 @@ export default function AdminProducts() {
                   {/* Product Info */}
                   <div className="min-w-0">
                     <h3 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h3>
-                    <p className="mb-3 text-sm text-gray-600">{product.description || "Sem descrição cadastrada."}</p>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                    <p className="mb-2 line-clamp-2 text-sm text-gray-600">{product.description || "Sem descrição cadastrada."}</p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                       <span className="inline-flex items-baseline gap-1.5 text-emerald-700">
                         <span className="font-medium text-gray-500">Pix</span>
                         <strong className="text-sm">{paymentPrices.pix.label}</strong>
