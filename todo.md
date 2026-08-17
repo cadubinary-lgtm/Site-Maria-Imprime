@@ -2975,3 +2975,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar Ver normas para envio de arte como botão secundário com contorno rosa
 - [x] Padronizar Falar com a Maria como botão principal rosa preenchido
 - [x] Validar alinhamento, responsividade e ações dos botões do Guia da Maria
+- [x] Revisar o diff recente do rodapé do Guia da Maria e remover estilos paddingTop duplicados
+- [x] Manter o ajuste de 3px somente no contêiner visual correto, sem deslocar ícones, textos e botões
+- [x] Validar TypeScript, testes e layout após a correção do editor visual
