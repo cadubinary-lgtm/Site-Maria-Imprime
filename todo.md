@@ -2971,3 +2971,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o botão principal de contato com preenchimento rosa, ícone e sombra suave
 - [x] Padronizar os botões secundários de produtos com fundo branco e contorno rosa
 - [x] Validar os botões da página inicial em desktop e em tela estreita
+- [x] Mapear os botões atuais do Guia da Maria e preservar seus destinos
+- [x] Padronizar Ver normas para envio de arte como botão secundário com contorno rosa
+- [x] Padronizar Falar com a Maria como botão principal rosa preenchido
+- [x] Validar alinhamento, responsividade e ações dos botões do Guia da Maria
