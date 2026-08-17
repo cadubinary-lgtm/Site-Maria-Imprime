@@ -2890,3 +2890,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a tela branca ao abrir o painel lateral do carrinho
 - [x] Atualizar o bloco de pagamento seguro com identificação visual do Mercado Pago no configurador
 - [x] Padronizar referências a cartão como Cartão ou Cartão de débito/crédito em todo o site
+- [x] Configurar favicon oficial e metadados de ícone para mecanismos de busca
