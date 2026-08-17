@@ -12,9 +12,12 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(source).toContain("Google Safe Browsing");
     expect(source).toContain("Ambiente protegido");
     expect(source).toContain("Navegação segura e proteção dos seus dados.");
-    expect(source).toContain('documentationUrl("termos-venda")');
-    expect(source).toContain('documentationUrl("privacidade-lgpd")');
-    expect(source).toContain('documentationUrl("faq")');
+    expect(source).toContain('documentationPath("termos-venda")');
+    expect(source).toContain('documentationPath("privacidade-lgpd")');
+    expect(source).toContain('documentationPath("faq")');
+    expect(source).toContain('documentationPath("formas-pagamento")');
+    expect(source).toContain('documentationPath("entrega-retirada")');
+    expect(source).not.toContain('/produto/1200001');
   });
 
   it("usa dados reais da empresa e mantém layout responsivo", () => {
@@ -30,6 +33,9 @@ describe("rodapé institucional da Maria Imprime", () => {
     const terms = readFileSync(resolve(root, "client/src/components/TermsAcceptance.tsx"), "utf8");
     expect(terms).toContain('id: "aprovacao-arte"');
     expect(terms).toContain('id: "trocas-reembolsos"');
+    expect(terms).toContain("PUBLIC_DOCUMENTS");
+    expect(terms).toContain('id: "formas-pagamento"');
+    expect(terms).toContain('id: "entrega-retirada"');
     expect(terms).toContain('get("document")');
     expect(terms).toContain("setDocumentationOpen");
   });
@@ -39,7 +45,7 @@ describe("rodapé institucional da Maria Imprime", () => {
     const home = readFileSync(resolve(root, "client/src/pages/public/Home.tsx"), "utf8");
     const header = readFileSync(resolve(root, "client/src/components/layout/Header.tsx"), "utf8");
     expect(app).toContain('id="public-site-scroll-container" className="flex-1"');
-    expect(app).toContain('className="min-h-screen"');
+    expect(app).toContain('className="min-h-screen flex items-stretch"');
     expect(app).not.toContain('flex h-screen min-h-0 overflow-hidden');
     expect(app).not.toContain('overflow-y-auto');
     expect(header).toContain('window.scrollTo({ top: 0, left: 0, behavior: "smooth" })');

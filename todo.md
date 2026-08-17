@@ -2897,3 +2897,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o bloco Nossos diferenciais do configurador de pedido
 - [x] Atualizar a mensagem institucional do banner principal
 - [x] Remover a seção Como cuidamos do seu pedido da página inicial
+- [x] Criar páginas públicas individuais para documentos e corrigir links do rodapé
