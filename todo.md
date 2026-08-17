@@ -2898,3 +2898,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Atualizar a mensagem institucional do banner principal
 - [x] Remover a seção Como cuidamos do seu pedido da página inicial
 - [x] Criar páginas públicas individuais para documentos e corrigir links do rodapé
+- [x] Criar Configurações do site > Informações do rodapé para administrar textos, links e documentos públicos
+- [x] Validar visualmente a Central de documentação pública com cards, links individuais e rodapé carregados
+- [x] Confirmar visualmente que Termos e Condições abre em página própria sem alterar o modal do configurador

@@ -17,7 +17,8 @@ describe("central pública de documentação", () => {
     const page = readFileSync(resolve(root, "client/src/pages/public/DocumentationPage.tsx"), "utf8");
     const terms = readFileSync(resolve(root, "client/src/components/TermsAcceptance.tsx"), "utf8");
 
-    expect(page).toContain("PUBLIC_DOCUMENTS");
+    expect(page).toContain("mergePublicDocuments");
+    expect(page).toContain("siteContent.getPublicDocuments");
     expect(page).toContain("/documentos/:documentId");
     expect(page).toContain("currentDocument.content");
     expect(page).toContain("<Footer />");

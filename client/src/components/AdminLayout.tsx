@@ -441,6 +441,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
+    // Configurações públicas - conteúdo administrável do site
+    {
+      item: {
+        label: "CONFIGURAÇÕES DO SITE",
+        icon: <Settings className="w-4 h-4" />,
+        children: [
+          { label: "Informações do rodapé", href: "/admin/configuracoes-site/rodape" },
+          { label: "Dados da Empresa", href: "/admin/dados-da-empresa" },
+        ],
+      },
+    },
     // Backoffice - Transformado em menu retrátil
     {
       item: {

@@ -97,6 +97,7 @@ import { quotationsRouter } from "./quotationsRouter";
 import { variationsCvRouter } from "./variationsCvRouter";
 import { variationsOffsetRouter } from "./variationsOffsetRouter";
 import { companySettingsRouter } from "./companySettingsRouter";
+import { siteContentRouter } from "./siteContentRouter";
 import { abandonedCartsRouter } from "./abandonedCartsRouter";
 import { preImpressaoHistoryRouter } from "./preImpressaoHistoryRouter";
 import { ordersTrashRouter } from "./ordersTrashRouter";
@@ -133,6 +134,7 @@ export const appRouter = router({
   variationsCv: variationsCvRouter,
   variationsOffset: variationsOffsetRouter,
   companySettings: companySettingsRouter,
+  siteContent: siteContentRouter,
   abandonedCarts: abandonedCartsRouter,
   preImpressaoHistory: preImpressaoHistoryRouter,
   ordersTrash: ordersTrashRouter,
