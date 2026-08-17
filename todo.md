@@ -2882,3 +2882,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aproximar ainda mais o título da foto e aumentar levemente seu tamanho nos cards públicos
 - [x] Reduzir o espaço interno e exibir a imagem completa nos cards administrativos de Produtos
 - [x] Reduzir em aproximadamente 60% os espaços verticais superior e inferior dos cards administrativos
+- [x] Definir miniaturas quadradas 1:1 nos cards administrativos de Produtos
