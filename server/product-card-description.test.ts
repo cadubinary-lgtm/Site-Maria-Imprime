@@ -25,4 +25,10 @@ describe("Descrição do Card de produto", () => {
     expect(cardSource).toContain("getVisibleCardDescriptionLines(product.cardDescription)");
     expect(cardSource).toContain("cardDescriptionLines.length > 0 || sameDayUrgency");
   });
+
+  it("mantém Tags e Descrição do Card agrupadas na mesma coluna vertical", () => {
+    const verticalPanelClass = 'flex flex-col gap-4 self-start sm:col-start-2';
+    expect(newProductSource).toContain(verticalPanelClass);
+    expect(editProductSource).toContain(`${verticalPanelClass} sm:row-start-2`);
+  });
 });

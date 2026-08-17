@@ -360,6 +360,7 @@ export default function AdminNewProduct() {
                     </CardContent>
                   </Card>
 
+                  <div className="flex flex-col gap-4 self-start sm:col-start-2">
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
@@ -405,7 +406,7 @@ export default function AdminNewProduct() {
                       )}
                     </CardContent>
                   </Card>
-                  <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-2`}>
+                  <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Descrição do Card</h3>
                       <p className="text-sm text-gray-500">Defina até duas linhas exibidas abaixo dos preços. Quando preenchidas, substituem o aviso automático de urgência.</p>
@@ -433,6 +434,7 @@ export default function AdminNewProduct() {
                       </div>
                     </CardContent>
                   </Card>
+                  </div>
                   </div>
                 </div>
                 <div className="space-y-4">
