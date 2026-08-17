@@ -17,6 +17,51 @@ import { ProductImageUploader } from "@/components/products/ProductImageUploader
 import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL } from "@/lib/new-product-layout";
 import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
 import { getCardDescriptionLines, PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH, updateCardDescriptionLine } from "@/lib/product-card-description";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const getInitialCreateLogistics = () => ({
+  weight: "",
+  width: "",
+  height: "",
+  length: "",
+  allowedCarrierIds: [] as number[],
+});
+
+const getInitialCreateForm = () => ({
+  name: "",
+  description: "",
+  price: "",
+  pixPrice: "",
+  cardPrice: "",
+  resellerPrice: "",
+  segment: "",
+  imageUrl: "",
+  imageKey: "",
+  galleryUrls: [] as string[],
+  calculationType: "unidade",
+  pricePerM2: "",
+  pixPricePerM2: "",
+  cardPricePerM2: "",
+  resellerPricePerM2: "",
+  minWidth: "",
+  maxWidth: "",
+  minHeight: "",
+  maxHeight: "",
+  segmentIds: [] as number[],
+  specifications: [] as { label: string; value: string }[],
+  tags: [] as string[],
+  tagPosition: "top-right" as string,
+  cardDescription: "",
+});
 
 export default function AdminNewProduct() {
   const [, navigate] = useLocation();
@@ -26,41 +71,12 @@ export default function AdminNewProduct() {
   const [autoSaveState, setAutoSaveState] = useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
   const [lastSyncedSignature, setLastSyncedSignature] = useState("");
   const [autoSaveRevision, setAutoSaveRevision] = useState(0);
+  const [draftResetVersion, setDraftResetVersion] = useState(0);
+  const [isDiscardDraftDialogOpen, setIsDiscardDraftDialogOpen] = useState(false);
   const isAutoSaveInFlightRef = useRef(false);
   const autoSaveTimerRef = useRef<number | null>(null);
-  const [createLogistics, setCreateLogistics] = useState({
-    weight: "",
-    width: "",
-    height: "",
-    length: "",
-    allowedCarrierIds: [] as number[],
-  });
-  const [createForm, setCreateForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    pixPrice: "",
-    cardPrice: "",
-    resellerPrice: "",
-    segment: "",
-    imageUrl: "",
-    imageKey: "",
-    galleryUrls: [] as string[],
-    calculationType: "unidade",
-    pricePerM2: "",
-    pixPricePerM2: "",
-    cardPricePerM2: "",
-    resellerPricePerM2: "",
-    minWidth: "",
-    maxWidth: "",
-    minHeight: "",
-    maxHeight: "",
-    segmentIds: [] as number[],
-    specifications: [] as { label: string; value: string }[],
-    tags: [] as string[],
-    tagPosition: "top-right" as string,
-    cardDescription: "",
-  });
+  const [createLogistics, setCreateLogistics] = useState(getInitialCreateLogistics);
+  const [createForm, setCreateForm] = useState(getInitialCreateForm);
 
   const { data: segmentsData } = trpc.segments.getAll.useQuery();
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
@@ -195,7 +211,12 @@ export default function AdminNewProduct() {
       setLastSyncedSignature(signatureAtStart);
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
       setAutoSaveState("saved");
-      toast.success("Produto criado", { description: "As próximas alterações serão salvas automaticamente." });
+      toast.success("Produto criado com sucesso", {
+        description: `${createForm.name.trim()}: as próximas alterações serão salvas automaticamente.`,
+        position: "top-right",
+        duration: 3500,
+        id: `new-product-created-${productId}`,
+      });
     } catch (error) {
       console.error("[new-product-create]", error);
       window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
@@ -205,6 +226,35 @@ export default function AdminNewProduct() {
       isAutoSaveInFlightRef.current = false;
     }
   }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm.segmentIds, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateSegmentsMutation, utils]);
+
+  const handleDiscardDraft = useCallback(() => {
+    if (autoCreatedProductId || createProductMutation.isPending) return;
+    if (autoSaveTimerRef.current) window.clearTimeout(autoSaveTimerRef.current);
+
+    const initialForm = getInitialCreateForm();
+    const initialLogistics = getInitialCreateLogistics();
+    const initialDeliveryOptions: DeliveryOptionData[] = [];
+    setCreateForm(initialForm);
+    setCreateLogistics(initialLogistics);
+    setCreateDeliveryOptions(initialDeliveryOptions);
+    setAutoCreatedProductId(null);
+    setLastSyncedSignature(JSON.stringify({
+      createForm: initialForm,
+      createLogistics: initialLogistics,
+      createDeliveryOptions: initialDeliveryOptions,
+    }));
+    setAutoSaveState("idle");
+    setAutoSaveRevision((revision) => revision + 1);
+    setDraftResetVersion((version) => version + 1);
+    window.localStorage.removeItem("maria-imprime-new-product-autosave");
+    setIsDiscardDraftDialogOpen(false);
+    toast.info("Rascunho descartado", {
+      description: "Os dados preenchidos foram removidos.",
+      position: "top-right",
+      duration: 3500,
+      id: "new-product-draft-discarded",
+    });
+  }, [autoCreatedProductId, createProductMutation.isPending]);
 
   useEffect(() => {
     const signature = getNewProductSignature();
@@ -242,6 +292,18 @@ export default function AdminNewProduct() {
               }`} aria-live="polite">
                 {autoSaveState === "saving" ? (autoCreatedProductId ? "Salvando automaticamente..." : "Criando produto...") : autoSaveState === "saved" ? "Salvo automaticamente" : autoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : autoCreatedProductId ? "Aguardando dados obrigatórios" : "Pronto para criar"}
               </span>
+            )}
+            {!autoCreatedProductId && (createForm.name.trim() || createForm.description.trim() || createForm.pixPrice || createForm.cardPrice || createForm.pixPricePerM2 || createForm.cardPricePerM2 || createForm.imageUrl || createForm.galleryUrls.length > 0 || createForm.segmentIds.length > 0 || createForm.specifications.length > 0 || createForm.tags.length > 0 || createForm.cardDescription.trim() || createLogistics.weight || createLogistics.width || createLogistics.height || createLogistics.length || createLogistics.allowedCarrierIds.length > 0 || createDeliveryOptions.length > 0) && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={createProductMutation.isPending}
+                className="text-gray-500 hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600"
+                onClick={() => setIsDiscardDraftDialogOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Descartar Rascunho
+              </Button>
             )}
             <Button type="button" onClick={handleCreateProduct} disabled={Boolean(autoCreatedProductId) || createProductMutation.isPending}>
               {createProductMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
@@ -473,7 +535,7 @@ export default function AdminNewProduct() {
                 <div className="space-y-4">
                   {/* Prazos de Produção */}
                   <DeliveryOptionsManager
-                    key={autoCreatedProductId || "new-product-draft"}
+                    key={`${autoCreatedProductId || "new-product-draft"}-${draftResetVersion}`}
                     productId={autoCreatedProductId || undefined}
                     calculationType={createForm.calculationType}
                     onChange={autoCreatedProductId ? undefined : setCreateDeliveryOptions}
@@ -590,6 +652,22 @@ export default function AdminNewProduct() {
           </CardContent>
         </Card>
       </div>
+      <AlertDialog open={isDiscardDraftDialogOpen} onOpenChange={setIsDiscardDraftDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar rascunho?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todos os dados preenchidos neste novo produto serão removidos e não poderão ser recuperados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDiscardDraft} className="bg-pink-600 text-white hover:bg-pink-700">
+              Descartar rascunho
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

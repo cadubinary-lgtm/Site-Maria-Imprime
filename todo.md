@@ -2871,3 +2871,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar o alinhamento vertical entre Tags do Produto e Descrição do Card nos dois formulários
 - [x] Adicionar remoção confirmada da aplicação de desconto Pix ao lado de Aplicar no Pix
 - [x] Exigir Criar produto antes do autosalvamento em Novo Produto para impedir duplicidades
+- [x] Adicionar toast de sucesso e botão Descartar Rascunho em Novo Produto
