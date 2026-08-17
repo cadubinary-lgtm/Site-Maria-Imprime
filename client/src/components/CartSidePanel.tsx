@@ -135,7 +135,7 @@ export function CartSidePanel() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {cartItems.map((item) => {
+            {cartItems.map((item, index) => {
               const isPendingSync = item.id < 0;
               const isUpdating = updatingId === item.id || isPendingSync;
               const subtotalItem = Number(item.priceAtCart) * item.quantity;
@@ -147,7 +147,7 @@ export function CartSidePanel() {
                 return next;
               });
               return (
-                <div key={item.id} className="py-4">
+                <div key={`cart-item-${item.id}-${item.productId}-${index}`} className="py-4">
                   {/* Produto: imagem + nome */}
                   <div className="flex gap-3 mb-3">
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">

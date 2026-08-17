@@ -33,4 +33,11 @@ describe("atualização otimista do carrinho", () => {
     expect(source).toContain("refetchOnWindowFocus: false");
     expect(source).toContain("refetchOnMount: false");
   });
+
+  it("atribui uma chave única mesmo durante sincronizações otimistas", () => {
+    const source = readFileSync(cartPanelPath, "utf8");
+
+    expect(source).toContain("cartItems.map((item, index) => {");
+    expect(source).toContain('key={`cart-item-${item.id}-${item.productId}-${index}`}');
+  });
 });
