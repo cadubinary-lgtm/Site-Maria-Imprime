@@ -2042,7 +2042,7 @@ export default function ProductDetail() {
                       {missingFields.map((field) => (
                         <li key={field.id} className="text-sm text-gray-800 flex items-start gap-3 pl-1 cursor-pointer hover:text-gray-950 transition-colors" onClick={() => scrollToField(field.id)}>
                           <CheckSquare className="w-4 h-4 text-pink-500 flex-shrink-0 mt-0.5" />
-                          <span className="leading-snug underline">{field.message}</span>
+                          <span className="leading-snug">{field.message}</span>
                         </li>
                       ))}
                     </ul>

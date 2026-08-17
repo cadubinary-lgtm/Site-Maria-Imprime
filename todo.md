@@ -2884,3 +2884,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir em aproximadamente 60% os espaços verticais superior e inferior dos cards administrativos
 - [x] Definir miniaturas quadradas 1:1 nos cards administrativos de Produtos
 - [x] Aumentar efetivamente a miniatura administrativa e salvar checkpoint específico
+- [x] Remover os sublinhados das mensagens de pendência no configurador de produto
