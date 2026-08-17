@@ -21,6 +21,9 @@ describe("Guia da Maria global", () => {
     expect(content).toContain('id: "material"');
     expect(content).toContain('id: "acabamento"');
     expect(content).toContain('id: "entrega"');
+    expect(content).toContain('"lona-sanet"');
+    expect(content).toContain("Lona Ortofônica / Sanet — Perfurada");
+    expect(router).toContain('"lona-sanet"');
   });
 
   it("substitui os quatro cards promocionais no configurador sem tocar na lógica de pedido", () => {
@@ -39,8 +42,13 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('"adesivo-perfurado"');
     expect(guide).toContain("laminacao:");
     expect(guide).toContain('"meio-corte"');
-    expect(guide).toContain("sm:grid-cols-2 xl:grid-cols-4");
-    expect(guide).toContain("lg:grid-cols-[220px_minmax(0,1fr)]");
+    expect(guide).toContain('"lona-sanet"');
+    expect(guide).toContain("md:grid-cols-2 xl:grid-cols-4");
+    expect(guide).toContain("mt-4 grid gap-3 xl:grid-cols-4");
+    expect(guide).toContain("maria-guide-impressao");
+    expect(guide).toContain("maria-guide-material");
+    expect(guide).toContain("maria-guide-acabamento");
+    expect(guide).toContain("maria-guide-entrega");
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {

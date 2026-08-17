@@ -8,7 +8,7 @@ export const MARIA_GUIDE_ICON_KEYS = [
 ] as const;
 
 export type MariaGuideIconKey = typeof MARIA_GUIDE_ICON_KEYS[number];
-export type MariaGuideIllustration = "lona-ilhos" | "lona-bastao" | "adesivo-perfurado" | "papel-gramatura" | "placa" | "laminacao" | "meio-corte" | "vinco-dobra" | "entrega";
+export type MariaGuideIllustration = "lona-ilhos" | "lona-bastao" | "lona-sanet" | "adesivo-perfurado" | "papel-gramatura" | "placa" | "laminacao" | "meio-corte" | "vinco-dobra" | "entrega";
 
 export type MariaGuideItem = {
   id: string;
@@ -85,11 +85,12 @@ export const MARIA_GUIDE_FALLBACK: MariaGuideContent = {
       isActive: true,
       categories: [
         guideCategory("lonas", "Lonas", "Materiais para grandes formatos, comunicação visual interna e externa.", [
-          guideItem("lona-280", "Lona 280g", "Material leve e flexível, com boa relação entre qualidade de impressão e custo.", ["Banners", "Faixas", "Painéis", "Eventos"], "lona-ilhos"),
-          guideItem("lona-340", "Lona 340g", "Opção intermediária, com maior corpo e boa versatilidade para comunicação visual.", ["Banners", "Painéis", "Campanhas", "Eventos"], "lona-bastao"),
-          guideItem("lona-440", "Lona 440g", "Material mais encorpado e resistente para aplicações que exigem maior robustez.", ["Fachadas", "Banners grandes", "Painéis", "Grandes formatos"], "lona-ilhos"),
-          guideItem("lona-510", "Lona 510g", "Lona de maior gramatura indicada para projetos de alta resistência mecânica.", ["Outdoors", "Fachadas", "Estruturas tensionadas", "Áreas externas"], "lona-ilhos"),
-          guideItem("lona-backlight", "Lona Backlight", "Desenvolvida para aplicações com iluminação posicionada atrás do material.", ["Caixas luminosas", "Painéis iluminados", "Fachadas luminosas"], "lona-bastao"),
+          guideItem("lona-280", "Lona 280g", "Opção leve e versátil para projetos de comunicação visual, conforme a estrutura e o acabamento definidos.", ["Banners", "Faixas", "Painéis", "Eventos"], "lona-ilhos"),
+          guideItem("lona-340", "Lona 340g", "Equilíbrio entre leveza e resistência para diferentes projetos de comunicação visual.", ["Banners", "Painéis", "Campanhas", "Eventos"], "lona-bastao"),
+          guideItem("lona-440", "Lona 440g", "Material com maior corpo para projetos que podem se beneficiar de mais resistência e estabilidade.", ["Fachadas", "Banners grandes", "Painéis", "Grandes formatos"], "lona-ilhos"),
+          guideItem("lona-510", "Lona 510g", "Opção de alta resistência para aplicações cuja instalação e especificação pedem uma lona mais robusta.", ["Fachadas", "Painéis", "Estruturas", "Áreas externas"], "lona-ilhos"),
+          guideItem("lona-sanet", "Lona Ortofônica / Sanet — Perfurada", "Lona com microfuros que permitem circulação de ar e passagem parcial de luz e som, interessante para grandes áreas e estruturas expostas ao vento.", ["Fachadas", "Grandes painéis", "Eventos", "Cenários", "Stands", "Divisórias", "Veículos"], "lona-sanet"),
+          guideItem("lona-backlight", "Lona Backlight", "Material para aplicações com iluminação traseira, de acordo com a estrutura e o projeto luminoso.", ["Caixas luminosas", "Painéis iluminados", "Fachadas luminosas"], "lona-bastao"),
         ]),
         guideCategory("adesivos", "Adesivos", "Soluções para vitrines, paredes, sinalização e comunicação visual.", [
           guideItem("vinil-brilho", "Vinil Branco Brilho", "Superfície brilhante que proporciona maior impacto visual e cores intensas.", ["Fachadas", "Vitrines", "Promoções", "Sinalização"]),
