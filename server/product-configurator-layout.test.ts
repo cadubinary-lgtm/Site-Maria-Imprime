@@ -16,5 +16,7 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain('lg:grid-cols-[minmax(0,1fr)_280px]');
     expect(source).toContain('h-fit space-y-4 lg:sticky lg:top-4');
     expect(source).toContain("<MariaGuide />");
+    expect(source).toContain("leading-relaxed line-clamp-5");
+    expect(source).toContain('min-w-0 lg:col-span-2');
   });
 });
