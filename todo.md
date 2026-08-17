@@ -2877,3 +2877,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reorganizar card administrativo com imagem, descrição e preços Pix, cartão e revendedor visíveis
 - [x] Permitir recolher Preço rápido ao clicar novamente na mesma ação
 - [x] Exibir a imagem completa dos produtos na página Todos os Produtos sem corte
+- [x] Remover a etiqueta Desconto no Pix e reduzir os espaços entre foto, nome e preço nos cards públicos

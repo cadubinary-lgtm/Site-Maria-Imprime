@@ -81,11 +81,6 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
     <Card className="overflow-hidden border border-gray-200 bg-white p-0 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <ProductTagBadges tags={product.tags} tagPosition={product.tagPosition} />
-        {pixDiscount.eligible && (
-          <span className="absolute left-2 top-2 z-20 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-            Desconto no Pix
-          </span>
-        )}
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -97,8 +92,8 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         )}
       </div>
 
-      <CardContent className="px-4 pb-4 pt-3">
-        <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{product.name}</h3>
+      <CardContent className="px-4 pb-4 pt-1.5">
+        <h3 className="line-clamp-2 text-base font-semibold leading-tight text-gray-900">{product.name}</h3>
 
         {specifications.length > 0 && (
           <div className="mt-3 grid grid-cols-2 border-y border-gray-100 py-2 sm:grid-cols-4">
@@ -115,7 +110,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           </div>
         )}
 
-        <div className={`mt-3 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
+        <div className={`mt-1.5 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
           <div className="min-w-0">
             <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
             <p className="mt-0.5 truncate text-2xl font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
