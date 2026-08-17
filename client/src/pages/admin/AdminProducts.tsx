@@ -733,7 +733,7 @@ export default function AdminProducts() {
                   Produto recém-criado
                 </span>
               )}
-              <CardContent className="p-4">
+              <CardContent className="px-4 py-1.5">
                 <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[auto_7rem_minmax(0,1fr)_auto]">
                   {/* Checkbox */}
                   <div className="flex items-center">

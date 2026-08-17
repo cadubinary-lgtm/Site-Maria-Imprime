@@ -2881,3 +2881,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Confirmar checkpoint publicável com imagem completa em Todos os Produtos
 - [x] Aproximar ainda mais o título da foto e aumentar levemente seu tamanho nos cards públicos
 - [x] Reduzir o espaço interno e exibir a imagem completa nos cards administrativos de Produtos
+- [x] Reduzir em aproximadamente 60% os espaços verticais superior e inferior dos cards administrativos
