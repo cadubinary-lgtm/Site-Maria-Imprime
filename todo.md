@@ -2916,3 +2916,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar cards superiores, colunas técnicas, dicas e faixa final exatamente à hierarquia visual aprovada
 - [x] Validar visualmente a composição simultânea de quatro painéis no configurador da Lona Impressa
 - [x] Validar a abertura de Lonas com a Lona Ortofônica/Sanet como material global no painel Material
+- [x] Permitir expandir e recolher cada painel técnico pelos quatro cards superiores do Guia da Maria
+- [x] Validar a interação de expandir/recolher sem alterar o configurador, preço, carrinho ou checkout
+- [x] Confirmar visualmente que os quatro painéis técnicos aparecem expandidos no estado inicial
+- [x] Confirmar visualmente que o card Material recolhe o painel e reorganiza os demais painéis técnicos
