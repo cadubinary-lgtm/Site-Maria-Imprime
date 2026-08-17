@@ -636,7 +636,7 @@ Todos os documentos estão disponíveis na Central de Documentação da Maria Im
 
 Não. O processo de compra deverá apresentar um único aceite: “Aceito os termos e condições”. O link “Ler” permite consultar todos os documentos antes da conclusão da compra.`;
 
-const DOCUMENTS = [
+const CHECKOUT_DOCUMENTS = [
   { id: "termos-venda", title: "Termos e Condições de Venda", content: TERMS_OF_SALE_CONTENT },
   { id: "aprovacao-arte", title: "Termo de Aprovação de Arte", content: ART_APPROVAL_CONTENT },
   { id: "producao-prazos", title: "Política de Produção e Prazos", content: PRODUCTION_DEADLINE_CONTENT },
@@ -647,11 +647,35 @@ const DOCUMENTS = [
   { id: "faq", title: "Perguntas Frequentes (FAQ)", content: FAQ_CONTENT },
 ];
 
+export const PUBLIC_DOCUMENTS = [
+  ...CHECKOUT_DOCUMENTS,
+  {
+    id: "formas-pagamento",
+    title: "Formas de Pagamento",
+    content: `FORMAS DE PAGAMENTO
+
+As formas de pagamento, bandeiras, parcelamentos, limites e demais condições exibidos no checkout dependem da disponibilidade e das regras do processador de pagamentos homologado, bem como das análises e autorizações realizadas por ele e, quando aplicável, pela instituição financeira do cliente.
+
+A Maria Imprime poderá disponibilizar, restringir ou substituir modalidades de pagamento conforme essa disponibilidade, apresentando no checkout as opções efetivamente habilitadas para cada pedido. O cliente não deverá considerar como garantida uma modalidade que não esteja disponível ou aprovada no momento da conclusão da compra, sem prejuízo dos direitos previstos na legislação aplicável.`,
+  },
+  {
+    id: "entrega-retirada",
+    title: "Entrega e Retirada",
+    content: `ENTREGA E RETIRADA
+
+As modalidades de entrega disponíveis serão apresentadas durante a compra. O cliente deverá fornecer corretamente nome, endereço, número, complemento, bairro, cidade, estado, CEP, telefone e outras informações necessárias.
+
+O prazo de entrega exibido na compra é uma estimativa calculada pela transportadora para a modalidade selecionada e poderá variar conforme a operação de transporte. Ele é separado do prazo de produção do pedido.
+
+Quando houver opção de retirada, as instruções aplicáveis serão apresentadas no pedido após a confirmação das condições necessárias para produção e disponibilização.`,
+  },
+];
+
 export const TERMS_VERSION = "2026-08-12-v2";
 
 export function TermsAcceptance({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (checked: boolean) => void }) {
   const requestedDocumentId = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("document");
-  const requestedDocument = DOCUMENTS.find((document) => document.id === requestedDocumentId);
+  const requestedDocument = CHECKOUT_DOCUMENTS.find((document) => document.id === requestedDocumentId);
   const [documentationOpen, setDocumentationOpen] = useState(Boolean(requestedDocument));
 
   return <div id="terms" className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
@@ -660,7 +684,7 @@ export function TermsAcceptance({ checked, onCheckedChange }: { checked: boolean
       <Label htmlFor="terms-checkbox" className="text-sm cursor-pointer text-gray-700">Aceito os termos e condições</Label>
       <Dialog open={documentationOpen} onOpenChange={setDocumentationOpen}><DialogTrigger asChild><button type="button" className="text-sm font-semibold text-pink-600 hover:text-pink-700 underline underline-offset-2">Ler</button></DialogTrigger>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle>DOCUMENTAÇÃO DA MARIA IMPRIME</DialogTitle><DialogDescription>Para sua segurança e transparência, disponibilizamos os documentos que regulamentam compras, produção, impressão, arquivos, prazos, trocas, privacidade e utilização do site.</DialogDescription></DialogHeader>
-          <Accordion type="single" collapsible defaultValue={requestedDocument ? `document-${requestedDocument.id}` : undefined} className="w-full">{DOCUMENTS.map((document) => <AccordionItem key={document.id} value={`document-${document.id}`}><AccordionTrigger>{document.title}</AccordionTrigger><AccordionContent><p className="whitespace-pre-line text-sm leading-6 text-gray-600">{document.content}</p></AccordionContent></AccordionItem>)}</Accordion>
+          <Accordion type="single" collapsible defaultValue={requestedDocument ? `document-${requestedDocument.id}` : undefined} className="w-full">{CHECKOUT_DOCUMENTS.map((document) => <AccordionItem key={document.id} value={`document-${document.id}`}><AccordionTrigger>{document.title}</AccordionTrigger><AccordionContent><p className="whitespace-pre-line text-sm leading-6 text-gray-600">{document.content}</p></AccordionContent></AccordionItem>)}</Accordion>
         </DialogContent>
       </Dialog>
     </div>

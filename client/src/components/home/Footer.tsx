@@ -30,27 +30,27 @@ import {
   useWhatsAppButtonVisibility,
 } from "@/hooks/useCompanySettings";
 
-const documentationUrl = (documentId?: string) => `/produto/1200001${documentId ? `?document=${documentId}` : ""}#terms`;
+const documentationPath = (documentId?: string) => documentId ? `/documentos/${documentId}` : "/documentos";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const institutionalLinks = [
   { label: "Início", href: "/" },
   { label: "Nossos produtos", href: "/catalogo" },
-  { label: "Central de documentação", href: documentationUrl() },
-  { label: "Termos e condições de venda", href: documentationUrl("termos-venda") },
-  { label: "Termo de uso do site", href: documentationUrl("uso-site") },
-  { label: "Política de privacidade (LGPD)", href: documentationUrl("privacidade-lgpd") },
-  { label: "Política de cookies", href: documentationUrl("cookies") },
+  { label: "Central de documentação", href: documentationPath() },
+  { label: "Termos e condições de venda", href: documentationPath("termos-venda") },
+  { label: "Termo de uso do site", href: documentationPath("uso-site") },
+  { label: "Política de privacidade (LGPD)", href: documentationPath("privacidade-lgpd") },
+  { label: "Política de cookies", href: documentationPath("cookies") },
   { label: "Minha conta", href: "/minha-conta" },
 ];
 
 const supportLinks = [
-  { label: "Dúvidas frequentes", href: documentationUrl("faq") },
-  { label: "Termo de aprovação de arte", href: documentationUrl("aprovacao-arte") },
-  { label: "Prazos de produção", href: documentationUrl("producao-prazos") },
-  { label: "Formas de pagamento", href: documentationUrl("termos-venda") },
-  { label: "Entrega e retirada", href: documentationUrl("termos-venda") },
-  { label: "Trocas e devoluções", href: documentationUrl("trocas-reembolsos") },
+  { label: "Dúvidas frequentes", href: documentationPath("faq") },
+  { label: "Termo de aprovação de arte", href: documentationPath("aprovacao-arte") },
+  { label: "Prazos de produção", href: documentationPath("producao-prazos") },
+  { label: "Formas de pagamento", href: documentationPath("formas-pagamento") },
+  { label: "Entrega e retirada", href: documentationPath("entrega-retirada") },
+  { label: "Trocas e devoluções", href: documentationPath("trocas-reembolsos") },
 ];
 
 const productLinks = [
