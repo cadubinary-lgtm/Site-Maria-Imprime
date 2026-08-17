@@ -54,6 +54,8 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("aria-controls");
     expect(guide).toContain("aria-expanded");
     expect(guide).toContain("Escolha um dos quatro cards acima para expandir");
+    expect(guide).toContain("maria-material-${category.id}");
+    expect(guide).toContain("openMaterialId === category.id &&");
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {

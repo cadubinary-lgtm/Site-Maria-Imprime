@@ -2920,3 +2920,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar a interação de expandir/recolher sem alterar o configurador, preço, carrinho ou checkout
 - [x] Confirmar visualmente que os quatro painéis técnicos aparecem expandidos no estado inicial
 - [x] Confirmar visualmente que o card Material recolhe o painel e reorganiza os demais painéis técnicos
+- [x] Manter os quatro cards superiores do Guia da Maria independentes, com recolhimento individual sem interferir nos demais
+- [x] Abrir o detalhamento de Lonas, Adesivos e demais subcards imediatamente abaixo do item selecionado
+- [x] Validar visualmente a expansão dos subcards sem deslocar conteúdos para o fim da coluna
+- [x] Confirmar visualmente que Lonas abre seus detalhes imediatamente abaixo do próprio subcard
+- [x] Confirmar visualmente que a lista de Materiais e seus subcards está disponível no configurador após a correção
