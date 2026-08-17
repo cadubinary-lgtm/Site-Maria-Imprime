@@ -76,12 +76,12 @@ export default function AdminNewProduct() {
     if (!rawDraft) return;
     try {
       const draft = JSON.parse(rawDraft);
-      if (draft?.createForm?.name) {
-        setCreateForm((current) => ({ ...current, ...draft.createForm }));
-        if (draft.createLogistics) setCreateLogistics((current) => ({ ...current, ...draft.createLogistics }));
-        if (Array.isArray(draft.createDeliveryOptions)) setCreateDeliveryOptions(draft.createDeliveryOptions);
-        setAutoSaveState("waiting");
-        toast.info("Rascunho recuperado", { description: "O novo produto será salvo automaticamente quando os dados obrigatórios estiverem completos." });
+        if (draft?.createForm?.name) {
+          setCreateForm((current) => ({ ...current, ...draft.createForm }));
+          if (draft.createLogistics) setCreateLogistics((current) => ({ ...current, ...draft.createLogistics }));
+          if (Array.isArray(draft.createDeliveryOptions)) setCreateDeliveryOptions(draft.createDeliveryOptions);
+          setAutoSaveState("waiting");
+          toast.info("Rascunho recuperado", { description: "Conclua os dados obrigatórios e clique em Criar produto para confirmar o cadastro." });
       }
     } catch {
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
@@ -145,26 +145,14 @@ export default function AdminNewProduct() {
   const getNewProductSignature = useCallback(() => JSON.stringify({ createForm, createLogistics, createDeliveryOptions }), [createForm, createDeliveryOptions, createLogistics]);
 
   const synchronizeNewProduct = useCallback(async () => {
-    if (isAutoSaveInFlightRef.current || !isCreateFormReadyForAutoSave()) return;
+    if (isAutoSaveInFlightRef.current || !autoCreatedProductId || !isCreateFormReadyForAutoSave()) return;
     const signatureAtStart = getNewProductSignature();
     isAutoSaveInFlightRef.current = true;
     setAutoSaveState("saving");
     try {
       const payload = getCreatePayload();
-      let productId = autoCreatedProductId;
-      if (productId) {
-        await updateProductMutation.mutateAsync({ id: productId, ...payload });
-      } else {
-        const result = await createProductMutation.mutateAsync(payload);
-        productId = (result as any)?.id;
-        if (!productId) throw new Error("O produto não retornou um identificador");
-        setAutoCreatedProductId(productId);
-        const activeOptions = createDeliveryOptions.filter((opt) => opt.isActive);
-        await Promise.all(activeOptions.map((opt, index) => createDeliveryOptionMutation.mutateAsync({
-          productId: productId!, name: opt.name, daysToDeliver: opt.daysToDeliver, pricePerM2: opt.pricePerM2, isActive: true, order: index,
-        })));
-      }
-      await updateSegmentsMutation.mutateAsync({ productId, segmentIds: createForm.segmentIds });
+      await updateProductMutation.mutateAsync({ id: autoCreatedProductId, ...payload });
+      await updateSegmentsMutation.mutateAsync({ productId: autoCreatedProductId, segmentIds: createForm.segmentIds });
       await utils.products.getAll.invalidate();
       setLastSyncedSignature(signatureAtStart);
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
@@ -179,12 +167,53 @@ export default function AdminNewProduct() {
       isAutoSaveInFlightRef.current = false;
       setAutoSaveRevision((revision) => revision + 1);
     }
-  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateProductMutation, updateSegmentsMutation, utils]);
+  }, [autoCreatedProductId, createDeliveryOptions, createForm, createLogistics, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateProductMutation, updateSegmentsMutation, utils]);
+
+  const handleCreateProduct = useCallback(async () => {
+    if (isAutoSaveInFlightRef.current || autoCreatedProductId) return;
+    if (!isCreateFormReadyForAutoSave()) {
+      setAutoSaveState("waiting");
+      toast.error("Preencha os dados obrigatórios antes de criar o produto");
+      return;
+    }
+
+    const signatureAtStart = getNewProductSignature();
+    isAutoSaveInFlightRef.current = true;
+    setAutoSaveState("saving");
+    try {
+      const result = await createProductMutation.mutateAsync(getCreatePayload());
+      const productId = (result as any)?.id;
+      if (!productId) throw new Error("O produto não retornou um identificador");
+
+      const activeOptions = createDeliveryOptions.filter((opt) => opt.isActive);
+      await Promise.all(activeOptions.map((opt, index) => createDeliveryOptionMutation.mutateAsync({
+        productId, name: opt.name, daysToDeliver: opt.daysToDeliver, pricePerM2: opt.pricePerM2, isActive: true, order: index,
+      })));
+      await updateSegmentsMutation.mutateAsync({ productId, segmentIds: createForm.segmentIds });
+      setAutoCreatedProductId(productId);
+      await utils.products.getAll.invalidate();
+      setLastSyncedSignature(signatureAtStart);
+      window.localStorage.removeItem("maria-imprime-new-product-autosave");
+      setAutoSaveState("saved");
+      toast.success("Produto criado", { description: "As próximas alterações serão salvas automaticamente." });
+    } catch (error) {
+      console.error("[new-product-create]", error);
+      window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
+      setAutoSaveState("error");
+      toast.error("Falha ao criar produto: rascunho preservado no navegador");
+    } finally {
+      isAutoSaveInFlightRef.current = false;
+    }
+  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm.segmentIds, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, updateSegmentsMutation, utils]);
 
   useEffect(() => {
     const signature = getNewProductSignature();
     if (signature === lastSyncedSignature) return;
     window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
+    if (!autoCreatedProductId) {
+      setAutoSaveState("waiting");
+      return;
+    }
     if (!isCreateFormReadyForAutoSave()) {
       setAutoSaveState("waiting");
       return;
@@ -195,7 +224,7 @@ export default function AdminNewProduct() {
     return () => {
       if (autoSaveTimerRef.current) window.clearTimeout(autoSaveTimerRef.current);
     };
-  }, [autoSaveRevision, createDeliveryOptions, createForm, createLogistics, getNewProductSignature, isCreateFormReadyForAutoSave, lastSyncedSignature, synchronizeNewProduct]);
+  }, [autoCreatedProductId, autoSaveRevision, createDeliveryOptions, createForm, createLogistics, getNewProductSignature, isCreateFormReadyForAutoSave, lastSyncedSignature, synchronizeNewProduct]);
 
   return (
     <AdminLayout>
@@ -211,9 +240,13 @@ export default function AdminNewProduct() {
               <span className={`hidden sm:inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                 autoSaveState === "error" ? "bg-red-50 text-red-700" : autoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
               }`} aria-live="polite">
-                {autoSaveState === "saving" ? "Salvando automaticamente..." : autoSaveState === "saved" ? "Salvo automaticamente" : autoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : "Aguardando dados obrigatórios"}
+                {autoSaveState === "saving" ? (autoCreatedProductId ? "Salvando automaticamente..." : "Criando produto...") : autoSaveState === "saved" ? "Salvo automaticamente" : autoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : autoCreatedProductId ? "Aguardando dados obrigatórios" : "Pronto para criar"}
               </span>
             )}
+            <Button type="button" onClick={handleCreateProduct} disabled={Boolean(autoCreatedProductId) || createProductMutation.isPending}>
+              {createProductMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+              {autoCreatedProductId ? "Produto criado" : "Criar produto"}
+            </Button>
             <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
               ← Voltar para Produtos
             </Button>
@@ -550,7 +583,7 @@ export default function AdminNewProduct() {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 pt-2 text-sm text-gray-500">
-                <p>As alterações são salvas automaticamente assim que os dados obrigatórios estiverem válidos.</p>
+                <p>{autoCreatedProductId ? "As alterações são salvas automaticamente após a criação." : "Preencha os dados obrigatórios e clique em Criar produto para iniciar o autosalvamento."}</p>
                 <Button type="button" variant="outline" onClick={() => navigate("/admin/produtos")}>Voltar</Button>
               </div>
             </form>
