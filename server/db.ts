@@ -171,6 +171,24 @@ export async function applyPixDiscountToProducts(discountPercent: number, produc
   return { updatedCount: selectedProducts.length, discountPercent: normalizedPercent };
 }
 
+export async function removePixDiscountFromProducts(productIds?: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+
+  const scope = productIds && productIds.length > 0
+    ? inArray(products.id, productIds)
+    : eq(products.isActive, true);
+  const selectedProducts = await db.select({ id: products.id }).from(products).where(scope);
+
+  if (selectedProducts.length > 0) {
+    await db.update(products)
+      .set({ pixPrice: null, pixPricePerM2: null } as any)
+      .where(scope);
+  }
+
+  return { updatedCount: selectedProducts.length };
+}
+
 // Segments queries
 export async function getAllSegments() {
   const db = await getDb();

@@ -32,4 +32,17 @@ describe("desconto Pix em lote", () => {
     expect(publicCard).toContain("Desconto no Pix");
     expect(detail).toContain("Preço especial no Pix");
   });
+
+  it("permite remover a aplicação Pix sem alterar os outros preços", () => {
+    const admin = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
+    const database = readFileSync(resolve(root, "server/db.ts"), "utf8");
+    const router = readFileSync(resolve(root, "server/routers-product-payment-pricing.ts"), "utf8");
+
+    expect(admin).toContain("Remover aplicação do Pix");
+    expect(admin).toContain("productPaymentPricing.removePixDiscount");
+    expect(admin).toContain("Remover aplicação do Pix?");
+    expect(database).toContain("removePixDiscountFromProducts");
+    expect(database).toContain("set({ pixPrice: null, pixPricePerM2: null }");
+    expect(router).toContain("removePixDiscount:");
+  });
 });

@@ -2869,3 +2869,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar Descrição do Card editável abaixo de Tags do Produto e exibi-la nos cards públicos
 - [x] Criar painel separado de Descrição do Card com Linha 1 e Linha 2 editáveis
 - [x] Aplicar o alinhamento vertical entre Tags do Produto e Descrição do Card nos dois formulários
+- [x] Adicionar remoção confirmada da aplicação de desconto Pix ao lado de Aplicar no Pix
