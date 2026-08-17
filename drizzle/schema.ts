@@ -152,6 +152,23 @@ export type SiteDocument = typeof siteDocuments.$inferSelect;
 export type InsertSiteDocument = typeof siteDocuments.$inferInsert;
 
 /**
+ * Biblioteca global do Guia da Maria, compartilhada por todos os configuradores.
+ * O rascunho permite edição segura no painel antes da publicação para o site.
+ */
+export const siteMariaGuideSettings = mysqlTable("siteMariaGuideSettings", {
+  id: int("id").primaryKey().notNull(),
+  draftContent: longtext("draftContent"),
+  publishedContent: longtext("publishedContent"),
+  isPublished: boolean("isPublished").notNull().default(true),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SiteMariaGuideSettings = typeof siteMariaGuideSettings.$inferSelect;
+export type InsertSiteMariaGuideSettings = typeof siteMariaGuideSettings.$inferInsert;
+
+/**
  * Segments table - segmentos de negócio
  */
 export const segments = mysqlTable("segments", {

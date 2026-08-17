@@ -2901,3 +2901,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar Configurações do site > Informações do rodapé para administrar textos, links e documentos públicos
 - [x] Validar visualmente a Central de documentação pública com cards, links individuais e rodapé carregados
 - [x] Confirmar visualmente que Termos e Condições abre em página própria sem alterar o modal do configurador
+- [x] Substituir os cards de diferenciais do configurador pelo Guia da Maria global em todos os produtos
+- [x] Criar estrutura de conteúdo administrável para impressão, materiais, acabamentos e entrega do Guia da Maria
+- [x] Organizar o Guia da Maria com estética técnica rosa/preto, painéis expansíveis e ilustrações reutilizáveis
+- [x] Validar que o Guia da Maria não interfere em preço, carrinho, checkout ou modal de documentos
+- [x] Validar visualmente em desktop a inserção do Guia da Maria abaixo do configurador da Lona Impressa
+- [x] Validar a navegação entre os cards do Guia da Maria e a leitura técnica do conteúdo de impressão
+- [x] Validar a aba Material com categorias, itens e exemplo técnico reutilizável de lona com ilhós
