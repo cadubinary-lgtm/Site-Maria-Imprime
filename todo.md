@@ -2886,3 +2886,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aumentar efetivamente a miniatura administrativa e salvar checkpoint específico
 - [x] Remover os sublinhados das mensagens de pendência no configurador de produto
 - [x] Adicionar cards de seleção Pix e cartão com preço consistente até carrinho e checkout
+- [x] Corrigir chaves únicas na lista de itens do CartSidePanel
