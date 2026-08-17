@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const productDetailPath = resolve(process.cwd(), "client/src/pages/ecommerce/ProductDetail.tsx");
 const cartPanelPath = resolve(process.cwd(), "client/src/components/CartSidePanel.tsx");
+const appPath = resolve(process.cwd(), "client/src/App.tsx");
 
 describe("atualização otimista do carrinho", () => {
   it("abre o carrinho e atualiza item e contador antes da confirmação da rede", () => {
@@ -39,5 +40,14 @@ describe("atualização otimista do carrinho", () => {
 
     expect(source).toContain("cartItems.map((item, index) => {");
     expect(source).toContain('key={`cart-item-${item.id}-${item.productId}-${index}`}');
+  });
+
+  it("organiza a página e o painel lateral como colunas flexíveis", () => {
+    const appSource = readFileSync(appPath, "utf8");
+    const panelSource = readFileSync(cartPanelPath, "utf8");
+
+    expect(appSource).toContain('className="min-h-screen flex items-stretch"');
+    expect(appSource).toContain("{isOpen && <CartSidePanel />}");
+    expect(panelSource).toContain("flex-shrink-0 sticky top-0 h-screen");
   });
 });

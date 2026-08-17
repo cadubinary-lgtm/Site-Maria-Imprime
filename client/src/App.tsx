@@ -401,7 +401,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex items-stretch">
       {/* Coluna principal: 70% quando carrinho aberto, 100% quando fechado */}
       <div className={`flex min-w-0 flex-col transition-all duration-300 ${isOpen ? "w-[70%]" : "w-full"}`}>
         <Header />
