@@ -993,7 +993,7 @@ export default function ProductDetail() {
           <span className="text-gray-800 font-medium">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-4 lg:gap-6 items-start">
+        <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[240px_minmax(0,1fr)] xl:gap-6">
 
           {/* ═══════════════════════════════════════════════════════════════
               COLUNA ESQUERDA — Galeria + Info
@@ -1121,6 +1121,8 @@ export default function ProductDetail() {
             </div>
           </div>
 
+          <div className="min-w-0 space-y-4">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-5">
           {/* ═══════════════════════════════════════════════════════════════
               COLUNA CENTRAL — Configurador
           ═══════════════════════════════════════════════════════════════ */}
@@ -1819,7 +1821,7 @@ export default function ProductDetail() {
          {/* ═══════════════════════════════════════════════════════════════
              COLUNA DIREITA — Resumo do Pedido
          ═══════════════════════════════════════════════════════════════ */}
-          <div className="sticky top-4 h-fit space-y-4">
+          <div className="h-fit space-y-4 lg:sticky lg:top-4">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
               {/* Header do resumo */}
@@ -2137,12 +2139,14 @@ export default function ProductDetail() {
               </div>
             </div>
 
+            </div>
+
+            <MariaGuide />
           </div>
 
         </div>
-
-        <MariaGuide />
       </div>
+    </div>
     </div>
   );
 }

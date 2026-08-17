@@ -12,5 +12,9 @@ describe("layout do configurador de produto", () => {
     expect(source).not.toContain("COMPANY_DIFFERENTIALS");
     expect(source).toContain("Resumo do pedido");
     expect(source).toContain("Pagamento Seguro");
+    expect(source).toContain('xl:grid-cols-[240px_minmax(0,1fr)]');
+    expect(source).toContain('lg:grid-cols-[minmax(0,1fr)_280px]');
+    expect(source).toContain('h-fit space-y-4 lg:sticky lg:top-4');
+    expect(source).toContain("<MariaGuide />");
   });
 });
