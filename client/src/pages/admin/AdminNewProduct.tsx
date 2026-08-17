@@ -58,6 +58,7 @@ export default function AdminNewProduct() {
     specifications: [] as { label: string; value: string }[],
     tags: [] as string[],
     tagPosition: "top-right" as string,
+    cardDescription: "",
   });
 
   const { data: segmentsData } = trpc.segments.getAll.useQuery();
@@ -136,6 +137,7 @@ export default function AdminNewProduct() {
       specifications: createForm.specifications.length > 0 ? JSON.stringify(createForm.specifications) : undefined,
       tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
       tagPosition: createForm.tagPosition || "top-right",
+      cardDescription: createForm.cardDescription.trim(),
     };
   }, [createForm, createLogistics]);
 
@@ -400,6 +402,19 @@ export default function AdminNewProduct() {
                           </Select>
                         </div>
                       )}
+                      <div className="mt-4 border-t border-gray-100 pt-4">
+                        <Label htmlFor="create-card-description" className="text-sm font-medium text-gray-700">Descrição do Card</Label>
+                        <p className="mt-1 text-sm text-gray-500">Mensagem exibida abaixo dos preços no card público. Quando preenchida, substitui o aviso automático de urgência.</p>
+                        <Textarea
+                          id="create-card-description"
+                          value={createForm.cardDescription}
+                          onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: event.target.value.slice(0, 180) }))}
+                          placeholder="Ex.: Produção no mesmo dia · taxa de urgência de R$ 20,00/m²"
+                          maxLength={180}
+                          className="mt-3 min-h-20 resize-y"
+                        />
+                        <p className="mt-1 text-right text-xs text-gray-400">{createForm.cardDescription.length}/180</p>
+                      </div>
                     </CardContent>
                   </Card>
                   </div>

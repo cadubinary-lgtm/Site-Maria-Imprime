@@ -152,6 +152,7 @@ export async function getProductsBySegment(segmentId: number) {
         specifications: products.specifications,
         tags: products.tags,
         tagPosition: products.tagPosition,
+        cardDescription: products.cardDescription,
         isActive: products.isActive,
       })
       .from(productSegments)

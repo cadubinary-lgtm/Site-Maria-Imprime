@@ -24,6 +24,7 @@ export type ProductEditSnapshot = {
   specifications: { label: string; value: string }[];
   tags: string[];
   tagPosition: string;
+  cardDescription: string;
 };
 
 export function createProductEditSignature(form: ProductEditSnapshot): string {

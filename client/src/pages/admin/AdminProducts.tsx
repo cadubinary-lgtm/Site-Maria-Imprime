@@ -70,6 +70,7 @@ export default function AdminProducts() {
     specifications: [] as { label: string; value: string }[],
     tags: [] as string[],
     tagPosition: "top-right" as string,
+    cardDescription: "",
   });
   const lastCommittedEditFormRef = useRef<typeof editForm | null>(null);
   const [undoEditForm, setUndoEditForm] = useState<typeof editForm | null>(null);
@@ -240,6 +241,7 @@ export default function AdminProducts() {
         try { return product.tags ? JSON.parse(product.tags) : []; } catch { return []; }
       })(),
       tagPosition: product.tagPosition || "top-right",
+      cardDescription: product.cardDescription || "",
     }));
   };
 
@@ -387,6 +389,7 @@ export default function AdminProducts() {
         specifications: (editForm as any).specifications?.length > 0 ? JSON.stringify((editForm as any).specifications) : undefined,
         tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
         tagPosition: (editForm as any).tagPosition || "top-right",
+        cardDescription: (editForm as any).cardDescription?.trim() || "",
       });
       await updateSegmentsMutation.mutateAsync({
         productId: editingId,
@@ -918,6 +921,19 @@ export default function AdminProducts() {
                                   </Select>
                                 </div>
                               )}
+                              <div className="mt-4 border-t border-gray-100 pt-4">
+                                <Label htmlFor="edit-card-description" className="text-sm font-medium text-gray-700">Descrição do Card</Label>
+                                <p className="mt-1 text-sm text-gray-500">Mensagem exibida abaixo dos preços no card público. Quando preenchida, substitui o aviso automático de urgência.</p>
+                                <Textarea
+                                  id="edit-card-description"
+                                  value={(editForm as any).cardDescription || ""}
+                                  onChange={(event) => setEditForm((prev) => ({ ...prev, cardDescription: event.target.value.slice(0, 180) } as any))}
+                                  placeholder="Ex.: Produção no mesmo dia · taxa de urgência de R$ 20,00/m²"
+                                  maxLength={180}
+                                  className="mt-3 min-h-20 resize-y"
+                                />
+                                <p className="mt-1 text-right text-xs text-gray-400">{((editForm as any).cardDescription || "").length}/180</p>
+                              </div>
                             </CardContent>
                           </Card>
 
