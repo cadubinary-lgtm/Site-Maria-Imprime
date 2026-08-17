@@ -1,5 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +64,11 @@ const getInitialCreateForm = () => ({
 });
 
 export default function AdminNewProduct() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const duplicateProductId = useMemo(() => {
+    const productId = Number(new URLSearchParams(location.split("?")[1] || "").get("duplicar"));
+    return Number.isInteger(productId) && productId > 0 ? productId : null;
+  }, [location]);
 
   const [createDeliveryOptions, setCreateDeliveryOptions] = useState<DeliveryOptionData[]>([]);
   const [autoCreatedProductId, setAutoCreatedProductId] = useState<number | null>(null);
@@ -75,11 +79,24 @@ export default function AdminNewProduct() {
   const [isDiscardDraftDialogOpen, setIsDiscardDraftDialogOpen] = useState(false);
   const isAutoSaveInFlightRef = useRef(false);
   const autoSaveTimerRef = useRef<number | null>(null);
+  const duplicatedProductIdRef = useRef<number | null>(null);
   const [createLogistics, setCreateLogistics] = useState(getInitialCreateLogistics);
   const [createForm, setCreateForm] = useState(getInitialCreateForm);
 
   const { data: segmentsData } = trpc.segments.getAll.useQuery();
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
+  const { data: duplicateSourceProduct, isLoading: isDuplicateSourceLoading } = trpc.products.getById.useQuery(
+    { id: duplicateProductId || 0 },
+    { enabled: duplicateProductId !== null },
+  );
+  const { data: duplicateSourceSegments, isLoading: isDuplicateSegmentsLoading } = trpc.productSegments.getProductSegments.useQuery(
+    duplicateProductId || 0,
+    { enabled: duplicateProductId !== null },
+  );
+  const { data: duplicateSourceDeliveryOptions, isLoading: isDuplicateDeliveryOptionsLoading } = trpc.deliveryOptions.getByProduct.useQuery(
+    { productId: duplicateProductId || 0 },
+    { enabled: duplicateProductId !== null },
+  );
 
   const createProductMutation = trpc.admin.createProduct.useMutation();
   const updateProductMutation = trpc.admin.updateProduct.useMutation();
@@ -88,6 +105,7 @@ export default function AdminNewProduct() {
   const utils = trpc.useUtils();
 
   useEffect(() => {
+    if (duplicateProductId !== null) return;
     const rawDraft = window.localStorage.getItem("maria-imprime-new-product-autosave");
     if (!rawDraft) return;
     try {
@@ -102,7 +120,89 @@ export default function AdminNewProduct() {
     } catch {
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
     }
-  }, []);
+  }, [duplicateProductId]);
+
+  useEffect(() => {
+    if (
+      duplicateProductId === null
+      || duplicatedProductIdRef.current === duplicateProductId
+      || isDuplicateSourceLoading
+      || isDuplicateSegmentsLoading
+      || isDuplicateDeliveryOptionsLoading
+      || !duplicateSourceProduct
+    ) return;
+
+    const parseJsonArray = <T,>(value: string | null | undefined, fallback: T[]) => {
+      try {
+        const parsed = value ? JSON.parse(value) : fallback;
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+    const toInputValue = (value: unknown) => value === null || value === undefined ? "" : String(value);
+    const source = duplicateSourceProduct as any;
+    const sourceSegmentIds = (duplicateSourceSegments || []).map((segment: any) => segment.id);
+    const sourceDeliveryOptions = (duplicateSourceDeliveryOptions || []).map((option: any, index: number) => ({
+      name: option.name,
+      daysToDeliver: Number(option.daysToDeliver),
+      pricePerM2: Number(option.pricePerM2),
+      isActive: Boolean(option.isActive),
+      order: index,
+    }));
+    const sourceAllowedCarrierIds = parseJsonArray<number>(source.allowedCarriers, []).filter(Number.isFinite);
+    const duplicatedForm = {
+      ...getInitialCreateForm(),
+      name: `Cópia de ${source.name}`,
+      description: source.description || "",
+      price: toInputValue(source.price),
+      pixPrice: toInputValue(source.pixPrice ?? source.price),
+      cardPrice: toInputValue(source.cardPrice ?? source.price),
+      resellerPrice: toInputValue(source.resellerPrice),
+      segment: source.segment || "geral",
+      imageUrl: source.imageUrl || "",
+      imageKey: source.imageKey || "",
+      galleryUrls: parseJsonArray<string>(source.galleryUrls, []),
+      calculationType: source.calculationType || "unidade",
+      pricePerM2: toInputValue(source.pricePerM2),
+      pixPricePerM2: toInputValue(source.pixPricePerM2 ?? source.pricePerM2),
+      cardPricePerM2: toInputValue(source.cardPricePerM2 ?? source.pricePerM2),
+      resellerPricePerM2: toInputValue(source.resellerPricePerM2),
+      minWidth: toInputValue(source.minWidth),
+      maxWidth: toInputValue(source.maxWidth),
+      minHeight: toInputValue(source.minHeight),
+      maxHeight: toInputValue(source.maxHeight),
+      segmentIds: sourceSegmentIds,
+      specifications: parseJsonArray<{ label: string; value: string }>(source.specifications, []),
+      tags: parseJsonArray<string>(source.tags, []),
+      tagPosition: source.tagPosition || "top-right",
+      cardDescription: source.cardDescription || "",
+    };
+    const duplicatedLogistics = {
+      weight: toInputValue(source.weight),
+      width: toInputValue(source.width),
+      height: toInputValue(source.height),
+      length: toInputValue(source.length),
+      allowedCarrierIds: sourceAllowedCarrierIds,
+    };
+
+    duplicatedProductIdRef.current = duplicateProductId;
+    setCreateForm(duplicatedForm);
+    setCreateLogistics(duplicatedLogistics);
+    setCreateDeliveryOptions(sourceDeliveryOptions);
+    setAutoCreatedProductId(null);
+    setLastSyncedSignature("");
+    setAutoSaveState("waiting");
+    setDraftResetVersion((version) => version + 1);
+    window.localStorage.removeItem("maria-imprime-new-product-autosave");
+    toast.success("Produto pronto para duplicação", {
+      description: "Revise os dados e clique em Criar produto para confirmar o novo cadastro.",
+      position: "top-right",
+      duration: 3500,
+      id: `product-duplicate-ready-${duplicateProductId}`,
+    });
+    navigate("/admin/novo-produto", { replace: true });
+  }, [duplicateProductId, duplicateSourceDeliveryOptions, duplicateSourceProduct, duplicateSourceSegments, isDuplicateDeliveryOptionsLoading, isDuplicateSegmentsLoading, isDuplicateSourceLoading, navigate]);
 
   const handleCreateSegmentsChange = useCallback((segmentIds: number[]) => {
     setCreateForm((prev) => ({

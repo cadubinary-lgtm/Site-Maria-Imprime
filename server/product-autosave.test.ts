@@ -54,4 +54,20 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("setCreateDeliveryOptions(initialDeliveryOptions)");
     expect(source).toContain('setAutoSaveState("idle")');
   });
+
+  it("preenche Novo Produto ao duplicar um item existente, sem cadastrá-lo automaticamente", () => {
+    const newProductSource = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
+    const productsSource = readFileSync(resolve(root, "client/src/pages/admin/AdminProducts.tsx"), "utf8");
+
+    expect(productsSource).toContain('navigate(`/admin/novo-produto?duplicar=${product.id}`)');
+    expect(productsSource).toContain("Duplicar");
+    expect(newProductSource).toContain("duplicateProductId");
+    expect(newProductSource).toContain("trpc.products.getById.useQuery");
+    expect(newProductSource).toContain("trpc.productSegments.getProductSegments.useQuery");
+    expect(newProductSource).toContain("trpc.deliveryOptions.getByProduct.useQuery");
+    expect(newProductSource).toContain("name: `Cópia de ${source.name}`");
+    expect(newProductSource).toContain("setAutoCreatedProductId(null)");
+    expect(newProductSource).toContain("Produto pronto para duplicação");
+    expect(newProductSource).toContain('navigate("/admin/novo-produto", { replace: true })');
+  });
 });

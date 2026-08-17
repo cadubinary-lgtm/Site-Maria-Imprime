@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Edit2, Trash2, Plus, Search, X, Package } from "lucide-react";
+import { ArrowLeft, Loader2, Edit2, Trash2, Plus, Search, X, Package, Copy } from "lucide-react";
 import { formatProductPrice } from "@/lib/productPrice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -737,6 +737,14 @@ export default function AdminProducts() {
 
                   {/* Actions */}
                   <div className="flex gap-2 justify-end md:col-span-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/admin/novo-produto?duplicar=${product.id}`)}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Duplicar
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => startQuickEdit(product)}>
                       <Edit2 className="w-4 h-4 mr-2" />
                       Preço rápido
