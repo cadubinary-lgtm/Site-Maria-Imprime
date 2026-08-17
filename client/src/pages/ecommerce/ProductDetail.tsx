@@ -12,14 +12,14 @@ import {
   Package, ChevronDown, ChevronUp, Link2, Search,
   ShoppingCart, FileText, MessageCircle,
   ShieldCheck, Droplets, Scissors, LayoutGrid,
-  Truck, CreditCard,
-  Home, Clock, Tag, ThumbsUp,
+  Truck, CreditCard, Clock,
   Store, Zap, Lightbulb,
   AlertTriangle, CheckSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TermsAcceptance } from "@/components/TermsAcceptance";
+import { MariaGuide } from "@/components/products/MariaGuide";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
@@ -59,13 +59,6 @@ const PRODUCT_FEATURES = [
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
   { Icon: Scissors,   bg: "bg-orange-50", color: "text-orange-600", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
   { Icon: LayoutGrid, bg: "bg-orange-50", color: "text-orange-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
-];
-
-const FOOTER_BADGES = [
-  { Icon: Home,     bg: "bg-orange-50", color: "text-orange-500", label: "Qualidade garantida",      desc: "Impressão de alta definição" },
-  { Icon: Clock,    bg: "bg-orange-50", color: "text-orange-500", label: "Melhor prazo do mercado",  desc: "Produção rápida e eficiente" },
-  { Icon: Tag,      bg: "bg-orange-50", color: "text-orange-500", label: "Preço justo",              desc: "Melhor custo-benefício" },
-  { Icon: ThumbsUp, bg: "bg-orange-50", color: "text-orange-500", label: "Satisfação garantida",     desc: "Ou seu dinheiro de volta" },
 ];
 
 // ─── Utilitários de data/prazo ─────────────────────────────────────────────
@@ -1821,18 +1814,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Footer badges */}
-            <div className="grid grid-cols-4 gap-3">
-              {FOOTER_BADGES.map(({ Icon, bg, color, label, desc }) => (
-                <div key={label} className="bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm">
-                  <div className={`w-10 h-10 ${bg} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                    <Icon className={`w-5 h-5 ${color}`} />
-                  </div>
-                  <p className="text-xs font-semibold text-gray-800 leading-tight">{label}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-tight">{desc}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
          {/* ═══════════════════════════════════════════════════════════════
@@ -2159,6 +2140,8 @@ export default function ProductDetail() {
           </div>
 
         </div>
+
+        <MariaGuide />
       </div>
     </div>
   );

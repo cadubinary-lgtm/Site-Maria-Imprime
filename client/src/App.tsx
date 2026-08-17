@@ -63,6 +63,7 @@ import AdminOS from "./pages/admin/AdminOS";
 import AdminOSPrint from "./pages/admin/AdminOSPrint";
 import AdminCompanySettings from "./pages/admin/AdminCompanySettings";
 import AdminFooterInformation from "./pages/admin/AdminFooterInformation";
+import AdminMariaGuide from "./pages/admin/AdminMariaGuide";
 import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
 import ClientsManager from "./pages/admin/ClientsManager";
@@ -173,6 +174,7 @@ function AdminProtectedRoutesManus() {
   return (
     <Switch>
       <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+      <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
@@ -272,6 +274,7 @@ function AdminProtectedRoutes() {
   return (
     <Switch>
       <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+      <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />

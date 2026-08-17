@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { siteDocuments, siteFooterSettings } from "../drizzle/schema";
+import { siteDocuments, siteFooterSettings, siteMariaGuideSettings } from "../drizzle/schema";
 import { getDb } from "./db";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 
@@ -29,6 +29,49 @@ const documentsInput = z.array(documentInput).min(1).max(30).superRefine((docume
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, "slug"], message: "Cada documento precisa ter um endereço único" });
     }
     slugs.add(document.slug);
+  });
+});
+
+const guideItemInput = z.object({
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(2).max(120),
+  title: z.string().min(1).max(160),
+  description: z.string().min(1).max(1500),
+  bullets: z.array(z.string().min(1).max(160)).max(16),
+  isActive: z.boolean(),
+  illustration: z.enum(["lona-ilhos", "lona-bastao", "adesivo-perfurado", "papel-gramatura", "placa", "laminacao", "meio-corte", "vinco-dobra", "entrega"]).optional(),
+});
+
+const guideCategoryInput = z.object({
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(2).max(120),
+  title: z.string().min(1).max(160),
+  description: z.string().min(1).max(1000),
+  isActive: z.boolean(),
+  items: z.array(guideItemInput).min(1).max(80),
+});
+
+const guideSectionInput = z.object({
+  id: z.enum(["impressao", "material", "acabamento", "entrega"]),
+  title: z.string().min(1).max(120),
+  subtitle: z.string().min(1).max(240),
+  description: z.string().min(1).max(1000),
+  tip: z.string().min(1).max(1000),
+  icon: z.enum(["printer", "layers", "crop", "truck", "sparkles", "package"]),
+  isActive: z.boolean(),
+  categories: z.array(guideCategoryInput).min(1).max(20),
+});
+
+const mariaGuideInput = z.object({
+  eyebrow: z.string().min(1).max(80),
+  title: z.string().min(1).max(180),
+  description: z.string().min(1).max(700),
+  bottomNoteTitle: z.string().min(1).max(160),
+  bottomNote: z.string().min(1).max(1000),
+  sections: z.array(guideSectionInput).length(4),
+}).superRefine((guide, ctx) => {
+  const seenIds = new Set<string>();
+  guide.sections.forEach((section, sectionIndex) => {
+    if (seenIds.has(section.id)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["sections", sectionIndex, "id"], message: "Cada card principal deve ter um identificador único" });
+    seenIds.add(section.id);
   });
 });
 
@@ -98,5 +141,40 @@ export const siteContentRouter = router({
       });
     }
     return { success: true, saved: input.length } as const;
+  }),
+
+  getPublicMariaGuide: publicProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const [settings] = await db.select({ publishedContent: siteMariaGuideSettings.publishedContent, publishedAt: siteMariaGuideSettings.publishedAt })
+      .from(siteMariaGuideSettings).where(eq(siteMariaGuideSettings.id, 1)).limit(1);
+    return settings ?? null;
+  }),
+
+  getAdminMariaGuide: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const [settings] = await db.select().from(siteMariaGuideSettings).where(eq(siteMariaGuideSettings.id, 1)).limit(1);
+    return settings ?? null;
+  }),
+
+  saveMariaGuideDraft: adminProcedure.input(mariaGuideInput).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const draftContent = JSON.stringify(input);
+    const [existing] = await db.select({ id: siteMariaGuideSettings.id }).from(siteMariaGuideSettings).where(eq(siteMariaGuideSettings.id, 1)).limit(1);
+    if (existing) await db.update(siteMariaGuideSettings).set({ draftContent }).where(eq(siteMariaGuideSettings.id, 1));
+    else await db.insert(siteMariaGuideSettings).values({ id: 1, draftContent, isPublished: true });
+    return { success: true } as const;
+  }),
+
+  publishMariaGuide: adminProcedure.mutation(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const [settings] = await db.select().from(siteMariaGuideSettings).where(eq(siteMariaGuideSettings.id, 1)).limit(1);
+    if (!settings?.draftContent) throw new Error("Salve um rascunho do Guia da Maria antes de publicar");
+    const publishedAt = new Date();
+    await db.update(siteMariaGuideSettings).set({ publishedContent: settings.draftContent, isPublished: true, publishedAt }).where(eq(siteMariaGuideSettings.id, 1));
+    return { success: true, publishedAt } as const;
   }),
 });
