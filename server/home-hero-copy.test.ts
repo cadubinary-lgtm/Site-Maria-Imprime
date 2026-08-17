@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 const heroSectionPath = resolve(process.cwd(), "client/src/components/home/HeroSection.tsx");
 const prePrintChecklistPath = resolve(process.cwd(), "client/src/components/home/PrePrintChecklist.tsx");
 const publicHomePath = resolve(process.cwd(), "client/src/pages/public/Home.tsx");
+const featuredProductsPath = resolve(process.cwd(), "client/src/components/home/FeaturedProducts.tsx");
+const faqSupportPath = resolve(process.cwd(), "client/src/components/home/FAQSupport.tsx");
+const howItWorksPath = resolve(process.cwd(), "client/src/components/home/HowItWorks.tsx");
+const homeActionStylesPath = resolve(process.cwd(), "client/src/lib/homeActionStyles.ts");
 
 describe("conteúdo do banner principal", () => {
   it("mantém a chamada Pede pra Maria em uma segunda linha", () => {
@@ -59,5 +63,22 @@ describe("conteúdo do banner principal", () => {
     expect(source).not.toContain("<Testimonials />");
     expect(source).toContain("<PrePrintChecklist />");
     expect(source).toContain("<FAQSupport />");
+  });
+
+  it("padroniza os botões principais e secundários da página inicial", () => {
+    const styles = readFileSync(homeActionStylesPath, "utf8");
+    const featuredProducts = readFileSync(featuredProductsPath, "utf8");
+    const faqSupport = readFileSync(faqSupportPath, "utf8");
+    const howItWorks = readFileSync(howItWorksPath, "utf8");
+
+    expect(styles).toContain("HOME_PRIMARY_ACTION_CLASS");
+    expect(styles).toContain("HOME_SECONDARY_ACTION_CLASS");
+    expect(styles).toContain("rounded-full");
+    expect(faqSupport).toContain("HOME_PRIMARY_ACTION_CLASS");
+    expect(faqSupport).toContain("Falar com a Maria");
+    expect(howItWorks).toContain("HOME_PRIMARY_ACTION_CLASS");
+    expect(howItWorks).toContain("Fazer meu pedido");
+    expect(featuredProducts).toContain("HOME_SECONDARY_ACTION_CLASS");
+    expect(featuredProducts).toContain("Ver todos os produtos");
   });
 });

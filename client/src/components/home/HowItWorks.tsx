@@ -1,5 +1,7 @@
 import { Link } from "wouter";
 
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+
 const steps = [
   {
     number: "/manus-storage/NUMERO1_785a9e70.webp",
@@ -142,7 +144,7 @@ export function HowItWorks() {
         {/* Botão CTA */}
         <div className="flex justify-center mt-6 lg:mt-12">
           <Link href="/catalogo">
-            <button className="bg-[#FF0066] text-white font-bold text-sm lg:text-base px-6 lg:px-10 py-3 lg:py-4 rounded-full shadow-lg shadow-pink-200 transition-all duration-200 hover:bg-[#e0005a] hover:shadow-xl hover:shadow-pink-300 hover:-translate-y-0.5 active:scale-95">
+            <button className={`${HOME_PRIMARY_ACTION_CLASS} px-7 sm:px-8`}>
               Fazer meu pedido
             </button>
           </Link>

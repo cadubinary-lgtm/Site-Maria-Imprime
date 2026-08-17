@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { PublicProductCard } from "@/components/products/PublicProductCard";
+import { HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 export function FeaturedProducts() {
   const { data: products, isLoading } = trpc.products.getAll.useQuery();
@@ -39,8 +40,8 @@ export function FeaturedProducts() {
 
         <div className="text-center">
           <Link href="/catalogo">
-            <Button size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-50 rounded-full px-8 font-semibold">
-              Ver todos os produtos →
+            <Button size="lg" variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} px-7 sm:px-8`}>
+              Ver todos os produtos <span aria-hidden>→</span>
             </Button>
           </Link>
         </div>
