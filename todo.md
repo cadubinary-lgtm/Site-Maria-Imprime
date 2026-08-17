@@ -2876,3 +2876,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar Limpar imagens na duplicação e destacar o produto recém-criado na listagem
 - [x] Reorganizar card administrativo com imagem, descrição e preços Pix, cartão e revendedor visíveis
 - [x] Permitir recolher Preço rápido ao clicar novamente na mesma ação
+- [x] Exibir a imagem completa dos produtos na página Todos os Produtos sem corte
