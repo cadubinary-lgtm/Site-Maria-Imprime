@@ -46,6 +46,7 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("compact = false");
     expect(guide).toContain("grid-cols-2 md:grid-cols-4");
     expect(guide).toContain("responsivePanelGridClass");
+    expect(guide).toContain('panelSpacingClass = compact ? "mt-1.5 gap-1.5"');
     expect(guide).toContain("maria-guide-impressao");
     expect(guide).toContain("maria-guide-material");
     expect(guide).toContain("maria-guide-acabamento");
@@ -58,7 +59,7 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("maria-material-${category.id}");
     expect(guide).toContain("openMaterialId === category.id &&");
     expect(guide).toContain("mg-top-card");
-    expect(guide).toContain("min-h-[64px]");
+    expect(guide).toContain("min-h-[52px]");
     expect(guide).toContain("mg-top-subtitle");
     expect(guide).toContain("line-clamp-2");
     expect(guide).toContain("min-h-[104px]");

@@ -2954,3 +2954,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Limitar os subtítulos dos cards superiores a duas linhas com tipografia menor e legível
 - [x] Validar visualmente que os quatro cards permanecem organizados e interativos
 - [x] Confirmar por estilos computados que os quatro cards têm 74px de altura e subtítulos limitados a duas linhas
+- [x] Reduzir novamente a altura mínima e o preenchimento vertical dos quatro cards superiores compactos
+- [x] Validar que títulos, ícones e subtítulos em duas linhas permanecem legíveis após a redução
+- [x] Confirmar por estilos computados que os quatro cards agora têm 67px de altura com subtítulos em duas linhas
+- [x] Reduzir o espaço vertical entre a linha de cards superiores e os painéis técnicos do Guia da Maria
+- [x] Validar que a aproximação não sobrepõe conteúdos nem altera as interações do guia
