@@ -746,9 +746,9 @@ export default function AdminProducts() {
                   </div>
 
                   {/* Product Image */}
-                  <div className="flex h-20 w-28 items-center justify-center rounded-lg bg-gray-50 p-1">
+                  <div className="flex aspect-square w-16 shrink-0 items-center justify-center rounded-lg bg-gray-50">
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="max-h-full max-w-full rounded-md object-contain" />
+                      <img src={product.imageUrl} alt={product.name} className="h-full w-full rounded-md object-contain" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-200">
                         <span className="text-gray-400">Sem imagem</span>
