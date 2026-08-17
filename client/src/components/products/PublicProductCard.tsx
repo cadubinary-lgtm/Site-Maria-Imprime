@@ -20,6 +20,7 @@ type ProductCardData = {
   specifications?: string | null;
   tags?: string | null;
   tagPosition?: string | null;
+  cardDescription?: string | null;
   price: string | number;
   pixPrice?: string | number | null;
   cardPrice?: string | number | null;
@@ -72,6 +73,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         option.isActive !== false && Number(option.daysToDeliver) === 0 && Number(option.pricePerM2) > 0
       )
     : null;
+  const cardDescription = product.cardDescription?.trim();
 
   return (
     <Link href={`/produto/${product.id}`} className="group block">
@@ -127,10 +129,10 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           )}
         </div>
 
-        {sameDayUrgency && (
+        {(cardDescription || sameDayUrgency) && (
           <div className="mt-2 flex flex-nowrap items-center gap-1 whitespace-nowrap text-[9px] font-semibold leading-none tracking-[-0.015em] text-pink-700">
             <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span>Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency.pricePerM2), "/m²")}</span>
+            <span>{cardDescription || `Produção no mesmo dia · taxa de urgência de ${formatCurrency(Number(sameDayUrgency?.pricePerM2), "/m²")}`}</span>
           </div>
         )}
 

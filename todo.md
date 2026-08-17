@@ -2866,3 +2866,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter o aviso de produção no mesmo dia e taxa de urgência em uma única linha nos cards públicos
 - [x] Aplicar e validar o hover independente no botão Ver opções dos cards públicos
 - [x] Reorganizar foto principal e até seis fotos adicionais em Novo Produto e Editar Produto
+- [x] Adicionar Descrição do Card editável abaixo de Tags do Produto e exibi-la nos cards públicos

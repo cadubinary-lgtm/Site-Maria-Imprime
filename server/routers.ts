@@ -303,6 +303,7 @@ export const appRouter = router({
         specifications: z.string().optional(), // JSON array de { label, value }
         tags: z.string().optional(), // JSON array de tags
         tagPosition: z.string().optional(), // Posição das tags no card
+        cardDescription: z.string().max(180).optional(), // Texto comercial abaixo dos preços no card
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -342,6 +343,7 @@ export const appRouter = router({
             specifications: input.specifications || null,
             tags: input.tags || null,
             tagPosition: input.tagPosition || "top-right",
+            cardDescription: input.cardDescription?.trim() || null,
             isActive: true,
           } as any);
           
@@ -553,6 +555,7 @@ export const appRouter = router({
         specifications: z.string().optional(), // JSON array de { label, value }
         tags: z.string().optional(), // JSON array de tags
         tagPosition: z.string().optional(), // Posição das tags no card
+        cardDescription: z.string().max(180).optional(), // Texto comercial abaixo dos preços no card
         // Campos de logística
         weight: z.number().optional(),
         logisticsWidth: z.number().optional(),
@@ -590,6 +593,7 @@ export const appRouter = router({
         if (input.specifications !== undefined) updateData.specifications = input.specifications || null;
         if (input.tags !== undefined) updateData.tags = input.tags || null;
         if (input.tagPosition !== undefined) updateData.tagPosition = input.tagPosition || "top-right";
+        if (input.cardDescription !== undefined) updateData.cardDescription = input.cardDescription.trim() || null;
         // Campos de logística
         if (input.weight !== undefined) updateData.weight = input.weight;
         if (input.logisticsWidth !== undefined) updateData.width = input.logisticsWidth;
