@@ -734,7 +734,7 @@ export default function AdminProducts() {
                 </span>
               )}
               <CardContent className="px-4 py-1.5">
-                <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[auto_7rem_minmax(0,1fr)_auto]">
+                <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[auto_6rem_minmax(0,1fr)_auto]">
                   {/* Checkbox */}
                   <div className="flex items-center">
                     <input
@@ -746,7 +746,7 @@ export default function AdminProducts() {
                   </div>
 
                   {/* Product Image */}
-                  <div className="flex aspect-square w-16 shrink-0 items-center justify-center rounded-lg bg-gray-50">
+                  <div className="flex aspect-square w-24 shrink-0 items-center justify-center rounded-lg bg-gray-50">
                     {product.imageUrl ? (
                       <img src={product.imageUrl} alt={product.name} className="h-full w-full rounded-md object-contain" />
                     ) : (

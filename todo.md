@@ -2883,3 +2883,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir o espaço interno e exibir a imagem completa nos cards administrativos de Produtos
 - [x] Reduzir em aproximadamente 60% os espaços verticais superior e inferior dos cards administrativos
 - [x] Definir miniaturas quadradas 1:1 nos cards administrativos de Produtos
+- [x] Aumentar efetivamente a miniatura administrativa e salvar checkpoint específico
