@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const heroSectionPath = resolve(process.cwd(), "client/src/components/home/HeroSection.tsx");
 const prePrintChecklistPath = resolve(process.cwd(), "client/src/components/home/PrePrintChecklist.tsx");
+const publicHomePath = resolve(process.cwd(), "client/src/pages/public/Home.tsx");
 
 describe("conteúdo do banner principal", () => {
   it("mantém a chamada Pede pra Maria em uma segunda linha", () => {
@@ -49,5 +50,14 @@ describe("conteúdo do banner principal", () => {
 
     expect(source).toContain("Resolução mínima de 300 DPI");
     expect(source).not.toContain("Resolução mínima de 150 DPI");
+  });
+
+  it("não renderiza a seção Como cuidamos do seu pedido na página inicial", () => {
+    const source = readFileSync(publicHomePath, "utf8");
+
+    expect(source).not.toContain('import { Testimonials } from "@/components/home/Testimonials"');
+    expect(source).not.toContain("<Testimonials />");
+    expect(source).toContain("<PrePrintChecklist />");
+    expect(source).toContain("<FAQSupport />");
   });
 });
