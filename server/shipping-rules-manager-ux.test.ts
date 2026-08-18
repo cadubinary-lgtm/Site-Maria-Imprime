@@ -21,4 +21,10 @@ describe('regras locais de entrega', () => {
   it('mantém a ação de edição identificada pelo bairro', () => {
     expect(source).toContain('aria-label={`Editar regra de entrega ${rule.neighborhood}`}');
   });
+
+  it('usa rosa em CTAs e destaques administrativos sem alterar as cores de modalidade', () => {
+    expect(source).toContain('bg-pink-600 hover:bg-pink-700');
+    expect(source).toContain('text-pink-600');
+    expect(source).toContain("text-orange-500");
+  });
 });
