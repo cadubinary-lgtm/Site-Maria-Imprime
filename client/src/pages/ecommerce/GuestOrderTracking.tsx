@@ -2,11 +2,12 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useRoute, Link } from "wouter";
 import {
-  Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home, X, ZoomIn,
+  Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, Home, X, ZoomIn, AlertCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const STEPS_ENTREGA = [
   { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
@@ -80,18 +81,31 @@ export default function GuestOrderTracking() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando acompanhamento do pedido" />
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
-        <p className="text-gray-600">Link de acompanhamento inválido ou expirado.</p>
-        <Link href="/">
-          <Button>Voltar ao Início</Button>
-        </Link>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 text-center">
+        <div className="w-full max-w-md rounded-2xl border border-pink-100 bg-white p-7 shadow-sm sm:p-9">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-pink-100">
+            <AlertCircle className="h-7 w-7 text-pink-600" aria-hidden="true" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900">Não foi possível localizar este pedido</h1>
+          <p role="alert" className="mt-2 text-sm leading-6 text-gray-600">
+            Link de acompanhamento inválido ou expirado. Confira se você acessou o link mais recente enviado pela Maria Imprime.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link href="/catalogo">
+              <Button variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} w-full sm:w-auto`}>Explorar catálogo</Button>
+            </Link>
+            <Link href="/">
+              <Button className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}>Voltar ao Início</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -105,8 +119,8 @@ export default function GuestOrderTracking() {
       <div className="max-w-3xl mx-auto px-4">
         {/* Cabeçalho */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
-            <Package className="w-8 h-8 text-orange-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-100 rounded-full mb-4">
+            <Package className="w-8 h-8 text-pink-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Acompanhamento do Pedido</h1>
           <p className="text-gray-500 mt-1">
@@ -118,21 +132,21 @@ export default function GuestOrderTracking() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="w-5 h-5 text-orange-500" />
+              <Clock className="w-5 h-5 text-pink-600" />
               Status do Pedido
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
-              <p className="text-sm text-orange-600 font-medium">Status atual</p>
-              <p className="text-lg font-bold text-orange-700">
+            <div className="mb-6 p-4 bg-pink-50 rounded-lg border border-pink-100" aria-live="polite">
+              <p className="text-sm text-pink-600 font-medium">Status atual</p>
+              <p className="text-lg font-bold text-pink-700">
                 {isCancelled ? "Cancelado" : STATUS_LABELS[order.status] || order.status}
               </p>
             </div>
 
             {/* Timeline */}
             {!isCancelled && (
-              <div className="flex items-center justify-between overflow-x-auto pb-4">
+              <div className="flex items-center justify-between overflow-x-auto pb-4" aria-label="Etapas do pedido">
                 {timelineSteps.map((step, i) => {
                   const Icon = step.icon;
                   const isActive = i <= currentStepIndex;
@@ -142,27 +156,27 @@ export default function GuestOrderTracking() {
                       {i > 0 && (
                         <div
                           className={`absolute top-5 -left-1/2 w-full h-0.5 ${
-                            i <= currentStepIndex ? "bg-orange-400" : "bg-gray-200"
+                            i <= currentStepIndex ? "bg-pink-400" : "bg-gray-200"
                           }`}
                         />
                       )}
                       <div
                         className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                           isCurrent
-                            ? "bg-orange-500 border-orange-500 text-white scale-110 ring-4 ring-orange-100"
+                            ? "bg-pink-600 border-pink-600 text-white scale-110 ring-4 ring-pink-100"
                             : isActive
-                            ? "bg-orange-100 border-orange-400 text-orange-600"
+                            ? "bg-pink-100 border-pink-400 text-pink-600"
                             : "bg-gray-100 border-gray-200 text-gray-400"
                         }`}
                       >
                         {isActive && !isCurrent ? (
-                          <CheckCircle2 className="w-5 h-5 text-orange-500" />
+                          <CheckCircle2 className="w-5 h-5 text-pink-600" />
                         ) : (
                           <Icon className="w-5 h-5" />
                         )}
                       </div>
                       <p className={`text-xs mt-2 text-center leading-tight max-w-[70px] ${
-                        isCurrent ? "font-semibold text-orange-600" : isActive ? "text-orange-500" : "text-gray-400"
+                        isCurrent ? "font-semibold text-pink-600" : isActive ? "text-pink-500" : "text-gray-400"
                       }`}>
                         {step.label}
                       </p>
@@ -179,7 +193,7 @@ export default function GuestOrderTracking() {
                 <div className="space-y-2">
                   {history.map((h: any) => (
                     <div key={h.id} className="flex items-start gap-3 text-sm">
-                      <div className="w-2 h-2 rounded-full bg-orange-400 mt-1.5 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-pink-400 mt-1.5 flex-shrink-0" />
                       <div>
                         <span className="font-medium text-gray-800">{STATUS_LABELS[h.status] || h.status}</span>
                         {h.notes && <span className="text-gray-500"> — {h.notes}</span>}
@@ -197,10 +211,10 @@ export default function GuestOrderTracking() {
 
         {/* ── Prévia da Arte (enviada pela gráfica) ── */}
         {previews.length > 0 && (
-          <Card className="mb-6 border-2 border-orange-200 shadow-sm">
+          <Card className="mb-6 border-2 border-pink-200 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-lg text-orange-800">
-                <ZoomIn className="w-5 h-5 text-orange-600" />
+              <CardTitle className="flex items-center gap-2 text-lg text-pink-800">
+                <ZoomIn className="w-5 h-5 text-pink-600" />
                 Prévia da Arte
               </CardTitle>
             </CardHeader>
@@ -209,11 +223,13 @@ export default function GuestOrderTracking() {
                 A gráfica enviou uma prévia da arte do seu pedido. Clique na imagem para ampliar.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {previews.map((p: any) => (
-                  <div
+                {previews.map((p: any, index: number) => (
+                  <button
+                    type="button"
                     key={p.id}
-                    className="relative group rounded-xl overflow-hidden border border-orange-100 cursor-pointer hover:shadow-md transition-shadow"
+                    className="relative group rounded-xl overflow-hidden border border-pink-100 cursor-pointer text-left hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
                     onClick={() => setLightboxUrl(p.imageUrl)}
+                    aria-label={`Abrir prévia da arte ${index + 1}`}
                   >
                     <img
                       src={p.imageUrl}
@@ -223,19 +239,19 @@ export default function GuestOrderTracking() {
                     {/* Overlay de zoom */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                       <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
-                        <ZoomIn className="w-5 h-5 text-orange-700" />
+                        <ZoomIn className="w-5 h-5 text-pink-700" />
                       </div>
                     </div>
                     {/* Data e observação */}
-                    <div className="px-2 py-1.5 bg-white border-t border-orange-100">
+                    <div className="px-2 py-1.5 bg-white border-t border-pink-100">
                       <p className="text-xs text-gray-500">
                         {new Date(p.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                       {p.notes && (
-                        <p className="text-xs text-orange-700 font-medium truncate">{p.notes}</p>
+                        <p className="text-xs text-pink-700 font-medium truncate">{p.notes}</p>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-3 text-center">
@@ -290,7 +306,7 @@ export default function GuestOrderTracking() {
             )}
             <div className="flex justify-between font-semibold text-base pt-2 border-t">
               <span>Total</span>
-              <span className="text-orange-600">{formatCurrency(order.totalPrice)}</span>
+              <span className="text-pink-600">{formatCurrency(order.totalPrice)}</span>
             </div>
           </CardContent>
         </Card>
@@ -298,12 +314,12 @@ export default function GuestOrderTracking() {
         {/* Ações */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/catalogo">
-            <Button variant="outline" className="w-full sm:w-auto">
+            <Button variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} w-full sm:w-auto`}>
               Continuar Comprando
             </Button>
           </Link>
           <Link href="/cliente/login">
-            <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
+            <Button className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}>
               Criar Conta / Fazer Login
             </Button>
           </Link>
@@ -321,6 +337,7 @@ export default function GuestOrderTracking() {
             <button
               onClick={() => setLightboxUrl(null)}
               className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors"
+              aria-label="Fechar prévia da arte"
             >
               <X className="w-4 h-4" />
             </button>
