@@ -688,7 +688,7 @@ export default function AdminNewProduct() {
               <Card className={PRODUCT_FORM_PANEL.card}>
                 <CardContent className={PRODUCT_FORM_PANEL.content}>
                   <h3 className={`${PRODUCT_FORM_PANEL.title} flex items-center gap-2`}>
-                    <Package className="w-4 h-4 text-orange-500" />
+                    <Package className="w-4 h-4 text-pink-600" aria-hidden="true" />
                     Logística
                   </h3>
                 <div className={PRODUCT_FORM_PANEL.inner}>
