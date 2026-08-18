@@ -233,7 +233,7 @@ export function DeliveryOptionsManager({
           <DialogTrigger asChild>
             <Button
               size="sm"
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-pink-600 hover:bg-pink-700 text-white"
               onClick={() => {
                 setEditingId(null);
                 setFormData({ name: "", daysToDeliver: 5, pricePerM2: 0, isActive: true });
@@ -316,7 +316,7 @@ export function DeliveryOptionsManager({
                 <Button
                   onClick={handleSave}
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-pink-600 hover:bg-pink-700 text-white"
                 >
                   {editingId !== null ? "Atualizar" : "Criar"}
                 </Button>
