@@ -3334,3 +3334,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados das configurações dos Correios
 - [x] Padronizar controles dos Correios na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade das configurações dos Correios
+
+- [x] Revisar controles e estados da gestão de ordens de serviço
+- [x] Padronizar controles de ordens de serviço na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade das ordens de serviço
