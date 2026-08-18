@@ -180,33 +180,36 @@ export default function AdminQuotations() {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
             <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-pink-600" /><div><p className="text-sm font-semibold text-gray-800">Acompanhamento operacional</p><p className="text-xs text-gray-500">Os cards mostram a próxima ação necessária em cada etapa do orçamento.</p></div></div>
             <div className="flex flex-wrap items-center gap-2">
-              {[{ value: "all", label: "Todo período" }, { value: "this_month", label: "Este mês" }, { value: "last_month", label: "Mês passado" }].map((item) => <Button key={item.value} variant={period === item.value ? "default" : "outline"} size="sm" className={period === item.value ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod(item.value as typeof period)}>{item.label}</Button>)}
-              <Button variant={period === "custom" ? "default" : "outline"} size="sm" className={period === "custom" ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod("custom")}>Personalizado</Button>
-              {period === "custom" && <><Input type="date" value={customStartDate} onChange={(event) => setCustomStartDate(event.target.value)} className="h-8 w-36 text-xs" /><Input type="date" value={customEndDate} onChange={(event) => setCustomEndDate(event.target.value)} className="h-8 w-36 text-xs" /></>}
+              {[{ value: "all", label: "Todo período" }, { value: "this_month", label: "Este mês" }, { value: "last_month", label: "Mês passado" }].map((item) => <Button key={item.value} variant={period === item.value ? "default" : "outline"} size="sm" className={period === item.value ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod(item.value as typeof period)} aria-pressed={period === item.value}>{item.label}</Button>)}
+              <Button variant={period === "custom" ? "default" : "outline"} size="sm" className={period === "custom" ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod("custom")} aria-pressed={period === "custom"}>Personalizado</Button>
+              {period === "custom" && <><label htmlFor="quotation-period-start" className="sr-only">Data inicial</label><Input id="quotation-period-start" type="date" value={customStartDate} onChange={(event) => setCustomStartDate(event.target.value)} className="h-8 w-36 text-xs" /><label htmlFor="quotation-period-end" className="sr-only">Data final</label><Input id="quotation-period-end" type="date" value={customEndDate} onChange={(event) => setCustomEndDate(event.target.value)} className="h-8 w-36 text-xs" /></>}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores operacionais de orçamentos" aria-live="polite">
             {operationalCards.map((card) => {
               const Icon = card.icon;
-              return <div key={card.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${OPERATIONAL_CARD_TONES[card.tone]}`} /><p className="text-xs font-medium text-gray-500">{card.label}</p></div><p className={`mt-2 text-2xl font-bold ${OPERATIONAL_CARD_TONES[card.tone]}`}>{card.value}</p><p className="mt-1 text-xs text-gray-400">{card.detail}</p></div>;
+              return <div key={card.label} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${OPERATIONAL_CARD_TONES[card.tone]}`} aria-hidden="true" /><p className="text-xs font-medium text-gray-500">{card.label}</p></div><p className={`mt-2 text-2xl font-bold ${OPERATIONAL_CARD_TONES[card.tone]}`}>{card.value}</p><p className="mt-1 text-xs text-gray-400">{card.detail}</p></div>;
             })}
           </div>
         </div>
       )}
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-3 items-center bg-white p-3 rounded-lg border border-gray-200">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="flex flex-wrap gap-3 items-center bg-white p-3 rounded-lg border border-gray-200">
+          <div className="relative flex-1 min-w-48">
+          <label htmlFor="admin-quotations-search" className="sr-only">Buscar orçamentos</label>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <Input
+            id="admin-quotations-search"
             placeholder="Buscar por número, cliente ou e-mail..."
             className="pl-9 h-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <label htmlFor="admin-quotations-status" className="sr-only">Filtrar por status</label>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-44 h-9">
+          <SelectTrigger id="admin-quotations-status" className="w-44 h-9">
             <SelectValue placeholder="Todos os status" />
           </SelectTrigger>
           <SelectContent>
@@ -221,10 +224,10 @@ export default function AdminQuotations() {
       {/* Tabela */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Carregando orçamentos...</div>
+          <div className="p-8 text-center text-gray-400" role="status">Carregando orçamentos...</div>
         ) : rows.length === 0 ? (
           <div className="p-12 text-center">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
             <p className="text-gray-500 font-medium">Nenhum orçamento encontrado</p>
             <p className="text-gray-400 text-sm mt-1">Crie o primeiro orçamento clicando em "Novo Orçamento"</p>
           </div>
@@ -234,7 +237,7 @@ export default function AdminQuotations() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   {["Nº", "Cliente", "Data", "Validade", "Valor", "Status", "Próximo procedimento", "Ações"].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -278,8 +281,9 @@ export default function AdminQuotations() {
                             className="h-7 w-7 p-0"
                             onClick={() => navigate(`/admin/orcamentos/${row.id}`)}
                             title="Visualizar"
+                            aria-label={`Visualizar orçamento ${row.quotationNumber}`}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                           </Button>
                           {(isDraft || row.status === "em_negociacao") && (
                             <Button
@@ -288,8 +292,9 @@ export default function AdminQuotations() {
                               className="h-7 w-7 p-0"
                               onClick={() => navigate(`/admin/orcamentos/${row.id}/editar`)}
                               title="Editar"
+                              aria-label={`Editar orçamento ${row.quotationNumber}`}
                             >
-                              <Edit className="w-3.5 h-3.5" />
+                              <Edit className="w-3.5 h-3.5" aria-hidden="true" />
                             </Button>
                           )}
                           {isApproved && !alreadyConverted && (
@@ -298,15 +303,16 @@ export default function AdminQuotations() {
                               className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs gap-1"
                               onClick={() => convertToOrder.mutate({ id: row.id })}
                               title="Converter em Pedido"
+                              aria-busy={convertToOrder.isPending}
                             >
-                              <ArrowRight className="w-3 h-3" />
+                              <ArrowRight className="w-3 h-3" aria-hidden="true" />
                               Converter
                             </Button>
                           )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                                <MoreHorizontal className="w-3.5 h-3.5" />
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label={`Mais ações para o orçamento ${row.quotationNumber}`}>
+                                <MoreHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
                               </Button>
                             </DropdownMenuTrigger>
                            <DropdownMenuContent align="end" className="w-44">
