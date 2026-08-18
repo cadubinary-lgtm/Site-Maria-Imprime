@@ -3302,3 +3302,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar exclusões de tipos e opções no gerenciador de variações de produto
 - [x] Substituir confirmações nativas por diálogos acessíveis nas variações de produto
 - [x] Validar exclusões de variações de produto e seus feedbacks
+
+- [x] Revisar o uso visual de laranja na gestão de notas fiscais
+- [x] Padronizar controles e destaques não semânticos das notas fiscais na identidade rosa
+- [x] Validar a consistência visual e acessibilidade das notas fiscais
