@@ -107,7 +107,7 @@ export default function CorreiosSettings() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando configurações dos Correios" />
         </div>
       </AdminLayout>
     );
@@ -120,7 +120,7 @@ export default function CorreiosSettings() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Settings className="w-6 h-6 text-orange-500" />
+              <Settings className="w-6 h-6 text-pink-600" aria-hidden="true" />
               Configurações — Melhor Envio
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -131,9 +131,10 @@ export default function CorreiosSettings() {
             href="https://melhorenvio.com.br/painel/gerenciar/tokens"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-orange-500 hover:underline flex items-center gap-1"
+            className="text-sm text-pink-600 hover:text-pink-700 hover:underline flex items-center gap-1"
+            aria-label="Obter token no Melhor Envio, abre em nova aba"
           >
-            Obter Token <ExternalLink className="w-3 h-3" />
+            Obter Token <ExternalLink className="w-3 h-3" aria-hidden="true" />
           </a>
         </div>
 
@@ -186,6 +187,7 @@ export default function CorreiosSettings() {
               <Switch
                 checked={form.sandbox}
                 onCheckedChange={(v) => setForm(prev => ({ ...prev, sandbox: v }))}
+                aria-label={form.sandbox ? "Desativar modo Sandbox" : "Ativar modo Sandbox"}
               />
               <div>
                 <p className="font-medium">
@@ -251,10 +253,11 @@ export default function CorreiosSettings() {
               onClick={handleTest}
               disabled={testMutation.isPending || !settings?.hasToken}
               className="w-full"
+              aria-busy={testMutation.isPending}
             >
               {testMutation.isPending
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testando...</>
-                : <><CheckCircle className="w-4 h-4 mr-2" /> Testar Conexão</>}
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Testando...</>
+                : <><CheckCircle className="w-4 h-4 mr-2" aria-hidden="true" /> Testar Conexão</>}
             </Button>
           </CardContent>
         </Card>
@@ -302,46 +305,47 @@ export default function CorreiosSettings() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 col-span-2">
-                <Label>Nome / Razão Social</Label>
-                <Input placeholder="Maria Imprime Ltda" value={form.senderName} onChange={set('senderName')} />
+                <Label htmlFor="sender-name">Nome / Razão Social</Label>
+                <Input id="sender-name" placeholder="Maria Imprime Ltda" value={form.senderName} onChange={set('senderName')} />
               </div>
               <div className="space-y-2">
-                <Label>Telefone</Label>
-                <Input placeholder="(11) 99999-9999" value={form.senderPhone} onChange={set('senderPhone')} />
+                <Label htmlFor="sender-phone">Telefone</Label>
+                <Input id="sender-phone" placeholder="(11) 99999-9999" value={form.senderPhone} onChange={set('senderPhone')} />
               </div>
               <div className="space-y-2">
-                <Label>CPF / CNPJ</Label>
-                <Input placeholder="00.000.000/0001-00" value={form.senderDocument} onChange={set('senderDocument')} />
+                <Label htmlFor="sender-document">CPF / CNPJ</Label>
+                <Input id="sender-document" placeholder="00.000.000/0001-00" value={form.senderDocument} onChange={set('senderDocument')} />
               </div>
             </div>
             <Separator />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 col-span-2">
-                <Label>Endereço (Rua/Avenida)</Label>
-                <Input placeholder="Rua das Flores" value={form.senderAddress} onChange={set('senderAddress')} />
+                <Label htmlFor="sender-address">Endereço (Rua/Avenida)</Label>
+                <Input id="sender-address" placeholder="Rua das Flores" value={form.senderAddress} onChange={set('senderAddress')} />
               </div>
               <div className="space-y-2">
-                <Label>Número</Label>
-                <Input placeholder="123" value={form.senderNumber} onChange={set('senderNumber')} />
+                <Label htmlFor="sender-number">Número</Label>
+                <Input id="sender-number" placeholder="123" value={form.senderNumber} onChange={set('senderNumber')} />
               </div>
               <div className="space-y-2">
-                <Label>Complemento</Label>
-                <Input placeholder="Sala 1" value={form.senderComplement} onChange={set('senderComplement')} />
+                <Label htmlFor="sender-complement">Complemento</Label>
+                <Input id="sender-complement" placeholder="Sala 1" value={form.senderComplement} onChange={set('senderComplement')} />
               </div>
               <div className="space-y-2">
-                <Label>Bairro</Label>
-                <Input placeholder="Centro" value={form.senderDistrict} onChange={set('senderDistrict')} />
+                <Label htmlFor="sender-district">Bairro</Label>
+                <Input id="sender-district" placeholder="Centro" value={form.senderDistrict} onChange={set('senderDistrict')} />
               </div>
               <div className="space-y-2">
-                <Label>Cidade</Label>
-                <Input placeholder="São Paulo" value={form.senderCity} onChange={set('senderCity')} />
+                <Label htmlFor="sender-city">Cidade</Label>
+                <Input id="sender-city" placeholder="São Paulo" value={form.senderCity} onChange={set('senderCity')} />
               </div>
               <div className="space-y-2">
-                <Label>Estado (UF)</Label>
+                <Label htmlFor="sender-state">Estado (UF)</Label>
                 <select
+                  id="sender-state"
                   value={form.senderStateAbbr}
                   onChange={set('senderStateAbbr')}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">Selecione</option>
                   {ESTADOS_BR.map(uf => <option key={uf} value={uf}>{uf}</option>)}
@@ -356,11 +360,12 @@ export default function CorreiosSettings() {
           <Button
             onClick={handleSave}
             disabled={saveMutation.isPending}
-            className="bg-orange-500 hover:bg-orange-600 flex-1"
+            className="bg-pink-600 hover:bg-pink-700 flex-1"
+            aria-busy={saveMutation.isPending}
           >
             {saveMutation.isPending
-              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
-              : <><Package className="w-4 h-4 mr-2" /> Salvar Configurações</>}
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Salvando...</>
+              : <><Package className="w-4 h-4 mr-2" aria-hidden="true" /> Salvar Configurações</>}
           </Button>
         </div>
 
