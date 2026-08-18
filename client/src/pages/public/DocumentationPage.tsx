@@ -1,4 +1,5 @@
-import { ArrowLeft, ChevronRight, FileText, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ChevronRight, FileText, Search, ShieldCheck, X } from "lucide-react";
 import { Link, useRoute } from "wouter";
 import { Footer } from "@/components/home/Footer";
 import { trpc } from "@/lib/trpc";
@@ -7,11 +8,21 @@ import { mergeFooterContent, mergePublicDocuments } from "@/lib/siteContent";
 export default function DocumentationPage() {
   const [, params] = useRoute("/documentos/:documentId");
   const requestedId = params?.documentId;
+  const [documentQuery, setDocumentQuery] = useState("");
   const { data: savedDocuments } = trpc.siteContent.getPublicDocuments.useQuery(undefined, { staleTime: 60_000 });
   const { data: savedFooterContent } = trpc.siteContent.getPublicFooter.useQuery(undefined, { staleTime: 60_000 });
   const footerContent = mergeFooterContent(savedFooterContent);
   const documents = mergePublicDocuments(savedDocuments);
   const currentDocument = requestedId ? documents.find((document) => document.slug === requestedId) : null;
+  const normalizedDocumentQuery = documentQuery.trim().toLocaleLowerCase("pt-BR");
+  const filteredDocuments = documents.filter((document) => {
+    if (!normalizedDocumentQuery) return true;
+
+    return [document.title, document.summary]
+      .join(" ")
+      .toLocaleLowerCase("pt-BR")
+      .includes(normalizedDocumentQuery);
+  });
 
   if (requestedId && !currentDocument) {
     return (
@@ -40,15 +51,55 @@ export default function DocumentationPage() {
               <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{footerContent.documentsTitle}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-pink-50 sm:text-base">{footerContent.documentsDescription}</p>
             </section>
-            <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Documentos disponíveis">
-              {documents.map((document) => (
-                <Link key={document.slug} href={`/documentos/${document.slug}`} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-pink-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500">
-                  <FileText className="h-5 w-5 text-pink-600" />
-                  <h2 className="mt-4 text-base font-bold text-slate-900 group-hover:text-pink-600">{document.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{document.summary}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">Ler documento <ChevronRight className="h-4 w-4" /></span>
-                </Link>
-              ))}
+            <section className="mt-8" aria-labelledby="documents-list-title">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 id="documents-list-title" className="text-lg font-bold text-slate-900">Documentos disponíveis</h2>
+                  <p className="mt-1 text-sm text-slate-600">Encontre rapidamente a política ou orientação que você precisa.</p>
+                </div>
+                <div className="relative w-full sm:max-w-xs">
+                  <label htmlFor="document-search" className="sr-only">Buscar documentos</label>
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                  <input
+                    id="document-search"
+                    type="search"
+                    value={documentQuery}
+                    onChange={(event) => setDocumentQuery(event.target.value)}
+                    placeholder="Buscar documentos"
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-10 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                  />
+                  {documentQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setDocumentQuery("")}
+                      className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-pink-50 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+                      aria-label="Limpar busca de documentos"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {filteredDocuments.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite">
+                  {filteredDocuments.map((document) => (
+                    <Link key={document.slug} href={`/documentos/${document.slug}`} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-pink-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500">
+                      <FileText className="h-5 w-5 text-pink-600" />
+                      <h3 className="mt-4 text-base font-bold text-slate-900 group-hover:text-pink-600">{document.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{document.summary}</p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">Ler documento <ChevronRight className="h-4 w-4" /></span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-pink-200 bg-pink-50 px-6 py-10 text-center" role="status" aria-live="polite">
+                  <Search className="mx-auto h-6 w-6 text-pink-600" aria-hidden="true" />
+                  <h3 className="mt-3 font-bold text-slate-900">Nenhum documento encontrado</h3>
+                  <p className="mt-1 text-sm text-slate-600">Tente outro termo ou limpe a busca para ver todos os documentos.</p>
+                  <button type="button" onClick={() => setDocumentQuery("")} className="mt-4 text-sm font-bold text-pink-600 hover:text-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2">Limpar busca</button>
+                </div>
+              )}
             </section>
           </div>
         </main>

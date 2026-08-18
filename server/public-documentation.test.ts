@@ -25,4 +25,16 @@ describe("central pública de documentação", () => {
     expect(terms).toContain("CHECKOUT_DOCUMENTS.map");
     expect(terms).toContain("setDocumentationOpen");
   });
+
+  it("permite localizar documentos por busca com estado vazio orientado", () => {
+    const page = readFileSync(resolve(root, "client/src/pages/public/DocumentationPage.tsx"), "utf8");
+
+    expect(page).toContain('id="document-search"');
+    expect(page).toContain("setDocumentQuery");
+    expect(page).toContain("filteredDocuments");
+    expect(page).toContain('aria-label="Limpar busca de documentos"');
+    expect(page).toContain("Nenhum documento encontrado");
+    expect(page).toContain('role="status"');
+    expect(page).toContain('aria-live="polite"');
+  });
 });
