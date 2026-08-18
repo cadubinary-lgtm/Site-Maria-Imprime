@@ -110,9 +110,11 @@ export default function AdminPreImpressao() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-      </div>
+      <AdminLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando pedidos da pré-impressão" />
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -123,7 +125,7 @@ export default function AdminPreImpressao() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Layers className="w-6 h-6 text-orange-500" />
+              <Layers className="w-6 h-6 text-pink-600" aria-hidden="true" />
               Pré-Impressão
             </h1>
             <p className="text-gray-500 mt-1 text-sm">
@@ -131,8 +133,8 @@ export default function AdminPreImpressao() {
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-            <Layers className="w-4 h-4" />
-            {filtered.length} pedido{filtered.length !== 1 ? "s" : ""}
+            <Layers className="w-4 h-4" aria-hidden="true" />
+            <span aria-live="polite">{filtered.length} pedido{filtered.length !== 1 ? "s" : ""}</span>
           </div>
         </div>
 
@@ -140,8 +142,10 @@ export default function AdminPreImpressao() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <label htmlFor="prepress-search" className="sr-only">Buscar pedidos da pré-impressão</label>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
               <Input
+                id="prepress-search"
                 placeholder="Buscar por número, cliente ou telefone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -152,12 +156,14 @@ export default function AdminPreImpressao() {
               {["todos", "liberado_analise", "arte_final_aprovada"].map((s) => (
                 <div key={s} className="flex items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => setFilterStatus(s)}
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                       filterStatus === s
-                        ? "bg-orange-500 text-white"
+                        ? "bg-pink-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
+                    aria-pressed={filterStatus === s}
                   >
                     {s === "todos" ? "Todos" : PRE_PRODUCTION_STATUS[s]?.label ?? s}
                   </button>
@@ -182,7 +188,7 @@ export default function AdminPreImpressao() {
         {filtered.length === 0 ? (
           <Card>
             <CardContent className="pt-12 pb-12 text-center">
-              <Layers className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <Layers className="w-12 h-12 text-gray-300 mx-auto mb-4" aria-hidden="true" />
               <p className="text-gray-500">Nenhum pedido encontrado</p>
             </CardContent>
           </Card>
@@ -217,7 +223,7 @@ export default function AdminPreImpressao() {
                         <span className="text-xs text-gray-500 whitespace-nowrap">Pré-Impressão:</span>
                         {isAwaitingRelease ? (
                           <Badge className="text-xs border bg-pink-600 text-white border-pink-600 hover:bg-pink-600">
-                            Aguardando liberação
+                            Aguardando Liberação Comercial
                           </Badge>
                         ) : (
                           <Badge className={`text-xs border ${statusCfg?.color}`}>
@@ -229,12 +235,12 @@ export default function AdminPreImpressao() {
                       {/* Status de pré-impressão é gerenciado por item na tela de detalhes */}
 
                       {/* Link para detalhes */}
-                      <Link href={`/admin/pedidos/${order.orderId ?? order.id}`}>
-                        <Button variant="outline" size="sm" className="gap-1 h-8 text-xs">
+                      <Button variant="outline" size="sm" className="gap-1 h-8 text-xs" asChild>
+                        <Link href={`/admin/pedidos/${order.orderId ?? order.id}`} aria-label={`Ver detalhes do pedido ${order.orderNumber}`}>
                           Detalhes
-                          <ChevronRight className="w-3 h-3" />
-                        </Button>
-                      </Link>
+                          <ChevronRight className="w-3 h-3" aria-hidden="true" />
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -247,7 +253,7 @@ export default function AdminPreImpressao() {
           <CardContent className="pt-5 pb-5">
             <h2 className="text-sm font-semibold text-gray-800">Histórico da Pré-Impressão</h2>
             <p className="mt-1 text-xs text-gray-500">Pedidos removidos da lista ativa após ficarem Prontos para Entrega. São exibidos 20 registros por página.</p>
-            {isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-orange-500" /></div> : !historyResult?.data.length ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <><div className="mt-4 space-y-2">{historyResult.data.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="min-w-0 truncate font-medium">#{order.orderNumber} · {order.deliveryFullName || "Cliente não informado"}</span><div className="flex shrink-0 items-center gap-2"><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${order.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${order.orderNumber}`} onClick={() => setHistoryOrderToDelete(order)}><Trash2 className="h-3.5 w-3.5" /></Button>}</div></div>)}</div>{historyResult.totalPages > 1 && <div className="mt-4 flex items-center justify-between border-t pt-3"><span className="text-xs text-gray-500">Página {historyResult.page} de {historyResult.totalPages} · {historyResult.total} registro(s)</span><div className="flex gap-2"><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</Button><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === historyResult.totalPages} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</Button></div></div>}</>}
+            {isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-pink-600" aria-label="Carregando histórico de pré-impressão" /></div> : !historyResult?.data.length ? <p className="py-5 text-center text-sm text-gray-400">Nenhum pedido finalizado no histórico.</p> : <><div className="mt-4 space-y-2">{historyResult.data.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="min-w-0 truncate font-medium">#{order.orderNumber} · {order.deliveryFullName || "Cliente não informado"}</span><div className="flex shrink-0 items-center gap-2"><Badge variant="outline">{ORDER_STATUS_LABEL[order.status] ?? order.status}</Badge>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${order.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${order.orderNumber}`} onClick={() => setHistoryOrderToDelete(order)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>}</div></div>)}</div>{historyResult.totalPages > 1 && <div className="mt-4 flex items-center justify-between border-t pt-3"><span className="text-xs text-gray-500" aria-live="polite">Página {historyResult.page} de {historyResult.totalPages} · {historyResult.total} registro(s)</span><div className="flex gap-2"><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</Button><Button variant="outline" size="sm" className="h-8 text-xs" disabled={historyPage === historyResult.totalPages} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</Button></div></div>}</>}
           </CardContent>
         </Card>
         <AlertDialog open={Boolean(historyOrderToDelete)} onOpenChange={(open) => !open && setHistoryOrderToDelete(null)}>
@@ -258,7 +264,7 @@ export default function AdminPreImpressao() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleteHistoryMutation.isPending}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); if (historyOrderToDelete?.orderId ?? historyOrderToDelete?.id) deleteHistoryMutation.mutate({ orderId: historyOrderToDelete.orderId ?? historyOrderToDelete.id }); }}>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteHistoryMutation.isPending} aria-busy={deleteHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); if (historyOrderToDelete?.orderId ?? historyOrderToDelete?.id) deleteHistoryMutation.mutate({ orderId: historyOrderToDelete.orderId ?? historyOrderToDelete.id }); }}>
                 {deleteHistoryMutation.isPending ? "Excluindo..." : "Excluir permanentemente"}
               </AlertDialogAction>
             </AlertDialogFooter>
