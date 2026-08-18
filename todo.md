@@ -3176,3 +3176,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar campos e ações do cadastro na identidade cinza e rosa
 - [x] Melhorar limites de conteúdo e feedback de salvamento do cadastro
 - [x] Validar acessibilidade e continuidade do cadastro de produtos
+
+- [x] Revisar o painel de indicadores de produtos para identificar o ajuste prioritário
+- [x] Padronizar métricas e atalhos na identidade cinza e rosa
+- [x] Melhorar a leitura dos estados do catálogo no painel
+- [x] Validar métricas e acessibilidade do painel de indicadores
