@@ -74,8 +74,8 @@ export default function FinanceiroPagamentosRetirada() {
           <h1 className="text-2xl font-bold text-gray-900">Pagamentos na Retirada</h1>
           <p className="text-sm text-gray-500 mt-1">Pedidos com retirada na loja e pagamento presencial</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-1" />Atualizar
+        <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+          <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />Atualizar
         </Button>
       </div>
 
@@ -84,15 +84,18 @@ export default function FinanceiroPagamentosRetirada() {
         <Button
           variant={filterStatus === "" ? "default" : "outline"}
           size="sm"
+          type="button"
           onClick={() => { setFilterStatus(""); setPage(1); }}
-          className={filterStatus === "" ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+          className={filterStatus === "" ? "bg-pink-600 hover:bg-pink-700 text-white" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+          aria-pressed={filterStatus === ""}
         >
           Todos ({data?.total ?? 0})
         </Button>
         {Object.entries(STATUS_CONFIG).map(([k, cfg]) => (
-          <Button key={k} variant={filterStatus === k ? "default" : "outline"} size="sm"
+          <Button key={k} type="button" variant={filterStatus === k ? "default" : "outline"} size="sm"
             onClick={() => { setFilterStatus(k); setPage(1); }}
-            className={filterStatus === k ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}>
+            className={filterStatus === k ? "bg-pink-600 hover:bg-pink-700 text-white" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+            aria-pressed={filterStatus === k}>
             {cfg.label} ({byStatus[k]?.length ?? 0})
           </Button>
         ))}
@@ -103,7 +106,7 @@ export default function FinanceiroPagamentosRetirada() {
         <div className="p-8 text-center text-gray-400">Carregando...</div>
       ) : !allOrders.length ? (
         <div className="p-8 text-center text-gray-400">
-          <Package className="h-12 w-12 mx-auto mb-2 opacity-30" />
+          <Package className="h-12 w-12 mx-auto mb-2 opacity-30" aria-hidden="true" />
           <p>Nenhum pedido de retirada encontrado</p>
         </div>
       ) : filterStatus ? (
@@ -128,7 +131,7 @@ export default function FinanceiroPagamentosRetirada() {
                     const nextStatuses = NEXT_STATUS[item.status] || [];
                     return (
                       <tr key={i} className="hover:bg-gray-50">
-                        <td className="p-3 font-mono text-xs font-semibold text-orange-600">#{item.orderNumber}</td>
+                        <td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td>
                         <td className="p-3 font-medium">{item.cliente || "—"}</td>
                         <td className="p-3 text-right font-semibold">{formatCurrency(item.valor)}</td>
                         <td className="p-3 text-gray-500">{formatDate(item.createdAt)}</td>
@@ -138,8 +141,9 @@ export default function FinanceiroPagamentosRetirada() {
                         <td className="p-3">
                           <div className="flex gap-1 justify-center">
                             {nextStatuses.map(ns => (
-                              <Button key={ns} size="sm" variant="outline" className="h-7 px-2 text-xs"
-                                onClick={() => setActionDialog({ open: true, order: item, nextStatus: ns })}>
+                              <Button key={ns} type="button" size="sm" variant="outline" className="h-7 px-2 text-xs border-pink-200 text-pink-700 hover:bg-pink-50"
+                                onClick={() => setActionDialog({ open: true, order: item, nextStatus: ns })}
+                                aria-label={`Alterar pedido ${item.orderNumber} para ${STATUS_CONFIG[ns].label}`}>
                                 {STATUS_CONFIG[ns].label}
                               </Button>
                             ))}
@@ -162,7 +166,7 @@ export default function FinanceiroPagamentosRetirada() {
             return (
               <div key={status} className="space-y-2">
                 <div className={`flex items-center gap-2 p-2 rounded-lg ${cfg.color}`}>
-                  <cfg.icon className="h-4 w-4" />
+                  <cfg.icon className="h-4 w-4" aria-hidden="true" />
                   <span className="text-xs font-semibold">{cfg.label}</span>
                   <Badge variant="secondary" className="ml-auto text-xs">{items.length}</Badge>
                 </div>
@@ -173,7 +177,7 @@ export default function FinanceiroPagamentosRetirada() {
                       <Card key={i} className="border shadow-sm hover:shadow-md transition-shadow">
                         <CardContent className="p-3 space-y-2">
                           <div className="flex items-start justify-between">
-                            <span className="font-mono text-xs font-bold text-orange-600">#{item.orderNumber}</span>
+                            <span className="font-mono text-xs font-bold text-pink-600">#{item.orderNumber}</span>
                             <span className="text-xs font-bold text-gray-900">{formatCurrency(item.valor)}</span>
                           </div>
                           <p className="text-xs font-medium text-gray-700 truncate">{item.cliente || "—"}</p>
@@ -181,8 +185,9 @@ export default function FinanceiroPagamentosRetirada() {
                           {nextStatuses.length > 0 && (
                             <div className="flex flex-col gap-1 pt-1">
                               {nextStatuses.map(ns => (
-                                <Button key={ns} size="sm" variant="outline" className="h-6 text-xs w-full"
-                                  onClick={() => setActionDialog({ open: true, order: item, nextStatus: ns })}>
+                                <Button key={ns} type="button" size="sm" variant="outline" className="h-6 text-xs w-full border-pink-200 text-pink-700 hover:bg-pink-50"
+                                  onClick={() => setActionDialog({ open: true, order: item, nextStatus: ns })}
+                                  aria-label={`Alterar pedido ${item.orderNumber} para ${STATUS_CONFIG[ns].label}`}>
                                   → {STATUS_CONFIG[ns].label}
                                 </Button>
                               ))}
@@ -226,7 +231,7 @@ export default function FinanceiroPagamentosRetirada() {
                   <span className="font-bold text-green-600">{formatCurrency(actionDialog.order.valor)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-lg">
                 <span className="text-sm text-gray-600">Novo status:</span>
                 <Badge className={`${STATUS_CONFIG[actionDialog.nextStatus].color} border-0`}>
                   {STATUS_CONFIG[actionDialog.nextStatus].label}
@@ -235,12 +240,14 @@ export default function FinanceiroPagamentosRetirada() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActionDialog({ open: false, order: null, nextStatus: null })}>
+            <Button type="button" variant="outline" onClick={() => setActionDialog({ open: false, order: null, nextStatus: null })}>
               Cancelar
             </Button>
             <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              type="button"
+              className="bg-pink-600 hover:bg-pink-700 text-white"
               disabled={atualizarStatus.isPending}
+              aria-busy={atualizarStatus.isPending}
               onClick={() => {
                 if (actionDialog.order && actionDialog.nextStatus) {
                   atualizarStatus.mutate({
