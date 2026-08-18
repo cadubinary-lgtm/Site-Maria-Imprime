@@ -3146,3 +3146,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os painéis de logística e resumo na identidade cinza e rosa
 - [x] Melhorar a leitura de informações, ações e estados do pedido
 - [x] Validar os controles e a acessibilidade dos painéis de pedido
+
+- [x] Revisar o resumo financeiro de pedidos para identificar o ajuste prioritário
+- [x] Padronizar o resumo financeiro na identidade cinza e rosa
+- [x] Melhorar a leitura de valores, pagamento e dados do cliente
+- [x] Validar valores e acessibilidade do resumo financeiro
