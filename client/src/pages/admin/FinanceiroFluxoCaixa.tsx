@@ -235,18 +235,18 @@ export default function FinanceiroFluxoCaixa() {
           <p className="text-sm text-gray-500 mt-1">Entradas e saídas financeiras</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-1" />Atualizar
+          <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />Atualizar
           </Button>
-          <Button variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportCsv}>
-            <Download className="h-4 w-4 mr-1" />CSV
+          <Button type="button" variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportCsv} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <Download className="h-4 w-4 mr-1" aria-hidden="true" />CSV
           </Button>
-          <Button variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportPdf}>
-            <Download className="h-4 w-4 mr-1" />PDF
+          <Button type="button" variant="outline" size="sm" disabled={!data?.timeline.length} onClick={exportPdf} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <Download className="h-4 w-4 mr-1" aria-hidden="true" />PDF
           </Button>
-          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white"
+          <Button type="button" size="sm" className="bg-pink-600 hover:bg-pink-700 text-white"
             onClick={() => { setEditId(null); setForm(emptyForm); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4 mr-1" />Nova movimentação
+            <Plus className="h-4 w-4 mr-1" aria-hidden="true" />Nova movimentação
           </Button>
         </div>
       </div>
@@ -255,22 +255,23 @@ export default function FinanceiroFluxoCaixa() {
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
           <div className="flex flex-wrap gap-2">
             {([[1, "Hoje"], [7, "7 dias"], [30, "30 dias"], [90, "90 dias"]] as const).map(([days, label]) => (
-              <Button key={days} variant={periodo === String(days) ? "default" : "outline"} size="sm"
+              <Button key={days} type="button" variant={periodo === String(days) ? "default" : "outline"} size="sm"
                 onClick={() => applyPeriod(days)}
-                className={periodo === String(days) ? "bg-blue-600 text-white hover:bg-blue-700" : ""}>
+                className={periodo === String(days) ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+                aria-pressed={periodo === String(days)}>
                 {label}
               </Button>
             ))}
           </div>
           <label className="grid gap-1 text-xs font-medium text-gray-600">
             Data inicial
-            <Input type="date" value={startDate} onChange={(event) => { setPeriodo("custom"); setStartDate(event.target.value); }} className="h-9" />
+            <Input id="cashflow-start-date" type="date" value={startDate} onChange={(event) => { setPeriodo("custom"); setStartDate(event.target.value); }} className="h-9" />
           </label>
           <label className="grid gap-1 text-xs font-medium text-gray-600">
             Data final
-            <Input type="date" value={endDate} onChange={(event) => { setPeriodo("custom"); setEndDate(event.target.value); }} className="h-9" />
+            <Input id="cashflow-end-date" type="date" value={endDate} onChange={(event) => { setPeriodo("custom"); setEndDate(event.target.value); }} className="h-9" />
           </label>
-          <div className="flex items-center gap-1 text-xs text-gray-500"><CalendarDays className="h-3.5 w-3.5" />Período de movimentação</div>
+          <div className="flex items-center gap-1 text-xs text-gray-500"><CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />Período de movimentação</div>
         </CardContent>
       </Card>
 
@@ -305,14 +306,14 @@ export default function FinanceiroFluxoCaixa() {
               </div>
             </CardContent>
           </Card>
-          <Card className={`border-0 shadow-sm ${data.closingBalance >= 0 ? "bg-blue-50" : "bg-orange-50"}`}>
+          <Card className={`border-0 shadow-sm ${data.closingBalance >= 0 ? "bg-green-50" : "bg-red-50"}`}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${data.closingBalance >= 0 ? "bg-blue-100" : "bg-orange-100"}`}>
-                <DollarSign className={`h-5 w-5 ${data.closingBalance >= 0 ? "text-blue-600" : "text-orange-600"}`} />
+              <div className={`p-2 rounded-lg ${data.closingBalance >= 0 ? "bg-green-100" : "bg-red-100"}`}>
+                <DollarSign className={`h-5 w-5 ${data.closingBalance >= 0 ? "text-green-600" : "text-red-600"}`} aria-hidden="true" />
               </div>
               <div>
-                <p className={`text-xs font-medium ${data.closingBalance >= 0 ? "text-blue-700" : "text-orange-700"}`}>Saldo final</p>
-                <p className={`text-lg font-bold ${data.closingBalance >= 0 ? "text-blue-800" : "text-orange-800"}`}>
+                <p className={`text-xs font-medium ${data.closingBalance >= 0 ? "text-green-700" : "text-red-700"}`}>Saldo final</p>
+                <p className={`text-lg font-bold ${data.closingBalance >= 0 ? "text-green-800" : "text-red-800"}`}>
                   {formatCurrency(data.closingBalance)}
                 </p>
               </div>
@@ -363,11 +364,11 @@ export default function FinanceiroFluxoCaixa() {
                     </span>
                     {entry.origem === "manual" && (
                       <div className="flex gap-1 flex-shrink-0">
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(entry)}>
-                          <Pencil className="h-3 w-3" />
+                        <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(entry)} aria-label={`Editar movimentação ${entry.descricao || entry.categoria}`}>
+                          <Pencil className="h-3 w-3" aria-hidden="true" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500" onClick={() => setDeleteId(entry.entryId)}>
-                          <Trash2 className="h-3 w-3" />
+                        <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500" onClick={() => setDeleteId(entry.entryId)} aria-label={`Remover movimentação ${entry.descricao || entry.categoria}`}>
+                          <Trash2 className="h-3 w-3" aria-hidden="true" />
                         </Button>
                       </div>
                     )}
@@ -385,16 +386,18 @@ export default function FinanceiroFluxoCaixa() {
           <DialogHeader>
             <DialogTitle>{editId !== null ? "Editar movimentação" : "Nova movimentação manual"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form id="cashflow-entry-form" className="space-y-4" onSubmit={(event) => { event.preventDefault(); handleSubmit(); }}>
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">Tipo</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Tipo de movimentação">
                 {[
                   { value: "income", label: "Entrada", color: "border-green-500 bg-green-50 text-green-700" },
                   { value: "expense", label: "Saída", color: "border-red-500 bg-red-50 text-red-700" },
                 ].map(opt => (
                   <button key={opt.value} type="button"
                     onClick={() => setForm(f => ({ ...f, tipo: opt.value as any, categoria: "" }))}
+                    role="radio"
+                    aria-checked={form.tipo === opt.value}
                     className={`p-3 rounded-lg border-2 font-medium text-sm transition-all ${form.tipo === opt.value ? opt.color : "border-gray-200 hover:border-gray-300"}`}>
                     {opt.label}
                   </button>
@@ -402,9 +405,9 @@ export default function FinanceiroFluxoCaixa() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Categoria *</label>
+              <label htmlFor="cashflow-category" className="text-sm font-medium text-gray-700 block mb-1">Categoria *</label>
               <Select value={form.categoria} onValueChange={(v) => setForm(f => ({ ...f, categoria: v }))}>
-                <SelectTrigger>
+                <SelectTrigger id="cashflow-category">
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -413,30 +416,31 @@ export default function FinanceiroFluxoCaixa() {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Descrição</label>
-              <Input placeholder="Descrição opcional" value={form.descricao}
+              <label htmlFor="cashflow-description" className="text-sm font-medium text-gray-700 block mb-1">Descrição</label>
+              <Input id="cashflow-description" placeholder="Descrição opcional" value={form.descricao}
                 onChange={(e) => setForm(f => ({ ...f, descricao: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Valor (R$) *</label>
-                <Input type="number" step="0.01" min="0.01" placeholder="0,00" value={form.valor}
+                <label htmlFor="cashflow-value" className="text-sm font-medium text-gray-700 block mb-1">Valor (R$) *</label>
+                <Input id="cashflow-value" type="number" step="0.01" min="0.01" placeholder="0,00" value={form.valor}
                   onChange={(e) => setForm(f => ({ ...f, valor: e.target.value }))} />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Data *</label>
-                <Input type="date" value={form.data}
+                <label htmlFor="cashflow-entry-date" className="text-sm font-medium text-gray-700 block mb-1">Data *</label>
+                <Input id="cashflow-entry-date" type="date" value={form.data}
                   onChange={(e) => setForm(f => ({ ...f, data: e.target.value }))} />
               </div>
             </div>
-          </div>
+          </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); setEditId(null); setForm(emptyForm); }}>
+            <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); setEditId(null); setForm(emptyForm); }}>
               Cancelar
             </Button>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white"
+            <Button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white"
               disabled={addEntrada.isPending || editEntrada.isPending}
-              onClick={handleSubmit}>
+              form="cashflow-entry-form"
+              aria-busy={addEntrada.isPending || editEntrada.isPending}>
               {addEntrada.isPending || editEntrada.isPending ? "Salvando..." : editId !== null ? "Salvar" : "Adicionar"}
             </Button>
           </DialogFooter>
