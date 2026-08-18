@@ -3076,3 +3076,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os controles do cabeçalho na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a acessibilidade e os estados de navegação do cabeçalho
 - [x] Validar os atalhos de busca, conta e carrinho do cabeçalho público
+
+- [x] Revisar os componentes de descoberta de produtos da página inicial para identificar o ajuste prioritário
+- [x] Padronizar a descoberta de produtos na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar a orientação, responsividade e acessibilidade da descoberta de produtos
+- [x] Validar os destinos e estados de continuidade da descoberta pública
