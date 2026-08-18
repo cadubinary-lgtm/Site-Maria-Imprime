@@ -17,9 +17,21 @@ import {
   AlertCircle,
   FileImage,
   Link as LinkIcon,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CartItem {
   id: number;
@@ -148,6 +160,7 @@ function CartItemCard({
               className="h-7 w-7"
               onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
               disabled={item.quantity <= 1 || isUpdating}
+              aria-label={`Diminuir quantidade de ${item.productName}`}
             >
               <Minus className="h-3 w-3" />
             </Button>
@@ -158,6 +171,7 @@ function CartItemCard({
               className="h-7 w-7"
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
               disabled={isUpdating}
+              aria-label={`Aumentar quantidade de ${item.productName}`}
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -173,6 +187,7 @@ function CartItemCard({
               className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
               onClick={() => onRemove(item.id)}
               disabled={isUpdating}
+              aria-label={`Remover ${item.productName} do carrinho`}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -184,7 +199,6 @@ function CartItemCard({
 }
 
 export default function CartPage() {
-  const { customer } = useCustomerAuth();
   const [, setLocation] = useLocation();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
@@ -233,14 +247,20 @@ export default function CartPage() {
     if (item?.cepDestino && item?.shippingMethod && item.shippingMethod !== 'retirada' && !item.shippingMethod.startsWith('local_')) {
       setRecalculating(id);
     }
-    await updateQty.mutateAsync({ id, quantity: qty });
-    setUpdatingId(null);
+    try {
+      await updateQty.mutateAsync({ id, quantity: qty });
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const handleRemove = async (id: number) => {
     setUpdatingId(id);
-    await removeItem.mutateAsync({ id });
-    setUpdatingId(null);
+    try {
+      await removeItem.mutateAsync({ id });
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   // Carrinho agora é público - não bloqueia visitantes
@@ -263,10 +283,10 @@ export default function CartPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-orange-500" />
+            <ShoppingCart className="h-6 w-6 text-pink-600" />
             Meu Carrinho
             {itemCount > 0 && (
-              <Badge className="bg-orange-500 text-white">{itemCount}</Badge>
+              <Badge className="bg-pink-600 text-white">{itemCount}</Badge>
             )}
           </h1>
           <Button
@@ -314,7 +334,7 @@ export default function CartPage() {
               Adicione produtos ao carrinho para continuar
             </p>
             <Button
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-pink-600 hover:bg-pink-700"
               onClick={() => setLocation("/catalogo")}
             >
               Ver Produtos
@@ -332,16 +352,37 @@ export default function CartPage() {
                   <CardTitle className="text-base lg:text-lg">
                     {cartItems.length} {cartItems.length === 1 ? "item" : "itens"}
                   </CardTitle>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => clearCart.mutate()}
-                    disabled={clearCart.isPending}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Limpar carrinho
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        disabled={clearCart.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Limpar carrinho
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Limpar todo o carrinho?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação removerá todos os itens adicionados. Você poderá incluir novos produtos novamente pelo catálogo.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-600 text-white hover:bg-red-700"
+                          onClick={() => clearCart.mutate()}
+                          disabled={clearCart.isPending}
+                        >
+                          {clearCart.isPending ? "Limpando..." : "Limpar carrinho"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </CardHeader>
                 <CardContent>
                   {cartItems.map((item, index) => (
@@ -382,11 +423,11 @@ export default function CartPage() {
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span className="text-orange-600">{formatCurrency(total)}</span>
+                    <span className="text-pink-600">{formatCurrency(total)}</span>
                   </div>
 
                   <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600 mt-2"
+                    className="w-full bg-pink-600 hover:bg-pink-700 mt-2"
                     size="lg"
                     onClick={() => setLocation("/checkout")}
                   >
@@ -400,10 +441,11 @@ export default function CartPage() {
               </Card>
 
               {/* Segurança */}
-              <Card className="bg-green-50 border-green-200">
+              <Card className="border-pink-100 bg-pink-50/50">
                 <CardContent className="p-4">
-                  <p className="text-xs text-green-700 text-center">
-                    🔒 Compra 100% segura. Seus dados estão protegidos.
+                  <p className="flex items-center justify-center gap-1.5 text-center text-xs text-slate-600">
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-pink-600" />
+                    Ambiente protegido — navegação segura e proteção dos seus dados.
                   </p>
                 </CardContent>
               </Card>

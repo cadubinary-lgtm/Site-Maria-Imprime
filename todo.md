@@ -2985,3 +2985,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar o feedback de remoção e atalhos ao CartSidePanel efetivamente exibido na interface pública
 - [x] Evitar manter uma segunda implementação de melhorias de carrinho fora do fluxo público
 - [x] Validar o carrinho lateral público com estado vazio e com itens antes do checkpoint
+- [x] Revisar o carrinho e checkout para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento no fluxo de carrinho e checkout sem alterar preços ou regras de pedido
+- [x] Validar o refinamento de carrinho e checkout antes de avançar para o configurador
+- [x] Proteger a ação Limpar carrinho com confirmação explícita antes de remover todos os itens
+- [x] Padronizar os destaques de ação do carrinho completo com a identidade rosa da Maria Imprime
