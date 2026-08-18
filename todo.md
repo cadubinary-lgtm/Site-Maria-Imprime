@@ -3283,3 +3283,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o cancelamento de pedido no kanban para identificar o ajuste prioritário
 - [x] Substituir a confirmação nativa de cancelamento por diálogo acessível
 - [x] Validar o cancelamento no kanban e seus feedbacks
+
+- [x] Revisar exclusões unitárias e em lote na gestão de produtos
+- [x] Substituir confirmações nativas por diálogos acessíveis nas exclusões de produtos
+- [x] Validar exclusões de produtos e seus feedbacks
