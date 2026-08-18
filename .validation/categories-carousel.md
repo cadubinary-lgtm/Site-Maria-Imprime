@@ -1,0 +1,1 @@
+Na página inicial, o carrossel de Acesso rápido mantém os cards alinhados sem a largura fixa anterior. As setas rosa permanecem disponíveis no desktop com rótulos acessíveis e, ao avançar, a faixa revela as categorias seguintes sem alterar os links dos cards.

@@ -2995,3 +2995,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar as interações e a continuidade do fluxo de compra após o ajuste do configurador
 - [x] Padronizar os controles selecionáveis e CTAs do configurador na paleta rosa da Maria Imprime
 - [x] Preservar as cores semânticas de sucesso, informação e alerta no configurador
+- [x] Revisar a página inicial para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento da página inicial sem alterar seus destinos de navegação
+- [x] Validar responsividade, ações e consistência visual da página inicial
+- [x] Remover dimensões e espaçamentos fixos que comprometem a responsividade do carrossel de acesso rápido
+- [x] Padronizar o carrossel de categorias com navegação acessível e limites visuais coerentes
