@@ -3081,3 +3081,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a descoberta de produtos na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a orientação, responsividade e acessibilidade da descoberta de produtos
 - [x] Validar os destinos e estados de continuidade da descoberta pública
+
+- [x] Revisar a seção de etapas da jornada na página inicial para identificar o ajuste prioritário
+- [x] Padronizar as etapas da jornada na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar a leitura responsiva e acessibilidade da seção como funciona
+- [x] Validar a ação de continuidade após as etapas da jornada
