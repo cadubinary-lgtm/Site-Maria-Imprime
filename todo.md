@@ -3000,3 +3000,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar responsividade, ações e consistência visual da página inicial
 - [x] Remover dimensões e espaçamentos fixos que comprometem a responsividade do carrossel de acesso rápido
 - [x] Padronizar o carrossel de categorias com navegação acessível e limites visuais coerentes
+- [x] Revisar o painel administrativo para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento administrativo sem alterar regras operacionais existentes
+- [x] Validar a consistência visual, a acessibilidade e os fluxos após o ajuste administrativo
+- [x] Padronizar itens ativos e indicadores da navegação administrativa na paleta cinza e rosa
+- [x] Adicionar estados ARIA aos grupos retráteis do menu lateral administrativo
