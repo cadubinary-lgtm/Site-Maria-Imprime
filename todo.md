@@ -3151,3 +3151,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o resumo financeiro na identidade cinza e rosa
 - [x] Melhorar a leitura de valores, pagamento e dados do cliente
 - [x] Validar valores e acessibilidade do resumo financeiro
+
+- [x] Revisar o rodapé público para identificar o ajuste prioritário
+- [x] Padronizar links e elementos do rodapé na identidade rosa
+- [x] Melhorar a leitura dos canais de atendimento, pagamentos e segurança
+- [x] Validar navegação e acessibilidade do rodapé

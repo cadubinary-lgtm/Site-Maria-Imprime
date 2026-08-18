@@ -133,5 +133,8 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('if (!emailPattern.test(email))');
     expect(footer).toContain('Digite um endereço de e-mail válido para continuar.');
     expect(footer).toContain('aria-invalid={newsletterStatus === "error"}');
+    expect(footer).toContain('onSubmit={handleNewsletterSubmit} noValidate');
+    expect(footer).toContain('aria-describedby="newsletter-feedback"');
+    expect(footer).toContain('role={newsletterStatus === "error" ? "alert" : "status"}');
   });
 });
