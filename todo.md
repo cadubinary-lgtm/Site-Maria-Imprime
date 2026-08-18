@@ -3442,3 +3442,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar controles e indicadores da página alternativa de relatórios financeiros
 - [x] Padronizar controles da página alternativa de relatórios na identidade rosa
 - [x] Validar a página alternativa de relatórios e salvar checkpoint publicável
+
+- [x] Revisar controles, indicadores e estados da página legada de contas a receber
+- [x] Padronizar controles da página legada de contas a receber na identidade rosa
+- [x] Validar a página legada de contas a receber e salvar checkpoint publicável
