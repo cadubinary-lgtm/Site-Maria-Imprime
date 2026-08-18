@@ -46,7 +46,7 @@ export function CarriersManager() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Truck className="w-6 h-6 text-orange-500" />
+              <Truck className="w-6 h-6 text-pink-600" aria-hidden="true" />
               Transportadoras
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -56,17 +56,18 @@ export function CarriersManager() {
           <Button
             onClick={handleSync}
             disabled={syncMutation.isPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-pink-600 hover:bg-pink-700"
+            aria-busy={syncMutation.isPending}
           >
             {syncMutation.isPending
-              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sincronizando...</>
-              : <><RefreshCw className="w-4 h-4 mr-2" /> Sincronizar com Melhor Envio</>}
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Sincronizando...</>
+              : <><RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" /> Sincronizar com Melhor Envio</>}
           </Button>
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center h-48">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando transportadoras" />
           </div>
         ) : !carriers || carriers.length === 0 ? (
           <Card>
@@ -107,16 +108,17 @@ export function CarriersManager() {
                       <p className="font-semibold">{carrier.name}</p>
                       <p className="text-sm text-muted-foreground">Código: {carrier.code}</p>
                     </div>
-                    <Badge variant={carrier.isActive ? 'default' : 'secondary'}>
+                    <Badge variant={carrier.isActive ? 'default' : 'secondary'} className={carrier.isActive ? "bg-green-100 text-green-700" : undefined}>
                       {carrier.isActive ? 'Ativa' : 'Inativa'}
                     </Badge>
                     <div className="flex items-center gap-2">
                       {toggling === carrier.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" aria-label={`Atualizando transportadora ${carrier.name}`} />
                       ) : (
                         <Switch
                           checked={carrier.isActive}
                           onCheckedChange={(v) => handleToggle(carrier.id, v)}
+                          aria-label={`${carrier.isActive ? "Desativar" : "Ativar"} transportadora ${carrier.name}`}
                         />
                       )}
                     </div>
