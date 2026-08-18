@@ -1,0 +1,1 @@
+Uma rota inexistente apresentou página 404 em português, na identidade rosa, com descrição orientativa e ações para início ou catálogo. A ação “Explorar catálogo” foi validada e abriu corretamente a vitrine pública, sem gerar uma nova página de erro.

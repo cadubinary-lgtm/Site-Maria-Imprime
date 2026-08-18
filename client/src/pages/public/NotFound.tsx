@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
+import { AlertCircle, Home, Search } from "lucide-react";
 import { useLocation } from "wouter";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
@@ -10,27 +11,27 @@ export default function NotFound() {
     setLocation("/");
   };
 
+  const handleBrowseCatalog = () => {
+    setLocation("/catalogo");
+  };
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardContent className="pt-8 pb-8 text-center">
+    <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-slate-50 p-4" aria-labelledby="not-found-title">
+      <Card className="w-full max-w-lg border border-pink-100 bg-white/90 shadow-lg backdrop-blur-sm">
+        <CardContent className="py-8 text-center sm:py-10">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
-              <AlertCircle className="relative h-16 w-16 text-red-500" />
+              <div className="absolute inset-0 rounded-full bg-pink-100 motion-safe:animate-pulse" aria-hidden="true" />
+              <AlertCircle className="relative h-16 w-16 text-pink-600" aria-hidden="true" />
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-pink-600">Erro 404</p>
 
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
-          </h2>
+          <h1 id="not-found-title" className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">Página não encontrada</h1>
 
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
-            <br />
-            It may have been moved or deleted.
+          <p role="alert" className="mx-auto mt-4 max-w-sm text-sm leading-6 text-slate-600">
+            O endereço acessado não existe ou pode ter sido movido. Você pode voltar ao início ou explorar o catálogo.
           </p>
 
           <div
@@ -39,14 +40,18 @@ export default function NotFound() {
           >
             <Button
               onClick={handleGoHome}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+              className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}
             >
-              <Home className="w-4 h-4 mr-2" />
-              Go Home
+              <Home className="w-4 h-4" />
+              Voltar ao início
+            </Button>
+            <Button onClick={handleBrowseCatalog} variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} w-full sm:w-auto`}>
+              <Search className="w-4 h-4" />
+              Explorar catálogo
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

@@ -3066,3 +3066,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o atendimento público na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar mensagens, estados e acessibilidade das ações de contato
 - [x] Validar as rotas e ações de continuidade do atendimento público
+
+- [x] Revisar o estado público de rota indisponível para identificar o ajuste prioritário
+- [x] Padronizar o estado de rota indisponível na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar a orientação e acessibilidade de páginas não encontradas
+- [x] Validar as ações de continuidade da navegação pública
