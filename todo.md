@@ -3342,3 +3342,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados das configurações do Mercado Pago
 - [x] Padronizar controles de pagamento na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade das configurações do Mercado Pago
+
+- [x] Revisar controles e estados da gestão de usuários administrativos
+- [x] Padronizar controles de usuários na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade da gestão de usuários administrativos
