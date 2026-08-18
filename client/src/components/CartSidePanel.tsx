@@ -5,6 +5,7 @@ import { useState } from "react";
 import { X, ShoppingCart, Minus, Plus, Trash2, Package, Lock, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
+import { toast } from "sonner";
 
 interface CartItem {
   id: number;
@@ -52,17 +53,16 @@ export function CartSidePanel() {
 
   const updateQty = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => {
-      utils.cart.getItems.invalidate();
-      utils.cart.getCount.invalidate();
-      setUpdatingId(null);
+      void utils.cart.getItems.invalidate();
+      void utils.cart.getCount.invalidate();
     },
-    onError: () => setUpdatingId(null),
   });
 
   const removeItem = trpc.cart.removeItem.useMutation({
     onSuccess: () => {
-      utils.cart.getItems.invalidate();
-      utils.cart.getCount.invalidate();
+      void utils.cart.getItems.invalidate();
+      void utils.cart.getCount.invalidate();
+      toast.success("Produto removido do carrinho.", { id: "cart-item-removed", duration: 3500 });
     },
   });
 
@@ -79,13 +79,24 @@ export function CartSidePanel() {
   const handleUpdateQuantity = async (id: number, qty: number) => {
     if (qty < 1) return;
     setUpdatingId(id);
-    await updateQty.mutateAsync({ id, quantity: qty });
+    try {
+      await updateQty.mutateAsync({ id, quantity: qty });
+    } catch {
+      toast.error("Não foi possível atualizar a quantidade. Tente novamente.", { id: "cart-quantity-error" });
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const handleRemove = async (id: number) => {
     setUpdatingId(id);
-    await removeItem.mutateAsync({ id });
-    setUpdatingId(null);
+    try {
+      await removeItem.mutateAsync({ id });
+    } catch {
+      toast.error("Não foi possível remover o produto. Tente novamente.", { id: "cart-remove-error" });
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const handleCheckout = () => {
@@ -206,6 +217,7 @@ export function CartSidePanel() {
                         className="h-7 w-7"
                         onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1 || isUpdating}
+                        aria-label={`Diminuir quantidade de ${item.productName}`}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -216,6 +228,7 @@ export function CartSidePanel() {
                         className="h-7 w-7"
                         onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                         disabled={isUpdating}
+                        aria-label={`Aumentar quantidade de ${item.productName}`}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
@@ -228,6 +241,7 @@ export function CartSidePanel() {
                         className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
                         onClick={() => handleRemove(item.id)}
                         disabled={isUpdating}
+                        aria-label={`Remover ${item.productName} do carrinho`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -268,6 +282,25 @@ export function CartSidePanel() {
           >
             {cartItems.some(item => item.id < 0) ? "Adicionando item..." : "Finalizar Pedido →"}
           </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={closeCart}
+              className="min-h-10 rounded-full border border-pink-200 bg-white px-3 text-xs font-bold text-pink-700 transition hover:border-pink-400 hover:bg-pink-50"
+            >
+              Continuar comprando
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                closeCart();
+                setLocation("/carrinho");
+              }}
+              className="min-h-10 rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+            >
+              Ver carrinho completo
+            </button>
+          </div>
           <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400">
             <Lock className="w-3 h-3" />
             <span>Compra 100% segura. Seus dados estão protegidos.</span>
