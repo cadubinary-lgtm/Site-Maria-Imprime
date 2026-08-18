@@ -3116,3 +3116,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o acesso flutuante na identidade visual e em controles acessíveis
 - [x] Melhorar a leitura e a continuidade do atendimento por WhatsApp
 - [x] Validar o link e o comportamento do atendimento flutuante
+
+- [x] Revisar o seletor de entrega do checkout para identificar o ajuste prioritário
+- [x] Padronizar a escolha de entrega na identidade rosa e em controles acessíveis
+- [x] Melhorar a leitura dos prazos, valores e estados de entrega
+- [x] Validar as opções e continuidade da seleção de entrega

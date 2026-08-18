@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Truck, MapPin, Zap, Store } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 interface CartItem {
   productId: number;
@@ -184,7 +185,7 @@ export function ShippingMethodSelector({
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
   const getMethodIcon = (methodId: string) => {
-    if (methodId === "retirada" || methodId === "pickup") return <Store className="w-5 h-5 text-orange-500" />;
+    if (methodId === "retirada" || methodId === "pickup") return <Store className="w-5 h-5 text-pink-600" />;
     if (methodId === "moto_express") return <Zap className="w-5 h-5" />;
     return <Truck className="w-5 h-5" />;
   };
@@ -228,37 +229,41 @@ export function ShippingMethodSelector({
           )}
 
           {/* ─── Opção fixa: Retirada na Loja ─── */}
-          <div
+          <button
+            type="button"
+            aria-pressed={selectedMethod === "retirada"}
+            aria-label="Retirar o pedido na loja, grátis"
             onClick={() => {
               if (disabled) return;
               setSelectedMethod("retirada");
               // Confirmar automaticamente ao selecionar retirada
               onMethodSelected(PICKUP_METHOD, "");
             }}
-            className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            disabled={disabled}
+            className={`flex w-full items-start gap-3 p-4 rounded-xl border-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
               selectedMethod === "retirada"
-                ? "border-orange-500 bg-orange-50"
-                : "border-gray-200 hover:border-orange-300 bg-white"
+                ? "border-pink-600 bg-pink-50"
+                : "border-gray-200 hover:border-pink-300 bg-white"
             }`}
           >
             <div className="mt-0.5">
               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                selectedMethod === "retirada" ? "border-orange-500" : "border-gray-400"
+                selectedMethod === "retirada" ? "border-pink-600" : "border-gray-400"
               }`}>
                 {selectedMethod === "retirada" && (
-                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  <div className="w-2 h-2 rounded-full bg-pink-600" />
                 )}
               </div>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <Store className="w-5 h-5 text-orange-500" />
+                <Store className="w-5 h-5 text-pink-600" />
                 <span className="font-semibold text-gray-800">Retirar na Loja</span>
                 <span className="ml-auto text-sm font-bold text-green-600">Grátis</span>
               </div>
               <p className="text-sm text-gray-500">Retire seu pedido diretamente em nossa loja. Você será avisado quando estiver pronto.</p>
             </div>
-          </div>
+          </button>
 
           {/* ─── Separador ─── */}
           <div className="flex items-center gap-3">
@@ -288,7 +293,7 @@ export function ShippingMethodSelector({
                 type="button"
                 onClick={() => handleCalculateShipping()}
                 disabled={disabled || isLoading || zipCode.replace(/\D/g, "").length < 8 || !hasCartItems}
-                variant="default"
+                className={HOME_PRIMARY_ACTION_CLASS}
               >
                 {isLoading ? "Calculando..." : "Calcular"}
               </Button>
@@ -310,6 +315,7 @@ export function ShippingMethodSelector({
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700">Opções de entrega para {zipCode.slice(0,5)}-{zipCode.slice(5)}:</p>
               <RadioGroup
+                aria-label="Opções de entrega calculadas"
                 value={selectedMethod ?? ""}
                 onValueChange={(v) => {
                   if (v !== "retirada") {
@@ -323,10 +329,10 @@ export function ShippingMethodSelector({
                 {deliveryMethods.map((method) => (
                   <div
                     key={method.id}
-                    className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedMethod === method.id
-                        ? "border-orange-500 bg-orange-50"
-                        : "border-gray-200 hover:border-orange-300 bg-white"
+                        ? "border-pink-600 bg-pink-50"
+                        : "border-gray-200 hover:border-pink-300 bg-white"
                     }`}
                     onClick={() => setSelectedMethod(method.id)}
                   >
@@ -356,7 +362,7 @@ export function ShippingMethodSelector({
             type="button"
             onClick={handleConfirmMethod}
             disabled={!selectedMethod || disabled}
-            className="w-full"
+            className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
             size="lg"
           >
             Confirmar Entrega
