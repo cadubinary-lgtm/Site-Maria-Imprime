@@ -3310,3 +3310,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles legados do gerenciador de prazos de produção
 - [x] Padronizar controles não semânticos do gerenciador de prazos na identidade rosa
 - [x] Validar a consistência visual e acessibilidade dos prazos de produção
+
+- [x] Revisar o destaque legado das variações expandidas
+- [x] Padronizar o estado expandido das variações na identidade rosa
+- [x] Validar o destaque visual e acessibilidade das variações expandidas

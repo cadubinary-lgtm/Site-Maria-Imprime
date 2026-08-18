@@ -23,4 +23,9 @@ describe("exclusões de variações de produto", () => {
     expect(source).toContain('aria-label={`Excluir variação ${vt.name}`}');
     expect(source).toContain("setPendingDeletion(null)");
   });
+
+  it("mantém o destaque de expansão na identidade rosa", () => {
+    expect(source).toContain('"bg-pink-50 border-b border-pink-300"');
+    expect(source).not.toContain('"bg-orange-50 border-b border-orange-300"');
+  });
 });
