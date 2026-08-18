@@ -3374,3 +3374,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles, indicadores e estados do painel administrativo geral
 - [x] Padronizar controles do painel na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade do painel administrativo geral
+
+- [x] Revisar navegação, estados e controles do Guia da Maria administrativo
+- [x] Padronizar o Guia da Maria administrativo na identidade rosa e com interações acessíveis
+- [x] Validar o Guia da Maria administrativo e salvar checkpoint publicável
