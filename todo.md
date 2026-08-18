@@ -3020,3 +3020,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Vincular o indicador de carrinho do catálogo à contagem real de itens
 - [x] Tornar os filtros de segmento e a paginação do catálogo explicitamente acessíveis
 - [x] Remover ícones de segmento não configurados na barra lateral do catálogo
+- [x] Revisar a busca pública para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento da busca sem alterar produtos, preços ou rotas existentes
+- [x] Validar resultados, navegação e acessibilidade da busca pública
+- [x] Padronizar os destaques e CTAs de busca na identidade rosa da Maria Imprime
+- [x] Tornar os resultados de categoria acessíveis sem depender de clique no card inteiro
+- [x] Adicionar uma ação clara para refazer ou limpar uma busca sem resultados

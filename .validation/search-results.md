@@ -1,0 +1,1 @@
+Na rota `/busca?q=lona`, os resultados de produto usam CTAs e preços na identidade rosa. Na rota `/busca?q=produto-inexistente-xyz`, o estado vazio mostra as ações Explorar catálogo e Fazer nova busca, ambas como links navegáveis. A página preserva a busca global no cabeçalho e os resultados de materiais.
