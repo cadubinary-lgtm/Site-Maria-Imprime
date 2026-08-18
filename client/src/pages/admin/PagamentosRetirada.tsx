@@ -60,9 +60,9 @@ export default function PagamentosRetirada() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Link href="/admin/gerenciador-financeiro">
-            <Button variant="ghost" size="sm">
-              <ChevronLeft className="w-4 h-4 mr-1" /> Voltar
-            </Button>
+            <span className="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+              <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" /> Voltar
+            </span>
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Pagamentos na Retirada</h1>
@@ -72,11 +72,11 @@ export default function PagamentosRetirada() {
 
         {/* Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border border-orange-200 bg-orange-50">
+          <Card className="border border-pink-200 bg-pink-50">
             <CardContent className="p-4">
-              <p className="text-xs font-medium text-orange-600 uppercase tracking-wide">Total Retirada (Mês)</p>
-              <p className="text-2xl font-bold text-orange-700 mt-1">{fmt(totalValue)}</p>
-              <p className="text-xs text-orange-500 mt-1">{total} pedidos</p>
+              <p className="text-xs font-medium text-pink-600 uppercase tracking-wide">Total Retirada (Mês)</p>
+              <p className="text-2xl font-bold text-pink-700 mt-1">{fmt(totalValue)}</p>
+              <p className="text-xs text-pink-500 mt-1">{total} pedidos</p>
             </CardContent>
           </Card>
           <Card className="border border-green-200 bg-green-50">
@@ -103,12 +103,14 @@ export default function PagamentosRetirada() {
               {["", "pagamento_retirada", "pronto_retirada", "entregue", "cancelado"].map((s) => (
                 <button
                   key={s}
+                  type="button"
                   onClick={() => { setStatusFilter(s); setPage(1); }}
                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                     statusFilter === s
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
+                      ? "bg-pink-600 text-white border-pink-600"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-pink-300 hover:text-pink-700"
                   }`}
+                  aria-pressed={statusFilter === s}
                 >
                   {s === "" ? "Todos" : STATUS_LABELS[s]?.label ?? s}
                 </button>
@@ -121,18 +123,18 @@ export default function PagamentosRetirada() {
         <Card className="border border-gray-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Store className="w-4 h-4 text-orange-500" />
+              <Store className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Pedidos para Retirada
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-8 text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto" />
+                <div className="animate-spin w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full mx-auto" aria-label="Carregando pagamentos na retirada" />
               </div>
             ) : orders.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                 <p className="text-sm">Nenhum pedido de retirada encontrado</p>
               </div>
             ) : (
@@ -167,14 +169,14 @@ export default function PagamentosRetirada() {
                           <td className="px-4 py-3">
                             <Badge className={`text-xs ${paymentCfg.color}`}>{paymentCfg.label}</Badge>
                           </td>
-                          <td className="px-4 py-3 text-right font-semibold text-orange-600">
+                          <td className="px-4 py-3 text-right font-semibold text-pink-600">
                             {fmt(order.totalPrice || "0")}
                           </td>
                           <td className="px-4 py-3 text-center">
                             <Link href={`/admin/pedidos/${order.id}`}>
-                              <Button variant="ghost" size="sm" className="h-7 px-2">
-                                <Eye className="w-3.5 h-3.5" />
-                              </Button>
+                              <span className="inline-flex h-7 items-center rounded-md px-2 text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800" aria-label={`Ver pedido ${order.id}`}>
+                                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                              </span>
                             </Link>
                           </td>
                         </tr>
@@ -192,11 +194,11 @@ export default function PagamentosRetirada() {
                   Página {page} de {totalPages} ({total} registros)
                 </p>
                 <div className="flex gap-1">
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                    <ChevronLeft className="w-4 h-4" />
+                  <Button type="button" variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Página anterior">
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                    <ChevronRight className="w-4 h-4" />
+                  <Button type="button" variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Próxima página">
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
