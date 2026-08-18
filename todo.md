@@ -3414,3 +3414,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da central financeira de contas recebidas
 - [x] Padronizar controles de contas recebidas na identidade rosa e com acessibilidade
 - [x] Validar a central financeira de contas recebidas e salvar checkpoint publicável
+
+- [x] Revisar controles e indicadores da central financeira de fluxo de caixa
+- [x] Padronizar controles de fluxo de caixa na identidade rosa e com acessibilidade
+- [x] Validar a central financeira de fluxo de caixa e salvar checkpoint publicável
