@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,15 @@ interface CalculadoraGraficaProps {
   pairValue?: number;
   placeholder?: string;
   disabled?: boolean;
+}
+
+/** Anexa um dígito ao valor interno em centavos, sem depender da posição do cursor. */
+export function appendCalculatorDigit(currentValue: number, digit: string): number {
+  const normalizedCurrent = Number.isFinite(currentValue) && currentValue > 0
+    ? Math.trunc(currentValue)
+    : 0;
+  const rawNext = `${normalizedCurrent}${digit}`.replace(/^0+/, "") || "0";
+  return Number(rawNext.slice(0, 10));
 }
 
 /**
@@ -33,6 +42,9 @@ export function CalculadoraGrafica({
   placeholder = "0.00",
   disabled = false,
 }: CalculadoraGraficaProps) {
+  const fieldId = `calculadora-grafica-${useId().replace(/:/g, "")}`;
+  const helperId = `${fieldId}-ajuda`;
+  const skipNativeInput = useRef(false);
   // Estado interno para controlar a entrada
   const [displayValue, setDisplayValue] = useState<string>(formatValue(value));
   const [internalValue, setInternalValue] = useState<number>(value);
@@ -66,8 +78,15 @@ export function CalculadoraGrafica({
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     const key = e.key;
 
-    // Permitir apenas números, backspace, delete, tab, enter
-    if (!/^\d$/.test(key) && !["Backspace", "Delete", "Tab", "Enter"].includes(key)) {
+    if (/^\d$/.test(key)) {
+      e.preventDefault();
+      skipNativeInput.current = true;
+      handleDigit(key);
+      return;
+    }
+
+    // Permitir apenas backspace, delete, tab e enter além dos dígitos tratados acima.
+    if (!["Backspace", "Delete", "Tab", "Enter"].includes(key)) {
       e.preventDefault();
       return;
     }
@@ -81,7 +100,19 @@ export function CalculadoraGrafica({
     if (key === "Delete") {
       e.preventDefault();
       handleClear();
-      return;
+    }
+  }
+
+  /** Insere números sempre pela direita, preservando o modelo de calculadora financeira. */
+  function handleDigit(digit: string) {
+    const numValue = appendCalculatorDigit(internalValue, digit);
+    setInternalValue(numValue);
+    setDisplayValue(formatValue(numValue));
+    onChange(numValue);
+
+    if (onAreaChange && pairValue !== undefined) {
+      const area = (numValue / 100) * (pairValue / 100);
+      onAreaChange(Math.round(area * 100) / 100);
     }
   }
 
@@ -89,6 +120,11 @@ export function CalculadoraGrafica({
    * Trata entrada de números
    */
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    if (skipNativeInput.current) {
+      skipNativeInput.current = false;
+      return;
+    }
+
     let inputValue = e.target.value;
 
     // Remover tudo que não é número
@@ -155,12 +191,12 @@ export function CalculadoraGrafica({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={label} className="text-sm font-medium">
+      <Label htmlFor={fieldId} className="text-sm font-medium text-gray-800">
         {label}
       </Label>
       <div className="relative flex items-center gap-2">
         <Input
-          id={label}
+          id={fieldId}
           type="text"
           inputMode="numeric"
           placeholder={placeholder}
@@ -168,7 +204,8 @@ export function CalculadoraGrafica({
           onChange={handleInput}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          className="text-right font-mono text-lg font-semibold pr-10"
+          aria-describedby={helperId}
+          className="text-right font-mono text-lg font-semibold pr-10 focus-visible:border-pink-500 focus-visible:ring-pink-200"
         />
         {internalValue > 0 && (
           <Button
@@ -177,15 +214,16 @@ export function CalculadoraGrafica({
             size="sm"
             onClick={handleClear}
             disabled={disabled}
-            className="absolute right-1 h-8 w-8 p-0"
-            title="Limpar (Delete)"
+            className="absolute right-1 h-8 w-8 p-0 text-gray-500 hover:bg-pink-50 hover:text-pink-600 focus-visible:ring-pink-300"
+            aria-label={`Limpar ${label}`}
+            title={`Limpar ${label} (Delete)`}
           >
-            <Delete className="w-4 h-4 text-red-500" />
+            <Delete className="w-4 h-4" aria-hidden="true" />
           </Button>
         )}
       </div>
-      <p className="text-xs text-gray-500">
-        Digite números • Backspace para apagar • Delete para limpar
+      <p id={helperId} className="text-xs text-gray-500">
+        Digite somente números. O campo mantém duas casas decimais; use Backspace para apagar ou Delete para limpar.
       </p>
     </div>
   );

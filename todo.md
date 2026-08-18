@@ -3126,3 +3126,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o resumo técnico na identidade rosa e em uma estrutura acessível
 - [x] Melhorar a leitura de especificações, arquivos e prazos dos itens
 - [x] Validar estados e acessibilidade do resumo técnico de itens
+
+- [x] Revisar a calculadora gráfica pública para identificar o ajuste prioritário
+- [x] Padronizar os controles da calculadora na identidade rosa e em uma estrutura acessível
+- [x] Melhorar a leitura de medidas, área e estimativa de preço
+- [x] Validar cálculos, estados e comportamento responsivo da calculadora
