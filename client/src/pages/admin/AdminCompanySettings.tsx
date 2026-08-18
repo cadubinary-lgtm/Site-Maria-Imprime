@@ -235,7 +235,7 @@ export default function AdminCompanySettings() {
 
         {isLoading ? (
           <div className="flex min-h-64 items-center justify-center">
-            <Loader2 className="w-7 h-7 animate-spin text-pink-600" />
+            <Loader2 className="w-7 h-7 animate-spin text-pink-600" aria-label="Carregando dados da empresa" />
           </div>
         ) : (
           <div className="space-y-6">
@@ -315,7 +315,7 @@ export default function AdminCompanySettings() {
                         <Label className="text-xs text-gray-600">Dias de atendimento</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {[{ value: 0, label: "Dom" }, { value: 1, label: "Seg" }, { value: 2, label: "Ter" }, { value: 3, label: "Qua" }, { value: 4, label: "Qui" }, { value: 5, label: "Sex" }, { value: 6, label: "Sáb" }].map((day) => (
-                            <Button key={day.value} type="button" size="sm" variant={form.whatsappBusinessDays.includes(day.value) ? "default" : "outline"} className={form.whatsappBusinessDays.includes(day.value) ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => toggleBusinessDay(day.value)}>{day.label}</Button>
+                            <Button key={day.value} type="button" size="sm" variant={form.whatsappBusinessDays.includes(day.value) ? "default" : "outline"} className={form.whatsappBusinessDays.includes(day.value) ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => toggleBusinessDay(day.value)} aria-pressed={form.whatsappBusinessDays.includes(day.value)}>{day.label}</Button>
                           ))}
                         </div>
                       </div>
@@ -367,22 +367,22 @@ export default function AdminCompanySettings() {
                 <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
                   <Label htmlFor="instagramUrl" className="font-semibold text-gray-800">Instagram</Label>
                   <Input id="instagramUrl" type="url" value={form.instagramUrl} onChange={(event) => setField("instagramUrl", event.target.value)} placeholder="https://instagram.com/suaempresa" />
-                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.instagramActive ? "text-emerald-700" : "text-gray-500"}`}>{form.instagramActive ? "Ativo" : "Desativado"}</span><Switch checked={form.instagramActive} onCheckedChange={(checked) => setField("instagramActive", checked)} /></div>
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.instagramActive ? "text-emerald-700" : "text-gray-500"}`}>{form.instagramActive ? "Ativo" : "Desativado"}</span><Switch id="instagramActive" aria-label="Exibir Instagram no rodapé" checked={form.instagramActive} onCheckedChange={(checked) => setField("instagramActive", checked)} /></div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
                   <Label htmlFor="facebookUrl" className="font-semibold text-gray-800">Facebook</Label>
                   <Input id="facebookUrl" type="url" value={form.facebookUrl} onChange={(event) => setField("facebookUrl", event.target.value)} placeholder="https://facebook.com/suaempresa" />
-                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.facebookActive ? "text-emerald-700" : "text-gray-500"}`}>{form.facebookActive ? "Ativo" : "Desativado"}</span><Switch checked={form.facebookActive} onCheckedChange={(checked) => setField("facebookActive", checked)} /></div>
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.facebookActive ? "text-emerald-700" : "text-gray-500"}`}>{form.facebookActive ? "Ativo" : "Desativado"}</span><Switch id="facebookActive" aria-label="Exibir Facebook no rodapé" checked={form.facebookActive} onCheckedChange={(checked) => setField("facebookActive", checked)} /></div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
                   <Label htmlFor="youtubeUrl" className="font-semibold text-gray-800">YouTube</Label>
                   <Input id="youtubeUrl" type="url" value={form.youtubeUrl} onChange={(event) => setField("youtubeUrl", event.target.value)} placeholder="https://youtube.com/@suaempresa" />
-                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.youtubeActive ? "text-emerald-700" : "text-gray-500"}`}>{form.youtubeActive ? "Ativo" : "Desativado"}</span><Switch checked={form.youtubeActive} onCheckedChange={(checked) => setField("youtubeActive", checked)} /></div>
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.youtubeActive ? "text-emerald-700" : "text-gray-500"}`}>{form.youtubeActive ? "Ativo" : "Desativado"}</span><Switch id="youtubeActive" aria-label="Exibir YouTube no rodapé" checked={form.youtubeActive} onCheckedChange={(checked) => setField("youtubeActive", checked)} /></div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] items-center gap-3 rounded-lg border border-gray-200 p-3">
                   <Label htmlFor="otherSocialUrl" className="font-semibold text-gray-800">Outro link</Label>
                   <Input id="otherSocialUrl" type="url" value={form.otherSocialUrl} onChange={(event) => setField("otherSocialUrl", event.target.value)} placeholder="https://sua-rede.com/perfil" />
-                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.otherSocialActive ? "text-emerald-700" : "text-gray-500"}`}>{form.otherSocialActive ? "Ativo" : "Desativado"}</span><Switch checked={form.otherSocialActive} onCheckedChange={(checked) => setField("otherSocialActive", checked)} /></div>
+                  <div className="flex items-center gap-2 justify-end"><span className={`text-xs font-medium ${form.otherSocialActive ? "text-emerald-700" : "text-gray-500"}`}>{form.otherSocialActive ? "Ativo" : "Desativado"}</span><Switch id="otherSocialActive" aria-label="Exibir outro link no rodapé" checked={form.otherSocialActive} onCheckedChange={(checked) => setField("otherSocialActive", checked)} /></div>
                 </div>
               </CardContent>
             </Card>
@@ -404,14 +404,14 @@ export default function AdminCompanySettings() {
                       )}
                       {uploadingLogo && <div className="absolute inset-0 bg-white/75 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-pink-600" /></div>}
                     </div>
-                    <input ref={logoInputRef} type="file" accept={logoAccept} className="hidden" onChange={handleLogoUpload} />
+                    <input id="print-logo-upload" ref={logoInputRef} type="file" accept={logoAccept} className="hidden" onChange={handleLogoUpload} />
                     <div className="flex gap-2 mt-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo}>
-                        <Upload className="w-3.5 h-3.5 mr-1.5" /> Enviar logotipo
+                      <Button type="button" variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} aria-busy={uploadingLogo}>
+                        <Upload className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" /> Enviar logotipo
                       </Button>
                       {form.printLogoUrl && (
-                        <Button type="button" variant="ghost" size="sm" className="text-gray-500" onClick={() => { setField("printLogoUrl", ""); setField("printLogoKey", ""); }}>
-                          <X className="w-3.5 h-3.5 mr-1" /> Remover
+                      <Button type="button" variant="ghost" size="sm" className="text-gray-500 hover:text-pink-600" onClick={() => { setField("printLogoUrl", ""); setField("printLogoKey", ""); }}>
+                          <X className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Remover
                         </Button>
                       )}
                     </div>
@@ -425,7 +425,7 @@ export default function AdminCompanySettings() {
                 </div>
 
                 <div>
-                  <Label>Termos e Condições / Garantia da OS</Label>
+                  <Label htmlFor="os-terms-editor">Termos e Condições / Garantia da OS</Label>
                   <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden bg-white">
                     <div className="flex items-center gap-1 px-2 py-1.5 bg-gray-50 border-b border-gray-200">
                       <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 font-bold" title="Negrito" onMouseDown={(event) => event.preventDefault()} onClick={() => applyTermsFormat("bold")}>B</Button>
@@ -435,7 +435,11 @@ export default function AdminCompanySettings() {
                     </div>
                     <div
                       ref={termsEditorRef}
+                      id="os-terms-editor"
                       contentEditable
+                      role="textbox"
+                      aria-multiline="true"
+                      aria-label="Termos e condições da ordem de serviço"
                       suppressContentEditableWarning
                       onInput={(event) => setField("osTerms", event.currentTarget.innerHTML)}
                       className="min-h-36 p-3 text-sm text-gray-700 outline-none leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
@@ -448,8 +452,8 @@ export default function AdminCompanySettings() {
             </Card>
 
             <div className="flex justify-end">
-              <Button onClick={handleSave} disabled={saveSettings.isPending} className="bg-pink-600 hover:bg-pink-700">
-                {saveSettings.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</> : <><Save className="w-4 h-4 mr-2" /> Salvar Dados da Empresa</>}
+              <Button onClick={handleSave} disabled={saveSettings.isPending} aria-busy={saveSettings.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">
+                {saveSettings.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Salvando...</> : <><Save className="w-4 h-4 mr-2" aria-hidden="true" /> Salvar Dados da Empresa</>}
               </Button>
             </div>
           </div>
