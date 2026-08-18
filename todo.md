@@ -3236,3 +3236,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar etapas e ações de produção na identidade cinza e rosa
 - [x] Melhorar a leitura de pendências e continuidade operacional
 - [x] Validar etapas e acessibilidade do painel de status de produção
+
+- [x] Revisar o dashboard administrativo para identificar o ajuste prioritário
+- [x] Padronizar indicadores e atalhos na identidade cinza e rosa
+- [x] Melhorar a leitura de pendências e oportunidades operacionais
+- [x] Validar indicadores e acessibilidade do dashboard administrativo
