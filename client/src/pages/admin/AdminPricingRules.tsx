@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, Copy, Edit2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { toast } from "sonner";
 
 export function AdminPricingRules() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<any>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -61,7 +64,12 @@ export function AdminPricingRules() {
   });
 
   const deleteMutation = trpc.pricingRules.delete.useMutation({
-    onSuccess: () => refetchRules(),
+    onSuccess: () => {
+      refetchRules();
+      setRuleToDelete(null);
+      toast.success("Regra de precificação excluída.", { id: "pricing-rule-delete" });
+    },
+    onError: (error) => toast.error(`Não foi possível excluir a regra: ${error.message}`, { id: "pricing-rule-delete" }),
   });
 
   const duplicateMutation = trpc.pricingRules.duplicate.useMutation({
@@ -93,7 +101,7 @@ export function AdminPricingRules() {
 
   const handleSave = async () => {
     if (!formData.name || !formData.category) {
-      alert("Nome e categoria são obrigatórios");
+      toast.error("Nome e categoria são obrigatórios.", { id: "pricing-rule-save" });
       return;
     }
 
@@ -121,6 +129,10 @@ export function AdminPricingRules() {
       newExpanded.add(category);
     }
     setExpandedCategories(newExpanded);
+  };
+
+  const handleConfirmDelete = () => {
+    if (ruleToDelete) deleteMutation.mutate({ id: ruleToDelete.id });
   };
 
   return (
@@ -365,19 +377,13 @@ export function AdminPricingRules() {
                         <Copy className="w-4 h-4" />
                       </Button>
                       <Button
+                        type="button"
                         size="sm"
                         variant="destructive"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              `Tem certeza que deseja deletar "${rule.name}"?`
-                            )
-                          ) {
-                            deleteMutation.mutate({ id: rule.id });
-                          }
-                        }}
+                        onClick={() => setRuleToDelete(rule)}
+                        aria-label={`Excluir regra ${rule.name}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -396,6 +402,20 @@ export function AdminPricingRules() {
           </Button>
         </Card>
       )}
+      <AlertDialog open={Boolean(ruleToDelete)} onOpenChange={(open) => !open && setRuleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir a regra “{ruleToDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>Esta ação remove a regra de precificação e não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteMutation.isPending} aria-busy={deleteMutation.isPending} onClick={(event) => { event.preventDefault(); handleConfirmDelete(); }}>
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir regra"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </AdminLayout>
   );
