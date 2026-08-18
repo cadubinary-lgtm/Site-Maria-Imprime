@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const fmt = (v: number | string) =>
@@ -39,6 +40,7 @@ export default function NotasFiscais() {
   const [customerDoc, setCustomerDoc] = useState("");
   const [totalValue, setTotalValue] = useState("");
   const [description, setDescription] = useState("");
+  const [noteToCancel, setNoteToCancel] = useState<any | null>(null);
   const limit = 20;
 
   const { data, isLoading, refetch } = trpc.gestaoFiscal.listNotes.useQuery({
@@ -58,7 +60,7 @@ export default function NotasFiscais() {
   });
 
   const updateNoteStatus = trpc.gestaoFiscal.updateNoteStatus.useMutation({
-    onSuccess: () => { toast.success("Nota cancelada."); refetch(); },
+    onSuccess: () => { toast.success("Nota cancelada."); setNoteToCancel(null); refetch(); },
     onError: (e: any) => toast.error("Erro: " + e.message),
   });
 
@@ -78,6 +80,10 @@ export default function NotasFiscais() {
       notes: description || undefined,
       items: [],
     });
+  };
+
+  const handleConfirmCancel = () => {
+    if (noteToCancel) updateNoteStatus.mutate({ id: noteToCancel.id, status: "cancelled" });
   };
 
   return (
@@ -201,13 +207,11 @@ export default function NotasFiscais() {
                                   variant="ghost"
                                   size="sm"
                                   className="h-7 px-2 text-red-500 hover:text-red-700"
-                                  onClick={() => {
-                                    if (confirm("Cancelar esta nota fiscal?")) {
-                                      updateNoteStatus.mutate({ id: note.id, status: "cancelled" });
-                                    }
-                                  }}
+                                  onClick={() => setNoteToCancel(note)}
+                                  disabled={updateNoteStatus.isPending}
+                                  aria-label={`Cancelar nota fiscal ${note.noteNumber || `#${note.id}`}`}
                                 >
-                                  <XCircle className="w-3.5 h-3.5" />
+                                  <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
                                 </Button>
                               )}
                             </div>
@@ -321,6 +325,20 @@ export default function NotasFiscais() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={Boolean(noteToCancel)} onOpenChange={(open) => !open && setNoteToCancel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar a nota fiscal {noteToCancel?.noteNumber || (noteToCancel ? `#${noteToCancel.id}` : "")}?</AlertDialogTitle>
+            <AlertDialogDescription>O cancelamento será registrado na gestão fiscal e esta nota não poderá mais ser utilizada como emitida.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateNoteStatus.isPending}>Voltar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={updateNoteStatus.isPending} aria-busy={updateNoteStatus.isPending} onClick={(event) => { event.preventDefault(); handleConfirmCancel(); }}>
+              {updateNoteStatus.isPending ? "Cancelando..." : "Cancelar nota"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

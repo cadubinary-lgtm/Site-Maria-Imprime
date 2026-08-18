@@ -3287,3 +3287,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar exclusões unitárias e em lote na gestão de produtos
 - [x] Substituir confirmações nativas por diálogos acessíveis nas exclusões de produtos
 - [x] Validar exclusões de produtos e seus feedbacks
+
+- [x] Revisar o cancelamento de nota fiscal para identificar o ajuste prioritário
+- [x] Substituir a confirmação nativa de cancelamento de nota por diálogo acessível
+- [x] Validar o cancelamento de nota fiscal e seus feedbacks
