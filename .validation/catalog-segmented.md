@@ -1,0 +1,1 @@
+Na rota `/catalogo?segmentId=3`, o catálogo exibiu o segmento Lonas com título e resultado coerentes. O atalho de carrinho mostrou a contagem real de zero itens e os filtros laterais permaneceram sem ícones não configurados. O card da Lona Impressa preservou preço, promoção e link para o configurador.
