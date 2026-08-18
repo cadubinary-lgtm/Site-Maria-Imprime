@@ -48,9 +48,9 @@ export default function ContasReceber() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Link href="/admin/gerenciador-financeiro">
-            <Button variant="ghost" size="sm">
-              <ChevronLeft className="w-4 h-4 mr-1" /> Voltar
-            </Button>
+            <span className="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+              <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" /> Voltar
+            </span>
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Contas a Receber</h1>
@@ -90,8 +90,9 @@ export default function ContasReceber() {
           <CardContent className="p-4">
             <div className="flex gap-3">
               <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                 <Input
+                  aria-label="Buscar contas a receber"
                   placeholder="Buscar por cliente ou pedido..."
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -106,18 +107,18 @@ export default function ContasReceber() {
         <Card className="border border-gray-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-500" />
+              <Clock className="w-4 h-4 text-orange-500" aria-hidden="true" />
               Pedidos Pendentes de Pagamento
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-8 text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto" />
+                <div className="animate-spin w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full mx-auto" aria-label="Carregando contas a receber" />
               </div>
             ) : orders.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                 <p className="text-sm">Nenhum pedido pendente encontrado</p>
               </div>
             ) : (
@@ -149,14 +150,14 @@ export default function ContasReceber() {
                             <Badge className={`text-xs ${statusCfg.color}`}>{statusCfg.label}</Badge>
                           </td>
                           <td className="px-4 py-3 text-gray-600 capitalize">{order.paymentMethod || "—"}</td>
-                          <td className="px-4 py-3 text-right font-semibold text-orange-600">
+                          <td className="px-4 py-3 text-right font-semibold text-pink-600">
                             {fmt(order.totalPrice || "0")}
                           </td>
                           <td className="px-4 py-3 text-center">
                             <Link href={`/admin/pedidos/${order.id}`}>
-                              <Button variant="ghost" size="sm" className="h-7 px-2">
-                                <Eye className="w-3.5 h-3.5" />
-                              </Button>
+                              <span className="inline-flex h-7 items-center rounded-md px-2 text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800" aria-label={`Ver pedido ${order.id}`}>
+                                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                              </span>
                             </Link>
                           </td>
                         </tr>
@@ -174,11 +175,11 @@ export default function ContasReceber() {
                   Página {page} de {totalPages} ({total} registros)
                 </p>
                 <div className="flex gap-1">
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                    <ChevronLeft className="w-4 h-4" />
+                  <Button type="button" variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Página anterior">
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                    <ChevronRight className="w-4 h-4" />
+                  <Button type="button" variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Próxima página">
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
