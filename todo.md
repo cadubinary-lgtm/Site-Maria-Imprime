@@ -3398,3 +3398,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Classificar controles de marca e estados semânticos nos detalhes administrativos do pedido
 - [x] Padronizar controles de marca nos detalhes do pedido na identidade rosa e com acessibilidade
 - [x] Validar os detalhes administrativos do pedido e salvar checkpoint publicável
+
+- [x] Revisar controles de retirada e bloqueio de clientes de balcão
+- [x] Padronizar ações de clientes de balcão na identidade rosa e com acessibilidade
+- [x] Validar os controles de clientes de balcão e salvar checkpoint publicável

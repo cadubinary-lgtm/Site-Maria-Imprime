@@ -426,7 +426,7 @@ export default function ClientesBalcao() {
                           </td>
                           <td className="px-4 py-3">
                             <Select value={client.priceTier === "reseller" ? "reseller" : "final"} onValueChange={(priceTier: "final" | "reseller") => handlePriceTierChange(client, priceTier)} disabled={updatePriceTier.isPending}>
-                              <SelectTrigger className="h-8 min-w-28 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="h-8 min-w-28 text-xs" aria-label={`Tabela de preços de ${client.name}`}><SelectValue /></SelectTrigger>
                               <SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent>
                             </Select>
                           </td>
@@ -434,20 +434,26 @@ export default function ClientesBalcao() {
                             {client.allowStorePickup ? (
                               <Button
                                 variant="outline" size="sm"
-                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                type="button"
+                                className="text-green-700 border-green-200 hover:bg-green-50 text-xs"
                                 onClick={() => togglePickup.mutate({ clientId: client.id, allow: false })}
                                 disabled={togglePickup.isPending}
+                                aria-busy={togglePickup.isPending}
+                                aria-label={`Desativar retirada em loja para ${client.name}`}
                               >
-                                <Store className="w-3.5 h-3.5 mr-1" /> Liberado
+                                <Store className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Liberado
                               </Button>
                             ) : (
                               <Button
                                 variant="outline" size="sm"
-                                className="text-gray-400 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                                type="button"
+                                className="text-gray-500 border-gray-200 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200 text-xs"
                                 onClick={() => togglePickup.mutate({ clientId: client.id, allow: true })}
                                 disabled={togglePickup.isPending}
+                                aria-busy={togglePickup.isPending}
+                                aria-label={`Liberar retirada em loja para ${client.name}`}
                               >
-                                <StoreIcon className="w-3.5 h-3.5 mr-1" /> Liberar
+                                <StoreIcon className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Liberar
                               </Button>
                             )}
                           </td>
@@ -466,11 +472,14 @@ export default function ClientesBalcao() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="text-gray-500 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                                type="button"
+                                className={`text-xs ${client.isActive ? "text-red-600 border-red-200 hover:bg-red-50" : "text-green-700 border-green-200 hover:bg-green-50"}`}
                                 onClick={() => toggleBlocked.mutate({ clientId: client.id, data: { isActive: !client.isActive } })}
                                 disabled={toggleBlocked.isPending}
+                                aria-busy={toggleBlocked.isPending}
+                                aria-label={`${client.isActive ? "Bloquear" : "Desbloquear"} ${client.name}`}
                               >
-                                {client.isActive ? <><Ban className="w-3.5 h-3.5 mr-1" /> Bloquear</> : <><UserCheck className="w-3.5 h-3.5 mr-1" /> Desbloquear</>}
+                                {client.isActive ? <><Ban className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Bloquear</> : <><UserCheck className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Desbloquear</>}
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
