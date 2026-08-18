@@ -1,0 +1,1 @@
+O botão flutuante de WhatsApp permaneceu visível na experiência pública e passou a informar explicitamente que abre uma nova aba para falar com a Maria. A leitura assistiva reconhece o nome completo do controle, enquanto o ícone é decorativo.
