@@ -1719,8 +1719,9 @@ export default function AdminQuotationForm() {
               </div>
               {shippingMethod !== "pickup" && (
                 <div className="col-span-2">
-                  <label className="text-xs text-gray-500 font-medium">Endereço de entrega</label>
+                  <label htmlFor="quotation-delivery-address" className="text-xs text-gray-500 font-medium">Endereço de entrega</label>
                   <Textarea
+                    id="quotation-delivery-address"
                     value={deliveryAddress}
                     onChange={(e) => setDeliveryAddress(e.target.value)}
                     className="mt-0.5 text-sm"
@@ -1740,9 +1741,9 @@ export default function AdminQuotationForm() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-500 font-medium">Forma de pagamento</label>
+                <label htmlFor="quotation-payment-method" className="text-xs text-gray-500 font-medium">Forma de pagamento</label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger className="mt-0.5 h-9">
+                  <SelectTrigger id="quotation-payment-method" className="mt-0.5 h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1756,8 +1757,9 @@ export default function AdminQuotationForm() {
                 </Select>
               </div>
               <div>
-                <label className="text-xs text-gray-500 font-medium">Prazo de produção (dias)</label>
+                <label htmlFor="quotation-production-deadline" className="text-xs text-gray-500 font-medium">Prazo de produção (dias)</label>
                 <Input
+                  id="quotation-production-deadline"
                   type="number"
                   min={0}
                   value={productionDeadline}
@@ -1766,8 +1768,9 @@ export default function AdminQuotationForm() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 font-medium">Validade do orçamento (dias)</label>
+                <label htmlFor="quotation-validity" className="text-xs text-gray-500 font-medium">Validade do orçamento (dias)</label>
                 <Input
+                  id="quotation-validity"
                   type="number"
                   min={1}
                   value={quotationValidity}
@@ -1776,8 +1779,9 @@ export default function AdminQuotationForm() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-gray-500 font-medium">Observações / Termos personalizados</label>
+                <label htmlFor="quotation-commercial-notes" className="text-xs text-gray-500 font-medium">Observações / Termos personalizados</label>
                 <Textarea
+                  id="quotation-commercial-notes"
                   value={commercialNotes}
                   onChange={(e) => setCommercialNotes(e.target.value)}
                   className="mt-0.5 text-sm"
@@ -1807,8 +1811,9 @@ export default function AdminQuotationForm() {
                   {discountAmount > 0 && <span className="text-green-600 font-medium">- {fmt(discountAmount)}</span>}
                 </div>
                 <div className="flex gap-2">
+                  <label htmlFor="quotation-discount-type" className="sr-only">Tipo de desconto</label>
                   <Select value={discountType} onValueChange={(v) => setDiscountType(v as any)}>
-                    <SelectTrigger className="h-8 w-28 text-xs">
+                    <SelectTrigger id="quotation-discount-type" className="h-8 w-28 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1816,7 +1821,9 @@ export default function AdminQuotationForm() {
                       <SelectItem value="percentual">% percentual</SelectItem>
                     </SelectContent>
                   </Select>
+                  <label htmlFor="quotation-discount-value" className="sr-only">Valor do desconto</label>
                   <Input
+                    id="quotation-discount-value"
                     type="number"
                     min={0}
                     step={0.01}
@@ -1837,7 +1844,7 @@ export default function AdminQuotationForm() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5">
-                    <label className="text-xs text-gray-500 font-medium">Acerto Total</label>
+                    <label htmlFor="quotation-manual-total" className="text-xs text-gray-500 font-medium">Acerto Total</label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button type="button" aria-label="Como funciona o Acerto Total" className="text-gray-400 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600">
@@ -1858,6 +1865,7 @@ export default function AdminQuotationForm() {
                 </div>
                 <Input
                   ref={acertoTotalInputRef}
+                  id="quotation-manual-total"
                   aria-label="Acerto Total"
                   type="text"
                   inputMode="decimal"
@@ -1873,12 +1881,12 @@ export default function AdminQuotationForm() {
                   placeholder={`Calculado: ${fmt(calculatedTotal)}`}
                 />
                 {hasManualTotal && (
-                  <p className="text-xs text-amber-600 mt-0.5">⚠ Valor manual sobrepõe o cálculo automático</p>
+                  <p className="text-xs text-amber-600 mt-0.5" role="status">⚠ Valor manual sobrepõe o cálculo automático</p>
                 )}
               </div>
 
               <div className="border-t border-gray-100 pt-3">
-                <div className={`flex justify-between items-center rounded-lg px-4 py-3 text-white transition-colors ${hasManualTotal ? "bg-amber-500" : "bg-pink-600"}`}>
+                <div className={`flex justify-between items-center rounded-lg px-4 py-3 text-white transition-colors ${hasManualTotal ? "bg-amber-500" : "bg-pink-600"}`} aria-live="polite">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{hasManualTotal ? "TOTAL AJUSTADO" : "TOTAL"}</span>
                     {hasManualTotal && <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">Manual</span>}
@@ -1894,8 +1902,9 @@ export default function AdminQuotationForm() {
                 className="w-full bg-pink-600 hover:bg-pink-700 text-white gap-2"
                 onClick={() => handleSave(false)}
                 disabled={createMutation.isPending || updateMutation.isPending}
+                aria-busy={createMutation.isPending || updateMutation.isPending}
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-4 h-4" aria-hidden="true" />
                 {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar e Enviar"}
               </Button>
               <Button
@@ -1903,8 +1912,9 @@ export default function AdminQuotationForm() {
                 className="w-full gap-2"
                 onClick={() => handleSave(true)}
                 disabled={createMutation.isPending || updateMutation.isPending}
+                aria-busy={createMutation.isPending || updateMutation.isPending}
               >
-                <Save className="w-4 h-4" />
+                <Save className="w-4 h-4" aria-hidden="true" />
                 Salvar como Rascunho
               </Button>
             </div>
@@ -1970,7 +1980,7 @@ export default function AdminQuotationForm() {
             onClick={openCustomItemNameStep}
           >
             <div className="w-10 h-10 rounded bg-pink-100 flex items-center justify-center">
-              <Plus className="w-5 h-5 text-pink-600" />
+              <Plus className="w-5 h-5 text-pink-600" aria-hidden="true" />
             </div>
             <div>
               <p className="font-medium text-sm text-pink-800">Adicionar item personalizado</p>
@@ -1978,8 +1988,10 @@ export default function AdminQuotationForm() {
             </div>
           </button>
           <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <label htmlFor="quotation-product-search" className="sr-only">Buscar produto para adicionar ao orçamento</label>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
             <Input
+              id="quotation-product-search"
               placeholder="Buscar produto..."
               className="pl-9"
               value={productSearch}
@@ -2019,8 +2031,15 @@ export default function AdminQuotationForm() {
         <div
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center cursor-pointer"
           onClick={() => setLightboxImg(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Prévia ampliada da arte"
+          onKeyDown={(event) => { if (event.key === "Escape") setLightboxImg(null); }}
         >
-          <img src={lightboxImg} alt="Arte" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+          <div className="relative max-w-[90vw] max-h-[90vh]" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="absolute right-2 top-2 rounded-full bg-white/90 p-2 text-slate-700 shadow transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" onClick={() => setLightboxImg(null)} aria-label="Fechar prévia da arte"><X className="h-4 w-4" aria-hidden="true" /></button>
+            <img src={lightboxImg} alt="Arte" className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain" />
+          </div>
         </div>
       )}
     </div>
