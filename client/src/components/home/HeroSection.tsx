@@ -59,13 +59,16 @@ export function HeroSection() {
       return;
     }
 
-    setShowProductResults(normalizedQuery.length > 0);
+    if (normalizedQuery.length > 0) {
+      navigate(`/busca?q=${encodeURIComponent(normalizedQuery)}`);
+    }
   };
 
   return (
     <section
       className="w-full relative overflow-hidden"
       style={{ minHeight: "520px", backgroundColor: "#ffffff", fontFamily: FONT }}
+      aria-labelledby="hero-title"
     >
       {/* Fundo rosa blob */}
       <img
@@ -112,6 +115,7 @@ export function HeroSection() {
               fontFamily: FONT, paddingLeft: '18px',
             }}
             className="lg:text-left text-left"
+            id="hero-title"
           >
             Precisou imprimir?<br />
             Pede pra{" "}
@@ -156,6 +160,7 @@ export function HeroSection() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -174,6 +179,8 @@ export function HeroSection() {
                 onFocus={() => normalizedQuery.length > 0 && setShowProductResults(true)}
                 name="hero-product-search"
                 autoComplete="off"
+                aria-label="Buscar produtos no catálogo"
+                aria-autocomplete="list"
                 aria-busy={isSearching}
                 aria-expanded={showProductResults && normalizedQuery.length > 0}
                 aria-controls="hero-product-results"
@@ -190,6 +197,7 @@ export function HeroSection() {
               {isSearching && (
                 <span
                   aria-label="Buscando produtos"
+                  role="status"
                   className="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-gray-200 border-t-pink-600"
                 />
               )}
@@ -198,17 +206,22 @@ export function HeroSection() {
             {showProductResults && normalizedQuery.length > 0 && (
               <div
                 id="hero-product-results"
+                role="listbox"
+                aria-label="Resultados da busca de produtos"
                 className="absolute left-0 right-0 z-30 overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-lg"
                 style={{ top: "calc(100% + 8px)", maxHeight: "260px" }}
               >
                 {isSearching ? (
-                  <p className="px-5 py-3 text-sm text-gray-500">Buscando produtos...</p>
+                  <p role="status" className="px-5 py-3 text-sm text-gray-500">Buscando produtos...</p>
                 ) : productResults.length > 0 ? (
                   <div className="divide-y divide-gray-100">
                     {productResults.map((product) => (
                       <button
                         key={product.id}
                         type="button"
+                        role="option"
+                        aria-selected="false"
+                        aria-label={`${product.name}, ${formatProductPrice(product, priceAudience)}`}
                         onClick={() => selectProduct(product.id)}
                         className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-pink-50 focus:bg-pink-50 focus:outline-none"
                       >
@@ -234,7 +247,7 @@ export function HeroSection() {
                     ))}
                   </div>
                 ) : (
-                  <p className="px-5 py-4 text-sm text-gray-500">
+                  <p role="status" className="px-5 py-4 text-sm text-gray-500">
                     Nenhum produto encontrado para “{normalizedQuery}”. Tente outro termo.
                   </p>
                 )}
@@ -245,6 +258,8 @@ export function HeroSection() {
           {/* 4 Pilares */}
           <div
             className="pilares-row"
+            role="list"
+            aria-label="Pilares da Maria Imprime"
             style={{
               display: "flex",
               flexDirection: "row",
@@ -259,6 +274,7 @@ export function HeroSection() {
               <div
                 key={idx}
                 className="pilar-item"
+                role="listitem"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -271,7 +287,8 @@ export function HeroSection() {
               >
                 <img
                   src={pilar.icon}
-                  alt={pilar.label}
+                  alt=""
+                  aria-hidden="true"
                   className="pilar-icon"
                   style={{
                     width: "clamp(22px, 5vw, 36px)",

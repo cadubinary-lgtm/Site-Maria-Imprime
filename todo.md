@@ -3101,3 +3101,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir qualquer conteúdo de prova social não verificável por comunicação institucional adequada
 - [x] Padronizar a seção revisada na identidade rosa e em uma estrutura acessível
 - [x] Validar a conformidade e leitura da seção pública revisada
+
+- [x] Revisar a busca e as ações do banner principal para identificar o ajuste prioritário
+- [x] Padronizar a descoberta do banner na identidade rosa e nos controles reutilizáveis
+- [x] Melhorar a acessibilidade e orientação da busca no banner principal
+- [x] Validar os destinos e estados de continuidade do banner público
