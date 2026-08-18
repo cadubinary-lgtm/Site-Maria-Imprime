@@ -3186,3 +3186,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar ações e estados de segmentos na identidade cinza e rosa
 - [x] Melhorar a leitura de visibilidade e organização do catálogo
 - [x] Validar ações e acessibilidade da gestão de segmentos
+
+- [x] Revisar o painel administrativo de dados da empresa para identificar o ajuste prioritário
+- [x] Padronizar campos e ações de dados institucionais na identidade cinza e rosa
+- [x] Melhorar a leitura de contatos, endereço e presença pública
+- [x] Validar campos e acessibilidade do painel de dados da empresa
