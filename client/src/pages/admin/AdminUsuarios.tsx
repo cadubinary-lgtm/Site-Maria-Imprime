@@ -85,7 +85,7 @@ const PERMISSION_TREE = [
 ];
 
 const roleLabels: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  superadmin: { label: "Superadmin", icon: <ShieldCheck className="h-3 w-3" />, color: "bg-orange-100 text-orange-700 border-orange-200" },
+  superadmin: { label: "Superadmin", icon: <ShieldCheck className="h-3 w-3" aria-hidden="true" />, color: "bg-pink-100 text-pink-700 border-pink-200" },
   admin: { label: "Admin", icon: <Shield className="h-3 w-3" />, color: "bg-blue-100 text-blue-700 border-blue-200" },
   production: { label: "Produção", icon: <Wrench className="h-3 w-3" />, color: "bg-gray-100 text-gray-700 border-gray-200" },
 };
@@ -176,17 +176,20 @@ function PermissionsPanel({
                     type="button"
                     onClick={() => toggleGroup(group.key)}
                     className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                    aria-label={`${isOpen ? "Recolher" : "Expandir"} permissões de ${group.label}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`permissions-${group.key}`}
                   >
                     {isOpen
-                      ? <ChevronDown className="w-3.5 h-3.5" />
-                      : <ChevronRight className="w-3.5 h-3.5" />}
+                      ? <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+                      : <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />}
                   </button>
                 </div>
               )}
             </div>
             {/* Subitens (colapsáveis) */}
             {hasChildren && isOpen && (
-              <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
+              <div id={`permissions-${group.key}`} className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
                 {group.children.map((child) => (
                   <div key={child.key} className="flex items-center gap-3 ml-6">
                     <Checkbox
@@ -367,7 +370,7 @@ export default function AdminUsuarios() {
                             </td>
                             <td className="px-4 py-3">
                               {admin.role === "superadmin" ? (
-                                <span className="text-xs text-orange-600 font-medium">Acesso Total</span>
+                                <span className="text-xs text-pink-600 font-medium">Acesso Total</span>
                               ) : admin.permissions === null ? (
                                 <span className="text-xs text-green-600 font-medium">Acesso Total</span>
                               ) : admin.permissions.length === 0 ? (
@@ -463,16 +466,16 @@ export default function AdminUsuarios() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Dados do Operador</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">Nome completo</Label>
-                <Input value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} placeholder="Ex: João Silva" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+                <Label htmlFor="create-admin-name" className="text-sm font-medium text-gray-700">Nome completo</Label>
+                <Input id="create-admin-name" value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} placeholder="Ex: João Silva" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">E-mail</Label>
-                <Input type="email" value={createForm.email} onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))} placeholder="joao@empresa.com" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+                <Label htmlFor="create-admin-email" className="text-sm font-medium text-gray-700">E-mail</Label>
+                <Input id="create-admin-email" type="email" value={createForm.email} onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))} placeholder="joao@empresa.com" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">Senha <span className="text-gray-400 font-normal">(mín. 8 caracteres)</span></Label>
-                <Input type="password" value={createForm.password} onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••••" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
+                <Label htmlFor="create-admin-password" className="text-sm font-medium text-gray-700">Senha <span className="text-gray-400 font-normal">(mín. 8 caracteres)</span></Label>
+                <Input id="create-admin-password" type="password" value={createForm.password} onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••••" className="mt-1.5 focus:border-pink-400 focus:ring-pink-400" />
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-700">Perfil de Acesso</Label>
@@ -485,7 +488,7 @@ export default function AdminUsuarios() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="superadmin">
-                      <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-orange-500" /> Superadmin (acesso total)</span>
+                      <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-pink-600" aria-hidden="true" /> Superadmin (acesso total)</span>
                     </SelectItem>
                     <SelectItem value="admin">
                       <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-blue-500" /> Admin</span>
@@ -503,12 +506,12 @@ export default function AdminUsuarios() {
               <div className="pb-2 border-b border-gray-100 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Permissões de Menu</p>
                 {createForm.role === "superadmin" && (
-                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>
+                  <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>
                 )}
               </div>
               {createForm.role === "superadmin" ? (
                 <div className="flex flex-col items-center justify-center h-40 text-center text-gray-400">
-                  <ShieldCheck className="w-10 h-10 mb-2 text-orange-300" />
+                  <ShieldCheck className="w-10 h-10 mb-2 text-pink-300" aria-hidden="true" />
                   <p className="text-sm">Superadmin tem acesso irrestrito a todos os módulos do sistema.</p>
                 </div>
               ) : (
@@ -522,6 +525,7 @@ export default function AdminUsuarios() {
               className="bg-pink-600 hover:bg-pink-700 text-white"
               disabled={createAdmin.isPending}
               onClick={() => createAdmin.mutate({ ...createForm })}
+              aria-busy={createAdmin.isPending}
             >
               {createAdmin.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Criar Operador
@@ -547,12 +551,12 @@ export default function AdminUsuarios() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Dados do Operador</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">Nome completo</Label>
-                <Input value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} className="mt-1.5" />
+                <Label htmlFor="edit-admin-name" className="text-sm font-medium text-gray-700">Nome completo</Label>
+                <Input id="edit-admin-name" value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">E-mail</Label>
-                <Input type="email" value={editForm.email} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="mt-1.5" />
+                <Label htmlFor="edit-admin-email" className="text-sm font-medium text-gray-700">E-mail</Label>
+                <Input id="edit-admin-email" type="email" value={editForm.email} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="mt-1.5" />
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-700">Perfil de Acesso</Label>
@@ -562,7 +566,7 @@ export default function AdminUsuarios() {
                 }}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="superadmin"><span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-orange-500" /> Superadmin</span></SelectItem>
+                    <SelectItem value="superadmin"><span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-pink-600" aria-hidden="true" /> Superadmin</span></SelectItem>
                     <SelectItem value="admin"><span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-blue-500" /> Admin</span></SelectItem>
                     <SelectItem value="production"><span className="flex items-center gap-2"><Wrench className="w-3.5 h-3.5 text-gray-500" /> Produção</span></SelectItem>
                   </SelectContent>
@@ -575,11 +579,11 @@ export default function AdminUsuarios() {
             <div className="space-y-3">
               <div className="pb-2 border-b border-gray-100 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Permissões de Menu</p>
-                {editForm.role === "superadmin" && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>}
+                {editForm.role === "superadmin" && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full font-medium">Acesso Total</span>}
               </div>
               {editForm.role === "superadmin" ? (
                 <div className="flex flex-col items-center justify-center h-40 text-center text-gray-400">
-                  <ShieldCheck className="w-10 h-10 mb-2 text-orange-300" />
+                  <ShieldCheck className="w-10 h-10 mb-2 text-pink-300" aria-hidden="true" />
                   <p className="text-sm">Superadmin tem acesso irrestrito a todos os módulos.</p>
                 </div>
               ) : (
@@ -593,6 +597,7 @@ export default function AdminUsuarios() {
               className="bg-pink-600 hover:bg-pink-700 text-white"
               disabled={updateAdmin.isPending}
               onClick={() => updateAdmin.mutate({ id: editForm.id, name: editForm.name, email: editForm.email, role: editForm.role })}
+              aria-busy={updateAdmin.isPending}
             >
               {updateAdmin.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Salvar Alterações
@@ -634,8 +639,8 @@ export default function AdminUsuarios() {
             </DialogTitle>
           </DialogHeader>
           <div className="py-2">
-            <Label>Nova senha (mín. 8 caracteres)</Label>
-            <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="mt-1" />
+            <Label htmlFor="reset-admin-password">Nova senha (mín. 8 caracteres)</Label>
+            <Input id="reset-admin-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="mt-1" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetOpen(false)}>Cancelar</Button>
