@@ -35,6 +35,7 @@ import {
 import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import AdminLayout from "@/components/AdminLayout";
 import { formatCompanyAddress, formatCompanyContact } from "@/lib/companyQuotationDetails";
 import { getSelectedQuotationSpecifications } from "@/lib/quotationSpecifications";
 import { buildQuotationWhatsappUrl } from "@/lib/quotationWhatsappShare";
@@ -378,10 +379,10 @@ export default function AdminQuotationDetail() {
   });
 
   if (isLoading) {
-    return <div className="p-8 text-center text-gray-400">Carregando orçamento...</div>;
+    return <AdminLayout><div className="p-8 text-center text-gray-400" role="status">Carregando orçamento...</div></AdminLayout>;
   }
   if (!quotation) {
-    return <div className="p-8 text-center text-gray-400">Orçamento não encontrado.</div>;
+    return <AdminLayout><div className="p-8 text-center text-gray-400" role="status">Orçamento não encontrado.</div></AdminLayout>;
   }
 
   const q = quotation;
@@ -408,18 +409,19 @@ export default function AdminQuotationDetail() {
   };
 
   return (
+    <AdminLayout>
     <div className="admin-visual-system p-6 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">
-            <ArrowLeft className="w-4 h-4" /> {returnTarget.label}
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" /> {returnTarget.label}
           </Button>
           <div>
             <img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-8 object-contain mb-1" />
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-gray-900">{q.quotationNumber}</h1>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.cls}`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.cls}`} aria-live="polite">
                 {sc.label}
               </span>
               {alreadyConverted && (
@@ -435,10 +437,10 @@ export default function AdminQuotationDetail() {
         {/* Ações */}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
-            <Printer className="w-3.5 h-3.5" /> Imprimir PDF
+            <Printer className="w-3.5 h-3.5" aria-hidden="true" /> Imprimir PDF
           </Button>
           <Button variant="outline" size="sm" className="gap-1 text-green-700 border-green-200 hover:bg-green-50" onClick={shareQuotationOnWhatsapp}>
-            <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+            <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp
           </Button>
           <Button
             variant="outline"
@@ -452,14 +454,14 @@ export default function AdminQuotationDetail() {
               setShowEmailConfirm(true);
             }}
           >
-            <Mail className="w-3.5 h-3.5" /> E-mail
+            <Mail className="w-3.5 h-3.5" aria-hidden="true" /> E-mail
           </Button>
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => duplicate.mutate({ id: q.id })}>
-            <Copy className="w-3.5 h-3.5" /> Duplicar
+          <Button variant="outline" size="sm" className="gap-1" onClick={() => duplicate.mutate({ id: q.id })} aria-busy={duplicate.isPending}>
+            <Copy className="w-3.5 h-3.5" aria-hidden="true" /> Duplicar
           </Button>
           {isEditable && (
             <Button variant="outline" size="sm" className="gap-1" onClick={() => navigate(`/admin/orcamentos/${q.id}/editar`)}>
-              <Edit className="w-3.5 h-3.5" /> Editar
+              <Edit className="w-3.5 h-3.5" aria-hidden="true" /> Editar
             </Button>
           )}
           {isDraft && (
@@ -467,8 +469,9 @@ export default function AdminQuotationDetail() {
               size="sm"
               className="gap-1 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => updateStatus.mutate({ id: q.id, status: "enviado" })}
+              aria-busy={updateStatus.isPending}
             >
-              <Send className="w-3.5 h-3.5" /> Enviar ao Cliente
+              <Send className="w-3.5 h-3.5" aria-hidden="true" /> Enviar ao Cliente
             </Button>
           )}
           {q.status === "enviado" && (
@@ -477,16 +480,18 @@ export default function AdminQuotationDetail() {
                 size="sm"
                 className="gap-1 bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => updateStatus.mutate({ id: q.id, status: "aprovado" })}
+                aria-busy={updateStatus.isPending}
               >
-                <CheckCircle className="w-3.5 h-3.5" /> Aprovar
+                <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" /> Aprovar
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
                 onClick={() => updateStatus.mutate({ id: q.id, status: "recusado" })}
+                aria-busy={updateStatus.isPending}
               >
-                <XCircle className="w-3.5 h-3.5" /> Recusar
+                <XCircle className="w-3.5 h-3.5" aria-hidden="true" /> Recusar
               </Button>
             </>
           )}
@@ -496,7 +501,7 @@ export default function AdminQuotationDetail() {
               className="gap-1 bg-pink-600 hover:bg-pink-700 text-white"
               onClick={() => setShowConvertConfirm(true)}
             >
-              <ArrowRight className="w-3.5 h-3.5" /> Converter em Pedido
+              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /> Converter em Pedido
             </Button>
           )}
         </div>
@@ -533,15 +538,15 @@ export default function AdminQuotationDetail() {
         <div className="flex items-center gap-2 mb-2"><Package className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Produtos / Serviços</h2></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="bg-gray-50 border-y border-gray-100">{["", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => <th key={h} className="text-left py-1.5 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>)}</tr></thead>
+            <thead><tr className="bg-gray-50 border-y border-gray-100">{["Imagem", "Produto", "Especificações", "Arte", "Qtd", "Unit.", "Total"].map((h) => <th scope="col" key={h} className="text-left py-1.5 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h === "Imagem" ? <span className="sr-only">Imagem</span> : h}</th>)}</tr></thead>
             <tbody className="divide-y divide-gray-100">
               {(q.items ?? []).map((item: any) => {
                 const specPairs = buildSpecPairs(item.specifications);
                 return <tr key={item.id}>
-                  <td className="py-1.5 px-2">{item.productImage ? <img src={item.productImage} alt={item.productName} className="w-8 h-8 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.productImage)} /> : <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-300" /></div>}</td>
+                  <td className="py-1.5 px-2">{item.productImage ? <button type="button" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" onClick={() => setLightboxImg(item.productImage)} aria-label={`Ampliar imagem de ${item.productName}`}><img src={item.productImage} alt="" className="w-8 h-8 object-contain rounded border border-gray-100" /></button> : <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-300" aria-hidden="true" /></div>}</td>
                   <td className="py-1.5 px-2 font-semibold text-gray-800 align-top">{item.productName}</td>
                   <td className="py-1.5 px-2 text-[11px] text-gray-600 max-w-72 leading-4 align-top">{specPairs.length > 0 && <div className="space-y-0.5">{specPairs.map((pair, index) => <p key={index} className="block">{pair.label && <span className="text-gray-500">{pair.label} </span>}<span className={pair.label ? "text-gray-700" : "text-gray-600"}>{pair.value}</span></p>)}</div>}</td>
-                  <td className="py-1.5 px-2 align-top">{item.artFileUrl && <img src={item.artFileUrl} alt="Arte" className="w-10 h-10 object-contain rounded border border-gray-100 cursor-pointer" onClick={() => setLightboxImg(item.artFileUrl)} />}</td>
+                  <td className="py-1.5 px-2 align-top">{item.artFileUrl && <button type="button" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" onClick={() => setLightboxImg(item.artFileUrl)} aria-label={`Ampliar arte de ${item.productName}`}><img src={item.artFileUrl} alt="" className="w-10 h-10 object-contain rounded border border-gray-100" /></button>}</td>
                   <td className="py-1.5 px-2 text-center align-top">{item.quantity}</td><td className="py-1.5 px-2 text-right align-top">{fmt(item.unitPrice)}</td><td className="py-1.5 px-2 font-semibold text-right align-top">{fmt(item.totalPrice)}</td>
                 </tr>;
               })}
@@ -551,7 +556,7 @@ export default function AdminQuotationDetail() {
       </section>
 
       <section className="bg-white rounded-lg border border-gray-200 p-3">
-        <div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div>{Number(q.discountAmount ?? 0) > 0 && <div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div>}<div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-3 py-1 min-h-7 mt-2"><span className="font-semibold">TOTAL</span><span className="text-sm font-bold">{fmt(q.total)}</span></div></div>
+        <div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-medium">{fmt(Number(q.total ?? 0) - Number(q.shippingPrice ?? 0) + Number(q.discountAmount ?? 0))}</span></div>{Number(q.discountAmount ?? 0) > 0 && <div className="flex justify-between text-green-600"><span>Desconto</span><span className="font-medium">- {fmt(q.discountAmount)}</span></div>}<div className="flex justify-between"><span className="text-gray-600">Frete / Entrega</span><span className="font-medium">{fmt(q.shippingPrice)}</span></div><div className="flex justify-between items-center bg-pink-600 text-white rounded-lg px-3 py-1 min-h-7 mt-2" aria-live="polite"><span className="font-semibold">TOTAL</span><span className="text-sm font-bold">{fmt(q.total)}</span></div></div>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -575,6 +580,7 @@ export default function AdminQuotationDetail() {
             <AlertDialogAction
               className="bg-pink-600 hover:bg-pink-700"
               onClick={() => convertToOrder.mutate({ id: q.id })}
+              aria-busy={convertToOrder.isPending}
             >
               Confirmar Conversão
             </AlertDialogAction>
@@ -596,6 +602,7 @@ export default function AdminQuotationDetail() {
               className="bg-pink-600 hover:bg-pink-700"
               disabled={sendEmail.isPending}
               onClick={() => sendEmail.mutate({ id: q.id })}
+              aria-busy={sendEmail.isPending}
             >
               {sendEmail.isPending ? "Enviando..." : "Confirmar envio"}
             </AlertDialogAction>
@@ -608,10 +615,17 @@ export default function AdminQuotationDetail() {
         <div
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center cursor-pointer"
           onClick={() => setLightboxImg(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Prévia ampliada da imagem"
         >
-          <img src={lightboxImg} alt="Arte" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+          <div className="relative max-h-[90vh] max-w-[90vw]" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="absolute right-2 top-2 rounded-full bg-white/90 p-2 text-slate-700 shadow transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" onClick={() => setLightboxImg(null)} aria-label="Fechar prévia da imagem">×</button>
+            <img src={lightboxImg} alt="Arte" className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain" />
+          </div>
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 }

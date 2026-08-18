@@ -3211,3 +3211,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar campos e ações do orçamento na identidade cinza e rosa
 - [x] Melhorar a leitura de valores, condições e resumo comercial
 - [x] Validar campos e acessibilidade do formulário de orçamento
+
+- [x] Revisar os detalhes administrativos de orçamento para identificar o ajuste prioritário
+- [x] Padronizar status e ações comerciais na identidade cinza e rosa
+- [x] Melhorar a leitura de itens, valores e continuidade do orçamento
+- [x] Validar status e acessibilidade dos detalhes administrativos de orçamento
