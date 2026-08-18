@@ -1,0 +1,1 @@
+Foram validados dois estados da confirmação de pedido. Um número inexistente apresentou o cartão orientativo com ações para catálogo ou início. Um pedido recente exibiu confirmação de sucesso, status atual em rosa, timeline de acompanhamento, resumo financeiro e ações para continuar comprando ou acessar os pedidos. Nenhum dado foi alterado durante a validação.
