@@ -3438,3 +3438,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles, alertas e estados da gestão administrativa de envios
 - [x] Padronizar controles da gestão de envios na identidade rosa e com acessibilidade
 - [x] Validar a gestão administrativa de envios e salvar checkpoint publicável
+
+- [x] Verificar controles e indicadores da página alternativa de relatórios financeiros
+- [x] Padronizar controles da página alternativa de relatórios na identidade rosa
+- [x] Validar a página alternativa de relatórios e salvar checkpoint publicável

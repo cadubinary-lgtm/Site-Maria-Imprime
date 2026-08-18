@@ -57,9 +57,9 @@ export default function RelatoriosFinanceiros() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin/gerenciador-financeiro">
-              <Button variant="ghost" size="sm">
-                <ChevronLeft className="w-4 h-4 mr-1" /> Voltar
-              </Button>
+              <span className="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+                <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" /> Voltar
+              </span>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Relatórios Financeiros</h1>
@@ -74,10 +74,12 @@ export default function RelatoriosFinanceiros() {
             {(["month", "quarter", "year"] as const).map((p) => (
               <button
                 key={p}
+                type="button"
                 onClick={() => setPeriod(p)}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  period === p ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                  period === p ? "bg-pink-600 text-white" : "bg-white text-gray-600 hover:bg-pink-50 hover:text-pink-700"
                 }`}
+                aria-pressed={period === p}
               >
                 {p === "month" ? "Mês" : p === "quarter" ? "Trimestre" : "Ano"}
               </button>
@@ -90,10 +92,12 @@ export default function RelatoriosFinanceiros() {
             ] as const).map((r) => (
               <button
                 key={r.key}
+                type="button"
                 onClick={() => setReportType(r.key)}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  reportType === r.key ? "bg-blue-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                  reportType === r.key ? "bg-pink-600 text-white" : "bg-white text-gray-600 hover:bg-pink-50 hover:text-pink-700"
                 }`}
+                aria-pressed={reportType === r.key}
               >
                 {r.label}
               </button>
@@ -133,7 +137,7 @@ export default function RelatoriosFinanceiros() {
           <CardContent>
             {isLoading ? (
               <div className="h-48 flex items-center justify-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full" />
+                <div className="animate-spin w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full" aria-label="Carregando relatório financeiro" />
               </div>
             ) : reportType === "payment_methods" && reportData.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -176,7 +180,7 @@ export default function RelatoriosFinanceiros() {
             ) : (
               <div className="h-48 flex items-center justify-center text-gray-400">
                 <div className="text-center">
-                  <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                   <p className="text-sm">Nenhum dado no período</p>
                 </div>
               </div>
@@ -195,7 +199,7 @@ export default function RelatoriosFinanceiros() {
           <CardContent className="p-0">
             {orders.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                 <p className="text-sm">Nenhum pedido no período</p>
               </div>
             ) : (
@@ -217,7 +221,7 @@ export default function RelatoriosFinanceiros() {
                         <td className="px-4 py-3 text-gray-700">{order.guestName || order.deliveryFullName || "—"}</td>
                         <td className="px-4 py-3 text-gray-600">{fmtDate(order.createdAt)}</td>
                         <td className="px-4 py-3 text-gray-600 capitalize">{order.paymentMethod || "—"}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-orange-600">
+                        <td className="px-4 py-3 text-right font-semibold text-pink-600">
                           {fmt(parseFloat(order.totalPrice || "0"))}
                         </td>
                       </tr>
