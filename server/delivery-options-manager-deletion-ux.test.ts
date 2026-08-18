@@ -16,4 +16,10 @@ describe("prazos de produção do produto", () => {
     expect(source).toContain("aria-busy={deleteMutation.isPending}");
     expect(source).toContain("setOptionToDelete(null)");
   });
+
+  it("usa a identidade rosa nos controles principais de prazo", () => {
+    expect(source).toContain("bg-pink-600 hover:bg-pink-700 text-white");
+    expect(source).not.toContain("bg-orange-500");
+    expect(source).not.toContain("hover:bg-orange-600");
+  });
 });

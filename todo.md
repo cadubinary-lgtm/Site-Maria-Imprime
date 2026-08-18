@@ -3306,3 +3306,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o uso visual de laranja na gestão de notas fiscais
 - [x] Padronizar controles e destaques não semânticos das notas fiscais na identidade rosa
 - [x] Validar a consistência visual e acessibilidade das notas fiscais
+
+- [x] Revisar controles legados do gerenciador de prazos de produção
+- [x] Padronizar controles não semânticos do gerenciador de prazos na identidade rosa
+- [x] Validar a consistência visual e acessibilidade dos prazos de produção
