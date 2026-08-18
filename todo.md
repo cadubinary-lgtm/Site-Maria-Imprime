@@ -3005,3 +3005,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar a consistência visual, a acessibilidade e os fluxos após o ajuste administrativo
 - [x] Padronizar itens ativos e indicadores da navegação administrativa na paleta cinza e rosa
 - [x] Adicionar estados ARIA aos grupos retráteis do menu lateral administrativo
+- [x] Revisar o tratamento de produtos sem imagem nos cards da página inicial
+- [x] Criar uma apresentação visual consistente para cards de produtos sem imagem
+- [x] Validar a vitrine de produtos em diferentes larguras sem alterar links ou preços
