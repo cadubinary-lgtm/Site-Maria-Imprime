@@ -3036,3 +3036,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a navegação e os estados visuais das páginas documentais na identidade rosa
 - [x] Melhorar a leitura e acessibilidade do conteúdo documental público
 - [x] Validar as rotas e ações de continuidade da documentação pública
+
+- [x] Revisar a área pública de conta do cliente para identificar o ajuste prioritário
+- [x] Padronizar a área de conta na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar os estados vazios e a acessibilidade da conta do cliente
+- [x] Validar a navegação e as ações de continuidade da área de conta

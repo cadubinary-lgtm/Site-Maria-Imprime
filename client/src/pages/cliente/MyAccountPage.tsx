@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 import {
   LogOut,
   User,
@@ -204,7 +205,7 @@ export default function MyAccountPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando dados da conta" />
       </div>
     );
   }
@@ -222,7 +223,7 @@ export default function MyAccountPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Minha Conta</h1>
             <p className="text-gray-500 mt-1" translate="no">
-              Olá, <span className="font-semibold text-orange-600">{customer.firstName}</span>! Bem-vindo(a) de volta.
+              Olá, <span className="font-semibold text-pink-600">{customer.firstName}</span>! Bem-vindo(a) de volta.
             </p>
           </div>
           <Button
@@ -273,7 +274,7 @@ export default function MyAccountPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-orange-500" />
+                  <Package className="w-5 h-5 text-pink-600" />
                   Histórico de Pedidos
                 </CardTitle>
                 <CardDescription>Acompanhe o status dos seus pedidos</CardDescription>
@@ -281,25 +282,25 @@ export default function MyAccountPage() {
               <CardContent>
                 {ordersLoading ? (
                   <div className="flex justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                    <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando pedidos" />
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500 font-medium">Você ainda não fez nenhum pedido</p>
                     <p className="text-gray-400 text-sm mt-1">Explore nosso catálogo e faça seu primeiro pedido!</p>
-                    <Button asChild className="mt-6 bg-orange-500 hover:bg-orange-600">
+                    <Button asChild className={`mt-6 ${HOME_PRIMARY_ACTION_CLASS}`}>
                       <Link href="/catalogo">Ver Catálogo</Link>
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {orders.map((order: any) => (
-                      <Link key={order.id} href={`/pedido/${order.orderNumber}`}>
-                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-orange-200 hover:bg-orange-50/30 transition cursor-pointer group">
+                      <Link key={order.id} href={`/pedido/${order.orderNumber}`} aria-label={`Ver detalhes do pedido ${order.orderNumber}`}>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-pink-200 hover:bg-pink-50/30 transition cursor-pointer group">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                              <Package className="w-5 h-5 text-orange-600" />
+                            <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                              <Package className="w-5 h-5 text-pink-600" />
                             </div>
                             <div>
                               <p className="font-semibold text-gray-900">
@@ -325,7 +326,7 @@ export default function MyAccountPage() {
                             >
                               {STATUS_LABELS[order.status] || order.status}
                             </span>
-                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition" />
+                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-pink-600 transition" />
                           </div>
                         </div>
                       </Link>
@@ -343,7 +344,7 @@ export default function MyAccountPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5 text-orange-500" />
+                      <User className="w-5 h-5 text-pink-600" />
                       Informações Pessoais
                     </CardTitle>
                     <CardDescription>Seus dados de cadastro</CardDescription>
@@ -353,7 +354,7 @@ export default function MyAccountPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2"
+                      className={`flex items-center gap-2 ${HOME_SECONDARY_ACTION_CLASS}`}
                     >
                       <Edit2 className="w-4 h-4" />
                       Editar
@@ -364,7 +365,7 @@ export default function MyAccountPage() {
                         size="sm"
                         onClick={handleSave}
                         disabled={updateProfile.isPending}
-                        className="bg-orange-500 hover:bg-orange-600"
+                        className={HOME_PRIMARY_ACTION_CLASS}
                       >
                         {updateProfile.isPending ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -373,7 +374,7 @@ export default function MyAccountPage() {
                         )}
                         <span className="ml-1">Salvar</span>
                       </Button>
-                      <Button variant="outline" size="sm" onClick={handleCancel}>
+                      <Button variant="outline" size="sm" onClick={handleCancel} aria-label="Cancelar alterações do perfil">
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
@@ -385,22 +386,22 @@ export default function MyAccountPage() {
                 {/* ── Dados Pessoais ── */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <User className="w-4 h-4 text-orange-500" />
+                    <User className="w-4 h-4 text-pink-600" />
                     Dados Pessoais
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <Label>Nome <span className="text-red-500">*</span></Label>
+                      <Label htmlFor="profile-first-name">Nome <span className="text-red-500">*</span></Label>
                       {isEditing ? (
-                        <Input value={editForm.firstName} onChange={setField("firstName")} placeholder="João" />
+                        <Input id="profile-first-name" value={editForm.firstName} onChange={setField("firstName")} placeholder="João" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">{displayProfile.firstName}</p>
                       )}
                     </div>
                     <div className="space-y-1">
-                      <Label>Sobrenome <span className="text-red-500">*</span></Label>
+                      <Label htmlFor="profile-last-name">Sobrenome <span className="text-red-500">*</span></Label>
                       {isEditing ? (
-                        <Input value={editForm.lastName} onChange={setField("lastName")} placeholder="Silva" />
+                        <Input id="profile-last-name" value={editForm.lastName} onChange={setField("lastName")} placeholder="Silva" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">{displayProfile.lastName}</p>
                       )}
@@ -425,9 +426,9 @@ export default function MyAccountPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <Label>Telefone / WhatsApp</Label>
+                      <Label htmlFor="profile-phone">Telefone / WhatsApp</Label>
                       {isEditing ? (
-                        <Input value={editForm.phone} onChange={setField("phone")} placeholder="(11) 99999-9999" />
+                        <Input id="profile-phone" value={editForm.phone} onChange={setField("phone")} placeholder="(11) 99999-9999" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">
                           {formatPhoneDisplay((displayProfile as any).phone)}
@@ -436,9 +437,9 @@ export default function MyAccountPage() {
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
-                      <Label>CPF / CNPJ</Label>
+                      <Label htmlFor="profile-cpf-cnpj">CPF / CNPJ</Label>
                       {isEditing ? (
-                        <Input value={editForm.cpfCnpj} onChange={setField("cpfCnpj")} placeholder="000.000.000-00" />
+                        <Input id="profile-cpf-cnpj" value={editForm.cpfCnpj} onChange={setField("cpfCnpj")} placeholder="000.000.000-00" />
                       ) : (
                         <p className="text-gray-900 font-medium py-2">
                           {formatCpfCnpjDisplay(profile?.cpfCnpj)}
@@ -453,7 +454,7 @@ export default function MyAccountPage() {
                 {/* ── Endereço de Entrega ── */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-500" />
+                    <MapPin className="w-4 h-4 text-pink-600" />
                     Endereço de Entrega
                     {!isEditing && (
                       <span className="text-xs text-gray-400 font-normal ml-1">
@@ -466,9 +467,10 @@ export default function MyAccountPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* CEP com busca automática */}
                       <div className="space-y-1 md:col-span-2">
-                        <Label>CEP</Label>
+                        <Label htmlFor="profile-zip-code">CEP</Label>
                         <div className="relative">
                           <Input
+                            id="profile-zip-code"
                             value={editForm.addressZipCode}
                             onChange={setField("addressZipCode")}
                             onBlur={handleCepBlur}
@@ -476,40 +478,41 @@ export default function MyAccountPage() {
                             maxLength={9}
                           />
                           {cepLoading && (
-                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-pulse text-orange-500" />
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-pulse text-pink-600" aria-label="Consultando CEP" />
                           )}
                         </div>
                         <p className="text-xs text-gray-400">Digite o CEP para preencher o endereço automaticamente</p>
                       </div>
 
                       <div className="space-y-1 md:col-span-2">
-                        <Label>Rua / Avenida</Label>
-                        <Input value={editForm.addressStreet} onChange={setField("addressStreet")} placeholder="Nome da rua" />
+                        <Label htmlFor="profile-street">Rua / Avenida</Label>
+                        <Input id="profile-street" value={editForm.addressStreet} onChange={setField("addressStreet")} placeholder="Nome da rua" />
                       </div>
 
                       <div className="space-y-1">
-                        <Label>Número</Label>
-                        <Input value={editForm.addressNumber} onChange={setField("addressNumber")} placeholder="123" />
+                        <Label htmlFor="profile-address-number">Número</Label>
+                        <Input id="profile-address-number" value={editForm.addressNumber} onChange={setField("addressNumber")} placeholder="123" />
                       </div>
 
                       <div className="space-y-1">
-                        <Label>Complemento</Label>
-                        <Input value={editForm.addressComplement} onChange={setField("addressComplement")} placeholder="Apto, sala, bloco..." />
+                        <Label htmlFor="profile-address-complement">Complemento</Label>
+                        <Input id="profile-address-complement" value={editForm.addressComplement} onChange={setField("addressComplement")} placeholder="Apto, sala, bloco..." />
                       </div>
 
                       <div className="space-y-1">
-                        <Label>Bairro</Label>
-                        <Input value={editForm.addressNeighborhood} onChange={setField("addressNeighborhood")} placeholder="Bairro" />
+                        <Label htmlFor="profile-address-neighborhood">Bairro</Label>
+                        <Input id="profile-address-neighborhood" value={editForm.addressNeighborhood} onChange={setField("addressNeighborhood")} placeholder="Bairro" />
                       </div>
 
                       <div className="space-y-1">
-                        <Label>Cidade</Label>
-                        <Input value={editForm.addressCity} onChange={setField("addressCity")} placeholder="Cidade" />
+                        <Label htmlFor="profile-address-city">Cidade</Label>
+                        <Input id="profile-address-city" value={editForm.addressCity} onChange={setField("addressCity")} placeholder="Cidade" />
                       </div>
 
                       <div className="space-y-1">
-                        <Label>UF</Label>
+                        <Label htmlFor="profile-address-state">UF</Label>
                         <Input
+                          id="profile-address-state"
                           value={editForm.addressState}
                           onChange={setField("addressState")}
                           placeholder="SP"
@@ -556,7 +559,7 @@ export default function MyAccountPage() {
                       })}
                     </span>
                   </p>
-                  <Button asChild variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm" className={HOME_SECONDARY_ACTION_CLASS}>
                     <Link href="/recuperar-senha">Alterar Senha</Link>
                   </Button>
                 </div>

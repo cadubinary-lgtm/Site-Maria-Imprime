@@ -1,0 +1,1 @@
+Ao acessar `/minha-conta` sem uma sessão de cliente, a aplicação encaminha corretamente para `/login-cliente`, sem expor dados pessoais. A página de login apresenta campos de e-mail e senha rotulados, além de rotas de recuperação, cadastro e reenvio de confirmação. A identidade rosa foi mantida no fluxo de entrada.
