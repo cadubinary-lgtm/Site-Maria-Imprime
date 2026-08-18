@@ -70,11 +70,10 @@ function ArtStateTag({ state }: { state: ArtState }) {
   return null;
 }
 
-function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragStart, onDragEnd, onSelect, isSelected }: {
+function KanbanCard({ order, artState, onAdvance, isUpdating, onDragStart, onDragEnd, onSelect, isSelected }: {
   order: Order;
   artState: ArtState;
   onAdvance: (id: number, nextStatus: string) => void;
-  onCancel: (id: number) => void;
   isUpdating: boolean;
   onDragStart: (orderId: number) => void;
   onDragEnd: () => void;
@@ -196,20 +195,6 @@ export default function AdminKanban() {
       refetch();
     } catch {
       toast.error("Erro ao atualizar status");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const handleCancel = async (orderId: number) => {
-    if (!confirm("Cancelar este pedido?")) return;
-    setUpdatingId(orderId);
-    try {
-      await updateStatusMutation.mutateAsync({ orderId, newStatus: "cancelado" });
-      toast.success("Pedido cancelado");
-      refetch();
-    } catch {
-      toast.error("Erro ao cancelar pedido");
     } finally {
       setUpdatingId(null);
     }
@@ -444,7 +429,6 @@ export default function AdminKanban() {
                        order={order}
                        artState={(artStatusMap as Record<number, ArtState>)[order.id] ?? "none"}
                        onAdvance={handleAdvance}
-                       onCancel={handleCancel}
                        isUpdating={updatingId === order.id}
                        onDragStart={handleDragStart}
                        onDragEnd={handleDragEnd}
