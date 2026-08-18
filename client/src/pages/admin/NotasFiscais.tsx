@@ -102,7 +102,7 @@ export default function NotasFiscais() {
               <p className="text-sm text-gray-500">Gestão de notas fiscais emitidas</p>
             </div>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-pink-600 hover:bg-pink-700 text-white">
             <Plus className="w-4 h-4 mr-2" /> Nova Nota
           </Button>
         </div>
@@ -121,8 +121,8 @@ export default function NotasFiscais() {
               onClick={() => { setStatusFilter(s.key); setPage(1); }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 statusFilter === s.key
-                  ? "bg-orange-500 text-white border-orange-500"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
+                  ? "bg-pink-600 text-white border-pink-600"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-pink-300 hover:text-pink-700"
               }`}
             >
               {s.label}
@@ -134,14 +134,14 @@ export default function NotasFiscais() {
         <Card className="border border-gray-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Receipt className="w-4 h-4 text-orange-500" />
+              <Receipt className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Notas Fiscais ({total})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-8 text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto" />
+                <div className="animate-spin w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full mx-auto" role="status" aria-label="Carregando notas fiscais" />
               </div>
             ) : notes.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
@@ -174,7 +174,7 @@ export default function NotasFiscais() {
                           </td>
                           <td className="px-4 py-3 text-gray-600">
                             {note.orderId ? (
-                              <Link href={`/admin/pedidos/${note.orderId}`} className="text-orange-600 hover:underline">
+                              <Link href={`/admin/pedidos/${note.orderId}`} className="text-pink-600 hover:text-pink-700 hover:underline">
                                 #{note.orderId}
                               </Link>
                             ) : "—"}
@@ -257,7 +257,7 @@ export default function NotasFiscais() {
                     key={t}
                     onClick={() => setNoteType(t)}
                     className={`flex-1 py-2 rounded-lg text-sm font-medium border uppercase transition-colors ${
-                      noteType === t ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-600 border-gray-200"
+                      noteType === t ? "bg-pink-600 text-white border-pink-600" : "bg-white text-gray-600 border-gray-200 hover:border-pink-300 hover:text-pink-700"
                     }`}
                   >
                     {t}
@@ -318,7 +318,7 @@ export default function NotasFiscais() {
             <Button
               onClick={handleCreate}
               disabled={createNote.isPending}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-pink-600 hover:bg-pink-700 text-white"
             >
               {createNote.isPending ? "Criando..." : "Criar Nota"}
             </Button>
