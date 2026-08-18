@@ -3263,3 +3263,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Melhorar a leitura de condições, efeitos e estados de regras
 - [x] Validar acessibilidade e fluxo operacional da gestão de regras
 - [x] Implementar persistência real para editar, ativar e excluir regras de atributos
+
+- [x] Verificar o construtor alternativo de regras exposto nas rotas administrativas
+- [x] Unificar as rotas de regras no gerenciador operacional persistente
+- [x] Validar a ausência de fluxos duplicados que simulavam regras
