@@ -3326,3 +3326,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles legados das configurações fiscais
 - [x] Padronizar controles fiscais não semânticos na identidade rosa
 - [x] Validar a consistência visual e acessibilidade das configurações fiscais
+
+- [x] Revisar controles e estados da gestão de transportadoras
+- [x] Padronizar controles logísticos não semânticos na identidade rosa
+- [x] Validar a consistência visual e acessibilidade da gestão de transportadoras
