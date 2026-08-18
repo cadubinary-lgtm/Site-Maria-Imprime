@@ -95,13 +95,13 @@ export default function FinanceiroDashboard() {
           <p className="text-sm text-gray-500 mt-1">Visão geral das finanças da Gráfica Ponto Digital</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-1" />
+          <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />
             Atualizar
           </Button>
           {notifs && notifs.total > 0 && (
             <Badge variant="destructive" className="flex items-center gap-1">
-              <Bell className="h-3 w-3" />
+              <Bell className="h-3 w-3" aria-hidden="true" />
               {notifs.total} alertas
             </Badge>
           )}
@@ -115,8 +115,10 @@ export default function FinanceiroDashboard() {
             key={p}
             variant={periodo === p ? "default" : "outline"}
             size="sm"
+            type="button"
             onClick={() => setPeriodo(p)}
-            className={periodo === p ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+            className={periodo === p ? "bg-pink-600 hover:bg-pink-700 text-white" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+            aria-pressed={periodo === p}
           >
             {PERIODO_LABELS[p]}
           </Button>
@@ -135,7 +137,7 @@ export default function FinanceiroDashboard() {
                   : "bg-yellow-50 border-yellow-200 text-yellow-800"
               }`}
             >
-              <Bell className="h-4 w-4 flex-shrink-0" />
+              <Bell className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm font-medium">{alerta.mensagem}</span>
             </div>
           ))}
@@ -161,7 +163,7 @@ export default function FinanceiroDashboard() {
                     {m.suffix && <p className="text-xs text-gray-400">{m.suffix}</p>}
                   </div>
                   <div className={`p-2 rounded-lg ${m.bg}`}>
-                    <m.icon className={`h-5 w-5 ${m.color}`} />
+                    <m.icon className={`h-5 w-5 ${m.color}`} aria-hidden="true" />
                   </div>
                 </div>
               </CardContent>
@@ -175,7 +177,7 @@ export default function FinanceiroDashboard() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <BarChart2 className="h-5 w-5 text-orange-500" />
+              <BarChart2 className="h-5 w-5 text-pink-600" aria-hidden="true" />
               Evolução Financeira Mensal
             </CardTitle>
           </CardHeader>
@@ -190,9 +192,10 @@ export default function FinanceiroDashboard() {
                       {formatCurrency(m.receita).replace("R$\u00a0", "R$")}
                     </span>
                     <div
-                      className="w-full rounded-t-md bg-orange-400 transition-all"
+                      className="w-full rounded-t-md bg-pink-400 transition-all"
                       style={{ height: `${height}%` }}
-                      title={`${m.mes}: ${formatCurrency(m.receita)}`}
+                      role="img"
+                      aria-label={`${m.mes}: ${formatCurrency(m.receita)}`}
                     />
                     <span className="text-xs text-gray-400">{m.mes}</span>
                   </div>
@@ -216,13 +219,13 @@ export default function FinanceiroDashboard() {
             <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${link.bg}`}>
-                  <link.icon className={`h-5 w-5 ${link.color}`} />
+                  <link.icon className={`h-5 w-5 ${link.color}`} aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">{link.label}</p>
                   <p className="text-xs text-gray-500">{link.desc}</p>
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-gray-400 ml-auto" />
+                <ArrowUpRight className="h-4 w-4 text-gray-400 ml-auto" aria-hidden="true" />
               </CardContent>
             </Card>
           </Link>
