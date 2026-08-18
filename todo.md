@@ -3014,3 +3014,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir contagens coerentes para todos os produtos e para o segmento filtrado
 - [x] Tornar os filtros de segmento explicitamente selecionáveis para tecnologias assistivas
 - [x] Remover a exibição de ícones não configurados nos filtros laterais de segmentos
+- [x] Revisar o catálogo segmentado para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento do catálogo sem alterar preços, links ou regras de segmento
+- [x] Validar filtros, resultados e navegação do catálogo segmentado
+- [x] Vincular o indicador de carrinho do catálogo à contagem real de itens
+- [x] Tornar os filtros de segmento e a paginação do catálogo explicitamente acessíveis
+- [x] Remover ícones de segmento não configurados na barra lateral do catálogo

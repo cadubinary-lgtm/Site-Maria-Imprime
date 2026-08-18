@@ -9,6 +9,7 @@ import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide
 import { getProductPrice } from "@/lib/productPrice";
 import { Slider } from "@/components/ui/slider";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { PublicProductCard } from "@/components/products/PublicProductCard";
 
 const ITEMS_PER_PAGE = 12;
@@ -41,7 +42,8 @@ export default function Catalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [cartCount, setCartCount] = useState(0);
+  const { openCart } = useCartDrawer();
+  const { data: cartCount = 0 } = trpc.cart.getCount.useQuery();
 
   // Quando os segmentos carregarem, se não há seleção, usar o primeiro
   useEffect(() => {
@@ -83,10 +85,6 @@ export default function Catalog() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const handleAddToCart = (productName: string) => {
-    setCartCount((c) => c + 1);
-  };
-
   const handleSegmentChange = (segId: number) => {
     setSelectedSegment(segId);
     setCurrentPage(1);
@@ -119,16 +117,21 @@ export default function Catalog() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 bg-pink-50 px-4 py-2 rounded-lg border border-pink-100">
+          <button
+            type="button"
+            onClick={openCart}
+            aria-label={`Abrir carrinho com ${cartCount} ${cartCount === 1 ? "item" : "itens"}`}
+            className="flex items-center gap-2 rounded-lg border border-pink-100 bg-pink-50 px-4 py-2 transition-colors hover:bg-pink-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+          >
             <ShoppingCart className="w-5 h-5 text-pink-500" />
             <span className="font-semibold text-pink-600">{cartCount} itens</span>
-          </div>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar com Filtros */}
           <div className="lg:col-span-1">
-            <Card className="border-gray-200 sticky top-4">
+            <Card className="border-gray-200 lg:sticky lg:top-4">
               <CardContent className="p-6 space-y-6">
                 {/* Segmentos */}
                 <div className="space-y-3">
@@ -140,16 +143,15 @@ export default function Catalog() {
                       segments.map((seg) => (
                         <button
                           key={seg.id}
+                          type="button"
                           onClick={() => handleSegmentChange(seg.id)}
+                          aria-pressed={activeSegment === seg.id}
                           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${
                             activeSegment === seg.id
                               ? "bg-pink-600 text-white shadow-sm"
                               : "bg-gray-50 text-gray-700 hover:bg-pink-50 hover:text-pink-700 border border-gray-200"
                           }`}
                         >
-                          {seg.icon && (
-                            <img src={seg.icon} alt={seg.label} className="w-5 h-5 flex-shrink-0" />
-                          )}
                           <span className="truncate">{seg.label}</span>
                         </button>
                       ))
@@ -181,6 +183,7 @@ export default function Catalog() {
                   <Slider
                     value={priceRange}
                     onValueChange={setPriceRange}
+                    aria-label="Faixa de preço"
                     min={0}
                     max={1000}
                     step={50}
@@ -193,7 +196,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Contagem */}
-                <div className="bg-pink-50 p-3 rounded-lg text-sm text-pink-700 border border-pink-100">
+                <div className="bg-pink-50 p-3 rounded-lg text-sm text-pink-700 border border-pink-100" aria-live="polite">
                   <p>
                     <strong>{filteredProducts.length}</strong> produto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
                   </p>
@@ -214,6 +217,7 @@ export default function Catalog() {
                   <p className="text-gray-600 mb-4">Nenhum produto encontrado com os filtros selecionados.</p>
                   <Button
                     variant="outline"
+                    type="button"
                     onClick={() => {
                       setSearchTerm("");
                       setPriceRange([0, 1000]);
@@ -238,8 +242,10 @@ export default function Catalog() {
                   <div className="flex justify-center items-center gap-4">
                     <Button
                       variant="outline"
+                      type="button"
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
+                      aria-label="Página anterior"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -248,9 +254,12 @@ export default function Catalog() {
                       {Array.from({ length: totalPages }).map((_, i) => (
                         <Button
                           key={i + 1}
+                          type="button"
                           variant={currentPage === i + 1 ? "default" : "outline"}
                           size="sm"
                           onClick={() => setCurrentPage(i + 1)}
+                          aria-label={`Ir para página ${i + 1}`}
+                          aria-current={currentPage === i + 1 ? "page" : undefined}
                           className={currentPage === i + 1 ? "bg-pink-600 hover:bg-pink-700" : ""}
                         >
                           {i + 1}
@@ -260,8 +269,10 @@ export default function Catalog() {
 
                     <Button
                       variant="outline"
+                      type="button"
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
+                      aria-label="Próxima página"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
