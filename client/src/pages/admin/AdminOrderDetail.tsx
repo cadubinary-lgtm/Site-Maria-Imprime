@@ -1099,6 +1099,20 @@ export function OrderDetailContent({
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+  const formatPaymentMethod = (method?: string | null) => {
+    const normalized = String(method ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const labels: Record<string, string> = {
+      pix: "Pix",
+      card: "Cartão de débito/crédito",
+      credit_card: "Cartão de débito/crédito",
+      debit_card: "Cartão de débito/crédito",
+      pagar_na_retirada: "Pagamento na retirada",
+      cash_on_pickup: "Pagamento na retirada",
+      boleto: "Boleto",
+      mercado_pago: "Mercado Pago",
+    };
+    return labels[normalized] || String(method).replace(/_/g, " ");
+  };
   const fmtDate = (d: any) =>
     d ? new Date(d).toLocaleDateString("pt-BR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "-";
 
@@ -1119,6 +1133,8 @@ export function OrderDetailContent({
   }
 
   const o = order as any;
+  const shippingAmount = Number(o.shippingPrice ?? 0);
+  const hasShipping = Boolean(o.shippingMethod || o.shippingLabel || o.shippingPrice !== null && o.shippingPrice !== undefined);
   const sc = ORDER_STATUS[o.status] ?? ORDER_STATUS.analisando;
   const STATUS_STEPS = getAdminStatusSteps(o);
   const currentStepIndex = STATUS_STEPS.findIndex((s: any) => s.key === o.status);
@@ -1652,46 +1668,48 @@ export function OrderDetailContent({
           {!isProductionRole && <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5" /> Resumo Financeiro
+                <DollarSign className="w-5 h-5 text-pink-600" aria-hidden="true" /> Resumo financeiro
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+              <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50" role="list" aria-label="Composição financeira do pedido">
                 {o.items && o.items.length > 0 && (() => {
                   const subtotal = o.items.reduce((acc: number, item: any) =>
                     acc + parseFloat(item.priceAtOrder) * item.quantity, 0);
                   return (
-                    <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                    <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3" role="listitem">
                       <div className="flex items-center gap-2">
-                        <Package className="w-3.5 h-3.5 text-pink-500" />
+                        <Package className="w-3.5 h-3.5 text-pink-500" aria-hidden="true" />
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Subtotal Produtos</p>
                       </div>
                       <p className="text-sm font-semibold text-gray-800">{fmt(subtotal)}</p>
                     </div>
                   );
                 })()}
-                {o.shippingPrice && parseFloat(o.shippingPrice) > 0 && (
-                  <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                {hasShipping && (
+                  <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3" role="listitem">
                     <div className="flex items-center gap-2">
-                      <Truck className="w-3.5 h-3.5 text-blue-500" />
+                      <Truck className="w-3.5 h-3.5 text-pink-500" aria-hidden="true" />
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Frete</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-800">{fmt(parseFloat(o.shippingPrice))}</p>
+                    <p className={`text-sm font-semibold ${Number.isFinite(shippingAmount) && shippingAmount <= 0 ? "text-green-700" : "text-gray-800"}`}>
+                      {Number.isFinite(shippingAmount) && shippingAmount <= 0 ? "Grátis" : fmt(shippingAmount)}
+                    </p>
                   </div>
                 )}
-                <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+                <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3" role="listitem">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-3.5 h-3.5 text-green-600" />
+                    <DollarSign className="w-3.5 h-3.5 text-pink-600" aria-hidden="true" />
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total do Pedido</p>
                   </div>
-                  <p className="text-base font-bold text-indigo-600">{fmt(parseFloat(o.totalPrice))}</p>
+                  <p className="text-base font-bold text-pink-700">{fmt(parseFloat(o.totalPrice))}</p>
                 </div>
-                <div className="px-4 py-3 grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-3 px-4 py-3 sm:grid-cols-2" role="listitem">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-500" aria-hidden="true" />
                     <div>
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pagamento</p>
-                      <span className={`inline-block mt-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
                         o.paymentStatus === "pago" ? "bg-emerald-100 text-emerald-800"
                         : o.paymentStatus === "cancelado" ? "bg-red-100 text-red-800"
                         : "bg-yellow-100 text-yellow-800"
@@ -1702,10 +1720,10 @@ export function OrderDetailContent({
                   </div>
                   {o.paymentMethod && (
                     <div className="flex items-start gap-2">
-                      <DollarSign className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <DollarSign className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                       <div>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Método</p>
-                        <p className="text-sm font-semibold text-gray-800 capitalize">{o.paymentMethod}</p>
+                        <p className="text-sm font-semibold text-gray-800">{formatPaymentMethod(o.paymentMethod)}</p>
                       </div>
                     </div>
                   )}
