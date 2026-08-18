@@ -326,6 +326,8 @@ export default function AdminPanel() {
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
           }`}
+          role="status"
+          aria-live="polite"
         >
           {notification.type === 'success' ? (
             <CheckCircle className="w-5 h-5" />
@@ -344,8 +346,8 @@ export default function AdminPanel() {
           </div>
           <Dialog open={isCreatingProduct} onOpenChange={setIsCreatingProduct}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="bg-pink-600 hover:bg-pink-700 text-white">
+                <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
                 Novo Produto
               </Button>
             </DialogTrigger>
@@ -354,26 +356,29 @@ export default function AdminPanel() {
                 <DialogTitle>Criar Novo Produto</DialogTitle>
                 <DialogDescription>Preencha os dados do novo produto para adicioná-lo ao catálogo.</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); handleCreateProduct(); }}>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Nome *</label>
+                  <label htmlFor="admin-panel-product-name" className="block text-sm font-medium mb-1">Nome *</label>
                   <Input
+                    id="admin-panel-product-name"
                     value={newProductForm.name}
                     onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })}
                     placeholder="Nome do produto"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Descrição</label>
+                  <label htmlFor="admin-panel-product-description" className="block text-sm font-medium mb-1">Descrição</label>
                   <Input
+                    id="admin-panel-product-description"
                     value={newProductForm.description}
                     onChange={(e) => setNewProductForm({ ...newProductForm, description: e.target.value })}
                     placeholder="Descrição do produto"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Preço *</label>
+                  <label htmlFor="admin-panel-product-price" className="block text-sm font-medium mb-1">Preço *</label>
                   <Input
+                    id="admin-panel-product-price"
                     type="number"
                     step="0.01"
                     value={newProductForm.price}
@@ -382,9 +387,9 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Tipo de Cobrança</label>
+                  <label htmlFor="admin-panel-calculation-type" className="block text-sm font-medium mb-1">Tipo de Cobrança</label>
                   <Select value={(newProductForm as any).calculationType || 'unidade'} onValueChange={(val) => setNewProductForm({ ...newProductForm, calculationType: val } as any)}>
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-panel-calculation-type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -457,9 +462,9 @@ export default function AdminPanel() {
                   onChange={setDeliveryOptions}
                 />
                 <div>
-                  <label className="block text-sm font-medium mb-1">Segmento</label>
+                  <label htmlFor="admin-panel-segment" className="block text-sm font-medium mb-1">Segmento</label>
                   <Select value={newProductForm.segment} onValueChange={(val) => setNewProductForm({ ...newProductForm, segment: val })}>
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-panel-segment">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -474,14 +479,17 @@ export default function AdminPanel() {
                 <div>
                   <label className="block text-sm font-medium mb-1">Foto</label>
                   <button
+                    type="button"
                     onClick={() => createFileInputRef.current?.click()}
                     className="w-full flex items-center justify-center gap-2 p-2 border border-gray-300 rounded hover:bg-gray-50"
+                    aria-label={newProductForm.imageUrl ? "Mudar foto do produto" : "Selecionar foto do produto"}
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="w-4 h-4" aria-hidden="true" />
                     {newProductForm.imageUrl ? 'Mudar foto' : 'Selecionar foto'}
                   </button>
                   <input
                     ref={createFileInputRef}
+                    aria-label="Selecionar arquivo de foto do produto"
                     type="file"
                     accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                     onChange={handleCreatePhotoUpload}
@@ -494,19 +502,21 @@ export default function AdminPanel() {
                 <div className="flex gap-2 pt-4">
                   <Button
                     variant="outline"
+                    type="button"
                     onClick={() => setIsCreatingProduct(false)}
                     className="flex-1"
                   >
                     Cancelar
                   </Button>
                   <Button
-                    onClick={handleCreateProduct}
+                    type="submit"
                     disabled={createProductMutation.isPending}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white"
+                    aria-busy={createProductMutation.isPending}
                   >
                     {createProductMutation.isPending ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                         Criando...
                       </>
                     ) : (
@@ -514,7 +524,7 @@ export default function AdminPanel() {
                     )}
                   </Button>
                 </div>
-              </div>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
@@ -539,17 +549,18 @@ export default function AdminPanel() {
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Buscar Produto</label>
+              <label htmlFor="admin-panel-search" className="block text-sm font-medium mb-2">Buscar Produto</label>
               <Input
+                id="admin-panel-search"
                 placeholder="Nome ou descrição..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Filtrar por Segmento</label>
+              <label htmlFor="admin-panel-segment-filter" className="block text-sm font-medium mb-2">Filtrar por Segmento</label>
               <Select value={selectedSegment || 'all'} onValueChange={(val) => setSelectedSegment(val === 'all' ? '' : val)}>
-                <SelectTrigger>
+                <SelectTrigger id="admin-panel-segment-filter">
                   <SelectValue placeholder="Todos os segmentos" />
                 </SelectTrigger>
                 <SelectContent>
@@ -577,7 +588,7 @@ export default function AdminPanel() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {isLoading ? (
             <div className="p-8 flex justify-center">
-              <Loader2 className="w-8 h-8 animate-spin" />
+              <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando produtos" />
             </div>
           ) : (
             <Table>
@@ -620,7 +631,7 @@ export default function AdminPanel() {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm">
+                        <span className="bg-pink-100 text-pink-700 px-2 py-1 rounded text-sm">
                           {SEGMENT_LABELS[product.segment] || product.segment}
                         </span>
                       )}
@@ -652,10 +663,12 @@ export default function AdminPanel() {
                     <TableCell>
                       {editingId === product.id ? (
                         <button
+                          type="button"
                           onClick={() => fileInputRef.current?.click()}
                           className="flex items-center justify-center gap-1 p-1 border border-gray-300 rounded hover:bg-gray-50"
+                          aria-label={`Alterar foto de ${product.name}`}
                         >
-                          <Camera className="w-4 h-4" />
+                          <Camera className="w-4 h-4" aria-hidden="true" />
                         </button>
                       ) : (
                         <span className="text-gray-600 text-sm">
@@ -677,15 +690,17 @@ export default function AdminPanel() {
                             size="sm"
                             onClick={() => handleSaveProduct(product.id)}
                             className="bg-green-600 hover:bg-green-700"
+                            aria-label={`Salvar alterações de ${product.name}`}
                           >
-                            <Save className="w-4 h-4" />
+                            <Save className="w-4 h-4" aria-hidden="true" />
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={handleCancel}
+                            aria-label={`Cancelar edição de ${product.name}`}
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-4 h-4" aria-hidden="true" />
                           </Button>
                         </div>
                       ) : (
@@ -693,8 +708,9 @@ export default function AdminPanel() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleEditClick(product)}
+                          aria-label={`Editar ${product.name}`}
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4" aria-hidden="true" />
                         </Button>
                       )}
                     </TableCell>

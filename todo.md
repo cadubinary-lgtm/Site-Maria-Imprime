@@ -3370,3 +3370,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da configuração inicial administrativa
 - [x] Padronizar a configuração inicial na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade da configuração inicial
+
+- [x] Revisar controles, indicadores e estados do painel administrativo geral
+- [x] Padronizar controles do painel na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade do painel administrativo geral
