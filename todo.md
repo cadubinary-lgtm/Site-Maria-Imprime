@@ -3046,3 +3046,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a confirmação de pedido na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a orientação e acessibilidade das informações de confirmação
 - [x] Validar as ações de continuidade após a confirmação do pedido
+
+- [x] Revisar o acesso público à conta para identificar o ajuste prioritário
+- [x] Padronizar login, cadastro e recuperação na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar mensagens, validações e acessibilidade dos formulários de acesso
+- [x] Validar a navegação de continuidade entre acesso, cadastro e recuperação

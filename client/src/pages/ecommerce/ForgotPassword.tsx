@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, Loader2, ArrowLeft, Mail, KeyRound } from "lucide-react";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+
+function maskCpfCnpj(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "não informado";
+  return `•••• ${digits.slice(-4)}`;
+}
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -27,9 +34,9 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-xl border-0">
-          <CardContent className="pt-12 pb-12 text-center">
+          <CardContent className="pt-12 pb-12 text-center" aria-live="polite">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
@@ -38,7 +45,7 @@ export default function ForgotPassword() {
               Se o email <strong>{email}</strong> estiver cadastrado, você receberá as instruções em breve.
             </p>
             <p className="text-gray-400 text-sm mb-8">Verifique também a pasta de spam.</p>
-            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
+            <Button asChild className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}>
               <Link href="/login-cliente">Voltar ao Login</Link>
             </Button>
           </CardContent>
@@ -48,10 +55,10 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/login-cliente" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 text-sm mb-4">
+          <Link href="/login-cliente" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-700 text-sm mb-4">
             <ArrowLeft className="w-4 h-4" />
             Voltar ao login
           </Link>
@@ -62,7 +69,7 @@ export default function ForgotPassword() {
         <Card className="shadow-xl border-0">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
-              <KeyRound className="w-5 h-5 text-orange-500" />
+              <KeyRound className="w-5 h-5 text-pink-600" />
               Esqueci minha senha
             </CardTitle>
             <CardDescription>Digite seu email cadastrado</CardDescription>
@@ -74,7 +81,7 @@ export default function ForgotPassword() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              {cpfReference && <p className="rounded-md bg-orange-50 px-3 py-2 text-xs text-orange-700">CPF/CNPJ informado: <strong>{cpfReference}</strong>. Digite abaixo o e-mail vinculado a este cadastro.</p>}
+              {cpfReference && <p className="rounded-md bg-yellow-50 px-3 py-2 text-xs text-yellow-800">CPF/CNPJ informado: <strong>{maskCpfCnpj(cpfReference)}</strong>. Digite abaixo o e-mail vinculado a este cadastro.</p>}
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
@@ -89,13 +96,13 @@ export default function ForgotPassword() {
                     autoComplete="email"
                     className="pl-10"
                   />
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
+                className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
                 disabled={requestReset.isPending}
               >
                 {requestReset.isPending ? (

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, LogIn, ArrowLeft, Mail } from "lucide-react";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const EMAIL_NOT_VERIFIED_MSG = "Confirme seu email antes de fazer login";
 
@@ -47,11 +48,11 @@ export default function CustomerLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Voltar */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 text-sm mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-700 text-sm mb-4">
             <ArrowLeft className="w-4 h-4" />
             Voltar para o site
           </Link>
@@ -62,7 +63,7 @@ export default function CustomerLogin() {
         <Card className="shadow-xl border-0">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
-              <LogIn className="w-5 h-5 text-orange-500" />
+              <LogIn className="w-5 h-5 text-pink-600" />
               Login
             </CardTitle>
             <CardDescription>Entre com seu email e senha</CardDescription>
@@ -76,9 +77,9 @@ export default function CustomerLogin() {
               )}
 
               {emailNotVerified && (
-                <Alert className="border-orange-200 bg-orange-50">
-                  <Mail className="h-4 w-4 text-orange-500" />
-                  <AlertDescription className="text-orange-800">
+                <Alert className="border-yellow-200 bg-yellow-50">
+                  <Mail className="h-4 w-4 text-yellow-600" />
+                  <AlertDescription className="text-yellow-800">
                     <p className="font-medium mb-1">Email não confirmado</p>
                     <p className="text-sm mb-3">
                       Enviamos um link de confirmação para <strong>{form.email}</strong>.
@@ -86,7 +87,7 @@ export default function CustomerLogin() {
                     </p>
                     <Link
                       href={`/reenviar-verificacao?email=${encodeURIComponent(form.email)}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700 underline"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-pink-600 hover:text-pink-700 underline"
                     >
                       Reenviar email de confirmação
                     </Link>
@@ -108,14 +109,14 @@ export default function CustomerLogin() {
                     autoComplete="email"
                     className="pl-10"
                   />
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Senha</Label>
-                  <Link href="/recuperar-senha" className="text-xs text-orange-600 hover:underline">
+                  <Link href="/recuperar-senha" className="text-xs text-pink-600 hover:underline">
                     Esqueci minha senha
                   </Link>
                 </div>
@@ -134,7 +135,9 @@ export default function CustomerLogin() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-gray-400 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -143,7 +146,7 @@ export default function CustomerLogin() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
+                className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
                 disabled={login.isPending}
               >
                 {login.isPending ? (
@@ -167,14 +170,14 @@ export default function CustomerLogin() {
 
               <p className="text-center text-sm text-gray-500">
                 Não tem conta?{" "}
-                <Link href="/cadastro" className="text-orange-600 font-medium hover:underline">
+                <Link href="/cadastro" className="text-pink-600 font-medium hover:underline">
                   Criar conta grátis
                 </Link>
               </p>
 
               <p className="text-center text-xs text-gray-400 pt-2">
                 Não recebeu o email de confirmação?{" "}
-                <Link href="/reenviar-verificacao" className="text-orange-600 hover:underline">
+                <Link href="/reenviar-verificacao" className="text-pink-600 hover:underline">
                   Reenviar
                 </Link>
               </p>
