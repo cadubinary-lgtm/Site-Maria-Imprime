@@ -105,17 +105,19 @@ export default function GerenciadorFinanceiroDashboard() {
               {(["today", "week", "month"] as const).map((p) => (
                 <button
                   key={p}
+                  type="button"
                   onClick={() => setPeriod(p)}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                    period === p ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                    period === p ? "bg-pink-600 text-white" : "bg-white text-gray-600 hover:bg-pink-50 hover:text-pink-700"
                   }`}
+                  aria-pressed={period === p}
                 >
                   {p === "today" ? "Hoje" : p === "week" ? "7 dias" : "Mês"}
                 </button>
               ))}
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="w-4 h-4" />
+            <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50" aria-label="Atualizar dashboard financeiro">
+              <RefreshCw className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -182,10 +184,8 @@ export default function GerenciadorFinanceiroDashboard() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold text-gray-900">Fluxo de Receita</CardTitle>
-                <Link href="/admin/gerenciador-financeiro/fluxo">
-                  <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700">
-                    Ver detalhes <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                  </Button>
+                <Link href="/admin/gerenciador-financeiro/fluxo" className="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+                  Ver detalhes <ArrowRight className="ml-1 h-3.5 w-3.5" aria-hidden="true" />
                 </Link>
               </div>
             </CardHeader>
@@ -209,7 +209,7 @@ export default function GerenciadorFinanceiroDashboard() {
               ) : (
                 <div className="h-48 flex items-center justify-center text-gray-400">
                   <div className="text-center">
-                    <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                     <p className="text-sm">Nenhum dado no período</p>
                   </div>
                 </div>
@@ -255,10 +255,10 @@ export default function GerenciadorFinanceiroDashboard() {
             { label: "Gestão Fiscal", href: "/admin/fiscal", icon: <DollarSign className="w-4 h-4" />, color: "text-indigo-600" },
           ].map((link) => (
             <Link key={link.href} href={link.href}>
-              <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-sm transition-all cursor-pointer">
+              <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-pink-300 hover:shadow-sm transition-all cursor-pointer">
                 <span className={link.color}>{link.icon}</span>
                 <span className="text-sm font-medium text-gray-700">{link.label}</span>
-                <ArrowRight className="w-3.5 h-3.5 text-gray-400 ml-auto" />
+                <ArrowRight className="w-3.5 h-3.5 text-gray-400 ml-auto" aria-hidden="true" />
               </div>
             </Link>
           ))}

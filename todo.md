@@ -3430,3 +3430,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles, atalhos e indicadores do dashboard financeiro
 - [x] Padronizar controles e atalhos do dashboard financeiro com acessibilidade
 - [x] Validar o dashboard financeiro e salvar checkpoint publicável
+
+- [x] Verificar controles e fluxos do gerenciador financeiro alternativo
+- [x] Padronizar controles do gerenciador financeiro alternativo na identidade rosa
+- [x] Validar o gerenciador financeiro alternativo e salvar checkpoint publicável
