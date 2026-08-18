@@ -3231,3 +3231,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar status e ações de conferência na identidade cinza e rosa
 - [x] Melhorar a leitura de artes e pendências de pré-impressão
 - [x] Validar status e acessibilidade do painel de pré-impressão
+
+- [x] Revisar o painel administrativo de status de produção para identificar o ajuste prioritário
+- [x] Padronizar etapas e ações de produção na identidade cinza e rosa
+- [x] Melhorar a leitura de pendências e continuidade operacional
+- [x] Validar etapas e acessibilidade do painel de status de produção
