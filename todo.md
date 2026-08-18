@@ -3166,3 +3166,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar filtros, tipos e ações de clientes na identidade cinza e rosa
 - [x] Melhorar a leitura dos dados e estados da listagem de clientes
 - [x] Validar filtros e acessibilidade da listagem de clientes
+
+- [x] Revisar a listagem administrativa de produtos para identificar o ajuste prioritário
+- [x] Padronizar filtros, estados e ações de produtos na identidade cinza e rosa
+- [x] Melhorar a leitura dos dados e preços da listagem de produtos
+- [x] Validar filtros e acessibilidade da listagem de produtos
