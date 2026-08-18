@@ -3422,3 +3422,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da central de pagamentos na retirada
 - [x] Padronizar controles de retirada na identidade rosa e com acessibilidade
 - [x] Validar a central de pagamentos na retirada e salvar checkpoint publicável
+
+- [x] Revisar filtros, métricas e estados dos relatórios financeiros
+- [x] Padronizar controles de relatórios na identidade rosa e com acessibilidade
+- [x] Validar os relatórios financeiros e salvar checkpoint publicável
