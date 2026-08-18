@@ -48,14 +48,15 @@ function SortableColumn({ id, children }: { id: string; children: (dragHandle: R
     zIndex: isDragging ? 10 : undefined,
   };
   const dragHandle = (
-    <span
+    <button
+      type="button"
       {...attributes}
       {...listeners}
       className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 ml-auto pl-2 touch-none"
-      title="Arrastar coluna"
+      aria-label="Arrastar coluna para reordenar"
     >
-      <GripVertical className="w-4 h-4" />
-    </span>
+      <GripVertical className="w-4 h-4" aria-hidden="true" />
+    </button>
   );
   return (
     <div ref={setNodeRef} style={style} className="flex flex-col min-w-0 overflow-hidden">
@@ -91,8 +92,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
     >
       {/* Header - Clicável para expandir/recolher */}
       <div
-        onClick={() => onToggleExpand(isExpanded ? null : vt.id)}
-        className={`p-4 cursor-pointer transition ${
+        className={`p-4 transition ${
           isExpanded
             ? "bg-orange-50 border-b border-orange-300"
             : "bg-white hover:bg-gray-50"
@@ -100,11 +100,19 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
       >
         {/* Linha 1: drag handle + seta + nome */}
         <div className="flex items-center gap-2">
-          <div {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>
-            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab active:cursor-grabbing flex-shrink-0" />
-          </div>
-          <div className={`transform transition-transform text-gray-500 text-xs ${isExpanded ? 'rotate-90' : ''}`}>▶</div>
-          <h4 className="font-semibold text-sm flex-1 truncate">{vt.name}</h4>
+          <button type="button" {...attributes} {...listeners} className="cursor-grab rounded text-gray-400 hover:text-pink-600 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" aria-label={`Arrastar ${vt.name} para reordenar`}>
+            <GripVertical className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleExpand(isExpanded ? null : vt.id)}
+            aria-expanded={isExpanded}
+            aria-controls={`variation-options-${vt.id}`}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+          >
+            <span className={`transform transition-transform text-gray-500 text-xs ${isExpanded ? 'rotate-90' : ''}`} aria-hidden="true">▶</span>
+            <h4 className="font-semibold text-sm flex-1 truncate">{vt.name}</h4>
+          </button>
         </div>
         {/* Linha 2: obrigatório + lixeira */}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
@@ -114,6 +122,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
               value={vt.isRequired ? "sim" : "nao"}
               onValueChange={(value) => onToggleRequired(vt.id, value === "sim")}
               className="flex gap-2"
+              aria-label={`Obrigatoriedade da variação ${vt.name}`}
             >
               <div className="flex items-center space-x-1">
                 <RadioGroupItem value="sim" id={`required-sim-${vt.id}`} />
@@ -130,15 +139,16 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
             size="sm"
             onClick={(e) => { e.stopPropagation(); onDelete(vt.id); }}
             className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+            aria-label={`Excluir variação ${vt.name}`}
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
         </div>
       </div>
 
       {/* Expanded Content - Opções */}
       {isExpanded && (
-        <div className="border-t bg-gray-50 p-4 space-y-3">
+        <div id={`variation-options-${vt.id}`} className="border-t bg-gray-50 p-4 space-y-3">
           <h5 className="font-semibold text-sm">Opções ({vt.options?.length || 0})</h5>
           {!vt.options || vt.options.length === 0 ? (
             <p className="text-gray-500 text-sm">Nenhuma opção vinculada. Adicione no sistema global.</p>
@@ -752,20 +762,24 @@ export function ProductVariationManager() {
           </div>
           <div className="p-3 space-y-1">
             <button
+              type="button"
               onClick={() => setSelectedSegmentId(null)}
               className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
                 selectedSegmentId === null ? "bg-pink-50 text-pink-700 font-semibold" : "text-gray-600 hover:bg-gray-50"
               }`}
+              aria-pressed={selectedSegmentId === null}
             >
               Todos
             </button>
             {(allSegments as any[]).map((seg: any) => (
               <button
                 key={seg.id}
+                type="button"
                 onClick={() => setSelectedSegmentId(seg.id)}
                 className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
                   selectedSegmentId === seg.id ? "bg-pink-50 text-pink-700 font-semibold" : "text-gray-600 hover:bg-gray-50"
                 }`}
+                aria-pressed={selectedSegmentId === seg.id}
               >
                 {seg.name}
               </button>
@@ -784,7 +798,9 @@ export function ProductVariationManager() {
             </div>
           </div>
           <div className="p-3">
+            <Label htmlFor="variation-product-search" className="sr-only">Buscar produto</Label>
             <Input
+              id="variation-product-search"
               placeholder="Buscar produto..."
               value={productSearchQuery}
               onChange={(e) => setProductSearchQuery(e.target.value)}
@@ -803,6 +819,7 @@ export function ProductVariationManager() {
                   onClick={() => handleSelectProduct(product.id)}
                   variant={selectedProductId === product.id ? "default" : "outline"}
                   className="w-full justify-start text-sm"
+                  aria-pressed={selectedProductId === product.id}
                 >
                   {product.name}
                 </Button>
