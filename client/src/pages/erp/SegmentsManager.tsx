@@ -93,7 +93,7 @@ function SortableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    background: isDragging ? '#f0f9ff' : undefined,
+    background: isDragging ? '#fdf2f8' : undefined,
     zIndex: isDragging ? 10 : undefined,
   };
 
@@ -103,14 +103,16 @@ function SortableRow({
     <tr ref={setNodeRef} style={style} className="border-b hover:bg-gray-50 transition-colors">
       {/* Handle de arrastar */}
       <td className="px-3 py-3 w-10">
-        <div
+        <button
+          type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 flex items-center justify-center"
+          className="flex items-center justify-center text-gray-400 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 cursor-grab active:cursor-grabbing"
           title="Arrastar para reordenar"
+          aria-label={`Reordenar segmento ${segment.name}`}
         >
-          <GripVertical className="w-5 h-5" />
-        </div>
+          <GripVertical className="w-5 h-5" aria-hidden="true" />
+        </button>
       </td>
 
       {/* Posição */}
@@ -125,6 +127,7 @@ function SortableRow({
             value={editingName}
             onChange={(e) => onNameChange(e.target.value)}
             className="w-full"
+            aria-label={`Nome do segmento ${segment.name}`}
           />
         ) : (
           segment.name
@@ -138,6 +141,7 @@ function SortableRow({
             <Input
               type="file"
               accept="image/png,image/webp"
+              aria-label={`Enviar ícone para ${segment.name}`}
               onChange={(e) => {
                 if (e.target.files?.[0]) onIconFileChange(e.target.files[0]);
               }}
@@ -147,7 +151,7 @@ function SortableRow({
               <div className="flex items-center gap-1">
                 <img
                   src={editingIconFile ? URL.createObjectURL(editingIconFile) : editingIcon}
-                  alt="preview"
+                  alt="Prévia do ícone selecionado"
                   className="w-8 h-8 object-contain"
                 />
                 <Button size="icon" variant="ghost" type="button" onClick={() => onRemoveIcon(segment)} className="h-8 w-8 text-gray-400 hover:bg-pink-50 hover:text-pink-600" aria-label={`Remover ícone de ${segment.name}`} title="Remover ícone">
@@ -157,7 +161,7 @@ function SortableRow({
             )}
           </div>
         ) : segment.icon ? (
-          <img src={segment.icon} alt={segment.name} className="w-8 h-8 object-contain" />
+          <img src={segment.icon} alt="" className="w-8 h-8 object-contain" />
         ) : (
           <span className="text-gray-400">—</span>
         )}
@@ -170,6 +174,7 @@ function SortableRow({
             value={editingSlug}
             onChange={(e) => onSlugChange(e.target.value)}
             className="w-full"
+            aria-label={`Slug do segmento ${segment.name}`}
           />
         ) : (
           <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">{segment.slug}</code>
@@ -186,19 +191,19 @@ function SortableRow({
               disabled={uploadingIcon}
               className="bg-green-600 hover:bg-green-700"
             >
-              {uploadingIcon ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {uploadingIcon ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
             </Button>
-            <Button size="sm" variant="destructive" onClick={onCancel}>
-              <X className="w-4 h-4" />
+            <Button size="sm" variant="outline" onClick={onCancel} aria-label={`Cancelar edição de ${segment.name}`}>
+              <X className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         ) : (
           <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={() => onEdit(segment)}>
-              <Edit2 className="w-4 h-4" />
+            <Button size="sm" variant="ghost" onClick={() => onEdit(segment)} aria-label={`Editar segmento ${segment.name}`}>
+              <Edit2 className="w-4 h-4" aria-hidden="true" />
             </Button>
             <Button size="icon" variant="ghost" onClick={() => onDelete(segment)} className="h-8 w-8 text-gray-400 hover:bg-pink-50 hover:text-pink-600" aria-label={`Excluir segmento ${segment.name}`} title="Excluir segmento">
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         )}
@@ -398,10 +403,10 @@ export default function SegmentsManager() {
     <div className={SEGMENTS_PAGE_CONTENT_CLASS}>
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 z-50 shadow-lg ${
+        <div role={notification.type === 'error' ? 'alert' : 'status'} aria-live="polite" className={`fixed top-4 right-4 p-4 rounded-lg flex items-center gap-2 z-50 shadow-lg ${
           notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
-          {notification.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          {notification.type === 'success' ? <CheckCircle className="w-5 h-5" aria-hidden="true" /> : <AlertCircle className="w-5 h-5" aria-hidden="true" />}
           {notification.message}
         </div>
       )}
@@ -414,8 +419,8 @@ export default function SegmentsManager() {
           </div>
           <Dialog open={isCreating} onOpenChange={setIsCreating}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="bg-pink-600 hover:bg-pink-700 text-white focus-visible:ring-pink-300">
+                <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
                 Novo Segmento
               </Button>
             </DialogTrigger>
@@ -426,18 +431,20 @@ export default function SegmentsManager() {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Nome *</label>
+                  <label htmlFor="new-segment-name" className="block text-sm font-medium mb-1">Nome *</label>
                   <Input
+                    id="new-segment-name"
                     value={newSegmentForm.name}
                     onChange={(e) => setNewSegmentForm({ ...newSegmentForm, name: e.target.value })}
                     placeholder="Ex: Adesivos"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Ícone (PNG ou WebP)</label>
+                  <label htmlFor="new-segment-icon" className="block text-sm font-medium mb-1">Ícone (PNG ou WebP)</label>
                   <div className="flex gap-2">
                     <Input
                       type="file"
+                      id="new-segment-icon"
                       accept="image/png,image/webp"
                       onChange={(e) => { if (e.target.files?.[0]) setNewSegmentIconFile(e.target.files[0]); }}
                       className="flex-1"
@@ -448,8 +455,9 @@ export default function SegmentsManager() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Slug *</label>
+                  <label htmlFor="new-segment-slug" className="block text-sm font-medium mb-1">Slug *</label>
                   <Input
+                    id="new-segment-slug"
                     value={newSegmentForm.slug}
                     onChange={(e) => setNewSegmentForm({ ...newSegmentForm, slug: e.target.value })}
                     placeholder="Ex: adesivos"
@@ -460,7 +468,7 @@ export default function SegmentsManager() {
                   <Button
                     onClick={handleCreateSegment}
                     disabled={createSegmentMutation.isPending || uploadingIcon}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white focus-visible:ring-pink-300"
                   >
                     {createSegmentMutation.isPending || uploadingIcon ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{uploadingIcon ? 'Enviando ícone...' : 'Criando...'}</>
@@ -475,22 +483,22 @@ export default function SegmentsManager() {
         {/* Saving indicator */}
         {isSavingOrder && (
           <div className="mb-4 flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             Salvando nova ordem...
           </div>
         )}
 
         {/* Drag hint */}
         <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
-          <GripVertical className="w-4 h-4" />
-          Arraste pelo ícone <GripVertical className="w-3 h-3 inline" /> para reordenar
+          <GripVertical className="w-4 h-4" aria-hidden="true" />
+          Arraste pelo ícone ou use o teclado para reordenar
         </div>
 
         {/* Segments Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {isLoading ? (
             <div className="p-8 flex justify-center">
-              <Loader2 className="w-8 h-8 animate-spin" />
+              <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando segmentos" />
             </div>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -498,16 +506,16 @@ export default function SegmentsManager() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-gray-50 text-left text-sm font-medium text-gray-600">
-                      <th className="px-3 py-3 w-10"></th>
-                      <th className="px-3 py-3 w-10">#</th>
-                      <th className="px-3 py-3">Nome</th>
-                      <th className="px-3 py-3">Ícone</th>
-                      <th className="px-3 py-3">Slug</th>
-                      <th className="px-3 py-3">Ações</th>
+                      <th scope="col" className="px-3 py-3 w-10"><span className="sr-only">Reordenar</span></th>
+                      <th scope="col" className="px-3 py-3 w-10">#</th>
+                      <th scope="col" className="px-3 py-3">Nome</th>
+                      <th scope="col" className="px-3 py-3">Ícone</th>
+                      <th scope="col" className="px-3 py-3">Slug</th>
+                      <th scope="col" className="px-3 py-3">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {orderedSegments.map((segment, index) => (
+                    {orderedSegments.length === 0 ? <tr><td colSpan={6} className="px-3 py-8 text-center text-sm text-gray-500">Nenhum segmento cadastrado. Use “Novo Segmento” para organizar o catálogo.</td></tr> : orderedSegments.map((segment, index) => (
                       <SortableRow
                         key={segment.id}
                         segment={segment}
@@ -544,7 +552,7 @@ export default function SegmentsManager() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSegment} className="bg-pink-600 text-white hover:bg-pink-700">Excluir segmento</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteSegment} className="bg-red-600 text-white hover:bg-red-700">Excluir segmento</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -556,7 +564,7 @@ export default function SegmentsManager() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveSegmentIcon} className="bg-pink-600 text-white hover:bg-pink-700">Remover ícone</AlertDialogAction>
+            <AlertDialogAction onClick={handleRemoveSegmentIcon} className="bg-red-600 text-white hover:bg-red-700">Remover ícone</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
