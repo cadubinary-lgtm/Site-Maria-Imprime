@@ -3267,3 +3267,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar o construtor alternativo de regras exposto nas rotas administrativas
 - [x] Unificar as rotas de regras no gerenciador operacional persistente
 - [x] Validar a ausência de fluxos duplicados que simulavam regras
+
+- [x] Revisar a exclusão de regras de precificação para identificar o ajuste prioritário
+- [x] Substituir a confirmação nativa de exclusão por diálogo acessível
+- [x] Validar a exclusão de regras de precificação e seus feedbacks
