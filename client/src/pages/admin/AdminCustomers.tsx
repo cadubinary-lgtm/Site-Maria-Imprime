@@ -116,7 +116,7 @@ function CustomerDetailModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <Users className="w-5 h-5 text-orange-500" />
+            <Users className="w-5 h-5 text-pink-600" aria-hidden="true" />
             Detalhes do Cliente
           </DialogTitle>
           <DialogDescription>
@@ -126,7 +126,7 @@ function CustomerDetailModal({
 
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando detalhes do cliente" />
           </div>
         ) : !customer ? (
           <div className="text-center py-8 text-gray-500">Cliente não encontrado</div>
@@ -136,7 +136,7 @@ function CustomerDetailModal({
             {/* Informações Pessoais */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
-                <UserCheck className="w-4 h-4 text-orange-500" />
+                <UserCheck className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Informações Pessoais
               </h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -190,7 +190,7 @@ function CustomerDetailModal({
                     onValueChange={(priceTier) => updatePriceTier.mutate({ customerId: customer.id, priceTier: priceTier as "final" | "reseller" })}
                     disabled={updatePriceTier.isPending}
                   >
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 text-xs" aria-label={`Tabela de preços de ${customer.firstName} ${customer.lastName}`}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="final">Cliente final</SelectItem>
                       <SelectItem value="reseller">Revendedor</SelectItem>
@@ -205,7 +205,7 @@ function CustomerDetailModal({
             {/* Datas e Acesso */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
-                <Calendar className="w-4 h-4 text-orange-500" />
+                <Calendar className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Datas e Acesso
               </h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -244,7 +244,7 @@ function CustomerDetailModal({
             {/* Endereço */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
-                <MapPin className="w-4 h-4 text-orange-500" />
+                <MapPin className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Endereço de Entrega
               </h3>
               {customer.addressStreet ? (
@@ -282,7 +282,7 @@ function CustomerDetailModal({
             {/* Redefinir Senha */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
-                <Lock className="w-4 h-4 text-orange-500" />
+                <Lock className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Segurança
               </h3>
               {!showPasswordForm ? (
@@ -290,15 +290,17 @@ function CustomerDetailModal({
                   variant="outline"
                   size="sm"
                   onClick={() => setShowPasswordForm(true)}
-                  className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                  className="text-pink-600 border-pink-200 hover:bg-pink-50"
                 >
-                  <Lock className="w-3.5 h-3.5 mr-1.5" />
+                  <Lock className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
                   Redefinir Senha do Cliente
                 </Button>
               ) : (
                 <div className="flex gap-2 items-start">
                   <div className="flex-1">
+                    <label htmlFor="customer-reset-password" className="sr-only">Nova senha do cliente</label>
                     <Input
+                      id="customer-reset-password"
                       type="text"
                       placeholder="Nova senha (mín. 8 chars, 1 maiúscula, 1 número)"
                       value={newPassword}
@@ -313,9 +315,10 @@ function CustomerDetailModal({
                     size="sm"
                     onClick={handleSetPassword}
                     disabled={setPassword.isPending}
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    aria-busy={setPassword.isPending}
                   >
-                    {setPassword.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Salvar"}
+                    {setPassword.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> : "Salvar"}
                   </Button>
                   <Button
                     size="sm"
@@ -333,7 +336,7 @@ function CustomerDetailModal({
             {/* Histórico de Pedidos */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
-                <ShoppingBag className="w-4 h-4 text-orange-500" />
+                <ShoppingBag className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Histórico de Pedidos ({orders.length})
               </h3>
               {orders.length === 0 ? (
@@ -508,15 +511,15 @@ export default function AdminCustomers() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Users className="w-6 h-6 text-orange-500" />
+                  <Users className="w-6 h-6 text-pink-600" aria-hidden="true" />
                   {pageTitle}
                 </h1>
                 <p className="text-gray-500 text-sm mt-0.5">{partnerType ? `Gerenciamento de contas de ${partnerType === "reseller" ? "revendedores" : "agências"}` : "Gerenciamento de contas de clientes da loja"}</p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={() => setShowPartnerForm((open) => !open)}><Plus className="w-4 h-4 mr-2" />Novo Cliente</Button>
-              <Button variant="outline" size="sm" onClick={() => refetch()}><RefreshCw className="w-4 h-4 mr-2" />Atualizar</Button>
+              <Button size="sm" className="bg-pink-600 hover:bg-pink-700 text-white" onClick={() => setShowPartnerForm((open) => !open)}><Plus className="w-4 h-4 mr-2" aria-hidden="true" />Novo Cliente</Button>
+              <Button variant="outline" size="sm" onClick={() => refetch()} aria-busy={isLoading}><RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />Atualizar</Button>
             </div>
           </div>
 
@@ -569,8 +572,10 @@ export default function AdminCustomers() {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <label htmlFor="admin-customers-search" className="sr-only">Buscar clientes</label>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                   <Input
+                    id="admin-customers-search"
                     placeholder="Buscar por nome, email ou telefone..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -602,7 +607,7 @@ export default function AdminCustomers() {
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="flex justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                  <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando clientes" />
                 </div>
               ) : customers.length === 0 ? (
                 <div className="text-center py-12">
@@ -671,7 +676,7 @@ export default function AdminCustomers() {
                           </td>
                           <td className="px-4 py-3">
                             <Select value={customer.priceTier || "final"} onValueChange={(priceTier: "final" | "reseller") => updatePriceTier.mutate({ customerId: customer.id, priceTier })} disabled={updatePriceTier.isPending}>
-                              <SelectTrigger className="h-8 min-w-28 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="h-8 min-w-28 text-xs" aria-label={`Tabela de preços de ${customer.firstName} ${customer.lastName}`}><SelectValue /></SelectTrigger>
                               <SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent>
                             </Select>
                           </td>
@@ -679,21 +684,25 @@ export default function AdminCustomers() {
                             {customer.allowStorePickup ? (
                               <Button
                                 variant="outline" size="sm"
-                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                className="text-green-700 border-green-200 hover:bg-green-50 text-xs"
                                 onClick={() => toggleStorePickup.mutate({ customerId: customer.id, allow: false })}
                                 disabled={toggleStorePickup.isPending}
+                                aria-busy={toggleStorePickup.isPending}
+                                aria-label={`Revogar retirada na loja para ${customer.firstName} ${customer.lastName}`}
                               >
-                                <Store className="w-3.5 h-3.5 mr-1" />
+                                <Store className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
                                 Liberado
                               </Button>
                             ) : (
                               <Button
                                 variant="outline" size="sm"
-                                className="text-gray-400 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 text-xs"
+                                className="text-gray-500 border-gray-200 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-200 text-xs"
                                 onClick={() => toggleStorePickup.mutate({ customerId: customer.id, allow: true })}
                                 disabled={toggleStorePickup.isPending}
+                                aria-busy={toggleStorePickup.isPending}
+                                aria-label={`Liberar retirada na loja para ${customer.firstName} ${customer.lastName}`}
                               >
-                                <StoreIcon className="w-3.5 h-3.5 mr-1" />
+                                <StoreIcon className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
                                 Liberar
                               </Button>
                             )}
@@ -703,22 +712,24 @@ export default function AdminCustomers() {
                               {/* Ver Detalhes */}
                               <Button
                                 variant="outline" size="sm"
-                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs"
                                 onClick={() => { setSelectedCustomerId(customer.id); setDetailOpen(true); }}
+                                aria-label={`Ver detalhes de ${customer.firstName} ${customer.lastName}`}
                               >
-                                <Eye className="w-3.5 h-3.5 mr-1" />
+                                <Eye className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
                                 Ver
                               </Button>
                               <Button
                                 variant="outline" size="sm"
-                                className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs"
+                                className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs"
                                 onClick={() => setEditingCustomer(customer)}
+                                aria-label={`Editar ${customer.firstName} ${customer.lastName}`}
                               >
-                                <Pencil className="w-3.5 h-3.5 mr-1" />Editar
+                                <Pencil className="w-3.5 h-3.5 mr-1" aria-hidden="true" />Editar
                               </Button>
                               {partnerType && (
-                                <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs" onClick={() => resendPartnerInvite.mutate({ customerId: customer.id })} disabled={resendPartnerInvite.isPending}>
-                                  <Mail className="w-3.5 h-3.5 mr-1" />Reenviar acesso
+                                <Button variant="outline" size="sm" className="text-pink-600 border-pink-200 hover:bg-pink-50 text-xs" onClick={() => resendPartnerInvite.mutate({ customerId: customer.id })} disabled={resendPartnerInvite.isPending} aria-busy={resendPartnerInvite.isPending} aria-label={`Reenviar acesso para ${customer.firstName} ${customer.lastName}`}>
+                                  <Mail className="w-3.5 h-3.5 mr-1" aria-hidden="true" />Reenviar acesso
                                 </Button>
                               )}
 
