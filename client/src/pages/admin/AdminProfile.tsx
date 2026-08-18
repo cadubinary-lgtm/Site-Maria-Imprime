@@ -23,8 +23,8 @@ import { toast } from "sonner";
 const roleInfo: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   superadmin: {
     label: "Superadmin",
-    icon: <ShieldCheck className="h-4 w-4" />,
-    color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    icon: <ShieldCheck className="h-4 w-4" aria-hidden="true" />,
+    color: "bg-pink-100 text-pink-700 border-pink-200",
   },
   admin: {
     label: "Admin",
@@ -34,7 +34,7 @@ const roleInfo: Record<string, { label: string; icon: React.ReactNode; color: st
   production: {
     label: "Produção",
     icon: <Wrench className="h-4 w-4" />,
-    color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    color: "bg-gray-100 text-gray-700 border-gray-200",
   },
 };
 
@@ -154,7 +154,7 @@ export default function AdminProfile() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-96">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-pink-600" aria-label="Carregando perfil administrativo" />
         </div>
       </AdminLayout>
     );
@@ -166,7 +166,7 @@ export default function AdminProfile() {
         {/* Cabeçalho */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <UserCircle className="h-7 w-7 text-orange-500" />
+            <UserCircle className="h-7 w-7 text-pink-600" aria-hidden="true" />
             Meu Perfil
           </h1>
           <p className="text-gray-500 mt-1">Gerencie suas informações e segurança de acesso</p>
@@ -227,16 +227,18 @@ export default function AdminProfile() {
                   </Alert>
                 )}
                 <div className="space-y-2">
-                  <Label>Nome completo</Label>
+                  <Label htmlFor="profile-name">Nome completo</Label>
                   <Input
+                    id="profile-name"
                     value={profileForm.name}
                     onChange={e => setProfileForm(f => ({ ...f, name: e.target.value }))}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>E-mail</Label>
+                  <Label htmlFor="profile-email">E-mail</Label>
                   <Input
+                    id="profile-email"
                     type="email"
                     value={profileForm.email}
                     onChange={e => setProfileForm(f => ({ ...f, email: e.target.value }))}
@@ -244,8 +246,8 @@ export default function AdminProfile() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={updateProfileMutation.isPending}>
-                    {updateProfileMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+                  <Button type="submit" className="bg-pink-600 hover:bg-pink-700" disabled={updateProfileMutation.isPending} aria-busy={updateProfileMutation.isPending}>
+                    {updateProfileMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Salvar"}
                   </Button>
                   <Button type="button" variant="ghost" onClick={() => setProfileEditing(false)}>
                     Cancelar
@@ -262,7 +264,7 @@ export default function AdminProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <KeyRound className="h-5 w-5 text-orange-500" />
+              <KeyRound className="h-5 w-5 text-pink-600" aria-hidden="true" />
               Alterar Senha
             </CardTitle>
             <CardDescription>
@@ -286,9 +288,10 @@ export default function AdminProfile() {
 
               {/* Senha atual */}
               <div className="space-y-2">
-                <Label>Senha atual</Label>
+                <Label htmlFor="current-password">Senha atual</Label>
                 <div className="relative">
                   <Input
+                    id="current-password"
                     type={showCurrent ? "text" : "password"}
                     value={pwForm.currentPassword}
                     onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
@@ -300,17 +303,19 @@ export default function AdminProfile() {
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowCurrent(v => !v)}
+                    aria-label={showCurrent ? "Ocultar senha atual" : "Mostrar senha atual"}
                   >
-                    {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showCurrent ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
 
               {/* Nova senha */}
               <div className="space-y-2">
-                <Label>Nova senha</Label>
+                <Label htmlFor="new-password">Nova senha</Label>
                 <div className="relative">
                   <Input
+                    id="new-password"
                     type={showNew ? "text" : "password"}
                     value={pwForm.newPassword}
                     onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
@@ -322,8 +327,9 @@ export default function AdminProfile() {
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowNew(v => !v)}
+                    aria-label={showNew ? "Ocultar nova senha" : "Mostrar nova senha"}
                   >
-                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showNew ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
                 <PasswordStrength password={pwForm.newPassword} />
@@ -331,9 +337,10 @@ export default function AdminProfile() {
 
               {/* Confirmar nova senha */}
               <div className="space-y-2">
-                <Label>Confirmar nova senha</Label>
+                <Label htmlFor="confirm-password">Confirmar nova senha</Label>
                 <div className="relative">
                   <Input
+                    id="confirm-password"
                     type={showConfirm ? "text" : "password"}
                     value={pwForm.confirmPassword}
                     onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
@@ -345,8 +352,9 @@ export default function AdminProfile() {
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowConfirm(v => !v)}
+                    aria-label={showConfirm ? "Ocultar confirmação de senha" : "Mostrar confirmação de senha"}
                   >
-                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirm ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
                 {pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword && (
@@ -361,11 +369,12 @@ export default function AdminProfile() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white"
                 disabled={changePasswordMutation.isPending}
+                aria-busy={changePasswordMutation.isPending}
               >
                 {changePasswordMutation.isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Alterando senha...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Alterando senha...</>
                 ) : (
                   <><KeyRound className="mr-2 h-4 w-4" /> Alterar Senha</>
                 )}
