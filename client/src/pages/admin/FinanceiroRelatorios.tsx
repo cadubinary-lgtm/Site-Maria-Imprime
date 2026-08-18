@@ -56,11 +56,11 @@ export default function FinanceiroRelatorios() {
           <p className="text-sm text-gray-500 mt-1">Análise detalhada do desempenho financeiro</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-1" />Atualizar
+          <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />Atualizar
           </Button>
-          <Button variant="outline" size="sm" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-1" />Imprimir
+          <Button type="button" variant="outline" size="sm" onClick={handlePrint} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <Printer className="h-4 w-4 mr-1" aria-hidden="true" />Imprimir
           </Button>
         </div>
       </div>
@@ -70,24 +70,26 @@ export default function FinanceiroRelatorios() {
         <CardContent className="p-4 space-y-3">
           <div className="flex flex-wrap gap-2">
             {(["diario","semanal","mensal","anual"] as TipoRelatorio[]).map(t => (
-              <Button key={t} variant={tipo === t && !useCustom ? "default" : "outline"} size="sm"
+              <Button key={t} type="button" variant={tipo === t && !useCustom ? "default" : "outline"} size="sm"
                 onClick={() => { setTipo(t); setUseCustom(false); }}
-                className={tipo === t && !useCustom ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}>
+                className={tipo === t && !useCustom ? "bg-pink-600 hover:bg-pink-700 text-white" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+                aria-pressed={tipo === t && !useCustom}>
                 {t === "diario" ? "Hoje" : t === "semanal" ? "Esta Semana" : t === "mensal" ? "Este Mês" : "Este Ano"}
               </Button>
             ))}
-            <Button variant={useCustom ? "default" : "outline"} size="sm"
+            <Button type="button" variant={useCustom ? "default" : "outline"} size="sm"
               onClick={() => setUseCustom(true)}
-              className={useCustom ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}>
+              className={useCustom ? "bg-pink-600 hover:bg-pink-700 text-white" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+              aria-pressed={useCustom}>
               Período Personalizado
             </Button>
           </div>
           {useCustom && (
             <div className="flex gap-3 items-center">
-              <Input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="w-40" />
+              <Input aria-label="Data inicial do período personalizado" type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="w-40" />
               <span className="text-gray-500 text-sm">até</span>
-              <Input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="w-40" />
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => refetch()}>
+              <Input aria-label="Data final do período personalizado" type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="w-40" />
+              <Button type="button" size="sm" className="bg-pink-600 hover:bg-pink-700 text-white" onClick={() => refetch()}>
                 Aplicar
               </Button>
             </div>
@@ -106,8 +108,8 @@ export default function FinanceiroRelatorios() {
             {[
               { label: "Receita Bruta", value: formatCurrency(data.receitaBruta), icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
               { label: "Receita Líquida", value: formatCurrency(data.receitaLiquida), icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
-              { label: "Ticket Médio", value: formatCurrency(data.ticketMedio), icon: BarChart2, color: "text-orange-600", bg: "bg-orange-50" },
-              { label: "Pedidos Pagos", value: String(data.pedidosPagos), icon: ShoppingBag, color: "text-orange-600", bg: "bg-orange-50", suffix: "pedidos" },
+              { label: "Ticket Médio", value: formatCurrency(data.ticketMedio), icon: BarChart2, color: "text-pink-600", bg: "bg-pink-50" },
+              { label: "Pedidos Pagos", value: String(data.pedidosPagos), icon: ShoppingBag, color: "text-pink-600", bg: "bg-pink-50", suffix: "pedidos" },
             ].map(m => (
               <Card key={m.label} className="border-0 shadow-sm">
                 <CardContent className="p-4">
@@ -118,7 +120,7 @@ export default function FinanceiroRelatorios() {
                       {m.suffix && <p className="text-xs text-gray-400">{m.suffix}</p>}
                     </div>
                     <div className={`p-2 rounded-lg ${m.bg}`}>
-                      <m.icon className={`h-5 w-5 ${m.color}`} />
+                      <m.icon className={`h-5 w-5 ${m.color}`} aria-hidden="true" />
                     </div>
                   </div>
                 </CardContent>
@@ -132,7 +134,7 @@ export default function FinanceiroRelatorios() {
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <BarChart2 className="h-5 w-5 text-orange-500" />
+                    <BarChart2 className="h-5 w-5 text-pink-600" aria-hidden="true" />
                     Evolução de Receita
                   </CardTitle>
                 </CardHeader>
@@ -142,9 +144,10 @@ export default function FinanceiroRelatorios() {
                       const height = Math.max((d.valor / maxDailyValue) * 100, 3);
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                          <div className="w-full rounded-t bg-orange-400 transition-all"
+                          <div className="w-full rounded-t bg-pink-400 transition-all"
                             style={{ height: `${height}%` }}
-                            title={`${d.date}: ${formatCurrency(d.valor)}`} />
+                            role="img"
+                            aria-label={`${d.date}: ${formatCurrency(d.valor)}`} />
                           <span className="text-xs text-gray-400 rotate-45 origin-left" style={{ fontSize: "9px" }}>
                             {new Date(d.date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                           </span>
@@ -161,7 +164,7 @@ export default function FinanceiroRelatorios() {
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-orange-500" />
+                    <DollarSign className="h-5 w-5 text-pink-600" aria-hidden="true" />
                     Formas de Pagamento
                   </CardTitle>
                 </CardHeader>
