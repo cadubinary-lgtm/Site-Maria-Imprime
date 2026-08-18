@@ -3161,3 +3161,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os controles do painel de rodapé na identidade cinza e rosa
 - [x] Melhorar a edição e o feedback das informações públicas
 - [x] Validar acessibilidade e continuidade da edição do rodapé
+
+- [x] Revisar a listagem administrativa de clientes para identificar o ajuste prioritário
+- [x] Padronizar filtros, tipos e ações de clientes na identidade cinza e rosa
+- [x] Melhorar a leitura dos dados e estados da listagem de clientes
+- [x] Validar filtros e acessibilidade da listagem de clientes
