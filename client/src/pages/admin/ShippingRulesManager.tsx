@@ -219,7 +219,7 @@ export function ShippingRulesManager() {
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Calculator className="w-6 h-6 text-orange-500" />
+            <Calculator className="w-6 h-6 text-pink-600" aria-hidden="true" />
             Regras de Frete
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -232,7 +232,7 @@ export function ShippingRulesManager() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-orange-500" />
+                <MapPin className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Entrega Local — Bairros e Regiões
               </CardTitle>
               <CardDescription>
@@ -241,8 +241,8 @@ export function ShippingRulesManager() {
                 Você pode cadastrar a mesma faixa de CEP duas vezes — uma para Moto e outra para Carro.
               </CardDescription>
             </div>
-            <Button size="sm" onClick={openCreate} className="bg-orange-500 hover:bg-orange-600 shrink-0">
-              <Plus className="w-4 h-4 mr-1" /> Adicionar Regra
+            <Button size="sm" onClick={openCreate} className="bg-pink-600 hover:bg-pink-700 shrink-0">
+              <Plus className="w-4 h-4 mr-1" aria-hidden="true" /> Adicionar Regra
             </Button>
           </CardHeader>
           <CardContent>
@@ -307,7 +307,7 @@ export function ShippingRulesManager() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-orange-500" />
+              <Calculator className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Simulador de Frete (Melhor Envio + Opções Fixas)
             </CardTitle>
             <CardDescription>
@@ -355,11 +355,11 @@ export function ShippingRulesManager() {
             <Button
               onClick={handleCalculate}
               disabled={calculateMutation.isPending}
-              className="w-full bg-orange-500 hover:bg-orange-600"
+              className="w-full bg-pink-600 hover:bg-pink-700"
             >
               {calculateMutation.isPending
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Calculando...</>
-                : <><Calculator className="w-4 h-4 mr-2" /> Simular Frete</>}
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Calculando...</>
+                : <><Calculator className="w-4 h-4 mr-2" aria-hidden="true" /> Simular Frete</>}
             </Button>
 
             {hasCalculated && (
@@ -538,7 +538,7 @@ export function ShippingRulesManager() {
             <Button
               onClick={handleSave}
               disabled={createRule.isPending || updateRule.isPending}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-pink-600 hover:bg-pink-700"
             >
               {(createRule.isPending || updateRule.isPending)
                 ? <Loader2 className="w-4 h-4 animate-spin" />

@@ -3314,3 +3314,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o destaque legado das variações expandidas
 - [x] Padronizar o estado expandido das variações na identidade rosa
 - [x] Validar o destaque visual e acessibilidade das variações expandidas
+
+- [x] Revisar os elementos visuais legados da central de regras de frete
+- [x] Padronizar controles não semânticos de frete na identidade rosa
+- [x] Validar a consistência visual e acessibilidade da central de frete
