@@ -16,9 +16,9 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",      color: "bg-green-100 text-green-800",   icon: "💳" },
   pagamento_retirada:  { label: "Pagamento na Retirada",   color: "bg-blue-100 text-blue-800",     icon: "🏪" },
-  analisando:          { label: "Analisando",              color: "bg-orange-100 text-orange-800", icon: "🔍" },
+  analisando:          { label: "Analisando",              color: "bg-amber-100 text-amber-800", icon: "🔍" },
   com_problemas:       { label: "Com Problemas",           color: "bg-red-100 text-red-800",       icon: "⚠️" },
-  em_producao:         { label: "Em Produção",             color: "bg-orange-100 text-orange-800", icon: "⚙️" },
+  em_producao:         { label: "Em Produção",             color: "bg-amber-100 text-amber-800", icon: "⚙️" },
   pronto_entrega:      { label: "Pronto para Entrega",     color: "bg-teal-100 text-teal-800",     icon: "🚚" },
   pronto_retirada:     { label: "Pronto para Retirada",    color: "bg-cyan-100 text-cyan-800",     icon: "🎁" },
   saiu_entrega:        { label: "Saiu para Entrega",       color: "bg-indigo-100 text-indigo-800", icon: "🚚" },
@@ -118,7 +118,7 @@ export default function AdminOrders() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando pedidos" />
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function AdminOrders() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Package className="w-8 h-8 text-indigo-600" />
+              <Package className="w-8 h-8 text-pink-600" aria-hidden="true" />
               Gerenciamento de Pedidos
             </h1>
             <p className="text-gray-500 mt-1">Acompanhe e gerencie todos os pedidos operacionais</p>
@@ -148,8 +148,10 @@ export default function AdminOrders() {
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              <label htmlFor="admin-orders-search" className="sr-only">Buscar pedidos</label>
+              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" aria-hidden="true" />
               <Input
+                id="admin-orders-search"
                 placeholder="Buscar por número do pedido, cliente ou telefone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -162,26 +164,30 @@ export default function AdminOrders() {
                 variant={showFilters ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowFilters(!showFilters)}
+                aria-expanded={showFilters}
+                aria-controls="admin-order-status-filters"
+                className={showFilters ? "bg-pink-600 text-white hover:bg-pink-700" : ""}
               >
-                <Filter className="w-4 h-4 mr-1" />
+                <Filter className="w-4 h-4 mr-1" aria-hidden="true" />
                 Filtros {filter !== "todos" && `• ${ORDER_STATUS[filter]?.label}`}
               </Button>
               {filter !== "todos" && (
                 <Button variant="ghost" size="sm" onClick={() => setFilter("todos")}>
-                  <X className="w-4 h-4 mr-1" /> Limpar
+                  <X className="w-4 h-4 mr-1" aria-hidden="true" /> Limpar
                 </Button>
               )}
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-4 border-t">
+              <div id="admin-order-status-filters" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-4 border-t" aria-label="Filtrar pedidos por status">
                 {FILTER_OPTIONS.map((opt) => (
                   <Button
                     key={opt.id}
                     variant={filter === opt.id ? "default" : "outline"}
                     size="sm"
-                    className="text-xs justify-start"
+                    className={filter === opt.id ? "bg-pink-600 text-xs justify-start text-white hover:bg-pink-700" : "text-xs justify-start"}
                     onClick={() => setFilter(opt.id)}
+                    aria-pressed={filter === opt.id}
                   >
                     {opt.id !== "todos" && ORDER_STATUS[opt.id]?.icon + " "}
                     {opt.label}
@@ -197,13 +203,13 @@ export default function AdminOrders() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Pedidos</span>
-              <Badge variant="outline">{filtered.length} resultado(s)</Badge>
+              <Badge variant="outline" aria-live="polite">{filtered.length} resultado(s)</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {filtered.length === 0 ? (
               <div className="text-center py-12">
-                <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
                 <p className="text-gray-600 font-medium">Nenhum pedido encontrado</p>
                 <p className="text-gray-400 text-sm">Ajuste os filtros ou a busca</p>
               </div>
@@ -212,13 +218,13 @@ export default function AdminOrders() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-gray-50 text-gray-600">
-                      <th className="px-4 py-3 text-left font-semibold">Pedido</th>
-                      <th className="px-4 py-3 text-left font-semibold">Cliente</th>
-                      <th className="px-4 py-3 text-left font-semibold">Valor</th>
-                      <th className="px-4 py-3 text-left font-semibold">Pagamento</th>
-                      <th className="px-4 py-3 text-left font-semibold">Status</th>
-                      <th className="px-4 py-3 text-left font-semibold">Data</th>
-                      <th className="px-4 py-3 text-left font-semibold">Ações</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Pedido</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Cliente</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Valor</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Pagamento</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Status</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Data</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -238,17 +244,17 @@ export default function AdminOrders() {
                             <Badge variant="outline" className="text-xs">{order.paymentStatus || "Pendente"}</Badge>
                           </td>
                           <td className="px-4 py-3">
-                            <Badge className={`${sc.color} text-xs`}>{sc.icon} {sc.label}</Badge>
+                            <Badge className={`${sc.color} text-xs`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge>
                           </td>
                           <td className="px-4 py-3 text-gray-600">{fmtDate(order.createdAt)}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1">
                               <Button variant="ghost" size="sm" asChild>
-                                <Link href={`/admin/pedidos/${order.id}`}>
-                                  Ver <ChevronRight className="w-4 h-4 ml-1" />
+                                <Link href={`/admin/pedidos/${order.id}`} aria-label={`Ver detalhes do pedido ${order.orderNumber}`}>
+                                  Ver <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
                                 </Link>
                               </Button>
-                              {canManageTrash && <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50" title={`Mover o pedido ${order.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setOrderToTrash(order); }}><Trash2 className="w-4 h-4" /></Button>}
+                              {canManageTrash && <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50" title={`Mover o pedido ${order.orderNumber} para a lixeira`} aria-label={`Mover o pedido ${order.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setOrderToTrash(order); }}><Trash2 className="w-4 h-4" aria-hidden="true" /></Button>}
                             </div>
                           </td>
                         </tr>
