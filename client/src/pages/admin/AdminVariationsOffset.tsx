@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X, GripVertical } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 function SortableHandleOffset({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({ id });
@@ -41,6 +42,7 @@ export default function AdminVariationsOffset() {
   const [editingOptionName, setEditingOptionName] = useState("");
   const [editingOptionPrice, setEditingOptionPrice] = useState("");
   const [editingOptionCalcType, setEditingOptionCalcType] = useState("unit");
+  const [pendingDeletion, setPendingDeletion] = useState<{ kind: "type" | "option"; id: number; name: string } | null>(null);
 
   const CALC_TYPE_OPTIONS = [
     { value: "unit", label: "Unidade" },
@@ -109,15 +111,20 @@ export default function AdminVariationsOffset() {
     }
   };
 
-  const handleDeleteType = async (id: number) => {
-    if (!confirm("Excluir este tipo de variação?")) return;
+  const confirmDelete = async () => {
+    if (!pendingDeletion) return;
     try {
-      await deleteTypeMutation.mutateAsync({ id });
+      if (pendingDeletion.kind === "type") {
+        await deleteTypeMutation.mutateAsync({ id: pendingDeletion.id });
+      } else {
+        await deleteOptionMutation.mutateAsync({ id: pendingDeletion.id });
+      }
       await utils.variationsOffset.getGlobal.invalidate();
       refetch();
-      toast.success("Tipo excluído");
+      toast.success(pendingDeletion.kind === "type" ? "Tipo de variação excluído" : "Opção de variação excluída");
+      setPendingDeletion(null);
     } catch {
-      toast.error("Erro ao excluir");
+      toast.error("Erro ao excluir variação");
     }
   };
 
@@ -174,17 +181,6 @@ export default function AdminVariationsOffset() {
       toast.success("Opção atualizada!");
     } catch {
       toast.error("Erro ao atualizar opção");
-    }
-  };
-
-  const handleDeleteOption = async (optionId: number) => {
-    if (!confirm("Excluir esta opção?")) return;
-    try {
-      await deleteOptionMutation.mutateAsync({ id: optionId });
-      await utils.variationsOffset.getGlobal.invalidate();
-      refetch();
-    } catch {
-      toast.error("Erro ao excluir opção");
     }
   };
 
@@ -326,10 +322,12 @@ export default function AdminVariationsOffset() {
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDeleteType(vt.id)}
+                      type="button"
+                      onClick={() => setPendingDeletion({ kind: "type", id: vt.id, name: vt.name })}
                       className="text-gray-300 hover:text-red-500 transition"
+                      aria-label={`Excluir tipo de variação ${vt.name}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -394,11 +392,13 @@ export default function AdminVariationsOffset() {
                                 <Pencil className="w-3 h-3" />
                               </button>
                               <button
-                                onClick={() => handleDeleteOption(opt.id)}
+                                type="button"
+                                onClick={() => setPendingDeletion({ kind: "option", id: opt.id, name: opt.name })}
                                 className="text-gray-300 hover:text-red-500 transition"
                                 title="Excluir opção"
+                                aria-label={`Excluir opção de variação ${opt.name}`}
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3 h-3" aria-hidden="true" />
                               </button>
                             </div>
                           </div>
@@ -452,6 +452,20 @@ export default function AdminVariationsOffset() {
           </SortableContext>
         </DndContext>
       </div>
+      <AlertDialog open={Boolean(pendingDeletion)} onOpenChange={(open) => !open && setPendingDeletion(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir {pendingDeletion?.kind === "type" ? "o tipo" : "a opção"} “{pendingDeletion?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>{pendingDeletion?.kind === "type" ? "As opções ligadas a este tipo também serão removidas." : "Esta opção deixará de estar disponível no configurador."} Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteTypeMutation.isPending || deleteOptionMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteTypeMutation.isPending || deleteOptionMutation.isPending} aria-busy={deleteTypeMutation.isPending || deleteOptionMutation.isPending} onClick={(event) => { event.preventDefault(); confirmDelete(); }}>
+              {deleteTypeMutation.isPending || deleteOptionMutation.isPending ? "Excluindo..." : "Excluir variação"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
