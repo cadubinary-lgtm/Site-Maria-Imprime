@@ -1,0 +1,1 @@
+Na rota de detalhe com um identificador inexistente, a página apresenta um estado orientativo na identidade rosa e não exibe dados de pedido. O atalho “Meus Pedidos” retornou à lista protegida; sem sessão, a lista exibe apenas o encaminhamento para login. A linha do tempo, as ações e a visualização de arte receberam cobertura de regressão sem alterar pedidos ou arquivos.
