@@ -291,8 +291,9 @@ export default function AdminsManager() {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label className="text-slate-300">Nome completo</Label>
+              <Label htmlFor="create-admin-name" className="text-slate-300">Nome completo</Label>
               <Input
+                id="create-admin-name"
                 value={createForm.name}
                 onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))}
                 className="bg-slate-800 border-slate-700 text-white"
@@ -323,12 +324,12 @@ export default function AdminsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Perfil</Label>
+              <Label htmlFor="create-admin-role" className="text-slate-300">Perfil</Label>
               <Select
                 value={createForm.role}
                 onValueChange={v => setCreateForm(f => ({ ...f, role: v as any }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger id="create-admin-role" className="bg-slate-800 border-slate-700 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -342,8 +343,8 @@ export default function AdminsManager() {
               <Button type="button" variant="ghost" onClick={() => setShowCreate(false)} className="text-slate-400">
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={createMutation.isPending}>
-                {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+              <Button type="submit" className="bg-pink-600 hover:bg-pink-700" disabled={createMutation.isPending} aria-busy={createMutation.isPending}>
+                {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Criar"}
               </Button>
             </DialogFooter>
           </form>
@@ -391,8 +392,8 @@ export default function AdminsManager() {
               <Button type="button" variant="ghost" onClick={() => setShowEdit(null)} className="text-slate-400">
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+              <Button type="submit" className="bg-pink-600 hover:bg-pink-700" disabled={updateMutation.isPending} aria-busy={updateMutation.isPending}>
+                {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Salvar"}
               </Button>
             </DialogFooter>
           </form>
@@ -411,13 +412,16 @@ export default function AdminsManager() {
           </DialogHeader>
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-300">Nova senha</Label>
+              <Label htmlFor="reset-admin-password" className="text-slate-300">Nova senha</Label>
               <Input
+                id="reset-admin-password"
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 className="bg-slate-800 border-slate-700 text-white"
                 placeholder="Mínimo 8 caracteres"
+                minLength={8}
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
@@ -437,8 +441,8 @@ export default function AdminsManager() {
               <Button type="button" variant="ghost" onClick={() => setShowResetPassword(null)} className="text-slate-400">
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={resetPasswordMutation.isPending}>
-                {resetPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Resetar Senha"}
+              <Button type="submit" className="bg-pink-600 hover:bg-pink-700" disabled={resetPasswordMutation.isPending} aria-busy={resetPasswordMutation.isPending}>
+                {resetPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Resetar Senha"}
               </Button>
             </DialogFooter>
           </form>
