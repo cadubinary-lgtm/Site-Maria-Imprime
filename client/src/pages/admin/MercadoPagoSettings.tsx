@@ -86,7 +86,7 @@ export default function MercadoPagoSettings() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando configurações do Mercado Pago" />
         </div>
       </AdminLayout>
     );
@@ -123,7 +123,7 @@ export default function MercadoPagoSettings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Key className="w-4 h-4 text-orange-500" />
+              <Key className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Credenciais da API
             </CardTitle>
             <CardDescription>
@@ -132,10 +132,11 @@ export default function MercadoPagoSettings() {
                 href="https://www.mercadopago.com.br/developers/pt/docs/checkout-api/credentials"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-orange-500 hover:underline inline-flex items-center gap-1"
+                className="text-pink-600 hover:text-pink-700 hover:underline inline-flex items-center gap-1"
+                aria-label="Abrir Mercado Pago Developers em nova aba"
               >
                 Mercado Pago Developers
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3 h-3" aria-hidden="true" />
               </a>
             </CardDescription>
           </CardHeader>
@@ -149,6 +150,7 @@ export default function MercadoPagoSettings() {
               <Switch
                 checked={form.sandbox}
                 onCheckedChange={(v) => setForm(prev => ({ ...prev, sandbox: v }))}
+                aria-label={form.sandbox ? "Desativar modo Sandbox" : "Ativar modo Sandbox"}
               />
             </div>
 
@@ -182,8 +184,9 @@ export default function MercadoPagoSettings() {
                   type="button"
                   onClick={() => setShowToken(!showToken)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showToken ? "Ocultar Access Token" : "Mostrar Access Token"}
                 >
-                  {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showToken ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
               <p className="text-xs text-gray-500">Usado exclusivamente no servidor. Nunca exposto ao cliente.</p>
@@ -207,7 +210,7 @@ export default function MercadoPagoSettings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <CreditCard className="w-4 h-4 text-orange-500" />
+              <CreditCard className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Métodos de Pagamento
             </CardTitle>
           </CardHeader>
@@ -223,6 +226,7 @@ export default function MercadoPagoSettings() {
               <Switch
                 checked={form.pixEnabled}
                 onCheckedChange={(v) => setForm(prev => ({ ...prev, pixEnabled: v }))}
+                aria-label={form.pixEnabled ? "Desativar pagamento por Pix" : "Ativar pagamento por Pix"}
               />
             </div>
 
@@ -237,6 +241,7 @@ export default function MercadoPagoSettings() {
               <Switch
                 checked={form.cardEnabled}
                 onCheckedChange={(v) => setForm(prev => ({ ...prev, cardEnabled: v }))}
+                aria-label={form.cardEnabled ? "Desativar pagamento por cartão" : "Ativar pagamento por cartão"}
               />
             </div>
           </CardContent>
@@ -246,7 +251,7 @@ export default function MercadoPagoSettings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Webhook className="w-4 h-4 text-orange-500" />
+              <Webhook className="w-4 h-4 text-pink-600" aria-hidden="true" />
               Webhook IPN
             </CardTitle>
             <CardDescription>
@@ -266,7 +271,8 @@ export default function MercadoPagoSettings() {
                     navigator.clipboard.writeText(`${window.location.origin}/api/payments/mercadopago/webhook`);
                     toast.success('URL copiada!');
                   }}
-                  className="text-xs text-orange-500 hover:text-orange-600 whitespace-nowrap"
+                  className="text-xs text-pink-600 hover:text-pink-700 whitespace-nowrap"
+                  aria-label="Copiar URL do webhook"
                 >
                   Copiar
                 </button>
@@ -293,18 +299,19 @@ export default function MercadoPagoSettings() {
                   type="button"
                   onClick={() => setShowWebhookSecret(!showWebhookSecret)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showWebhookSecret ? "Ocultar chave secreta do webhook" : "Mostrar chave secreta do webhook"}
                 >
-                  {showWebhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showWebhookSecret ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
               <p className="text-xs text-gray-500">Configure no painel MP → Webhooks → Chave secreta</p>
             </div>
 
-            <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
-              <Shield className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-orange-700 space-y-1">
+            <div className="flex items-start gap-2 bg-pink-50 border border-pink-200 rounded-lg p-3">
+              <Shield className="w-4 h-4 text-pink-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="text-xs text-pink-700 space-y-1">
                 <p><strong>Eventos a configurar no MP:</strong></p>
-                <ul className="list-disc list-inside space-y-0.5 text-orange-600">
+                <ul className="list-disc list-inside space-y-0.5 text-pink-600">
                   <li>payment — para PIX e cartão</li>
                   <li>merchant_order — para pedidos</li>
                 </ul>
@@ -329,10 +336,11 @@ export default function MercadoPagoSettings() {
           <Button
             onClick={handleSave}
             disabled={saveMutation.isPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-pink-600 hover:bg-pink-700"
+            aria-busy={saveMutation.isPending}
           >
             {saveMutation.isPending ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />Salvando...</>
             ) : (
               'Salvar Configurações'
             )}
@@ -343,9 +351,10 @@ export default function MercadoPagoSettings() {
               variant="outline"
               onClick={handleTest}
               disabled={testMutation.isPending}
+              aria-busy={testMutation.isPending}
             >
               {testMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Testando...</>
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />Testando...</>
               ) : (
                 'Testar Conexão'
               )}

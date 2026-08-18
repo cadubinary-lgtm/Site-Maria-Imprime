@@ -3338,3 +3338,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da gestão de ordens de serviço
 - [x] Padronizar controles de ordens de serviço na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade das ordens de serviço
+
+- [x] Revisar controles e estados das configurações do Mercado Pago
+- [x] Padronizar controles de pagamento na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade das configurações do Mercado Pago
