@@ -3226,3 +3226,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar indicadores e ações de expedição na identidade cinza e rosa
 - [x] Melhorar a leitura de status e oportunidades operacionais de logística
 - [x] Validar indicadores e acessibilidade do painel de logística
+
+- [x] Revisar o painel administrativo de pré-impressão para identificar o ajuste prioritário
+- [x] Padronizar status e ações de conferência na identidade cinza e rosa
+- [x] Melhorar a leitura de artes e pendências de pré-impressão
+- [x] Validar status e acessibilidade do painel de pré-impressão
