@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Eye, EyeOff, Loader2, UserPlus, ArrowLeft, MapPin, Search } from "lucide-react";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 export default function CustomerRegister() {
   const [, navigate] = useLocation();
@@ -142,7 +143,7 @@ export default function CustomerRegister() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-xl border-0">
           <CardContent className="pt-10 pb-10 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -155,7 +156,7 @@ export default function CustomerRegister() {
             <p className="text-gray-500 text-sm mb-8">
               Verifique sua caixa de entrada (e a pasta de spam) e clique no link para ativar sua conta.
             </p>
-            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
+            <Button asChild className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}>
               <Link href="/login-cliente">Ir para o Login</Link>
             </Button>
           </CardContent>
@@ -165,11 +166,11 @@ export default function CustomerRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white py-8 px-4">
       <div className="w-full max-w-2xl mx-auto">
         {/* Logo / Voltar */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 text-sm mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-700 text-sm mb-4">
             <ArrowLeft className="w-4 h-4" />
             Voltar para o site
           </Link>
@@ -190,7 +191,7 @@ export default function CustomerRegister() {
           <Card className="shadow-lg border-0">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-orange-500" />
+                <UserPlus className="w-5 h-5 text-pink-600" />
                 Dados Pessoais
               </CardTitle>
               <CardDescription>Preencha seus dados para criar sua conta</CardDescription>
@@ -229,7 +230,7 @@ export default function CustomerRegister() {
                 <Label htmlFor="password">Senha *</Label>
                 <div className="relative">
                   <Input id="password" name="password" type={showPassword ? "text" : "password"} value={form.password} onChange={handleChange} placeholder="Mínimo 8 caracteres" required autoComplete="new-password" className="pr-10" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-gray-400 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -240,7 +241,7 @@ export default function CustomerRegister() {
                 <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
                 <div className="relative">
                   <Input id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} value={form.confirmPassword} onChange={handleChange} placeholder="Repita a senha" required autoComplete="new-password" className="pr-10" />
-                  <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-gray-400 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500" aria-label={showConfirm ? "Ocultar confirmação de senha" : "Mostrar confirmação de senha"} aria-pressed={showConfirm}>
                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -252,7 +253,7 @@ export default function CustomerRegister() {
           <Card className="shadow-lg border-0">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-orange-500" />
+                <MapPin className="w-5 h-5 text-pink-600" />
                 Endereço de Entrega
               </CardTitle>
               <CardDescription>
@@ -276,8 +277,8 @@ export default function CustomerRegister() {
                     className="pr-10"
                   />
                   {cepLoading
-                    ? <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500 animate-spin" />
-                    : <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    ? <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-600 animate-spin" aria-label="Consultando CEP" />
+                    : <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                   }
                 </div>
                 <p className="text-xs text-gray-400">Digite o CEP para preencher o endereço automaticamente</p>
@@ -331,19 +332,19 @@ export default function CustomerRegister() {
                   name="acceptTerms"
                   checked={form.acceptTerms}
                   onChange={handleChange}
-                  className="mt-1 w-4 h-4 accent-orange-500"
+                  className="mt-1 w-4 h-4 accent-pink-600"
                 />
                 <label htmlFor="acceptTerms" className="text-sm text-gray-600">
                   Concordo com os{" "}
-                  <Link href="/termos" className="text-orange-600 hover:underline">Termos de Uso</Link>{" "}
+                  <Link href="/termos" className="text-pink-600 hover:underline">Termos de Uso</Link>{" "}
                   e a{" "}
-                  <Link href="/privacidade" className="text-orange-600 hover:underline">Política de Privacidade</Link>
+                  <Link href="/privacidade" className="text-pink-600 hover:underline">Política de Privacidade</Link>
                 </label>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
+                className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
                 disabled={register.isPending}
               >
                 {register.isPending ? (
@@ -355,7 +356,7 @@ export default function CustomerRegister() {
 
               <p className="text-center text-sm text-gray-500">
                 Já tem conta?{" "}
-                <Link href="/login-cliente" className="text-orange-600 font-medium hover:underline">Fazer login</Link>
+                <Link href="/login-cliente" className="text-pink-600 font-medium hover:underline">Fazer login</Link>
               </p>
             </CardContent>
           </Card>
