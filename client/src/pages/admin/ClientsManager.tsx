@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   balcao:      { label: "Cliente Balcão", color: "bg-blue-100 text-blue-800" },
   site:        { label: "Cliente Site", color: "bg-green-100 text-green-800" },
   revendedor:  { label: "Revendedor",  color: "bg-purple-100 text-purple-800" },
-  agencia:     { label: "Agência",     color: "bg-orange-100 text-orange-800" },
+  agencia:     { label: "Agência",     color: "bg-pink-100 text-pink-800" },
 };
 
 const OPERATIONAL_STATUS_STYLES: Record<string, string> = {
@@ -166,7 +166,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   const [activityFilter, setActivityFilter] = useState("todos");
   const [pendingDeleteClient, setPendingDeleteClient] = useState<any | null>(null);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
-  const [expandedActionClientIds, setExpandedActionClientIds] = useState<Set<number>>(() => new Set());
+  const [expandedActionClientIds, setExpandedActionClientIds] = useState<Set<string>>(() => new Set());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -280,7 +280,9 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     updateLegacyStatus.mutate({ clientId: client.id, data: { isActive: !client.isActive } });
   };
 
-  const toggleActionExpansion = (clientId: number) => {
+  const getCustomerActionKey = (client: any) => `${client.source ?? "legacy"}-${client.externalId ?? client.id}`;
+
+  const toggleActionExpansion = (clientId: string) => {
     setExpandedActionClientIds((current) => {
       const next = new Set(current);
       next.has(clientId) ? next.delete(clientId) : next.add(clientId);
@@ -379,18 +381,22 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="flex gap-2 flex-1 min-w-[200px]">
             <Input
+              id="customer-search"
+              aria-label="Buscar clientes por nome, e-mail ou telefone"
               placeholder="Buscar por nome, e-mail ou telefone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="flex-1"
             />
-            <Button size="sm" variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4" />
+            <Button size="sm" variant="outline" onClick={() => refetch()} aria-label="Atualizar lista de clientes">
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
           {!defaultType && (
+            <div>
+            <Label id="customer-type-filter-label" className="sr-only">Filtrar por tipo de cliente</Label>
             <Select value={filterType || "todos"} onValueChange={(v) => setFilterType(v === "todos" ? "" : v)}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-44" aria-labelledby="customer-type-filter-label">
                 <SelectValue placeholder="Tipo de cliente" />
               </SelectTrigger>
               <SelectContent>
@@ -401,9 +407,12 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                 <SelectItem value="agencia">Agência</SelectItem>
               </SelectContent>
             </Select>
+            </div>
           )}
+          <div>
+          <Label id="customer-activity-filter-label" className="sr-only">Filtrar por situação de compra</Label>
           <Select value={activityFilter} onValueChange={setActivityFilter}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="Situação" /></SelectTrigger>
+            <SelectTrigger className="w-44" aria-labelledby="customer-activity-filter-label"><SelectValue placeholder="Situação" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todas as situações</SelectItem>
               <SelectItem value="ativo">Ativos (até 30 dias)</SelectItem>
@@ -412,6 +421,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               <SelectItem value="sem_compras">Sem compras</SelectItem>
             </SelectContent>
           </Select>
+          </div>
         </div>
 
         {/* Formulário */}
@@ -521,7 +531,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                   Clientes
                 </CardTitle>
                 <CardDescription>
-                  {filtered.length} cliente(s) encontrado(s){filterType ? ` · Tipo: ${TYPE_LABELS[filterType]?.label ?? filterType}` : ""}
+                  <span aria-live="polite">{filtered.length} cliente(s) encontrado(s){filterType ? ` · Tipo: ${TYPE_LABELS[filterType]?.label ?? filterType}` : ""}</span>
                 </CardDescription>
               </div>
             </div>
@@ -536,20 +546,21 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                 <table className="customer-list-standard w-full text-[11px]">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2 px-4 font-semibold">Cliente</th>
-                      <th className="text-left py-2 px-4 font-semibold">Contato</th>
-                      <th className="text-left py-2 px-4 font-semibold">E-mail</th>
-                      <th className="text-left py-2 px-4 font-semibold">Status</th>
-                      <th className="text-left py-2 px-4 font-semibold">Cadastro</th>
-                      <th className="text-left py-2 px-4 font-semibold">Retirada</th>
-                      <th className="text-left py-2 px-4 font-semibold">Ações</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Cliente</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Contato</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">E-mail</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Status</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Cadastro</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Retirada</th>
+                      <th scope="col" className="text-left py-2 px-4 font-semibold">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((client: any) => {
-                      const isActionExpanded = expandedActionClientIds.has(client.id);
+                      const customerActionKey = getCustomerActionKey(client);
+                      const isActionExpanded = expandedActionClientIds.has(customerActionKey);
                       return (
-                      <tr key={client.id} className="border-b hover:bg-gray-50">
+                      <tr key={customerActionKey} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <p className="font-medium text-gray-900">{client.name}</p>
                           {client.cpfCnpj && <p className="text-xs text-gray-500">{client.cpfCnpj}</p>}
@@ -584,9 +595,10 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
                               size="sm"
                               variant="ghost"
                               aria-label={isActionExpanded ? `Recolher ações de ${client.name}` : `Expandir ações de ${client.name}`}
+                              aria-expanded={isActionExpanded}
                               title={isActionExpanded ? "Recolher ações" : "Expandir ações"}
                               className={`${ADMIN_VISUAL_SYSTEM.iconAction} text-gray-400 hover:bg-transparent hover:text-pink-600`}
-                              onClick={() => toggleActionExpansion(client.id)}
+                              onClick={() => toggleActionExpansion(customerActionKey)}
                             >
                               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isActionExpanded ? "rotate-180" : ""}`} />
                             </Button>
