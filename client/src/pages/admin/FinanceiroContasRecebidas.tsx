@@ -123,12 +123,12 @@ export default function FinanceiroContasRecebidas() {
           </div>
           <div className="flex items-center gap-2">
             {canDeleteReceivedAccounts && (
-              <Button variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : ""}>
-                <Trash2 className="mr-1 h-4 w-4" />{showTrash ? "Fechar lixeira" : "Lixeira"}
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} aria-pressed={showTrash} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : "border-pink-200 text-pink-700 hover:bg-pink-50"}>
+                <Trash2 className="mr-1 h-4 w-4" aria-hidden="true" />{showTrash ? "Fechar lixeira" : "Lixeira"}
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="mr-1 h-4 w-4" />Atualizar
+            <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+              <RefreshCw className="mr-1 h-4 w-4" aria-hidden="true" />Atualizar
             </Button>
           </div>
         </div>
@@ -139,8 +139,10 @@ export default function FinanceiroContasRecebidas() {
               key={p}
               variant={periodo === p ? "default" : "outline"}
               size="sm"
+              type="button"
               onClick={() => { setPeriodo(p); setPage(1); }}
-              className={periodo === p ? "bg-green-600 text-white hover:bg-green-700" : ""}
+              className={periodo === p ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
+              aria-pressed={periodo === p}
             >
               {p === "dia" ? "Hoje" : p === "semana" ? "Semana" : p === "mes" ? "Mês" : "Ano"}
             </Button>
@@ -150,25 +152,25 @@ export default function FinanceiroContasRecebidas() {
         <Card className="border border-gray-200 shadow-sm">
           <CardContent className="flex flex-wrap items-end gap-3 p-4">
             <div className="relative min-w-[230px] flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Buscar por pedido, cliente ou e-mail..." className="h-9 pl-9" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+              <Input aria-label="Buscar contas recebidas" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Buscar por pedido, cliente ou e-mail..." className="h-9 pl-9" />
             </div>
             <label className="grid gap-1 text-xs font-medium text-gray-600">
               Data inicial
-              <Input type="date" value={startDate} onChange={(event) => { setStartDate(event.target.value); setPage(1); }} className="h-9" />
+              <Input id="received-start-date" type="date" value={startDate} onChange={(event) => { setStartDate(event.target.value); setPage(1); }} className="h-9" />
             </label>
             <label className="grid gap-1 text-xs font-medium text-gray-600">
               Data final
-              <Input type="date" value={endDate} onChange={(event) => { setEndDate(event.target.value); setPage(1); }} className="h-9" />
+              <Input id="received-end-date" type="date" value={endDate} onChange={(event) => { setEndDate(event.target.value); setPage(1); }} className="h-9" />
             </label>
-            {(search || startDate || endDate) && <Button variant="ghost" size="sm" className="h-9" onClick={clearFilters}>Limpar filtros</Button>}
+            {(search || startDate || endDate) && <Button type="button" variant="ghost" size="sm" className="h-9 text-pink-700 hover:bg-pink-50 hover:text-pink-800" onClick={clearFilters}>Limpar filtros</Button>}
           </CardContent>
         </Card>
 
         {data && (
           <Card className="border-0 bg-green-50 shadow-sm">
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="rounded-xl bg-green-100 p-3"><TrendingUp className="h-6 w-6 text-green-600" /></div>
+              <div className="rounded-xl bg-green-100 p-3"><TrendingUp className="h-6 w-6 text-green-600" aria-hidden="true" /></div>
               <div>
                 <p className="text-sm font-medium text-green-700">Total Recebido no Período</p>
                 <p className="mt-1 text-2xl font-bold text-green-800">{formatCurrency(data.totalValor)}</p>
@@ -184,7 +186,7 @@ export default function FinanceiroContasRecebidas() {
             {isLoading ? (
               <div className="p-8 text-center text-gray-400">Carregando...</div>
             ) : !data?.data.length ? (
-              <div className="p-8 text-center text-gray-400"><CheckCircle className="mx-auto mb-2 h-12 w-12 opacity-30" /><p>Nenhum recebimento encontrado com estes filtros</p></div>
+              <div className="p-8 text-center text-gray-400"><CheckCircle className="mx-auto mb-2 h-12 w-12 opacity-30" aria-hidden="true" /><p>Nenhum recebimento encontrado com estes filtros</p></div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -192,14 +194,14 @@ export default function FinanceiroContasRecebidas() {
                   <tbody className="divide-y divide-gray-100">
                     {data.data.map((item: any) => (
                       <tr key={item.pedidoId} className="hover:bg-gray-50">
-                        <td className="p-3 font-mono text-xs font-semibold text-orange-600">#{item.orderNumber}</td>
+                        <td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td>
                         <td className="p-3 font-medium">{item.cliente || "—"}</td>
                         <td className="p-3 text-right font-semibold text-green-700">{formatCurrency(item.valor)}</td>
                         <td className="p-3 text-gray-500">{formatDate(item.createdAt)}</td>
                         <td className="p-3"><Badge variant="outline" className="text-xs">{PAYMENT_LABELS[item.formaPagamento] || item.formaPagamento || "—"}</Badge></td>
                         <td className="p-3 text-xs text-gray-500">{item.formaEntrega === "retirada_loja" ? "Retirada" : item.formaEntrega || "—"}</td>
                         <td className="p-3"><Badge className="border-0 bg-green-100 text-xs text-green-700">Pago</Badge></td>
-                        {canDeleteReceivedAccounts && <td className="p-3 text-center"><Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setReceiptToDelete(item); }}><Trash2 className="h-3.5 w-3.5" /></Button></td>}
+                        {canDeleteReceivedAccounts && <td className="p-3 text-center"><Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setReceiptToDelete(item); }}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button></td>}
                       </tr>
                     ))}
                   </tbody>
