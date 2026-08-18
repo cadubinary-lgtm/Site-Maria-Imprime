@@ -3322,3 +3322,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados visuais do dashboard fiscal
 - [x] Padronizar controles fiscais não semânticos na identidade rosa
 - [x] Validar a consistência visual e acessibilidade do dashboard fiscal
+
+- [x] Revisar controles legados das configurações fiscais
+- [x] Padronizar controles fiscais não semânticos na identidade rosa
+- [x] Validar a consistência visual e acessibilidade das configurações fiscais
