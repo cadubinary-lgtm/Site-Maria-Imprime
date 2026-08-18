@@ -79,8 +79,8 @@ export default function GestaoFiscalDashboard() {
               </Button>
             </Link>
             <Link href="/admin/fiscal/notas">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white" size="sm">
-                <Plus className="w-4 h-4 mr-2" /> Nova Nota
+              <Button className="bg-pink-600 hover:bg-pink-700 text-white" size="sm">
+                <Plus className="w-4 h-4 mr-2" aria-hidden="true" /> Nova Nota
               </Button>
             </Link>
           </div>
@@ -135,12 +135,12 @@ export default function GestaoFiscalDashboard() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-orange-500" />
+                <Receipt className="w-4 h-4 text-pink-600" aria-hidden="true" />
                 Notas Fiscais Recentes
               </CardTitle>
               <Link href="/admin/fiscal/notas">
-                <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700">
-                  Ver todas <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                <Button variant="ghost" size="sm" className="text-pink-600 hover:text-pink-700">
+                  Ver todas <ArrowRight className="w-3.5 h-3.5 ml-1" aria-hidden="true" />
                 </Button>
               </Link>
             </div>
@@ -151,7 +151,7 @@ export default function GestaoFiscalDashboard() {
                 <Receipt className="w-10 h-10 mx-auto mb-2 opacity-30" />
                 <p className="text-sm">Nenhuma nota fiscal emitida ainda</p>
                 <Link href="/admin/fiscal/notas">
-                  <Button className="mt-3 bg-orange-500 hover:bg-orange-600 text-white" size="sm">
+                  <Button className="mt-3 bg-pink-600 hover:bg-pink-700 text-white" size="sm">
                     Emitir primeira nota
                   </Button>
                 </Link>
@@ -205,10 +205,10 @@ export default function GestaoFiscalDashboard() {
           {[
             { label: "Listar Notas Fiscais", href: "/admin/fiscal/notas", icon: <FileText className="w-4 h-4" />, color: "text-blue-600" },
             { label: "Configurações Fiscais", href: "/admin/fiscal/configuracoes", icon: <Settings className="w-4 h-4" />, color: "text-gray-600" },
-            { label: "Gerenciador Financeiro", href: "/admin/gerenciador-financeiro", icon: <Receipt className="w-4 h-4" />, color: "text-orange-600" },
+            { label: "Gerenciador Financeiro", href: "/admin/gerenciador-financeiro", icon: <Receipt className="w-4 h-4" />, color: "text-pink-600" },
           ].map((link) => (
             <Link key={link.href} href={link.href}>
-              <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-sm transition-all cursor-pointer">
+              <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-pink-300 hover:shadow-sm transition-all cursor-pointer">
                 <span className={link.color}>{link.icon}</span>
                 <span className="text-sm font-medium text-gray-700">{link.label}</span>
                 <ArrowRight className="w-3.5 h-3.5 text-gray-400 ml-auto" />

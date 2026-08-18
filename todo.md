@@ -3318,3 +3318,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar os elementos visuais legados da central de regras de frete
 - [x] Padronizar controles não semânticos de frete na identidade rosa
 - [x] Validar a consistência visual e acessibilidade da central de frete
+
+- [x] Revisar controles e estados visuais do dashboard fiscal
+- [x] Padronizar controles fiscais não semânticos na identidade rosa
+- [x] Validar a consistência visual e acessibilidade do dashboard fiscal
