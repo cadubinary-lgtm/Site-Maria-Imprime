@@ -3191,3 +3191,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar campos e ações de dados institucionais na identidade cinza e rosa
 - [x] Melhorar a leitura de contatos, endereço e presença pública
 - [x] Validar campos e acessibilidade do painel de dados da empresa
+
+- [x] Revisar a página pública de contato para identificar o ajuste prioritário
+- [x] Padronizar canais e chamadas à ação de contato na identidade rosa
+- [x] Melhorar a leitura de endereço e horários de atendimento
+- [x] Validar a continuidade e acessibilidade da página de contato
