@@ -84,17 +84,17 @@ export default function FluxoCaixa() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin/gerenciador-financeiro">
-              <Button variant="ghost" size="sm">
-                <ChevronLeft className="w-4 h-4 mr-1" /> Voltar
-              </Button>
+              <span className="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+                <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" /> Voltar
+              </span>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Fluxo de Caixa</h1>
               <p className="text-sm text-gray-500">Entradas e saídas financeiras</p>
             </div>
           </div>
-          <Button onClick={() => setShowAddDialog(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
-            <Plus className="w-4 h-4 mr-2" /> Novo Lançamento
+          <Button type="button" onClick={() => setShowAddDialog(true)} className="bg-pink-600 hover:bg-pink-700 text-white">
+            <Plus className="w-4 h-4 mr-2" aria-hidden="true" /> Novo Lançamento
           </Button>
         </div>
 
@@ -103,7 +103,7 @@ export default function FluxoCaixa() {
           <Card className="border border-green-200 bg-green-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-600" />
+                <TrendingUp className="w-4 h-4 text-green-600" aria-hidden="true" />
                 <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Total Entradas</p>
               </div>
               <p className="text-2xl font-bold text-green-700 mt-1">{fmt(data?.totalIncome ?? 0)}</p>
@@ -112,7 +112,7 @@ export default function FluxoCaixa() {
           <Card className="border border-red-200 bg-red-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <TrendingDown className="w-4 h-4 text-red-600" />
+                <TrendingDown className="w-4 h-4 text-red-600" aria-hidden="true" />
                 <p className="text-xs font-medium text-red-600 uppercase tracking-wide">Total Saídas</p>
               </div>
               <p className="text-2xl font-bold text-red-700 mt-1">{fmt(data?.totalExpense ?? 0)}</p>
@@ -121,7 +121,7 @@ export default function FluxoCaixa() {
           <Card className={`border ${(data?.netBalance ?? 0) >= 0 ? "border-blue-200 bg-blue-50" : "border-red-200 bg-red-50"}`}>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <DollarSign className={`w-4 h-4 ${(data?.netBalance ?? 0) >= 0 ? "text-blue-600" : "text-red-600"}`} />
+                <DollarSign className={`w-4 h-4 ${(data?.netBalance ?? 0) >= 0 ? "text-blue-600" : "text-red-600"}`} aria-hidden="true" />
                 <p className={`text-xs font-medium uppercase tracking-wide ${(data?.netBalance ?? 0) >= 0 ? "text-blue-600" : "text-red-600"}`}>Saldo Líquido</p>
               </div>
               <p className={`text-2xl font-bold mt-1 ${(data?.netBalance ?? 0) >= 0 ? "text-blue-700" : "text-red-700"}`}>
@@ -137,10 +137,12 @@ export default function FluxoCaixa() {
             {(["week", "month", "quarter"] as const).map((p) => (
               <button
                 key={p}
+                type="button"
                 onClick={() => setPeriod(p)}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  period === p ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                  period === p ? "bg-pink-600 text-white" : "bg-white text-gray-600 hover:bg-pink-50 hover:text-pink-700"
                 }`}
+                aria-pressed={period === p}
               >
                 {p === "week" ? "7 dias" : p === "month" ? "Mês" : "90 dias"}
               </button>
@@ -150,10 +152,12 @@ export default function FluxoCaixa() {
             {(["day", "week", "month"] as const).map((g) => (
               <button
                 key={g}
+                type="button"
                 onClick={() => setGroupBy(g)}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  groupBy === g ? "bg-blue-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                  groupBy === g ? "bg-pink-600 text-white" : "bg-white text-gray-600 hover:bg-pink-50 hover:text-pink-700"
                 }`}
+                aria-pressed={groupBy === g}
               >
                 {g === "day" ? "Diário" : g === "week" ? "Semanal" : "Mensal"}
               </button>
@@ -169,7 +173,7 @@ export default function FluxoCaixa() {
           <CardContent>
             {isLoading ? (
               <div className="h-48 flex items-center justify-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full" />
+                <div className="animate-spin w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full" aria-label="Carregando fluxo de caixa" />
               </div>
             ) : cashFlowData.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
@@ -186,7 +190,7 @@ export default function FluxoCaixa() {
             ) : (
               <div className="h-48 flex items-center justify-center text-gray-400">
                 <div className="text-center">
-                  <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" aria-hidden="true" />
                   <p className="text-sm">Nenhum dado no período</p>
                 </div>
               </div>
@@ -242,28 +246,33 @@ export default function FluxoCaixa() {
           <DialogHeader>
             <DialogTitle>Novo Lançamento Manual</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <form id="cash-flow-entry-form" className="space-y-4 py-2" onSubmit={(event) => { event.preventDefault(); handleAddEntry(); }}>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => setEntryType("income")}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
                   entryType === "income" ? "bg-green-500 text-white border-green-500" : "bg-white text-gray-600 border-gray-200"
                 }`}
+                aria-pressed={entryType === "income"}
               >
                 Entrada
               </button>
               <button
+                type="button"
                 onClick={() => setEntryType("expense")}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
                   entryType === "expense" ? "bg-red-500 text-white border-red-500" : "bg-white text-gray-600 border-gray-200"
                 }`}
+                aria-pressed={entryType === "expense"}
               >
                 Saída
               </button>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Valor (R$)</label>
+              <label htmlFor="cash-flow-entry-amount" className="text-sm font-medium text-gray-700">Valor (R$)</label>
               <Input
+                id="cash-flow-entry-amount"
                 type="number"
                 placeholder="0,00"
                 value={entryAmount}
@@ -272,8 +281,9 @@ export default function FluxoCaixa() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Categoria</label>
+              <label htmlFor="cash-flow-entry-category" className="text-sm font-medium text-gray-700">Categoria</label>
               <Input
+                id="cash-flow-entry-category"
                 placeholder="Ex: Aluguel, Material, Venda..."
                 value={entryCategory}
                 onChange={(e) => setEntryCategory(e.target.value)}
@@ -281,21 +291,24 @@ export default function FluxoCaixa() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Descrição</label>
+              <label htmlFor="cash-flow-entry-description" className="text-sm font-medium text-gray-700">Descrição</label>
               <Input
+                id="cash-flow-entry-description"
                 placeholder="Descrição do lançamento"
                 value={entryDescription}
                 onChange={(e) => setEntryDescription(e.target.value)}
                 className="mt-1"
               />
             </div>
-          </div>
+          </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancelar</Button>
+            <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setShowAddDialog(false)}>Cancelar</Button>
             <Button
-              onClick={handleAddEntry}
+              type="submit"
+              form="cash-flow-entry-form"
               disabled={addEntry.isPending}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+              aria-busy={addEntry.isPending}
             >
               {addEntry.isPending ? "Salvando..." : "Salvar Lançamento"}
             </Button>

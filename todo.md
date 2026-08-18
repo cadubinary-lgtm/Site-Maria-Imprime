@@ -3450,3 +3450,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da página legada de pagamentos na retirada
 - [x] Padronizar controles da página legada de pagamentos na retirada na identidade rosa
 - [x] Validar a página legada de pagamentos na retirada e salvar checkpoint publicável
+
+- [x] Revisar controles, filtros e indicadores da página legada de fluxo de caixa
+- [x] Padronizar controles da página legada de fluxo de caixa na identidade rosa
+- [x] Validar a página legada de fluxo de caixa e salvar checkpoint publicável
