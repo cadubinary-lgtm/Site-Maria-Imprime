@@ -3096,3 +3096,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os diferenciais na identidade rosa e em uma estrutura acessível
 - [x] Melhorar a leitura responsiva e consistência visual dos diferenciais
 - [x] Validar a seção de diferenciais no fluxo público
+
+- [x] Revisar a seção pública de prova social e benefícios para identificar conteúdo a ajustar
+- [x] Substituir qualquer conteúdo de prova social não verificável por comunicação institucional adequada
+- [x] Padronizar a seção revisada na identidade rosa e em uma estrutura acessível
+- [x] Validar a conformidade e leitura da seção pública revisada

@@ -1,0 +1,1 @@
+A seção “Como cuidamos do seu pedido” foi validada como comunicação institucional: apresenta compromissos operacionais em cards, sem comentários de clientes, notas ou avaliações. A estrutura foi mantida legível e acessível na página inicial.

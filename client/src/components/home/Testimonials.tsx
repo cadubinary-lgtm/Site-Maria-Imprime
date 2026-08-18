@@ -26,28 +26,28 @@ const SERVICE_COMMITMENTS = [
 
 export function Testimonials() {
   return (
-    <section className="bg-white py-20 px-4" style={{paddingTop: '39px'}}>
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-3 text-center text-gray-900">Como cuidamos do seu pedido</h2>
-        <p className="text-center text-gray-600 text-sm">Um processo claro, do primeiro contato à entrega.</p>
+    <section className="bg-white px-4 py-16 sm:py-20" aria-labelledby="service-commitments-title">
+      <div className="mx-auto max-w-7xl">
+        <h2 id="service-commitments-title" className="mb-3 text-center text-3xl font-bold text-gray-900">Como cuidamos do seu pedido</h2>
+        <p className="text-center text-sm text-gray-600">Um processo claro, do primeiro contato à entrega.</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-label="Compromissos de atendimento">
           {SERVICE_COMMITMENTS.map(({ title, description, Icon }) => (
-            <Card key={title} className="border-0 shadow-sm hover:shadow-md transition-all bg-white" style={{paddingTop: '3px'}}>
-              <CardContent className="pt-6">
+            <li key={title}>
+              <Card className="h-full border border-pink-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <CardContent className="p-5">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center">
-                    <Icon className="w-4 h-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-pink-50 text-pink-600">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{title}</p>
-                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
                 </div>
-                <p className="text-gray-600 text-xs mt-4 leading-relaxed font-light">{description}</p>
-              </CardContent>
-            </Card>
+                <p className="mt-4 text-xs font-light leading-relaxed text-gray-600">{description}</p>
+                </CardContent>
+              </Card>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
