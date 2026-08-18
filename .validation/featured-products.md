@@ -1,0 +1,1 @@
+Na página inicial, a vitrine apresenta o título “Produtos em destaque”, um texto de apoio orientativo e cards públicos disponíveis. O atalho “Ver todos os produtos” foi validado e direcionou ao catálogo público. A seção também possui estados implementados para falha ou ausência de destaques, cobertos por testes de regressão.
