@@ -4,6 +4,7 @@ import { Loader2, CheckCircle2, Clock, Package, Printer, Scissors, Box, Truck, H
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 function getTimelineSteps(order: any) {
   const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
@@ -52,18 +53,23 @@ export default function OrderConfirmation() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando confirmação do pedido" />
       </div>
     );
   }
 
   if (!order || !order.status) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
-        <p className="text-gray-600">Pedido não encontrado</p>
-        <Link href="/">
-          <Button>Voltar ao Início</Button>
-        </Link>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 text-center">
+        <div className="w-full max-w-md rounded-2xl border border-pink-100 bg-white p-7 shadow-sm sm:p-9">
+          <Package className="mx-auto h-8 w-8 text-pink-600" aria-hidden="true" />
+          <h1 className="mt-4 text-xl font-bold text-gray-900">Pedido não encontrado</h1>
+          <p role="alert" className="mt-2 text-sm leading-6 text-gray-600">Confira o link recebido ou navegue pelo catálogo para iniciar um novo pedido.</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link href="/catalogo"><Button variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} w-full sm:w-auto`}>Explorar catálogo</Button></Link>
+            <Link href="/"><Button className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}>Voltar ao início</Button></Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -91,10 +97,14 @@ export default function OrderConfirmation() {
     cancelado:           "Cancelado",
   };
 
-  const handleCopyLink = () => {
-    if (trackUrl) {
-      navigator.clipboard.writeText(trackUrl);
+  const handleCopyLink = async () => {
+    if (!trackUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(trackUrl);
       toast.success("Link copiado!");
+    } catch {
+      toast.error("Não foi possível copiar o link. Tente selecionar e copiar manualmente.");
     }
   };
 
@@ -121,7 +131,7 @@ export default function OrderConfirmation() {
 
         {/* Destaque do link de acompanhamento para convidados */}
         {trackUrl && (
-          <Card className="mb-6 border-2 border-blue-300 bg-blue-50 shadow-md">
+          <Card className="mb-6 border-2 border-pink-200 bg-pink-50 shadow-md">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <p className="text-gray-700 text-base">
@@ -129,24 +139,25 @@ export default function OrderConfirmation() {
                 </p>
                 <a
                   href={trackUrl}
-                  className="inline-flex items-center gap-2 text-blue-700 font-bold text-lg hover:text-blue-900 underline underline-offset-4 transition-colors"
+                  className="inline-flex items-center gap-2 text-pink-700 font-bold text-lg hover:text-pink-900 underline underline-offset-4 transition-colors"
                 >
-                  👉 Acompanhar meu pedido
+                  Acompanhar meu pedido
                   <ExternalLink className="w-4 h-4" />
                 </a>
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <code className="text-xs bg-white border border-blue-200 rounded px-3 py-1.5 text-blue-700 break-all max-w-xs truncate">
+                  <code className="text-xs bg-white border border-pink-200 rounded px-3 py-1.5 text-pink-700 break-all max-w-xs truncate">
                     {trackUrl}
                   </code>
                   <button
                     onClick={handleCopyLink}
-                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-300 rounded px-2 py-1.5 bg-white hover:bg-blue-50 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1 text-xs text-pink-600 hover:text-pink-800 border border-pink-300 rounded px-2 py-1.5 bg-white hover:bg-pink-50 transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+                    aria-label="Copiar link de acompanhamento"
                   >
                     <Copy className="w-3 h-3" />
                     Copiar
                   </button>
                 </div>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-pink-600">
                   Guarde este link — ele também foi enviado para o seu e-mail.
                 </p>
               </div>
@@ -158,22 +169,22 @@ export default function OrderConfirmation() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="w-5 h-5 text-orange-500" />
+              <Clock className="w-5 h-5 text-pink-600" />
               Status do Pedido
             </CardTitle>
           </CardHeader>
           <CardContent>
             {/* Status Atual */}
-            <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
-              <p className="text-sm text-orange-600 font-medium">Status atual</p>
-              <p className="text-lg font-bold text-orange-700">
+            <div className="mb-6 p-4 bg-pink-50 rounded-lg border border-pink-100" aria-live="polite">
+              <p className="text-sm text-pink-600 font-medium">Status atual</p>
+              <p className="text-lg font-bold text-pink-700">
                 {isCancelled ? "Cancelado" : STATUS_LABELS[order.status] || order.status}
               </p>
             </div>
 
             {/* Timeline Visual */}
             {!isCancelled && (
-              <div className="flex items-center justify-between overflow-x-auto pb-4">
+              <div className="flex items-center justify-between overflow-x-auto pb-4" aria-label="Etapas do pedido">
                 {TIMELINE_STEPS.map((step: any, i: number) => {
                   const Icon = step.icon;
                   const isActive = i <= currentStepIndex;
@@ -185,7 +196,7 @@ export default function OrderConfirmation() {
                       {i > 0 && (
                         <div
                           className={`absolute top-5 -left-1/2 w-full h-0.5 ${
-                            i <= currentStepIndex ? "bg-orange-400" : "bg-gray-200"
+                            i <= currentStepIndex ? "bg-pink-400" : "bg-gray-200"
                           }`}
                           style={{ zIndex: 0 }}
                         />
@@ -194,9 +205,9 @@ export default function OrderConfirmation() {
                       <div
                         className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                           isCurrent
-                            ? "bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-200"
+                            ? "bg-pink-600 border-pink-600 text-white shadow-lg shadow-pink-200"
                             : isActive
-                            ? "bg-orange-100 border-orange-400 text-orange-600"
+                            ? "bg-pink-100 border-pink-400 text-pink-600"
                             : "bg-gray-100 border-gray-200 text-gray-400"
                         }`}
                       >
@@ -205,7 +216,7 @@ export default function OrderConfirmation() {
                       {/* Label */}
                       <span
                         className={`text-[10px] mt-2 text-center leading-tight ${
-                          isCurrent ? "font-bold text-orange-600" : isActive ? "text-orange-500" : "text-gray-400"
+                          isCurrent ? "font-bold text-pink-600" : isActive ? "text-pink-500" : "text-gray-400"
                         }`}
                       >
                         {step.label}
@@ -232,7 +243,7 @@ export default function OrderConfirmation() {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Total:</span>
-              <span className="font-bold text-lg">
+              <span className="font-bold text-lg text-pink-600">
                 {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
                   parseFloat(order.totalPrice.toString())
                 )}
@@ -260,19 +271,19 @@ export default function OrderConfirmation() {
         {/* Ações */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/catalogo">
-            <Button variant="outline" className="w-full sm:w-auto">
+            <Button variant="outline" className={`${HOME_SECONDARY_ACTION_CLASS} w-full sm:w-auto`}>
               Continuar Comprando
             </Button>
           </Link>
           {trackUrl ? (
             <a href={trackUrl}>
-              <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
-                👉 Acompanhar meu pedido
+              <Button className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}>
+                Acompanhar meu pedido
               </Button>
             </a>
           ) : (
             <Link href="/meus-pedidos">
-              <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
+              <Button className={`${HOME_PRIMARY_ACTION_CLASS} w-full sm:w-auto`}>
                 Meus Pedidos
               </Button>
             </Link>
