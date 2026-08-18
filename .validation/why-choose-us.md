@@ -1,0 +1,1 @@
+Na página inicial, os quatro diferenciais foram exibidos em cards consistentes, com ícones rosa e leitura clara em grade. A estrutura de lista foi preservada na leitura assistiva e o ajuste removeu deslocamentos fixos que comprometiam o alinhamento em diferentes larguras.

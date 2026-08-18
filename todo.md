@@ -3091,3 +3091,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a preparação de arte na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a leitura e acessibilidade das orientações de arquivo
 - [x] Validar as ações de continuidade da preparação de arte
+
+- [x] Revisar a seção de diferenciais da página inicial para identificar o ajuste prioritário
+- [x] Padronizar os diferenciais na identidade rosa e em uma estrutura acessível
+- [x] Melhorar a leitura responsiva e consistência visual dos diferenciais
+- [x] Validar a seção de diferenciais no fluxo público
