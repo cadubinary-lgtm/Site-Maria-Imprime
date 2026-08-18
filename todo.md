@@ -3291,3 +3291,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o cancelamento de nota fiscal para identificar o ajuste prioritário
 - [x] Substituir a confirmação nativa de cancelamento de nota por diálogo acessível
 - [x] Validar o cancelamento de nota fiscal e seus feedbacks
+
+- [ ] Revisar exclusões nos componentes de entrega e variações de produto
+- [ ] Substituir confirmações nativas por diálogos acessíveis nas configurações de produto
+- [ ] Validar exclusões das configurações de produto e seus feedbacks
+
+- [x] Substituir a confirmação nativa de exclusão de prazo de produção por diálogo acessível
+- [x] Validar a exclusão de prazo de produção e seus feedbacks

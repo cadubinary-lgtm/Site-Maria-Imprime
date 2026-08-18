@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GripVertical, Trash2, Edit2, Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -67,6 +68,7 @@ export function DeliveryOptionsManager({
   });
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [optionToDelete, setOptionToDelete] = useState<DeliveryOptionData | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     daysToDeliver: 5,
@@ -123,7 +125,8 @@ export function DeliveryOptionsManager({
   const deleteMutation = trpc.deliveryOptions.delete.useMutation({
     onSuccess: () => {
       toast.success("Prazo removido!");
-      setOptions((prev) => prev.filter((o) => o.id !== editingId));
+      setOptions((prev) => prev.filter((o) => o.id !== optionToDelete?.id));
+      setOptionToDelete(null);
       setEditingId(null);
     },
     onError: (error) => toast.error(`Erro ao deletar prazo: ${error.message}`),
@@ -180,13 +183,15 @@ export function DeliveryOptionsManager({
     setIsOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (!confirm("Tem certeza que deseja remover este prazo?")) return;
+  const handleConfirmDelete = () => {
+    if (!optionToDelete?.id) return;
     if (isOfflineMode) {
-      setOptions((prev) => prev.filter((o) => o.id !== id));
+      setOptions((prev) => prev.filter((o) => o.id !== optionToDelete.id));
+      toast.success("Prazo removido!");
+      setOptionToDelete(null);
     } else {
-      setEditingId(id);
-      deleteMutation.mutate({ id });
+      setEditingId(optionToDelete.id);
+      deleteMutation.mutate({ id: optionToDelete.id });
     }
   };
 
@@ -374,17 +379,19 @@ export function DeliveryOptionsManager({
                     className="h-7 w-7 p-0"
                     onClick={() => handleEdit(option)}
                     title="Editar"
+                    aria-label={`Editar prazo ${option.name}`}
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     className="h-7 w-7 p-0"
-                    onClick={() => handleDelete(option.id!)}
+                    onClick={() => setOptionToDelete(option)}
                     title="Remover"
+                    aria-label={`Excluir prazo ${option.name}`}
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    <Trash2 className="w-3.5 h-3.5 text-red-500" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
@@ -392,6 +399,20 @@ export function DeliveryOptionsManager({
           </div>
         )}
       </CardContent>
+      <AlertDialog open={Boolean(optionToDelete)} onOpenChange={(open) => !open && setOptionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir o prazo “{optionToDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>Este prazo deixará de estar disponível para o produto. Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteMutation.isPending} aria-busy={deleteMutation.isPending} onClick={(event) => { event.preventDefault(); handleConfirmDelete(); }}>
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir prazo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
