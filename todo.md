@@ -3111,3 +3111,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o checkout na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a clareza de pagamento, entrega e acessibilidade do checkout
 - [x] Validar valores, ações e continuidade da finalização de compra
+
+- [x] Revisar o acesso flutuante de atendimento para identificar o ajuste prioritário
+- [x] Padronizar o acesso flutuante na identidade visual e em controles acessíveis
+- [x] Melhorar a leitura e a continuidade do atendimento por WhatsApp
+- [x] Validar o link e o comportamento do atendimento flutuante
