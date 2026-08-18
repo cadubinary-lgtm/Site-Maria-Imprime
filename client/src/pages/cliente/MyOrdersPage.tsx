@@ -12,6 +12,7 @@ import {
   ArrowLeft, AlertCircle, Filter, Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-100 text-green-700" },
@@ -68,10 +69,10 @@ export default function MyOrdersPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-6">
-            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-pink-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Faça login para ver seus pedidos</h2>
             <p className="text-gray-500 mb-6">Você precisa estar logado para acessar seus pedidos</p>
-            <Button className="bg-orange-500 hover:bg-orange-600 w-full" onClick={() => setLocation("/login-cliente")}>
+            <Button className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`} onClick={() => setLocation("/login-cliente")}>
               Fazer Login
             </Button>
           </CardContent>
@@ -81,6 +82,7 @@ export default function MyOrdersPage() {
   }
 
   const orderList = (orders ?? []) as any[];
+  const hasActiveFilters = Boolean(search) || statusFilter !== "all";
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -93,16 +95,16 @@ export default function MyOrdersPage() {
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Package className="h-6 w-6 text-orange-500" />
+              <Package className="h-6 w-6 text-pink-600" />
               Meus Pedidos
             </h1>
             {!isLoading && (
               <p className="text-sm text-gray-500">
-                {orderList.length} {orderList.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
+                <span aria-live="polite">{orderList.length} {orderList.length === 1 ? "pedido encontrado" : "pedidos encontrados"}</span>
               </p>
             )}
           </div>
-          <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setLocation("/catalogo")}>
+          <Button className={HOME_PRIMARY_ACTION_CLASS} onClick={() => setLocation("/catalogo")}>
             <ShoppingBag className="h-4 w-4 mr-2" />
             Novo Pedido
           </Button>
@@ -113,16 +115,17 @@ export default function MyOrdersPage() {
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
                 <Input
                   placeholder="Buscar por número do pedido..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9"
+                  aria-label="Buscar por número do pedido"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-52">
+                <SelectTrigger className="w-full sm:w-52" aria-label="Filtrar pedidos por status">
                   <Filter className="h-4 w-4 mr-2 text-gray-400" />
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
@@ -134,7 +137,7 @@ export default function MyOrdersPage() {
                 </SelectContent>
               </Select>
               <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
-                <SelectTrigger className="w-full sm:w-44">
+                <SelectTrigger className="w-full sm:w-44" aria-label="Ordenar pedidos">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
@@ -184,8 +187,12 @@ export default function MyOrdersPage() {
                 ? "Tente ajustar os filtros de busca"
                 : "Comece a comprar e seus pedidos aparecerão aqui"}
             </p>
-            {!search && statusFilter === "all" && (
-              <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setLocation("/catalogo")}>
+            {hasActiveFilters ? (
+              <Button variant="outline" className={HOME_SECONDARY_ACTION_CLASS} onClick={() => { setSearch(""); setStatusFilter("all"); }}>
+                Limpar filtros
+              </Button>
+            ) : (
+              <Button className={HOME_PRIMARY_ACTION_CLASS} onClick={() => setLocation("/catalogo")}>
                 Ver Produtos
               </Button>
             )}
@@ -209,7 +216,7 @@ export default function MyOrdersPage() {
                           <Calendar className="h-3.5 w-3.5" />
                           {formatDate(order.createdAt)}
                         </span>
-                        <span className="font-semibold text-orange-600 text-base">
+                        <span className="font-semibold text-pink-600 text-base">
                           {formatCurrency(order.totalPrice)}
                         </span>
                         {order.itemCount && (
@@ -231,6 +238,7 @@ export default function MyOrdersPage() {
                         size="sm"
                         onClick={() => setLocation(`/pedido/${order.orderNumber}`)}
                         className="text-gray-700"
+                        aria-label={`Ver detalhes do pedido ${order.orderNumber}`}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         Ver
@@ -240,7 +248,8 @@ export default function MyOrdersPage() {
                         size="sm"
                         onClick={() => reorderMutation.mutate({ orderId: order.id })}
                         disabled={reorderMutation.isPending}
-                        className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                        className="text-pink-600 border-pink-300 hover:bg-pink-50 hover:text-pink-700"
+                        aria-label={`Refazer o pedido ${order.orderNumber}`}
                       >
                         <RefreshCw className={`h-4 w-4 mr-1 ${reorderMutation.isPending ? "animate-spin" : ""}`} />
                         Recomprar

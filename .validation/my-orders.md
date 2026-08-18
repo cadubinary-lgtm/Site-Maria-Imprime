@@ -1,0 +1,1 @@
+Na rota `/meus-pedidos` sem sessão, a área não exibiu dados de pedidos e apresentou um estado protegido com ação de login na identidade rosa. A ação “Fazer Login” direcionou corretamente para `/login-cliente`. A lista autenticada foi coberta por testes de filtros, estado vazio e ações nomeadas, sem alterar pedidos ou dados de clientes.
