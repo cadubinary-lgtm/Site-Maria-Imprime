@@ -3386,3 +3386,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar permissões, controles e estados do gerenciador alternativo de administradores
 - [x] Padronizar o gerenciador alternativo de administradores na identidade rosa e com ações acessíveis
 - [x] Validar o gerenciador alternativo de administradores e salvar checkpoint publicável
+
+- [x] Revisar controles e fluxos da página administrativa de variações
+- [x] Padronizar controles de variações na identidade rosa e com acessibilidade
+- [x] Validar a página administrativa de variações e salvar checkpoint publicável
