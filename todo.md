@@ -3051,3 +3051,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar login, cadastro e recuperação na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar mensagens, validações e acessibilidade dos formulários de acesso
 - [x] Validar a navegação de continuidade entre acesso, cadastro e recuperação
+
+- [x] Revisar o acompanhamento público de pedidos do cliente para identificar o ajuste prioritário
+- [x] Padronizar o acompanhamento do cliente na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar os estados vazios e a acessibilidade do acompanhamento do cliente
+- [x] Validar informações, ações e continuidade do acompanhamento
