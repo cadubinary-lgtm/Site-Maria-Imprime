@@ -3136,3 +3136,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os controles de configuração na identidade rosa e em uma estrutura acessível
 - [x] Melhorar a leitura das escolhas de material, impressão e acabamento
 - [x] Validar estados de seleção e continuidade do configurador visual
+
+- [x] Revisar o painel de produção para identificar o ajuste prioritário
+- [x] Padronizar o acompanhamento operacional na identidade cinza e rosa
+- [x] Melhorar a leitura de status, etapas e ações de produção
+- [x] Validar os controles e a acessibilidade operacional do painel
