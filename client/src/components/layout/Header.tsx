@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle, Package } from "lucide-react";
 import { toast } from "sonner";
 import { formatProductPrice } from "@/lib/productPrice";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 function CartIcon() {
   const { data: count } = trpc.cart.getCount.useQuery(undefined, {
@@ -18,10 +19,10 @@ function CartIcon() {
   const cartCount = Number(count ?? 0);
   const { toggleCart } = useCartDrawer();
   return (
-    <button onClick={toggleCart} className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-      <ShoppingCart className="w-5 h-5 text-gray-600" />
+    <button onClick={toggleCart} className="relative rounded-lg p-2 transition hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500" aria-label={`Abrir carrinho com ${cartCount} ${cartCount === 1 ? "item" : "itens"}`} aria-haspopup="dialog">
+      <ShoppingCart className="w-5 h-5 text-gray-600" aria-hidden="true" />
       {cartCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+        <span aria-hidden="true" className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white">
           {cartCount > 99 ? "99+" : cartCount}
         </span>
       )}
@@ -145,7 +146,7 @@ export default function Header() {
           {/* Search Bar */}
           <div className="flex-1 max-w-md relative" ref={searchRef}>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
               <Input
                 type="search"
                 name="site-search"
@@ -154,13 +155,16 @@ export default function Header() {
                 value={searchQuery}
                 onChange={handleSearch}
                 onFocus={() => searchQuery && setShowResults(true)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus-visible:ring-pink-500"
+                aria-label="Buscar produtos, materiais ou serviços"
+                aria-controls="header-search-results"
+                aria-expanded={showResults && Boolean(searchQuery)}
               />
             </div>
 
             {/* Search Results Dropdown */}
             {showResults && searchQuery && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+              <div id="header-search-results" role="status" aria-live="polite" className="absolute top-full left-0 right-0 z-50 mt-2 max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                 {isSearching ? (
                   <div className="p-4 text-center text-gray-500">Buscando...</div>
                 ) : totalResults === 0 ? (
@@ -193,7 +197,7 @@ export default function Header() {
                           <button
                             key={category.id}
                             onClick={() => {
-                              navigate(`/categoria/${category.id}`);
+                              navigate(`/catalogo?segmentId=${category.id}`);
                               setSearchQuery("");
                               setShowResults(false);
                             }}
@@ -252,7 +256,7 @@ export default function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-gray-700 hover:text-orange-600 flex items-center gap-1.5"
+                    className="flex items-center gap-1.5 text-gray-700 hover:text-pink-600"
                   >
                     <Package className="w-4 h-4" />
                     Meus Pedidos
@@ -262,7 +266,7 @@ export default function Header() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-orange-200 text-orange-700 hover:bg-orange-50 flex items-center gap-2"
+                    className={`flex items-center gap-2 ${HOME_SECONDARY_ACTION_CLASS}`}
                   >
                     <UserCircle className="w-4 h-4" />
                     <span translate="no">{customer.firstName}</span>
@@ -296,7 +300,7 @@ export default function Header() {
                   </Button>
                 </Link>
                 <Link href="/cadastro">
-                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                  <Button size="sm" className={HOME_PRIMARY_ACTION_CLASS}>
                     Cadastrar
                   </Button>
                 </Link>
@@ -330,7 +334,10 @@ export default function Header() {
             <CartIcon />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              className="rounded-lg p-2 transition hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+              aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? (
                 <X className="w-5 h-5 text-gray-600" />
@@ -343,11 +350,11 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 space-y-4 border-t pt-4">
+          <div id="mobile-navigation" className="md:hidden mt-4 space-y-4 border-t pt-4">
             {/* Mobile Search */}
             <div className="relative" ref={searchRef}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                 <Input
                   type="search"
                   name="site-search-mobile"
@@ -356,10 +363,13 @@ export default function Header() {
                   value={searchQuery}
                   onChange={handleSearch}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg"
+                  aria-label="Buscar produtos, materiais ou serviços"
+                  aria-controls="mobile-search-results"
+                  aria-expanded={showResults && Boolean(searchQuery)}
                 />
               </div>
               {showResults && searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50">
+                <div id="mobile-search-results" role="status" aria-live="polite" className="absolute top-full left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                   {isSearching ? (
                     <div className="p-4 text-center text-gray-500 text-sm">Buscando...</div>
                   ) : totalResults === 0 ? (
@@ -417,7 +427,7 @@ export default function Header() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start border-orange-200 text-orange-700"
+                    className={`w-full justify-start ${HOME_SECONDARY_ACTION_CLASS}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Package className="w-4 h-4 mr-2" />
@@ -462,7 +472,7 @@ export default function Header() {
                 <Link href="/cadastro">
                   <Button
                     size="sm"
-                    className="w-full bg-orange-500 hover:bg-orange-600"
+                    className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Cadastrar
