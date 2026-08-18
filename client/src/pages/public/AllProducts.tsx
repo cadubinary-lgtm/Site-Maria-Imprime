@@ -64,13 +64,23 @@ export default function AllProducts() {
     return filtered;
   }, [products, segmentProducts, searchTerm, selectedSegmentId, sortBy, priceAudience]);
 
+  const activeProductsInScope = useMemo(() => {
+    const productsInScope = selectedSegmentId === null ? products : segmentProducts;
+    return (productsInScope ?? []).filter((product) => Boolean(product.isActive)).length;
+  }, [products, segmentProducts, selectedSegmentId]);
+
+  const selectedSegment = useMemo(
+    () => segments.find((segment) => segment.id === selectedSegmentId) ?? null,
+    [segments, selectedSegmentId],
+  );
+
 
 
   if (isLoading || (selectedSegmentId !== null && segmentProductsLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-pink-600" />
           <p className="text-foreground">Carregando produtos...</p>
         </div>
       </div>
@@ -97,6 +107,7 @@ export default function AllProducts() {
                   type="button"
                   variant={selectedSegmentId === null ? 'default' : 'outline'}
                   onClick={() => setSelectedSegmentId(null)}
+                  aria-pressed={selectedSegmentId === null}
                   className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === null ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
                 >
                   Todos os segmentos
@@ -112,9 +123,9 @@ export default function AllProducts() {
                     type="button"
                     variant={selectedSegmentId === seg.id ? 'default' : 'outline'}
                     onClick={() => setSelectedSegmentId(seg.id)}
-                  className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === seg.id ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
-                >
-                    {seg.icon ? <span aria-hidden="true">{seg.icon}</span> : null}
+                    aria-pressed={selectedSegmentId === seg.id}
+                    className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === seg.id ? 'bg-pink-600 hover:bg-pink-700' : 'hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700'}`}
+                  >
                     <span>{seg.name}</span>
                   </Button>
                 ))}
@@ -126,11 +137,12 @@ export default function AllProducts() {
             <div className="mb-6 rounded-lg border border-border bg-card p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
+                  <label htmlFor="catalog-product-search" className="mb-2 block text-sm font-medium text-foreground">
                     Buscar
                   </label>
                   <Input
                     placeholder="Nome ou descrição..."
+                    id="catalog-product-search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="bg-background border-border"
@@ -138,11 +150,12 @@ export default function AllProducts() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
+                  <label htmlFor="catalog-sort" className="mb-2 block text-sm font-medium text-foreground">
                     Ordenar por
                   </label>
                   <select
                     value={sortBy}
+                    id="catalog-sort"
                     onChange={(e) => setSortBy(e.target.value as 'name' | 'price')}
                     className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground"
                   >
@@ -153,8 +166,9 @@ export default function AllProducts() {
               </div>
             </div>
 
-            <div className="mb-6 text-sm text-gray-400">
-              Mostrando {filteredAndSortedProducts.length} de {products?.length || 0} produtos
+            <div className="mb-6 text-sm text-gray-500" aria-live="polite">
+              Mostrando {filteredAndSortedProducts.length} de {activeProductsInScope} produtos
+              {selectedSegment ? ` em ${selectedSegment.name}` : ''}
             </div>
 
             {filteredAndSortedProducts.length > 0 ? (
@@ -170,6 +184,7 @@ export default function AllProducts() {
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedSegmentId(null);
+                    setSortBy('name');
                   }}
                   variant="outline"
                 >
