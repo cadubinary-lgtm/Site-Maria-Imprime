@@ -360,14 +360,14 @@ export async function createAttributeRule(data: {
 /**
  * Listar regras de um produto
  */
-export async function getProductRules(productId: number) {
+export async function getProductRules(productId: number, includeInactive = false) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const rules = await db
     .select()
     .from(attributeRules)
-    .where(and(eq(attributeRules.productId, productId), eq(attributeRules.isActive, true)));
+    .where(includeInactive ? eq(attributeRules.productId, productId) : and(eq(attributeRules.productId, productId), eq(attributeRules.isActive, true)));
 
   const result = await Promise.all(
     rules.map(async (rule) => {
@@ -383,6 +383,66 @@ export async function getProductRules(productId: number) {
   );
 
   return result;
+}
+
+/**
+ * Atualizar dados e definição de uma regra dinâmica.
+ * Quando condições ou ações são informadas, a coleção anterior é substituída
+ * dentro da mesma transação para manter a regra consistente.
+ */
+export async function updateAttributeRule(data: {
+  id: number;
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+  conditions?: Array<{
+    attributeId: number;
+    operator: "equals" | "contains" | "greaterThan" | "lessThan" | "in";
+    value: string;
+  }>;
+  actions?: Array<{
+    targetAttributeId: number;
+    action: "show" | "hide" | "enable" | "disable" | "setPrice" | "addPrice";
+    value?: string;
+  }>;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.transaction(async (tx) => {
+    const updates: Record<string, unknown> = {};
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.description !== undefined) updates.description = data.description;
+    if (data.isActive !== undefined) updates.isActive = data.isActive;
+
+    if (Object.keys(updates).length > 0) {
+      await tx.update(attributeRules).set(updates).where(eq(attributeRules.id, data.id));
+    }
+
+    if (data.conditions) {
+      await tx.delete(attributeRuleConditions).where(eq(attributeRuleConditions.ruleId, data.id));
+      if (data.conditions.length > 0) {
+        await tx.insert(attributeRuleConditions).values(data.conditions.map((condition) => ({ ...condition, ruleId: data.id })));
+      }
+    }
+
+    if (data.actions) {
+      await tx.delete(attributeRuleActions).where(eq(attributeRuleActions.ruleId, data.id));
+      if (data.actions.length > 0) {
+        await tx.insert(attributeRuleActions).values(data.actions.map((action) => ({ ...action, ruleId: data.id })));
+      }
+    }
+  });
+
+  return data.id;
+}
+
+/** Excluir uma regra e seus relacionamentos dependentes. */
+export async function deleteAttributeRule(ruleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(attributeRules).where(eq(attributeRules.id, ruleId));
 }
 
 /**
@@ -528,4 +588,3 @@ export async function unlinkAttributeFromProduct(productAttributeId: number) {
     .delete(productAttributes)
     .where(eq(productAttributes.id, productAttributeId));
 }
-

@@ -283,6 +283,44 @@ export const attributesRouter = router({
     return await dbAttributes.getProductRules(input);
   }),
 
+  /** Listar regras ativas e inativas para manutenção administrativa. */
+  getProductRulesForAdmin: adminProcedure.input(z.number()).query(async ({ input }) => {
+    return await dbAttributes.getProductRules(input, true);
+  }),
+
+  /** Atualizar a definição, os efeitos ou o status de uma regra. */
+  updateAttributeRule: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        isActive: z.boolean().optional(),
+        conditions: z.array(
+          z.object({
+            attributeId: z.number().positive(),
+            operator: z.enum(["equals", "contains", "greaterThan", "lessThan", "in"]),
+            value: z.string(),
+          })
+        ).min(1).optional(),
+        actions: z.array(
+          z.object({
+            targetAttributeId: z.number().positive(),
+            action: z.enum(["show", "hide", "enable", "disable", "setPrice", "addPrice"]),
+            value: z.string().optional(),
+          })
+        ).min(1).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await dbAttributes.updateAttributeRule(input);
+    }),
+
+  /** Remover permanentemente uma regra sem afetar atributos ou produtos. */
+  deleteAttributeRule: adminProcedure.input(z.number()).mutation(async ({ input }) => {
+    return await dbAttributes.deleteAttributeRule(input);
+  }),
+
   /**
    * ========================================
    * ATRIBUTOS DO PEDIDO
