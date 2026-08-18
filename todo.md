@@ -3390,3 +3390,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e fluxos da página administrativa de variações
 - [x] Padronizar controles de variações na identidade rosa e com acessibilidade
 - [x] Validar a página administrativa de variações e salvar checkpoint publicável
+
+- [x] Classificar controles administrativos laranja remanescentes sem função semântica
+- [x] Padronizar controles administrativos legados prioritários na identidade rosa
+- [x] Validar a substituição de controles administrativos legados e salvar checkpoint publicável
