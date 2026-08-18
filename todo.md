@@ -3382,3 +3382,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar o uso e os fluxos do Kanban de produção administrativo
 - [x] Padronizar os controles e estados do Kanban de produção na identidade rosa
 - [x] Validar o Kanban de produção administrativo e salvar checkpoint publicável
+
+- [x] Revisar permissões, controles e estados do gerenciador alternativo de administradores
+- [x] Padronizar o gerenciador alternativo de administradores na identidade rosa e com ações acessíveis
+- [x] Validar o gerenciador alternativo de administradores e salvar checkpoint publicável

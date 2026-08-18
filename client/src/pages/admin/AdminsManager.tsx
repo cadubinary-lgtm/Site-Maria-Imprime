@@ -41,9 +41,9 @@ type AdminRow = {
 };
 
 const roleLabels: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  superadmin: { label: "Superadmin", icon: <ShieldCheck className="h-3 w-3" />, color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
-  admin: { label: "Admin", icon: <Shield className="h-3 w-3" />, color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  production: { label: "Produção", icon: <Wrench className="h-3 w-3" />, color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+  superadmin: { label: "Superadmin", icon: <ShieldCheck className="h-3 w-3" aria-hidden="true" />, color: "bg-pink-500/20 text-pink-300 border-pink-500/30" },
+  admin: { label: "Admin", icon: <Shield className="h-3 w-3" aria-hidden="true" />, color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  production: { label: "Produção", icon: <Wrench className="h-3 w-3" aria-hidden="true" />, color: "bg-pink-500/20 text-pink-300 border-pink-500/30" },
 };
 
 export default function AdminsManager() {
@@ -143,17 +143,18 @@ export default function AdminsManager() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Users className="h-6 w-6 text-orange-500" />
+            <Users className="h-6 w-6 text-pink-600" aria-hidden="true" />
             Administradores
           </h1>
           <p className="text-slate-400 mt-1">Gerencie os administradores do sistema</p>
         </div>
         {isSuperAdmin && (
           <Button
+            type="button"
             onClick={() => setShowCreate(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-pink-600 hover:bg-pink-700 text-white"
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
             Novo Administrador
           </Button>
         )}
@@ -175,7 +176,7 @@ export default function AdminsManager() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-pink-600" aria-label="Carregando administradores" />
             </div>
           ) : (
             <Table>
@@ -222,21 +223,23 @@ export default function AdminsManager() {
                               variant="ghost"
                               className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-700"
                               title="Editar"
+                              aria-label={`Editar ${admin.name}`}
                               onClick={() => {
                                 setShowEdit(admin);
                                 setEditForm({ name: admin.name, email: admin.email, role: admin.role });
                               }}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
                               className="h-8 w-8 p-0 text-slate-400 hover:text-yellow-400 hover:bg-slate-700"
                               title="Resetar senha"
+                              aria-label={`Redefinir senha de ${admin.name}`}
                               onClick={() => setShowResetPassword(admin)}
                             >
-                              <KeyRound className="h-3.5 w-3.5" />
+                              <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
                             </Button>
                             {admin.id !== adminUser?.id && (
                               <Button
@@ -244,10 +247,12 @@ export default function AdminsManager() {
                                 variant="ghost"
                                 className={`h-8 w-8 p-0 hover:bg-slate-700 ${admin.status === "active" ? "text-slate-400 hover:text-red-400" : "text-slate-400 hover:text-green-400"}`}
                                 title={admin.status === "active" ? "Desativar" : "Ativar"}
+                                aria-label={`${admin.status === "active" ? "Desativar" : "Ativar"} ${admin.name}`}
                                 onClick={() => handleToggleStatus(admin)}
                                 disabled={toggleStatusMutation.isPending}
+                                aria-busy={toggleStatusMutation.isPending}
                               >
-                                <Power className="h-3.5 w-3.5" />
+                                <Power className="h-3.5 w-3.5" aria-hidden="true" />
                               </Button>
                             )}
                           </div>
@@ -305,13 +310,16 @@ export default function AdminsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Senha (mín. 8 caracteres)</Label>
+              <Label htmlFor="create-admin-password" className="text-slate-300">Senha (mín. 8 caracteres)</Label>
               <Input
+                id="create-admin-password"
                 type="password"
                 value={createForm.password}
                 onChange={e => setCreateForm(f => ({ ...f, password: e.target.value }))}
                 className="bg-slate-800 border-slate-700 text-white"
                 required
+                minLength={8}
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
@@ -367,9 +375,9 @@ export default function AdminsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Perfil</Label>
+              <Label htmlFor="edit-admin-role" className="text-slate-300">Perfil</Label>
               <Select value={editForm.role} onValueChange={v => setEditForm(f => ({ ...f, role: v as any }))}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger id="edit-admin-role" className="bg-slate-800 border-slate-700 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -413,13 +421,16 @@ export default function AdminsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Confirmar nova senha</Label>
+              <Label htmlFor="reset-admin-password-confirmation" className="text-slate-300">Confirmar nova senha</Label>
               <Input
+                id="reset-admin-password-confirmation"
                 type="password"
                 value={confirmNewPassword}
                 onChange={e => setConfirmNewPassword(e.target.value)}
                 className="bg-slate-800 border-slate-700 text-white"
                 placeholder="Repita a senha"
+                minLength={8}
+                autoComplete="new-password"
               />
             </div>
             <DialogFooter>
