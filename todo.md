@@ -3221,3 +3221,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar filtros e ações de recuperação na identidade cinza e rosa
 - [x] Melhorar a leitura de contato e oportunidade comercial na listagem
 - [x] Validar filtros e acessibilidade da recuperação de carrinhos
+
+- [x] Revisar o painel administrativo de logística para identificar o ajuste prioritário
+- [x] Padronizar indicadores e ações de expedição na identidade cinza e rosa
+- [x] Melhorar a leitura de status e oportunidades operacionais de logística
+- [x] Validar indicadores e acessibilidade do painel de logística
