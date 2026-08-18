@@ -98,7 +98,7 @@ export default function FinanceiroContasReceber() {
 
   const enviarCobranca = trpc.financeiro.enviarCobrancaWhatsApp.useMutation({
     onSuccess: (data) => {
-      window.open(data.whatsappUrl, "_blank");
+      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       toast.success("Abrindo WhatsApp...");
     },
     onError: (e) => toast.error("Erro: " + e.message),
@@ -149,9 +149,9 @@ export default function FinanceiroContasReceber() {
           <p className="text-sm text-gray-500 mt-1">Pedidos aguardando confirmação de pagamento</p>
         </div>
         <div className="flex items-center gap-2">
-          {canDeleteReceivable && <Button variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : ""}><Trash2 className="h-4 w-4 mr-1" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-1" />
+          {canDeleteReceivable && <Button type="button" variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} aria-pressed={showTrash} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : "border-pink-200 text-pink-700 hover:bg-pink-50"}><Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
+          <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
+            <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />
             Atualizar
           </Button>
         </div>
@@ -163,18 +163,19 @@ export default function FinanceiroContasReceber() {
           <div className="flex flex-wrap gap-3">
             <div className="flex gap-2 flex-1 min-w-[200px]">
               <Input
+                aria-label="Buscar contas a receber"
                 placeholder="Buscar por cliente, pedido..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="flex-1"
               />
-              <Button onClick={handleSearch} size="sm">
-                <Search className="h-4 w-4" />
+              <Button type="button" onClick={handleSearch} size="sm" className="bg-pink-600 hover:bg-pink-700" aria-label="Aplicar busca de contas a receber">
+                <Search className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
             <Select value={formaPagamento} onValueChange={(v) => { setFormaPagamento(v === "todos" ? "" : v); setPage(1); }}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48" aria-label="Filtrar por forma de pagamento">
                 <SelectValue placeholder="Forma de Pagamento" />
               </SelectTrigger>
               <SelectContent>
@@ -222,7 +223,7 @@ export default function FinanceiroContasReceber() {
                 <tbody className="divide-y divide-gray-100">
                   {data.data.map((item: any, i: number) => (
                     <tr key={i} className="hover:bg-gray-50 transition-colors">
-                      <td className="p-3 font-mono text-xs font-semibold text-orange-600">
+                      <td className="p-3 font-mono text-xs font-semibold text-pink-600">
                         #{item.orderNumber}
                       </td>
                       <td className="p-3 font-medium">{item.cliente || "—"}</td>
@@ -250,37 +251,41 @@ export default function FinanceiroContasReceber() {
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs"
+                            type="button"
                             onClick={() => setLocation(createAdminDetailLocation(`/admin/pedidos/${item.pedidoId}`, "/admin/financeiro/receber"))}
-                            title="Ver pedido"
+                            aria-label={`Ver pedido ${item.orderNumber}`}
                           >
-                            <Eye className="h-3 w-3 mr-1" />
+                            <Eye className="h-3 w-3 mr-1" aria-hidden="true" />
                             Ver
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs"
+                            type="button"
                             onClick={() => setConfirmDialog({ open: true, order: item })}
-                            title="Confirmar Pagamento"
+                            aria-label={`Registrar recebimento do pedido ${item.orderNumber}`}
                           >
-                            <CreditCard className="h-3 w-3 mr-1" />
+                            <CreditCard className="h-3 w-3 mr-1" aria-hidden="true" />
                             Receber
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs"
+                            type="button"
                             onClick={() => {
                               setPixDialog({ open: true, order: item });
                             }}
-                            title="Gerar Pix"
+                            aria-label={`Gerar Pix para o pedido ${item.orderNumber}`}
                           >
-                            <QrCode className="h-3 w-3" />
+                            <QrCode className="h-3 w-3" aria-hidden="true" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs text-green-600 hover:bg-green-50 hover:border-green-300"
+                            type="button"
                             onClick={() => {
                               if (item.telefone) {
                                 enviarCobranca.mutate({ orderId: item.pedidoId, telefone: item.telefone });
@@ -289,18 +294,19 @@ export default function FinanceiroContasReceber() {
                                 setWhatsappDialog({ open: true, order: item });
                               }
                             }}
-                            title="Enviar Cobrança WhatsApp"
+                            aria-label={`Enviar cobrança por WhatsApp para o pedido ${item.orderNumber}`}
                           >
-                            <Send className="h-3 w-3" />
+                            <Send className="h-3 w-3" aria-hidden="true" />
                           </Button>
                           {canDeleteReceivable && <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs text-red-500 hover:bg-red-50 hover:border-red-300"
+                            type="button"
                             onClick={() => { setDeletionReason(""); setDeleteDialog({ open: true, order: item }); }}
-                            title="Mover conta para a lixeira"
+                            aria-label={`Mover conta do pedido ${item.orderNumber} para a lixeira`}
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3 w-3" aria-hidden="true" />
                           </Button>}
                         </div>
                       </td>
@@ -363,7 +369,7 @@ export default function FinanceiroContasReceber() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">Forma de Pagamento Recebida</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Forma de pagamento recebida">
                   {[
                     { value: "dinheiro", label: "Dinheiro", icon: Banknote },
                     { value: "pix", label: "Pix", icon: QrCode },
@@ -375,13 +381,15 @@ export default function FinanceiroContasReceber() {
                       key={opt.value}
                       type="button"
                       onClick={() => setSelectedPayment(opt.value as any)}
+                      role="radio"
+                      aria-checked={selectedPayment === opt.value}
                       className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all text-sm ${
                         selectedPayment === opt.value
-                          ? "border-orange-500 bg-orange-50 text-orange-700"
+                          ? "border-pink-500 bg-pink-50 text-pink-700"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <opt.icon className="h-4 w-4" />
+                      <opt.icon className="h-4 w-4" aria-hidden="true" />
                       {opt.label}
                     </button>
                   ))}
@@ -507,10 +515,11 @@ export default function FinanceiroContasReceber() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label htmlFor="whatsapp-phone" className="text-sm font-medium text-gray-700 block mb-1">
                   Número de WhatsApp do cliente
                 </label>
                 <Input
+                  id="whatsapp-phone"
                   placeholder="Ex: 11999999999"
                   value={whatsappPhone}
                   onChange={(e) => setWhatsappPhone(e.target.value.replace(/\D/g, ""))}
@@ -535,7 +544,7 @@ export default function FinanceiroContasReceber() {
                 }
               }}
             >
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 mr-2" aria-hidden="true" />
               {enviarCobranca.isPending ? "Abrindo..." : "Abrir WhatsApp"}
             </Button>
           </DialogFooter>
@@ -579,14 +588,15 @@ export default function FinanceiroContasReceber() {
                 </div>
               ) : (
                 <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
                   disabled={gerarPix.isPending}
+                  aria-busy={gerarPix.isPending}
                   onClick={() => gerarPix.mutate({
                     orderId: pixDialog.order.pedidoId,
                     valor: parseFloat(pixDialog.order.valor),
                   })}
                 >
-                  <QrCode className="h-4 w-4 mr-2" />
+                  <QrCode className="h-4 w-4 mr-2" aria-hidden="true" />
                   {gerarPix.isPending ? "Gerando..." : "Gerar Código Pix"}
                 </Button>
               )}
