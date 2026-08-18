@@ -3275,3 +3275,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar a exclusão de regras locais de entrega para identificar o ajuste prioritário
 - [x] Substituir a confirmação nativa de regra de entrega por diálogo acessível
 - [x] Validar a exclusão de regras locais de entrega e seus feedbacks
+
+- [x] Revisar exclusões de tipos e opções nos gerenciadores de variações
+- [x] Substituir confirmações nativas por diálogos acessíveis nas variações
+- [x] Validar exclusões de variações e seus feedbacks
