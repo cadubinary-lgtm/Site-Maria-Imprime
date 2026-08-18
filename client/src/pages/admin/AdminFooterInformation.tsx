@@ -14,6 +14,14 @@ import { FOOTER_CONTENT_FALLBACK, getDefaultPublicDocuments, mergeManagedDocumen
 type FooterForm = typeof FOOTER_CONTENT_FALLBACK;
 
 const DOCUMENT_LIMIT = 50_000;
+const FOOTER_FIELD_LIMITS = {
+  introduction: 1000,
+  newsletterTitle: 120,
+  newsletterDescription: 1000,
+  businessHours: 1000,
+  documentsTitle: 160,
+  documentsDescription: 1000,
+} as const;
 
 export default function AdminFooterInformation() {
   const utils = trpc.useUtils();
@@ -47,6 +55,22 @@ export default function AdminFooterInformation() {
   const updateDocument = (slug: string, patch: Partial<ManagedPublicDocument>) => setDocuments((current) => current.map((document) => document.slug === slug ? { ...document, ...patch } : document));
 
   const handleSaveFooter = async () => {
+    const invalidField = (Object.keys(FOOTER_FIELD_LIMITS) as Array<keyof FooterForm>).find((field) => {
+      const value = footer[field].trim();
+      return !value || value.length > FOOTER_FIELD_LIMITS[field];
+    });
+    if (invalidField) {
+      const labels: Record<keyof FooterForm, string> = {
+        introduction: "Apresentação da marca",
+        newsletterTitle: "Título da newsletter",
+        newsletterDescription: "Descrição da newsletter",
+        businessHours: "Horários de atendimento",
+        documentsTitle: "Título da Central de documentação",
+        documentsDescription: "Descrição da Central de documentação",
+      };
+      toast.error(`Revise o campo “${labels[invalidField]}” antes de salvar.`, { position: "top-right", id: "site-footer-content-validation-error" });
+      return;
+    }
     try {
       await saveFooter.mutateAsync(footer);
       await Promise.all([utils.siteContent.getAdminFooter.invalidate(), utils.siteContent.getPublicFooter.invalidate()]);
@@ -80,24 +104,24 @@ export default function AdminFooterInformation() {
           <Card>
             <CardHeader className="border-b border-slate-100"><div className="flex items-center gap-3"><Settings2 className="h-5 w-5 text-pink-600" /><div><CardTitle>Textos institucionais do rodapé</CardTitle><CardDescription>Estes campos são exibidos no rodapé e no cabeçalho da Central de documentação.</CardDescription></div></div></CardHeader>
             <CardContent className="grid gap-5 pt-6 lg:grid-cols-2">
-              <div className="space-y-2 lg:col-span-2"><Label htmlFor="footer-introduction">Apresentação da marca</Label><Textarea id="footer-introduction" value={footer.introduction} onChange={(event) => setFooterField("introduction", event.target.value)} rows={3} /></div>
-              <div className="space-y-2"><Label htmlFor="newsletter-title">Título da newsletter</Label><Input id="newsletter-title" value={footer.newsletterTitle} onChange={(event) => setFooterField("newsletterTitle", event.target.value)} /></div>
-              <div className="space-y-2"><Label htmlFor="newsletter-description">Descrição da newsletter</Label><Input id="newsletter-description" value={footer.newsletterDescription} onChange={(event) => setFooterField("newsletterDescription", event.target.value)} /></div>
-              <div className="space-y-2"><Label htmlFor="business-hours">Horários de atendimento</Label><Textarea id="business-hours" value={footer.businessHours} onChange={(event) => setFooterField("businessHours", event.target.value)} rows={3} placeholder="Uma linha por período de atendimento" /></div>
-              <div className="space-y-2"><Label htmlFor="documents-title">Título da Central de documentação</Label><Input id="documents-title" value={footer.documentsTitle} onChange={(event) => setFooterField("documentsTitle", event.target.value)} /></div>
-              <div className="space-y-2 lg:col-span-2"><Label htmlFor="documents-description">Descrição da Central de documentação</Label><Textarea id="documents-description" value={footer.documentsDescription} onChange={(event) => setFooterField("documentsDescription", event.target.value)} rows={2} /></div>
-              <div className="flex justify-end lg:col-span-2"><Button onClick={handleSaveFooter} disabled={saveFooter.isPending}>{saveFooter.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}Salvar textos do rodapé</Button></div>
+              <div className="space-y-2 lg:col-span-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="footer-introduction">Apresentação da marca</Label><span id="footer-introduction-count" className="text-xs text-slate-500">{footer.introduction.length}/{FOOTER_FIELD_LIMITS.introduction}</span></div><Textarea id="footer-introduction" value={footer.introduction} maxLength={FOOTER_FIELD_LIMITS.introduction} aria-describedby="footer-introduction-count" onChange={(event) => setFooterField("introduction", event.target.value)} rows={3} /></div>
+              <div className="space-y-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="newsletter-title">Título da newsletter</Label><span id="newsletter-title-count" className="text-xs text-slate-500">{footer.newsletterTitle.length}/{FOOTER_FIELD_LIMITS.newsletterTitle}</span></div><Input id="newsletter-title" value={footer.newsletterTitle} maxLength={FOOTER_FIELD_LIMITS.newsletterTitle} aria-describedby="newsletter-title-count" onChange={(event) => setFooterField("newsletterTitle", event.target.value)} /></div>
+              <div className="space-y-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="newsletter-description">Descrição da newsletter</Label><span id="newsletter-description-count" className="text-xs text-slate-500">{footer.newsletterDescription.length}/{FOOTER_FIELD_LIMITS.newsletterDescription}</span></div><Input id="newsletter-description" value={footer.newsletterDescription} maxLength={FOOTER_FIELD_LIMITS.newsletterDescription} aria-describedby="newsletter-description-count" onChange={(event) => setFooterField("newsletterDescription", event.target.value)} /></div>
+              <div className="space-y-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="business-hours">Horários de atendimento</Label><span id="business-hours-count" className="text-xs text-slate-500">{footer.businessHours.length}/{FOOTER_FIELD_LIMITS.businessHours}</span></div><Textarea id="business-hours" value={footer.businessHours} maxLength={FOOTER_FIELD_LIMITS.businessHours} aria-describedby="business-hours-count" onChange={(event) => setFooterField("businessHours", event.target.value)} rows={3} placeholder="Uma linha por período de atendimento" /></div>
+              <div className="space-y-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="documents-title">Título da Central de documentação</Label><span id="documents-title-count" className="text-xs text-slate-500">{footer.documentsTitle.length}/{FOOTER_FIELD_LIMITS.documentsTitle}</span></div><Input id="documents-title" value={footer.documentsTitle} maxLength={FOOTER_FIELD_LIMITS.documentsTitle} aria-describedby="documents-title-count" onChange={(event) => setFooterField("documentsTitle", event.target.value)} /></div>
+              <div className="space-y-2 lg:col-span-2"><div className="flex items-center justify-between gap-3"><Label htmlFor="documents-description">Descrição da Central de documentação</Label><span id="documents-description-count" className="text-xs text-slate-500">{footer.documentsDescription.length}/{FOOTER_FIELD_LIMITS.documentsDescription}</span></div><Textarea id="documents-description" value={footer.documentsDescription} maxLength={FOOTER_FIELD_LIMITS.documentsDescription} aria-describedby="documents-description-count" onChange={(event) => setFooterField("documentsDescription", event.target.value)} rows={2} /></div>
+              <div className="flex justify-end lg:col-span-2"><Button onClick={handleSaveFooter} disabled={saveFooter.isPending} aria-busy={saveFooter.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooter.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar textos do rodapé</Button></div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="border-b border-slate-100"><div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><FileText className="h-5 w-5 text-pink-600" /><div><CardTitle>Documentos e links públicos</CardTitle><CardDescription>Edite o título, o resumo, o conteúdo e a visibilidade de cada página da Central de documentação.</CardDescription></div></div><a className="text-sm font-semibold text-pink-600 hover:text-pink-700" href="/documentos" target="_blank" rel="noreferrer">Ver Central pública</a></div></CardHeader>
+            <CardHeader className="border-b border-slate-100"><div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><FileText className="h-5 w-5 text-pink-600" /><div><CardTitle>Documentos e links públicos</CardTitle><CardDescription>Edite o título, o resumo, o conteúdo e a visibilidade de cada página da Central de documentação.</CardDescription></div></div><a className="text-sm font-semibold text-pink-600 hover:text-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" href="/documentos" target="_blank" rel="noopener noreferrer">Ver Central pública</a></div></CardHeader>
             <CardContent className="space-y-5 pt-6">
               {documents.map((document) => <section key={document.slug} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-bold text-slate-900">{document.title}</h2><p className="mt-1 text-xs text-slate-500">/documentos/{document.slug}</p></div><div className="flex items-center gap-3"><Label htmlFor={`document-visible-${document.slug}`} className="text-sm text-slate-600">Exibir na Central</Label><Switch id={`document-visible-${document.slug}`} checked={document.isPublished} onCheckedChange={(checked) => updateDocument(document.slug, { isPublished: checked })} /></div></div>
-                <div className="grid gap-4 lg:grid-cols-2"><div className="space-y-2"><Label htmlFor={`document-title-${document.slug}`}>Título</Label><Input id={`document-title-${document.slug}`} value={document.title} onChange={(event) => updateDocument(document.slug, { title: event.target.value })} /></div><div className="space-y-2"><Label htmlFor={`document-summary-${document.slug}`}>Resumo do card</Label><Input id={`document-summary-${document.slug}`} value={document.summary} maxLength={500} onChange={(event) => updateDocument(document.slug, { summary: event.target.value })} /></div><div className="space-y-2 lg:col-span-2"><div className="flex items-center justify-between"><Label htmlFor={`document-content-${document.slug}`}>Conteúdo do documento</Label><span className="text-xs text-slate-500">{document.content.length}/{DOCUMENT_LIMIT}</span></div><Textarea id={`document-content-${document.slug}`} value={document.content} maxLength={DOCUMENT_LIMIT} onChange={(event) => updateDocument(document.slug, { content: event.target.value })} rows={12} /></div></div>
+                <div className="grid gap-4 lg:grid-cols-2"><div className="space-y-2"><Label htmlFor={`document-title-${document.slug}`}>Título</Label><Input id={`document-title-${document.slug}`} value={document.title} maxLength={255} onChange={(event) => updateDocument(document.slug, { title: event.target.value })} /></div><div className="space-y-2"><Label htmlFor={`document-summary-${document.slug}`}>Resumo do card</Label><Input id={`document-summary-${document.slug}`} value={document.summary} maxLength={500} onChange={(event) => updateDocument(document.slug, { summary: event.target.value })} /></div><div className="space-y-2 lg:col-span-2"><div className="flex items-center justify-between"><Label htmlFor={`document-content-${document.slug}`}>Conteúdo do documento</Label><span id={`document-content-count-${document.slug}`} className="text-xs text-slate-500">{document.content.length}/{DOCUMENT_LIMIT}</span></div><Textarea id={`document-content-${document.slug}`} value={document.content} maxLength={DOCUMENT_LIMIT} aria-describedby={`document-content-count-${document.slug}`} onChange={(event) => updateDocument(document.slug, { content: event.target.value })} rows={12} /></div></div>
               </section>)}
-              <div className="flex justify-end"><Button onClick={handleSaveDocuments} disabled={saveDocuments.isPending}>{saveDocuments.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}Salvar documentos públicos</Button></div>
+              <div className="flex justify-end"><Button onClick={handleSaveDocuments} disabled={saveDocuments.isPending} aria-busy={saveDocuments.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveDocuments.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar documentos públicos</Button></div>
             </CardContent>
           </Card>
 
