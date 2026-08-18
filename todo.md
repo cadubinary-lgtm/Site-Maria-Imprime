@@ -3106,3 +3106,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a descoberta do banner na identidade rosa e nos controles reutilizáveis
 - [x] Melhorar a acessibilidade e orientação da busca no banner principal
 - [x] Validar os destinos e estados de continuidade do banner público
+
+- [x] Revisar o checkout público para identificar o ajuste prioritário
+- [x] Padronizar o checkout na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar a clareza de pagamento, entrega e acessibilidade do checkout
+- [x] Validar valores, ações e continuidade da finalização de compra
