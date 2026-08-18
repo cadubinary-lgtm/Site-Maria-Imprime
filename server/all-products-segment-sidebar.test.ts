@@ -15,4 +15,15 @@ describe("barra lateral de segmentos em Todos os Produtos", () => {
     expect(source).toContain("setSelectedSegmentId(seg.id)");
     expect(source).toContain("lg:grid-cols-[15rem_minmax(0,1fr)]");
   });
+
+  it("mantém o estado dos filtros acessível e informa uma contagem coerente ao segmento atual", () => {
+    expect(source).toContain("activeProductsInScope");
+    expect(source).toContain("selectedSegment");
+    expect(source).toContain("aria-pressed={selectedSegmentId === null}");
+    expect(source).toContain("aria-pressed={selectedSegmentId === seg.id}");
+    expect(source).toContain("Mostrando {filteredAndSortedProducts.length} de {activeProductsInScope} produtos");
+    expect(source).toContain('htmlFor="catalog-product-search"');
+    expect(source).toContain('htmlFor="catalog-sort"');
+    expect(source).not.toContain('{seg.icon ? <span aria-hidden="true">{seg.icon}</span> : null}');
+  });
 });

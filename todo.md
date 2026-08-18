@@ -3008,3 +3008,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o tratamento de produtos sem imagem nos cards da página inicial
 - [x] Criar uma apresentação visual consistente para cards de produtos sem imagem
 - [x] Validar a vitrine de produtos em diferentes larguras sem alterar links ou preços
+- [x] Revisar a listagem pública para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento da listagem sem alterar filtros, links ou preços
+- [x] Validar filtros, cards e responsividade da listagem pública
+- [x] Exibir contagens coerentes para todos os produtos e para o segmento filtrado
+- [x] Tornar os filtros de segmento explicitamente selecionáveis para tecnologias assistivas
+- [x] Remover a exibição de ícones não configurados nos filtros laterais de segmentos

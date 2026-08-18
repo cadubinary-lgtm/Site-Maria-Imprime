@@ -1,0 +1,1 @@
+Na rota `/todos-produtos`, a listagem mostra filtros laterais sem ícones não configurados, rótulos associados aos controles Buscar e Ordenar por, e a contagem coerente de produtos ativos no escopo atual. Os cards preservam preços e links, incluindo o novo estado visual para produtos sem imagem.
