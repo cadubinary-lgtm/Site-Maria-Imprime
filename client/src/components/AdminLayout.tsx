@@ -81,6 +81,9 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
   const hasChildren = item.children && item.children.length > 0;
   const isActive = item.href ? currentLocation === item.href : false;
   const isGroupActive = hasChildren && hasActiveChild;
+  const groupContentId = hasChildren
+    ? `admin-nav-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
+    : undefined;
 
   // Chave única para persistir o estado no localStorage
   const storageKey = hasChildren ? `sidebar_open_${item.label}` : null;
@@ -152,10 +155,13 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
     return (
       <div>
         <button
+          type="button"
           onClick={() => {
             saveScrollPosition();
             toggleOpen();
           }}
+          aria-expanded={open}
+          aria-controls={groupContentId}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
             ${getAdminMenuGroupColors(isGroupActive, isActive)}
           `}
@@ -167,7 +173,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
           {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
         </button>
         {open && (
-          <div className="mt-0.5">
+          <div id={groupContentId} className="mt-0.5">
             {filteredChildren.map((child) => (
               <NavLink key={child.label} item={child} depth={depth + 1} searchQuery={searchQuery} />
             ))}
@@ -181,7 +187,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
     <Link
       href={item.href || "#"}
       className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-        ${isActive ? "bg-orange-500 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
+        ${isActive ? "bg-pink-600 text-white font-medium" : "text-gray-300 hover:bg-gray-800 hover:text-white"}
       `}
       style={{ paddingLeft: `${12 + depth * 12}px` }}
       onClick={(e) => {
@@ -193,7 +199,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
     >
       {item.icon && shouldShowAdminMenuItemIcon(item.label) && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
       <span className="flex-1">{item.label}</span>
-      {item.badge ? <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
+      {item.badge ? <Badge className="bg-pink-600 text-white text-[10px] px-1.5 py-0 h-4">{item.badge}</Badge> : null}
     </Link>
   );
 }
