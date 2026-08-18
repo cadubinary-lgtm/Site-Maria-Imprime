@@ -94,9 +94,11 @@ export default function AdminStatusProducao() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-      </div>
+      <AdminLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando pedidos de produção" />
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -107,7 +109,7 @@ export default function AdminStatusProducao() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Printer className="w-6 h-6 text-orange-500" />
+              <Printer className="w-6 h-6 text-pink-600" aria-hidden="true" />
               Status de Produção
             </h1>
             <p className="text-gray-500 mt-1 text-sm">
@@ -115,8 +117,8 @@ export default function AdminStatusProducao() {
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-            <Printer className="w-4 h-4" />
-            {filtered.length} pedido{filtered.length !== 1 ? "s" : ""}
+            <Printer className="w-4 h-4" aria-hidden="true" />
+            <span aria-live="polite">{filtered.length} pedido{filtered.length !== 1 ? "s" : ""}</span>
           </div>
         </div>
 
@@ -124,8 +126,10 @@ export default function AdminStatusProducao() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <label htmlFor="production-status-search" className="sr-only">Buscar pedidos de produção</label>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
               <Input
+                id="production-status-search"
                 placeholder="Buscar por número, cliente ou telefone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -136,12 +140,14 @@ export default function AdminStatusProducao() {
               {["todos", "pendente", "impresso", "acabamento_finalizado"].map((s) => (
                 <div key={s} className="flex items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => setFilterStatus(s)}
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                       filterStatus === s
-                        ? "bg-orange-500 text-white"
+                        ? "bg-pink-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
+                    aria-pressed={filterStatus === s}
                   >
                     {s === "todos" ? "Todos" : PRODUCTION_STATUS[s]?.label ?? s}
                   </button>
@@ -166,7 +172,7 @@ export default function AdminStatusProducao() {
         {filtered.length === 0 ? (
           <Card>
             <CardContent className="pt-12 pb-12 text-center">
-              <Printer className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <Printer className="w-12 h-12 text-gray-300 mx-auto mb-4" aria-hidden="true" />
               <p className="text-gray-500">Nenhum pedido encontrado</p>
             </CardContent>
           </Card>
@@ -196,7 +202,7 @@ export default function AdminStatusProducao() {
 
                       {/* Status de Produção */}
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 whitespace-nowrap">Produção:</span>
+                        <span id={`production-status-label-${order.orderId ?? order.id}`} className="text-xs text-gray-500 whitespace-nowrap">Produção:</span>
                         <Badge className={`text-xs border ${statusCfg?.color}`}>
                           {statusCfg?.label ?? currentProdStatus}
                         </Badge>
@@ -204,6 +210,7 @@ export default function AdminStatusProducao() {
 
                       {/* Dropdown para alterar status */}
                       <div className="flex items-center gap-2">
+                        <label htmlFor={`production-status-${order.orderId ?? order.id}`} className="sr-only">Atualizar produção do pedido {order.orderNumber}</label>
                         <Select
                           value={currentProdStatus}
                           onValueChange={(val) =>
@@ -213,7 +220,7 @@ export default function AdminStatusProducao() {
                             })
                           }
                         >
-                          <SelectTrigger className="h-8 text-xs w-[200px]">
+                          <SelectTrigger id={`production-status-${order.orderId ?? order.id}`} className="h-8 text-xs w-[200px]" disabled={updateProductionMutation.isPending} aria-describedby={`production-status-label-${order.orderId ?? order.id}`} aria-busy={updateProductionMutation.isPending}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -225,12 +232,12 @@ export default function AdminStatusProducao() {
                       </div>
 
                       {/* Link para detalhes */}
-                      <Link href={`/admin/pedidos/${order.orderId ?? order.id}`}>
-                        <Button variant="outline" size="sm" className="gap-1 h-8 text-xs">
+                      <Button variant="outline" size="sm" className="gap-1 h-8 text-xs" asChild>
+                        <Link href={`/admin/pedidos/${order.orderId ?? order.id}`} aria-label={`Ver detalhes do pedido ${order.orderNumber}`}>
                           Detalhes
-                          <ChevronRight className="w-3 h-3" />
-                        </Button>
-                      </Link>
+                          <ChevronRight className="w-3 h-3" aria-hidden="true" />
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -243,7 +250,7 @@ export default function AdminStatusProducao() {
           <CardContent className="pt-5 pb-5">
             <h2 className="text-base font-semibold text-gray-900">Histórico de Status de Produção</h2>
             <p className="mt-1 text-sm text-gray-500">Pedidos que concluíram acabamento e seguiram para retirada ou entrega.</p>
-            {history.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma produção finalizada registrada.</p> : <div className="mt-4 space-y-2">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge className="bg-green-100 text-green-700">{ORDER_STATUS_LABEL[order.status]}</Badge></div>)}</div>}
+            {history.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma produção finalizada registrada.</p> : <div className="mt-4 space-y-2" aria-live="polite">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge className="bg-green-100 text-green-700">{ORDER_STATUS_LABEL[order.status]}</Badge></div>)}</div>}
           </CardContent>
         </Card>
         <ProductionQuickDetailsDialog
