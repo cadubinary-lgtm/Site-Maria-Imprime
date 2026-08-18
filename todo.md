@@ -2978,3 +2978,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o diff recente do rodapé do Guia da Maria e remover estilos paddingTop duplicados
 - [x] Manter o ajuste de 3px somente no contêiner visual correto, sem deslocar ícones, textos e botões
 - [x] Validar TypeScript, testes e layout após a correção do editor visual
+- [x] Revisar o fluxo atual de carrinho e identificar pontos de feedback ao adicionar produtos
+- [x] Melhorar o feedback visual após adicionar um produto ao carrinho sem interromper a navegação
+- [x] Adicionar atalhos rápidos entre configurador, carrinho e catálogo onde fizer sentido
+- [x] Validar as melhorias de usabilidade em desktop e mobile
+- [x] Aplicar o feedback de remoção e atalhos ao CartSidePanel efetivamente exibido na interface pública
+- [x] Evitar manter uma segunda implementação de melhorias de carrinho fora do fluxo público
+- [x] Validar o carrinho lateral público com estado vazio e com itens antes do checkpoint
