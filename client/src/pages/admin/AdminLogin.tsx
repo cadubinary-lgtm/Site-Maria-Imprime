@@ -73,7 +73,7 @@ export default function AdminLogin() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-pink-600" aria-label="Carregando acesso administrativo" />
       </div>
     );
   }
@@ -84,15 +84,15 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
       {/* Background pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-600/10 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl mb-4 shadow-lg shadow-orange-500/30">
-            <Lock className="h-8 w-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-600 rounded-2xl mb-4 shadow-lg shadow-pink-500/30">
+            <Lock className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
           <h1 className="text-2xl font-bold text-white">Painel Administrativo</h1>
           <p className="text-slate-400 mt-1">Gráfica Ponto Digital</p>
@@ -117,14 +117,14 @@ export default function AdminLogin() {
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-slate-300">E-mail</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="admin@mariaimprime.com.br"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500/20"
+                    className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-pink-500 focus:ring-pink-500/20"
                     autoComplete="email"
                     disabled={isLoggingIn}
                   />
@@ -134,14 +134,14 @@ export default function AdminLogin() {
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-slate-300">Senha</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="pl-10 pr-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500/20"
+                    className="pl-10 pr-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-pink-500 focus:ring-pink-500/20"
                     autoComplete="current-password"
                     disabled={isLoggingIn}
                   />
@@ -149,21 +149,22 @@ export default function AdminLogin() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                    tabIndex={-1}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold h-11 shadow-lg shadow-orange-500/25 transition-all"
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold h-11 shadow-lg shadow-pink-500/25 transition-all"
                 disabled={isLoggingIn}
+                aria-busy={isLoggingIn}
               >
                 {isLoggingIn ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     Entrando...
                   </>
                 ) : (
