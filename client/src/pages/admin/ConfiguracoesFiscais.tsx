@@ -88,9 +88,10 @@ export default function ConfiguracoesFiscais() {
           <Button
             onClick={handleSave}
             disabled={saveSettings.isPending}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-pink-600 hover:bg-pink-700 text-white"
+            aria-busy={saveSettings.isPending}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-4 h-4 mr-2" aria-hidden="true" />
             {saveSettings.isPending ? "Salvando..." : "Salvar Configurações"}
           </Button>
         </div>
@@ -120,14 +121,15 @@ export default function ConfiguracoesFiscais() {
             <Card className="border border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Building className="w-4 h-4 text-orange-500" />
+                  <Building className="w-4 h-4 text-pink-600" aria-hidden="true" />
                   Dados da Empresa
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">CNPJ</label>
+                  <label htmlFor="fiscal-cnpj" className="text-sm font-medium text-gray-700">CNPJ</label>
                   <Input
+                    id="fiscal-cnpj"
                     placeholder="00.000.000/0000-00"
                     value={cnpj}
                     onChange={(e) => setCnpj(e.target.value)}
@@ -135,8 +137,9 @@ export default function ConfiguracoesFiscais() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Razão Social</label>
+                  <label htmlFor="fiscal-company-name" className="text-sm font-medium text-gray-700">Razão Social</label>
                   <Input
+                    id="fiscal-company-name"
                     placeholder="Nome da empresa"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
@@ -144,8 +147,9 @@ export default function ConfiguracoesFiscais() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Nome Fantasia</label>
+                  <label htmlFor="fiscal-trade-name" className="text-sm font-medium text-gray-700">Nome Fantasia</label>
                   <Input
+                    id="fiscal-trade-name"
                     placeholder="Nome fantasia"
                     value={tradeName}
                     onChange={(e) => setTradeName(e.target.value)}
@@ -154,8 +158,9 @@ export default function ConfiguracoesFiscais() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Inscrição Estadual</label>
+                    <label htmlFor="fiscal-state-registration" className="text-sm font-medium text-gray-700">Inscrição Estadual</label>
                     <Input
+                      id="fiscal-state-registration"
                       placeholder="IE"
                       value={stateRegistration}
                       onChange={(e) => setStateRegistration(e.target.value)}
@@ -163,8 +168,9 @@ export default function ConfiguracoesFiscais() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Inscrição Municipal</label>
+                    <label htmlFor="fiscal-city-registration" className="text-sm font-medium text-gray-700">Inscrição Municipal</label>
                     <Input
+                      id="fiscal-city-registration"
                       placeholder="IM"
                       value={cityRegistration}
                       onChange={(e) => setCityRegistration(e.target.value)}
@@ -173,8 +179,9 @@ export default function ConfiguracoesFiscais() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Telefone</label>
+                  <label htmlFor="fiscal-phone" className="text-sm font-medium text-gray-700">Telefone</label>
                   <Input
+                    id="fiscal-phone"
                     placeholder="(00) 00000-0000"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -182,8 +189,9 @@ export default function ConfiguracoesFiscais() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">E-mail</label>
+                  <label htmlFor="fiscal-email" className="text-sm font-medium text-gray-700">E-mail</label>
                   <Input
+                    id="fiscal-email"
                     type="email"
                     placeholder="contato@empresa.com.br"
                     value={email}
@@ -198,14 +206,15 @@ export default function ConfiguracoesFiscais() {
             <Card className="border border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-orange-500" />
+                  <Settings className="w-4 h-4 text-pink-600" aria-hidden="true" />
                   Endereço e Configurações de Emissão
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Endereço</label>
+                  <label htmlFor="fiscal-address" className="text-sm font-medium text-gray-700">Endereço</label>
                   <Input
+                    id="fiscal-address"
                     placeholder="Rua, número, complemento"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
@@ -214,8 +223,9 @@ export default function ConfiguracoesFiscais() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Cidade</label>
+                    <label htmlFor="fiscal-city" className="text-sm font-medium text-gray-700">Cidade</label>
                     <Input
+                      id="fiscal-city"
                       placeholder="Cidade"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -223,8 +233,9 @@ export default function ConfiguracoesFiscais() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Estado</label>
+                    <label htmlFor="fiscal-state" className="text-sm font-medium text-gray-700">Estado</label>
                     <Input
+                      id="fiscal-state"
                       placeholder="UF"
                       maxLength={2}
                       value={state}
@@ -234,8 +245,9 @@ export default function ConfiguracoesFiscais() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">CEP</label>
+                  <label htmlFor="fiscal-zip-code" className="text-sm font-medium text-gray-700">CEP</label>
                   <Input
+                    id="fiscal-zip-code"
                     placeholder="00000-000"
                     value={zipCode}
                     onChange={(e) => setZipCode(e.target.value)}
@@ -251,8 +263,9 @@ export default function ConfiguracoesFiscais() {
                         key={t}
                         onClick={() => setDocumentType(t)}
                         className={`flex-1 py-2 rounded-lg text-sm font-medium border uppercase transition-colors ${
-                          documentType === t ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-600 border-gray-200"
+                          documentType === t ? "bg-pink-600 text-white border-pink-600" : "bg-white text-gray-600 border-gray-200 hover:border-pink-300 hover:text-pink-700"
                         }`}
+                        aria-pressed={documentType === t}
                       >
                         {t === "both" ? "Ambos" : t.toUpperCase()}
                       </button>
@@ -268,16 +281,18 @@ export default function ConfiguracoesFiscais() {
                       { key: "on_payment" as const, label: "Ao Aprovar Pagamento", desc: "Emitir automaticamente ao confirmar pagamento" },
                       { key: "on_completed" as const, label: "Ao Concluir Pedido", desc: "Emitir ao marcar pedido como entregue" },
                     ]).map((m) => (
-                      <div
+                      <button
+                        type="button"
                         key={m.key}
                         onClick={() => setEmitMode(m.key)}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          emitMode === m.key ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-orange-300"
+                        className={`w-full p-3 rounded-lg border cursor-pointer text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 ${
+                          emitMode === m.key ? "border-pink-600 bg-pink-50" : "border-gray-200 hover:border-pink-300"
                         }`}
+                        aria-pressed={emitMode === m.key}
                       >
-                        <p className={`text-sm font-medium ${emitMode === m.key ? "text-orange-700" : "text-gray-700"}`}>{m.label}</p>
+                        <p className={`text-sm font-medium ${emitMode === m.key ? "text-pink-700" : "text-gray-700"}`}>{m.label}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{m.desc}</p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
