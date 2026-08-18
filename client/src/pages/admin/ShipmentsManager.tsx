@@ -137,7 +137,7 @@ export function ShipmentsManager() {
       const result = await checkoutMutation.mutateAsync({ shipmentId });
       if (result.labelUrl) {
         toast.success('✅ Etiqueta emitida! Abrindo PDF em nova aba...');
-        window.open(result.labelUrl, '_blank');
+        window.open(result.labelUrl, '_blank', 'noopener,noreferrer');
       } else {
         toast.success('Pagamento aprovado! A etiqueta será gerada em instantes. Clique em "Imprimir Etiqueta" para baixar.');
       }
@@ -163,7 +163,7 @@ export function ShipmentsManager() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Package className="w-6 h-6 text-orange-500" />
+              <Package className="w-6 h-6 text-pink-600" aria-hidden="true" />
               Expedição
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -171,15 +171,16 @@ export function ShipmentsManager() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleRefreshAll} size="sm">
-              <RefreshCw className="w-4 h-4 mr-1" /> Atualizar
+            <Button type="button" variant="outline" onClick={handleRefreshAll} size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50">
+              <RefreshCw className="w-4 h-4 mr-1" aria-hidden="true" /> Atualizar
             </Button>
             <Button
+              type="button"
               onClick={() => { setAddForm(EMPTY_FORM); setShowAddDialog(true); }}
               disabled={!settings?.hasToken}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-pink-600 hover:bg-pink-700"
             >
-              <Plus className="w-4 h-4 mr-2" /> Nova Expedição Manual
+              <Plus className="w-4 h-4 mr-2" aria-hidden="true" /> Nova Expedição Manual
             </Button>
           </div>
         </div>
@@ -197,7 +198,7 @@ export function ShipmentsManager() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <ClipboardList className="w-5 h-5 text-orange-500" />
+              <ClipboardList className="w-5 h-5 text-pink-600" aria-hidden="true" />
               Fila de Expedição — Pedidos Prontos para Entrega
             </CardTitle>
             <CardDescription>
@@ -207,7 +208,7 @@ export function ShipmentsManager() {
           <CardContent>
             {loadingPending ? (
               <div className="flex items-center justify-center h-24">
-                <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-pink-600" aria-label="Carregando pedidos para expedição" />
               </div>
             ) : !pendingOrders || pendingOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground">
@@ -236,11 +237,13 @@ export function ShipmentsManager() {
                     <Badge className="bg-orange-100 text-orange-700 shrink-0">Pronto para Entrega</Badge>
                     <Button
                       size="sm"
+                      type="button"
                       onClick={() => handleSelectOrder(order)}
                       disabled={!settings?.hasToken}
-                      className="bg-orange-500 hover:bg-orange-600 shrink-0"
+                      className="bg-pink-600 hover:bg-pink-700 shrink-0"
+                      aria-label={`Gerar etiqueta do pedido ${order.orderNumber}`}
                     >
-                      <ArrowRight className="w-4 h-4 mr-1" /> Gerar Etiqueta
+                      <ArrowRight className="w-4 h-4 mr-1" aria-hidden="true" /> Gerar Etiqueta
                     </Button>
                   </div>
                 ))}
@@ -252,13 +255,13 @@ export function ShipmentsManager() {
         {/* ── Expedições já criadas ── */}
         <div>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <Truck className="w-5 h-5 text-orange-500" />
+            <Truck className="w-5 h-5 text-pink-600" aria-hidden="true" />
             Expedições Criadas
           </h2>
 
           {isLoading ? (
             <div className="flex items-center justify-center h-48">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando expedições" />
             </div>
           ) : !shipments || shipments.length === 0 ? (
             <Card>
@@ -276,8 +279,8 @@ export function ShipmentsManager() {
                 return (
                   <Card key={shipment.id}>
                     <CardContent className="flex items-center gap-4 py-4">
-                      <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center shrink-0">
-                        <Truck className="w-5 h-5 text-orange-500" />
+                      <div className="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center shrink-0">
+                        <Truck className="w-5 h-5 text-pink-600" aria-hidden="true" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold">Pedido #{shipment.orderId}</p>
@@ -296,9 +299,11 @@ export function ShipmentsManager() {
                         {shipment.status === 'cart' && (
                           <Button
                             size="sm"
+                            type="button"
                             onClick={() => handleCheckout(shipment.id)}
                             disabled={checkoutMutation.isPending}
                             className="bg-green-600 hover:bg-green-700 font-semibold"
+                            aria-busy={checkoutMutation.isPending}
                           >
                             {checkoutMutation.isPending
                               ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processando...</>
@@ -308,11 +313,13 @@ export function ShipmentsManager() {
                         {shipment.labelUrl && (
                           <Button
                             size="sm"
-                            onClick={() => window.open(shipment.labelUrl!, '_blank')}
-                            className="bg-orange-500 hover:bg-orange-600 font-semibold"
+                            type="button"
+                            onClick={() => window.open(shipment.labelUrl!, '_blank', 'noopener,noreferrer')}
+                            className="bg-pink-600 hover:bg-pink-700 font-semibold"
+                            aria-label={`Imprimir etiqueta do pedido ${shipment.orderId} em nova aba`}
                           >
-                            <Tag className="w-4 h-4 mr-1" /> Imprimir Etiqueta
-                            <ExternalLink className="w-3 h-3 ml-1" />
+                            <Tag className="w-4 h-4 mr-1" aria-hidden="true" /> Imprimir Etiqueta
+                            <ExternalLink className="w-3 h-3 ml-1" aria-hidden="true" />
                           </Button>
                         )}
                         {shipment.status === 'paid' && !shipment.labelUrl && (
@@ -344,15 +351,15 @@ export function ShipmentsManager() {
                   : 'Nova Expedição Manual'}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-2">
+            <form id="shipment-entry-form" className="space-y-4 py-2" onSubmit={(event) => { event.preventDefault(); handleAddToCart(); }}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>ID do Pedido *</Label>
-                  <Input placeholder="123" value={addForm.orderId} onChange={setField('orderId')} type="number" />
+                  <Label htmlFor="shipment-order-id">ID do Pedido *</Label>
+                  <Input id="shipment-order-id" placeholder="123" value={addForm.orderId} onChange={setField('orderId')} type="number" />
                 </div>
                 <div className="space-y-2">
-                  <Label>ID do Serviço (Melhor Envio) *</Label>
-                  <Input placeholder="1 = PAC, 2 = SEDEX..." value={addForm.serviceId} onChange={setField('serviceId')} type="number" />
+                  <Label htmlFor="shipment-service-id">ID do Serviço (Melhor Envio) *</Label>
+                  <Input id="shipment-service-id" placeholder="1 = PAC, 2 = SEDEX..." value={addForm.serviceId} onChange={setField('serviceId')} type="number" />
                 </div>
                 <div className="space-y-2">
                   <Label>Nome do Serviço</Label>
@@ -373,8 +380,9 @@ export function ShipmentsManager() {
                   <Input placeholder="João Silva" value={addForm.recipientName} onChange={setField('recipientName')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>CPF / CNPJ <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="shipment-recipient-document">CPF / CNPJ <span className="text-red-500">*</span></Label>
                   <Input
+                    id="shipment-recipient-document"
                     placeholder="000.000.000-00"
                     value={addForm.recipientDocument}
                     onChange={setField('recipientDocument')}
@@ -385,8 +393,9 @@ export function ShipmentsManager() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>E-mail <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="shipment-recipient-email">E-mail <span className="text-red-500">*</span></Label>
                   <Input
+                    id="shipment-recipient-email"
                     type="email"
                     placeholder="cliente@email.com"
                     value={addForm.recipientEmail}
@@ -457,17 +466,19 @@ export function ShipmentsManager() {
                   <p className="text-xs text-gray-500">Usado como base para seguro obrigatório da transportadora.</p>
                 </div>
               </div>
-            </div>
+            </form>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>Cancelar</Button>
               <Button
-                onClick={handleAddToCart}
+                type="submit"
+                form="shipment-entry-form"
                 disabled={addToCartMutation.isPending}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-pink-600 hover:bg-pink-700"
+                aria-busy={addToCartMutation.isPending}
               >
                 {addToCartMutation.isPending
-                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Adicionando...</>
-                  : <><Package className="w-4 h-4 mr-2" /> Adicionar ao Carrinho</>}
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" /> Adicionando...</>
+                  : <><Package className="w-4 h-4 mr-2" aria-hidden="true" /> Adicionar ao Carrinho</>}
               </Button>
             </DialogFooter>
           </DialogContent>
