@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 import {
   ChevronRight, ChevronLeft, ChevronDown, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
@@ -552,7 +553,7 @@ export default function CheckoutPage() {
   if (cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando checkout" />
       </div>
     );
   }
@@ -737,7 +738,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <ShoppingBag className="w-16 h-16 text-gray-300" />
         <h2 className="text-xl font-semibold text-gray-700">Seu carrinho está vazio</h2>
-        <Button onClick={() => setLocation("/catalogo")} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => setLocation("/catalogo")} className={HOME_PRIMARY_ACTION_CLASS}>
           Ver Produtos
         </Button>
       </div>
@@ -754,13 +755,14 @@ export default function CheckoutPage() {
         </div>
 
         {/* Steps */}
-        <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1" role="list" aria-label="Etapas do checkout">
           {visibleSteps.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
+            <div key={s.id} className="flex items-center gap-1 flex-shrink-0" role="listitem">
               <div
+                aria-current={s.id === step ? "step" : undefined}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   s.id === step
-                    ? "bg-orange-500 text-white shadow-md"
+                    ? "bg-pink-600 text-white shadow-md"
                     : i < visibleStepIndex
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-400"
@@ -851,6 +853,8 @@ export default function CheckoutPage() {
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                aria-label={showPassword ? "Ocultar senha" : "Exibir senha"}
+                                aria-pressed={showPassword}
                               >
                                 {showPassword ? "🙈" : "👁"}
                               </button>
@@ -867,7 +871,7 @@ export default function CheckoutPage() {
                       <Label htmlFor="notes">Observações (opcional)</Label>
                       <textarea
                         id="notes"
-                        className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-500"
                         rows={3}
                         placeholder="Instruções especiais, referências de entrega..."
                         value={notes}
@@ -958,15 +962,17 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("pix")}
+                        aria-pressed={paymentMethod === "pix"}
+                        aria-label="Pagar via PIX"
                         className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                          paymentMethod === "pix" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                          paymentMethod === "pix" ? "border-pink-600 bg-pink-50 shadow-md" : "border-gray-200 hover:border-pink-300 bg-white"
                         }`}
                       >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "pix" ? "bg-orange-100" : "bg-gray-100"}`}>
-                          <QrCode className={`w-6 h-6 ${paymentMethod === "pix" ? "text-orange-600" : "text-gray-500"}`} />
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "pix" ? "bg-pink-100" : "bg-gray-100"}`}>
+                          <QrCode className={`w-6 h-6 ${paymentMethod === "pix" ? "text-pink-600" : "text-gray-500"}`} />
                         </div>
                         <div className="text-center">
-                          <p className={`font-semibold text-sm ${paymentMethod === "pix" ? "text-orange-700" : "text-gray-800"}`}>PIX</p>
+                          <p className={`font-semibold text-sm ${paymentMethod === "pix" ? "text-pink-700" : "text-gray-800"}`}>PIX</p>
                           <p className="text-xs text-gray-500 mt-0.5">Aprovação imediata</p>
                         </div>
                         {paymentMethod === "pix" && (
@@ -976,18 +982,20 @@ export default function CheckoutPage() {
 
                       {/* Pagamento na Retirada — apenas para clientes com permissão */}
                       {customerProfile?.allowStorePickup && (
-                        <button
-                          type="button"
-                          onClick={() => setPaymentMethod("retirada_loja")}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            paymentMethod === "retirada_loja" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
-                          }`}
-                        >
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "retirada_loja" ? "bg-orange-100" : "bg-gray-100"}`}>
-                            <Store className={`w-6 h-6 ${paymentMethod === "retirada_loja" ? "text-orange-600" : "text-gray-500"}`} />
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("retirada_loja")}
+                            aria-pressed={paymentMethod === "retirada_loja"}
+                            aria-label="Pagar na retirada da loja"
+                            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                            paymentMethod === "retirada_loja" ? "border-pink-600 bg-pink-50 shadow-md" : "border-gray-200 hover:border-pink-300 bg-white"
+                            }`}
+                          >
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "retirada_loja" ? "bg-pink-100" : "bg-gray-100"}`}>
+                            <Store className={`w-6 h-6 ${paymentMethod === "retirada_loja" ? "text-pink-600" : "text-gray-500"}`} />
                           </div>
                           <div className="text-center">
-                            <p className={`font-semibold text-sm ${paymentMethod === "retirada_loja" ? "text-orange-700" : "text-gray-800"}`}>Pagar na Retirada</p>
+                            <p className={`font-semibold text-sm ${paymentMethod === "retirada_loja" ? "text-pink-700" : "text-gray-800"}`}>Pagar na Retirada</p>
                             <p className="text-xs text-gray-500 mt-0.5">Pague ao retirar</p>
                           </div>
                           {paymentMethod === "retirada_loja" && (
@@ -1000,15 +1008,17 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("cartao")}
+                        aria-pressed={paymentMethod === "cartao"}
+                        aria-label="Pagar com cartão de débito ou crédito"
                         className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                          paymentMethod === "cartao" ? "border-orange-500 bg-orange-50 shadow-md" : "border-gray-200 hover:border-orange-300 bg-white"
+                          paymentMethod === "cartao" ? "border-pink-600 bg-pink-50 shadow-md" : "border-gray-200 hover:border-pink-300 bg-white"
                         }`}
                       >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "cartao" ? "bg-orange-100" : "bg-gray-100"}`}>
-                          <CreditCard className={`w-6 h-6 ${paymentMethod === "cartao" ? "text-orange-600" : "text-gray-500"}`} />
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === "cartao" ? "bg-pink-100" : "bg-gray-100"}`}>
+                          <CreditCard className={`w-6 h-6 ${paymentMethod === "cartao" ? "text-pink-600" : "text-gray-500"}`} />
                         </div>
                         <div className="text-center">
-                          <p className={`font-semibold text-sm ${paymentMethod === "cartao" ? "text-orange-700" : "text-gray-800"}`}>Cartão</p>
+                          <p className={`font-semibold text-sm ${paymentMethod === "cartao" ? "text-pink-700" : "text-gray-800"}`}>Cartão</p>
                           <p className="text-xs text-gray-500 mt-0.5">Crédito ou débito</p>
                         </div>
                         {paymentMethod === "cartao" && (
@@ -1054,7 +1064,7 @@ export default function CheckoutPage() {
                     {paymentMethod === "cartao" && (
                       <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
                         <div className="flex items-center gap-2">
-                          <CreditCard className="w-5 h-5 text-orange-500" />
+                          <CreditCard className="w-5 h-5 text-pink-600" />
                           <p className="font-semibold text-gray-800">Dados do Cartão</p>
                         </div>
 
@@ -1103,7 +1113,7 @@ export default function CheckoutPage() {
                           <Label htmlFor="cardInstallments">Parcelas</Label>
                           <select
                             id="cardInstallments"
-                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white"
                             value={cardInstallments}
                             onChange={(e) => setCardInstallments(e.target.value)}
                           >
@@ -1212,6 +1222,9 @@ export default function CheckoutPage() {
                                     <button
                                       onClick={() => toggleCheckoutItem(item.id)}
                                       className="flex items-center gap-1 w-full text-left"
+                                      aria-expanded={isExpanded}
+                                      aria-controls={`checkout-item-specs-${item.id}`}
+                                      aria-label={`${isExpanded ? "Ocultar" : "Exibir"} especificações de ${item.productName}`}
                                     >
                                       <p className="font-medium text-sm text-gray-900 truncate flex-1">{item.productName}</p>
                                       <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
@@ -1223,7 +1236,7 @@ export default function CheckoutPage() {
                                   </p>
                                 </div>
                                 {/* Especificações recolhidas por padrão */}
-                                <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? "max-h-96 mt-3" : "max-h-0"}`}>
+                                <div id={`checkout-item-specs-${item.id}`} className={`overflow-hidden transition-all duration-200 ${isExpanded ? "max-h-96 mt-3" : "max-h-0"}`}>
                                   <OrderItemSpecs
                                     customDimensions={item.customDimensions}
                                     variationSnapshot={item.variationSnapshot}
@@ -1264,7 +1277,7 @@ export default function CheckoutPage() {
                   )}
 
                   {step !== "revisao" ? (
-                    <Button onClick={handleNext} className="bg-orange-500 hover:bg-orange-600">
+                    <Button onClick={handleNext} className={HOME_PRIMARY_ACTION_CLASS}>
                       Continuar
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
@@ -1357,7 +1370,7 @@ export default function CheckoutPage() {
                 {/* Total */}
                 <div className="flex justify-between font-bold text-base">
                   <span>Total</span>
-                  <span className="text-orange-600">{formatCurrency(totalPrice)}</span>
+                  <span className="text-pink-600">{formatCurrency(totalPrice)}</span>
                 </div>
 
                 {/* Alterar frete */}

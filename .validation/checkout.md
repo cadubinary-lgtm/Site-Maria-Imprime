@@ -1,0 +1,1 @@
+No checkout sem itens, a interface apresentou o estado vazio com CTA rosa “Ver Produtos”. A ação foi validada e encaminhou corretamente ao catálogo público. Os controles de etapas, métodos de pagamento, itens expansíveis e resumo receberam cobertura de regressão para identidade rosa e acessibilidade, sem processar nenhum pedido ou pagamento.
