@@ -57,8 +57,8 @@ const ART_MAX_FILE_SIZE = 100 * 1024 * 1024;
 const PRODUCT_FEATURES = [
   { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
   { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
-  { Icon: Scissors,   bg: "bg-orange-50", color: "text-orange-600", label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
-  { Icon: LayoutGrid, bg: "bg-orange-50", color: "text-orange-600", label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
+  { Icon: Scissors,   bg: "bg-pink-50",   color: "text-pink-600",   label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
+  { Icon: LayoutGrid, bg: "bg-pink-50",   color: "text-pink-600",   label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
 ];
 
 // ─── Utilitários de data/prazo ─────────────────────────────────────────────
@@ -94,7 +94,7 @@ function AccordionStep({
         <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
           isCompleted ? 'bg-gray-200 text-gray-500' : 'text-white'
         }`}
-          style={{ backgroundColor: isCompleted ? undefined : '#7DCCD8' }}
+          style={{ backgroundColor: isCompleted ? undefined : '#ec4899' }}
         >
           {number}
         </div>
@@ -1169,17 +1169,17 @@ export default function ProductDetail() {
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                             isSel
-                              ? "border-orange-500 bg-orange-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/30"
+                              ? "border-pink-500 bg-pink-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-pink-300 hover:bg-pink-50/30"
                           }`}
                         >
                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            isSel ? "border-orange-500" : "border-gray-300"
+                            isSel ? "border-pink-500" : "border-gray-300"
                           }`}>
-                            {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                            {isSel && <div className="w-2 h-2 rounded-full bg-pink-500" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium leading-tight ${isSel ? "text-orange-700" : "text-gray-800"}`}>
+                            <p className={`text-sm font-medium leading-tight ${isSel ? "text-pink-700" : "text-gray-800"}`}>
                               {opt.name}
                             </p>
                             {opt.description && (
@@ -1239,17 +1239,17 @@ export default function ProductDetail() {
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                             isSel
-                              ? "border-orange-500 bg-orange-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/30"
+                              ? "border-pink-500 bg-pink-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-pink-300 hover:bg-pink-50/30"
                           }`}
                         >
                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            isSel ? "border-orange-500" : "border-gray-300"
+                            isSel ? "border-pink-500" : "border-gray-300"
                           }`}>
-                            {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                            {isSel && <div className="w-2 h-2 rounded-full bg-pink-500" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium leading-tight ${isSel ? "text-orange-700" : "text-gray-800"}`}>
+                            <p className={`text-sm font-medium leading-tight ${isSel ? "text-pink-700" : "text-gray-800"}`}>
                               {val.value}
                             </p>
                             {(val as any).description && (
@@ -1341,11 +1341,11 @@ export default function ProductDetail() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setFileMode("upload")}
-                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                      fileMode === "upload"
-                        ? "border-orange-500 bg-orange-50 text-orange-700"
-                        : "border-gray-200 bg-white text-gray-600 hover:border-orange-300"
+                  onClick={() => setFileMode("upload")}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    fileMode === "upload"
+                        ? "border-pink-500 bg-pink-50 text-pink-700"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-pink-300"
                     }`}
                   >
                     <Upload className="w-4 h-4" />
@@ -1354,11 +1354,11 @@ export default function ProductDetail() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFileMode("link")}
-                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                      fileMode === "link"
-                        ? "border-orange-500 bg-orange-50 text-orange-700"
-                        : "border-gray-200 bg-white text-gray-600 hover:border-orange-300"
+                  onClick={() => setFileMode("link")}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    fileMode === "link"
+                        ? "border-pink-500 bg-pink-50 text-pink-700"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-pink-300"
                     }`}
                   >
                     <Link2 className="w-4 h-4" />
@@ -1378,7 +1378,7 @@ export default function ProductDetail() {
                       </button>
                     </div>
                     <div
-                      className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${isArtDropActive ? "border-pink-500 bg-pink-50 scale-[1.01]" : "border-gray-300 hover:border-orange-400 hover:bg-orange-50/20"}`}
+                      className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${isArtDropActive ? "border-pink-500 bg-pink-50 scale-[1.01]" : "border-gray-300 hover:border-pink-400 hover:bg-pink-50/20"}`}
                       onClick={() => fileInputRef.current?.click()}
                       onDragEnter={(event) => { event.preventDefault(); setIsArtDropActive(true); }}
                       onDragOver={(event) => { event.preventDefault(); setIsArtDropActive(true); }}
@@ -1524,19 +1524,19 @@ export default function ProductDetail() {
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all duration-800 ${
                         selectedDeliveryOption?.id === opt.id
-                          ? "border-orange-500 bg-orange-50 shadow-sm"
-                          : "border-gray-200 bg-white hover:border-orange-300"
+                          ? "border-pink-500 bg-pink-50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-pink-300"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                          selectedDeliveryOption?.id === opt.id ? "border-orange-500" : "border-gray-300"
+                          selectedDeliveryOption?.id === opt.id ? "border-pink-500" : "border-gray-300"
                         }`}>
-                          {selectedDeliveryOption?.id === opt.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                          {selectedDeliveryOption?.id === opt.id && <div className="w-2 h-2 rounded-full bg-pink-500" />}
                         </div>
                         <div className="text-left">
                           <span className={`font-medium block ${
-                            selectedDeliveryOption?.id === opt.id ? "text-orange-700" : "text-gray-800"
+                            selectedDeliveryOption?.id === opt.id ? "text-pink-700" : "text-gray-800"
                           }`}>
                             {opt.name}
                           </span>
@@ -1604,18 +1604,18 @@ export default function ProductDetail() {
                         }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-800 ${
                           isPickupSel
-                            ? 'border-orange-500 bg-orange-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-orange-300'
+                            ? 'border-pink-500 bg-pink-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-pink-300'
                         }`}
                       >
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isPickupSel ? 'border-orange-500' : 'border-gray-300'}`}>
-                          {isPickupSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isPickupSel ? 'border-pink-500' : 'border-gray-300'}`}>
+                          {isPickupSel && <div className="w-2 h-2 rounded-full bg-pink-500" />}
                         </div>
                         <span className="flex-shrink-0">
                           <Store className="w-4 h-4 text-green-600" />
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${isPickupSel ? 'text-orange-700' : 'text-gray-800'}`}>Retirar na Loja</p>
+                          <p className={`text-sm font-medium ${isPickupSel ? 'text-pink-700' : 'text-gray-800'}`}>Retirar na Loja</p>
                           <p className="text-xs text-gray-500">Retirada Presencial — Grátis</p>
                         </div>
                         <span className="text-sm font-bold flex-shrink-0 text-green-600">Grátis</span>
@@ -1760,18 +1760,18 @@ export default function ProductDetail() {
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                         isSel
-                          ? "border-orange-500 bg-orange-50 shadow-sm"
-                          : "border-gray-200 bg-white hover:border-orange-300"
+                          ? "border-pink-500 bg-pink-50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-pink-300"
                       }`}
                     >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSel ? "border-orange-500" : "border-gray-300"}`}>
-                        {isSel && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSel ? "border-pink-500" : "border-gray-300"}`}>
+                        {isSel && <div className="w-2 h-2 rounded-full bg-pink-500" />}
                       </div>
                       <span className="flex-shrink-0 text-gray-500">
-                        {isLocal ? <Zap className="w-4 h-4 text-orange-500" /> : <Truck className="w-4 h-4" />}
+                        {isLocal ? <Zap className="w-4 h-4 text-pink-500" /> : <Truck className="w-4 h-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${isSel ? "text-orange-700" : "text-gray-800"}`}>{opt.name}</p>
+                        <p className={`text-sm font-medium ${isSel ? "text-pink-700" : "text-gray-800"}`}>{opt.name}</p>
                         {opt.company && opt.company !== opt.name && !opt.name.startsWith(opt.company) && (
                           <p className="text-xs text-gray-500">{opt.company}</p>
                         )}
@@ -1783,7 +1783,7 @@ export default function ProductDetail() {
                           }`}>{deadlineText}</p>
                         )}
                       </div>
-                      <span className={`text-sm font-bold flex-shrink-0 ${isSel ? "text-orange-600" : "text-gray-700"}`}>
+                      <span className={`text-sm font-bold flex-shrink-0 ${isSel ? "text-pink-600" : "text-gray-700"}`}>
                         {opt.price === 0 ? <span className="text-green-600">Grátis</span> : `R$ ${opt.price.toFixed(2)}`}
                       </span>
                     </button>
@@ -1827,7 +1827,7 @@ export default function ProductDetail() {
 
               {/* Header do resumo */}
               <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-orange-500" />
+                <ShoppingCart className="w-4 h-4 text-pink-600" />
                 <h3 className="font-bold text-gray-900">Resumo do pedido</h3>
               </div>
 
@@ -1961,13 +1961,15 @@ export default function ProductDetail() {
                     <button
                       type="button"
                       onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-orange-400 hover:text-orange-500 transition-colors text-sm font-bold"
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-pink-400 hover:text-pink-600 transition-colors text-sm font-bold"
+                      aria-label="Diminuir quantidade"
                     >−</button>
                     <span className="text-sm font-semibold text-gray-800 w-6 text-center">{quantity}</span>
                     <button
                       type="button"
                       onClick={() => setQuantity(q => q + 1)}
-                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-orange-400 hover:text-orange-500 transition-colors text-sm font-bold"
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-pink-400 hover:text-pink-600 transition-colors text-sm font-bold"
+                      aria-label="Aumentar quantidade"
                     >+</button>
                   </div>
                 </div>
@@ -2052,7 +2054,7 @@ export default function ProductDetail() {
                 <Button
                   onClick={handleAddToCart}
                   disabled={isProcessing || !canAddToCart}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-base h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl text-base h-12 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing
                     ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{uploadState.isUploading ? `Enviando arquivo... ${uploadState.progress}%` : "Processando..."}</>
@@ -2113,7 +2115,7 @@ export default function ProductDetail() {
                   variant="outline"
                   onClick={handleExportBudget}
                   disabled={isExporting}
-                  className="w-full border-orange-500 text-orange-600 hover:bg-orange-50 font-semibold py-3 rounded-xl h-12"
+                  className="w-full border-pink-500 text-pink-700 hover:bg-pink-50 font-semibold py-3 rounded-xl h-12"
                 >
                   {isExporting
                     ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Gerando...</>

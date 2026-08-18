@@ -19,4 +19,13 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain("leading-relaxed line-clamp-5");
     expect(source).toContain("TermsAcceptance checked={acceptedTerms}");
   });
+
+  it("padroniza os controles interativos e CTAs do configurador na identidade rosa", () => {
+    const source = readFileSync(productDetailPath, "utf8");
+
+    expect(source).toContain("backgroundColor: isCompleted ? undefined : '#ec4899'");
+    expect(source).toContain('bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl text-base h-12');
+    expect(source).toContain('border-pink-500 text-pink-700 hover:bg-pink-50');
+    expect(source).toContain('border-pink-500 bg-pink-50 shadow-sm');
+  });
 });
