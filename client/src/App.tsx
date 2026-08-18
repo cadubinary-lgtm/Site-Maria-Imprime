@@ -21,6 +21,7 @@ import AllProducts from "./pages/public/AllProducts";
 import SearchResults from "./pages/public/SearchResults";
 import CalculadoraDemo from "./pages/public/CalculadoraDemo";
 import DocumentationPage from "./pages/public/DocumentationPage";
+import ContactPage from "./pages/public/ContactPage";
 
 // ─── Páginas de E-commerce ───────────────────────────────────────────────────
 import ProductDetail from "./pages/ecommerce/ProductDetail";
@@ -371,6 +372,7 @@ function Router() {
       <Route path="/pedido/acompanhar/:token" component={GuestOrderTracking} />
       <Route path="/busca" component={SearchResults} />
       <Route path="/calculadora-demo" component={CalculadoraDemo} />
+      <Route path="/contato" component={ContactPage} />
       <Route path="/documentos" component={DocumentationPage} />
       <Route path="/documentos/:documentId" component={DocumentationPage} />
 

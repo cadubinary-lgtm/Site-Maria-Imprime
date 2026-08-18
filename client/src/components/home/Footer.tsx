@@ -169,7 +169,7 @@ export function Footer() {
           <FooterColumn title="Ajuda e suporte">
             <ul className="space-y-3 text-sm">
               {supportLinks.map((link) => <li key={link.label}><a href={link.href} className="transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600">{link.label}</a></li>)}
-              <li><a href={showWhatsApp ? whatsappHref : `mailto:${company.supportEmail}`} className="font-medium text-pink-600 transition-colors hover:text-pink-700">Fale conosco</a></li>
+              <li><a href="/contato" className="font-medium text-pink-600 transition-colors hover:text-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Fale conosco</a></li>
             </ul>
           </FooterColumn>
 
