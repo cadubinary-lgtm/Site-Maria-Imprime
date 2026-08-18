@@ -1,0 +1,1 @@
+O checkout sem itens permaneceu em estado vazio estável, sem expor opções de cálculo sem produtos no carrinho. A seleção de retirada e as opções calculadas foram cobertas por testes de acessibilidade, com controle nomeado para retirada, grupo rotulado de opções de entrega e ações em rosa.
