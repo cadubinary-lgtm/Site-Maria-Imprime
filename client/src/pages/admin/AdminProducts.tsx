@@ -555,7 +555,7 @@ export default function AdminProducts() {
   if (isLoading || (selectedSegmentId !== null && selectedSegmentProductsLoading)) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando produtos" />
       </div>
     );
   }
@@ -571,13 +571,13 @@ export default function AdminProducts() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-pink-600 hover:bg-pink-700"
             onClick={() => navigate("/admin/variacoes")}
           >
             <span className="mr-2">⚙</span> Gerenciar Variações
           </Button>
           <Button
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-pink-600 hover:bg-pink-700"
             onClick={() => navigate("/admin/novo-produto")}
           >
             <Plus className="w-4 h-4 mr-2" /> Novo Produto
@@ -600,6 +600,7 @@ export default function AdminProducts() {
                     setSelectedSegmentId(null);
                     setSelectedProducts(new Set());
                   }}
+                  aria-pressed={selectedSegmentId === null}
                   className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === null ? "bg-pink-600 hover:bg-pink-700" : "border-gray-200 text-gray-700 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"}`}
                 >
                   Todos os segmentos
@@ -618,6 +619,7 @@ export default function AdminProducts() {
                       setSelectedSegmentId(segment.id);
                       setSelectedProducts(new Set());
                     }}
+                    aria-pressed={selectedSegmentId === segment.id}
                     className={`h-auto justify-start whitespace-normal px-3 py-2 text-left text-sm ${selectedSegmentId === segment.id ? "bg-pink-600 hover:bg-pink-700" : "border-gray-200 text-gray-700 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"}`}
                   >
                     {segment.icon ? <span aria-hidden="true">{segment.icon}</span> : null}
@@ -635,19 +637,20 @@ export default function AdminProducts() {
         <div className="relative">
           <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <Input
+            aria-label="Buscar produtos por nome"
             placeholder="Buscar produto..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
-              <X className="w-5 h-5" />
+            <button type="button" onClick={() => setSearchQuery("")} aria-label="Limpar busca de produtos" className="absolute right-3 top-3 text-gray-400 hover:text-pink-600">
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           )}
         </div>
         {searchQuery && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600" aria-live="polite">
             {filteredProducts.length} produto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
           </p>
         )}
@@ -659,6 +662,7 @@ export default function AdminProducts() {
                 type="checkbox"
                 checked={selectedProducts.size === filteredProducts.length && filteredProducts.length > 0}
                 onChange={handleSelectAll}
+                aria-label={`Selecionar todos os ${filteredProducts.length} produtos filtrados`}
                 className="w-5 h-5 rounded border-gray-300 cursor-pointer"
               />
               <span className="text-sm text-gray-600">
@@ -706,7 +710,7 @@ export default function AdminProducts() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-gray-600 mb-4">Nenhum produto criado ainda</p>
-            <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => navigate("/admin/novo-produto")}>
+            <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => navigate("/admin/novo-produto")}>
               Criar Primeiro Produto
             </Button>
           </CardContent>
@@ -715,7 +719,7 @@ export default function AdminProducts() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-gray-600">Nenhum produto encontrado com "{searchQuery}"</p>
-            <Button variant="ghost" onClick={() => setSearchQuery("")} className="mt-4 text-orange-500 hover:text-orange-600">
+            <Button variant="ghost" onClick={() => setSearchQuery("")} className="mt-4 text-pink-600 hover:text-pink-700">
               Limpar busca
             </Button>
           </CardContent>
@@ -727,7 +731,7 @@ export default function AdminProducts() {
             const paymentPrices = getProductPaymentPrices(product);
             const resellerPrice = getProductPrice(product, "reseller");
             return (
-            <Card key={product.id} className={`${selectedProducts.has(product.id) ? "border-orange-500 bg-orange-50" : ""} ${isRecentlyCreated ? "relative border-pink-400 bg-pink-50/70 ring-1 ring-pink-200" : ""}`} style={{paddingBottom: '0px', paddingTop: '0px'}}>
+            <Card key={product.id} className={`${selectedProducts.has(product.id) ? "border-pink-500 bg-pink-50" : ""} ${isRecentlyCreated ? "relative border-pink-400 bg-pink-50/70 ring-1 ring-pink-200" : ""}`} style={{paddingBottom: '0px', paddingTop: '0px'}}>
               {isRecentlyCreated && (
                 <span className="absolute right-4 top-3 rounded-full bg-pink-600 px-2.5 py-1 text-xs font-semibold text-white">
                   Produto recém-criado
@@ -741,6 +745,7 @@ export default function AdminProducts() {
                       type="checkbox"
                       checked={selectedProducts.has(product.id)}
                       onChange={() => handleToggleProduct(product.id)}
+                      aria-label={`Selecionar produto ${product.name}`}
                       className="w-5 h-5 rounded border-gray-300 cursor-pointer"
                     />
                   </div>
@@ -1119,12 +1124,12 @@ export default function AdminProducts() {
                 </div>
 
                 {quickEditingId === product.id && (
-                  <div className="mt-5 rounded-lg border border-orange-200 bg-orange-50/60 p-4">
+                  <div className="mt-5 rounded-lg border border-pink-200 bg-pink-50/60 p-4" aria-label={`Edição rápida de preço para ${product.name}`}>
                     <div className="grid gap-4 md:grid-cols-4 md:items-end">
                       <div className="min-w-0">
-                        <Label className="text-sm font-semibold text-gray-900">Unidade de cobrança</Label>
+                        <Label htmlFor={`quick-calculation-${product.id}`} className="text-sm font-semibold text-gray-900">Unidade de cobrança</Label>
                         <Select value={quickCalculationType} onValueChange={setQuickCalculationType}>
-                          <SelectTrigger className="mt-1 bg-white">
+                          <SelectTrigger id={`quick-calculation-${product.id}`} className="mt-1 bg-white">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -1136,7 +1141,7 @@ export default function AdminProducts() {
                         </Select>
                       </div>
                       <div className="min-w-0">
-                        <Label className="text-sm font-semibold text-gray-900">
+                        <Label htmlFor={`quick-pix-${product.id}`} className="text-sm font-semibold text-gray-900">
                           {quickCalculationType === "m2"
                             ? "Preço via Pix por m² (R$)"
                             : quickCalculationType === "metro_linear"
@@ -1147,6 +1152,7 @@ export default function AdminProducts() {
                           type="number"
                           min="0.01"
                           step="0.01"
+                          id={`quick-pix-${product.id}`}
                           value={quickPixPrice}
                           onChange={(event) => setQuickPixPrice(event.target.value)}
                           onKeyDown={(event) => {
@@ -1157,7 +1163,7 @@ export default function AdminProducts() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <Label className="text-sm font-semibold text-gray-900">
+                        <Label htmlFor={`quick-card-${product.id}`} className="text-sm font-semibold text-gray-900">
                           {quickCalculationType === "m2"
                             ? "Preço via Cartão por m² (R$)"
                             : quickCalculationType === "metro_linear"
@@ -1168,6 +1174,7 @@ export default function AdminProducts() {
                           type="number"
                           min="0.01"
                           step="0.01"
+                          id={`quick-card-${product.id}`}
                           value={quickCardPrice}
                           onChange={(event) => setQuickCardPrice(event.target.value)}
                           onKeyDown={(event) => {
@@ -1178,7 +1185,7 @@ export default function AdminProducts() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <Label className="text-sm font-semibold text-gray-900">
+                        <Label htmlFor={`quick-reseller-${product.id}`} className="text-sm font-semibold text-gray-900">
                           {quickCalculationType === "m2"
                             ? "Preço Revendedor por m² (R$)"
                             : quickCalculationType === "metro_linear"
@@ -1189,6 +1196,7 @@ export default function AdminProducts() {
                           type="number"
                           min="0.01"
                           step="0.01"
+                          id={`quick-reseller-${product.id}`}
                           value={quickResellerPrice}
                           onChange={(event) => setQuickResellerPrice(event.target.value)}
                           onKeyDown={(event) => {
@@ -1209,7 +1217,7 @@ export default function AdminProducts() {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600"
+                          className="bg-pink-600 hover:bg-pink-700"
                           onClick={() => handleQuickPricingSave(product)}
                           disabled={updateProductMutation.isPending}
                         >
