@@ -18,6 +18,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface QuoteResult {
   id: string | number;
@@ -71,11 +72,19 @@ export function ShippingRulesManager() {
   const { data: localRules, refetch: refetchRules } = trpc.logistics.localRules.list.useQuery();
   const createRule = trpc.logistics.localRules.create.useMutation();
   const updateRule = trpc.logistics.localRules.update.useMutation();
-  const deleteRule = trpc.logistics.localRules.delete.useMutation();
+  const deleteRule = trpc.logistics.localRules.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Regra de entrega excluída');
+      setRuleToDelete(null);
+      refetchRules();
+    },
+    onError: (error) => toast.error(error.message || 'Erro ao excluir regra de entrega'),
+  });
 
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [ruleToDelete, setRuleToDelete] = useState<LocalRule | null>(null);
 
   const handleCalculate = async () => {
     const cep = destinationCep.replace(/\D/g, '');
@@ -175,15 +184,8 @@ export function ShippingRulesManager() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Deseja excluir esta regra de entrega local?')) return;
-    try {
-      await deleteRule.mutateAsync({ id });
-      toast.success('Regra excluída');
-      refetchRules();
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao excluir');
-    }
+  const handleConfirmDelete = () => {
+    if (ruleToDelete) deleteRule.mutate({ id: ruleToDelete.id });
   };
 
   const formatCurrency = (value: number | string) =>
@@ -287,11 +289,11 @@ export function ShippingRulesManager() {
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-green-600">{formatCurrency(rule.price)}</span>
                       {!rule.isActive && <Badge variant="secondary">Inativo</Badge>}
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(rule as LocalRule)}>
-                        <Pencil className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(rule as LocalRule)} aria-label={`Editar regra de entrega ${rule.neighborhood}`}>
+                        <Pencil className="w-4 h-4" aria-hidden="true" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(rule.id)} className="text-destructive hover:text-destructive">
-                        <Trash2 className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => setRuleToDelete(rule as LocalRule)} className="text-destructive hover:text-destructive" aria-label={`Excluir regra de entrega ${rule.neighborhood}`}>
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -545,6 +547,20 @@ export function ShippingRulesManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={Boolean(ruleToDelete)} onOpenChange={(open) => !open && setRuleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir a regra de entrega de {ruleToDelete?.neighborhood}?</AlertDialogTitle>
+            <AlertDialogDescription>Essa regra deixará de estar disponível para a faixa de CEP configurada. Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteRule.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteRule.isPending} aria-busy={deleteRule.isPending} onClick={(event) => { event.preventDefault(); handleConfirmDelete(); }}>
+              {deleteRule.isPending ? 'Excluindo...' : 'Excluir regra'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
