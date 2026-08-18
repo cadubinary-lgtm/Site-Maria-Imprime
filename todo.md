@@ -3362,3 +3362,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da tela de acesso administrativo
 - [x] Padronizar controles de acesso na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade da tela de acesso administrativo
+
+- [x] Verificar que não há uma rota própria de recuperação de acesso administrativo no projeto
+- [x] Registrar que a padronização de recuperação não se aplica sem uma tela exposta
+- [x] Validar que o fluxo administrativo de acesso usa a tela de login já refinada
+
+- [x] Revisar controles e estados da configuração inicial administrativa
+- [x] Padronizar a configuração inicial na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade da configuração inicial

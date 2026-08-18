@@ -61,10 +61,10 @@ export default function AdminSetup() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
         <Card className="bg-slate-900 border-slate-800 max-w-md w-full">
           <CardContent className="pt-6 text-center">
-            <ShieldCheck className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <ShieldCheck className="h-12 w-12 text-pink-600 mx-auto mb-4" aria-hidden="true" />
             <h2 className="text-white text-xl font-bold mb-2">Setup já realizado</h2>
             <p className="text-slate-400 mb-4">O superadmin já foi configurado. Faça login normalmente.</p>
-            <Button onClick={() => navigate("/admin/login")} className="bg-orange-500 hover:bg-orange-600">
+            <Button onClick={() => navigate("/admin/login")} className="bg-pink-600 hover:bg-pink-700">
               Ir para Login
             </Button>
           </CardContent>
@@ -91,8 +91,8 @@ export default function AdminSetup() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl mb-4">
-            <ShieldCheck className="h-8 w-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-600 rounded-2xl mb-4">
+            <ShieldCheck className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
           <h1 className="text-2xl font-bold text-white">Setup Inicial</h1>
           <p className="text-slate-400 mt-1">Criar primeiro superadministrador</p>
@@ -115,59 +115,64 @@ export default function AdminSetup() {
               )}
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Nome completo</Label>
+                <Label htmlFor="setup-name" className="text-slate-300">Nome completo</Label>
                 <Input
+                  id="setup-name"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800 border-slate-700 text-white focus:border-pink-500 focus:ring-pink-500/20"
                   placeholder="Seu nome"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">E-mail</Label>
+                <Label htmlFor="setup-email" className="text-slate-300">E-mail</Label>
                 <Input
+                  id="setup-email"
                   type="email"
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800 border-slate-700 text-white focus:border-pink-500 focus:ring-pink-500/20"
                   placeholder="admin@mariaimprime.com.br"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Senha (mín. 8 caracteres)</Label>
+                <Label htmlFor="setup-password" className="text-slate-300">Senha (mín. 8 caracteres)</Label>
                 <Input
+                  id="setup-password"
                   type="password"
                   value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800 border-slate-700 text-white focus:border-pink-500 focus:ring-pink-500/20"
                   placeholder="••••••••"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Confirmar senha</Label>
+                <Label htmlFor="setup-confirm-password" className="text-slate-300">Confirmar senha</Label>
                 <Input
+                  id="setup-confirm-password"
                   type="password"
                   value={form.confirmPassword}
                   onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800 border-slate-700 text-white focus:border-pink-500 focus:ring-pink-500/20"
                   placeholder="••••••••"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Chave de setup</Label>
+                <Label htmlFor="setup-key" className="text-slate-300">Chave de setup</Label>
                 <Input
+                  id="setup-key"
                   type="password"
                   value={form.setupKey}
                   onChange={e => setForm(f => ({ ...f, setupKey: e.target.value }))}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800 border-slate-700 text-white focus:border-pink-500 focus:ring-pink-500/20"
                   placeholder="Chave fornecida pelo suporte técnico"
                   required
                 />
@@ -175,11 +180,12 @@ export default function AdminSetup() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white"
                 disabled={createMutation.isPending}
+                aria-busy={createMutation.isPending}
               >
                 {createMutation.isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Criando...</>
                 ) : "Criar Superadmin"}
               </Button>
             </form>
