@@ -1,0 +1,1 @@
+A busca no banner principal expõe um rótulo acessível específico e, ao enviar o termo amplo `a`, encaminhou corretamente para `/busca?q=a`. A página de resultados exibiu produtos, categorias e materiais correspondentes, preservando a continuidade para a descoberta detalhada.
