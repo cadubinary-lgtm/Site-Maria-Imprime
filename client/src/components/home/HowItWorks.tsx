@@ -45,11 +45,11 @@ const ARROW_URL = "/manus-storage/SETA_e3737895.webp";
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-8 lg:py-16 px-4 lg:px-8" style={{ minHeight: 'auto' }}>
+    <section className="bg-white px-4 py-8 lg:px-8 lg:py-16" aria-labelledby="how-it-works-title">
       <div className="max-w-6xl mx-auto">
         {/* Título */}
         <div className="text-center mb-6 lg:mb-10">
-          <h2 className="text-2xl lg:text-4xl font-bold text-gray-800 mb-3">
+          <h2 id="how-it-works-title" className="mb-3 text-2xl font-bold text-gray-800 lg:text-4xl">
             Como funciona
           </h2>
           <div className="w-10 h-1 bg-[#FF0066] mx-auto rounded-full" />
@@ -58,37 +58,38 @@ export function HowItWorks() {
         {/* ── Desktop ── */}
         <div className="hidden lg:block">
           {/* Linha única: mascote com bolinha sobreposta + seta entre elas */}
-          <div className="flex items-end justify-center" style={{ height: "220px" }}>
+          <div className="flex min-h-[220px] items-end justify-center" role="list" aria-label="Etapas do seu pedido">
             {steps.map((step, i) => (
-              <div key={i} className="flex items-end flex-1">
+              <div key={i} className="flex flex-1 items-end" role="listitem">
                 {/* Wrapper relativo para sobrepor bolinha na cabeça */}
                 <div className="flex-1 flex justify-center items-end group relative">
                   {/* Bolinha numérica — posicionada acima da cabeça com pequeno espaço */}
                   <img
                     src={step.number}
-                    alt={`Passo ${i + 1}`}
+                    alt=""
+                    aria-hidden="true"
                     className="absolute w-7 h-7 object-contain z-10"
                     style={{ top: "-40px", left: "50%", transform: "translateX(-50%)" }}
                   />
                   {/* Mascote */}
                   <img
                     src={step.mascote}
-                    alt={step.title}
-                    className="w-[140px] h-auto max-h-[210px] object-contain object-bottom transition-transform duration-300 group-hover:scale-105"
+                    alt=""
+                    aria-hidden="true"
+                    className="h-auto max-h-[210px] w-[140px] object-contain object-bottom transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
                   />
                 </div>
 
                 {/* Seta entre mascotes */}
                 {i < steps.length - 1 && (
                   <div
-                    className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: "32px", marginBottom: "82px" }}
+                    className="mb-[82px] flex w-8 shrink-0 items-center justify-center"
                   >
                     <img
                       src={ARROW_URL}
-                      alt="→"
-                      className="object-contain opacity-90"
-                      style={{ width: "32px", height: "31px" }}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-8 w-8 object-contain opacity-90"
                     />
                   </div>
                 )}
@@ -112,23 +113,23 @@ export function HowItWorks() {
         </div>
 
         {/* ── Mobile ── */}
-        <div className="grid grid-cols-2 gap-3 lg:hidden">
+        <div className="grid grid-cols-2 gap-3 lg:hidden" role="list" aria-label="Etapas do seu pedido">
           {steps.map((step, i) => (
-            <div key={i} className="flex flex-col items-center text-center group pt-8 pb-2">
-              <div className="relative flex justify-center" style={{ minHeight: '140px' }}>
+            <div key={i} role="listitem" className="group flex flex-col items-center pb-2 pt-8 text-center">
+              <div className="relative flex min-h-[140px] justify-center">
                 {/* Bolinha posicionada dentro do container, no topo — sem sobrepor conteúdo acima */}
                 <img
                   src={step.number}
-                  alt={`Passo ${i + 1}`}
-                  className="absolute w-7 h-7 object-contain z-10"
-                  style={{ top: "0px", left: "50%", transform: "translateX(-50%)" }}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute top-0 left-1/2 z-10 h-7 w-7 -translate-x-1/2 object-contain"
                 />
                 {/* Mascote com margem para não ficar atrás da bolinha */}
                 <img
                   src={step.mascote}
-                  alt={step.title}
-                  className="w-[90px] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                  style={{ marginTop: "28px" }}
+                  alt=""
+                  aria-hidden="true"
+                  className="mt-7 h-auto w-[90px] object-contain transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
                 />
               </div>
               <p className="font-bold text-gray-800 text-xs leading-tight mt-1 mb-0.5">
@@ -143,10 +144,8 @@ export function HowItWorks() {
 
         {/* Botão CTA */}
         <div className="flex justify-center mt-6 lg:mt-12">
-          <Link href="/catalogo">
-            <button className={`${HOME_PRIMARY_ACTION_CLASS} px-7 sm:px-8`}>
-              Fazer meu pedido
-            </button>
+          <Link href="/catalogo" className={`${HOME_PRIMARY_ACTION_CLASS} px-7 sm:px-8`}>
+            Fazer meu pedido
           </Link>
         </div>
       </div>

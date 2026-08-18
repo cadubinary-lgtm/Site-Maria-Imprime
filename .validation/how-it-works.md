@@ -1,0 +1,1 @@
+A seção “Como funciona” mantém seis etapas visíveis e uma ação única para iniciar o pedido. O CTA “Fazer meu pedido” foi validado e direcionou corretamente ao catálogo. As ilustrações foram preservadas como apoio visual sem competir com a leitura dos títulos e descrições das etapas.
