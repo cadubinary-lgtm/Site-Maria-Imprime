@@ -20,6 +20,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 // ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
 // Constrói a URL absoluta da imagem a partir de uma URL relativa ou absoluta,
@@ -641,7 +642,7 @@ function EmailHistorySection({ orderId }: { orderId: number }) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Mail className="w-4 h-4 text-orange-500" />
+          <Mail className="w-4 h-4 text-pink-600" />
           Histórico de E-mails
         </CardTitle>
       </CardHeader>
@@ -686,14 +687,16 @@ export default function OrderDetailPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-4">
-        <AlertCircle className="w-16 h-16 text-gray-300" />
-        <h2 className="text-xl font-semibold text-gray-700">Pedido não encontrado</h2>
-        <p className="text-gray-500">Este pedido não existe ou não pertence à sua conta</p>
-        <Button onClick={() => setLocation("/meus-pedidos")} variant="outline">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Meus Pedidos
-        </Button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 text-center">
+        <div className="w-full max-w-md rounded-2xl border border-pink-100 bg-white p-8 shadow-sm">
+          <AlertCircle className="mx-auto h-12 w-12 text-pink-600" aria-hidden="true" />
+          <h2 className="mt-4 text-xl font-semibold text-gray-800">Pedido não encontrado</h2>
+          <p role="alert" className="mt-2 text-sm text-gray-500">Este pedido não existe ou não pertence à sua conta.</p>
+          <Button onClick={() => setLocation("/meus-pedidos")} variant="outline" className={`mt-6 ${HOME_SECONDARY_ACTION_CLASS}`}>
+            <ArrowLeft className="w-4 h-4" />
+            Meus Pedidos
+          </Button>
+        </div>
       </div>
     );
   }
@@ -728,7 +731,8 @@ export default function OrderDetailPage() {
             size="sm"
             onClick={() => reorderMutation.mutate({ orderId: order.id })}
             disabled={reorderMutation.isPending}
-            className="text-orange-600 border-orange-300 hover:bg-orange-50"
+            className={HOME_SECONDARY_ACTION_CLASS}
+            aria-label={`Refazer o pedido ${order.orderNumber}`}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${reorderMutation.isPending ? "animate-spin" : ""}`} />
             Recomprar
@@ -760,7 +764,7 @@ export default function OrderDetailPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Clock className="w-4 h-4 text-orange-500" />
+                  <Clock className="w-4 h-4 text-pink-600" />
                   Acompanhamento do Pedido
                 </CardTitle>
               </CardHeader>
@@ -776,23 +780,23 @@ export default function OrderDetailPage() {
                 ) : (
                   <>
                     {/* Current status highlight */}
-                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200 mb-5">
-                      <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white flex-shrink-0">
+                    <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-lg border border-pink-200 mb-5" aria-live="polite">
+                      <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white flex-shrink-0">
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-xs text-orange-600 font-medium">Status atual</p>
-                        <p className="font-bold text-orange-800">{STATUS_LABELS[order.status] ?? order.status}</p>
+                        <p className="text-xs text-pink-600 font-medium">Status atual</p>
+                        <p className="font-bold text-pink-800">{STATUS_LABELS[order.status] ?? order.status}</p>
                       </div>
                     </div>
 
                       {/* Progress bar */}
-                    <div className="relative mb-8">
+                    <div className="relative mb-8" aria-label="Etapas do pedido">
                       {/* Background line */}
                       <div className="absolute top-5 left-5 right-5 h-1 bg-gray-200 rounded-full" />
                       {/* Progress line (only up to current step) */}
                       <div
-                        className="absolute top-5 left-5 h-1 bg-orange-500 rounded-full transition-all duration-700"
+                        className="absolute top-5 left-5 h-1 bg-pink-600 rounded-full transition-all duration-700"
                         style={{ width: currentStepIndex >= 0 ? `calc(${(currentStepIndex / (STATUS_STEPS.length - 1)) * 100}% - 0px)` : "0%", maxWidth: "calc(100% - 2.5rem)" }}
                       />
                       {/* Steps */}
@@ -806,9 +810,9 @@ export default function OrderDetailPage() {
                               <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center text-sm border-2 transition-all z-10 relative ${
                                   isCurrent
-                                    ? "bg-orange-500 border-orange-500 text-white shadow-md ring-4 ring-orange-100 scale-110"
+                                    ? "bg-pink-600 border-pink-600 text-white shadow-md ring-4 ring-pink-100 scale-110"
                                     : isPast
-                                    ? "bg-orange-400 border-orange-400 text-white"
+                                    ? "bg-pink-400 border-pink-400 text-white"
                                     : "bg-gray-100 border-gray-200 text-gray-300"
                                 }`}
                               >
@@ -816,7 +820,7 @@ export default function OrderDetailPage() {
                               </div>
                               <span
                                 className={`text-xs text-center font-medium leading-tight whitespace-pre-line ${
-                                  isCurrent ? "text-orange-600 font-bold" : isPast ? "text-orange-400" : "text-gray-300"
+                                  isCurrent ? "text-pink-600 font-bold" : isPast ? "text-pink-400" : "text-gray-300"
                                 }`}
                                 style={{ fontSize: "0.65rem" }}
                               >
@@ -836,7 +840,7 @@ export default function OrderDetailPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Package className="w-4 h-4 text-orange-500" />
+                  <Package className="w-4 h-4 text-pink-600" />
                   Itens do Pedido ({(items ?? []).length})
                 </CardTitle>
               </CardHeader>
@@ -1068,14 +1072,14 @@ export default function OrderDetailPage() {
                 <Separator />
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-orange-600 text-lg">{formatCurrency(order.totalPrice)}</span>
+                  <span className="text-pink-600 text-lg">{formatCurrency(order.totalPrice)}</span>
                 </div>
                 <div className={`text-xs px-3 py-2 rounded-lg font-medium text-center ${
                   order.paymentStatus === "pago"
                     ? "bg-green-100 text-green-800"
                     : order.paymentStatus === "falhou"
                     ? "bg-red-100 text-red-800"
-                    : "bg-orange-100 text-orange-800"
+                    : "bg-yellow-100 text-yellow-800"
                 }`}>
                   {order.paymentStatus === "pago" ? "✅ Pago"
                     : order.paymentStatus === "falhou" ? "❌ Pagamento Falhou"
@@ -1087,7 +1091,8 @@ export default function OrderDetailPage() {
             {/* Actions */}
             <div className="space-y-2">
               <Button
-                className="w-full bg-orange-500 hover:bg-orange-600"
+                className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
+                aria-label={`Refazer o pedido ${order.orderNumber}`}
                 onClick={() => reorderMutation.mutate({ orderId: order.id })}
                 disabled={reorderMutation.isPending}
               >
@@ -1096,7 +1101,7 @@ export default function OrderDetailPage() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full"
+                className={`w-full ${HOME_SECONDARY_ACTION_CLASS}`}
                 onClick={() => setLocation("/carrinho")}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -1119,11 +1124,15 @@ export default function OrderDetailPage() {
       {lightboxUrl && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visualização da arte aprovada"
           onClick={() => setLightboxUrl(null)}
         >
           <button
             className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
             onClick={() => setLightboxUrl(null)}
+            aria-label="Fechar visualização da arte"
           >
             <X className="w-6 h-6" />
           </button>
