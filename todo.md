@@ -3256,3 +3256,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar seleção e ações de vínculo na identidade cinza e rosa
 - [x] Melhorar a leitura de configurações e estados de catálogo vinculados
 - [x] Validar seleção e acessibilidade dos vínculos de atributos
+
+- [x] Verificar que a versão V2 do vinculador de atributos não está exposta nas rotas administrativas
+- [x] Revisar a gestão de regras de atributos para identificar o ajuste prioritário
+- [x] Padronizar controles e ações de regras na identidade cinza e rosa
+- [x] Melhorar a leitura de condições, efeitos e estados de regras
+- [x] Validar acessibilidade e fluxo operacional da gestão de regras
+- [x] Implementar persistência real para editar, ativar e excluir regras de atributos
