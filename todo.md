@@ -3298,3 +3298,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Substituir a confirmação nativa de exclusão de prazo de produção por diálogo acessível
 - [x] Validar a exclusão de prazo de produção e seus feedbacks
+
+- [x] Revisar exclusões de tipos e opções no gerenciador de variações de produto
+- [x] Substituir confirmações nativas por diálogos acessíveis nas variações de produto
+- [x] Validar exclusões de variações de produto e seus feedbacks

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus, Edit2, Trash2, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 interface VariationType {
@@ -137,7 +138,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => { e.stopPropagation(); onDelete(vt.id); }}
+            onClick={(e) => { e.stopPropagation(); onDelete(vt); }}
             className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
             aria-label={`Excluir variação ${vt.name}`}
           >
@@ -188,6 +189,7 @@ export function ProductVariationManager() {
   const [expandedCvId, setExpandedCvId] = useState<number | null>(null);
   const [expandedOffsetId, setExpandedOffsetId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'products' | 'manage'>('products');
+  const [pendingDeletion, setPendingDeletion] = useState<{ kind: "variation" | "option" | "cv" | "offset"; id: number; name: string; globalVariationId?: number } | null>(null);
 
   // Fetch all products
   const { data: products = [] } = trpc.products.getAll.useQuery();
@@ -288,14 +290,8 @@ export function ProductVariationManager() {
     } catch { toast.error("Erro ao vincular variação CV"); }
   };
 
-  const handleDeleteCvVariationType = async (id: number) => {
-    if (!confirm("Excluir este tipo de variação CV?")) return;
-    try {
-      await deleteCvTypeMutation.mutateAsync({ id });
-      toast.success("Tipo CV excluído");
-      await utils.variationsCv.getGlobal.invalidate();
-      refetchCvVariationTypes();
-    } catch { toast.error("Erro ao excluir tipo CV"); }
+  const handleDeleteCvVariationType = (id: number, name = "tipo de variação CV") => {
+    setPendingDeletion({ kind: "cv", id, name });
   };
 
   const handleToggleCvRequired = async (id: number, current: boolean) => {
@@ -409,37 +405,12 @@ export function ProductVariationManager() {
     }
   };
 
-  const handleDeleteVariationType = async (id: number) => {
-    if (!confirm("Tem certeza que deseja remover este tipo de variação?")) return;
-
-    try {
-      await deleteVariationTypeMutation.mutateAsync({ id });
-      toast.success("Tipo de variação removido!");
-      setEditingVariationType(null);
-      // Invalidar ambas as listas
-      await invalidateBoth();
-    } catch (error) {
-      toast.error("Erro ao remover tipo de variação");
-      console.error(error);
-    }
+  const handleDeleteVariationType = (variation: VariationType) => {
+    setPendingDeletion({ kind: "variation", id: variation.id, name: variation.name });
   };
 
-  const handleDeleteOption = async (id: number, globalVariationId?: number) => {
-    if (!confirm("Tem certeza que deseja remover esta opção?")) return;
-
-    try {
-      await deleteVariationOptionMutation.mutateAsync({ id });
-      // Se a opção pertence a uma variação global, propagar a exclusão para todas as cópias
-      if (globalVariationId) {
-        await syncGlobalOptionsMutation.mutateAsync({ globalVariationId });
-      }
-      toast.success("Opção removida!");
-      // Invalidar ambas as listas
-      await invalidateBoth();
-    } catch (error) {
-      toast.error("Erro ao remover opção");
-      console.error(error);
-    }
+  const handleDeleteOption = (id: number, name = "opção de variação", globalVariationId?: number) => {
+    setPendingDeletion({ kind: "option", id, name, globalVariationId });
   };
 
   const handleMoveVariationType = async (list: VariationType[], vtId: number, direction: "up" | "down") => {
@@ -704,13 +675,36 @@ export function ProductVariationManager() {
       refetchOffsetVariationTypes();
     } catch (error) { console.error('Erro ao reordenar offset:', error); }
   };
-  const handleDeleteOffsetVariationType = async (id: number) => {
-    if (!confirm('Excluir este tipo de variação offset?')) return;
+  const handleDeleteOffsetVariationType = (id: number, name = "tipo de variação Offset") => {
+    setPendingDeletion({ kind: "offset", id, name });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeletion) return;
     try {
-      await deleteOffsetTypeMutation.mutateAsync({ id });
-      await utils.variationsOffset.getGlobal.invalidate();
-      refetchOffsetVariationTypes();
-    } catch (error) { console.error('Erro ao excluir tipo offset:', error); }
+      if (pendingDeletion.kind === "variation") {
+        await deleteVariationTypeMutation.mutateAsync({ id: pendingDeletion.id });
+        setEditingVariationType(null);
+        await invalidateBoth();
+      } else if (pendingDeletion.kind === "option") {
+        await deleteVariationOptionMutation.mutateAsync({ id: pendingDeletion.id });
+        if (pendingDeletion.globalVariationId) await syncGlobalOptionsMutation.mutateAsync({ globalVariationId: pendingDeletion.globalVariationId });
+        await invalidateBoth();
+      } else if (pendingDeletion.kind === "cv") {
+        await deleteCvTypeMutation.mutateAsync({ id: pendingDeletion.id });
+        await utils.variationsCv.getGlobal.invalidate();
+        refetchCvVariationTypes();
+      } else {
+        await deleteOffsetTypeMutation.mutateAsync({ id: pendingDeletion.id });
+        await utils.variationsOffset.getGlobal.invalidate();
+        refetchOffsetVariationTypes();
+      }
+      toast.success(`${pendingDeletion.kind === "option" ? "Opção" : "Variação"} removida com sucesso.`);
+      setPendingDeletion(null);
+    } catch (error) {
+      toast.error("Erro ao remover variação");
+      console.error(error);
+    }
   };
   const handleLinkOffsetVariation = async (globalVariationId: number) => {
     if (!selectedProductId) { toast.error("Selecione um produto"); return; }
@@ -730,6 +724,7 @@ export function ProductVariationManager() {
   };
 
   const sortedVariationTypes = [...variationTypes].sort((a: VariationType, b: VariationType) => a.order - b.order);
+  const isDeleting = deleteVariationTypeMutation.isPending || deleteVariationOptionMutation.isPending || deleteCvTypeMutation.isPending || deleteOffsetTypeMutation.isPending;
 
   // Estado para ordem das colunas
   const [columnOrder, setColumnOrder] = useState(['segmentos', 'produtos', 'variacoes', 'tipos', 'tipos2']);
@@ -1033,6 +1028,20 @@ export function ProductVariationManager() {
           </div>
         </SortableContext>
       </DndContext>
+      <AlertDialog open={Boolean(pendingDeletion)} onOpenChange={(open) => !open && setPendingDeletion(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir “{pendingDeletion?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>{pendingDeletion?.kind === "option" ? "Esta opção deixará de estar disponível no configurador." : "As opções vinculadas a esta variação também poderão deixar de estar disponíveis."} Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={isDeleting} aria-busy={isDeleting} onClick={(event) => { event.preventDefault(); handleConfirmDelete(); }}>
+              {isDeleting ? "Excluindo..." : "Excluir variação"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
