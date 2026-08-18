@@ -3201,3 +3201,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar filtros, status e ações de pedidos na identidade cinza e rosa
 - [x] Melhorar a leitura de dados e estados operacionais na listagem
 - [x] Validar filtros e acessibilidade da listagem administrativa de pedidos
+
+- [x] Revisar a listagem administrativa de orçamentos para identificar o ajuste prioritário
+- [x] Padronizar filtros, status e ações de orçamentos na identidade cinza e rosa
+- [x] Melhorar a leitura de dados e estados comerciais na listagem
+- [x] Validar filtros e acessibilidade da listagem administrativa de orçamentos
