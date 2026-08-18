@@ -1,0 +1,1 @@
+Na página inicial, o bloco “Não encontrou o que procura?” permaneceu integrado à identidade rosa, com a ação de WhatsApp visível, nomeada e indicada como abertura em nova aba. A composição foi reorganizada sem altura, margens negativas ou corte fixo. Os links de atendimento no rodapé também permanecem disponíveis.
