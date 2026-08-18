@@ -3026,3 +3026,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os destaques e CTAs de busca na identidade rosa da Maria Imprime
 - [x] Tornar os resultados de categoria acessíveis sem depender de clique no card inteiro
 - [x] Adicionar uma ação clara para refazer ou limpar uma busca sem resultados
+
+- [x] Revisar o fluxo público de atendimento e orçamento para identificar o ajuste prioritário
+- [x] Padronizar CTAs, mensagens e estados de atendimento na identidade rosa da Maria Imprime
+- [x] Melhorar a orientação e a acessibilidade do formulário de orçamento público
+- [x] Validar o fluxo de envio de orçamento e as ações de continuidade do cliente

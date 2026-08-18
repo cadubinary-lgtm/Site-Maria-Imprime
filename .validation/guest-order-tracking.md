@@ -1,0 +1,1 @@
+Na rota `/pedido/acompanhar/token-invalido-validacao`, a experiência de acompanhamento agora apresenta um cartão orientativo na identidade rosa. A mensagem informa que o link é inválido ou expirou, explica que o cliente deve usar o link mais recente e oferece os atalhos “Explorar catálogo” e “Voltar ao Início”. Os dois CTAs foram exibidos e permanecem navegáveis.
