@@ -3350,3 +3350,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados do perfil administrativo
 - [x] Padronizar controles do perfil na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade do perfil administrativo
+
+- [x] Revisar controles, filtros e estados dos logs de auditoria
+- [x] Padronizar controles de auditoria na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade dos logs de auditoria

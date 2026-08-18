@@ -16,7 +16,7 @@ const actionLabels: Record<string, { label: string; color: string }> = {
   admin_login: { label: "Login", color: "bg-blue-500/20 text-blue-400" },
   create_admin: { label: "Criou admin", color: "bg-green-500/20 text-green-400" },
   update_admin: { label: "Editou admin", color: "bg-yellow-500/20 text-yellow-400" },
-  reset_password: { label: "Resetou senha", color: "bg-orange-500/20 text-orange-400" },
+  reset_password: { label: "Resetou senha", color: "bg-pink-500/20 text-pink-400" },
   activate_admin: { label: "Ativou admin", color: "bg-green-500/20 text-green-400" },
   deactivate_admin: { label: "Desativou admin", color: "bg-red-500/20 text-red-400" },
 };
@@ -39,7 +39,7 @@ export default function AuditLogs() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ScrollText className="h-6 w-6 text-orange-500" />
+            <ScrollText className="h-6 w-6 text-pink-600" aria-hidden="true" />
             Logs de Auditoria
           </h1>
           <p className="text-slate-400 mt-1">Registro de todas as ações administrativas</p>
@@ -48,9 +48,10 @@ export default function AuditLogs() {
           variant="outline"
           size="sm"
           onClick={() => refetch()}
-          className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="border-pink-300 text-pink-700 hover:bg-pink-50"
+          aria-busy={isLoading}
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
           Atualizar
         </Button>
       </div>
@@ -62,7 +63,7 @@ export default function AuditLogs() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-pink-600" aria-label="Carregando logs de auditoria" />
             </div>
           ) : (
             <div className="space-y-2">
@@ -108,7 +109,7 @@ export default function AuditLogs() {
 
           {/* Paginação */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
-            <span className="text-slate-500 text-sm">
+            <span className="text-slate-500 text-sm" aria-live="polite">
               Mostrando {offset + 1}–{offset + (logs?.length || 0)}
             </span>
             <div className="flex gap-2">
@@ -118,8 +119,9 @@ export default function AuditLogs() {
                 className="border-slate-700 text-slate-300"
                 onClick={() => setOffset(Math.max(0, offset - limit))}
                 disabled={offset === 0}
+                aria-label="Ver página anterior de logs"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </Button>
               <Button
                 size="sm"
@@ -127,8 +129,9 @@ export default function AuditLogs() {
                 className="border-slate-700 text-slate-300"
                 onClick={() => setOffset(offset + limit)}
                 disabled={!logs || logs.length < limit}
+                aria-label="Ver próxima página de logs"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
