@@ -53,6 +53,8 @@ export default function AdminProducts() {
   const [pixDiscountPercent, setPixDiscountPercent] = useState("");
   const [isPixDiscountConfirmOpen, setIsPixDiscountConfirmOpen] = useState(false);
   const [isPixDiscountRemovalConfirmOpen, setIsPixDiscountRemovalConfirmOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
+  const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -483,13 +485,19 @@ export default function AdminProducts() {
     }
   };
 
-  const handleDeleteMultiple = async () => {
+  const handleDeleteMultiple = () => {
     if (selectedProducts.size === 0) { toast.error("Selecione pelo menos um produto"); return; }
-    if (!confirm(`Tem certeza que deseja remover ${selectedProducts.size} produto(s)?`)) return;
+    setIsBulkDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDeleteMultiple = async () => {
+    const productIds = Array.from(selectedProducts);
+    if (productIds.length === 0) return;
     try {
-      await deleteMultipleProductsMutation.mutateAsync({ ids: Array.from(selectedProducts) });
-      toast.success(`${selectedProducts.size} produto(s) removido(s) com sucesso!`);
+      await deleteMultipleProductsMutation.mutateAsync({ ids: productIds });
+      toast.success(`${productIds.length} produto(s) removido(s) com sucesso!`);
       setSelectedProducts(new Set());
+      setIsBulkDeleteConfirmOpen(false);
     } catch (error) { toast.error("Erro ao remover produtos"); }
   };
 
@@ -540,12 +548,14 @@ export default function AdminProducts() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Tem certeza que deseja remover este produto?")) return;
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+    const productId = productToDelete.id;
     try {
-      utils.products.getAll.setData(undefined, (old: any) => old ? old.filter((p: any) => p.id !== id) : old);
-      await deleteProductMutation.mutateAsync({ id });
+      utils.products.getAll.setData(undefined, (old: any) => old ? old.filter((p: any) => p.id !== productId) : old);
+      await deleteProductMutation.mutateAsync({ id: productId });
       toast.success("Produto removido com sucesso!");
+      setProductToDelete(null);
     } catch (error) {
       utils.products.getAll.invalidate();
       toast.error("Erro ao remover produto");
@@ -1114,7 +1124,7 @@ export default function AdminProducts() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => setProductToDelete(product)}
                       disabled={deleteProductMutation.isPending}
                       title="Remover este produto individualmente"
                     >
@@ -1269,6 +1279,36 @@ export default function AdminProducts() {
               className="bg-pink-600 hover:bg-pink-700"
             >
               {removePixDiscountMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Removendo...</> : <><Trash2 className="mr-2 h-4 w-4" />Remover aplicação</>}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={Boolean(productToDelete)} onOpenChange={(open) => !open && setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir o produto “{productToDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>O produto será removido do catálogo e não poderá mais ser comprado. Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteProductMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteProductMutation.isPending} aria-busy={deleteProductMutation.isPending} onClick={(event) => { event.preventDefault(); handleConfirmDelete(); }}>
+              {deleteProductMutation.isPending ? "Excluindo..." : "Excluir produto"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isBulkDeleteConfirmOpen} onOpenChange={setIsBulkDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir {selectedProducts.size} produto(s) selecionado(s)?</AlertDialogTitle>
+            <AlertDialogDescription>Todos os produtos selecionados serão removidos do catálogo. Esta ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMultipleProductsMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteMultipleProductsMutation.isPending} aria-busy={deleteMultipleProductsMutation.isPending} onClick={(event) => { event.preventDefault(); handleConfirmDeleteMultiple(); }}>
+              {deleteMultipleProductsMutation.isPending ? "Excluindo..." : "Excluir produtos"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
