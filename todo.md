@@ -3410,3 +3410,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles, pagamento e estados da central financeira de contas a receber
 - [x] Padronizar controles financeiros na identidade rosa e com acessibilidade
 - [x] Validar a central financeira de contas a receber e salvar checkpoint publicável
+
+- [x] Revisar controles e estados da central financeira de contas recebidas
+- [x] Padronizar controles de contas recebidas na identidade rosa e com acessibilidade
+- [x] Validar a central financeira de contas recebidas e salvar checkpoint publicável
