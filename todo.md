@@ -3131,3 +3131,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar os controles da calculadora na identidade rosa e em uma estrutura acessível
 - [x] Melhorar a leitura de medidas, área e estimativa de preço
 - [x] Validar cálculos, estados e comportamento responsivo da calculadora
+
+- [x] Revisar os componentes de configuração visual para identificar o ajuste prioritário
+- [x] Padronizar os controles de configuração na identidade rosa e em uma estrutura acessível
+- [x] Melhorar a leitura das escolhas de material, impressão e acabamento
+- [x] Validar estados de seleção e continuidade do configurador visual

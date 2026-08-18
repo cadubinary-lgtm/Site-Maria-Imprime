@@ -42,7 +42,6 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
   basePrice,
 }) => {
   const [expandedStep, setExpandedStep] = useState<string | null>(steps[0]?.id || null);
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
 
   // Calcular preço total baseado em seleções
   const totalPrice = useMemo(() => {
@@ -71,15 +70,17 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
 
   const handleStepSelect = (stepId: string, value: string | string[]) => {
     onSelectionChange(stepId, value);
-    
-    // Marcar step como completo
-    const newCompleted = new Set(completedSteps);
-    newCompleted.add(stepId);
-    setCompletedSteps(newCompleted);
   };
 
   const visibleSteps = steps.filter(step => step.visible);
-  const completionPercentage = Math.round((completedSteps.size / visibleSteps.length) * 100);
+  const isStepComplete = (step: ConfiguradorStep) => {
+    const value = selectedValues[step.id];
+    return Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
+  };
+  const completedSteps = visibleSteps.filter(isStepComplete);
+  const completionPercentage = visibleSteps.length > 0
+    ? Math.round((completedSteps.length / visibleSteps.length) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -87,12 +88,17 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold text-sm text-gray-700">Configuração do Produto</h3>
-          <span className="text-xs font-medium text-orange-600">{completionPercentage}% completo</span>
+          <span className="text-xs font-medium text-pink-600" aria-live="polite">{completionPercentage}% completo</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+            className="bg-pink-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${completionPercentage}%` }}
+            role="progressbar"
+            aria-label="Progresso da configuração"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={completionPercentage}
           />
         </div>
       </div>
@@ -105,7 +111,7 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
             step={step}
             stepNumber={index + 1}
             isExpanded={expandedStep === step.id}
-            isCompleted={completedSteps.has(step.id)}
+            isCompleted={isStepComplete(step)}
             selectedValue={selectedValues[step.id]}
             onToggle={() => setExpandedStep(expandedStep === step.id ? null : step.id)}
             onSelect={(value) => handleStepSelect(step.id, value)}
@@ -114,11 +120,11 @@ export const ConfiguradorVisual: React.FC<ConfiguradorVisualProps> = ({
       </div>
 
       {/* Resumo de Preço */}
-      <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200 p-4">
+      <Card className="border-pink-200 bg-gradient-to-r from-pink-50 to-rose-50 p-4" aria-live="polite" aria-atomic="true">
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-600">Preço Total Estimado</p>
-            <p className="text-2xl font-bold text-orange-600">R$ {totalPrice.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-pink-700">R$ {totalPrice.toFixed(2)}</p>
           </div>
           <div className="text-right text-xs text-gray-600">
             <p>Preço Base: R$ {basePrice.toFixed(2)}</p>
@@ -152,6 +158,13 @@ const StepCard: React.FC<StepCardProps> = ({
   const [localValues, setLocalValues] = useState<string[]>(
     Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : []
   );
+  const stepHeadingId = `configurador-${step.id}-titulo`;
+  const stepContentId = `configurador-${step.id}-conteudo`;
+  const optionId = (attributeId: string) => `configurador-${step.id}-${attributeId}`;
+
+  useEffect(() => {
+    setLocalValues(Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : []);
+  }, [selectedValue]);
 
   const handleRadioChange = (value: string) => {
     onSelect(value);
@@ -181,20 +194,23 @@ const StepCard: React.FC<StepCardProps> = ({
 
   return (
     <Card className={`border-2 transition-all ${
-      isCompleted ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:border-orange-300'
+      isCompleted ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:border-pink-300'
     }`}>
       <button
+        type="button"
         onClick={onToggle}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
+        className="w-full p-4 flex items-center justify-between rounded-xl text-left transition-colors hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-400"
+        aria-expanded={isExpanded}
+        aria-controls={stepContentId}
       >
         <div className="flex items-center gap-3 text-left flex-1">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-            isCompleted ? 'bg-green-500 text-white' : 'bg-orange-100 text-orange-600'
+            isCompleted ? 'bg-green-500 text-white' : 'bg-pink-100 text-pink-700'
           }`}>
             {isCompleted ? '✓' : stepNumber}
           </div>
           <div>
-            <h4 className="font-semibold text-gray-900">{step.title}</h4>
+            <h4 id={stepHeadingId} className="font-semibold text-gray-900">{step.title}</h4>
             {step.description && (
               <p className="text-xs text-gray-500 mt-1">{step.description}</p>
             )}
@@ -209,14 +225,14 @@ const StepCard: React.FC<StepCardProps> = ({
       </button>
 
       {isExpanded && (
-        <div className="border-t border-gray-200 p-4 bg-gray-50">
+        <div id={stepContentId} role="region" aria-labelledby={stepHeadingId} className="border-t border-gray-200 p-4 bg-gray-50">
           {step.type === 'radio' && (
-            <RadioGroup value={selectedValue as string || ''} onValueChange={handleRadioChange}>
+            <RadioGroup value={selectedValue as string || ''} onValueChange={handleRadioChange} aria-label={`Opções de ${step.title}`}>
               <div className="space-y-3">
                 {step.attributes.map(attr => (
                   <div key={attr.id} className="flex items-start space-x-3">
-                    <RadioGroupItem value={attr.id} id={attr.id} className="mt-1" />
-                    <Label htmlFor={attr.id} className="flex-1 cursor-pointer">
+                    <RadioGroupItem value={attr.id} id={optionId(attr.id)} className="mt-1 border-pink-300 text-pink-600 focus-visible:ring-pink-300" />
+                    <Label htmlFor={optionId(attr.id)} className="flex-1 cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900">{attr.label}</p>
@@ -225,7 +241,7 @@ const StepCard: React.FC<StepCardProps> = ({
                           )}
                         </div>
                         {attr.priceModifier && attr.priceModifier > 0 && (
-                          <span className="text-sm font-semibold text-orange-600">
+                          <span className="text-sm font-semibold text-pink-600">
                             +R$ {attr.priceModifier.toFixed(2)}
                           </span>
                         )}
@@ -242,11 +258,11 @@ const StepCard: React.FC<StepCardProps> = ({
               {step.attributes.map(attr => (
                 <div key={attr.id} className="flex items-start space-x-3">
                   <Checkbox
-                    id={attr.id}
+                    id={optionId(attr.id)}
                     checked={localValues.includes(attr.id)}
                     onCheckedChange={(checked) => handleCheckboxChange(attr.id, checked as boolean)}
                   />
-                  <Label htmlFor={attr.id} className="flex-1 cursor-pointer">
+                  <Label htmlFor={optionId(attr.id)} className="flex-1 cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">{attr.label}</p>
@@ -255,7 +271,7 @@ const StepCard: React.FC<StepCardProps> = ({
                         )}
                       </div>
                       {attr.priceModifier && attr.priceModifier > 0 && (
-                        <span className="text-sm font-semibold text-orange-600">
+                          <span className="text-sm font-semibold text-pink-600">
                           +R$ {attr.priceModifier.toFixed(2)}
                         </span>
                       )}
@@ -273,7 +289,9 @@ const StepCard: React.FC<StepCardProps> = ({
                   <Button
                     key={qty}
                     variant={selectedValue === String(qty) ? 'default' : 'outline'}
-                    className="text-sm"
+                    type="button"
+                    aria-pressed={selectedValue === String(qty)}
+                    className={`text-sm ${selectedValue === String(qty) ? 'bg-pink-600 text-white hover:bg-pink-700' : 'border-pink-200 text-pink-700 hover:bg-pink-50'}`}
                     onClick={() => onSelect(String(qty))}
                   >
                     {qty}
@@ -281,15 +299,15 @@ const StepCard: React.FC<StepCardProps> = ({
                 ))}
               </div>
               <div>
-                <Label htmlFor="custom-qty" className="text-sm">Quantidade customizada</Label>
+                <Label htmlFor={`${step.id}-custom-qty`} className="text-sm">Quantidade personalizada</Label>
                 <Input
-                  id="custom-qty"
+                  id={`${step.id}-custom-qty`}
                   type="number"
                   min="1"
                   placeholder="Digite a quantidade"
                   value={selectedValue || ''}
                   onChange={(e) => onSelect(e.target.value)}
-                  className="mt-2"
+                  className="mt-2 focus-visible:border-pink-500 focus-visible:ring-pink-200"
                 />
               </div>
             </div>
