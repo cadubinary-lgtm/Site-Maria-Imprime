@@ -3121,3 +3121,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a escolha de entrega na identidade rosa e em controles acessíveis
 - [x] Melhorar a leitura dos prazos, valores e estados de entrega
 - [x] Validar as opções e continuidade da seleção de entrega
+
+- [x] Revisar o resumo técnico de itens do pedido para identificar o ajuste prioritário
+- [x] Padronizar o resumo técnico na identidade rosa e em uma estrutura acessível
+- [x] Melhorar a leitura de especificações, arquivos e prazos dos itens
+- [x] Validar estados e acessibilidade do resumo técnico de itens
