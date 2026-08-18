@@ -56,7 +56,7 @@ function ArtStateTag({ state }: { state: ArtState }) {
   if (state === "approved") {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
-        ⚠️ Cliente Aprovou a Arte
+        ✓ Cliente aprovou a arte
       </span>
     );
   }
@@ -101,6 +101,7 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
     <div
       className={`rounded-md border shadow-sm p-3 space-y-2 hover:shadow-md transition-all cursor-pointer ${isSelected ? 'ring-2 ring-pink-400 border-pink-300' : ''} ${isAnalysisDelayed ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-200' : isLateOrder ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-100'}`}
       onClick={() => onSelect(order.id)}
+      aria-busy={isUpdating}
     >
       {/* Linha 1: Número do pedido */}
       <div className="font-bold text-sm text-gray-900">{order.orderNumber}</div>
@@ -127,9 +128,12 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
         </div>
       )}
 
+      {artState !== "none" && <ArtStateTag state={artState} />}
+
       {/* Linha 4: Link Ver pedido + Drag Handle */}
       <div className="flex items-center justify-between">
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onSelect(order.id); }}
           className="inline-block text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors font-medium"
         >
@@ -141,9 +145,11 @@ function KanbanCard({ order, artState, onAdvance, onCancel, isUpdating, onDragSt
           onDragStart={(e) => { e.stopPropagation(); onDragStart(order.id); }}
           onDragEnd={(e) => { e.stopPropagation(); onDragEnd(); }}
           title="Arraste para mover"
+          role="img"
+          aria-label={`Arrastar pedido ${order.orderNumber} para outra etapa`}
           className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors p-0.5 rounded select-none"
         >
-          <GripVertical className="w-4 h-4" />
+          <GripVertical className="w-4 h-4" aria-hidden="true" />
         </div>
       </div>
     </div>
@@ -280,7 +286,7 @@ export default function AdminKanban() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando pedidos" />
       </div>
     );
   }
@@ -316,17 +322,20 @@ export default function AdminKanban() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
+          aria-label="Buscar por número do pedido"
           placeholder="Buscar por número do pedido..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white text-sm rounded-lg pl-9 pr-9 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder-gray-400"
+          className="w-full bg-white text-sm rounded-lg pl-9 pr-9 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 placeholder-gray-400"
         />
         {searchQuery && (
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Limpar busca por pedido"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -341,9 +350,10 @@ export default function AdminKanban() {
         <span className="text-xs text-gray-600 font-semibold">Ordenar por:</span>
         <div className="relative inline-block">
           <select
+            aria-label="Ordenar pedidos do Kanban"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "date" | "priority")}
-            className="appearance-none bg-white text-sm rounded-lg px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer pr-8 text-gray-700"
+            className="appearance-none bg-white text-sm rounded-lg px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 cursor-pointer pr-8 text-gray-700"
           >
             <option value="date">Data de entrada (mais antigos)</option>
             <option value="priority">Prioridade (maior valor)</option>
@@ -353,16 +363,19 @@ export default function AdminKanban() {
       </div>
 
       {/* Filtro de colunas visíveis */}
-      <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-gray-200">
+      <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-gray-200" role="group" aria-label="Colunas visíveis do Kanban">
         <span className="text-xs text-gray-600 font-semibold self-center">Mostrar/ocultar:</span>
         {KANBAN_COLUMNS.map(col => (
           <button
+            type="button"
             key={col.id}
             onClick={() => toggleCol(col.id)}
+            aria-pressed={!hiddenCols.has(col.id)}
+            aria-label={`${hiddenCols.has(col.id) ? "Mostrar" : "Ocultar"} coluna ${col.label}`}
             className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
               hiddenCols.has(col.id)
-                ? "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-150"
-                : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                ? "bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200"
+                : "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100"
             }`}
           >
             {col.icon} {col.label} ({byStatus[col.id].length})
@@ -377,21 +390,23 @@ export default function AdminKanban() {
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhum pedido encontrado</h3>
           <p className="text-sm text-gray-500 mb-4">Nenhum pedido corresponde à sua busca: <span className="font-semibold text-gray-700">"{searchQuery}"</span></p>
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
-            className="text-sm text-orange-600 hover:text-orange-700 underline"
+            className="text-sm text-pink-600 hover:text-pink-700 underline"
           >
             Limpar busca
           </button>
         </div>
       ) : (
-      <div className="overflow-x-auto pb-4">
-        <div className="flex gap-4" style={{ minWidth: `${visibleCols.length * 220}px` }}>
+      <div className="overflow-x-auto pb-4" role="region" aria-label="Etapas do Kanban de produção" tabIndex={0}>
+        <div className="flex gap-4" role="list" style={{ minWidth: `${visibleCols.length * 220}px` }}>
           {visibleCols.map(col => {
             const colOrders = byStatus[col.id];
             const isAwaitingAnalysis = col.id === "analisando" && colOrders.length > 0;
             return (
               <div
                 key={col.id}
+                role="listitem"
                 className={`flex-shrink-0 w-52 rounded-lg border overflow-hidden transition-colors ${
                   dragOverColId === col.id
                     ? 'border-pink-400 bg-pink-50'
@@ -449,23 +464,23 @@ export default function AdminKanban() {
 
     {/* Painel Direito: Detalhes do Pedido */}
     {selectedOrderId && (
-      <div className="w-2/5 flex flex-col overflow-hidden border-l border-gray-200 bg-white">
+      <aside className="w-2/5 flex flex-col overflow-hidden border-l border-gray-200 bg-white" aria-label="Detalhes do pedido selecionado">
         {/* Header do painel */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <span className="text-sm font-semibold text-gray-700">Detalhes do Pedido</span>
           <div className="flex items-center gap-2">
-            <Link href={`/admin/pedidos/${selectedOrderId}?from=kanban`}>
-              <button className="text-xs text-pink-600 hover:text-pink-700 flex items-center gap-1 transition-colors">
-                <ExternalLink className="w-3.5 h-3.5" />
-                Abrir completo
-              </button>
+            <Link href={`/admin/pedidos/${selectedOrderId}?from=kanban`} className="flex items-center gap-1 text-xs text-pink-600 transition-colors hover:text-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">
+              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+              Abrir completo
             </Link>
             <button
+              type="button"
               onClick={() => setSelectedOrderId(null)}
               className="p-1 rounded hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
+              aria-label="Fechar detalhes do pedido"
               title="Fechar painel"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -477,7 +492,7 @@ export default function AdminKanban() {
             backLabel="Voltar para Kanban"
           />
        </div>
-      </div>
+      </aside>
     )}
     </div>
     </AdminLayout>
