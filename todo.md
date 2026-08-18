@@ -3402,3 +3402,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles de retirada e bloqueio de clientes de balcão
 - [x] Padronizar ações de clientes de balcão na identidade rosa e com acessibilidade
 - [x] Validar os controles de clientes de balcão e salvar checkpoint publicável
+
+- [x] Revisar controles e estados da página administrativa de novos pedidos
+- [x] Padronizar controles de novos pedidos na identidade rosa e com acessibilidade
+- [x] Validar a página administrativa de novos pedidos e salvar checkpoint publicável

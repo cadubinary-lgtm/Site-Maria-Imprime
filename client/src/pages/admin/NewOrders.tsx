@@ -101,15 +101,15 @@ export default function NewOrders() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Package className="w-7 h-7 text-orange-500" />
+              <Package className="w-7 h-7 text-pink-600" aria-hidden="true" />
               Novos Pedidos
             </h1>
             <p className="text-gray-500 mt-1 text-sm">
               Pedidos recém-chegados aguardando atenção
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-            <RefreshCw className="w-4 h-4" />
+          <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="gap-2 border-pink-200 text-pink-700 hover:bg-pink-50">
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
             Atualizar
           </Button>
         </div>
@@ -117,8 +117,9 @@ export default function NewOrders() {
         {/* Search */}
         <div className="mb-5 flex gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
             <Input
+              aria-label="Buscar novos pedidos"
               placeholder="Buscar por número, cliente, telefone ou e-mail..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -126,17 +127,17 @@ export default function NewOrders() {
             />
           </div>
           {search && (
-            <Button variant="outline" size="sm" onClick={() => setSearch("")} className="gap-2">
-              <X className="w-4 h-4" /> Limpar
+            <Button type="button" variant="outline" size="sm" onClick={() => setSearch("")} className="gap-2 border-pink-200 text-pink-700 hover:bg-pink-50">
+              <X className="w-4 h-4" aria-hidden="true" /> Limpar
             </Button>
           )}
         </div>
 
         {/* Counter */}
         <div className="mb-5 flex items-center gap-2 text-sm text-gray-600">
-          <Clock className="w-4 h-4 text-orange-500" />
+          <Clock className="w-4 h-4 text-pink-600" aria-hidden="true" />
           {isLoading ? "Carregando..." : (
-            <span>
+            <span aria-live="polite">
               <strong className="text-gray-900">{newOrders.length}</strong> novo{newOrders.length !== 1 ? "s" : ""} pedido{newOrders.length !== 1 ? "s" : ""}
             </span>
           )}
@@ -145,7 +146,7 @@ export default function NewOrders() {
         {/* List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando novos pedidos" />
           </div>
         ) : newOrders.length === 0 ? (
           <Card>
@@ -168,7 +169,7 @@ export default function NewOrders() {
               const priceTierConfig = PRICE_TIER_CONFIG[priceTier];
 
               return (
-                <Card key={order.id} className="hover:shadow-md transition-all border-l-4 border-l-orange-400">
+                <Card key={order.id} className="hover:shadow-md transition-all border-l-4 border-l-pink-400">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -217,18 +218,22 @@ export default function NewOrders() {
                       <div className="flex flex-col gap-2 shrink-0">
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600 text-white gap-1 w-full"
+                          type="button"
+                          className="bg-pink-600 hover:bg-pink-700 text-white gap-1 w-full"
                           onClick={() => handleOpen(order.id)}
+                          aria-label={`Abrir pedido ${order.orderNumber}`}
                         >
-                          <>Abrir <ChevronRight className="w-4 h-4" /></>
+                          <>Abrir <ChevronRight className="w-4 h-4" aria-hidden="true" /></>
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
+                          type="button"
                           onClick={() => setConfirmDeleteId(order.id)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
+                          aria-label={`Excluir pedido ${order.orderNumber}`}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </Button>
                       </div>
                     </div>
@@ -238,14 +243,15 @@ export default function NewOrders() {
                       <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
                         <p className="text-sm text-red-800 font-medium">Confirmar exclusão do pedido #{order.orderNumber}?</p>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => setConfirmDeleteId(null)}>Cancelar</Button>
+                          <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDeleteId(null)}>Cancelar</Button>
                           <Button
                             size="sm"
                             className="bg-red-600 hover:bg-red-700 text-white"
                             onClick={() => deleteOrderMutation.mutate({ orderId: order.id })}
                             disabled={deleteOrderMutation.isPending}
+                            aria-busy={deleteOrderMutation.isPending}
                           >
-                            {deleteOrderMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Excluir"}
+                            {deleteOrderMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : "Excluir"}
                           </Button>
                         </div>
                       </div>
