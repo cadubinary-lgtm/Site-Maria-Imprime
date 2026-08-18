@@ -3141,3 +3141,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o acompanhamento operacional na identidade cinza e rosa
 - [x] Melhorar a leitura de status, etapas e ações de produção
 - [x] Validar os controles e a acessibilidade operacional do painel
+
+- [x] Revisar os painéis administrativos de pedido para identificar o ajuste prioritário
+- [x] Padronizar os painéis de logística e resumo na identidade cinza e rosa
+- [x] Melhorar a leitura de informações, ações e estados do pedido
+- [x] Validar os controles e a acessibilidade dos painéis de pedido

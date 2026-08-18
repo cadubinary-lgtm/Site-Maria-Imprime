@@ -1717,7 +1717,9 @@ export function OrderDetailContent({
           {/* ── Logística e Entrega ── */}
           {!isProductionRole && <OrderShippingPanel
             shippingMethod={o.shippingMethod}
+            shippingLabel={o.shippingLabel}
             shippingPrice={o.shippingPrice}
+            shippingEstimatedDays={o.shippingEstimatedDays}
             deliveryZipCode={o.deliveryZipCode}
             deliveryStreet={o.deliveryStreet}
             deliveryNumber={o.deliveryNumber}
@@ -1725,6 +1727,7 @@ export function OrderDetailContent({
             deliveryNeighborhood={o.deliveryNeighborhood}
             deliveryCity={o.deliveryCity}
             deliveryState={o.deliveryState}
+            deliveryFullName={o.deliveryFullName}
           />}
 
           {!isProductionRole && <ShippingLabelViewer orderId={o.id} />}
