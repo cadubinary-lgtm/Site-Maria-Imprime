@@ -348,21 +348,22 @@ function ArtPreviewColumn({
           rows={2}
           className="bg-white text-xs py-1.5 w-full resize-none"
         />
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} />
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileSelect} aria-label="Selecionar prévia da arte" />
         
         {pendingFile && (
           <div className="space-y-2">
             <img
               src={URL.createObjectURL(pendingFile)}
-              alt="Preview"
-              className="w-full max-h-64 object-contain rounded border border-orange-300 bg-white cursor-zoom-in hover:opacity-90 transition-opacity"
+              alt="Prévia da arte selecionada"
+              className="w-full max-h-64 object-contain rounded border border-pink-200 bg-white cursor-zoom-in hover:opacity-90 transition-opacity"
               onClick={() => setPendingLightbox(true)}
               title="Clique para ampliar em tela cheia"
             />
             <button
+              type="button"
               className="w-full py-1.5 text-sm bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 rounded transition-colors"
               onClick={() => onPendingFileChange(null)}
-              title="Remover imagem"
+              aria-label="Remover prévia da arte selecionada"
             >
               Excluir
             </button>
@@ -371,12 +372,12 @@ function ArtPreviewColumn({
         
         {!pendingFile && (
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Button size="sm" className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1 px-2.5"
+            <Button type="button" size="sm" className="h-7 text-xs bg-pink-600 hover:bg-pink-700 gap-1 px-2.5"
               onClick={() => fileRef.current?.click()}>
-              <Upload className="w-3 h-3" />
+              <Upload className="w-3 h-3" aria-hidden="true" />
               Selecionar
             </Button>
-            <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-orange-100 border border-orange-300 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
+            <p className="text-[10px] text-gray-400">JPG/PNG · 10MB · ou <kbd className="bg-pink-50 border border-pink-200 rounded px-0.5 font-mono text-[9px]">Ctrl+V</kbd></p>
           </div>
         )}
         {pendingFile && (
@@ -600,7 +601,7 @@ function PreImpressaoColumn({
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
       <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1">
-        <Layers className="w-3 h-3 text-orange-500" /> Pré-Impressão
+        <Layers className="w-3 h-3 text-pink-600" aria-hidden="true" /> Pré-Impressão
       </p>
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-gray-500">Status:</span>
@@ -640,7 +641,7 @@ function PreImpressaoColumn({
               type="checkbox"
               checked={requireResend}
               onChange={(e) => handleRequireResendChange(e.target.checked)}
-              className="mt-0.5 w-3.5 h-3.5 accent-orange-500 flex-shrink-0"
+              className="mt-0.5 w-3.5 h-3.5 accent-pink-600 flex-shrink-0"
             />
             <div>
               <p className="text-xs font-medium text-gray-800">Exigir Reenvio do Cliente</p>
@@ -946,7 +947,7 @@ function ItemPreviewSection({
   return (
     <div className="p-5">
       <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
-        <ImagePlus className="w-3 h-3 text-orange-500" /> Prévia da Arte
+        <ImagePlus className="w-3 h-3 text-pink-600" aria-hidden="true" /> Prévia da Arte
       </p>
       <ArtPreviewColumn
         orderId={orderId}
