@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { CalculadoraGrafica, useCalculadoraGrafica } from "@/components/CalculadoraGrafica";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calculator, Info, Ruler } from "lucide-react";
 
 export default function CalculadoraDemo() {
   const { width, height, area, setWidth, setHeight } = useCalculadoraGrafica();
@@ -21,22 +20,26 @@ export default function CalculadoraDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <main className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <Link href="/">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
+        <Link href="/" className="mb-6 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-pink-50 hover:text-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+          Voltar ao início
         </Link>
+
+        <header className="mb-6 max-w-2xl">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-pink-600">Ferramenta de demonstração</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Calculadora gráfica</h1>
+          <p className="mt-2 text-gray-600">Informe as medidas para acompanhar a área calculada e uma estimativa ilustrativa de valor.</p>
+        </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Calculadora */}
-          <Card>
+          <Card className="border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Calculadora Gráfica Inteligente</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Calculator className="h-5 w-5 text-pink-600" aria-hidden="true" />Defina as medidas</CardTitle>
               <CardDescription>
-                Digite números sem ponto ou vírgula. Valor mantém 2 casas decimais automaticamente.
+                Digite somente números. A calculadora posiciona automaticamente as duas casas decimais.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -60,38 +63,38 @@ export default function CalculadoraDemo() {
                 />
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <p className="text-sm text-gray-600 mb-2">Área Total (m²)</p>
-                <p className="text-3xl font-bold text-blue-600">{area.toFixed(2)}</p>
+              <div className="rounded-xl border border-pink-200 bg-pink-50 p-4" aria-live="polite" aria-atomic="true">
+                <p className="text-sm font-medium text-gray-700">Área total</p>
+                <p className="mt-1 text-3xl font-bold text-pink-700">{area.toFixed(2)} <span className="text-lg">m²</span></p>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <p className="text-sm text-gray-600 mb-2">Preço Estimado</p>
-                <p className="text-3xl font-bold text-green-600">
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" aria-live="polite" aria-atomic="true">
+                <p className="text-sm font-medium text-gray-700">Estimativa de demonstração</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900">
                   R$ {precoFinal.toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="mt-2 text-xs text-gray-500">
                   Base: R$ {precoBase.toFixed(2)} × {area.toFixed(2)}m²
                 </p>
+                <p className="mt-1 text-xs text-gray-500">Este valor é apenas ilustrativo; o orçamento final depende das configurações do produto.</p>
               </div>
 
-              <div className="bg-gray-100 p-4 rounded-lg">
-                <p className="text-sm font-semibold mb-2">Como Usar:</p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>✓ Digite apenas números</li>
-                  <li>✓ Backspace para apagar dígito</li>
-                  <li>✓ Delete para limpar tudo</li>
-                  <li>✓ Valor sempre com 2 casas decimais</li>
-                  <li>✓ Funciona em mobile e desktop</li>
+              <div className="rounded-xl bg-gray-100 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900"><Info className="h-4 w-4 text-pink-600" aria-hidden="true" />Como usar</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                  <li>Digite apenas números.</li>
+                  <li>Use Backspace para apagar o último dígito.</li>
+                  <li>Use Delete ou o botão de lixeira para limpar um campo.</li>
+                  <li>Os valores aparecem sempre com duas casas decimais.</li>
                 </ul>
               </div>
             </CardContent>
           </Card>
 
           {/* Informações */}
-          <Card>
+          <Card className="border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Exemplos de Digitação</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Ruler className="h-5 w-5 text-pink-600" aria-hidden="true" />Exemplos de digitação</CardTitle>
               <CardDescription>
                 Veja como a calculadora funciona
               </CardDescription>
@@ -144,28 +147,29 @@ export default function CalculadoraDemo() {
         </div>
 
         {/* Informações Técnicas */}
-        <Card className="mt-8">
+        <Card className="mt-8 border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Informações Técnicas</CardTitle>
+            <CardTitle>Resumo do cálculo</CardTitle>
+            <CardDescription>Os valores abaixo acompanham as medidas informadas acima.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm font-semibold text-gray-700">Largura Interna</p>
-                <p className="text-lg font-mono text-gray-900">{width}</p>
+                <p className="text-sm font-semibold text-gray-700">Largura</p>
+                <output className="text-lg font-mono text-gray-900">{(width / 100).toFixed(2)} m</output>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-700">Altura Interna</p>
-                <p className="text-lg font-mono text-gray-900">{height}</p>
+                <p className="text-sm font-semibold text-gray-700">Altura</p>
+                <output className="text-lg font-mono text-gray-900">{(height / 100).toFixed(2)} m</output>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-700">Área Calculada</p>
-                <p className="text-lg font-mono text-gray-900">{area}</p>
+                <p className="text-sm font-semibold text-gray-700">Área calculada</p>
+                <output className="text-lg font-mono text-pink-700">{area.toFixed(2)} m²</output>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }
