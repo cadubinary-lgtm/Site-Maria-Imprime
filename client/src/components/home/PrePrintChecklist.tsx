@@ -1,3 +1,6 @@
+import { Link } from "wouter";
+import { HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+
 const MASCOTE = "/manus-storage/mascote7v2_02cfb9a3.webp";
 const FUNDO   = "/manus-storage/fundorosa2_7ec48199.webp";
 const CHECK   = "/manus-storage/certo_54c281fc.png";
@@ -15,7 +18,7 @@ const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
 
 export function PrePrintChecklist() {
   return (
-    <section className="w-full py-10 px-4 lg:px-8 bg-white" style={{paddingTop: '0px'}}>
+    <section className="w-full bg-white px-4 py-10 lg:px-8" aria-label="Conferência de arquivo antes da produção">
       <div className="max-w-6xl mx-auto">
         <div className="relative" style={{ paddingTop: '19px' }}>
 
@@ -45,30 +48,34 @@ export function PrePrintChecklist() {
                 paddingTop: '47px',
                 paddingBottom: '10px',
               }}>
-                <h2 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2 leading-tight" style={{ fontFamily: FONT }}>
+                <h2 className="mb-2 text-2xl font-black leading-tight text-gray-900 lg:text-3xl" style={{ fontFamily: FONT }}>
                   Antes de imprimir,{" "}
                   <span style={{ color: "#E6005C" }}>nós verificamos!</span>
                 </h2>
                 <p className="text-gray-600 text-sm lg:text-base mb-6" style={{ fontFamily: FONT }}>
                   Nossa equipe confere cada detalhe do seu arquivo antes de enviar para produção.
                 </p>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <ul className="grid grid-cols-2 gap-3 md:gap-4" aria-label="Itens conferidos no arquivo">
                   {checks.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2 md:gap-3">
-                      <img src={CHECK} alt="✓" className="w-7 h-7 flex-shrink-0 object-contain mt-0.5" />
+                    <li key={i} className="flex items-start gap-2 md:gap-3">
+                      <img src={CHECK} alt="" aria-hidden="true" className="mt-0.5 h-7 w-7 shrink-0 object-contain" />
                       <span className="text-gray-800 text-sm lg:text-base font-medium leading-snug" style={{ fontFamily: FONT }}>
                         {item}
                       </span>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
+                <Link href="/documentos" className={`${HOME_SECONDARY_ACTION_CLASS} mt-7 w-fit px-4 py-2 text-sm`}>
+                  Ver normas para envio de arte
+                </Link>
               </div>
             </div>
 
             {/* Mascote desktop — posicionada absolutamente */}
             <img
               src={MASCOTE}
-              alt="Maria verificando arquivo"
+              alt=""
+              aria-hidden="true"
               className="hidden md:block absolute object-contain object-bottom drop-shadow-lg pointer-events-none"
               style={{
                 width: "auto",
@@ -90,7 +97,7 @@ export function PrePrintChecklist() {
             ══════════════════════════════════════════ */}
             <div className="md:hidden px-5 pt-6 pb-6">
               {/* Título */}
-              <h2 className="text-2xl font-black text-gray-900 mb-2 leading-tight" style={{ fontFamily: FONT }}>
+              <h2 className="mb-2 text-2xl font-black leading-tight text-gray-900" style={{ fontFamily: FONT }}>
                 Antes de imprimir,{" "}
                 <span style={{ color: "#E6005C" }}>nós verificamos!</span>
               </h2>
@@ -105,24 +112,28 @@ export function PrePrintChecklist() {
                 <div className="flex-shrink-0" style={{ width: "42%" }}>
                   <img
                     src={MASCOTE}
-                    alt="Maria verificando arquivo"
+                    alt=""
+                    aria-hidden="true"
                     className="w-full h-auto object-contain drop-shadow-lg"
                     draggable={false}
                   />
                 </div>
 
                 {/* Grid 2 colunas de checks — texto bem pequeno */}
-                <div className="flex-1 grid grid-cols-2 gap-x-2 gap-y-2">
+                <ul className="grid flex-1 grid-cols-2 gap-x-2 gap-y-2" aria-label="Itens conferidos no arquivo">
                   {checks.map((item, i) => (
-                    <div key={i} className="flex items-start gap-1">
-                      <img src={CHECK} alt="✓" className="flex-shrink-0 object-contain mt-0.5" style={{width: '14px', height: '14px'}} />
+                    <li key={i} className="flex items-start gap-1">
+                      <img src={CHECK} alt="" aria-hidden="true" className="mt-0.5 shrink-0 object-contain" style={{width: '14px', height: '14px'}} />
                       <span style={{ fontFamily: FONT, fontSize: '10px', lineHeight: '1.3', color: '#1f2937', fontWeight: 500 }}>
                         {item}
                       </span>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
+              <Link href="/documentos" className={`${HOME_SECONDARY_ACTION_CLASS} mt-5 w-full px-4 py-2 text-center text-sm`}>
+                Ver normas para envio de arte
+              </Link>
             </div>
 
           </div>

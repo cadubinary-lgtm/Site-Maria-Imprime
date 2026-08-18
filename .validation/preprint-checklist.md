@@ -1,0 +1,1 @@
+A seção de conferência de arte mantém as seis orientações técnicas em uma lista legível e oferece o atalho “Ver normas para envio de arte”. O atalho foi validado e abriu a Central de Documentação, onde o Termo de Aprovação de Arte está disponível entre os documentos públicos.

@@ -3086,3 +3086,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar as etapas da jornada na identidade rosa e nos CTAs reutilizáveis
 - [x] Melhorar a leitura responsiva e acessibilidade da seção como funciona
 - [x] Validar a ação de continuidade após as etapas da jornada
+
+- [x] Revisar a seção de conferência de arte para identificar o ajuste prioritário
+- [x] Padronizar a preparação de arte na identidade rosa e nos CTAs reutilizáveis
+- [x] Melhorar a leitura e acessibilidade das orientações de arquivo
+- [x] Validar as ações de continuidade da preparação de arte
