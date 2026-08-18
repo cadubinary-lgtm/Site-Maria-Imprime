@@ -196,18 +196,18 @@ export function OrderItemSpecs({
   if (compact) {
     // Modo compacto: apenas linhas simples, sem bloco cinza
     return (
-      <div className="mt-1 space-y-0.5">
+      <div className="mt-1 space-y-0.5" role="list" aria-label="Especificações do item">
         {(largura || altura) && (
           <SpecLine label="Medidas" value={`${largura}×${altura}`} />
         )}
         {allSpecs.map((s, i) => (
-          <SpecLine key={i} label={s.label} value={s.value} />
+          <SpecLine key={s.label} label={s.label} value={s.value} />
         ))}
         {artFileUrl && (
           artFileUrl.startsWith('http') && !artFileUrl.includes('manus-storage') ? (
-            <p className="text-xs text-gray-700">
+            <p className="text-xs text-gray-700" role="listitem">
               <span className="text-gray-400">Arte:</span>{" "}
-              <a href={artFileUrl} target="_blank" rel="noreferrer" className="underline truncate text-blue-600">{artFileUrl}</a>
+              <a href={artFileUrl} target="_blank" rel="noopener noreferrer" aria-label={`Abrir arte em nova aba: ${formatArtFileName(artFileUrl)}`} className="underline truncate text-pink-600 hover:text-pink-700">{formatArtFileName(artFileUrl)}</a>
             </p>
           ) : (
             <SpecLine label="Arte" value={formatArtFileName(artFileUrl)} />
@@ -235,8 +235,8 @@ export function OrderItemSpecs({
       )}
 
       {/* Especificações agrupadas */}
-      {allSpecs.map((s, i) => (
-        <SpecBlock key={i} label={s.label} value={s.value} />
+      {allSpecs.map((s) => (
+        <SpecBlock key={s.label} label={s.label} value={s.value} />
       ))}
 
       {/* Arte */}
@@ -244,7 +244,7 @@ export function OrderItemSpecs({
         artFileUrl.startsWith('http') && !artFileUrl.includes('manus-storage') ? (
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Arte</span>
-            <a href={artFileUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-600 underline break-all hover:text-blue-700">{artFileUrl}</a>
+            <a href={artFileUrl} target="_blank" rel="noopener noreferrer" aria-label={`Abrir arte em nova aba: ${formatArtFileName(artFileUrl)}`} className="text-sm font-medium text-pink-600 underline break-all hover:text-pink-700">{formatArtFileName(artFileUrl)}</a>
           </div>
         ) : (
           <SpecBlock label="Arte" value={formatArtFileName(artFileUrl)} />
@@ -255,7 +255,7 @@ export function OrderItemSpecs({
       {notes && (
         <div className="flex flex-col gap-0.5">
           <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-            <FileText className="w-3 h-3" /> Obs.
+            <FileText className="w-3 h-3" /> Observações
           </span>
           <span className="text-sm font-medium text-gray-900 italic leading-snug">{notes}</span>
         </div>
