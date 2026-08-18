@@ -2990,3 +2990,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar o refinamento de carrinho e checkout antes de avançar para o configurador
 - [x] Proteger a ação Limpar carrinho com confirmação explícita antes de remover todos os itens
 - [x] Padronizar os destaques de ação do carrinho completo com a identidade rosa da Maria Imprime
+- [x] Revisar o configurador de produto para definir o próximo ajuste de usabilidade prioritário
+- [x] Implementar o próximo refinamento do configurador sem alterar preço, frete, carrinho ou checkout
+- [x] Validar as interações e a continuidade do fluxo de compra após o ajuste do configurador
+- [x] Padronizar os controles selecionáveis e CTAs do configurador na paleta rosa da Maria Imprime
+- [x] Preservar as cores semânticas de sucesso, informação e alerta no configurador

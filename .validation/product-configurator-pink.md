@@ -1,0 +1,1 @@
+Na rota `/produto/1200001`, o configurador carregou normalmente após a padronização. Os indicadores numéricos das etapas, o destaque do resumo e a chamada Adicionar ao carrinho usam a identidade rosa, enquanto os estados semânticos de Pix, pagamento seguro, validação e sucesso permanecem distintos. Os controles de quantidade continuam disponíveis com rótulos acessíveis.
