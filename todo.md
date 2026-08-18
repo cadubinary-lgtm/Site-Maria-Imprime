@@ -3246,3 +3246,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar campos, preços e ações de variações na identidade cinza e rosa
 - [x] Melhorar a leitura de configurações e estados de catálogo
 - [x] Validar campos e acessibilidade da gestão de variações
+
+- [x] Revisar a gestão administrativa de atributos de produto para identificar o ajuste prioritário
+- [x] Padronizar campos, preços e ações de atributos na identidade cinza e rosa
+- [x] Melhorar a leitura de configurações e estados de catálogo
+- [x] Validar campos e acessibilidade da gestão de atributos

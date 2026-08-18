@@ -7,16 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Edit2, Trash2, Loader2, Search, X } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
 type AttributeType = "button" | "select" | "card" | "radio" | "checkbox" | "numeric" | "text" | "measures";
 
+const formatCurrency = (value: number | string) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value) || 0);
+
 export default function AdminAttributesManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [attributeToDelete, setAttributeToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -100,10 +104,8 @@ export default function AdminAttributesManager() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Tem certeza que deseja deletar este atributo?")) {
-      deleteMutation.mutate(id);
-    }
+  const handleDelete = () => {
+    if (attributeToDelete) deleteMutation.mutate(attributeToDelete.id, { onSuccess: () => setAttributeToDelete(null) });
   };
 
   // Filtrar atributos por busca
@@ -121,15 +123,15 @@ export default function AdminAttributesManager() {
   return (
     <AdminLayout>
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Gerenciar Atributos</h1>
           <p className="text-gray-600 mt-2">Cadastre atributos globais reutilizáveis para seus produtos</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={() => handleOpenDialog()} className="bg-pink-600 hover:bg-pink-700">
+              <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
               Novo Atributo
             </Button>
           </DialogTrigger>
@@ -142,7 +144,7 @@ export default function AdminAttributesManager() {
                   : "Crie um novo atributo global reutilizável"}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); handleSave(); }}>
               <div>
                 <Label htmlFor="name">Nome *</Label>
                 <Input
@@ -201,13 +203,13 @@ export default function AdminAttributesManager() {
                 />
               </div>
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
+                <Button type="submit" className="bg-pink-600 hover:bg-pink-700" disabled={createMutation.isPending || updateMutation.isPending} aria-busy={createMutation.isPending || updateMutation.isPending}>
                   {createMutation.isPending || updateMutation.isPending ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                       Salvando...
                     </>
                   ) : (
@@ -215,15 +217,17 @@ export default function AdminAttributesManager() {
                   )}
                 </Button>
               </div>
-            </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* Campo de Busca */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Label htmlFor="attribute-search" className="sr-only">Buscar atributos</Label>
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
         <Input
+          id="attribute-search"
           placeholder="Buscar atributo..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -231,20 +235,22 @@ export default function AdminAttributesManager() {
         />
         {searchQuery && (
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label="Limpar busca de atributos"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         )}
       </div>
 
       {isLoading ? (
         <div className="flex justify-center">
-          <Loader2 className="w-8 h-8 animate-spin" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando atributos" />
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4" aria-live="polite" aria-label={`${filteredAttributes.length} atributo${filteredAttributes.length !== 1 ? "s" : ""} encontrado${filteredAttributes.length !== 1 ? "s" : ""}`}>
           {filteredAttributes && filteredAttributes.length > 0 ? (
             filteredAttributes.map((attr: any) => (
               <Card key={attr.id}>
@@ -255,7 +261,7 @@ export default function AdminAttributesManager() {
                         <CardTitle>{attr.name}</CardTitle>
                         {attr.basePrice > 0 && (
                           <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
-                            +R$ {Number(attr.basePrice).toFixed(2)}
+                            {formatCurrency(attr.basePrice)} adicional
                           </span>
                         )}
                       </div>
@@ -273,19 +279,21 @@ export default function AdminAttributesManager() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenDialog(attr)}
+                        aria-label={`Editar atributo ${attr.name}`}
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" aria-hidden="true" />
                       </Button>
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDelete(attr.id)}
+                        onClick={() => setAttributeToDelete(attr)}
                         disabled={deleteMutation.isPending}
+                        aria-label={`Excluir atributo ${attr.name}`}
                       >
                         {deleteMutation.isPending ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         )}
                       </Button>
                     </div>
@@ -317,6 +325,20 @@ export default function AdminAttributesManager() {
           )}
         </div>
       )}
+      <AlertDialog open={Boolean(attributeToDelete)} onOpenChange={(open) => !open && setAttributeToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir o atributo “{attributeToDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>Essa ação remove o atributo global. Revise os produtos que o utilizam antes de confirmar.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteMutation.isPending} aria-busy={deleteMutation.isPending} onClick={(event) => { event.preventDefault(); handleDelete(); }}>
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir atributo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </AdminLayout>
   );
