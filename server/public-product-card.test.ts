@@ -46,4 +46,12 @@ describe("cards públicos informativos", () => {
     expect(segmentQuerySource).toContain("pixPrice: products.pixPrice");
     expect(segmentQuerySource).toContain("cardPrice: products.cardPrice");
   });
+
+  it("apresenta uma alternativa visual acessível quando a imagem ainda não está disponível", () => {
+    expect(publicCardSource).toContain('aria-label={`Imagem de ${product.name} indisponível`}');
+    expect(publicCardSource).toContain("Imagem em atualização");
+    expect(publicCardSource).toContain("Confira os detalhes e opções deste produto.");
+    expect(publicCardSource).toContain("ImageOff");
+    expect(publicCardSource).not.toContain('items-center justify-center text-sm text-gray-400">Sem imagem');
+  });
 });

@@ -3,7 +3,7 @@ import { ProductTagBadges } from "@/components/products/ProductTagBadges";
 import { trpc } from "@/lib/trpc";
 import { getPixDiscountInfo, getProductPaymentPrices, type ProductPriceAudience } from "@/lib/productPrice";
 import { getVisibleCardDescriptionLines } from "@/lib/product-card-description";
-import { Award, Box, Store, Tag, Zap } from "lucide-react";
+import { Award, Box, ImageOff, Store, Tag, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 type ProductCardData = {
@@ -88,7 +88,21 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
             className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">Sem imagem</div>
+          <div
+            role="img"
+            aria-label={`Imagem de ${product.name} indisponível`}
+            className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-pink-50 via-white to-slate-50 px-6 text-center"
+          >
+            <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-pink-100/70" aria-hidden="true" />
+            <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-pink-100/50" aria-hidden="true" />
+            <div className="relative flex max-w-[11rem] flex-col items-center gap-2">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-pink-100 bg-white text-pink-500 shadow-sm">
+                <ImageOff className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <span className="text-sm font-semibold text-slate-700">Imagem em atualização</span>
+              <span className="text-xs leading-relaxed text-slate-500">Confira os detalhes e opções deste produto.</span>
+            </div>
+          </div>
         )}
       </div>
 
