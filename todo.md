@@ -3378,3 +3378,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar navegação, estados e controles do Guia da Maria administrativo
 - [x] Padronizar o Guia da Maria administrativo na identidade rosa e com interações acessíveis
 - [x] Validar o Guia da Maria administrativo e salvar checkpoint publicável
+
+- [x] Verificar o uso e os fluxos do Kanban de produção administrativo
+- [x] Padronizar os controles e estados do Kanban de produção na identidade rosa
+- [x] Validar o Kanban de produção administrativo e salvar checkpoint publicável
