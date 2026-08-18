@@ -20,9 +20,9 @@ import {
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "text-green-700",   bg: "bg-green-100",   dot: "#22c55e" },
   pagamento_retirada: { label: "Pagamento Retirada",  color: "text-blue-700",    bg: "bg-blue-100",    dot: "#3b82f6" },
-  analisando:         { label: "Analisando",          color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
+  analisando:         { label: "Analisando",          color: "text-amber-700",   bg: "bg-amber-100",   dot: "#d97706" },
   com_problemas:      { label: "Com Problemas",       color: "text-red-700",     bg: "bg-red-100",     dot: "#ef4444" },
-  em_producao:        { label: "Em Produção",         color: "text-orange-700",  bg: "bg-orange-100",  dot: "#E6005C" },
+  em_producao:        { label: "Em Produção",         color: "text-amber-700",   bg: "bg-amber-100",   dot: "#d97706" },
   pronto_entrega:     { label: "Pronto p/ Entrega",   color: "text-teal-700",    bg: "bg-teal-100",    dot: "#14b8a6" },
   pronto_retirada:    { label: "Pronto p/ Retirada",  color: "text-cyan-700",    bg: "bg-cyan-100",    dot: "#06b6d4" },
   entregue:           { label: "Entregue",            color: "text-emerald-700", bg: "bg-emerald-100", dot: "#10b981" },
@@ -69,7 +69,7 @@ function KpiCard({ icon, iconBg, title, value, sub, subColor, href }: {
         <p className="text-xs text-gray-500 font-medium">{title}</p>
         <p className="text-2xl font-bold text-gray-900 leading-tight mt-0.5">{value}</p>
         {sub && <p className={`text-xs mt-1 ${subColor ?? "text-gray-500"}`}>{sub}</p>}
-        {href && <Link href={href} className="text-xs text-orange-500 hover:underline mt-1 inline-block">Ver detalhes →</Link>}
+        {href && <Link href={href} className="mt-1 inline-block text-xs text-pink-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Ver detalhes →</Link>}
       </div>
     </div>
   );
@@ -84,7 +84,7 @@ function AlertItem({ type, title, desc, time }: { type: "error"|"warn"|"info"|"o
   }[type];
   return (
     <div className={`flex items-start gap-2.5 p-2.5 rounded-lg ${cfg.bg}`}>
-      <div className="mt-0.5 flex-shrink-0">{cfg.icon}</div>
+      <div className="mt-0.5 flex-shrink-0" aria-hidden="true">{cfg.icon}</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold text-gray-900">{title}</p>
         <p className="text-[11px] text-gray-500">{desc}</p>
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-600" aria-label="Carregando indicadores administrativos" />
         </div>
       </AdminLayout>
     );
@@ -173,16 +173,16 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-500">Bem-vindo de volta, visão geral do sistema</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-            <Clock className="w-4 h-4" />
+            <Clock className="w-4 h-4" aria-hidden="true" />
             {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
           </div>
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" aria-label="Indicadores principais" aria-live="polite">
           <KpiCard icon={<ShoppingCart className="w-5 h-5 text-blue-600" />}   iconBg="bg-blue-100"   title="Pedidos Hoje"      value={todayOrders.length}  sub={`${allOrders.length} total`}                                               href="/admin/pedidos" />
           <KpiCard icon={<DollarSign className="w-5 h-5 text-green-600" />}   iconBg="bg-green-100"  title="Faturamento Hoje"  value={fmt(todayRevenue)}   sub={`Total: ${fmt(allOrders.reduce((a,o)=>a+parseFloat(o.totalPrice?.toString()??"0"),0))}`} subColor="text-green-600" href="/admin/financeiro" />
-          <KpiCard icon={<Printer className="w-5 h-5 text-orange-600" />}     iconBg="bg-orange-100" title="Em Produção"       value={inProduction}        sub="Ver produção →"                                                             href="/admin/pedidos/kanban" />
+          <KpiCard icon={<Printer className="w-5 h-5 text-pink-600" aria-hidden="true" />}     iconBg="bg-pink-100" title="Em Produção"       value={inProduction}        sub="Ver produção →"                                                             href="/admin/pedidos/kanban" />
           <KpiCard icon={<Package className="w-5 h-5 text-teal-600" />}       iconBg="bg-teal-100"   title="Prontos p/ Envio"  value={readyToShip}         sub="Ver expedição →"                                                            href="/admin/pedidos" />
           <KpiCard icon={<AlertTriangle className="w-5 h-5 text-red-600" />}  iconBg="bg-red-100"    title="Com Problemas"     value={withProblems}        sub={withProblems > 0 ? "Atenção necessária" : "Tudo ok"} subColor={withProblems > 0 ? "text-red-600" : "text-green-600"} href="/admin/pedidos" />
         </div>
@@ -197,6 +197,7 @@ export default function AdminDashboard() {
                 <h2 className="font-semibold text-gray-900">Faturamento (últimos 7 dias)</h2>
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Últimos 7 dias</span>
               </div>
+              <div role="img" aria-label="Gráfico de faturamento dos últimos sete dias">
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -212,6 +213,7 @@ export default function AdminDashboard() {
                   <Area type="monotone" dataKey="value" stroke="#E6005C" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ fill: "#E6005C", r: 4 }} activeDot={{ r: 6 }} />
                 </AreaChart>
               </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Pedidos por Status (donut) */}
@@ -223,6 +225,7 @@ export default function AdminDashboard() {
               {pieData.length > 0 ? (
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
+                    <div role="img" aria-label="Gráfico de distribuição de pedidos por status">
                     <ResponsiveContainer width={180} height={180}>
                       <PieChart>
                         <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} dataKey="count" paddingAngle={2}>
@@ -231,6 +234,7 @@ export default function AdminDashboard() {
                         <Tooltip formatter={(v: any, _: any, props: any) => [v, props.payload.label]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
                       </PieChart>
                     </ResponsiveContainer>
+                    </div>
                   </div>
                   <div className="flex-1 space-y-1.5">
                     {pieData.map((entry) => (
@@ -256,14 +260,14 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">Últimos Pedidos</h2>
-                <Link href="/admin/pedidos" className="text-xs text-orange-500 hover:underline">Ver todos →</Link>
+                <Link href="/admin/pedidos" className="text-xs text-pink-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Ver todos →</Link>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100">
                       {["Pedido","Cliente","Valor","Status","Data",""].map((h) => (
-                        <th key={h} className="text-left text-xs font-semibold text-gray-500 pb-2 pr-3">{h}</th>
+                        <th scope="col" key={h} className="text-left text-xs font-semibold text-gray-500 pb-2 pr-3">{h || <span className="sr-only">Ações</span>}</th>
                       ))}
                     </tr>
                   </thead>
@@ -284,7 +288,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-2.5 text-xs text-gray-500">{fmtDate(order.createdAt)}</td>
                           <td className="py-2.5 pl-2">
-                            <Link href={`/admin/pedidos/${order.id}`} className="text-gray-400 hover:text-gray-700"><ChevronRight className="w-4 h-4" /></Link>
+                            <Link href={`/admin/pedidos/${order.id}`} className="text-gray-400 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300" aria-label={`Ver detalhes do pedido ${order.orderNumber}`}><ChevronRight className="w-4 h-4" aria-hidden="true" /></Link>
                           </td>
                         </tr>
                       );
@@ -304,7 +308,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Alertas Importantes</h2>
-                <Link href="/admin/pedidos" className="text-xs text-orange-500 hover:underline">Ver todos</Link>
+                <Link href="/admin/pedidos" className="text-xs text-pink-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Ver todos</Link>
               </div>
               <div className="space-y-2">
                 {alerts.map((a, i) => <AlertItem key={i} {...a} />)}
@@ -315,7 +319,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Produção - Kanban</h2>
-                <Link href="/admin/pedidos/kanban" className="text-xs text-orange-500 hover:underline">Ver quadro completo</Link>
+                <Link href="/admin/pedidos/kanban" className="text-xs text-pink-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Ver quadro completo</Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {kanbanCols.map((col) => {
@@ -334,7 +338,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-semibold text-gray-900">Produtos</h2>
-                <Link href="/admin/produtos" className="text-xs text-orange-500 hover:underline">Gerenciar</Link>
+                <Link href="/admin/produtos" className="text-xs text-pink-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Gerenciar</Link>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -352,14 +356,14 @@ export default function AdminDashboard() {
               <h2 className="font-semibold text-gray-900 mb-3">Ações Rápidas</h2>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: "Pedidos",    icon: <ShoppingCart className="w-5 h-5" />, href: "/admin/pedidos",        color: "text-orange-500 bg-orange-50" },
+                  { label: "Pedidos",    icon: <ShoppingCart className="w-5 h-5" aria-hidden="true" />, href: "/admin/pedidos",        color: "text-pink-600 bg-pink-50" },
                   { label: "Produtos",   icon: <Package className="w-5 h-5" />,      href: "/admin/produtos",       color: "text-blue-500 bg-blue-50" },
-                  { label: "Clientes",   icon: <Users className="w-5 h-5" />,        href: "/admin/clientes",       color: "text-orange-500 bg-orange-50" },
+                  { label: "Clientes",   icon: <Users className="w-5 h-5" aria-hidden="true" />,        href: "/admin/clientes",       color: "text-pink-600 bg-pink-50" },
                   { label: "Kanban",     icon: <BarChart3 className="w-5 h-5" />,    href: "/admin/pedidos/kanban", color: "text-teal-500 bg-teal-50" },
                   { label: "Financeiro", icon: <DollarSign className="w-5 h-5" />,   href: "/admin/financeiro",     color: "text-green-500 bg-green-50" },
                   { label: "Relatórios", icon: <FileText className="w-5 h-5" />,     href: "/admin/erp",            color: "text-gray-500 bg-gray-50" },
                 ].map((action) => (
-                  <Link key={action.label} href={action.href} className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl hover:shadow-md transition-all border border-gray-100 hover:border-gray-200">
+                  <Link key={action.label} href={action.href} className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-100 p-2.5 transition-all hover:border-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.color}`}>{action.icon}</div>
                     <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{action.label}</span>
                   </Link>
@@ -371,13 +375,10 @@ export default function AdminDashboard() {
 
         {/* Footer */}
         <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
-          <span>© {new Date().getFullYear()} Gráfica Ponto Digital — ERP. Todos os direitos reservados.</span>
+          <span>© {new Date().getFullYear()} Maria Imprime. Todos os direitos reservados.</span>
           <div className="flex items-center gap-2">
             <span>Versão 2.0.0</span>
-            <span className="flex items-center gap-1 text-green-500">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span>
-              Sistema Online
-            </span>
+            <span>Painel administrativo</span>
           </div>
         </div>
       </div>
