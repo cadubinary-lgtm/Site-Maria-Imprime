@@ -3394,3 +3394,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Classificar controles administrativos laranja remanescentes sem função semântica
 - [x] Padronizar controles administrativos legados prioritários na identidade rosa
 - [x] Validar a substituição de controles administrativos legados e salvar checkpoint publicável
+
+- [x] Classificar controles de marca e estados semânticos nos detalhes administrativos do pedido
+- [x] Padronizar controles de marca nos detalhes do pedido na identidade rosa e com acessibilidade
+- [x] Validar os detalhes administrativos do pedido e salvar checkpoint publicável
