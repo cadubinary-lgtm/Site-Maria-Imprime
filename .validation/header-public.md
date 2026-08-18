@@ -1,0 +1,1 @@
+O cabeçalho público exibe a busca com rótulo acessível e o carrinho com quantidade anunciada no nome do controle. A busca por “lona” apresentou resultados de produto e materiais dentro do painel associado ao campo. Os controles de cadastro e carrinho permanecem visíveis e consistentes com a identidade rosa.
