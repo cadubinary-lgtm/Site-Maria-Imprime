@@ -414,7 +414,7 @@ export default function AdminNewProduct() {
           </div>
           <div className="flex items-center gap-2">
             {autoSaveState !== "idle" && (
-              <span className={`hidden sm:inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+              <span role="status" className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                 autoSaveState === "error" ? "bg-red-50 text-red-700" : autoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
               }`} aria-live="polite">
                 {autoSaveState === "saving" ? (autoCreatedProductId ? "Salvando automaticamente..." : "Criando produto...") : autoSaveState === "saved" ? "Salvo automaticamente" : autoSaveState === "error" ? "Falha ao salvar: rascunho preservado" : autoCreatedProductId ? "Aguardando dados obrigatórios" : "Pronto para criar"}
@@ -432,8 +432,8 @@ export default function AdminNewProduct() {
                 Descartar Rascunho
               </Button>
             )}
-            <Button type="button" onClick={handleCreateProduct} disabled={Boolean(autoCreatedProductId) || createProductMutation.isPending}>
-              {createProductMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+            <Button type="button" onClick={handleCreateProduct} disabled={Boolean(autoCreatedProductId) || createProductMutation.isPending} aria-busy={createProductMutation.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">
+              {createProductMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="mr-2 h-4 w-4" aria-hidden="true" />}
               {autoCreatedProductId ? "Produto criado" : "Criar produto"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
@@ -445,7 +445,7 @@ export default function AdminNewProduct() {
         <Card className={PRODUCT_FORM_PANEL.card}>
           <CardContent className={PRODUCT_FORM_PANEL.content}>
             <h3 className={PRODUCT_FORM_PANEL.title}>Dados comerciais</h3>
-            <form onSubmit={(event) => event.preventDefault()} className="space-y-4">
+            <form onSubmit={(event) => { event.preventDefault(); handleCreateProduct(); }} className="space-y-4">
               <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
                 <div className={EDIT_PRODUCT_MODAL_LAYOUT.name}>
                   <Label htmlFor="create-name">Nome</Label>
