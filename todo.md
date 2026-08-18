@@ -3434,3 +3434,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar controles e fluxos do gerenciador financeiro alternativo
 - [x] Padronizar controles do gerenciador financeiro alternativo na identidade rosa
 - [x] Validar o gerenciador financeiro alternativo e salvar checkpoint publicável
+
+- [x] Revisar controles, alertas e estados da gestão administrativa de envios
+- [x] Padronizar controles da gestão de envios na identidade rosa e com acessibilidade
+- [x] Validar a gestão administrativa de envios e salvar checkpoint publicável
