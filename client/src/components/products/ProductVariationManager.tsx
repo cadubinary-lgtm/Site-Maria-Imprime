@@ -95,7 +95,7 @@ function DraggableVariationItem({ vt, isSelected, onSelect, onDelete, onToggleRe
       <div
         className={`p-4 transition ${
           isExpanded
-            ? "bg-orange-50 border-b border-orange-300"
+            ? "bg-pink-50 border-b border-pink-300"
             : "bg-white hover:bg-gray-50"
         }`}
       >
