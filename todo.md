@@ -3031,3 +3031,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar CTAs, mensagens e estados de atendimento na identidade rosa da Maria Imprime
 - [x] Melhorar a orientação e a acessibilidade do formulário de orçamento público
 - [x] Validar o fluxo de envio de orçamento e as ações de continuidade do cliente
+
+- [x] Revisar a documentação pública para identificar o próximo ajuste prioritário
+- [x] Padronizar a navegação e os estados visuais das páginas documentais na identidade rosa
+- [x] Melhorar a leitura e acessibilidade do conteúdo documental público
+- [x] Validar as rotas e ações de continuidade da documentação pública
