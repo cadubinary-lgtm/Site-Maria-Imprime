@@ -3406,3 +3406,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da página administrativa de novos pedidos
 - [x] Padronizar controles de novos pedidos na identidade rosa e com acessibilidade
 - [x] Validar a página administrativa de novos pedidos e salvar checkpoint publicável
+
+- [x] Revisar controles, pagamento e estados da central financeira de contas a receber
+- [x] Padronizar controles financeiros na identidade rosa e com acessibilidade
+- [x] Validar a central financeira de contas a receber e salvar checkpoint publicável
