@@ -3358,3 +3358,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles e estados da central administrativa de clientes
 - [x] Padronizar controles de clientes na identidade rosa e com rótulos acessíveis
 - [x] Validar a consistência visual e acessibilidade da central de clientes
+
+- [x] Revisar controles e estados da tela de acesso administrativo
+- [x] Padronizar controles de acesso na identidade rosa e com rótulos acessíveis
+- [x] Validar a consistência visual e acessibilidade da tela de acesso administrativo
