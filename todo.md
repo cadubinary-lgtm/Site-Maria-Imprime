@@ -3665,3 +3665,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir em aproximadamente 50% o espaço visual entre imagem e título nos cards públicos
 - [x] Preservar a leitura do título e o limite visual da imagem
 - [x] Validar o refinamento e salvar checkpoint publicável
+
+- [x] Remover o percentual de desconto da legenda Pix nos cards públicos
+- [x] Ampliar discretamente os preços Pix e cartão sem quebrar a linha
+- [x] Validar o ajuste e salvar checkpoint publicável
