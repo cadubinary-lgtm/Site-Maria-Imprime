@@ -3523,3 +3523,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Garantir produção confirmada para pedido de um item somente após clicar em Produzir
 - [x] Garantir envio global para produção em pedidos com dois ou mais itens somente após todas as artes aprovadas
+
+- [x] Regra protegida: aprovação de arte não altera o status geral do pedido
+- [x] Referência de restauração da pré-impressão: checkpoint afdba8d6
