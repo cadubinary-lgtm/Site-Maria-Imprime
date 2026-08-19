@@ -3681,3 +3681,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aumentar em 50% a unidade m² associada aos preços nos cards públicos
 - [x] Preservar hierarquia e alinhamento da unidade com o valor monetário
 - [x] Validar o ajuste e salvar checkpoint publicável
+
+- [x] Aumentar em 100% a unidade /m² do aviso de urgência nos cards públicos
+- [x] Preservar o alinhamento e a leitura após ampliar a unidade
+- [x] Validar o ajuste e salvar checkpoint publicável
