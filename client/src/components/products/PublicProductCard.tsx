@@ -105,7 +105,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         )}
       </div>
 
-      <CardContent className="product-card-content px-4 pb-4 pt-0">
+      <CardContent className="product-card-content relative -mt-1.5 px-4 pb-4 pt-0">
         <h3 className="product-card-title line-clamp-2 text-[17px] font-semibold leading-tight text-gray-900">{product.name}</h3>
 
         {specifications.length > 0 && (
