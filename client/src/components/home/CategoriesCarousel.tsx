@@ -60,7 +60,7 @@ export function CategoriesCarousel() {
             <div
               id="categories-container"
               ref={containerRef}
-              className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{borderRadius: '33px'}}
             >
               {(segments as any[]).map((segment) => (
                 <button
