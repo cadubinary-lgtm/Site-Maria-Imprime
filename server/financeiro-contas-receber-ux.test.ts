@@ -7,7 +7,8 @@ const source = readFileSync(resolve(import.meta.dirname, "../client/src/pages/ad
 describe("central financeira de contas a receber", () => {
   it("usa rosa para os controles de navegação e mantém Pix em verde", () => {
     expect(source).toContain("bg-pink-600 hover:bg-pink-700");
-    expect(source).toContain("border-pink-500 bg-pink-50 text-pink-700");
+    expect(source).toContain("border-pink-500 bg-pink-50 font-semibold text-pink-700");
+    expect(source).toContain("shadow-[0_0_0_3px_rgba(236,72,153,0.14)]");
     expect(source).toContain("bg-green-600 hover:bg-green-700 text-white");
   });
 
@@ -17,6 +18,7 @@ describe("central financeira de contas a receber", () => {
     expect(source).toContain('aria-label={`Gerar Pix para o pedido ${item.orderNumber}`}');
     expect(source).toContain('role="radiogroup" aria-label="Forma de pagamento recebida"');
     expect(source).toContain("aria-checked={selectedPayment === opt.value}");
+    expect(source).toContain("Forma de pagamento selecionada");
   });
 
   it("abre o WhatsApp com proteção contra acesso à janela de origem", () => {

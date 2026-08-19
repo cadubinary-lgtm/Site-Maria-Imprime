@@ -454,14 +454,16 @@ export default function FinanceiroContasReceber() {
                       onClick={() => setSelectedPayment(opt.value as any)}
                       role="radio"
                       aria-checked={selectedPayment === opt.value}
-                      className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all text-sm ${
+                      aria-label={`${opt.label}${selectedPayment === opt.value ? ", selecionado" : ""}`}
+                      className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 ${
                         selectedPayment === opt.value
-                          ? "border-pink-500 bg-pink-50 text-pink-700"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-pink-500 bg-pink-50 font-semibold text-pink-700 shadow-[0_0_0_3px_rgba(236,72,153,0.14)]"
+                          : "border-gray-200 text-gray-600 hover:border-pink-200 hover:bg-pink-50/40"
                       }`}
                     >
                       <opt.icon className="h-4 w-4" aria-hidden="true" />
                       {opt.label}
+                      {selectedPayment === opt.value && <span className="sr-only">Forma de pagamento selecionada</span>}
                     </button>
                   ))}
                 </div>
