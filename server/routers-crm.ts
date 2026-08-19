@@ -25,7 +25,7 @@ export const crmRouter = router({
   /**
    * Criar novo cliente (admin only)
    */
-  createClient: adminProcedure
+  createClient: adminOrManusAuthProcedure
     .input(
       z.object({
         name: z.string().min(1),
