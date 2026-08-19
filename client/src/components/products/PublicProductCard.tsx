@@ -160,7 +160,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           </div>
         )}
 
-        <span className="product-card-action mt-2 inline-flex h-7 w-full items-center justify-center rounded-full bg-pink-600 px-2 text-[11px] font-semibold text-white shadow-sm transition-all hover:bg-pink-700 hover:shadow-md">
+        <span className="product-card-action mx-auto mt-2 inline-flex h-4 w-1/2 items-center justify-center rounded-full bg-pink-600 px-1 text-[9px] font-semibold text-white shadow-sm transition-all hover:bg-pink-700 hover:shadow-md">
           Ver opções
         </span>
       </CardContent>

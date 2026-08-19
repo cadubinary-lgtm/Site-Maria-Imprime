@@ -3689,3 +3689,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir aproximadamente em um terço o botão rosa “Ver opções” dos cards públicos
 - [x] Preservar legibilidade, acessibilidade e alinhamento após reduzir o botão
 - [x] Validar o ajuste e salvar checkpoint publicável
+
+- [x] Reduzir o botão rosa “Ver opções” em 50% na altura e na largura
+- [x] Centralizar o botão reduzido dentro dos cards públicos
+- [x] Validar dimensões, alinhamento e salvar checkpoint publicável
