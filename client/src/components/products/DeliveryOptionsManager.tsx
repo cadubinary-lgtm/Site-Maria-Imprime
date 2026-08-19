@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { GripVertical, Trash2, Edit2, Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { formatProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
 
 export interface DeliveryOptionData {
   id?: number;
@@ -75,6 +76,7 @@ export function DeliveryOptionsManager({
     pricePerM2: 0,
     isActive: true,
   });
+  const [priceInput, setPriceInput] = useState("0,00");
 
   // Modo online: buscar prazos do banco (para qualquer tipo de produto)
   const { data: deliveryOptions, isLoading } = trpc.deliveryOptions.getByProduct.useQuery(
@@ -139,6 +141,7 @@ export function DeliveryOptionsManager({
   const resetForm = () => {
     setEditingId(null);
     setFormData({ name: "", daysToDeliver: 5, pricePerM2: 0, isActive: true });
+    setPriceInput("0,00");
     setIsOpen(false);
   };
 
@@ -180,6 +183,7 @@ export function DeliveryOptionsManager({
       pricePerM2: option.pricePerM2,
       isActive: option.isActive,
     });
+    setPriceInput(formatProductPriceInput(String(option.pricePerM2)));
     setIsOpen(true);
   };
 
@@ -237,6 +241,7 @@ export function DeliveryOptionsManager({
               onClick={() => {
                 setEditingId(null);
                 setFormData({ name: "", daysToDeliver: 5, pricePerM2: 0, isActive: true });
+                setPriceInput("0,00");
               }}
             >
               <Plus className="w-4 h-4 mr-1" />
@@ -277,14 +282,16 @@ export function DeliveryOptionsManager({
               <div>
                 <label className="text-sm font-medium">{priceLabel}</label>
                 <Input
-                  type="number"
-                  value={formData.pricePerM2}
-                  onChange={(e) =>
-                    setFormData({ ...formData, pricePerM2: parseFloat(e.target.value) || 0 })
-                  }
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
+                  type="text"
+                  inputMode="decimal"
+                  value={priceInput}
+                  onChange={(e) => {
+                    const nextValue = e.target.value;
+                    setPriceInput(nextValue);
+                    setFormData({ ...formData, pricePerM2: parseProductPriceInput(nextValue) || 0 });
+                  }}
+                  onBlur={() => setPriceInput(formatProductPriceInput(priceInput))}
+                  placeholder="0,00"
                   className="mt-1"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -345,7 +352,7 @@ export function DeliveryOptionsManager({
                   <div className="text-xs text-gray-500">
                     {option.daysToDeliver} dias úteis
                     {Number(option.pricePerM2) > 0 && (
-                      <> • R$ {Number(option.pricePerM2).toFixed(2)}{priceSuffix}</>
+                      <> • R$ {formatProductPriceInput(String(option.pricePerM2))}{priceSuffix}</>
                     )}
                     {!option.isActive && (
                       <span className="ml-1 text-red-400">• Inativo</span>

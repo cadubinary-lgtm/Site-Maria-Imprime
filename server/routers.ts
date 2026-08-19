@@ -257,7 +257,7 @@ export const appRouter = router({
 
   // Admin - Gerenciar produtos
   admin: router({
-    deleteMultipleProducts: adminProcedure
+    deleteMultipleProducts: adminAnyProcedure
       .input(z.object({ ids: z.array(z.number()) }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -590,7 +590,7 @@ export const appRouter = router({
           .where(eq(products.id, input.id));
         return result;
       }),
-    deleteProduct: adminProcedure
+    deleteProduct: adminAnyProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         const db = await getDb();

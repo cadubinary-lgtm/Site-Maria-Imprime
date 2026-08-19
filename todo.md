@@ -3611,3 +3611,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Analisar falhas posteriores ao cadastro de produto já confirmado
 - [x] Limpar formulário e rascunho após criar produto com sucesso
 - [x] Validar sucesso, limpeza de rascunho e salvar checkpoint publicável
+
+- [x] Mapear divergências do domínio oficial em Novo Produto e Todos os Produtos
+- [x] Corrigir autorizações, retornos de erro e formatos monetários nas páginas de produto
+- [x] Validar os fluxos oficiais de produto e salvar checkpoint publicável
