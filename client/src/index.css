@@ -273,6 +273,12 @@
     vertical-align: 0.16em;
   }
 
+  .product-card-area-unit {
+    display: inline-block;
+    font-size: 1.5em;
+    vertical-align: 0.08em;
+  }
+
   /*
    * ─── CARDS GLOBAIS — Estilo limpo, sem cor de fundo ───────────────
    * Todos os cards do sistema seguem este padrão:
