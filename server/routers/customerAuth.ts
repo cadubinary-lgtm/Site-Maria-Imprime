@@ -568,7 +568,7 @@ export const customerAuthRouter = router({
       z.object({
         search: z.string().optional(),
         status: z.enum(["all", "active", "inactive", "blocked"]).optional(),
-        accountType: z.enum(["customer", "reseller", "agency"]).optional(),
+        accountType: z.enum(["customer", "balcao", "reseller", "agency"]).optional(),
         limit: z.number().default(50),
         offset: z.number().default(0),
       })
@@ -622,7 +622,7 @@ export const customerAuthRouter = router({
   adminCreatePartnerAccount: publicProcedure
     .input(z.object({
       firstName: z.string().min(2), lastName: z.string().min(2), email: z.string().email(),
-      phone: z.string().optional(), cpfCnpj: z.string().optional(), accountType: z.enum(["customer", "reseller", "agency"]),
+      phone: z.string().optional(), cpfCnpj: z.string().optional(), accountType: z.enum(["customer", "reseller", "agency"]), priceTier: z.enum(["final", "reseller"]),
       password: z.string().min(8, "A senha temporária deve ter ao menos 8 caracteres"),
       addressZipCode: z.string().optional(), addressStreet: z.string().optional(), addressNumber: z.string().optional(),
       addressComplement: z.string().optional(), addressNeighborhood: z.string().optional(), addressCity: z.string().optional(), addressState: z.string().optional(),
@@ -646,7 +646,7 @@ export const customerAuthRouter = router({
         addressZipCode: input.addressZipCode?.trim() || null, addressStreet: input.addressStreet?.trim() || null, addressNumber: input.addressNumber?.trim() || null,
         addressComplement: input.addressComplement?.trim() || null, addressNeighborhood: input.addressNeighborhood?.trim() || null, addressCity: input.addressCity?.trim() || null, addressState: input.addressState?.trim() || null,
         passwordHash: await bcrypt.hash(input.password, SALT_ROUNDS), emailVerified: true, status: "active",
-        priceTier: input.accountType === "reseller" ? "reseller" : "final", accountType: input.accountType, resetPasswordToken: resetToken,
+        priceTier: input.priceTier, accountType: input.accountType, resetPasswordToken: resetToken,
         resetPasswordExpires: now + RESET_EXPIRES_MS, loginAttempts: 0, createdAt: now, updatedAt: now,
       });
       await sendPasswordResetEmail(email, input.firstName.trim(), resetToken);
@@ -685,7 +685,7 @@ export const customerAuthRouter = router({
       addressCity: z.string().optional(),
       addressState: z.string().max(2).optional(),
       priceTier: z.enum(["final", "reseller"]),
-      accountType: z.enum(["customer", "reseller", "agency"]),
+      accountType: z.enum(["customer", "balcao", "reseller", "agency"]),
       newPassword: z
         .string()
         .min(8, "Senha deve ter ao menos 8 caracteres")

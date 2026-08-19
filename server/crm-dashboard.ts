@@ -26,7 +26,7 @@ export type SiteCustomerAccountRow = {
   phone: string | null;
   cpfCnpj: string | null;
   status: string;
-  accountType: "customer" | "reseller" | "agency";
+  accountType: "customer" | "balcao" | "reseller" | "agency";
   allowStorePickup: boolean;
   createdAt: number;
 };
@@ -42,7 +42,7 @@ export function toSiteDashboardClients(accounts: SiteCustomerAccountRow[]): CrmC
     phone: account.phone,
     cpfCnpj: account.cpfCnpj,
     accountStatus: account.status,
-    clientType: account.accountType === "reseller" ? "revendedor" : account.accountType === "agency" ? "agencia" : "site",
+    clientType: account.accountType === "balcao" ? "balcao" : account.accountType === "reseller" ? "revendedor" : account.accountType === "agency" ? "agencia" : "site",
     isActive: account.status === "active",
     allowStorePickup: account.allowStorePickup,
     createdAt: new Date(account.createdAt),

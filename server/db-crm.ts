@@ -21,6 +21,7 @@ export async function createClient(data: {
   addressCity?: string;
   addressState?: string;
   clientType: "balcao" | "revendedor" | "agencia" | "corporativo" | "site";
+  priceTier?: "final" | "reseller";
   userId?: number;
 }) {
   const db = await getDb();
@@ -40,6 +41,7 @@ export async function createClient(data: {
     addressCity: data.addressCity?.trim() || null,
     addressState: data.addressState?.trim().toUpperCase() || null,
     clientType: data.clientType,
+    priceTier: data.priceTier ?? "final",
     userId: data.userId,
     totalVolume: 0 as any,
     totalOrders: 0,
@@ -130,8 +132,9 @@ export async function getOperationalCrmDashboard(options: {
     .limit(limit)
     .offset(offset);
 
-  const accountTypeByClientType: Record<string, "customer" | "reseller" | "agency"> = {
+  const accountTypeByClientType: Record<string, "customer" | "balcao" | "reseller" | "agency"> = {
     site: "customer",
+    balcao: "balcao",
     revendedor: "reseller",
     agencia: "agency",
   };
