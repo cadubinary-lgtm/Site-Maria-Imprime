@@ -27,7 +27,11 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("cardDescriptionLines.length > 0 || sameDayUrgency");
     expect(publicCardSource).toContain("flex-col gap-0.5");
     expect(publicCardSource).toContain('className="truncate"');
-    expect(publicCardSource).toContain("whitespace-nowrap");
+    expect(publicCardSource).toContain('className="min-w-0 break-words"');
+    expect(publicCardSource).not.toContain('className="whitespace-nowrap"');
+    expect(publicCardSource).toContain('break-words text-[clamp(1rem,2vw,1.5rem)]');
+    expect(publicCardSource).toContain('break-words text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain("product-card-action");
     expect(publicCardSource).toContain("text-[9px]");
     expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");
     expect(publicCardSource).not.toContain("group-hover:bg-pink-700");

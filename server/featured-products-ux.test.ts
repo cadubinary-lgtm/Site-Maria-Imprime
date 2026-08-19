@@ -24,12 +24,14 @@ describe("vitrine pública de produtos em destaque", () => {
     expect(source).toContain('href="/catalogo"');
   });
 
-  it("organiza dois, quatro e seis cards por fileira sem alterar o card interno", () => {
+  it("preserva a proporção dos cards antes de liberar seis colunas em telas amplas", () => {
     const source = readFileSync(resolve(root, "client/src/components/home/FeaturedProducts.tsx"), "utf8");
 
     expect(source).toContain("grid-cols-2");
     expect(source).toContain("md:grid-cols-4");
-    expect(source).toContain("lg:grid-cols-6");
+    expect(source).toContain("2xl:grid-cols-6");
+    expect(source).toContain("2xl:max-w-[1840px]");
+    expect(source).toContain("featured-products-grid");
     expect(source).toContain("<PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />");
   });
 });

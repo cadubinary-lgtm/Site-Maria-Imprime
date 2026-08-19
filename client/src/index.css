@@ -544,4 +544,20 @@
     align-items: flex-start;
     gap: 0.25rem;
   }
+
+  /* Mantém o conteúdo dos cards da vitrine legível quando a grade se adensa. */
+  @media (max-width: 1535px) {
+    .featured-products-grid .product-tag-badge {
+      gap: 0.25rem;
+      padding: 0.125rem 0.5rem;
+      font-size: 0.625rem;
+      line-height: 0.875rem;
+    }
+
+    .featured-products-grid .product-card-action {
+      height: 2.25rem;
+      margin-top: 0.625rem;
+      font-size: 0.75rem;
+    }
+  }
 }

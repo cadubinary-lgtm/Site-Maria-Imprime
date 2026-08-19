@@ -53,7 +53,7 @@ export function ProductTagBadges({ tags, tagPosition }: ProductTagBadgesProps) {
       {parsed.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center gap-1 bg-black text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm whitespace-nowrap"
+          className="product-tag-badge inline-flex items-center gap-1 bg-black text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm whitespace-nowrap"
         >
           <span>{TAG_ICONS[tag] ?? "🏷️"}</span>
           <span>{tag}</span>

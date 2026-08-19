@@ -3627,3 +3627,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar os pontos de quebra atuais da grade de produtos em destaque
 - [x] Exibir dois produtos por fileira em celular, quatro em tablet e seis em telas grandes
 - [x] Validar a responsividade da grade e salvar checkpoint publicável
+
+- [x] Mapear a causa do encolhimento visual dos cards de produtos em destaque
+- [x] Preservar a proporção anterior dos cards sem alterar a quantidade de colunas
+- [x] Garantir a leitura integral de promoção, preços Pix/cartão, urgência e botão
+- [x] Validar a correção visual e salvar checkpoint publicável
