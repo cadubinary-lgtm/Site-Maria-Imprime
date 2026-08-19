@@ -3641,3 +3641,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar seis cards ao limite horizontal do carrossel sem overflow
 - [x] Ajustar a escala compacta de promoção, preços, urgência e botão no desktop
 - [x] Validar responsividade, ausência de overflow e salvar checkpoint publicável
+
+- [x] Revisar estilos tipográficos adicionados pelo editor aos cards públicos
+- [x] Consolidar os ajustes aprovados sem prejudicar leitura e responsividade
+- [x] Validar os cards revisados e salvar checkpoint publicável

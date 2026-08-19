@@ -583,6 +583,15 @@
       letter-spacing: -0.035em;
     }
 
+    .featured-products-grid .product-card-pix-caption,
+    .featured-products-grid .product-card-card-caption {
+      font-size: 0.4375rem;
+    }
+
+    .featured-products-grid .product-card-urgency-content {
+      font-size: 0.375rem;
+    }
+
     .featured-products-grid .product-card-urgency {
       font-size: 0.5rem;
     }
