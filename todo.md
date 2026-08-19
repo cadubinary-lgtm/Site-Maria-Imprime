@@ -3636,3 +3636,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o espaçamento da grade de produtos em destaque em mobile e tablet
 - [x] Ajustar gaps da grade sem alterar conteúdo ou proporção dos cards
 - [x] Validar o respiro responsivo e salvar checkpoint publicável
+
+- [x] Mapear as larguras da vitrine e do carrossel Acesso rápido
+- [x] Alinhar seis cards ao limite horizontal do carrossel sem overflow
+- [x] Ajustar a escala compacta de promoção, preços, urgência e botão no desktop
+- [x] Validar responsividade, ausência de overflow e salvar checkpoint publicável

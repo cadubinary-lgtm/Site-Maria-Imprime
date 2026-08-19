@@ -28,7 +28,7 @@ export function FeaturedProducts() {
 
   return (
     <section className="bg-white px-4 py-16 sm:py-20" aria-labelledby="featured-products-title">
-      <div className="mx-auto max-w-7xl 2xl:max-w-[1840px]">
+      <div className="mx-auto max-w-7xl">
         <h2 id="featured-products-title" className="mb-3 text-center text-3xl font-bold text-gray-900">Produtos em destaque</h2>
         <p className="mb-10 text-center text-sm text-gray-600 sm:mb-12">Conheça opções para os seus materiais de comunicação visual.</p>
 
@@ -39,7 +39,7 @@ export function FeaturedProducts() {
             <p className="mt-1 text-sm text-gray-600">Você ainda pode explorar o catálogo completo.</p>
           </div>
         ) : featured.length > 0 ? (
-          <div className="featured-products-grid mb-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 md:gap-5 2xl:grid-cols-6 2xl:gap-6 sm:mb-12">
+          <div className="featured-products-grid mb-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 md:gap-5 xl:grid-cols-6 xl:gap-3 sm:mb-12">
             {featured.map((product: any) => (
               <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
             ))}
