@@ -41,6 +41,7 @@ export const crmRouter = router({
         addressCity: z.string().optional(),
         addressState: z.string().max(2).optional(),
         clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo", "site"]),
+        priceTier: z.enum(["final", "reseller"]).optional(),
         userId: z.number().optional(),
       })
     )

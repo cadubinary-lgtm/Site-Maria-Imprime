@@ -8,15 +8,16 @@ describe("edição de tipo de cliente", () => {
   const crmRouter = readFileSync("server/routers-crm.ts", "utf8");
 
   it("mostra o tipo ao lado da tabela de preços na edição de clientes do site", () => {
-    expect(siteEditor).toContain('accountType: "customer" as "customer" | "reseller" | "agency"');
+    expect(siteEditor).toContain('accountType: "customer" as "customer" | "balcao" | "reseller" | "agency"');
     expect(siteEditor).toContain('<span>Tipo de cliente</span><Select value={form.accountType}');
     expect(siteEditor).toContain('<span>Tabela de Preços</span><Select value={form.priceTier}');
     expect(siteEditor).toContain('<SelectItem value="customer">Cliente site</SelectItem>');
+    expect(siteEditor).toContain('<SelectItem value="balcao">Cliente balcão</SelectItem>');
   });
 
   it("persiste o tipo da conta do site no procedimento administrativo", () => {
     const section = siteRouter.slice(siteRouter.indexOf("adminUpdateCustomer: publicProcedure"));
-    expect(section).toContain('accountType: z.enum(["customer", "reseller", "agency"])');
+    expect(section).toContain('accountType: z.enum(["customer", "balcao", "reseller", "agency"])');
     expect(section).toContain("accountType: input.accountType,");
   });
 
@@ -27,5 +28,13 @@ describe("edição de tipo de cliente", () => {
     const section = crmRouter.slice(crmRouter.indexOf("adminUpdateBalcaoClient:"));
     expect(section).toContain('clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo"])');
     expect(section).toContain("clientType: input.clientType,");
+  });
+
+  it("define a tabela de preços já no novo cadastro, inclusive para balcão", () => {
+    expect(siteEditor).toContain('priceTier: "final" as "final" | "reseller"');
+    expect(siteEditor).toContain('<span>Tabela de preços</span><Select value={partnerForm.priceTier}');
+    expect(siteEditor).toContain('priceTier: partnerForm.priceTier');
+    expect(siteRouter).toContain('priceTier: z.enum(["final", "reseller"])');
+    expect(siteRouter).toContain('priceTier: input.priceTier, accountType: input.accountType');
   });
 });

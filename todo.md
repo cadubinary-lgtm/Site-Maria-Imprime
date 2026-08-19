@@ -3504,3 +3504,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear formulários e persistência do tipo de cliente durante a edição
 - [x] Adicionar o seletor de tipo de cliente ao lado da tabela de preços
 - [x] Validar a edição do tipo de cliente e salvar checkpoint publicável
+
+- [x] Mapear a conversão entre conta do site e cadastro de balcão
+- [x] Adicionar Cliente balcão ao seletor de tipo na edição e persistir a alteração
+- [x] Validar a edição com Cliente balcão e salvar checkpoint publicável
+
+- [x] Mapear a persistência da tabela de preços no novo cadastro de clientes
+- [x] Adicionar a tabela de preços ao formulário Novo cliente
+- [x] Validar novo cadastro com tipo e tabela de preços e salvar checkpoint publicável

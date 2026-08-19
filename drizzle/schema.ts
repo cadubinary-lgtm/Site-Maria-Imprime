@@ -663,6 +663,7 @@ export const clients = mysqlTable("clients", {
   addressCity: varchar("addresscity", { length: 100 }),
   addressState: varchar("addressstate", { length: 2 }),
   clientType: mysqlEnum("clientType", ["balcao", "revendedor", "agencia", "corporativo", "site"]).default("balcao").notNull(),
+  priceTier: mysqlEnum("priceTier", ["final", "reseller"]).default("final").notNull(),
   totalVolume: decimal("totalVolume", { precision: 15, scale: 2 }).default("0").notNull(), // Volume total comprado
   totalOrders: int("totalOrders").default(0).notNull(), // Quantidade de pedidos
   averageTicket: decimal("averageTicket", { precision: 10, scale: 2 }).default("0").notNull(), // Ticket médio
@@ -1273,7 +1274,7 @@ export const customerAccounts = mysqlTable("customer_accounts", {
   resetPasswordExpires: bigint("resetPasswordExpires", { mode: "number" }),
   status: mysqlEnum("status", ["active", "inactive", "blocked"]).default("inactive").notNull(),
   priceTier: mysqlEnum("priceTier", ["final", "reseller"]).default("final").notNull(),
-  accountType: mysqlEnum("accountType", ["customer", "reseller", "agency"]).default("customer").notNull(),
+  accountType: mysqlEnum("accountType", ["customer", "balcao", "reseller", "agency"]).default("customer").notNull(),
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
   lockedUntil: bigint("lockedUntil", { mode: "number" }),
