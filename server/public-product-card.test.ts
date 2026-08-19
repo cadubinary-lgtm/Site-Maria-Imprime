@@ -61,8 +61,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("text-[9px]");
     expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");
     expect(publicCardSource).not.toContain("group-hover:bg-pink-700");
-    expect(tagBadgeSource).toContain("w-1/2");
-    expect(tagBadgeSource).toContain("product-tag-badge flex h-4 w-full");
+    expect(tagBadgeSource).toContain("w-2/5");
+    expect(tagBadgeSource).toContain("product-tag-badge flex h-3 w-full");
     expect(tagBadgeSource).toContain("px-0 py-0");
     expect(tagBadgeSource).toContain("top-2 right-2");
   });
