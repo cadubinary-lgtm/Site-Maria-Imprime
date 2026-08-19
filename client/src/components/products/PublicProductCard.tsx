@@ -67,7 +67,6 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
   const pixDiscount = getPixDiscountInfo(product, priceAudience);
   const specifications = parseSpecifications(product.specifications);
   const calculationType = product.calculationType || "unidade";
-  const pricingSuffix = paymentPrices.pix.suffix;
   const isReseller = priceAudience === "reseller";
   const sameDayUrgency = calculationType === "m2"
     ? (deliveryOptions as ProductDeliveryOption[]).find((option) =>
@@ -127,13 +126,13 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         <div className={`mt-1.5 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
           <div className="min-w-0">
             <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
-            <p className="product-card-pix-price mt-0.5 break-words text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
+            <p className="product-card-pix-price mt-0.5 whitespace-nowrap text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value)}</p>
             {!isReseller && <p className="product-card-pix-caption mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
           </div>
           {!isReseller && (
             <div className="min-w-0 border-l border-gray-200 pl-2">
               <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
-              <p className="product-card-card-price mt-0.5 break-words text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
+              <p className="product-card-card-price mt-0.5 whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value)}</p>
               <p className="product-card-card-caption mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}

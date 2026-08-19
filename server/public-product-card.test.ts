@@ -37,9 +37,12 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("flex-col gap-0.5");
     expect(publicCardSource).toContain('className="truncate"');
     expect(publicCardSource).toContain('className="product-card-urgency-content min-w-0 break-words"');
-    expect(publicCardSource).not.toContain('className="whitespace-nowrap"');
-    expect(publicCardSource).toContain('break-words text-[clamp(1rem,2vw,1.5rem)]');
-    expect(publicCardSource).toContain('break-words text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(1rem,2vw,1.5rem)]');
+    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain('formatCurrency(paymentPrices.pix.value)');
+    expect(publicCardSource).toContain('formatCurrency(paymentPrices.card.value)');
+    expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.pix.value, pricingSuffix)');
+    expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)');
     expect(publicCardSource).toContain("product-card-action");
     expect(publicCardSource).toContain("text-[9px]");
     expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");
