@@ -437,27 +437,9 @@ export const appRouter = router({
         await db.update(orderItemsT)
           .set({ preProductionStatus: input.preProductionStatus } as any)
           .where(eq(orderItemsT.id, input.orderItemId));
-        // Se aprovado, verifica se todos os itens do pedido foram aprovados
-        // e atualiza o status do pedido para em_producao APENAS se for pedido de 1 item
-        if (input.preProductionStatus === "arte_final_aprovada") {
-          const [item] = await db.select({ orderId: orderItemsT.orderId })
-            .from(orderItemsT)
-            .where(eq(orderItemsT.id, input.orderItemId))
-            .limit(1);
-          if (item?.orderId) {
-            const allItems = await db.select({ preProductionStatus: orderItemsT.preProductionStatus })
-              .from(orderItemsT)
-              .where(eq(orderItemsT.orderId, item.orderId));
-            const allApproved = allItems.every((i: any) => i.preProductionStatus === "arte_final_aprovada");
-            // Só muda o status global automaticamente se for pedido de 1 único item.
-            // Pedidos com múltiplos itens aguardam o botão "Enviar para Produção" (sendToProduction).
-            if (allApproved && allItems.length === 1) {
-              await db.update(ordersT)
-                .set({ status: "em_producao" } as any)
-                .where(eq(ordersT.id, item.orderId));
-            }
-          }
-        }
+        // A aprovação de arte é estritamente do item. O pedido continua no status
+        // comercial/analisando até o operador confirmar "Produzir" (pedido com um
+        // item) ou "Enviar para Produção" após aprovar todos os itens (multi-item).
         return { success: true };
       }),
     // ── Gatilho de Produção: dispara os 3 status de uma vez quando operador clica em Salvar com Arte Final Aprovada ──
