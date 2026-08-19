@@ -3469,9 +3469,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar controles da central de rastreamento na identidade rosa e com acessibilidade
 - [x] Validar a central administrativa de rastreamento e salvar checkpoint publicável
 
-- [ ] Revisar controles e estados da central administrativa de validação de arquivos
-- [ ] Padronizar controles de validação de arquivos na identidade rosa e com acessibilidade
-- [ ] Validar a central de validação de arquivos e salvar checkpoint publicável
+- [x] Revisar controles e estados da central administrativa de validação de arquivos
+- [x] Padronizar controles de validação de arquivos na identidade rosa e com acessibilidade
+- [x] Validar a central de validação de arquivos e salvar checkpoint publicável
 
 - [x] Mapear o bloqueio de autorização no cadastro de cliente de balcão
 - [x] Corrigir a autorização de criação para balcão, site, revendedor e agência
