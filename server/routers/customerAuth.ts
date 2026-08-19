@@ -685,6 +685,7 @@ export const customerAuthRouter = router({
       addressCity: z.string().optional(),
       addressState: z.string().max(2).optional(),
       priceTier: z.enum(["final", "reseller"]),
+      accountType: z.enum(["customer", "reseller", "agency"]),
       newPassword: z
         .string()
         .min(8, "Senha deve ter ao menos 8 caracteres")
@@ -723,6 +724,7 @@ export const customerAuthRouter = router({
         addressCity: input.addressCity?.trim() || null,
         addressState: input.addressState?.trim().toUpperCase() || null,
         priceTier: input.priceTier,
+        accountType: input.accountType,
         ...(passwordHash ? { passwordHash } : {}),
         ...(emailChanged ? {
           emailVerified: false,

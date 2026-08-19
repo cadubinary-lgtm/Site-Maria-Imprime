@@ -190,7 +190,7 @@ function ClientDetailModal({ clientId, open, onClose }: { clientId: number | nul
 }
 
 function BalcaoEditDialog({ client, open, onClose, onSaved }: { client: any | null; open: boolean; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", cpfCnpj: "", priceTier: "final" as "final" | "reseller", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", cpfCnpj: "", priceTier: "final" as "final" | "reseller", clientType: "balcao" as "balcao" | "revendedor" | "agencia" | "corporativo", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
   const updateClient = trpc.crm.adminUpdateBalcaoClient.useMutation({
     onSuccess: () => { toast.success("Cliente atualizado com sucesso!"); onSaved(); onClose(); },
     onError: (error) => toast.error(error.message),
@@ -199,7 +199,7 @@ function BalcaoEditDialog({ client, open, onClose, onSaved }: { client: any | nu
   useEffect(() => {
     if (!client) return;
     setForm({
-      name: client.name || "", email: client.email || "", phone: client.phone || "", whatsapp: client.whatsapp || "", cpfCnpj: client.cpfCnpj || "", priceTier: client.priceTier === "reseller" ? "reseller" : "final",
+      name: client.name || "", email: client.email || "", phone: client.phone || "", whatsapp: client.whatsapp || "", cpfCnpj: client.cpfCnpj || "", priceTier: client.priceTier === "reseller" ? "reseller" : "final", clientType: client.clientType === "revendedor" || client.clientType === "agencia" || client.clientType === "corporativo" ? client.clientType : "balcao",
       addressZipCode: client.addressZipCode || "", addressStreet: client.addressStreet || "", addressNumber: client.addressNumber || "", addressComplement: client.addressComplement || "", addressNeighborhood: client.addressNeighborhood || "", addressCity: client.addressCity || "", addressState: client.addressState || "",
     });
   }, [client]);
@@ -220,7 +220,8 @@ function BalcaoEditDialog({ client, open, onClose, onSaved }: { client: any | nu
             <div className="mb-4"><h3 className="font-semibold text-gray-900">Dados Pessoais</h3><p className="text-xs text-gray-500">Informações de atendimento e contato do cliente.</p></div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {field("name", "Nome completo *", "Nome do cliente", "md:col-span-2")}{field("email", "E-mail", "email@exemplo.com", "md:col-span-2", "email")}{field("phone", "Telefone", "(00) 00000-0000")}{field("whatsapp", "WhatsApp", "(00) 00000-0000")}{field("cpfCnpj", "CPF / CNPJ", "000.000.000-00")}
-              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tipo de cliente</span><Select value={form.clientType} onValueChange={(value: "balcao" | "revendedor" | "agencia" | "corporativo") => setForm({ ...form, clientType: value })}><SelectTrigger aria-label="Tipo de cliente"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="balcao">Cliente balcão</SelectItem><SelectItem value="revendedor">Revendedor</SelectItem><SelectItem value="agencia">Agência</SelectItem><SelectItem value="corporativo">Corporativo</SelectItem></SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger aria-label="Tabela de preços"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
             </div>
           </section>
           <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -284,6 +285,7 @@ export default function ClientesBalcao() {
       whatsapp: client.whatsapp || "",
       cpfCnpj: client.cpfCnpj || "",
       priceTier,
+      clientType: client.clientType === "revendedor" || client.clientType === "agencia" || client.clientType === "corporativo" ? client.clientType : "balcao",
       addressZipCode: client.addressZipCode || "",
       addressStreet: client.addressStreet || "",
       addressNumber: client.addressNumber || "",
