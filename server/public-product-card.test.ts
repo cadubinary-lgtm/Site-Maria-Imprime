@@ -85,8 +85,9 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain("container-type: inline-size;");
     expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 1.5rem) !important;");
     expect(globalStyles).toContain("font-size: clamp(0.375rem, 7cqw, 0.625rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.625rem, 15cqw, 1.5rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.575rem, 12cqw, 1.125rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.625rem, 19cqw, 1.5rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.575rem, 17cqw, 1.125rem) !important;");
+    expect(globalStyles).toContain("line-height: 0.95;");
     expect(globalStyles).toContain(".product-price-currency,");
     expect(globalStyles).toContain("font-size: 0.58em;");
     expect(globalStyles).toContain(".product-price-composite.product-price-length-short");
