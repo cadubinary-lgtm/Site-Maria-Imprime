@@ -39,7 +39,7 @@ export function FeaturedProducts() {
             <p className="mt-1 text-sm text-gray-600">Você ainda pode explorar o catálogo completo.</p>
           </div>
         ) : featured.length > 0 ? (
-          <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6 sm:mb-12">
+          <div className="mb-10 grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-6 sm:mb-12">
             {featured.map((product: any) => (
               <PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />
             ))}
