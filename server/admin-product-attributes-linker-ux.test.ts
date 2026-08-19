@@ -25,4 +25,13 @@ describe("vínculo administrativo entre produtos e atributos", () => {
     expect(source).toContain("bg-pink-600 hover:bg-pink-700");
     expect(source).toContain("aria-busy={isLinking}");
   });
+
+  it("mantém navegação contextual, indicadores e remoção protegida de vínculo", () => {
+    expect(source).toContain('href="/admin/atributos"');
+    expect(source).toContain('aria-label="Indicadores do vinculador de atributos"');
+    expect(source).toContain("unlinkAttributeFromProduct.useMutation");
+    expect(source).toContain("Desvincular este atributo do produto?");
+    expect(source).toContain("Desvincular atributo");
+    expect(source).toContain("aria-busy={unlinkMutation.isPending}");
+  });
 });
