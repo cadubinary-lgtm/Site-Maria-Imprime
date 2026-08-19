@@ -3672,3 +3672,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a escala atual dos spans de preço Pix e cartão
 - [x] Aplicar teto de 45 px com redução automática para valores longos
 - [x] Validar os preços em todas as larguras e salvar checkpoint publicável
+
+- [x] Medir o tamanho efetivo dos preços no card compacto da vitrine
+- [x] Aumentar visivelmente Pix e cartão no card compacto sem quebra
+- [x] Validar o novo destaque e salvar checkpoint publicável

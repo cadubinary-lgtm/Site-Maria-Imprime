@@ -85,8 +85,8 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain("container-type: inline-size;");
     expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 2.8125rem) !important;");
     expect(globalStyles).toContain("font-size: clamp(0.375rem, 7cqw, 0.625rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.625rem, 19cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.575rem, 17cqw, 2.8125rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.625rem, 21cqw, 2.8125rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.575rem, 21cqw, 2.8125rem) !important;");
     expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 2.8125rem) !important;");
     expect(globalStyles).toContain("font-size: clamp(0.575rem, 12cqw, 2.8125rem) !important;");
     expect(globalStyles).toContain("line-height: 0.95;");
