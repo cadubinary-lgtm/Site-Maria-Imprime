@@ -3648,3 +3648,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar valores longos em desktop e celular e salvar checkpoint publicável
 
 - [x] Destacar o valor principal e reduzir visualmente moeda e sufixo dos preços
+
+- [x] Mapear a largura visual dos blocos Pix e cartão no card público
+- [x] Aproximar o bloco Pix da divisória e ampliar proporcionalmente ambos os preços
+- [x] Validar alinhamento com o botão e encaixe de valores longos
+- [x] Salvar checkpoint publicável do ajuste de escala dos preços
+
+- [x] Ajustar automaticamente a escala de preços curtos para preservar equilíbrio visual
+- [x] Validar preço curto e longo com a mesma hierarquia e alinhamento
