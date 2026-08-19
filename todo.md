@@ -3481,6 +3481,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar controles e ações de carrinhos abandonados na identidade rosa
 - [x] Validar a central de carrinhos abandonados e salvar checkpoint publicável
 
+- [x] Revisar controles e apresentação da impressão de ordem de serviço
+- [x] Padronizar controles da impressão de ordem de serviço na identidade rosa
+- [x] Validar a impressão de ordem de serviço e salvar checkpoint publicável
+
 - [x] Mapear o bloqueio de autorização no cadastro de cliente de balcão
 - [x] Corrigir a autorização de criação para balcão, site, revendedor e agência
 - [x] Validar os quatro tipos de cadastro e salvar checkpoint publicável

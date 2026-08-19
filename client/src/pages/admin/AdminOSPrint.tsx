@@ -160,16 +160,16 @@ export default function AdminOSPrint() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: orange }} />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: orange }} aria-label="Carregando ordem de serviço" />
       </div>
     );
   }
   if (error || !data) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-        <AlertCircle className="w-12 h-12 text-red-400" />
+        <AlertCircle className="w-12 h-12 text-red-400" aria-hidden="true" />
         <p className="text-gray-600">Pedido não encontrado</p>
-        <Button onClick={() => setLocation(returnTarget.path)}>← {returnTarget.label}</Button>
+        <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => setLocation(returnTarget.path)}><ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />{returnTarget.label}</Button>
       </div>
     );
   }
@@ -224,15 +224,15 @@ export default function AdminOSPrint() {
         boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Button variant="ghost" size="sm" onClick={() => setLocation(returnTarget.path)}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> {returnTarget.label}
+          <Button variant="ghost" size="sm" className="text-pink-700 hover:bg-pink-50 hover:text-pink-800" onClick={() => setLocation(returnTarget.path)}>
+            <ArrowLeft className="w-4 h-4 mr-1" aria-hidden="true" /> {returnTarget.label}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setLocation(createAdminDetailLocation(`/admin/pedidos/${orderId}`, returnTarget.path))}>
+          <Button variant="ghost" size="sm" className="text-pink-700 hover:bg-pink-50 hover:text-pink-800" onClick={() => setLocation(createAdminDetailLocation(`/admin/pedidos/${orderId}`, returnTarget.path))}>
             Ver Pedido
           </Button>
           <div style={{ display: "flex", gap: "4px", backgroundColor: "#f3f4f6", borderRadius: "8px", padding: "4px", marginLeft: "8px" }}>
             {(["a4", "thermal"] as const).map((m) => (
-              <button key={m} onClick={() => setPrintMode(m)} style={{
+              <button key={m} type="button" aria-pressed={printMode === m} aria-label={`Formato de impressão ${m === "a4" ? "A4" : "térmica 80 milímetros"}`} onClick={() => setPrintMode(m)} style={{
                 padding: "4px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
                 border: "none", cursor: "pointer",
                 backgroundColor: printMode === m ? "#fff" : "transparent",
@@ -246,11 +246,11 @@ export default function AdminOSPrint() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "13px", color: "#6b7280" }}>OS #{o.orderNumber}</span>
-          <Button variant="outline" size="sm" onClick={handlePrint}>
-            <FileDown className="w-4 h-4 mr-1" /> Exportar PDF
+          <Button variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={handlePrint}>
+            <FileDown className="w-4 h-4 mr-1" aria-hidden="true" /> Abrir impressão
           </Button>
           <Button onClick={handlePrint} size="sm" style={{ backgroundColor: orange, color: "#fff" }}>
-            <Printer className="w-4 h-4 mr-1" /> Imprimir
+            <Printer className="w-4 h-4 mr-1" aria-hidden="true" /> Imprimir
           </Button>
         </div>
       </div>
