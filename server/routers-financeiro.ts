@@ -711,7 +711,45 @@ export const financeiroRouter = router({
           paidAt,
           (ctx as any).adminUser,
         );
-        return { success: true, receiptId: receipt.id, receiptNumber: receipt.receiptNumber };
+        const recipientEmail = receipt.customerEmail;
+        let receiptEmailSent = false;
+        let receiptEmailError: string | null = null;
+        if (recipientEmail && !receipt.emailSentAt) {
+          const emailResult = await sendPaymentReceiptEmail(recipientEmail, {
+            customerName: receipt.customerName,
+            receiptNumber: receipt.receiptNumber,
+            orderNumber: receipt.orderNumber,
+            amount: formatReceiptCurrency(receipt.amount),
+            paymentMethod: RECEIPT_PAYMENT_LABELS[receipt.paymentMethod] || receipt.paymentMethod,
+            paidAt: formatReceiptDate(receipt.paidAt),
+          });
+          if (emailResult.success) {
+            const emailSentAt = Date.now();
+            await db.update(paymentReceipts).set({ emailSentAt }).where(eq(paymentReceipts.id, receipt.id));
+            await db.insert(emailHistory).values({
+              orderId: receipt.orderId,
+              recipientEmail,
+              recipientName: receipt.customerName,
+              emailType: "other",
+              subject: `Recibo ${receipt.receiptNumber} — Pedido #${receipt.orderNumber}`,
+              templateName: "sendPaymentReceiptEmail:auto",
+              status: "sent",
+            });
+            receiptEmailSent = true;
+          } else {
+            receiptEmailError = emailResult.error || "Não foi possível enviar o e-mail automático.";
+            console.error("[RECEIPT] Automatic e-mail failed:", receiptEmailError);
+          }
+        }
+        return {
+          success: true,
+          receiptId: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+          receiptEmailSent,
+          receiptEmailAvailable: Boolean(recipientEmail),
+          receiptRecipientEmail: recipientEmail || null,
+          receiptEmailError,
+        };
       }
 
       throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado para emissão do recibo." });
