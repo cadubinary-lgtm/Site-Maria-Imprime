@@ -3661,3 +3661,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aproximar adicionalmente o título da imagem nos cards públicos
 - [x] Preservar legibilidade e recorte visual após o refinamento
 - [x] Validar o refinamento e salvar checkpoint publicável
+
+- [x] Reduzir em aproximadamente 50% o espaço visual entre imagem e título nos cards públicos
+- [x] Preservar a leitura do título e o limite visual da imagem
+- [x] Validar o refinamento e salvar checkpoint publicável
