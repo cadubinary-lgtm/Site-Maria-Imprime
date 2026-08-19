@@ -45,6 +45,25 @@ function formatCurrency(value: number, suffix = "") {
   return `${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}${suffix}`;
 }
 
+function formatCardPrice(value: number, suffix = "") {
+  const parts = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).formatToParts(value);
+  const currency = parts.find((part) => part.type === "currency")?.value ?? "R$";
+  const integer = parts
+    .filter((part) => part.type === "integer" || part.type === "group")
+    .map((part) => part.value)
+    .join("");
+  const decimal = parts.find((part) => part.type === "decimal")?.value ?? ",";
+  const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
+
+  return (
+    <span className="product-price-composite">
+      <span className="product-price-currency">{currency}</span>
+      <span className="product-price-integer">{integer}</span>
+      <span className="product-price-suffix">{`${decimal}${fraction}${suffix}`}</span>
+    </span>
+  );
+}
+
 function parseSpecifications(specifications?: string | null): RealSpecification[] {
   if (!specifications) return [];
 
@@ -125,15 +144,15 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         )}
 
         <div className={`mt-1.5 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
-          <div className="min-w-0">
+          <div className="product-card-price-column min-w-0">
             <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
-            <p className="product-card-pix-price mt-0.5 break-words text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
-            {!isReseller && <p className="mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
+            <p className="product-card-pix-price mt-0.5 break-words text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCardPrice(paymentPrices.pix.value, pricingSuffix)}</p>
+            {!isReseller && <p className="product-card-pix-caption mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
           </div>
           {!isReseller && (
-            <div className="min-w-0 border-l border-gray-200 pl-2">
+            <div className="product-card-price-column min-w-0 border-l border-gray-200 pl-2">
               <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
-              <p className="product-card-card-price mt-0.5 break-words text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
+              <p className="product-card-card-price mt-0.5 break-words text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCardPrice(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
               <p className="mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}
