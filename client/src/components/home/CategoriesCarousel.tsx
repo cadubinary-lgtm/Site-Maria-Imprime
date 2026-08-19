@@ -51,7 +51,7 @@ export function CategoriesCarousel() {
   };
 
   return (
-    <section className="bg-white px-4 py-6 sm:px-6 lg:px-8">
+    <section className="bg-white px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Acesso rápido</h2>
 
@@ -59,7 +59,7 @@ export function CategoriesCarousel() {
           <div
             id="categories-container"
             ref={containerRef}
-            className="flex min-w-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 sm:px-12 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-w-0 flex-1 snap-x snap-mandatory gap-2.5 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {(segments as any[]).map((segment) => (
               <button
@@ -67,7 +67,7 @@ export function CategoriesCarousel() {
                 type="button"
                 data-segment-card
                 onClick={() => navigate(`/catalogo?segmentId=${segment.id}`)}
-                className="group w-[9.5rem] shrink-0 snap-start rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 px-4 py-2.5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-40"
+                className="group h-[52px] w-[9rem] shrink-0 snap-start !rounded-[18px] border border-pink-100 bg-gradient-to-br from-pink-50 to-pink-100 px-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-pink-200 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-[9.75rem]"
               >
                 <span className="flex min-h-9 items-center justify-center gap-2.5">
                   {segment.icon && (
@@ -94,7 +94,7 @@ export function CategoriesCarousel() {
                 disabled={!canScrollLeft}
                 aria-label="Ver categorias anteriores"
                 title="Categorias anteriores"
-                className="absolute left-0 hidden h-10 w-10 items-center justify-center rounded-full bg-pink-600 text-white shadow-md transition hover:-translate-x-0.5 hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                className="absolute left-0 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-pink-600 text-white shadow-md transition hover:-translate-x-0.5 hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:cursor-default disabled:bg-pink-600 disabled:opacity-100 sm:flex"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -104,7 +104,7 @@ export function CategoriesCarousel() {
                 disabled={!canScrollRight}
                 aria-label="Ver próximas categorias"
                 title="Próximas categorias"
-                className="absolute right-0 hidden h-10 w-10 items-center justify-center rounded-full bg-pink-600 text-white shadow-md transition hover:translate-x-0.5 hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                className="absolute right-0 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-pink-600 text-white shadow-md transition hover:translate-x-0.5 hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-0 sm:flex"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
               </button>

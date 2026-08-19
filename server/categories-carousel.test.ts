@@ -12,7 +12,9 @@ describe("Carrossel de acesso rápido", () => {
     expect(source).not.toContain("marginLeft: '50px'");
     expect(source).toContain("overflow-x-auto scroll-smooth");
     expect(source).toContain("snap-x snap-mandatory");
-    expect(source).toContain("w-[9.5rem]");
+    expect(source).toContain('!rounded-[18px]');
+    expect(source).toContain('h-[52px]');
+    expect(source).not.toContain("sm:px-12");
   });
 
   it("oferece navegação por setas acessível e com limites de rolagem", () => {
@@ -23,5 +25,8 @@ describe("Carrossel de acesso rápido", () => {
     expect(source).toContain("disabled={!canScrollLeft}");
     expect(source).toContain("disabled={!canScrollRight}");
     expect(source).toContain("container.scrollBy");
+    expect(source).toContain("absolute left-0 z-10");
+    expect(source).toContain("absolute right-0 z-10");
+    expect(source).toContain("disabled:opacity-100");
   });
 });
