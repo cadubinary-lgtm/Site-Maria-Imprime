@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Package, Trash2 } from "lucide-react";
+import { CheckCircle2, Loader2, Plus, Package, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -321,6 +321,8 @@ export default function AdminNewProduct() {
         position: "top-right",
         duration: 3500,
         id: `new-product-created-${productId}`,
+        icon: <CheckCircle2 className="h-5 w-5 animate-[pulse_1.2s_ease-in-out_2] text-emerald-600" aria-hidden="true" />,
+        className: "border-emerald-200 bg-emerald-50 text-emerald-950 shadow-lg",
       });
       if (isDuplicatingDraft) {
         navigate(`/admin/produtos?destacar=${productId}`);
