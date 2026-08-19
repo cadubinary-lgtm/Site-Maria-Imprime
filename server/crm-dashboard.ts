@@ -135,6 +135,13 @@ export function summarizeCrmDashboard(clients: ReturnType<typeof aggregateCrmDas
       if (client.operationalStatus === "reativar") summary.reactivationQueue += 1;
       if (client.operationalStatus === "atencao") summary.attentionQueue += 1;
       if (client.operationalStatus === "sem_compras") summary.clientsWithoutPurchases += 1;
+      const clientWithType = client as unknown as { clientType?: unknown };
+      const clientType = typeof clientWithType.clientType === "string"
+        ? clientWithType.clientType
+        : "balcao";
+      if (clientType === "site" || clientType === "balcao" || clientType === "revendedor" || clientType === "agencia") {
+        summary.clientsByType[clientType] += 1;
+      }
       return summary;
     },
     {
@@ -145,6 +152,7 @@ export function summarizeCrmDashboard(clients: ReturnType<typeof aggregateCrmDas
       attentionQueue: 0,
       clientsWithoutPurchases: 0,
       totalVolume: 0,
+      clientsByType: { site: 0, balcao: 0, revendedor: 0, agencia: 0 },
     },
   );
 }

@@ -29,15 +29,23 @@ export const crmRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        email: z.string().email().optional(),
+        email: z.string().email().optional().or(z.literal("")),
         phone: z.string().optional(),
         whatsapp: z.string().optional(),
+        cpfCnpj: z.string().optional(),
+        addressZipCode: z.string().optional(),
+        addressStreet: z.string().optional(),
+        addressNumber: z.string().optional(),
+        addressComplement: z.string().optional(),
+        addressNeighborhood: z.string().optional(),
+        addressCity: z.string().optional(),
+        addressState: z.string().max(2).optional(),
         clientType: z.enum(["balcao", "revendedor", "agencia", "corporativo", "site"]),
         userId: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
-      const result = await createClient(input);
+      const result = await createClient({ ...input, email: input.email?.trim() || undefined });
       return result;
     }),
 
