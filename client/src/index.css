@@ -584,13 +584,13 @@
     }
 
     .featured-products-grid .product-card-urgency {
-      font-size: 0.5rem;
+      font-size: 0.4375rem;
     }
 
     .featured-products-grid .product-card-action {
       height: 2rem;
       margin-top: 0.5rem;
-      font-size: 0.6875rem;
+      font-size: 0.9375rem;
     }
   }
 
@@ -649,6 +649,10 @@
 
   .product-price-composite.product-price-length-long {
     font-size: 1em;
+  }
+
+  .product-card-action {
+    font-size: clamp(0.75rem, 1.15vw, 0.9375rem) !important;
   }
 
   @media (min-width: 1280px) and (max-width: 1535px) {

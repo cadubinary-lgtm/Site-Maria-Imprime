@@ -90,5 +90,7 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain("font-size: 0.58em;");
     expect(globalStyles).toContain(".product-price-composite.product-price-length-short");
     expect(globalStyles).toContain("font-size: 1.16em;");
+    expect(globalStyles).toContain("font-size: 0.4375rem;");
+    expect(globalStyles).toContain("font-size: clamp(0.75rem, 1.15vw, 0.9375rem) !important;");
   });
 });

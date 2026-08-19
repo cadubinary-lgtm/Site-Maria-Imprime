@@ -3656,3 +3656,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Ajustar automaticamente a escala de preços curtos para preservar equilíbrio visual
 - [x] Validar preço curto e longo com a mesma hierarquia e alinhamento
+
+- [x] Revisar estilos visuais aplicados pelo editor aos preços e ações dos cards
+- [x] Preservar os ajustes visuais compatíveis sem comprometer a responsividade
+- [x] Validar o card revisado e salvar checkpoint publicável
