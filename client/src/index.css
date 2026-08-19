@@ -266,6 +266,13 @@
 }
 
 @layer components {
+  .product-card-currency {
+    display: inline-block;
+    margin-right: 0.125em;
+    font-size: 0.625em;
+    vertical-align: 0.16em;
+  }
+
   /*
    * ─── CARDS GLOBAIS — Estilo limpo, sem cor de fundo ───────────────
    * Todos os cards do sistema seguem este padrão:

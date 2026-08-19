@@ -24,6 +24,10 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("product-card-title");
     expect(publicCardSource).toContain("product-card-pix-price");
     expect(publicCardSource).toContain("product-card-card-price");
+    expect(publicCardSource).toContain("formatPriceAmount(paymentPrices.pix.value)");
+    expect(publicCardSource).toContain("formatPriceAmount(paymentPrices.card.value)");
+    expect(publicCardSource).toContain('className="product-card-currency"');
+    expect(publicCardSource).toContain('className="sr-only"');
     expect(publicCardSource).toContain("product-card-pix-caption");
     expect(publicCardSource).toContain("product-card-card-caption");
     expect(publicCardSource).toContain("product-card-urgency-content");
@@ -79,6 +83,8 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
     expect(globalStyles).toContain("white-space: nowrap;");
     expect(globalStyles).toContain("letter-spacing: -0.04em;");
+    expect(globalStyles).toContain(".product-card-currency {");
+    expect(globalStyles).toContain("font-size: 0.625em;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-caption");
