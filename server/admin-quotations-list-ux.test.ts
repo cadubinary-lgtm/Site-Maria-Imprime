@@ -10,11 +10,15 @@ describe("listagem administrativa de orçamentos", () => {
     expect(source).toContain('id="quotation-period-start"');
     expect(source).toContain('htmlFor="admin-quotations-search"');
     expect(source).toContain('id="admin-quotations-status"');
+    expect(source).toContain("const resetFilters = () =>");
+    expect(source).toContain('aria-label="Limpar filtros de orçamentos"');
+    expect(source).toContain("disabled={!hasActiveFilters}");
   });
 
   it("anuncia os indicadores e estrutura a tabela de orçamentos", () => {
     expect(source).toContain('aria-label="Indicadores operacionais de orçamentos"');
     expect(source).toContain('aria-live="polite"');
+    expect(source).toContain("Mostrando ${rows.length} orçamento");
     expect(source).toContain('scope="col"');
     expect(source).toContain('role="status"');
   });

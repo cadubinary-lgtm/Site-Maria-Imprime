@@ -3473,9 +3473,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar controles de validação de arquivos na identidade rosa e com acessibilidade
 - [x] Validar a central de validação de arquivos e salvar checkpoint publicável
 
-- [ ] Revisar controles, filtros e estados da central de solicitações de serviço
-- [ ] Padronizar controles e ações de solicitações de serviço na identidade rosa
-- [ ] Validar a central de solicitações de serviço e salvar checkpoint publicável
+- [x] Revisar controles, filtros e estados da central de solicitações de serviço
+- [x] Padronizar controles e ações de solicitações de serviço na identidade rosa
+- [x] Validar a central de solicitações de serviço e salvar checkpoint publicável
 
 - [x] Revisar controles, filtros e estados da central de carrinhos abandonados
 - [x] Padronizar controles e ações de carrinhos abandonados na identidade rosa
