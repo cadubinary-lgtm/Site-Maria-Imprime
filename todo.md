@@ -2789,8 +2789,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover os cards operacionais da página Todos os Clientes e mantê-los apenas no Dashboard de Clientes
 - [x] Adicionar seta cinza com hover rosa para expandir e recolher ações secundárias em Todos os Clientes
 - [x] Exibir no Dashboard de Clientes os 30 clientes com maior valor comprado nos últimos dois meses
-- [ ] Confirmar a publicação do checkpoint mais recente no site oficial Maria Imprime
-- [ ] Diagnosticar a discrepância entre a versão publicada e o domínio oficial
+- [x] Confirmar a publicação do checkpoint mais recente no site oficial Maria Imprime
+- [x] Diagnosticar a discrepância entre a versão publicada e o domínio oficial
 - [x] Corrigir o carregamento zerado de clientes e compras no Dashboard de Clientes em produção
 - [x] Inserir nos termos comerciais a disponibilidade variável dos meios de pagamento pelo processador homologado
 - [x] Reconstruir o rodapé em blocos responsivos com dados, links, pagamentos e segurança reais da Maria Imprime
