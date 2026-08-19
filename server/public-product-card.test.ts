@@ -54,6 +54,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.pix.value, pricingSuffix)');
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)');
     expect(publicCardSource).toContain("product-card-action");
+    expect(publicCardSource).toContain("h-7 w-full");
+    expect(publicCardSource).toContain("text-[11px]");
     expect(publicCardSource).toContain("text-[9px]");
     expect(publicCardSource).toContain("hover:bg-pink-700 hover:shadow-md");
     expect(publicCardSource).not.toContain("group-hover:bg-pink-700");
@@ -92,7 +94,9 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain("font-size: 2em;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
-    expect(globalStyles).toContain(".featured-products-grid .product-card-pix-caption");
+    expect(globalStyles).toContain(".featured-products-grid .product-card-action {");
+    expect(globalStyles).toContain("height: 1.5rem;");
+    expect(globalStyles).toContain("font-size: 0.5625rem;");
     expect(globalStyles).toContain("font-size: 0.4375rem;");
     expect(globalStyles).toContain("font-size: 0.375rem;");
   });
