@@ -823,7 +823,7 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await getDeliveryOptionsByProduct(input.productId);
       }),
-    create: adminProcedure
+    create: adminAnyProcedure
       .input(z.object({
         productId: z.number(),
         name: z.string(),
@@ -835,7 +835,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await createDeliveryOption(input);
       }),
-    update: adminProcedure
+    update: adminAnyProcedure
       .input(z.object({
         id: z.number(),
         name: z.string().optional(),
@@ -848,12 +848,12 @@ export const appRouter = router({
         const { id, ...data } = input;
         return await updateDeliveryOption(id, data);
       }),
-    delete: adminProcedure
+    delete: adminAnyProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteDeliveryOption(input.id);
       }),
-    reorder: adminProcedure
+    reorder: adminAnyProcedure
       .input(z.object({
         updates: z.array(z.object({ id: z.number(), order: z.number() }))
       }))

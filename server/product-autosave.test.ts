@@ -24,7 +24,7 @@ describe("salvamento automático de produtos", () => {
     expect(source).not.toContain("Salvar alterações antes de sair?");
   });
 
-  it("exige criação inicial explícita e só ativa o autosalvamento após o produto existir", () => {
+  it("exige criação inicial explícita e prepara um formulário limpo após a confirmação", () => {
     const source = readFileSync(resolve(root, "client/src/pages/admin/AdminNewProduct.tsx"), "utf8");
 
     expect(source).toContain("isCreateFormReadyForAutoSave");
@@ -34,7 +34,7 @@ describe("salvamento automático de produtos", () => {
     expect(source).toContain("Criar produto");
     expect(source).toContain("createProductMutation.mutateAsync(getCreatePayload())");
     expect(source).toContain("updateProductMutation.mutateAsync({ id: autoCreatedProductId, ...payload })");
-    expect(source).toContain("as próximas alterações serão salvas automaticamente.");
+    expect(source).toContain("cadastro confirmado e formulário pronto para um novo produto.");
     expect(source).toContain("Preencha os dados obrigatórios e clique em Criar produto para iniciar o autosalvamento.");
   });
 
