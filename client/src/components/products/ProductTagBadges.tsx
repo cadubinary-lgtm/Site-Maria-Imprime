@@ -49,12 +49,12 @@ export function ProductTagBadges({ tags, tagPosition }: ProductTagBadgesProps) {
   const posClass = POSITION_CLASSES[pos] ?? POSITION_CLASSES["top-right"];
 
   return (
-    <div className={`absolute z-10 flex w-1/2 flex-col gap-1 ${posClass}`}>
+    <div className={`absolute z-10 flex w-2/5 flex-col gap-1 ${posClass}`}>
 
       {parsed.map((tag) => (
         <span
           key={tag}
-          className="product-tag-badge flex h-4 w-full items-center justify-center gap-0.5 rounded-full bg-black px-0 py-0 text-[9px] font-semibold text-white shadow-sm whitespace-nowrap"
+          className="product-tag-badge flex h-3 w-full items-center justify-center gap-0 rounded-full bg-black px-0 py-0 text-[8px] font-semibold text-white shadow-sm whitespace-nowrap"
         >
           <span>{TAG_ICONS[tag] ?? "🏷️"}</span>
           <span>{tag}</span>
