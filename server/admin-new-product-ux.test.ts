@@ -19,4 +19,11 @@ describe("cadastro administrativo de produtos", () => {
   it("permite confirmar a criação pelo envio do formulário", () => {
     expect(source).toContain('onSubmit={(event) => { event.preventDefault(); handleCreateProduct(); }}');
   });
+
+  it("confirma a criação com sucesso animado, contextual e sem duplicidade", () => {
+    expect(source).toContain('toast.success("Produto criado com sucesso"');
+    expect(source).toContain('animate-[pulse_1.2s_ease-in-out_2]');
+    expect(source).toContain('position: "top-right"');
+    expect(source).toContain('id: `new-product-created-${productId}`');
+  });
 });

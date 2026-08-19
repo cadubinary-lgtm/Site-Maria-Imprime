@@ -3602,3 +3602,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear o fluxo de criação e a causa do erro ao criar produto
 - [x] Corrigir a criação de produto preservando o rascunho preenchido
 - [x] Validar a criação de produto e salvar checkpoint publicável
+
+- [x] Definir o fluxo reutilizável para corrigir mutações administrativas com segurança
+- [x] Criar e validar a habilidade reutilizável do fluxo administrativo
+- [x] Adicionar mensagem de sucesso animada após criar produto
+- [x] Validar a habilidade e o feedback de sucesso e salvar checkpoint publicável
