@@ -3664,3 +3664,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar a ampliação aplicada pelo editor ao preço principal
 - [x] Consolidar a ampliação em regra responsiva sem atributos JSX duplicados
 - [x] Validar valores curtos e longos após a ampliação e salvar checkpoint
+
+- [x] Mapear a composição visual atual dos preços Pix e cartão
+- [x] Refinar moeda, valor principal e sufixo conforme a referência visual
+- [x] Validar valores longos e salvar checkpoint publicável
