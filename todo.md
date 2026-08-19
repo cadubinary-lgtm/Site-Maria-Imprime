@@ -3461,6 +3461,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Consolidar todos os tipos de cliente na lista unificada e nos indicadores administrativos
 - [x] Validar criação e consolidação de clientes e salvar checkpoint publicável
 
-- [ ] Revisar controles, indicadores e estados da página legada de contas recebidas
-- [ ] Padronizar controles da página legada de contas recebidas na identidade rosa
-- [ ] Validar a página legada de contas recebidas e salvar checkpoint publicável
+- [x] Revisar controles, indicadores e estados da página legada de contas recebidas
+- [x] Padronizar controles da página legada de contas recebidas na identidade rosa
+- [x] Validar a página legada de contas recebidas e salvar checkpoint publicável
