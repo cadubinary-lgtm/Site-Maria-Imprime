@@ -297,10 +297,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   const navItems: { group?: string; item?: NavItem }[] = [
-    // COMERCIAL E VENDAS - Transformado em menu retrátil
+    // COMERCIAL - Transformado em menu retrátil
     {
       item: {
-        label: "VENDAS",
+        label: "COMERCIAL",
         icon: <ShoppingCart className="w-4 h-4" />,
         children: [
           { ...ADMIN_DASHBOARD_LINKS.sales, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.salesToday || undefined },
