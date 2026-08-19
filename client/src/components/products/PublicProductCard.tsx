@@ -45,6 +45,10 @@ function formatCurrency(value: number, suffix = "") {
   return `${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}${suffix}`;
 }
 
+function formatPriceAmount(value: number) {
+  return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function parseSpecifications(specifications?: string | null): RealSpecification[] {
   if (!specifications) return [];
 
@@ -125,13 +129,19 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         <div className={`mt-1.5 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
           <div className="min-w-0">
             <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
-            <p className="product-card-pix-price mt-0.5 whitespace-nowrap text-[clamp(0.9375rem,1.7vw,1.1875rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value)}</p>
+            <p className="product-card-pix-price mt-0.5 whitespace-nowrap text-[clamp(0.9375rem,1.7vw,1.1875rem)] font-extrabold leading-none text-emerald-600">
+              <span aria-hidden="true"><span className="product-card-currency">R$</span>{formatPriceAmount(paymentPrices.pix.value)}</span>
+              <span className="sr-only">{formatCurrency(paymentPrices.pix.value)}</span>
+            </p>
             {!isReseller && <p className="product-card-pix-caption mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix</p>}
           </div>
           {!isReseller && (
             <div className="relative z-10 min-w-0 border-l border-gray-200 bg-white pl-2">
               <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
-              <p className="product-card-card-price mt-0.5 whitespace-nowrap text-[clamp(0.9375rem,1.7vw,1.1875rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value)}</p>
+              <p className="product-card-card-price mt-0.5 whitespace-nowrap text-[clamp(0.9375rem,1.7vw,1.1875rem)] font-bold leading-none text-gray-500">
+                <span aria-hidden="true"><span className="product-card-currency">R$</span>{formatPriceAmount(paymentPrices.card.value)}</span>
+                <span className="sr-only">{formatCurrency(paymentPrices.card.value)}</span>
+              </p>
               <p className="product-card-card-caption mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}
