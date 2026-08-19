@@ -351,6 +351,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               { label: "Dashboard Financeiro", href: "/admin/financeiro-dashboard" },
               { label: "Contas a Receber", href: "/admin/financeiro/receber" },
               { label: "Contas Recebidas", href: "/admin/financeiro/recebidas" },
+              { label: "Recibos", href: "/admin/financeiro/recibos" },
               { label: "Pagamentos na Retirada", href: "/admin/financeiro/retirada" },
               { label: "Fluxo de Caixa", href: "/admin/financeiro/fluxo" },
               { label: "Relatórios Financeiros", href: "/admin/financeiro/relatorios" },

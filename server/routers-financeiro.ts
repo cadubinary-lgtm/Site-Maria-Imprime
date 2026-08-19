@@ -26,8 +26,10 @@ import {
   orderPayments,
   emailHistory,
   deletedReceivedAccounts,
+  paymentReceipts,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
+import { sendPaymentReceiptEmail } from "./emailService";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -93,6 +95,49 @@ function mapShippingMethod(method: string | null): string {
   if (method.startsWith("carrier_")) return "transportadora";
   if (method === "correios") return "correios";
   return "outro";
+}
+
+const RECEIPT_PAYMENT_LABELS: Record<string, string> = {
+  dinheiro: "Dinheiro",
+  pix: "Pix",
+  cartao_credito: "Cartão de crédito",
+  cartao_debito: "Cartão de débito",
+  transferencia: "Transferência",
+  boleto: "Boleto",
+  pagar_na_retirada: "Pagamento na retirada",
+  outro: "Outro",
+};
+
+function formatReceiptCurrency(value: string | number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
+}
+
+function formatReceiptDate(value: number) {
+  return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+async function ensurePaymentReceipt(db: any, order: any, financeiroId: number | null, paymentMethod: string, paidAt: number, adminUser: any) {
+  const [existing] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.orderId, order.id)).limit(1);
+  if (existing) return existing;
+
+  const receiptNumber = `REC-${new Date(paidAt).getFullYear()}-${String(order.id).padStart(6, "0")}`;
+  await db.insert(paymentReceipts).values({
+    receiptNumber,
+    orderId: order.id,
+    financeiroId,
+    orderNumber: order.orderNumber,
+    customerName: order.guestName || order.deliveryFullName || "Cliente",
+    customerEmail: order.guestEmail || null,
+    customerPhone: order.deliveryPhone || null,
+    amount: order.totalPrice,
+    paymentMethod,
+    paidAt,
+    issuedAt: Date.now(),
+    issuedByAdminId: adminUser?.adminId ?? null,
+    issuedByAdminName: adminUser?.name ?? "Administrador",
+  });
+  const [receipt] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.orderId, order.id)).limit(1);
+  return receipt;
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -609,6 +654,7 @@ export const financeiroRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new Error("Database not available");
+      const paidAt = Date.now();
 
       // Atualiza o pedido existente (apenas paymentStatus e paymentMethod)
       await db.update(orders)
@@ -630,7 +676,7 @@ export const financeiroRouter = router({
           await db.update(financeiro)
             .set({
               status: "pago",
-              dataPagamento: Date.now(),
+              dataPagamento: paidAt,
               formaPagamento: input.formaPagamento,
               observacoes: input.observacoes,
               atualizadoEm: new Date(),
@@ -647,14 +693,163 @@ export const financeiroRouter = router({
             formaPagamento: input.formaPagamento,
             formaEntrega: mapShippingMethod(o.shippingMethod) as any,
             status: "pago",
-            dataPagamento: Date.now(),
+            dataPagamento: paidAt,
             observacoes: input.observacoes,
             criadoPor: ctx.adminUser.adminId,
           });
         }
+
+        const [financeiroRecord] = await db.select({ id: financeiro.id })
+          .from(financeiro)
+          .where(eq(financeiro.pedidoId, input.orderId))
+          .limit(1);
+        const receipt = await ensurePaymentReceipt(
+          db,
+          o,
+          financeiroRecord?.id ?? null,
+          input.formaPagamento,
+          paidAt,
+          (ctx as any).adminUser,
+        );
+        return { success: true, receiptId: receipt.id, receiptNumber: receipt.receiptNumber };
       }
 
-      return { success: true };
+      throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado para emissão do recibo." });
+    }),
+
+  // ── Recibos ──────────────────────────────────────────────────────────────────
+  getRecibos: adminOrManusAuthProcedure
+    .input(z.object({
+      page: z.number().int().positive().default(1),
+      limit: z.number().int().min(1).max(100).default(20),
+      search: z.string().trim().max(255).optional(),
+    }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const conditions: any[] = [];
+      if (input.search) {
+        conditions.push(or(
+          like(paymentReceipts.receiptNumber, `%${input.search}%`),
+          like(paymentReceipts.orderNumber, `%${input.search}%`),
+          like(paymentReceipts.customerName, `%${input.search}%`),
+        ));
+      }
+      const whereClause = conditions.length ? and(...conditions) : undefined;
+      const offset = (input.page - 1) * input.limit;
+      const [summary] = await db.select({ total: sql<number>`count(*)` })
+        .from(paymentReceipts)
+        .where(whereClause);
+      const rows = await db.select().from(paymentReceipts)
+        .where(whereClause)
+        .orderBy(desc(paymentReceipts.issuedAt))
+        .limit(input.limit)
+        .offset(offset);
+      const total = Number(summary?.total ?? 0);
+      return {
+        data: rows,
+        total,
+        page: input.page,
+        totalPages: Math.max(1, Math.ceil(total / input.limit)),
+      };
+    }),
+
+  getRecibo: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(paymentReceipts)
+        .where(eq(paymentReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado." });
+      const items = await db.select({
+        id: orderItems.id,
+        productName: orderItems.productName,
+        quantity: orderItems.quantity,
+        priceAtOrder: orderItems.priceAtOrder,
+      }).from(orderItems).where(eq(orderItems.orderId, receipt.orderId));
+      return { receipt, items };
+    }),
+
+  prepareReceiptWhatsApp: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), phone: z.string().trim().min(10).max(30).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(paymentReceipts)
+        .where(eq(paymentReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado." });
+      const phone = (input.phone || receipt.customerPhone || "").replace(/\D/g, "");
+      if (phone.length < 10) throw new TRPCError({ code: "BAD_REQUEST", message: "Informe um número de WhatsApp válido." });
+      const message = [
+        `Olá, ${receipt.customerName}!`,
+        "",
+        "Confirmamos o recebimento do seu pagamento.",
+        `Recibo: ${receipt.receiptNumber}`,
+        `Pedido: #${receipt.orderNumber}`,
+        `Valor recebido: ${formatReceiptCurrency(receipt.amount)}`,
+        `Forma de pagamento: ${RECEIPT_PAYMENT_LABELS[receipt.paymentMethod] || receipt.paymentMethod}`,
+        `Data: ${formatReceiptDate(receipt.paidAt)}`,
+        "",
+        "Maria Imprime",
+      ].join("\n");
+      await db.update(paymentReceipts).set({ whatsappPreparedAt: Date.now() })
+        .where(eq(paymentReceipts.id, receipt.id));
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "receipt_whatsapp_prepared",
+        entity: "paymentReceipts",
+        entityId: String(receipt.id),
+        after: { receiptNumber: receipt.receiptNumber, phone },
+        ipAddress: ctx.req.ip,
+      });
+      return { whatsappUrl: `https://wa.me/55${phone.replace(/^55/, "")}?text=${encodeURIComponent(message)}` };
+    }),
+
+  sendReceiptEmail: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), email: z.string().email().optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(paymentReceipts)
+        .where(eq(paymentReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado." });
+      const recipientEmail = input.email || receipt.customerEmail;
+      if (!recipientEmail) throw new TRPCError({ code: "BAD_REQUEST", message: "Informe o e-mail do cliente para enviar o recibo." });
+      const result = await sendPaymentReceiptEmail(recipientEmail, {
+        customerName: receipt.customerName,
+        receiptNumber: receipt.receiptNumber,
+        orderNumber: receipt.orderNumber,
+        amount: formatReceiptCurrency(receipt.amount),
+        paymentMethod: RECEIPT_PAYMENT_LABELS[receipt.paymentMethod] || receipt.paymentMethod,
+        paidAt: formatReceiptDate(receipt.paidAt),
+      });
+      if (!result.success) throw new TRPCError({ code: "BAD_GATEWAY", message: result.error || "Não foi possível enviar o e-mail do recibo." });
+      const sentAt = Date.now();
+      await db.update(paymentReceipts).set({ emailSentAt: sentAt }).where(eq(paymentReceipts.id, receipt.id));
+      await db.insert(emailHistory).values({
+        orderId: receipt.orderId,
+        recipientEmail,
+        recipientName: receipt.customerName,
+        emailType: "other",
+        subject: `Recibo ${receipt.receiptNumber} — Pedido #${receipt.orderNumber}`,
+        templateName: "sendPaymentReceiptEmail",
+        status: "sent",
+      });
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "receipt_email_sent",
+        entity: "paymentReceipts",
+        entityId: String(receipt.id),
+        after: { receiptNumber: receipt.receiptNumber, recipientEmail, sentAt },
+        ipAddress: ctx.req.ip,
+      });
+      return { success: true, recipientEmail };
     }),
 
   // ── Atualizar Status Retirada ───────────────────────────────────────────────

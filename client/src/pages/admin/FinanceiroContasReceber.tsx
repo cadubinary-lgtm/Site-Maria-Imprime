@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import {
   Search, DollarSign, Eye, Send, CreditCard, Banknote,
-  QrCode, RefreshCw, Filter, Phone, Trash2, RotateCcw
+  QrCode, RefreshCw, Filter, Phone, Trash2, RotateCcw, Printer, Mail, ReceiptText
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
@@ -64,6 +64,9 @@ export default function FinanceiroContasReceber() {
   const [permanentDeleteDialog, setPermanentDeleteDialog] = useState<{ open: boolean; item: any | null }>({ open: false, item: null });
   const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [receiptActionDialog, setReceiptActionDialog] = useState<{ open: boolean; receiptId: number | null; receiptNumber: string; order: any | null }>({ open: false, receiptId: null, receiptNumber: "", order: null });
+  const [receiptContactDialog, setReceiptContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email"; receiptId: number | null; receiptNumber: string }>({ open: false, channel: "whatsapp", receiptId: null, receiptNumber: "" });
+  const [receiptContact, setReceiptContact] = useState("");
   const { adminUser } = useAdminAuth();
   const canDeleteReceivable = adminUser?.role === "superadmin";
   const utils = trpc.useUtils();
@@ -80,10 +83,17 @@ export default function FinanceiroContasReceber() {
   const trashedReceivables = trashedAccounts.filter((item: any) => item.paymentStatus !== "pago" || item.paymentMethod === "pagar_na_retirada");
 
   const confirmarPagamento = trpc.financeiro.confirmarPagamento.useMutation({
-    onSuccess: () => {
-      toast.success("Pagamento confirmado com sucesso!");
+    onSuccess: (data) => {
+      const receivedOrder = confirmDialog.order;
+      toast.success("Pagamento confirmado e recibo gerado", {
+        description: `Recibo ${data.receiptNumber} disponível para o pedido #${receivedOrder?.orderNumber}.`,
+        position: "top-right",
+        duration: 3500,
+        id: `payment-confirmed-receipt-${data.receiptId}`,
+      });
       setConfirmDialog({ open: false, order: null });
       refetch();
+      setReceiptActionDialog({ open: true, receiptId: data.receiptId, receiptNumber: data.receiptNumber, order: receivedOrder });
     },
     onError: (e) => toast.error("Erro: " + e.message),
   });
@@ -102,6 +112,35 @@ export default function FinanceiroContasReceber() {
       toast.success("Abrindo WhatsApp...");
     },
     onError: (e) => toast.error("Erro: " + e.message),
+  });
+
+  const prepararReciboWhatsApp = trpc.financeiro.prepareReceiptWhatsApp.useMutation({
+    onSuccess: (data, variables) => {
+      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
+      toast.success("Recibo preparado no WhatsApp", {
+        description: "Revise a mensagem e envie-a ao cliente no WhatsApp.",
+        position: "top-right",
+        duration: 3500,
+        id: `receipt-whatsapp-${variables.receiptId}`,
+      });
+      setReceiptContactDialog({ open: false, channel: "whatsapp", receiptId: null, receiptNumber: "" });
+      setReceiptContact("");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const enviarReciboEmail = trpc.financeiro.sendReceiptEmail.useMutation({
+    onSuccess: (data, variables) => {
+      toast.success("Recibo enviado por e-mail", {
+        description: `Enviado para ${data.recipientEmail}.`,
+        position: "top-right",
+        duration: 3500,
+        id: `receipt-email-${variables.receiptId}`,
+      });
+      setReceiptContactDialog({ open: false, channel: "email", receiptId: null, receiptNumber: "" });
+      setReceiptContact("");
+    },
+    onError: (error) => toast.error(error.message),
   });
 
   const moveToTrash = trpc.financeiro.moveContaRecebidaToTrash.useMutation({
@@ -415,6 +454,50 @@ export default function FinanceiroContasReceber() {
             >
               {confirmarPagamento.isPending ? "Confirmando..." : "Confirmar Pagamento"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={receiptActionDialog.open} onOpenChange={(open) => !open && setReceiptActionDialog({ open: false, receiptId: null, receiptNumber: "", order: null })}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><ReceiptText className="h-5 w-5 text-pink-600" aria-hidden="true" />Recibo gerado</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">O pagamento foi confirmado e o recibo <strong>{receiptActionDialog.receiptNumber}</strong> já está vinculado ao pedido #{receiptActionDialog.order?.orderNumber}.</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => { if (receiptActionDialog.receiptId) setLocation(`/admin/financeiro/recibos/${receiptActionDialog.receiptId}/imprimir`); }}><Printer className="mr-2 h-4 w-4" aria-hidden="true" />Imprimir</Button>
+              <Button type="button" variant="outline" className="border-green-200 text-green-700 hover:bg-green-50" disabled={prepararReciboWhatsApp.isPending} onClick={() => {
+                if (!receiptActionDialog.receiptId) return;
+                const phone = String(receiptActionDialog.order?.telefone || "").replace(/\D/g, "");
+                if (phone.length >= 10) prepararReciboWhatsApp.mutate({ receiptId: receiptActionDialog.receiptId, phone });
+                else { setReceiptContact(""); setReceiptContactDialog({ open: true, channel: "whatsapp", receiptId: receiptActionDialog.receiptId, receiptNumber: receiptActionDialog.receiptNumber }); }
+              }}><Send className="mr-2 h-4 w-4" aria-hidden="true" />WhatsApp</Button>
+              <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" disabled={enviarReciboEmail.isPending} onClick={() => {
+                if (!receiptActionDialog.receiptId) return;
+                const email = receiptActionDialog.order?.email || "";
+                if (email) enviarReciboEmail.mutate({ receiptId: receiptActionDialog.receiptId, email });
+                else { setReceiptContact(""); setReceiptContactDialog({ open: true, channel: "email", receiptId: receiptActionDialog.receiptId, receiptNumber: receiptActionDialog.receiptNumber }); }
+              }}><Mail className="mr-2 h-4 w-4" aria-hidden="true" />E-mail</Button>
+            </div>
+          </div>
+          <DialogFooter><Button type="button" variant="outline" onClick={() => setReceiptActionDialog({ open: false, receiptId: null, receiptNumber: "", order: null })}>Fechar</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={receiptContactDialog.open} onOpenChange={(open) => !open && setReceiptContactDialog({ open: false, channel: "whatsapp", receiptId: null, receiptNumber: "" })}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{receiptContactDialog.channel === "email" ? "Enviar recibo por e-mail" : "Preparar recibo no WhatsApp"}</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="receipt-contact" className="text-sm font-medium text-gray-700">{receiptContactDialog.channel === "email" ? "E-mail do cliente" : "WhatsApp do cliente"}</label>
+            <Input id="receipt-contact" type={receiptContactDialog.channel === "email" ? "email" : "tel"} value={receiptContact} onChange={(event) => setReceiptContact(receiptContactDialog.channel === "whatsapp" ? event.target.value.replace(/\D/g, "") : event.target.value)} placeholder={receiptContactDialog.channel === "email" ? "cliente@exemplo.com" : "Ex.: 11999999999"} />
+            <p className="text-xs text-gray-500">Recibo {receiptContactDialog.receiptNumber}</p>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setReceiptContactDialog({ open: false, channel: "whatsapp", receiptId: null, receiptNumber: "" })}>Cancelar</Button>
+            <Button type="button" className={receiptContactDialog.channel === "email" ? "bg-pink-600 hover:bg-pink-700" : "bg-green-600 hover:bg-green-700"} disabled={!receiptContact.trim() || prepararReciboWhatsApp.isPending || enviarReciboEmail.isPending} onClick={() => {
+              if (!receiptContactDialog.receiptId) return;
+              if (receiptContactDialog.channel === "email") enviarReciboEmail.mutate({ receiptId: receiptContactDialog.receiptId, email: receiptContact.trim() });
+              else prepararReciboWhatsApp.mutate({ receiptId: receiptContactDialog.receiptId, phone: receiptContact });
+            }}>{receiptContactDialog.channel === "email" ? "Enviar e-mail" : "Abrir WhatsApp"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -95,6 +95,8 @@ import FinanceiroContasRecebidas from "./pages/admin/FinanceiroContasRecebidas";
 import FinanceiroPagamentosRetirada from "./pages/admin/FinanceiroPagamentosRetirada";
 import FinanceiroFluxoCaixa from "./pages/admin/FinanceiroFluxoCaixa";
 import FinanceiroRelatorios from "./pages/admin/FinanceiroRelatorios";
+import FinanceiroRecibos from "./pages/admin/FinanceiroRecibos";
+import FinanceiroReciboPrint from "./pages/admin/FinanceiroReciboPrint";
 
 // ─── Gestão Fiscal ───────────────────────────────────────────────────────────
 import GestaoFiscalDashboard from "./pages/admin/GestaoFiscalDashboard";
@@ -171,11 +173,13 @@ function AdminProtectedRoutesManus() {
     return null;
   }
 
-  // Rotas protegidas do ambiente de prévia
-  return (
-    <Switch>
-      <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
-      <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+// Rotas protegidas do ambiente de prévia
+return (
+<Switch>
+<Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+<Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
+      <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
@@ -271,11 +275,13 @@ function AdminProtectedRoutes() {
     return null;
   }
 
-  // Rotas protegidas do domínio oficial
-  return (
-    <Switch>
-      <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
-      <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+// Rotas protegidas do domínio oficial
+return (
+<Switch>
+<Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+<Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
+      <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
