@@ -3500,3 +3500,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear as fontes de dados das listagens de clientes site e balcão
 - [x] Corrigir a criação e a exibição dos clientes nas páginas administrativas correspondentes
 - [x] Validar as listagens site e balcão com testes de regressão e salvar checkpoint publicável
+
+- [x] Mapear formulários e persistência do tipo de cliente durante a edição
+- [x] Adicionar o seletor de tipo de cliente ao lado da tabela de preços
+- [x] Validar a edição do tipo de cliente e salvar checkpoint publicável

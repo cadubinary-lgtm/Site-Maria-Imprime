@@ -375,7 +375,7 @@ function CustomerDetailModal({
 }
 
 function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: any | null; open: boolean; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", newPassword: "", confirmPassword: "", priceTier: "final" as "final" | "reseller", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", newPassword: "", confirmPassword: "", priceTier: "final" as "final" | "reseller", accountType: "customer" as "customer" | "reseller" | "agency", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
   const updateCustomer = trpc.customerAuth.adminUpdateCustomer.useMutation({
     onSuccess: (result) => {
       toast.success(result.emailVerificationSent ? "Cliente atualizado. Uma confirmação foi enviada ao novo e-mail." : "Cliente atualizado com sucesso.");
@@ -388,7 +388,7 @@ function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: an
   useEffect(() => {
     if (!customer) return;
     setForm({
-      firstName: customer.firstName || "", lastName: customer.lastName || "", email: customer.email || "", phone: customer.phone || "", cpfCnpj: customer.cpfCnpj || "", newPassword: "", confirmPassword: "", priceTier: customer.priceTier === "reseller" ? "reseller" : "final",
+      firstName: customer.firstName || "", lastName: customer.lastName || "", email: customer.email || "", phone: customer.phone || "", cpfCnpj: customer.cpfCnpj || "", newPassword: "", confirmPassword: "", priceTier: customer.priceTier === "reseller" ? "reseller" : "final", accountType: customer.accountType === "reseller" || customer.accountType === "agency" ? customer.accountType : "customer",
       addressZipCode: customer.addressZipCode || "", addressStreet: customer.addressStreet || "", addressNumber: customer.addressNumber || "", addressComplement: customer.addressComplement || "", addressNeighborhood: customer.addressNeighborhood || "", addressCity: customer.addressCity || "", addressState: customer.addressState || "",
     });
   }, [customer]);
@@ -411,7 +411,8 @@ function CustomerEditDialog({ customer, open, onClose, onSaved }: { customer: an
               {field("firstName", "Nome *", "Nome")}{field("lastName", "Sobrenome *", "Sobrenome")}
               {field("email", "E-mail *", "email@exemplo.com", "md:col-span-2", "email")}{field("phone", "Telefone / WhatsApp", "(00) 00000-0000")}{field("cpfCnpj", "CPF / CNPJ", "000.000.000-00")}
               {field("newPassword", "Nova senha (opcional)", "Deixe em branco para manter a atual", "", "password")}{field("confirmPassword", "Confirmar nova senha", "Repita a nova senha", "", "password")}
-              <label className="grid gap-1.5 text-sm font-medium text-gray-700 md:col-span-2"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tipo de cliente</span><Select value={form.accountType} onValueChange={(value: "customer" | "reseller" | "agency") => setForm({ ...form, accountType: value })}><SelectTrigger aria-label="Tipo de cliente"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="customer">Cliente site</SelectItem><SelectItem value="reseller">Revendedor</SelectItem><SelectItem value="agency">Agência</SelectItem></SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Tabela de Preços</span><Select value={form.priceTier} onValueChange={(value: "final" | "reseller") => setForm({ ...form, priceTier: value })}><SelectTrigger aria-label="Tabela de preços"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="final">Cliente final</SelectItem><SelectItem value="reseller">Revendedor</SelectItem></SelectContent></Select></label>
             </div>
           </section>
           <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
