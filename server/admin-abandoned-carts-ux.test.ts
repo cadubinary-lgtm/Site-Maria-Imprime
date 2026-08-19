@@ -14,6 +14,7 @@ describe("recuperação de carrinhos abandonados", () => {
 
   it("estrutura tabelas e ações de recuperação de forma acessível", () => {
     expect(source).toContain('scope="col"');
+    expect(source).toContain('aria-label={`Ver detalhes do carrinho de ${cart.clientName || "cliente"}`}');
     expect(source).toContain('aria-label={`Enviar lembrete por e-mail para ${cart.clientName || "cliente"}`}');
     expect(source).toContain('aria-label={`Preparar lembrete por WhatsApp para ${cart.clientName || "cliente"}`}');
     expect(source).toContain('aria-label={`Excluir carrinho de ${cart.clientName || "cliente"}`}');
@@ -23,5 +24,9 @@ describe("recuperação de carrinhos abandonados", () => {
     expect(source).toContain('rel="noopener noreferrer"');
     expect(source).toContain('aria-busy={deleteMutation.isPending}');
     expect(source).toContain('aria-busy={emailReminderMutation.isPending}');
+    expect(source).toContain('id: "abandoned-carts-cleanup"');
+    expect(source).toContain('id: "abandoned-carts-delete"');
+    expect(source).toContain('id: "abandoned-carts-email-reminder"');
+    expect(source).toContain('position: "top-right", duration: 3500');
   });
 });
