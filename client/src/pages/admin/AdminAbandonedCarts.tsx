@@ -41,7 +41,8 @@ export default function AdminAbandonedCarts() {
       toast.success(
         deletedItems > 0
           ? `${deletedItems} item(ns) de carrinhos expirados foram removidos.`
-          : "Nenhum carrinho com mais de 48 horas para remover."
+          : "Nenhum carrinho com mais de 48 horas para remover.",
+        { position: "top-right", duration: 3500, id: "abandoned-carts-cleanup" }
       );
       utils.abandonedCarts.list.invalidate();
     },
@@ -49,7 +50,7 @@ export default function AdminAbandonedCarts() {
   });
   const deleteMutation = trpc.abandonedCarts.deleteOne.useMutation({
     onSuccess: ({ deletedItems }) => {
-      toast.success(`${deletedItems} item(ns) removido(s) do carrinho.`);
+      toast.success(`${deletedItems} item(ns) removido(s) do carrinho.`, { position: "top-right", duration: 3500, id: "abandoned-carts-delete" });
       setCartToDelete(null);
       setSelectedCart(null);
       utils.abandonedCarts.list.invalidate();
@@ -58,7 +59,7 @@ export default function AdminAbandonedCarts() {
   });
   const emailReminderMutation = trpc.abandonedCarts.sendEmailReminder.useMutation({
     onSuccess: ({ email }) => {
-      toast.success(`Lembrete enviado para ${email}.`);
+      toast.success(`Lembrete enviado para ${email}.`, { position: "top-right", duration: 3500, id: "abandoned-carts-email-reminder" });
       setCartToRemind(null);
       utils.abandonedCarts.list.invalidate();
     },
@@ -105,7 +106,7 @@ export default function AdminAbandonedCarts() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" asChild>
               <Link href="/admin">← Voltar ao Admin</Link>
             </Button>
             <Button
@@ -177,7 +178,7 @@ export default function AdminAbandonedCarts() {
                         <td className="px-4 py-4"><Badge variant="outline" className="gap-1 border-pink-200 bg-pink-50 text-pink-700"><Clock3 className="h-3 w-3" aria-hidden="true" />{formatRemainingTime(cart.expiresAt)}</Badge></td>
                         <td className="px-4 py-4">
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" onClick={() => setSelectedCart(cart)}><Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />Detalhes</Button>
+                            <Button size="sm" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setSelectedCart(cart)} aria-label={`Ver detalhes do carrinho de ${cart.clientName || "cliente"}`}><Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />Detalhes</Button>
                             {cart.clientEmail && <Button size="icon" variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50" aria-label={`Enviar lembrete por e-mail para ${cart.clientName || "cliente"}`} onClick={() => setCartToRemind(cart)}><Mail className="h-4 w-4" aria-hidden="true" /></Button>}
                             {cart.clientPhone && <Button size="icon" variant="outline" className="border-emerald-200 text-emerald-600 hover:bg-emerald-50" aria-label={`Preparar lembrete por WhatsApp para ${cart.clientName || "cliente"}`} onClick={() => openWhatsAppReminder(cart)}><MessageCircle className="h-4 w-4" aria-hidden="true" /></Button>}
                             <Button size="icon" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" aria-label={`Excluir carrinho de ${cart.clientName || "cliente"}`} onClick={() => setCartToDelete(cart)}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>
@@ -278,7 +279,7 @@ export default function AdminAbandonedCarts() {
             <AlertDialogHeader><AlertDialogTitle>Enviar lembrete por e-mail?</AlertDialogTitle><AlertDialogDescription>Será enviado um lembrete de carrinho abandonado para {cartToRemind?.clientEmail}, usando a identidade da Maria Imprime.</AlertDialogDescription></AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={emailReminderMutation.isPending}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction disabled={emailReminderMutation.isPending} aria-busy={emailReminderMutation.isPending} onClick={(event) => { event.preventDefault(); if (cartToRemind) emailReminderMutation.mutate({ userId: cartToRemind.userId, sessionId: cartToRemind.sessionId }); }}>
+              <AlertDialogAction className="bg-pink-600 hover:bg-pink-700" disabled={emailReminderMutation.isPending} aria-busy={emailReminderMutation.isPending} onClick={(event) => { event.preventDefault(); if (cartToRemind) emailReminderMutation.mutate({ userId: cartToRemind.userId, sessionId: cartToRemind.sessionId }); }}>
                 {emailReminderMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Mail className="mr-2 h-4 w-4" aria-hidden="true" />}Enviar lembrete
               </AlertDialogAction>
             </AlertDialogFooter>
