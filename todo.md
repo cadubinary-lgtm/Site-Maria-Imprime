@@ -3545,3 +3545,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear o diálogo de confirmação e o documento existente de recibo
 - [x] Adicionar download em PDF do recibo após confirmar o pagamento
 - [x] Validar o download de PDF e salvar checkpoint publicável
+
+- [x] Mapear as ações e os ícones da página de recibos
+- [x] Adicionar baixar PDF às ações da lista de recibos
+- [x] Substituir o ícone genérico pelo ícone oficial do WhatsApp
+- [x] Validar as ações da página de recibos e salvar checkpoint publicável

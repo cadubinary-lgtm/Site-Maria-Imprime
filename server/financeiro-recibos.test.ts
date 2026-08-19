@@ -66,4 +66,12 @@ describe("central financeira de recibos", () => {
     expect(receiptPdf).toContain("OBSERVAÇÕES DA EMPRESA");
     expect(receiptPdf).toContain("doc.save(`recibo-");
   });
+
+  it("mantém PDF e ícone oficial do WhatsApp nas ações da central de recibos", () => {
+    expect(receiptHub).toContain("Baixar recibo ${receipt.receiptNumber} em PDF");
+    expect(receiptHub).toContain("downloadReceiptPdf");
+    expect(receiptHub).toContain("PDF do recibo baixado");
+    expect(receiptHub).toContain('import { FaWhatsapp } from "react-icons/fa"');
+    expect(receiptHub).toContain("<FaWhatsapp");
+  });
 });
