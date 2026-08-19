@@ -275,7 +275,7 @@ export const appRouter = router({
         );
         return { deletedCount: input.ids.length };
       }),
-    createProduct: adminProcedure
+    createProduct: adminAnyProcedure
       .input(z.object({
         name: z.string(),
         description: z.string().optional(),

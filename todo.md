@@ -3598,3 +3598,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar a edição de borda aplicada ao carrossel Acesso rápido
 - [x] Validar a edição visual sem afetar cartões e setas do carrossel
 - [x] Salvar checkpoint da edição visual validada
+
+- [x] Mapear o fluxo de criação e a causa do erro ao criar produto
+- [x] Corrigir a criação de produto preservando o rascunho preenchido
+- [x] Validar a criação de produto e salvar checkpoint publicável
