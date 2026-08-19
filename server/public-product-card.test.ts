@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const publicCardSource = readFileSync(resolve(root, "client/src/components/products/PublicProductCard.tsx"), "utf8");
+const globalStyles = readFileSync(resolve(root, "client/src/index.css"), "utf8");
 const featuredSource = readFileSync(resolve(root, "client/src/components/home/FeaturedProducts.tsx"), "utf8");
 const catalogSource = readFileSync(resolve(root, "client/src/pages/public/Catalog.tsx"), "utf8");
 const allProductsSource = readFileSync(resolve(root, "client/src/pages/public/AllProducts.tsx"), "utf8");
@@ -17,8 +18,13 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("object-contain");
     expect(publicCardSource).not.toContain("object-cover");
     expect(publicCardSource).not.toContain("Desconto no Pix");
-    expect(publicCardSource).toContain('className="px-4 pb-4 pt-1"');
+    expect(publicCardSource).toContain('className="product-card-content px-4 pb-4 pt-1"');
     expect(publicCardSource).toContain('text-[17px]');
+    expect(publicCardSource).toContain("product-card-content");
+    expect(publicCardSource).toContain("product-card-title");
+    expect(publicCardSource).toContain("product-card-pix-price");
+    expect(publicCardSource).toContain("product-card-card-price");
+    expect(publicCardSource).toContain("product-card-urgency");
     expect(publicCardSource).toContain("mt-1.5 grid gap-2");
     expect(publicCardSource).not.toContain("product.description &&");
     expect(publicCardSource).not.toContain("operationalFacts");
@@ -57,5 +63,12 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("Confira os detalhes e opções deste produto.");
     expect(publicCardSource).toContain("ImageOff");
     expect(publicCardSource).not.toContain('items-center justify-center text-sm text-gray-400">Sem imagem');
+  });
+
+  it("mantém os valores completos na grade compacta de seis produtos", () => {
+    expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price");
+    expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
+    expect(globalStyles).toContain("white-space: nowrap;");
+    expect(globalStyles).toContain("letter-spacing: -0.04em;");
   });
 });

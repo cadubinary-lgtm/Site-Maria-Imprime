@@ -560,4 +560,37 @@
       font-size: 0.75rem;
     }
   }
+
+  /* Seis cards compartilham a mesma largura útil do carrossel Acesso rápido. */
+  @media (min-width: 1280px) and (max-width: 1535px) {
+    .featured-products-grid .product-card-content {
+      padding: 0.5rem 0.5rem 0.75rem;
+    }
+
+    .featured-products-grid .product-card-title {
+      font-size: 0.875rem;
+    }
+
+    .featured-products-grid .product-card-pix-price {
+      white-space: nowrap;
+      font-size: 0.875rem;
+      letter-spacing: -0.04em;
+    }
+
+    .featured-products-grid .product-card-card-price {
+      white-space: nowrap;
+      font-size: 0.75rem;
+      letter-spacing: -0.035em;
+    }
+
+    .featured-products-grid .product-card-urgency {
+      font-size: 0.5rem;
+    }
+
+    .featured-products-grid .product-card-action {
+      height: 2rem;
+      margin-top: 0.5rem;
+      font-size: 0.6875rem;
+    }
+  }
 }

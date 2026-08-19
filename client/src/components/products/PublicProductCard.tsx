@@ -106,8 +106,8 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         )}
       </div>
 
-      <CardContent className="px-4 pb-4 pt-1">
-        <h3 className="line-clamp-2 text-[17px] font-semibold leading-tight text-gray-900">{product.name}</h3>
+      <CardContent className="product-card-content px-4 pb-4 pt-1">
+        <h3 className="product-card-title line-clamp-2 text-[17px] font-semibold leading-tight text-gray-900">{product.name}</h3>
 
         {specifications.length > 0 && (
           <div className="mt-3 grid grid-cols-2 border-y border-gray-100 py-2 sm:grid-cols-4">
@@ -127,20 +127,20 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
         <div className={`mt-1.5 grid gap-2 ${isReseller ? "grid-cols-1" : "grid-cols-2"}`}>
           <div className="min-w-0">
             <p className="text-[8px] font-bold uppercase tracking-wide text-emerald-700">{isReseller ? "Preço revendedor" : calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no Pix"}</p>
-            <p className="mt-0.5 break-words text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
+            <p className="product-card-pix-price mt-0.5 break-words text-[clamp(1rem,2vw,1.5rem)] font-extrabold leading-none text-emerald-600">{formatCurrency(paymentPrices.pix.value, pricingSuffix)}</p>
             {!isReseller && <p className="mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix{pixDiscount.eligible ? ` (${pixDiscount.percentage}% de desconto)` : ""}</p>}
           </div>
           {!isReseller && (
             <div className="min-w-0 border-l border-gray-200 pl-2">
               <p className="text-[8px] font-bold uppercase tracking-wide text-gray-400">{calculationType === "m2" || calculationType === "metro_linear" ? "A partir de" : "Preço no cartão"}</p>
-              <p className="mt-0.5 break-words text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
+              <p className="product-card-card-price mt-0.5 break-words text-[clamp(0.875rem,1.6vw,1.125rem)] font-bold leading-none text-gray-500">{formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)}</p>
               <p className="mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}
         </div>
 
         {(cardDescriptionLines.length > 0 || sameDayUrgency) && (
-          <div className="mt-2 flex min-w-0 items-start gap-1 text-[9px] font-semibold leading-[1.2] tracking-[-0.015em] text-pink-700">
+          <div className="product-card-urgency mt-2 flex min-w-0 items-start gap-1 text-[9px] font-semibold leading-[1.2] tracking-[-0.015em] text-pink-700">
             <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
             {cardDescriptionLines.length > 0 ? (
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
