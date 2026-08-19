@@ -3697,3 +3697,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o botão rosa para o centro real do card
 - [x] Validar centralização sem alterar seu tamanho reduzido
 - [x] Salvar checkpoint publicável da correção
+
+- [x] Reduzir a tag “Promoção” na largura e na altura
+- [x] Manter a tag no mesmo lugar sobre a imagem do produto
+- [x] Validar proporção e salvar checkpoint publicável
