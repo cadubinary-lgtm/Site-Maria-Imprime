@@ -3526,3 +3526,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Regra protegida: aprovação de arte não altera o status geral do pedido
 - [x] Referência de restauração da pré-impressão: checkpoint afdba8d6
+
+- [x] Mapear cabeçalho, identificação e linhas de notas internas da Ordem de Serviço
+- [x] Manter logo com CNPJ abaixo, remover identificação duplicada e separar linhas das notas
+- [x] Validar a Ordem de Serviço ajustada e salvar checkpoint publicável

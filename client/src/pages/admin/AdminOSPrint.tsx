@@ -268,15 +268,15 @@ export default function AdminOSPrint() {
           {/* ══ 1. CABEÇALHO: 3 colunas com divisores verticais ═════════════════════ */}
           <div style={{ display: "flex", borderBottom: `1px solid ${border}` }}>
 
-            {/* COL 1: Logo + contatos da empresa */}
+            {/* COL 1: Logo, CNPJ e contatos da empresa */}
             <div style={{
               width: "210px", flexShrink: 0,
               padding: "12px 14px 12px 14px",
               borderRight: `1px solid ${border}`,
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px", marginBottom: "10px" }}>
                 {company.printLogoUrl ? (
-                  <img src={company.printLogoUrl} alt={`Logotipo ${company.tradeName}`} style={{ width: "72px", height: "38px", objectFit: "contain", flexShrink: 0 }} />
+                  <img src={company.printLogoUrl} alt={`Logotipo ${company.tradeName}`} style={{ width: "88px", height: "42px", objectFit: "contain", flexShrink: 0 }} />
                 ) : (
                   <div style={{
                     width: "38px", height: "38px", backgroundColor: orange,
@@ -285,10 +285,7 @@ export default function AdminOSPrint() {
                     <FileText style={{ width: "19px", height: "19px", color: "#fff" }} />
                   </div>
                 )}
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 900, color: "#111827", lineHeight: 1.1 }}>{company.tradeName}</div>
-                  <div style={{ fontSize: "8px", fontWeight: 600, color: "#6b7280" }}>CNPJ: {company.cnpj}</div>
-                </div>
+                <div style={{ fontSize: "8px", fontWeight: 700, color: "#4b5563", letterSpacing: "0.1px" }}>CNPJ: 34.528.399/0001-08</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151" }}>
@@ -824,9 +821,11 @@ export default function AdminOSPrint() {
                   NOTAS INTERNAS
                 </span>
               </div>
-              <div style={{ height: "40px", borderBottom: `1px solid ${border}`, marginBottom: "4px" }} />
-              <div style={{ height: "1px", backgroundColor: border, marginBottom: "4px" }} />
-              <div style={{ height: "1px", backgroundColor: border }} />
+              <div style={{ height: "58px", paddingTop: "5px", display: "flex", flexDirection: "column", justifyContent: "space-between" }} aria-label="Área para notas internas manuscritas">
+                <div style={{ height: "1px", backgroundColor: border }} />
+                <div style={{ height: "1px", backgroundColor: border }} />
+                <div style={{ height: "1px", backgroundColor: border }} />
+              </div>
             </div>
           </div>
 
