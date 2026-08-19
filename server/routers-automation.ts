@@ -90,6 +90,14 @@ export const automationRouter = router({
   }),
 
   /**
+   * Visão consolidada das automações efetivamente implementadas no site.
+   */
+  getDashboard: adminProcedure.query(async () => {
+    const { getAutomationDashboard } = await import("./db-automation");
+    return await getAutomationDashboard();
+  }),
+
+  /**
    * Enviar notificação WhatsApp
    */
   sendWhatsApp: adminProcedure
