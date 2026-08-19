@@ -3550,3 +3550,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar baixar PDF às ações da lista de recibos
 - [x] Substituir o ícone genérico pelo ícone oficial do WhatsApp
 - [x] Validar as ações da página de recibos e salvar checkpoint publicável
+
+- [x] Revisar os estados visuais do seletor de forma de pagamento
+- [x] Destacar em rosa a forma de pagamento selecionada
+- [x] Validar o seletor de pagamento e salvar checkpoint publicável
