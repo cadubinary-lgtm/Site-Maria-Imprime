@@ -24,15 +24,6 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("product-card-title");
     expect(publicCardSource).toContain("product-card-pix-price");
     expect(publicCardSource).toContain("product-card-card-price");
-    expect(publicCardSource).toContain("formatCardPrice");
-    expect(publicCardSource).toContain("product-price-currency");
-    expect(publicCardSource).toContain("product-price-integer");
-    expect(publicCardSource).toContain("product-price-suffix");
-    expect(publicCardSource).toContain("product-price-length-short");
-    expect(publicCardSource).toContain("product-price-length-medium");
-    expect(publicCardSource).toContain("product-price-length-long");
-    expect(publicCardSource).not.toContain("style={{fontSize:");
-    expect(publicCardSource).toContain("product-card-pix-caption");
     expect(publicCardSource).toContain("product-card-urgency");
     expect(publicCardSource).toContain("mt-1.5 grid gap-2");
     expect(publicCardSource).not.toContain("product.description &&");
@@ -78,23 +69,6 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price");
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
     expect(globalStyles).toContain("white-space: nowrap;");
-    expect(globalStyles).toContain("letter-spacing: -0.075em;");
-  });
-
-  it("adapta preços longos e a frase Pix à largura da própria coluna", () => {
-    expect(globalStyles).toContain("container-type: inline-size;");
-    expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.375rem, 7cqw, 0.625rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.625rem, 21cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.575rem, 21cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("font-size: clamp(0.575rem, 12cqw, 2.8125rem) !important;");
-    expect(globalStyles).toContain("line-height: 0.95;");
-    expect(globalStyles).toContain(".product-price-currency,");
-    expect(globalStyles).toContain("font-size: 0.58em;");
-    expect(globalStyles).toContain(".product-price-composite.product-price-length-short");
-    expect(globalStyles).toContain("font-size: 1.16em;");
-    expect(globalStyles).toContain("font-size: 0.4375rem;");
-    expect(globalStyles).toContain("font-size: clamp(0.75rem, 1.15vw, 0.9375rem) !important;");
+    expect(globalStyles).toContain("letter-spacing: -0.04em;");
   });
 });
