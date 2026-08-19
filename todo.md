@@ -3709,3 +3709,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir visualmente de forma efetiva a largura e a altura da tag “Promoção”
 - [x] Comparar a tag com o botão rosa sem alterar sua posição
 - [x] Validar a diferença e salvar checkpoint publicável
+
+- [x] Reduzir o texto “A partir de” dos preços Pix e cartão
+- [x] Aplicar a redução de forma responsiva em desktop e mobile
+- [x] Validar as legendas e salvar checkpoint publicável
