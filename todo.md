@@ -3619,3 +3619,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear o estado da prévia, checkpoints e domínio oficial
 - [x] Corrigir divergências técnicas entre o ambiente interno e o domínio oficial
 - [x] Validar a sincronização e salvar checkpoint publicável
+
+- [x] Localizar a grade de produtos em destaque da página inicial
+- [x] Exibir até seis produtos por fileira em telas grandes sem alterar os cards
+- [x] Validar a grade responsiva e salvar checkpoint publicável
