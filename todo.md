@@ -3454,3 +3454,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar controles, filtros e indicadores da página legada de fluxo de caixa
 - [x] Padronizar controles da página legada de fluxo de caixa na identidade rosa
 - [x] Validar a página legada de fluxo de caixa e salvar checkpoint publicável
+
+- [x] Mapear formulário, modelo de dados, rotas e agregações de clientes cadastrados
+- [x] Adicionar escolha obrigatória e persistência segura de tipo: site, balcão, revendedor ou agência
+- [x] Corrigir a falha de criação de cliente e preservar feedback de sucesso e erro
+- [x] Consolidar todos os tipos de cliente na lista unificada e nos indicadores administrativos
+- [x] Validar criação e consolidação de clientes e salvar checkpoint publicável
+
+- [ ] Revisar controles, indicadores e estados da página legada de contas recebidas
+- [ ] Padronizar controles da página legada de contas recebidas na identidade rosa
+- [ ] Validar a página legada de contas recebidas e salvar checkpoint publicável

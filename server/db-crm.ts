@@ -12,6 +12,14 @@ export async function createClient(data: {
   email?: string;
   phone?: string;
   whatsapp?: string;
+  cpfCnpj?: string;
+  addressZipCode?: string;
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
   clientType: "balcao" | "revendedor" | "agencia" | "corporativo" | "site";
   userId?: number;
 }) {
@@ -19,7 +27,20 @@ export async function createClient(data: {
   if (!db) throw new Error("Database not available");
 
   const result = await db.insert(clients).values({
-    ...data,
+    name: data.name.trim(),
+    email: data.email?.trim().toLowerCase() || null,
+    phone: data.phone?.trim() || null,
+    whatsapp: data.whatsapp?.trim() || null,
+    cpfCnpj: data.cpfCnpj?.replace(/\D/g, "") || null,
+    addressZipCode: data.addressZipCode?.replace(/\D/g, "") || null,
+    addressStreet: data.addressStreet?.trim() || null,
+    addressNumber: data.addressNumber?.trim() || null,
+    addressComplement: data.addressComplement?.trim() || null,
+    addressNeighborhood: data.addressNeighborhood?.trim() || null,
+    addressCity: data.addressCity?.trim() || null,
+    addressState: data.addressState?.trim().toUpperCase() || null,
+    clientType: data.clientType,
+    userId: data.userId,
     totalVolume: 0 as any,
     totalOrders: 0,
     averageTicket: 0 as any,

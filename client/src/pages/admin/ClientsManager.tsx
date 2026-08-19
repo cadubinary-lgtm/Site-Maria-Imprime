@@ -337,6 +337,28 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         {isDashboardView && (
           <Card className="mb-6 border-gray-200 shadow-sm">
             <CardHeader className="pb-3">
+              <CardTitle className="text-base text-gray-900">Cadastros por tipo de cliente</CardTitle>
+              <CardDescription>Consolida clientes do site, balcão, revendedores e agências em uma única visão operacional.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {([
+                { key: "site", label: "Clientes site", className: "border-green-200 bg-green-50 text-green-800" },
+                { key: "balcao", label: "Clientes balcão", className: "border-blue-200 bg-blue-50 text-blue-800" },
+                { key: "revendedor", label: "Revendedores", className: "border-purple-200 bg-purple-50 text-purple-800" },
+                { key: "agencia", label: "Agências", className: "border-pink-200 bg-pink-50 text-pink-800" },
+              ] as const).map((item) => (
+                <div key={item.key} className={`rounded-lg border p-3 ${item.className}`}>
+                  <p className="text-xs font-medium">{item.label}</p>
+                  <p className="mt-1 text-2xl font-bold" aria-label={`${item.label}: ${metrics?.clientsByType?.[item.key] ?? 0}`}>{metrics?.clientsByType?.[item.key] ?? 0}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {isDashboardView && (
+          <Card className="mb-6 border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
               <CardTitle className="text-base text-gray-900">30 clientes que mais compraram nos últimos dois meses</CardTitle>
               <CardDescription>Ranking por valor total de pedidos não cancelados no período.</CardDescription>
             </CardHeader>

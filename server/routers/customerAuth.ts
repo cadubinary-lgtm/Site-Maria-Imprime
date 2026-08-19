@@ -635,13 +635,18 @@ export const customerAuthRouter = router({
       const admin = await requireCustomerAdmin(ctx);
       const db = await requireDb();
       const email = input.email.toLowerCase().trim();
+      const normalizedCpfCnpj = input.cpfCnpj?.replace(/\D/g, "") || null;
       const [existing] = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.email, email)).limit(1);
       if (existing) throw new TRPCError({ code: "CONFLICT", message: "Este e-mail já está cadastrado. Reenvie o acesso ou use a recuperação de senha." });
+      if (normalizedCpfCnpj) {
+        const [existingCpfCnpj] = await db.select({ id: customerAccounts.id }).from(customerAccounts).where(eq(customerAccounts.cpfCnpj, normalizedCpfCnpj)).limit(1);
+        if (existingCpfCnpj) throw new TRPCError({ code: "CONFLICT", message: "Este CPF/CNPJ já está cadastrado em outro cliente." });
+      }
       const now = Date.now();
       const resetToken = nanoid(64);
       await db.insert(customerAccounts).values({
         firstName: input.firstName.trim(), lastName: input.lastName.trim(), email,
-        phone: input.phone?.trim() || null, cpfCnpj: input.cpfCnpj?.replace(/\D/g, "") || null,
+        phone: input.phone?.trim() || null, cpfCnpj: normalizedCpfCnpj,
         addressZipCode: input.addressZipCode?.trim() || null, addressStreet: input.addressStreet?.trim() || null, addressNumber: input.addressNumber?.trim() || null,
         addressComplement: input.addressComplement?.trim() || null, addressNeighborhood: input.addressNeighborhood?.trim() || null, addressCity: input.addressCity?.trim() || null, addressState: input.addressState?.trim() || null,
         passwordHash: await bcrypt.hash(input.password, SALT_ROUNDS), emailVerified: true, status: "active",

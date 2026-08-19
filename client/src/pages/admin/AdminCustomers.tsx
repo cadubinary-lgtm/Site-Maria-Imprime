@@ -436,7 +436,7 @@ export default function AdminCustomers() {
       ? "agency"
       : undefined;
   const newCustomerMode = new URLSearchParams(searchParams).get("novo") === "cliente";
-  const creationType = partnerType ?? "customer";
+  const forcedClientType = partnerType === "reseller" ? "revendedor" : partnerType === "agency" ? "agencia" : undefined;
   const pageTitle = partnerType === "reseller" ? "Revendedores" : partnerType === "agency" ? "Agências" : "Clientes Cadastrados";
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "blocked">("all");
@@ -444,7 +444,11 @@ export default function AdminCustomers() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
   const [showPartnerForm, setShowPartnerForm] = useState(newCustomerMode);
+  const [creationClientType, setCreationClientType] = useState<"site" | "balcao" | "revendedor" | "agencia">(forcedClientType ?? "site");
   const [partnerForm, setPartnerForm] = useState({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+  const isBalcaoCreation = creationClientType === "balcao";
+  const accountTypeForCreation = creationClientType === "revendedor" ? "reseller" : creationClientType === "agencia" ? "agency" : "customer";
+  const resetCreationForm = () => setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
 
   const { data, isLoading, refetch } = trpc.customerAuth.adminListCustomers.useQuery({
     search: search || undefined,
@@ -478,12 +482,21 @@ export default function AdminCustomers() {
 
   const createPartner = trpc.customerAuth.adminCreatePartnerAccount.useMutation({
     onSuccess: () => {
-      toast.success("Acesso criado e link para definir senha enviado por e-mail.");
-      setPartnerForm({ firstName: "", lastName: "", email: "", phone: "", cpfCnpj: "", password: "", confirmPassword: "", addressZipCode: "", addressStreet: "", addressNumber: "", addressComplement: "", addressNeighborhood: "", addressCity: "", addressState: "" });
+      toast.success("Cliente criado com sucesso", { description: creationClientType === "site" ? "Acesso do cliente do site criado e e-mail de definição de senha enviado." : `Cadastro de ${creationClientType === "revendedor" ? "revendedor" : "agência"} criado e acesso enviado.`, position: "top-right", duration: 3500, id: `create-customer-account-${creationClientType}` });
+      resetCreationForm();
       setShowPartnerForm(false);
       refetch();
     },
     onError: (err) => toast.error(err.message),
+  });
+  const createBalcao = trpc.crm.createClient.useMutation({
+    onSuccess: () => {
+      toast.success("Cliente de balcão criado com sucesso", { description: "O cadastro já está disponível em Todos os Clientes e no dashboard.", position: "top-right", duration: 3500, id: "create-customer-balcao" });
+      resetCreationForm();
+      setShowPartnerForm(false);
+      refetch();
+    },
+    onError: (err) => toast.error(`Não foi possível criar o cliente de balcão: ${err.message}`),
   });
   const resendPartnerInvite = trpc.customerAuth.adminResendPartnerInvite.useMutation({
     onSuccess: () => toast.success("Novo link para definição de senha enviado por e-mail."),
@@ -495,6 +508,39 @@ export default function AdminCustomers() {
   const activeCount = customers.filter((c) => c.status === "active").length;
   const blockedCount = customers.filter((c) => c.status === "blocked").length;
   const unverifiedCount = customers.filter((c) => !c.emailVerified).length;
+  const isCreatingCustomer = createPartner.isPending || createBalcao.isPending;
+
+  const handleCreateCustomer = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!partnerForm.firstName.trim() || !partnerForm.lastName.trim()) {
+      toast.error("Informe nome e sobrenome do cliente.");
+      return;
+    }
+    if (isBalcaoCreation) {
+      await createBalcao.mutateAsync({
+        name: `${partnerForm.firstName.trim()} ${partnerForm.lastName.trim()}`,
+        email: partnerForm.email,
+        phone: partnerForm.phone,
+        whatsapp: partnerForm.phone,
+        cpfCnpj: partnerForm.cpfCnpj,
+        addressZipCode: partnerForm.addressZipCode,
+        addressStreet: partnerForm.addressStreet,
+        addressNumber: partnerForm.addressNumber,
+        addressComplement: partnerForm.addressComplement,
+        addressNeighborhood: partnerForm.addressNeighborhood,
+        addressCity: partnerForm.addressCity,
+        addressState: partnerForm.addressState,
+        clientType: "balcao",
+      });
+      return;
+    }
+    if (!partnerForm.email.trim() || partnerForm.password.length < 8 || partnerForm.password !== partnerForm.confirmPassword) {
+      toast.error("Informe um e-mail e uma senha temporária válida de ao menos 8 caracteres.");
+      return;
+    }
+    const { confirmPassword, ...payload } = partnerForm;
+    await createPartner.mutateAsync({ ...payload, accountType: accountTypeForCreation });
+  };
 
   return (
     <AdminLayout>
@@ -524,23 +570,23 @@ export default function AdminCustomers() {
           </div>
 
           {showPartnerForm && (
-            <Card className="mb-6"><CardContent className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
-              <Input placeholder="Nome" value={partnerForm.firstName} onChange={(e) => setPartnerForm({ ...partnerForm, firstName: e.target.value })} />
-              <Input placeholder="Sobrenome" value={partnerForm.lastName} onChange={(e) => setPartnerForm({ ...partnerForm, lastName: e.target.value })} />
-              <Input className="md:col-span-2" type="email" placeholder="E-mail" value={partnerForm.email} onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })} />
-              <Input placeholder="Telefone" value={partnerForm.phone} onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })} />
-              <Input placeholder="CPF/CNPJ" value={partnerForm.cpfCnpj} onChange={(e) => setPartnerForm({ ...partnerForm, cpfCnpj: e.target.value })} />
-              <Input type="password" placeholder="Senha temporária (mínimo 8 caracteres)" value={partnerForm.password} onChange={(e) => setPartnerForm({ ...partnerForm, password: e.target.value })} />
-              <Input type="password" placeholder="Confirmar senha temporária" value={partnerForm.confirmPassword} onChange={(e) => setPartnerForm({ ...partnerForm, confirmPassword: e.target.value })} />
-              <Input placeholder="CEP" value={partnerForm.addressZipCode} onChange={(e) => setPartnerForm({ ...partnerForm, addressZipCode: e.target.value })} />
-              <Input placeholder="Rua / Avenida" value={partnerForm.addressStreet} onChange={(e) => setPartnerForm({ ...partnerForm, addressStreet: e.target.value })} />
-              <Input placeholder="Número" value={partnerForm.addressNumber} onChange={(e) => setPartnerForm({ ...partnerForm, addressNumber: e.target.value })} />
-              <Input placeholder="Complemento" value={partnerForm.addressComplement} onChange={(e) => setPartnerForm({ ...partnerForm, addressComplement: e.target.value })} />
-              <Input placeholder="Bairro" value={partnerForm.addressNeighborhood} onChange={(e) => setPartnerForm({ ...partnerForm, addressNeighborhood: e.target.value })} />
-              <Input placeholder="Cidade" value={partnerForm.addressCity} onChange={(e) => setPartnerForm({ ...partnerForm, addressCity: e.target.value })} />
-              <Input placeholder="UF" value={partnerForm.addressState} onChange={(e) => setPartnerForm({ ...partnerForm, addressState: e.target.value })} />
-              <div className="flex gap-2 md:col-span-2"><Button disabled={!partnerForm.firstName || !partnerForm.lastName || !partnerForm.email || partnerForm.password.length < 8 || partnerForm.password !== partnerForm.confirmPassword || createPartner.isPending} onClick={() => { const { confirmPassword, ...payload } = partnerForm; createPartner.mutate({ ...payload, accountType: creationType }); }}>{creationType === "customer" ? "Criar Cliente" : "Criar e enviar acesso"}</Button><Button variant="outline" onClick={() => setShowPartnerForm(false)}>Cancelar</Button></div>
-            </CardContent></Card>
+            <Card className="mb-6 border-pink-100"><CardHeader><CardTitle className="text-base text-gray-900">Novo cliente</CardTitle><p className="text-sm text-gray-500">Escolha o tipo antes de criar. O cadastro será refletido na lista unificada e nos indicadores de clientes.</p></CardHeader><CardContent><form onSubmit={handleCreateCustomer} className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="md:col-span-2"><label htmlFor="creation-client-type" className="mb-1.5 block text-sm font-medium text-gray-700">Tipo de cliente *</label><Select value={creationClientType} onValueChange={(value: "site" | "balcao" | "revendedor" | "agencia") => setCreationClientType(value)} disabled={Boolean(forcedClientType)}><SelectTrigger id="creation-client-type" aria-label="Tipo de cliente para o novo cadastro"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="site">Cliente site</SelectItem><SelectItem value="balcao">Cliente balcão</SelectItem><SelectItem value="revendedor">Revendedor</SelectItem><SelectItem value="agencia">Agência</SelectItem></SelectContent></Select><p className="mt-1 text-xs text-gray-500">{isBalcaoCreation ? "Cliente de balcão não recebe acesso ao site; os dados ficam disponíveis no CRM." : "Este tipo terá acesso ao site e receberá um e-mail para definir a senha."}</p></div>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Nome *</span><Input value={partnerForm.firstName} onChange={(e) => setPartnerForm({ ...partnerForm, firstName: e.target.value })} required /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Sobrenome *</span><Input value={partnerForm.lastName} onChange={(e) => setPartnerForm({ ...partnerForm, lastName: e.target.value })} required /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700 md:col-span-2"><span>E-mail{isBalcaoCreation ? "" : " *"}</span><Input type="email" value={partnerForm.email} onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })} required={!isBalcaoCreation} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Telefone</span><Input value={partnerForm.phone} onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>CPF/CNPJ</span><Input value={partnerForm.cpfCnpj} onChange={(e) => setPartnerForm({ ...partnerForm, cpfCnpj: e.target.value })} /></label>
+              {!isBalcaoCreation && <><label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Senha temporária *</span><Input type="password" minLength={8} value={partnerForm.password} onChange={(e) => setPartnerForm({ ...partnerForm, password: e.target.value })} required /></label><label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Confirmar senha *</span><Input type="password" minLength={8} value={partnerForm.confirmPassword} onChange={(e) => setPartnerForm({ ...partnerForm, confirmPassword: e.target.value })} required /></label></>}
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>CEP</span><Input value={partnerForm.addressZipCode} onChange={(e) => setPartnerForm({ ...partnerForm, addressZipCode: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Rua / Avenida</span><Input value={partnerForm.addressStreet} onChange={(e) => setPartnerForm({ ...partnerForm, addressStreet: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Número</span><Input value={partnerForm.addressNumber} onChange={(e) => setPartnerForm({ ...partnerForm, addressNumber: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Complemento</span><Input value={partnerForm.addressComplement} onChange={(e) => setPartnerForm({ ...partnerForm, addressComplement: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Bairro</span><Input value={partnerForm.addressNeighborhood} onChange={(e) => setPartnerForm({ ...partnerForm, addressNeighborhood: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>Cidade</span><Input value={partnerForm.addressCity} onChange={(e) => setPartnerForm({ ...partnerForm, addressCity: e.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm font-medium text-gray-700"><span>UF</span><Input maxLength={2} value={partnerForm.addressState} onChange={(e) => setPartnerForm({ ...partnerForm, addressState: e.target.value.toUpperCase() })} /></label>
+              <div className="flex gap-2 pt-2 md:col-span-2"><Button type="submit" disabled={isCreatingCustomer} aria-busy={isCreatingCustomer}>{isCreatingCustomer ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}{isBalcaoCreation ? "Criar cliente de balcão" : "Criar e enviar acesso"}</Button><Button type="button" variant="outline" onClick={() => { resetCreationForm(); setShowPartnerForm(false); }}>Cancelar</Button></div>
+            </form></CardContent></Card>
           )}
 
           {/* Stats */}
