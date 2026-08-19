@@ -14,7 +14,7 @@ describe("Carrossel de acesso rápido", () => {
     expect(source).toContain("snap-x snap-mandatory");
     expect(source).toContain("w-[9.5rem]");
     expect(source).toContain("rounded-2xl");
-    expect(source).toContain("sm:px-12");
+    expect(source).toContain("mx-10 min-w-0 flex-1 sm:mx-12");
   });
 
   it("oferece navegação por setas acessível e com limites de rolagem", () => {
