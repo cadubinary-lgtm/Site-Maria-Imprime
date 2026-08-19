@@ -61,7 +61,7 @@ async function requireDb() {
 }
 
 async function requireCustomerAdmin(ctx: { user?: { role?: string } | null; req: unknown }) {
-  if (ctx.user?.role === "admin") return { name: "Administrador", adminId: undefined };
+  if (ctx.user?.role === "admin" || ctx.user?.role === "superadmin") return { name: "Administrador", adminId: undefined };
   const admin = await authenticateAdminRequest(ctx.req as Request);
   if (!admin || (admin.role !== "admin" && admin.role !== "superadmin")) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem gerenciar acessos de clientes." });
@@ -574,11 +574,7 @@ export const customerAuthRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      // Verificar se é admin via Manus OAuth
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
 
       const db = await requireDb();
       let query = db
@@ -752,10 +748,7 @@ export const customerAuthRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
 
       const db = await requireDb();
       await db
@@ -770,10 +763,7 @@ export const customerAuthRouter = router({
   adminUpdateCustomerPriceTier: publicProcedure
     .input(z.object({ customerId: z.number(), priceTier: z.enum(["final", "reseller"]) }))
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
 
       const db = await requireDb();
       await db
@@ -1115,10 +1105,7 @@ export const customerAuthRouter = router({
   adminDeleteCustomer: publicProcedure
     .input(z.object({ customerId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
       const db = await requireDb();
       // Sessões são removidas em cascata pelo banco (onDelete: cascade)
       await db.delete(customerAccounts).where(eq(customerAccounts.id, input.customerId));
@@ -1131,10 +1118,7 @@ export const customerAuthRouter = router({
   adminToggleStorePickup: publicProcedure
     .input(z.object({ customerId: z.number(), allow: z.boolean() }))
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
       const db = await requireDb();
       await db
         .update(customerAccounts)
@@ -1149,10 +1133,7 @@ export const customerAuthRouter = router({
   adminGetCustomerDetail: publicProcedure
     .input(z.object({ customerId: z.number() }))
     .query(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
       const db = await requireDb();
       const [customer] = await db
         .select({
@@ -1213,10 +1194,7 @@ export const customerAuthRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.user;
-      if (!user || user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin pode acessar." });
-      }
+      await requireCustomerAdmin(ctx);
       const db = await requireDb();
       const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
       await db

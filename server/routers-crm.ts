@@ -1,4 +1,4 @@
-import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
+import { router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import {
   createClient,
@@ -95,7 +95,7 @@ export const crmRouter = router({
   /**
    * Atualizar cliente (admin only)
    */
-  updateClient: adminProcedure
+  updateClient: adminOrManusAuthProcedure
     .input(
       z.object({
         clientId: z.number(),
@@ -117,7 +117,7 @@ export const crmRouter = router({
   /**
    * Deletar cliente (soft delete - admin only)
    */
-  deleteClient: adminProcedure
+  deleteClient: adminOrManusAuthProcedure
     .input(z.object({ clientId: z.number() }))
     .mutation(async ({ input }) => {
       return await deleteClient(input.clientId);
@@ -157,13 +157,13 @@ export const crmRouter = router({
   /**
    * Atualizar estatísticas do cliente (chamado internamente após novo pedido)
    */
-  updateClientStats: adminProcedure
+  updateClientStats: adminOrManusAuthProcedure
     .input(z.object({ clientId: z.number() }))
     .mutation(async ({ input }) => {
       return await updateClientStats(input.clientId);
     }),
 
-  adminListBalcaoClients: adminProcedure
+  adminListBalcaoClients: adminOrManusAuthProcedure
     .input(z.object({
       search: z.string().optional(),
       clientType: z.string().optional(),
@@ -195,7 +195,7 @@ export const crmRouter = router({
       return { clients: rows, total: rows.length };
     }),
 
-  adminGetBalcaoClientDetail: adminProcedure
+  adminGetBalcaoClientDetail: adminOrManusAuthProcedure
     .input(z.object({ clientId: z.number() }))
     .query(async ({ input }) => {
       const { clients, orders } = await import("../drizzle/schema.js");
@@ -212,7 +212,7 @@ export const crmRouter = router({
       return { client, orders: orderRows };
     }),
 
-  adminUpdateBalcaoClient: adminProcedure
+  adminUpdateBalcaoClient: adminOrManusAuthProcedure
     .input(z.object({
       clientId: z.number(),
       name: z.string().min(2),
@@ -251,7 +251,7 @@ export const crmRouter = router({
       return { success: true };
     }),
 
-  adminDeleteBalcaoClient: adminProcedure
+  adminDeleteBalcaoClient: adminOrManusAuthProcedure
     .input(z.object({ clientId: z.number() }))
     .mutation(async ({ input }) => {
       const { clients } = await import("../drizzle/schema.js");
@@ -261,7 +261,7 @@ export const crmRouter = router({
       return { success: true };
     }),
 
-  adminToggleBalcaoPickup: adminProcedure
+  adminToggleBalcaoPickup: adminOrManusAuthProcedure
     .input(z.object({ clientId: z.number(), allow: z.boolean() }))
     .mutation(async ({ input }) => {
       const { clients } = await import("../drizzle/schema.js");

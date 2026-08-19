@@ -3485,6 +3485,18 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar controles da impressão de ordem de serviço na identidade rosa
 - [x] Validar a impressão de ordem de serviço e salvar checkpoint publicável
 
+- [ ] Revisar controles, filtros e estados da central administrativa de pré-impressão
+- [ ] Padronizar controles e ações de pré-impressão na identidade rosa
+- [ ] Validar a central administrativa de pré-impressão e salvar checkpoint publicável
+
 - [x] Mapear o bloqueio de autorização no cadastro de cliente de balcão
 - [x] Corrigir a autorização de criação para balcão, site, revendedor e agência
 - [x] Validar os quatro tipos de cadastro e salvar checkpoint publicável
+
+- [x] Reproduzir o erro 10002 no cadastro de cliente de balcão com a sessão administrativa atual
+- [x] Corrigir a autorização do cadastro de cliente de balcão para os dois fluxos administrativos
+- [x] Criar teste de regressão do erro 10002 e salvar checkpoint publicável
+
+- [x] Mapear as fontes de dados das listagens de clientes site e balcão
+- [x] Corrigir a criação e a exibição dos clientes nas páginas administrativas correspondentes
+- [x] Validar as listagens site e balcão com testes de regressão e salvar checkpoint publicável
