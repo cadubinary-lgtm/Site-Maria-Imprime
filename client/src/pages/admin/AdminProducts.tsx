@@ -305,9 +305,9 @@ export default function AdminProducts() {
     const measureBased = isMeasureBased(calculationType);
     setQuickEditingId(product.id);
     setQuickCalculationType(calculationType);
-    setQuickPixPrice(String(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 ?? "" : product.pixPrice ?? product.price ?? ""));
-    setQuickCardPrice(String(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 ?? "" : product.cardPrice ?? product.price ?? ""));
-    setQuickResellerPrice(String(measureBased ? product.resellerPricePerM2 ?? "" : product.resellerPrice ?? ""));
+    setQuickPixPrice(formatProductPriceInput(String(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 ?? "" : product.pixPrice ?? product.price ?? "")));
+    setQuickCardPrice(formatProductPriceInput(String(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 ?? "" : product.cardPrice ?? product.price ?? "")));
+    setQuickResellerPrice(formatProductPriceInput(String(measureBased ? product.resellerPricePerM2 ?? "" : product.resellerPrice ?? "")));
   };
 
   const toggleQuickEdit = (product: any) => {
@@ -319,7 +319,7 @@ export default function AdminProducts() {
   };
 
   const handleQuickPricingSave = async (product: any) => {
-    const normalizePrice = (value: string) => value.replace(",", ".").trim();
+    const normalizePrice = (value: string) => normalizeProductPriceInput(value);
     const normalizedPixPrice = normalizePrice(quickPixPrice);
     const normalizedCardPrice = normalizePrice(quickCardPrice);
     const normalizedResellerPrice = normalizePrice(quickResellerPrice);
@@ -1159,12 +1159,12 @@ export default function AdminProducts() {
                               : "Preço via Pix (R$)"}
                         </Label>
                         <Input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           id={`quick-pix-${product.id}`}
                           value={quickPixPrice}
                           onChange={(event) => setQuickPixPrice(event.target.value)}
+                          onBlur={() => setQuickPixPrice(formatProductPriceInput(quickPixPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
@@ -1181,12 +1181,12 @@ export default function AdminProducts() {
                               : "Preço via Cartão (R$)"}
                         </Label>
                         <Input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           id={`quick-card-${product.id}`}
                           value={quickCardPrice}
                           onChange={(event) => setQuickCardPrice(event.target.value)}
+                          onBlur={() => setQuickCardPrice(formatProductPriceInput(quickCardPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
@@ -1203,12 +1203,12 @@ export default function AdminProducts() {
                               : "Preço Revendedor (R$)"}
                         </Label>
                         <Input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           id={`quick-reseller-${product.id}`}
                           value={quickResellerPrice}
                           onChange={(event) => setQuickResellerPrice(event.target.value)}
+                          onBlur={() => setQuickResellerPrice(formatProductPriceInput(quickResellerPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}

@@ -28,6 +28,15 @@ function toPositivePrice(value: unknown) {
   return parseFloat((value as any) ?? 0) || 0;
 }
 
+function formatBrazilianCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 function resolvePrice(
   pixPrice: unknown,
   cardPrice: unknown,
@@ -57,7 +66,7 @@ export function getProductPrice(
     const val = resolvePrice(product.pixPricePerM2, product.cardPricePerM2, product.pricePerM2, product.resellerPricePerM2, audience, paymentMethod);
     return {
       value: val,
-      label: `R$ ${val.toFixed(2)}/m²`,
+      label: `${formatBrazilianCurrency(val)}/m²`,
       suffix: "/m²",
     };
   }
@@ -66,7 +75,7 @@ export function getProductPrice(
     const val = resolvePrice(product.pixPricePerM2, product.cardPricePerM2, product.pricePerM2, product.resellerPricePerM2, audience, paymentMethod);
     return {
       value: val,
-      label: `R$ ${val.toFixed(2)}/ml`,
+      label: `${formatBrazilianCurrency(val)}/ml`,
       suffix: "/ml",
     };
   }
@@ -75,7 +84,7 @@ export function getProductPrice(
   const val = resolvePrice(product.pixPrice, product.cardPrice, product.price, product.resellerPrice, audience, paymentMethod);
   return {
     value: val,
-    label: `R$ ${val.toFixed(2)}`,
+    label: formatBrazilianCurrency(val),
     suffix: "",
   };
 }
