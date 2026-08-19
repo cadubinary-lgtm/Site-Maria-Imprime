@@ -3668,3 +3668,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a composição visual atual dos preços Pix e cartão
 - [x] Refinar moeda, valor principal e sufixo conforme a referência visual
 - [x] Validar valores longos e salvar checkpoint publicável
+
+- [x] Mapear a escala atual dos spans de preço Pix e cartão
+- [x] Aplicar teto de 45 px com redução automática para valores longos
+- [x] Validar os preços em todas as larguras e salvar checkpoint publicável
