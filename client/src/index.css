@@ -573,14 +573,14 @@
 
     .featured-products-grid .product-card-pix-price {
       white-space: nowrap;
-      font-size: 0.875rem;
-      letter-spacing: -0.04em;
+      font-size: 0.9375rem;
+      letter-spacing: -0.075em;
     }
 
     .featured-products-grid .product-card-card-price {
       white-space: nowrap;
-      font-size: 0.75rem;
-      letter-spacing: -0.035em;
+      font-size: 0.8125rem;
+      letter-spacing: -0.07em;
     }
 
     .featured-products-grid .product-card-urgency {
@@ -637,5 +637,32 @@
   .product-price-integer {
     font-size: 1em;
     letter-spacing: -0.055em;
+  }
+
+  .product-price-composite.product-price-length-short {
+    font-size: 1.16em;
+  }
+
+  .product-price-composite.product-price-length-medium {
+    font-size: 1.07em;
+  }
+
+  .product-price-composite.product-price-length-long {
+    font-size: 1em;
+  }
+
+  @media (min-width: 1280px) and (max-width: 1535px) {
+    .featured-products-grid .product-card-pix-price {
+      font-size: clamp(0.625rem, 15cqw, 1.5rem) !important;
+    }
+
+    .featured-products-grid .product-card-card-price {
+      font-size: clamp(0.575rem, 12cqw, 1.125rem) !important;
+    }
+
+    .featured-products-grid .product-card-pix-price .product-price-composite,
+    .featured-products-grid .product-card-card-price .product-price-composite {
+      letter-spacing: -0.075em;
+    }
   }
 }

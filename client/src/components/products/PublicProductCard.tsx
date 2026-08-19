@@ -54,9 +54,15 @@ function formatCardPrice(value: number, suffix = "") {
     .join("");
   const decimal = parts.find((part) => part.type === "decimal")?.value ?? ",";
   const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
+  const integerDigits = integer.replace(/\D/g, "").length;
+  const lengthClass = integerDigits <= 2
+    ? "product-price-length-short"
+    : integerDigits <= 3
+      ? "product-price-length-medium"
+      : "product-price-length-long";
 
   return (
-    <span className="product-price-composite">
+    <span className={`product-price-composite ${lengthClass}`}>
       <span className="product-price-currency">{currency}</span>
       <span className="product-price-integer">{integer}</span>
       <span className="product-price-suffix">{`${decimal}${fraction}${suffix}`}</span>

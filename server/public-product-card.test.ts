@@ -28,6 +28,9 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("product-price-currency");
     expect(publicCardSource).toContain("product-price-integer");
     expect(publicCardSource).toContain("product-price-suffix");
+    expect(publicCardSource).toContain("product-price-length-short");
+    expect(publicCardSource).toContain("product-price-length-medium");
+    expect(publicCardSource).toContain("product-price-length-long");
     expect(publicCardSource).toContain("product-card-pix-caption");
     expect(publicCardSource).toContain("product-card-urgency");
     expect(publicCardSource).toContain("mt-1.5 grid gap-2");
@@ -74,14 +77,18 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price");
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
     expect(globalStyles).toContain("white-space: nowrap;");
-    expect(globalStyles).toContain("letter-spacing: -0.04em;");
+    expect(globalStyles).toContain("letter-spacing: -0.075em;");
   });
 
   it("adapta preços longos e a frase Pix à largura da própria coluna", () => {
     expect(globalStyles).toContain("container-type: inline-size;");
     expect(globalStyles).toContain("font-size: clamp(0.625rem, 14cqw, 1.5rem) !important;");
     expect(globalStyles).toContain("font-size: clamp(0.375rem, 7cqw, 0.625rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.625rem, 15cqw, 1.5rem) !important;");
+    expect(globalStyles).toContain("font-size: clamp(0.575rem, 12cqw, 1.125rem) !important;");
     expect(globalStyles).toContain(".product-price-currency,");
     expect(globalStyles).toContain("font-size: 0.58em;");
+    expect(globalStyles).toContain(".product-price-composite.product-price-length-short");
+    expect(globalStyles).toContain("font-size: 1.16em;");
   });
 });
