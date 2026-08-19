@@ -178,7 +178,8 @@ return (
 <Switch>
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
-      <Route path="/admin/relatorios" component={AdminDashboard} />
+      <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
+<Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       {/* Rotas acessíveis para todos os roles admin */}
@@ -281,7 +282,8 @@ return (
 <Switch>
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
-      <Route path="/admin/relatorios" component={AdminDashboard} />
+      <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
+<Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       {/* Rotas acessíveis para todos os roles admin */}

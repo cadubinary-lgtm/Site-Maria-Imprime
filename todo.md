@@ -3562,3 +3562,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear as rotas e a regra ativa dos dashboards administrativos
 - [x] Separar a seleção ativa dos dashboards Comercial e Relatórios
 - [x] Validar a seleção individual dos dashboards e salvar checkpoint publicável
+
+- [x] Mapear as rotas duplicadas de Dados da Empresa nos grupos Sistema e Configurações do Site
+- [x] Separar os destinos de Dados da Empresa sem remover nenhum acesso
+- [x] Validar a seleção individual dos grupos e salvar checkpoint publicável
