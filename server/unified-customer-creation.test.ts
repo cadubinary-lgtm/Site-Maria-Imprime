@@ -21,6 +21,7 @@ describe("cadastro unificado de clientes", () => {
     expect(adminCustomers).toContain("const createBalcao = trpc.crm.createClient.useMutation");
     expect(adminCustomers).toContain('clientType: "balcao"');
     expect(adminCustomers).toContain("accountType: accountTypeForCreation");
+    expect(crmRouter).toContain("createClient: adminOrManusAuthProcedure");
     expect(crmRouter).toContain('addressState: z.string().max(2).optional()');
     expect(customerRouter).toContain('Este CPF/CNPJ já está cadastrado em outro cliente.');
   });

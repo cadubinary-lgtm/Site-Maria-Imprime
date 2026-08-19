@@ -10,6 +10,7 @@ import { ArrowLeft, FileCheck, AlertCircle, CheckCircle, XCircle, Clock } from "
 
 export default function FileValidationManager() {
   const [selectedTab, setSelectedTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const utils = trpc.useUtils();
 
   // Queries
   const { data: pendingValidations, isLoading: loadingPending } = trpc.web2print.getPendingValidations.useQuery();
@@ -19,8 +20,18 @@ export default function FileValidationManager() {
 
   // Mutations
   const updateStatusMutation = trpc.web2print.updateValidationStatus.useMutation({
-    onSuccess: () => {
-      toast.success("Status atualizado com sucesso!");
+    onSuccess: async (_, variables) => {
+      await Promise.all([
+        utils.web2print.getPendingValidations.invalidate(),
+        utils.web2print.getApprovedValidations.invalidate(),
+        utils.web2print.getRejectedValidations.invalidate(),
+        utils.web2print.countByStatus.invalidate(),
+      ]);
+      toast.success(variables.status === "aprovado" ? "Arquivo aprovado com sucesso" : "Arquivo rejeitado com sucesso", {
+        position: "top-right",
+        duration: 3500,
+        id: `file-validation-${variables.validationId}`,
+      });
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar status: ${error.message}`);
@@ -75,10 +86,10 @@ export default function FileValidationManager() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <Link href="/admin">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+          <span className="mb-6 inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 hover:text-pink-800">
+            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
             Voltar
-          </Button>
+          </span>
         </Link>
 
         <div className="mb-8">
@@ -145,19 +156,25 @@ export default function FileValidationManager() {
         <div className="flex gap-2 mb-6">
           <Button
             variant={selectedTab === "pending" ? "default" : "outline"}
+            className={selectedTab === "pending" ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
             onClick={() => setSelectedTab("pending")}
+            aria-pressed={selectedTab === "pending"}
           >
             Em Análise ({pendingValidations?.length || 0})
           </Button>
           <Button
             variant={selectedTab === "approved" ? "default" : "outline"}
+            className={selectedTab === "approved" ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
             onClick={() => setSelectedTab("approved")}
+            aria-pressed={selectedTab === "approved"}
           >
             Aprovados ({approvedValidations?.length || 0})
           </Button>
           <Button
             variant={selectedTab === "rejected" ? "default" : "outline"}
+            className={selectedTab === "rejected" ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-700 hover:bg-pink-50"}
             onClick={() => setSelectedTab("rejected")}
+            aria-pressed={selectedTab === "rejected"}
           >
             Rejeitados ({rejectedValidations?.length || 0})
           </Button>
@@ -184,7 +201,7 @@ export default function FileValidationManager() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <FileCheck className="w-4 h-4" />
+                            <FileCheck className="w-4 h-4 text-pink-600" aria-hidden="true" />
                             <h3 className="font-semibold">{validation.fileName}</h3>
                             {getStatusBadge(validation.status)}
                           </div>
@@ -212,8 +229,11 @@ export default function FileValidationManager() {
                           <Button
                             size="sm"
                             variant="default"
+                            className="bg-pink-600 hover:bg-pink-700"
                             onClick={() => handleApprove(validation.id)}
                             disabled={updateStatusMutation.isPending}
+                            aria-label={`Aprovar arquivo ${validation.fileName}`}
+                            aria-busy={updateStatusMutation.isPending}
                           >
                             Aprovar
                           </Button>
@@ -227,6 +247,8 @@ export default function FileValidationManager() {
                               )
                             }
                             disabled={updateStatusMutation.isPending}
+                            aria-label={`Rejeitar arquivo ${validation.fileName}`}
+                            aria-busy={updateStatusMutation.isPending}
                           >
                             Rejeitar
                           </Button>
@@ -263,7 +285,7 @@ export default function FileValidationManager() {
                     <div key={validation.id} className="border rounded-lg p-3 bg-green-50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <CheckCircle className="w-4 h-4 text-green-600" aria-hidden="true" />
                           <span className="font-medium">{validation.fileName}</span>
                         </div>
                         <span className="text-sm text-gray-600">
@@ -300,7 +322,7 @@ export default function FileValidationManager() {
                   {rejectedValidations.map((validation: any) => (
                     <div key={validation.id} className="border rounded-lg p-4 bg-red-50">
                       <div className="flex items-start gap-2 mb-2">
-                        <XCircle className="w-4 h-4 text-red-600 mt-1" />
+                        <XCircle className="w-4 h-4 text-red-600 mt-1" aria-hidden="true" />
                         <div className="flex-1">
                           <h3 className="font-semibold">{validation.fileName}</h3>
                           {validation.issues && (
