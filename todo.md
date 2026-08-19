@@ -3641,3 +3641,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar seis cards ao limite horizontal do carrossel sem overflow
 - [x] Ajustar a escala compacta de promoção, preços, urgência e botão no desktop
 - [x] Validar responsividade, ausência de overflow e salvar checkpoint publicável
+
+- [x] Mapear as regras de preços longos e desconto Pix nos cards públicos
+- [x] Manter preços Pix e cartão em uma linha com tamanho fluido
+- [x] Manter a frase de desconto Pix em uma linha sem corte
+- [x] Validar valores longos em desktop e celular e salvar checkpoint publicável
+
+- [x] Destacar o valor principal e reduzir visualmente moeda e sufixo dos preços
