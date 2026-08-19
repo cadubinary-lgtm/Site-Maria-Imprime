@@ -3558,3 +3558,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Localizar a seção Vendas no menu administrativo
 - [x] Renomear a seção do menu para Comercial
 - [x] Validar o menu administrativo e salvar checkpoint publicável
+
+- [x] Mapear as rotas e a regra ativa dos dashboards administrativos
+- [x] Separar a seleção ativa dos dashboards Comercial e Relatórios
+- [x] Validar a seleção individual dos dashboards e salvar checkpoint publicável

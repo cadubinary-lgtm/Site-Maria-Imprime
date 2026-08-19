@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = resolve(import.meta.dirname, "..");
+const appSource = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
 
 describe("navegação lateral administrativa", () => {
   it("usa o destaque rosa da identidade administrativa nos itens ativos e indicadores", () => {
@@ -26,5 +27,12 @@ describe("navegação lateral administrativa", () => {
 
     expect(source).toContain('label: "COMERCIAL"');
     expect(source).not.toContain('label: "VENDAS"');
+  });
+
+  it("mantém dashboards Comercial e Relatórios em rotas distintas", () => {
+    const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+
+    expect(source).toContain('{ label: "Dashboards", href: "/admin/relatorios" }');
+    expect(appSource).toContain('path="/admin/relatorios" component={AdminDashboard}');
   });
 });

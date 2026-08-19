@@ -430,7 +430,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "RELATÓRIOS",
         icon: <BarChart3 className="w-4 h-4" />,
         children: [
-          { label: "Dashboards", href: "/admin" },
+          { label: "Dashboards", href: "/admin/relatorios" },
           { label: "ERP", href: "/admin/erp" },
           { label: "Automação", href: "/admin/automacao" },
         ],
