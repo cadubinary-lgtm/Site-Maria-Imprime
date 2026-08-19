@@ -3653,3 +3653,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar os valores Pix e cartão pela mesma base visual no card público
 - [x] Preservar a separação cinza entre as opções de pagamento sem sobreposição
 - [x] Validar o ajuste e salvar checkpoint publicável
+
+- [x] Reduzir o espaço vertical entre a imagem e o título nos cards públicos
+- [x] Preservar proporção e responsividade após aproximar o título da imagem
+- [x] Validar o card e salvar checkpoint publicável
