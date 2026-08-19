@@ -13,7 +13,7 @@ const segmentQuerySource = readFileSync(resolve(root, "server/db-product-segment
 describe("cards públicos informativos", () => {
   it("mantém a composição compacta e só exibe urgência de m² quando ela estiver configurada", () => {
     expect(publicCardSource).toContain("getProductPaymentPrices(product, priceAudience)");
-    expect(publicCardSource).toContain("getPixDiscountInfo(product, priceAudience)");
+    expect(publicCardSource).not.toContain("getPixDiscountInfo(product, priceAudience)");
     expect(publicCardSource).toContain("parseSpecifications(product.specifications)");
     expect(publicCardSource).toContain("object-contain");
     expect(publicCardSource).not.toContain("object-cover");
@@ -37,11 +37,13 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("flex-col gap-0.5");
     expect(publicCardSource).toContain('className="truncate"');
     expect(publicCardSource).toContain('className="product-card-urgency-content min-w-0 break-words"');
-    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)]');
-    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.9375rem,1.7vw,1.1875rem)]');
+    expect(publicCardSource.match(/whitespace-nowrap text-\[clamp\(0\.9375rem,1\.7vw,1\.1875rem\)\]/g)).toHaveLength(2);
     expect(publicCardSource).toContain('relative z-10 min-w-0 border-l border-gray-200 bg-white pl-2');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.pix.value)');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.card.value)');
+    expect(publicCardSource).toContain(">no Pix</p>");
+    expect(publicCardSource).not.toContain("% de desconto");
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.pix.value, pricingSuffix)');
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)');
     expect(publicCardSource).toContain("product-card-action");
@@ -77,7 +79,8 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
     expect(globalStyles).toContain("white-space: nowrap;");
     expect(globalStyles).toContain("letter-spacing: -0.04em;");
-    expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.75rem;");
+    expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
+    expect(globalStyles).toContain(".featured-products-grid .product-card-card-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-caption");
     expect(globalStyles).toContain("font-size: 0.4375rem;");
     expect(globalStyles).toContain("font-size: 0.375rem;");
