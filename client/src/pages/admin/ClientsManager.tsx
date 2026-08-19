@@ -155,10 +155,13 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
   const searchParams = useSearch();
   const [, setLocation] = useLocation();
   const isDashboardView = new URLSearchParams(searchParams).get("view") === "dashboard";
+  const isSiteClientsView = defaultType === "site";
   const pageTitle = title ?? (isDashboardView ? "Dashboard de Clientes" : "Todos os Clientes");
   const pageDescription = isDashboardView
     ? "Visão operacional para priorizar clientes ativos, reativações e oportunidades de atendimento."
-    : "Consulta e gerenciamento completo dos cadastros de clientes.";
+    : isSiteClientsView
+      ? "Acompanhe os clientes que possuem acesso à loja, seus dados de contato e a situação de compra."
+      : "Consulta e gerenciamento completo dos cadastros de clientes.";
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
@@ -307,6 +310,16 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
     const q = search.toLowerCase();
     return c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q) || c.whatsapp?.includes(q);
   }), [activityFilter, clients, search]);
+  const hasActiveFilters = Boolean(search) || activityFilter !== "todos";
+  const clearClientFilters = () => {
+    setSearch("");
+    setActivityFilter("todos");
+  };
+  const siteClientSummary = {
+    total: clients.length,
+    active: clients.filter((client: any) => client.accountStatus !== "blocked" && client.accountStatus !== "inactive").length,
+    withoutPurchases: clients.filter((client: any) => client.operationalStatus === "sem_compras").length,
+  };
 
   return (
     <AdminLayout>
@@ -320,9 +333,18 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         </Link>
 
         <div className="mb-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pink-600">{isSiteClientsView ? "Clientes da loja" : "Relacionamento"}</p>
           <h1 className="text-3xl font-bold text-gray-900">{pageTitle}</h1>
           <p className="text-gray-600 mt-2">{pageDescription}</p>
         </div>
+
+        {isSiteClientsView && !isDashboardView && (
+          <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Indicadores dos clientes do site">
+            <Card className="border-pink-100 shadow-sm"><CardContent className="flex items-start justify-between gap-3 p-4"><div><p className="text-sm font-medium text-slate-600">Clientes cadastrados</p><p className="mt-1 text-2xl font-bold text-slate-900">{siteClientSummary.total}</p><p className="mt-1 text-xs leading-5 text-slate-500">Com acesso à loja virtual</p></div><span className="rounded-xl bg-pink-50 p-2.5 text-pink-700"><Store className="h-5 w-5" aria-hidden="true" /></span></CardContent></Card>
+            <Card className="border-slate-200 shadow-sm"><CardContent className="flex items-start justify-between gap-3 p-4"><div><p className="text-sm font-medium text-slate-600">Contas ativas</p><p className="mt-1 text-2xl font-bold text-slate-900">{siteClientSummary.active}</p><p className="mt-1 text-xs leading-5 text-slate-500">Acessos sem bloqueio ou inativação</p></div><span className="rounded-xl bg-emerald-50 p-2.5 text-emerald-700"><UserCheck className="h-5 w-5" aria-hidden="true" /></span></CardContent></Card>
+            <Card className="border-slate-200 shadow-sm"><CardContent className="flex items-start justify-between gap-3 p-4"><div><p className="text-sm font-medium text-slate-600">Sem compras</p><p className="mt-1 text-2xl font-bold text-slate-900">{siteClientSummary.withoutPurchases}</p><p className="mt-1 text-xs leading-5 text-slate-500">Oportunidades de primeira compra</p></div><span className="rounded-xl bg-slate-100 p-2.5 text-slate-700"><ShoppingBag className="h-5 w-5" aria-hidden="true" /></span></CardContent></Card>
+          </section>
+        )}
 
         {isDashboardView && (
           <div className="grid grid-cols-2 gap-3 mb-6 lg:grid-cols-5">
@@ -400,7 +422,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
         )}
 
         {/* Barra de busca e filtros */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6" aria-label="Filtros de clientes">
           <div className="flex gap-2 flex-1 min-w-[200px]">
             <Input
               id="customer-search"
@@ -444,6 +466,7 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
             </SelectContent>
           </Select>
           </div>
+          {hasActiveFilters && <Button type="button" variant="ghost" size="sm" onClick={clearClientFilters} className="text-pink-700 hover:bg-pink-50 hover:text-pink-800"><RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />Limpar filtros</Button>}
         </div>
 
         {/* Formulário */}
@@ -538,6 +561,14 @@ export default function ClientsManager({ defaultType, title, ..._ }: { defaultTy
               Novo Cliente
             </Button>
             <Button variant="outline" onClick={() => setLocation("/admin/clientes-loja")}>
+              Gerenciar acessos e senhas
+            </Button>
+          </div>
+        )}
+        {!isDashboardView && !showForm && filterType === "site" && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setLocation("/admin/clientes-loja")} className="border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800">
+              <Lock className="mr-2 h-4 w-4" aria-hidden="true" />
               Gerenciar acessos e senhas
             </Button>
           </div>

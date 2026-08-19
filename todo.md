@@ -3578,3 +3578,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a rota e os controles do vinculador de atributos em uso
 - [x] Padronizar o vinculador ativo com navegação, indicadores e remoção segura
 - [x] Validar o vinculador de atributos e salvar checkpoint publicável
+
+- [x] Mapear dados, filtros e ações da central de clientes do site
+- [x] Padronizar a experiência de clientes do site com indicadores e filtros claros
+- [x] Validar a central de clientes do site e salvar checkpoint publicável
