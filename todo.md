@@ -3554,3 +3554,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar os estados visuais do seletor de forma de pagamento
 - [x] Destacar em rosa a forma de pagamento selecionada
 - [x] Validar o seletor de pagamento e salvar checkpoint publicável
+
+- [x] Localizar a seção Vendas no menu administrativo
+- [x] Renomear a seção do menu para Comercial
+- [x] Validar o menu administrativo e salvar checkpoint publicável

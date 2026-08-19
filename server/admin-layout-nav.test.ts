@@ -20,4 +20,11 @@ describe("navegação lateral administrativa", () => {
     expect(source).toContain("aria-controls={groupContentId}");
     expect(source).toContain("id={groupContentId}");
   });
+
+  it("identifica a seção de pedidos e orçamentos como Comercial", () => {
+    const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+
+    expect(source).toContain('label: "COMERCIAL"');
+    expect(source).not.toContain('label: "VENDAS"');
+  });
 });
