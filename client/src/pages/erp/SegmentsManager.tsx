@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Loader2, Edit2, Save, X, CheckCircle, AlertCircle, Plus, Trash2, GripVertical, ImageIcon, Layers3 } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -355,6 +355,11 @@ export default function SegmentsManager() {
   const orderedSegments = localOrder
     ? localOrder.map((id) => baseSegments.find((s) => s.id === id)).filter(Boolean) as SegmentItem[]
     : baseSegments;
+  const segmentMetrics = {
+    total: baseSegments.length,
+    withIcon: baseSegments.filter((segment) => Boolean(segment.icon)).length,
+    withoutIcon: baseSegments.filter((segment) => !segment.icon).length,
+  };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -411,11 +416,15 @@ export default function SegmentsManager() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Gerenciador de Segmentos</h1>
-            <p className="text-gray-600">Arraste as linhas para reordenar os segmentos</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pink-600">Catálogo</p>
+            <h1 className="mt-1 flex items-center gap-2 text-3xl font-bold text-slate-900">
+              <span className="rounded-xl bg-pink-600 p-2 text-white shadow-sm shadow-pink-200"><Layers3 className="h-5 w-5" aria-hidden="true" /></span>
+              Gerenciador de Segmentos
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">Organize a ordem de exibição e os elementos visuais que ajudam clientes a descobrir o catálogo.</p>
           </div>
           <Dialog open={isCreating} onOpenChange={setIsCreating}>
             <DialogTrigger asChild>
@@ -429,7 +438,7 @@ export default function SegmentsManager() {
                 <DialogTitle>Criar Novo Segmento</DialogTitle>
                 <DialogDescription>Adicione um novo segmento de mercado ao catálogo.</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); handleCreateSegment(); }}>
                 <div>
                   <label htmlFor="new-segment-name" className="block text-sm font-medium mb-1">Nome *</label>
                   <Input
@@ -464,10 +473,11 @@ export default function SegmentsManager() {
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setIsCreating(false)} className="flex-1">Cancelar</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsCreating(false)} className="flex-1 border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800">Cancelar</Button>
                   <Button
-                    onClick={handleCreateSegment}
+                    type="submit"
                     disabled={createSegmentMutation.isPending || uploadingIcon}
+                    aria-busy={createSegmentMutation.isPending || uploadingIcon}
                     className="flex-1 bg-pink-600 hover:bg-pink-700 text-white focus-visible:ring-pink-300"
                   >
                     {createSegmentMutation.isPending || uploadingIcon ? (
@@ -475,10 +485,16 @@ export default function SegmentsManager() {
                     ) : 'Criar'}
                   </Button>
                 </div>
-              </div>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
+
+        <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Indicadores dos segmentos">
+          <div className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div><p className="text-sm font-medium text-slate-600">Segmentos ativos</p><p className="mt-1 text-2xl font-bold text-slate-900">{segmentMetrics.total}</p><p className="mt-1 text-xs leading-5 text-slate-500">Disponíveis para organizar o catálogo</p></div><span className="rounded-xl bg-pink-50 p-2.5 text-pink-700"><Layers3 className="h-5 w-5" aria-hidden="true" /></span></div>
+          <div className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div><p className="text-sm font-medium text-slate-600">Com ícone</p><p className="mt-1 text-2xl font-bold text-slate-900">{segmentMetrics.withIcon}</p><p className="mt-1 text-xs leading-5 text-slate-500">Possuem identificação visual cadastrada</p></div><span className="rounded-xl bg-green-50 p-2.5 text-green-700"><ImageIcon className="h-5 w-5" aria-hidden="true" /></span></div>
+          <div className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div><p className="text-sm font-medium text-slate-600">Sem ícone</p><p className="mt-1 text-2xl font-bold text-slate-900">{segmentMetrics.withoutIcon}</p><p className="mt-1 text-xs leading-5 text-slate-500">Continuam disponíveis sem imagem configurada</p></div><span className="rounded-xl bg-slate-100 p-2.5 text-slate-700"><ImageIcon className="h-5 w-5" aria-hidden="true" /></span></div>
+        </section>
 
         {/* Saving indicator */}
         {isSavingOrder && (
