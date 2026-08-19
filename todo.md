@@ -3536,3 +3536,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar subitem Recibos no Financeiro com visual próprio para impressão
 - [x] Oferecer imprimir, preparar WhatsApp e enviar recibo por e-mail após receber pagamento
 - [x] Validar o ciclo de recibos e salvar checkpoint publicável
+
+- [x] Mapear o documento de recibo e o ponto de confirmação de pagamento
+- [x] Adicionar observações específicas da empresa ao recibo impresso e enviado por e-mail
+- [x] Enviar automaticamente o recibo por e-mail após a confirmação quando houver e-mail cadastrado
+- [x] Validar o documento e o envio automático de recibos e salvar checkpoint publicável

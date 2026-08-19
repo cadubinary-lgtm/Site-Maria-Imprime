@@ -17,7 +17,8 @@ describe("central financeira de recibos", () => {
     expect(schema).toContain('orderId: int("orderId").notNull().unique()');
     expect(financeRouter).toContain("ensurePaymentReceipt");
     expect(financeRouter).toContain("receiptNumber = `REC-");
-    expect(financeRouter).toContain("return { success: true, receiptId: receipt.id, receiptNumber: receipt.receiptNumber }");
+    expect(financeRouter).toContain("receiptId: receipt.id");
+    expect(financeRouter).toContain("receiptNumber: receipt.receiptNumber");
   });
 
   it("mantém ações explícitas de impressão, WhatsApp preparado e e-mail enviado", () => {
@@ -44,5 +45,15 @@ describe("central financeira de recibos", () => {
     expect(receivables).toContain('position: "top-right"');
     expect(receivables).toContain('duration: 3500');
     expect(receivables).toContain('id: `payment-confirmed-receipt-${data.receiptId}`');
+  });
+
+  it("inclui observações da empresa e envia o recibo automaticamente quando há e-mail", () => {
+    expect(receiptPrint).toContain("Observações da empresa");
+    expect(receiptPrint).toContain("Este documento não substitui a nota fiscal quando sua emissão for aplicável.");
+    expect(emailService).toContain("Observações da empresa");
+    expect(financeRouter).toContain("if (recipientEmail && !receipt.emailSentAt)");
+    expect(financeRouter).toContain("receiptEmailSent");
+    expect(financeRouter).toContain('templateName: "sendPaymentReceiptEmail:auto"');
+    expect(receivables).toContain("enviado automaticamente para");
   });
 });

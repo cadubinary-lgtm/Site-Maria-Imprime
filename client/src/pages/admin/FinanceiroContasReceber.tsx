@@ -85,12 +85,18 @@ export default function FinanceiroContasReceber() {
   const confirmarPagamento = trpc.financeiro.confirmarPagamento.useMutation({
     onSuccess: (data) => {
       const receivedOrder = confirmDialog.order;
-      toast.success("Pagamento confirmado e recibo gerado", {
-        description: `Recibo ${data.receiptNumber} disponível para o pedido #${receivedOrder?.orderNumber}.`,
-        position: "top-right",
+      const toastOptions = {
+        description: data.receiptEmailSent
+          ? `Recibo ${data.receiptNumber} enviado automaticamente para ${data.receiptRecipientEmail}.`
+          : data.receiptEmailAvailable
+            ? `Recibo ${data.receiptNumber} gerado, mas o e-mail automático falhou. Use a ação de e-mail para tentar novamente.`
+            : `Recibo ${data.receiptNumber} disponível para o pedido #${receivedOrder?.orderNumber}. Não há e-mail cadastrado.`,
+        position: "top-right" as const,
         duration: 3500,
         id: `payment-confirmed-receipt-${data.receiptId}`,
-      });
+      };
+      if (data.receiptEmailAvailable && !data.receiptEmailSent) toast.warning("Pagamento confirmado e recibo gerado", toastOptions);
+      else toast.success("Pagamento confirmado e recibo gerado", toastOptions);
       setConfirmDialog({ open: false, order: null });
       refetch();
       setReceiptActionDialog({ open: true, receiptId: data.receiptId, receiptNumber: data.receiptNumber, order: receivedOrder });

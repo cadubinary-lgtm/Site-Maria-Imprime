@@ -401,6 +401,10 @@ export function templatePaymentReceipt(data: ReceiptEmailData): string {
         <tr><td style="padding:14px 0 0;border-top:1px solid #f5d8e5;color:#ec0069;font-size:16px;font-weight:800;">VALOR RECEBIDO</td><td style="padding:14px 0 0;border-top:1px solid #f5d8e5;text-align:right;color:#ec0069;font-size:20px;font-weight:900;">${escapeHtml(data.amount)}</td></tr>
       </table>
     </div>
+    <div style="background:#f8fafc;border-left:4px solid #ec0069;border-radius:0 10px 10px 0;padding:16px 18px;margin:20px 0;">
+      <p style="margin:0 0 8px;color:#7c2d50;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;">Observações da empresa</p>
+      <p style="margin:0;color:#475569;font-size:13px;line-height:1.65;">Este recibo comprova o recebimento do valor informado. Não substitui a nota fiscal quando sua emissão for aplicável. Em caso de divergência, entre em contato com os canais oficiais da Maria Imprime.</p>
+    </div>
     ${p("Este e-mail é o seu comprovante de recebimento. Guarde-o para consulta futura.")}
   `);
 }
