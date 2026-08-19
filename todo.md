@@ -3649,3 +3649,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o sufixo /m² dos preços Pix e cartão nos cards públicos
 - [x] Garantir valores Pix e cartão em uma única linha após o ajuste
 - [x] Validar a regressão e salvar checkpoint publicável
+
+- [x] Alinhar os valores Pix e cartão pela mesma base visual no card público
+- [x] Preservar a separação cinza entre as opções de pagamento sem sobreposição
+- [x] Validar o ajuste e salvar checkpoint publicável

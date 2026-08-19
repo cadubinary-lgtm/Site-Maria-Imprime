@@ -37,8 +37,9 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("flex-col gap-0.5");
     expect(publicCardSource).toContain('className="truncate"');
     expect(publicCardSource).toContain('className="product-card-urgency-content min-w-0 break-words"');
-    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(1rem,2vw,1.5rem)]');
     expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain('whitespace-nowrap text-[clamp(0.875rem,1.6vw,1.125rem)]');
+    expect(publicCardSource).toContain('relative z-10 min-w-0 border-l border-gray-200 bg-white pl-2');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.pix.value)');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.card.value)');
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.pix.value, pricingSuffix)');
@@ -76,6 +77,7 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price");
     expect(globalStyles).toContain("white-space: nowrap;");
     expect(globalStyles).toContain("letter-spacing: -0.04em;");
+    expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.75rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-caption");
     expect(globalStyles).toContain("font-size: 0.4375rem;");
     expect(globalStyles).toContain("font-size: 0.375rem;");
