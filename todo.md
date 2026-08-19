@@ -3582,3 +3582,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear dados, filtros e ações da central de clientes do site
 - [x] Padronizar a experiência de clientes do site com indicadores e filtros claros
 - [x] Validar a central de clientes do site e salvar checkpoint publicável
+
+- [x] Analisar a estrutura atual e a referência visual da seção Acesso rápido
+- [x] Restaurar cartões arredondados, espaçamento e setas laterais do Acesso rápido
+- [x] Validar a seção Acesso rápido restaurada e salvar checkpoint publicável
