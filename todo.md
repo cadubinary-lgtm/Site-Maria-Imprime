@@ -3516,3 +3516,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear o preenchimento indevido de senha e a posição dos campos no novo cadastro
 - [x] Manter os campos de senha vazios ao editar e alinhar tabela de preços ao lado do tipo
 - [x] Validar os formulários de clientes e salvar checkpoint publicável
+
+- [x] Mapear os gatilhos de aprovação de arte e mudança do status geral do pedido
+- [x] Restaurar a regra de produção para pedidos com um e múltiplos itens
+- [x] Validar a pré-impressão e salvar checkpoint publicável
+
+- [x] Garantir produção confirmada para pedido de um item somente após clicar em Produzir
+- [x] Garantir envio global para produção em pedidos com dois ou mais itens somente após todas as artes aprovadas
