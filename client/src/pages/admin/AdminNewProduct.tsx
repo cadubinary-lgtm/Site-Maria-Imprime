@@ -304,27 +304,55 @@ export default function AdminNewProduct() {
       const productId = (result as any)?.id;
       if (!productId) throw new Error("O produto não retornou um identificador");
 
+      const productName = createForm.name.trim();
+      const wasDuplicatingDraft = isDuplicatingDraft;
       const activeOptions = createDeliveryOptions.filter((opt) => opt.isActive);
-      await Promise.all(activeOptions.map((opt, index) => createDeliveryOptionMutation.mutateAsync({
-        productId, name: opt.name, daysToDeliver: opt.daysToDeliver, pricePerM2: opt.pricePerM2, isActive: true, order: index,
-      })));
-      await updateSegmentsMutation.mutateAsync({ productId, segmentIds: createForm.segmentIds });
-      setAutoCreatedProductId(productId);
+      const postCreateResults = await Promise.allSettled([
+        ...activeOptions.map((opt, index) => createDeliveryOptionMutation.mutateAsync({
+          productId, name: opt.name, daysToDeliver: opt.daysToDeliver, pricePerM2: opt.pricePerM2, isActive: true, order: index,
+        })),
+        updateSegmentsMutation.mutateAsync({ productId, segmentIds: createForm.segmentIds }),
+      ]);
+      const hasPostCreateFailure = postCreateResults.some((result) => result.status === "rejected");
+
       await utils.products.getAll.invalidate();
-      setLastSyncedSignature(signatureAtStart);
+      const initialForm = getInitialCreateForm();
+      const initialLogistics = getInitialCreateLogistics();
+      const initialDeliveryOptions: DeliveryOptionData[] = [];
+      setCreateForm(initialForm);
+      setCreateLogistics(initialLogistics);
+      setCreateDeliveryOptions(initialDeliveryOptions);
+      setAutoCreatedProductId(null);
+      setIsDuplicatingDraft(false);
+      duplicatedProductIdRef.current = null;
+      setLastSyncedSignature(JSON.stringify({
+        createForm: initialForm,
+        createLogistics: initialLogistics,
+        createDeliveryOptions: initialDeliveryOptions,
+      }));
+      setAutoSaveRevision((revision) => revision + 1);
+      setDraftResetVersion((version) => version + 1);
       window.localStorage.removeItem("maria-imprime-new-product-autosave");
-      setAutoSaveState("saved");
+      setAutoSaveState("idle");
       toast.success("Produto criado com sucesso", {
-        description: isDuplicatingDraft
-          ? `${createForm.name.trim()}: a cópia foi criada e será destacada na lista de produtos.`
-          : `${createForm.name.trim()}: as próximas alterações serão salvas automaticamente.`,
+        description: wasDuplicatingDraft
+          ? `${productName}: a cópia foi criada e será destacada na lista de produtos.`
+          : `${productName}: cadastro confirmado e formulário pronto para um novo produto.`,
         position: "top-right",
         duration: 3500,
         id: `new-product-created-${productId}`,
         icon: <CheckCircle2 className="h-5 w-5 animate-[pulse_1.2s_ease-in-out_2] text-emerald-600" aria-hidden="true" />,
         className: "border-emerald-200 bg-emerald-50 text-emerald-950 shadow-lg",
       });
-      if (isDuplicatingDraft) {
+      if (hasPostCreateFailure) {
+        toast.warning("Produto criado com dados complementares pendentes", {
+          description: "Revise prazos de produção e segmentos quando estiver pronto. O cadastro principal foi confirmado.",
+          position: "top-right",
+          duration: 4500,
+          id: `new-product-post-create-warning-${productId}`,
+        });
+      }
+      if (wasDuplicatingDraft) {
         navigate(`/admin/produtos?destacar=${productId}`);
       }
     } catch (error) {
@@ -335,7 +363,7 @@ export default function AdminNewProduct() {
     } finally {
       isAutoSaveInFlightRef.current = false;
     }
-  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm.segmentIds, createLogistics, createProductMutation, getCreatePayload, getNewProductSignature, isCreateFormReadyForAutoSave, isDuplicatingDraft, navigate, updateSegmentsMutation, utils]);
+  }, [autoCreatedProductId, createDeliveryOptionMutation, createDeliveryOptions, createForm, createProductMutation, getCreatePayload, isCreateFormReadyForAutoSave, isDuplicatingDraft, navigate, updateSegmentsMutation, utils]);
 
   const handleClearDuplicateImages = useCallback(() => {
     if (!isDuplicatingDraft || autoCreatedProductId) return;

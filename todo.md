@@ -3607,3 +3607,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar e validar a habilidade reutilizável do fluxo administrativo
 - [x] Adicionar mensagem de sucesso animada após criar produto
 - [x] Validar a habilidade e o feedback de sucesso e salvar checkpoint publicável
+
+- [x] Analisar falhas posteriores ao cadastro de produto já confirmado
+- [x] Limpar formulário e rascunho após criar produto com sucesso
+- [x] Validar sucesso, limpeza de rascunho e salvar checkpoint publicável
