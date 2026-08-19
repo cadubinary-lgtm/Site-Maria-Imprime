@@ -22,4 +22,12 @@ describe("impressão de ordem de serviço", () => {
     expect(source).toContain('items.map((item: any, i: number) => {');
     expect(source).not.toContain('Item 1 de 2');
   });
+
+  it("mantém somente a logo com o CNPJ abaixo e notas internas legíveis", () => {
+    expect(source).toContain('CNPJ: 34.528.399/0001-08');
+    expect(source).not.toContain('lineHeight: 1.1 }}>{company.tradeName}</div>');
+    expect(source).toContain('height: "58px"');
+    expect(source).toContain('aria-label="Área para notas internas manuscritas"');
+    expect(source).toContain('justifyContent: "space-between"');
+  });
 });
