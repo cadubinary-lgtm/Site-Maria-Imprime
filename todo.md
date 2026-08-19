@@ -3541,3 +3541,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar observações específicas da empresa ao recibo impresso e enviado por e-mail
 - [x] Enviar automaticamente o recibo por e-mail após a confirmação quando houver e-mail cadastrado
 - [x] Validar o documento e o envio automático de recibos e salvar checkpoint publicável
+
+- [x] Mapear o diálogo de confirmação e o documento existente de recibo
+- [x] Adicionar download em PDF do recibo após confirmar o pagamento
+- [x] Validar o download de PDF e salvar checkpoint publicável
