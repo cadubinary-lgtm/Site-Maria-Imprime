@@ -3645,3 +3645,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar estilos tipográficos adicionados pelo editor aos cards públicos
 - [x] Consolidar os ajustes aprovados sem prejudicar leitura e responsividade
 - [x] Validar os cards revisados e salvar checkpoint publicável
+
+- [x] Remover o sufixo /m² dos preços Pix e cartão nos cards públicos
+- [x] Garantir valores Pix e cartão em uma única linha após o ajuste
+- [x] Validar a regressão e salvar checkpoint publicável
