@@ -3701,3 +3701,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir a tag “Promoção” na largura e na altura
 - [x] Manter a tag no mesmo lugar sobre a imagem do produto
 - [x] Validar proporção e salvar checkpoint publicável
+
+- [x] Reduzir o espaçamento lateral interno da tag “Promoção”
+- [x] Preservar posição e altura da tag após compactar as laterais
+- [x] Validar o ajuste e salvar checkpoint publicável
