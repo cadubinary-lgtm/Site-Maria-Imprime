@@ -24,4 +24,12 @@ describe("gestão administrativa de segmentos", () => {
     expect(source).toContain('Nenhum segmento cadastrado.');
     expect(source).toContain('bg-red-600 text-white hover:bg-red-700');
   });
+
+  it("apresenta indicadores operacionais e aceita submissão do novo segmento pelo formulário", () => {
+    expect(source).toContain('aria-label="Indicadores dos segmentos"');
+    expect(source).toContain('Segmentos ativos');
+    expect(source).toContain('Sem ícone');
+    expect(source).toContain('onSubmit={(event) => { event.preventDefault(); handleCreateSegment(); }}');
+    expect(source).toContain('aria-busy={createSegmentMutation.isPending || uploadingIcon}');
+  });
 });

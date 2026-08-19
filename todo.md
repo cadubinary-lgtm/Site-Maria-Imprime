@@ -3570,3 +3570,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear automações existentes, fontes de dados e a página atual
 - [x] Organizar a central de automações com gatilho, status, última execução e resultado
 - [x] Validar a central de automações e salvar checkpoint publicável
+
+- [x] Revisar a gestão ativa de segmentos e seus controles operacionais
+- [x] Padronizar a gestão de segmentos com indicadores, filtros e ações acessíveis
+- [x] Validar a gestão de segmentos e salvar checkpoint publicável
