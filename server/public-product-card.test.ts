@@ -89,7 +89,7 @@ describe("cards públicos informativos", () => {
     expect(globalStyles).toContain(".product-card-currency {");
     expect(globalStyles).toContain("font-size: 0.625em;");
     expect(globalStyles).toContain(".product-card-area-unit {");
-    expect(globalStyles).toContain("font-size: 1.5em;");
+    expect(globalStyles).toContain("font-size: 2em;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-card-price {\n      white-space: nowrap;\n      font-size: 0.8125rem;");
     expect(globalStyles).toContain(".featured-products-grid .product-card-pix-caption");
