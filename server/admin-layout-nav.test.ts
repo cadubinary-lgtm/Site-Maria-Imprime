@@ -35,4 +35,12 @@ describe("navegação lateral administrativa", () => {
     expect(source).toContain('{ label: "Dashboards", href: "/admin/relatorios" }');
     expect(appSource).toContain('path="/admin/relatorios" component={AdminDashboard}');
   });
+
+  it("mantém os dois acessos de Dados da Empresa em rotas distintas", () => {
+    const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+
+    expect(source).toContain('{ label: "Dados da Empresa", href: "/admin/dados-da-empresa" }');
+    expect(source).toContain('{ label: "Dados da Empresa", href: "/admin/configuracoes-site/dados-da-empresa" }');
+    expect(appSource).toContain('path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings}');
+  });
 });

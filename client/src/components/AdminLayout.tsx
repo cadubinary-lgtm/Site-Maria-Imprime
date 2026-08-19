@@ -456,7 +456,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         children: [
           { label: "Informações do rodapé", href: "/admin/configuracoes-site/rodape" },
           { label: "Guia da Maria", href: "/admin/configuracoes-site/guia-da-maria" },
-          { label: "Dados da Empresa", href: "/admin/dados-da-empresa" },
+          { label: "Dados da Empresa", href: "/admin/configuracoes-site/dados-da-empresa" },
         ],
       },
     },
