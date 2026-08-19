@@ -12,13 +12,15 @@ import {
 } from "@/components/ui/select";
 import {
   Search, DollarSign, Eye, Send, CreditCard, Banknote,
-  QrCode, RefreshCw, Filter, Phone, Trash2, RotateCcw, Printer, Mail, ReceiptText
+  QrCode, RefreshCw, Filter, Phone, Trash2, RotateCcw, Printer, Mail, ReceiptText, Download
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { useLocation } from "wouter";
 import { createAdminDetailLocation } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { exportReceiptPDF } from "@/lib/export-receipt-pdf";
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
@@ -68,6 +70,7 @@ export default function FinanceiroContasReceber() {
   const [receiptContactDialog, setReceiptContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email"; receiptId: number | null; receiptNumber: string }>({ open: false, channel: "whatsapp", receiptId: null, receiptNumber: "" });
   const [receiptContact, setReceiptContact] = useState("");
   const { adminUser } = useAdminAuth();
+  const { company } = useCompanySettings();
   const canDeleteReceivable = adminUser?.role === "superadmin";
   const utils = trpc.useUtils();
 
@@ -77,6 +80,10 @@ export default function FinanceiroContasReceber() {
     search: search || undefined,
     formaPagamento: formaPagamento || undefined,
   });
+  const { data: receiptPdfData, isLoading: isLoadingReceiptPdf } = trpc.financeiro.getRecibo.useQuery(
+    { receiptId: receiptActionDialog.receiptId || 0 },
+    { enabled: receiptActionDialog.open && Boolean(receiptActionDialog.receiptId) },
+  );
   const { data: trashedAccounts = [], isLoading: isLoadingTrash } = trpc.financeiro.listDeletedContasRecebidas.useQuery(undefined, {
     enabled: canDeleteReceivable && showTrash,
   });
@@ -182,6 +189,25 @@ export default function FinanceiroContasReceber() {
   const handleSearch = () => {
     setSearch(searchInput);
     setPage(1);
+  };
+
+  const downloadReceiptPdf = async () => {
+    if (!receiptPdfData?.receipt) return;
+    try {
+      await exportReceiptPDF({
+        ...receiptPdfData.receipt,
+        items: receiptPdfData.items,
+        companyName: company.tradeName || "Maria Imprime",
+        legalName: company.legalName,
+        cnpj: company.cnpj || "34.528.399/0001-08",
+        commercialPhone: company.commercialPhone,
+        supportEmail: company.supportEmail,
+      });
+      toast.success("PDF do recibo baixado", { position: "top-right", duration: 3500, id: `receipt-pdf-${receiptPdfData.receipt.id}` });
+    } catch (error) {
+      console.error("Erro ao gerar PDF do recibo", error);
+      toast.error("Não foi possível gerar o PDF do recibo.", { position: "top-right", duration: 3500, id: `receipt-pdf-${receiptPdfData.receipt.id}` });
+    }
   };
 
   return (
@@ -469,8 +495,9 @@ export default function FinanceiroContasReceber() {
           <DialogHeader><DialogTitle className="flex items-center gap-2"><ReceiptText className="h-5 w-5 text-pink-600" aria-hidden="true" />Recibo gerado</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-gray-600">O pagamento foi confirmado e o recibo <strong>{receiptActionDialog.receiptNumber}</strong> já está vinculado ao pedido #{receiptActionDialog.order?.orderNumber}.</p>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => { if (receiptActionDialog.receiptId) setLocation(`/admin/financeiro/recibos/${receiptActionDialog.receiptId}/imprimir`); }}><Printer className="mr-2 h-4 w-4" aria-hidden="true" />Imprimir</Button>
+              <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" disabled={!receiptPdfData || isLoadingReceiptPdf} onClick={downloadReceiptPdf}><Download className="mr-2 h-4 w-4" aria-hidden="true" />{isLoadingReceiptPdf ? "Preparando..." : "Baixar PDF"}</Button>
               <Button type="button" variant="outline" className="border-green-200 text-green-700 hover:bg-green-50" disabled={prepararReciboWhatsApp.isPending} onClick={() => {
                 if (!receiptActionDialog.receiptId) return;
                 const phone = String(receiptActionDialog.order?.telefone || "").replace(/\D/g, "");

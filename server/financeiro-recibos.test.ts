@@ -10,6 +10,7 @@ const receiptPrint = readFileSync(resolve(import.meta.dirname, "../client/src/pa
 const navigation = readFileSync(resolve(import.meta.dirname, "../client/src/components/AdminLayout.tsx"), "utf8");
 const app = readFileSync(resolve(import.meta.dirname, "../client/src/App.tsx"), "utf8");
 const emailService = readFileSync(resolve(import.meta.dirname, "../server/emailService.ts"), "utf8");
+const receiptPdf = readFileSync(resolve(import.meta.dirname, "../client/src/lib/export-receipt-pdf.ts"), "utf8");
 
 describe("central financeira de recibos", () => {
   it("cria recibos únicos vinculados ao pedido confirmado", () => {
@@ -55,5 +56,14 @@ describe("central financeira de recibos", () => {
     expect(financeRouter).toContain("receiptEmailSent");
     expect(financeRouter).toContain('templateName: "sendPaymentReceiptEmail:auto"');
     expect(receivables).toContain("enviado automaticamente para");
+  });
+
+  it("permite baixar o recibo em PDF logo após confirmar o pagamento", () => {
+    expect(receivables).toContain("Baixar PDF");
+    expect(receivables).toContain("downloadReceiptPdf");
+    expect(receivables).toContain("PDF do recibo baixado");
+    expect(receiptPdf).toContain('await import("jspdf")');
+    expect(receiptPdf).toContain("OBSERVAÇÕES DA EMPRESA");
+    expect(receiptPdf).toContain("doc.save(`recibo-");
   });
 });
