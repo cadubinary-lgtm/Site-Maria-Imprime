@@ -3566,3 +3566,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear as rotas duplicadas de Dados da Empresa nos grupos Sistema e Configurações do Site
 - [x] Separar os destinos de Dados da Empresa sem remover nenhum acesso
 - [x] Validar a seleção individual dos grupos e salvar checkpoint publicável
+
+- [x] Mapear automações existentes, fontes de dados e a página atual
+- [x] Organizar a central de automações com gatilho, status, última execução e resultado
+- [x] Validar a central de automações e salvar checkpoint publicável
