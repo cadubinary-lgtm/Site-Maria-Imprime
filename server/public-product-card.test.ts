@@ -30,6 +30,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain('className="sr-only"');
     expect(publicCardSource).toContain("product-card-pix-caption");
     expect(publicCardSource).toContain("product-card-card-caption");
+    expect(publicCardSource).toContain('product-card-pix-caption mt-px');
+    expect(publicCardSource).toContain('product-card-card-caption mt-px');
     expect(publicCardSource).toContain("product-card-urgency-content");
     expect(publicCardSource).toContain("product-card-urgency");
     expect(publicCardSource).toContain("mt-1.5 grid gap-2");

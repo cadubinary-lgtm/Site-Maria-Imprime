@@ -133,7 +133,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
               <span aria-hidden="true"><span className="product-card-currency">R$</span>{formatPriceAmount(paymentPrices.pix.value)}</span>
               <span className="sr-only">{formatCurrency(paymentPrices.pix.value)}</span>
             </p>
-            {!isReseller && <p className="product-card-pix-caption mt-1 text-[10px] font-semibold leading-none text-emerald-700">no Pix</p>}
+            {!isReseller && <p className="product-card-pix-caption mt-px text-[10px] font-semibold leading-none text-emerald-700">no Pix</p>}
           </div>
           {!isReseller && (
             <div className="relative z-10 min-w-0 border-l border-gray-200 bg-white pl-2">
@@ -142,7 +142,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
                 <span aria-hidden="true"><span className="product-card-currency">R$</span>{formatPriceAmount(paymentPrices.card.value)}</span>
                 <span className="sr-only">{formatCurrency(paymentPrices.card.value)}</span>
               </p>
-              <p className="product-card-card-caption mt-1 text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
+              <p className="product-card-card-caption mt-px text-[10px] font-medium leading-none text-gray-500">no Cartão</p>
             </div>
           )}
         </div>

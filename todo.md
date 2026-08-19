@@ -3673,3 +3673,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir visualmente o símbolo R$ nos valores Pix e cartão dos cards públicos
 - [x] Preservar a escala principal dos números e a leitura em uma linha
 - [x] Validar o ajuste e salvar checkpoint publicável
+
+- [x] Reduzir em aproximadamente 70% a distância entre preço e legenda Pix
+- [x] Aplicar a mesma compactação entre preço e legenda Cartão
+- [x] Validar o ajuste e salvar checkpoint publicável
