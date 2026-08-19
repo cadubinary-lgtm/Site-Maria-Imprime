@@ -30,6 +30,7 @@ describe("vitrine pública de produtos em destaque", () => {
     expect(source).toContain("grid-cols-2");
     expect(source).toContain("md:grid-cols-4");
     expect(source).toContain("2xl:grid-cols-6");
+    expect(source).toContain("gap-3 sm:gap-4 md:grid-cols-4 md:gap-5 2xl:grid-cols-6 2xl:gap-6");
     expect(source).toContain("2xl:max-w-[1840px]");
     expect(source).toContain("featured-products-grid");
     expect(source).toContain("<PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />");
