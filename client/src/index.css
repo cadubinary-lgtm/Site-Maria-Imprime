@@ -606,11 +606,11 @@
   }
 
   .product-card-pix-price {
-    font-size: clamp(0.625rem, 14cqw, 1.5rem) !important;
+    font-size: clamp(0.625rem, 14cqw, 2.8125rem) !important;
   }
 
   .product-card-card-price {
-    font-size: clamp(0.575rem, 11cqw, 1.125rem) !important;
+    font-size: clamp(0.575rem, 12cqw, 2.8125rem) !important;
   }
 
   .product-card-pix-caption {
@@ -658,11 +658,11 @@
 
   @media (min-width: 1280px) and (max-width: 1535px) {
     .featured-products-grid .product-card-pix-price {
-      font-size: clamp(0.625rem, 19cqw, 1.5rem) !important;
+      font-size: clamp(0.625rem, 19cqw, 2.8125rem) !important;
     }
 
     .featured-products-grid .product-card-card-price {
-      font-size: clamp(0.575rem, 17cqw, 1.125rem) !important;
+      font-size: clamp(0.575rem, 17cqw, 2.8125rem) !important;
     }
 
     .featured-products-grid .product-card-pix-price .product-price-composite,
