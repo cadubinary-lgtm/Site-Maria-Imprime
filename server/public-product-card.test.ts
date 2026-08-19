@@ -31,6 +31,7 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("product-price-length-short");
     expect(publicCardSource).toContain("product-price-length-medium");
     expect(publicCardSource).toContain("product-price-length-long");
+    expect(publicCardSource).not.toContain("style={{fontSize:");
     expect(publicCardSource).toContain("product-card-pix-caption");
     expect(publicCardSource).toContain("product-card-urgency");
     expect(publicCardSource).toContain("mt-1.5 grid gap-2");

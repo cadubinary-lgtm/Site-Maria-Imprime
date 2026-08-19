@@ -3660,3 +3660,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar estilos visuais aplicados pelo editor aos preços e ações dos cards
 - [x] Preservar os ajustes visuais compatíveis sem comprometer a responsividade
 - [x] Validar o card revisado e salvar checkpoint publicável
+
+- [x] Revisar a ampliação aplicada pelo editor ao preço principal
+- [x] Consolidar a ampliação em regra responsiva sem atributos JSX duplicados
+- [x] Validar valores curtos e longos após a ampliação e salvar checkpoint
