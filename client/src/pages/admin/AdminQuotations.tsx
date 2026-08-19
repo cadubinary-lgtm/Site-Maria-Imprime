@@ -107,9 +107,18 @@ export default function AdminQuotations() {
   const [statusActionQuotation, setStatusActionQuotation] = useState<{ type: "cancel" | "restore"; quotation: any } | null>(null);
   const { adminUser } = useAdminAuth();
   const canManageTrash = adminUser?.role === "superadmin";
+  const hasActiveFilters = Boolean(search || statusFilter !== "all" || period !== "all");
   const presetRange = period === "this_month" ? getMonthRange(0) : period === "last_month" ? getMonthRange(-1) : { startDate: undefined, endDate: undefined };
   const startDate = period === "custom" ? customStartDate || undefined : presetRange.startDate;
   const endDate = period === "custom" ? customEndDate || undefined : presetRange.endDate;
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setPeriod("all");
+    setCustomStartDate("");
+    setCustomEndDate("");
+  };
 
   const { data, isLoading, refetch } = trpc.quotations.list.useQuery({
     search: search || undefined,
@@ -219,6 +228,19 @@ export default function AdminQuotations() {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          type="button"
+          variant="outline"
+          className="border-pink-200 text-pink-700 hover:bg-pink-50 hover:text-pink-800"
+          onClick={resetFilters}
+          disabled={!hasActiveFilters}
+          aria-label="Limpar filtros de orçamentos"
+        >
+          Limpar filtros
+        </Button>
+        <p className="w-full text-xs text-gray-500" aria-live="polite">
+          {isLoading ? "Atualizando resultados..." : `Mostrando ${rows.length} orçamento${rows.length === 1 ? "" : "s"}.`}
+        </p>
       </div>
 
       {/* Tabela */}
