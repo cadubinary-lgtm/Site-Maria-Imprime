@@ -3586,3 +3586,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Analisar a estrutura atual e a referência visual da seção Acesso rápido
 - [x] Restaurar cartões arredondados, espaçamento e setas laterais do Acesso rápido
 - [x] Validar a seção Acesso rápido restaurada e salvar checkpoint publicável
+
+- [x] Recuperar a implementação do Acesso rápido anterior ao checkpoint 799bfb47
+- [x] Restaurar isoladamente o Acesso rápido e seus controles móveis
+- [x] Validar a restauração isolada e salvar checkpoint publicável
