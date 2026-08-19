@@ -13,7 +13,9 @@ describe("painel administrativo de pré-impressão", () => {
 
   it("expõe busca, filtros e contagem com estados acessíveis", () => {
     expect(source).toContain('htmlFor="prepress-search"');
-    expect(source).toContain('aria-pressed={filterStatus === s}');
+    expect(source).toContain('aria-pressed={filterStatus === status}');
+    expect(source).toContain('aria-label="Filtros da pré-impressão"');
+    expect(source).toContain('aria-label={`Filtrar por ${status === "todos" ? "todos os pedidos" : PRE_PRODUCTION_STATUS[status]?.label ?? status}`');
     expect(source).toContain('aria-live="polite"');
     expect(source).toContain('aria-label="Carregando pedidos da pré-impressão"');
   });
@@ -22,5 +24,12 @@ describe("painel administrativo de pré-impressão", () => {
     expect(source).toContain("Aguardando Liberação Comercial");
     expect(source).toContain('aria-label={`Ver detalhes do pedido ${order.orderNumber}`}');
     expect(source).toContain('aria-busy={deleteHistoryMutation.isPending}');
+  });
+
+  it("organiza indicadores e oferece uma forma explícita de limpar filtros", () => {
+    expect(source).toContain('aria-label="Indicadores da pré-impressão"');
+    expect(source).toContain('label="Aguardando liberação"');
+    expect(source).toContain("const clearFilters = () => {");
+    expect(source).toContain("Limpar filtros");
   });
 });
