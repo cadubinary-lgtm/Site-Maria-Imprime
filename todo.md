@@ -3615,3 +3615,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear divergências do domínio oficial em Novo Produto e Todos os Produtos
 - [x] Corrigir autorizações, retornos de erro e formatos monetários nas páginas de produto
 - [x] Validar os fluxos oficiais de produto e salvar checkpoint publicável
+
+- [x] Mapear o estado da prévia, checkpoints e domínio oficial
+- [x] Corrigir divergências técnicas entre o ambiente interno e o domínio oficial
+- [x] Validar a sincronização e salvar checkpoint publicável
