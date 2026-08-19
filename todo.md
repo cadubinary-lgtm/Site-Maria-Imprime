@@ -3530,3 +3530,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear cabeçalho, identificação e linhas de notas internas da Ordem de Serviço
 - [x] Manter logo com CNPJ abaixo, remover identificação duplicada e separar linhas das notas
 - [x] Validar a Ordem de Serviço ajustada e salvar checkpoint publicável
+
+- [x] Mapear confirmação de pagamento, navegação financeira e envio de comprovantes
+- [x] Criar recibos numerados vinculados ao pedido e ao recebimento confirmado
+- [x] Criar subitem Recibos no Financeiro com visual próprio para impressão
+- [x] Oferecer imprimir, preparar WhatsApp e enviar recibo por e-mail após receber pagamento
+- [x] Validar o ciclo de recibos e salvar checkpoint publicável

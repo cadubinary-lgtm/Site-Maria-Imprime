@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `paymentReceipts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `receiptNumber` varchar(80) NOT NULL,
+  `orderId` int NOT NULL,
+  `financeiroId` int DEFAULT NULL,
+  `orderNumber` varchar(50) NOT NULL,
+  `customerName` varchar(255) NOT NULL,
+  `customerEmail` varchar(255) DEFAULT NULL,
+  `customerPhone` varchar(30) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `paymentMethod` varchar(50) NOT NULL,
+  `paidAt` bigint NOT NULL,
+  `issuedAt` bigint NOT NULL,
+  `issuedByAdminId` int DEFAULT NULL,
+  `issuedByAdminName` varchar(150) DEFAULT NULL,
+  `whatsappPreparedAt` bigint DEFAULT NULL,
+  `emailSentAt` bigint DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `paymentReceipts_receiptNumber_unique` (`receiptNumber`),
+  UNIQUE KEY `paymentReceipts_orderId_unique` (`orderId`)
+);

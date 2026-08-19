@@ -1592,6 +1592,33 @@ export type Financeiro = typeof financeiro.$inferSelect;
 export type InsertFinanceiro = typeof financeiro.$inferInsert;
 
 /**
+ * paymentReceipts - recibos emitidos para pagamentos confirmados.
+ * O snapshot mantém o documento íntegro mesmo quando dados do pedido são atualizados depois.
+ */
+export const paymentReceipts = mysqlTable("paymentReceipts", {
+  id: int("id").autoincrement().primaryKey(),
+  receiptNumber: varchar("receiptNumber", { length: 80 }).notNull().unique(),
+  orderId: int("orderId").notNull().unique(),
+  financeiroId: int("financeiroId"),
+  orderNumber: varchar("orderNumber", { length: 50 }).notNull(),
+  customerName: varchar("customerName", { length: 255 }).notNull(),
+  customerEmail: varchar("customerEmail", { length: 255 }),
+  customerPhone: varchar("customerPhone", { length: 30 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 50 }).notNull(),
+  paidAt: bigint("paidAt", { mode: "number" }).notNull(),
+  issuedAt: bigint("issuedAt", { mode: "number" }).notNull(),
+  issuedByAdminId: int("issuedByAdminId"),
+  issuedByAdminName: varchar("issuedByAdminName", { length: 150 }),
+  whatsappPreparedAt: bigint("whatsappPreparedAt", { mode: "number" }),
+  emailSentAt: bigint("emailSentAt", { mode: "number" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PaymentReceipt = typeof paymentReceipts.$inferSelect;
+export type InsertPaymentReceipt = typeof paymentReceipts.$inferInsert;
+
+/**
  * financeiroNotificacoes - Alertas e notificações financeiras
  */
 export const financeiroNotificacoes = mysqlTable("financeiroNotificacoes", {

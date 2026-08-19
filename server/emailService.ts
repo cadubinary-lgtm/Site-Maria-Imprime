@@ -378,6 +378,37 @@ export async function sendPixPaymentConfirmedEmail(
   );
 }
 
+export type ReceiptEmailData = {
+  customerName: string;
+  receiptNumber: string;
+  orderNumber: string;
+  amount: string;
+  paymentMethod: string;
+  paidAt: string;
+};
+
+export function templatePaymentReceipt(data: ReceiptEmailData): string {
+  const customerName = escapeHtml(data.customerName || "cliente");
+  return baseTemplate(`Recibo ${data.receiptNumber}`, `
+    ${h1("Recibo de pagamento")}
+    ${p(`Olá, <strong>${customerName}</strong>! Confirmamos o recebimento do pagamento do seu pedido.`)}
+    <div style="background:#fff6fa;border:1px solid #f7c4d9;border-radius:12px;padding:20px;margin:20px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr><td style="padding:7px 0;color:#7c2d50;font-size:13px;font-weight:700;">RECIBO</td><td style="padding:7px 0;text-align:right;color:#2d1020;font-size:15px;font-weight:800;">${escapeHtml(data.receiptNumber)}</td></tr>
+        <tr><td style="padding:7px 0;border-top:1px solid #f5d8e5;color:#7c2d50;font-size:13px;font-weight:700;">PEDIDO</td><td style="padding:7px 0;border-top:1px solid #f5d8e5;text-align:right;color:#2d1020;font-size:15px;font-weight:800;">#${escapeHtml(data.orderNumber)}</td></tr>
+        <tr><td style="padding:7px 0;border-top:1px solid #f5d8e5;color:#7c2d50;font-size:13px;font-weight:700;">FORMA DE PAGAMENTO</td><td style="padding:7px 0;border-top:1px solid #f5d8e5;text-align:right;color:#2d1020;font-size:14px;font-weight:700;">${escapeHtml(data.paymentMethod)}</td></tr>
+        <tr><td style="padding:7px 0;border-top:1px solid #f5d8e5;color:#7c2d50;font-size:13px;font-weight:700;">DATA DO RECEBIMENTO</td><td style="padding:7px 0;border-top:1px solid #f5d8e5;text-align:right;color:#2d1020;font-size:14px;font-weight:700;">${escapeHtml(data.paidAt)}</td></tr>
+        <tr><td style="padding:14px 0 0;border-top:1px solid #f5d8e5;color:#ec0069;font-size:16px;font-weight:800;">VALOR RECEBIDO</td><td style="padding:14px 0 0;border-top:1px solid #f5d8e5;text-align:right;color:#ec0069;font-size:20px;font-weight:900;">${escapeHtml(data.amount)}</td></tr>
+      </table>
+    </div>
+    ${p("Este e-mail é o seu comprovante de recebimento. Guarde-o para consulta futura.")}
+  `);
+}
+
+export async function sendPaymentReceiptEmail(to: string, data: ReceiptEmailData): Promise<SendResult> {
+  return send(to, `Recibo ${data.receiptNumber} — Pedido #${data.orderNumber}`, templatePaymentReceipt(data));
+}
+
 // ── Template: Reenvio de Arte Solicitado ─────────────────────────────────────
 export function templateArtResendRequest(
   firstName: string,
