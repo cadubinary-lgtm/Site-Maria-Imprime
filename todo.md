@@ -3512,3 +3512,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a persistência da tabela de preços no novo cadastro de clientes
 - [x] Adicionar a tabela de preços ao formulário Novo cliente
 - [x] Validar novo cadastro com tipo e tabela de preços e salvar checkpoint publicável
+
+- [x] Mapear o preenchimento indevido de senha e a posição dos campos no novo cadastro
+- [x] Manter os campos de senha vazios ao editar e alinhar tabela de preços ao lado do tipo
+- [x] Validar os formulários de clientes e salvar checkpoint publicável
