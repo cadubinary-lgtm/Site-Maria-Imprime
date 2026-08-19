@@ -12,9 +12,9 @@ describe("central de validação de arquivos", () => {
   });
 
   it("mantém aprovados, rejeitados e análise com cores semânticas", () => {
-    expect(source).toContain('color: "bg-green-100 text-green-800"');
-    expect(source).toContain('color: "bg-red-100 text-red-800"');
-    expect(source).toContain('color: "bg-yellow-100 text-yellow-800"');
+    expect(source).toContain('className="bg-green-100 text-green-800"');
+    expect(source).toContain('className="bg-red-100 text-red-800"');
+    expect(source).toContain('className="bg-yellow-100 text-yellow-800"');
   });
 
   it("atualiza as consultas depois da decisão e identifica ações por arquivo", () => {
