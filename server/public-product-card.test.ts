@@ -18,7 +18,7 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain("object-contain");
     expect(publicCardSource).not.toContain("object-cover");
     expect(publicCardSource).not.toContain("Desconto no Pix");
-    expect(publicCardSource).toContain('className="product-card-content px-4 pb-4 pt-0"');
+    expect(publicCardSource).toContain('className="product-card-content relative -mt-1.5 px-4 pb-4 pt-0"');
     expect(publicCardSource).toContain('text-[17px]');
     expect(publicCardSource).toContain("product-card-content");
     expect(publicCardSource).toContain("product-card-title");
