@@ -3677,3 +3677,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir em aproximadamente 70% a distância entre preço e legenda Pix
 - [x] Aplicar a mesma compactação entre preço e legenda Cartão
 - [x] Validar o ajuste e salvar checkpoint publicável
+
+- [x] Aumentar em 50% a unidade m² associada aos preços nos cards públicos
+- [x] Preservar hierarquia e alinhamento da unidade com o valor monetário
+- [x] Validar o ajuste e salvar checkpoint publicável

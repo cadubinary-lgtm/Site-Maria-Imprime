@@ -155,7 +155,7 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
                 {cardDescriptionLines.map((line, index) => <span key={`${line}-${index}`} className="truncate" title={line}>{line}</span>)}
               </span>
             ) : (
-              <span className="product-card-urgency-content min-w-0 break-words">Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency?.pricePerM2), "/m²")}</span>
+              <span className="product-card-urgency-content min-w-0 break-words">Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency?.pricePerM2))}<span className="product-card-area-unit">/m²</span></span>
             )}
           </div>
         )}
