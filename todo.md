@@ -3623,3 +3623,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Localizar a grade de produtos em destaque da página inicial
 - [x] Exibir até seis produtos por fileira em telas grandes sem alterar os cards
 - [x] Validar a grade responsiva e salvar checkpoint publicável
+
+- [x] Revisar os pontos de quebra atuais da grade de produtos em destaque
+- [x] Exibir dois produtos por fileira em celular, quatro em tablet e seis em telas grandes
+- [x] Validar a responsividade da grade e salvar checkpoint publicável

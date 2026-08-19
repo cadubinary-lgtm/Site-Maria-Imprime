@@ -24,9 +24,11 @@ describe("vitrine pública de produtos em destaque", () => {
     expect(source).toContain('href="/catalogo"');
   });
 
-  it("organiza até seis cards por fileira em telas grandes sem alterar o card interno", () => {
+  it("organiza dois, quatro e seis cards por fileira sem alterar o card interno", () => {
     const source = readFileSync(resolve(root, "client/src/components/home/FeaturedProducts.tsx"), "utf8");
 
+    expect(source).toContain("grid-cols-2");
+    expect(source).toContain("md:grid-cols-4");
     expect(source).toContain("lg:grid-cols-6");
     expect(source).toContain("<PublicProductCard key={product.id} product={product} priceAudience={priceAudience} />");
   });
