@@ -3632,3 +3632,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preservar a proporção anterior dos cards sem alterar a quantidade de colunas
 - [x] Garantir a leitura integral de promoção, preços Pix/cartão, urgência e botão
 - [x] Validar a correção visual e salvar checkpoint publicável
+
+- [x] Revisar o espaçamento da grade de produtos em destaque em mobile e tablet
+- [x] Ajustar gaps da grade sem alterar conteúdo ou proporção dos cards
+- [x] Validar o respiro responsivo e salvar checkpoint publicável
