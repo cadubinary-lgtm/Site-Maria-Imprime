@@ -3686,6 +3686,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preservar o alinhamento e a leitura após ampliar a unidade
 - [x] Validar o ajuste e salvar checkpoint publicável
 
-- [ ] Reduzir aproximadamente em um terço o botão rosa “Ver opções” dos cards públicos
-- [ ] Preservar legibilidade, acessibilidade e alinhamento após reduzir o botão
-- [ ] Validar o ajuste e salvar checkpoint publicável
+- [x] Reduzir aproximadamente em um terço o botão rosa “Ver opções” dos cards públicos
+- [x] Preservar legibilidade, acessibilidade e alinhamento após reduzir o botão
+- [x] Validar o ajuste e salvar checkpoint publicável
