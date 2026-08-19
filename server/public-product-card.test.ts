@@ -50,7 +50,8 @@ describe("cards públicos informativos", () => {
     expect(publicCardSource).toContain('relative z-10 min-w-0 border-l border-gray-200 bg-white pl-2');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.pix.value)');
     expect(publicCardSource).toContain('formatCurrency(paymentPrices.card.value)');
-    expect(publicCardSource).toContain(">no Pix</p>");
+    expect(publicCardSource).toContain('>no Pix</p>');
+    expect(publicCardSource.match(/text-\[7px\] font-bold uppercase tracking-wide/g)).toHaveLength(2);
     expect(publicCardSource).not.toContain("% de desconto");
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.pix.value, pricingSuffix)');
     expect(publicCardSource).not.toContain('formatCurrency(paymentPrices.card.value, paymentPrices.card.suffix)');
