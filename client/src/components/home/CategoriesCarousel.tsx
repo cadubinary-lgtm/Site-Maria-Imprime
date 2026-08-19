@@ -56,34 +56,36 @@ export function CategoriesCarousel() {
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Acesso rápido</h2>
 
         <div className="relative flex items-center">
-          <div
-            id="categories-container"
-            ref={containerRef}
-            className="flex min-w-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 sm:px-12 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {(segments as any[]).map((segment) => (
-              <button
-                key={segment.id}
-                type="button"
-                data-segment-card
-                onClick={() => navigate(`/catalogo?segmentId=${segment.id}`)}
-                className="group w-[9.5rem] shrink-0 snap-start rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 px-4 py-2.5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-40"
-              >
-                <span className="flex min-h-9 items-center justify-center gap-2.5">
-                  {segment.icon && (
-                    <img
-                      src={segment.icon}
-                      alt=""
-                      aria-hidden="true"
-                      className="h-7 w-7 shrink-0 object-contain"
-                    />
-                  )}
-                  <span className="text-center text-sm font-semibold leading-tight text-slate-900 transition-colors group-hover:text-pink-700">
-                    {segment.name}
+          <div className="mx-10 min-w-0 flex-1 sm:mx-12">
+            <div
+              id="categories-container"
+              ref={containerRef}
+              className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {(segments as any[]).map((segment) => (
+                <button
+                  key={segment.id}
+                  type="button"
+                  data-segment-card
+                  onClick={() => navigate(`/catalogo?segmentId=${segment.id}`)}
+                  className="group w-[9.5rem] shrink-0 snap-start rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 px-4 py-2.5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-40"
+                >
+                  <span className="flex min-h-9 items-center justify-center gap-2.5">
+                    {segment.icon && (
+                      <img
+                        src={segment.icon}
+                        alt=""
+                        aria-hidden="true"
+                        className="h-7 w-7 shrink-0 object-contain"
+                      />
+                    )}
+                    <span className="text-center text-sm font-semibold leading-tight text-slate-900 transition-colors group-hover:text-pink-700">
+                      {segment.name}
+                    </span>
                   </span>
-                </span>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
 
           {(segments as any[]).length > 4 && (
