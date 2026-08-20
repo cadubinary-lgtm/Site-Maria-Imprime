@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { parseQuotationCurrency, resolveQuotationItemTotal, roundQuotationMoney } from "@/lib/quotationItemPricing";
+import { QUOTATION_AUTO_ADVANCE_MS, scheduleQuotationAutoAdvance } from "@/lib/quotationAutoAdvance";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface QuotationItem {
@@ -99,7 +100,6 @@ const specificationLabels: Record<string, string> = {
   finish: "Tipo de acabamento",
 };
 const CUSTOM_ITEM_NAME_MAX_LENGTH = 80;
-const QUOTATION_AUTO_ADVANCE_MS = 800;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
@@ -780,6 +780,7 @@ export default function AdminQuotationForm() {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
                 updateItem(idx, { unitPrice: Math.max(0, parseFloat(raw) || 0) });
+                scheduleQuotationAutoAdvance(e.currentTarget);
               }}
               onBlur={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
@@ -811,8 +812,7 @@ export default function AdminQuotationForm() {
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               onChange={(e) => {
-                clearTimeout((e.target as any)._ajusteTimer);
-                (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), QUOTATION_AUTO_ADVANCE_MS);
+                scheduleQuotationAutoAdvance(e.currentTarget);
               }}
               className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
             />
@@ -943,6 +943,7 @@ export default function AdminQuotationForm() {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
                 updateItem(idx, { unitPrice: Math.max(0, parseFloat(raw) || 0) });
+                scheduleQuotationAutoAdvance(e.currentTarget);
               }}
               onBlur={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
@@ -969,6 +970,7 @@ export default function AdminQuotationForm() {
                 e.target.value = fmt(value);
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              onChangeCapture={(e) => scheduleQuotationAutoAdvance(e.currentTarget)}
               className="h-8 mt-0.5 border-pink-100 bg-pink-50/30 text-sm font-semibold text-right transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:bg-white focus-visible:ring-pink-100"
             />
           </div>
@@ -1469,6 +1471,7 @@ export default function AdminQuotationForm() {
                             placeholder="R$ 0,00"
                             onChange={(e) => {
                               setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
+                              scheduleQuotationAutoAdvance(e.currentTarget);
                             }}
                             onBlur={(e) => {
                               const value = parseQuotationCurrency(e.target.value);
@@ -1502,8 +1505,7 @@ export default function AdminQuotationForm() {
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                             onChange={(e) => {
-                              clearTimeout((e.target as any)._ajusteTimer);
-                              (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), QUOTATION_AUTO_ADVANCE_MS);
+                              scheduleQuotationAutoAdvance(e.currentTarget);
                             }}
                             className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
@@ -1773,7 +1775,10 @@ export default function AdminQuotationForm() {
                                   aria-label={`Valor unitário inferior de ${item.productName}`}
                                   value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
                                   placeholder="R$ 0,00"
-                                  onChange={(event) => setCustomUnitDrafts((previous) => ({ ...previous, [idx]: event.target.value }))}
+                                  onChange={(event) => {
+                                    setCustomUnitDrafts((previous) => ({ ...previous, [idx]: event.target.value }));
+                                    scheduleQuotationAutoAdvance(event.currentTarget);
+                                  }}
                                   onBlur={(event) => {
                                     const value = parseQuotationCurrency(event.target.value);
                                     updateItem(idx, { unitPrice: value });
@@ -1803,6 +1808,7 @@ export default function AdminQuotationForm() {
                                     event.target.value = fmt(total);
                                   }}
                                   onKeyDown={(event) => { if (event.key === "Enter") (event.target as HTMLInputElement).blur(); }}
+                                  onChangeCapture={(event) => scheduleQuotationAutoAdvance(event.currentTarget)}
                                   className="mt-0.5 h-8 border-pink-100 bg-pink-50/30 text-right text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:bg-white focus-visible:ring-pink-100"
                                 />
                               </div>
