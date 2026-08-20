@@ -899,7 +899,7 @@ export default function AdminQuotationForm() {
   };
 
   return (
-    <div className="admin-visual-system p-6 max-w-6xl mx-auto space-y-6">
+    <div className="admin-visual-system h-screen overflow-y-scroll overscroll-contain p-6 pb-12 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">

@@ -3713,3 +3713,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir o texto “A partir de” dos preços Pix e cartão
 - [x] Aplicar a redução de forma responsiva em desktop e mobile
 - [x] Validar as legendas e salvar checkpoint publicável
+
+- [x] Restaurar a rolagem vertical da página de Novo Produto/Novo Orçamento
+- [x] Preservar o layout e permitir acesso a todos os campos do formulário
+- [x] Validar a rolagem e salvar checkpoint publicável

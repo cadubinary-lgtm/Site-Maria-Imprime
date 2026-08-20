@@ -456,7 +456,7 @@ export default function AdminNewProduct() {
 
   return (
     <AdminLayout>
-      <div className="admin-visual-system space-y-4 xl:space-y-5">
+      <div className="admin-visual-system min-h-full space-y-4 xl:space-y-5">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between gap-3">
           <div>
