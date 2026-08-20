@@ -36,9 +36,10 @@ import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
-import { formatCompanyAddress, formatCompanyContact } from "@/lib/companyQuotationDetails";
+import { formatCompanyAddress } from "@/lib/companyQuotationDetails";
 import { getSelectedQuotationSpecifications } from "@/lib/quotationSpecifications";
 import { buildQuotationWhatsappUrl } from "@/lib/quotationWhatsappShare";
+import { FaWhatsapp } from "react-icons/fa";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -176,11 +177,23 @@ function fmtDate(d: Date | string | null | undefined) {
   return new Date(d).toLocaleDateString("pt-BR");
 }
 
+function formatBrazilPhone(value: string | number | null | undefined) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  const localNumber = digits.startsWith("55") && digits.length >= 12 ? digits.slice(2) : digits;
+  if (localNumber.length === 11) return `(${localNumber.slice(0, 2)}) ${localNumber.slice(2, 7)}-${localNumber.slice(7)}`;
+  if (localNumber.length === 10) return `(${localNumber.slice(0, 2)}) ${localNumber.slice(2, 6)}-${localNumber.slice(6)}`;
+  return String(value ?? "");
+}
+
 // ─── PDF Print ───────────────────────────────────────────────────────────────
 function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const items = q.items ?? [];
   const hasDiscount = Number(q.discountAmount ?? 0) > 0;
-  const companyLine = [company?.tradeName ?? "Maria Imprime", company?.cnpj ? `CNPJ: ${company.cnpj}` : "", company?.commercialPhone ?? "", company?.supportEmail ?? ""].filter(Boolean).join(" · ");
+  const companyAddress = formatCompanyAddress(company);
+  const contactPhone = company?.whatsappNumber ?? company?.commercialPhone;
+  const formattedContactPhone = formatBrazilPhone(contactPhone);
+  const responsibleName = q.responsibleName?.trim() || responsible?.trim();
+  const whatsappIconMarkup = `<svg class="whatsapp-icon" viewBox="0 0 448 512" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>`;
   const specs = (s: string) => buildSpecPairs(s)
     .map(({ label, value }) => `<div>${label ? `<span style="color:#777">${label}</span> ` : ""}<span>${value}</span></div>`)
     .join("");
@@ -223,7 +236,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .totals { margin-top:8px; border-top:2px solid #e0e0e0; padding-top:8px; }
   .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
-  .company-meta { font-size:9px; color:#555; line-height:1.25; margin-top:4px; max-width:360px; }
+  .company-meta { font-size:9px; color:#555; line-height:1.3; margin-top:4px; max-width:360px; }
+  .company-meta p { margin:1px 0; }
+  .whatsapp-icon { width:8px; height:8px; vertical-align:-1px; fill:#e91e8c; margin-right:2px; }
   .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
   .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
   .client-summary { margin-top:6px; padding-top:4px; border-top:1px dashed #ddd; text-align:right; color:#333; }
@@ -240,7 +255,13 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   <div class="header">
     <div class="brand">
       <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
-      <div class="company-meta">${companyLine}</div>
+      <div class="company-meta">
+        ${company?.cnpj ? `<p>CNPJ: ${company.cnpj}</p>` : ""}
+        ${contactPhone ? `<p>${whatsappIconMarkup}WhatsApp: ${formattedContactPhone}</p>` : ""}
+        ${company?.supportEmail ? `<p>${company.supportEmail}</p>` : ""}
+        ${companyAddress ? `<p>${companyAddress}</p>` : ""}
+        ${responsibleName ? `<p><strong>Responsável:</strong> ${responsibleName}</p>` : ""}
+      </div>
     </div>
 	    <div class="doc-info">
 	      <div class="num">${q.quotationNumber}<span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span></div>
@@ -440,7 +461,7 @@ export default function AdminQuotationDetail() {
             <Printer className="w-3.5 h-3.5" aria-hidden="true" /> Imprimir PDF
           </Button>
           <Button variant="outline" size="sm" className="gap-1 text-green-700 border-green-200 hover:bg-green-50" onClick={shareQuotationOnWhatsapp}>
-            <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp
+            <FaWhatsapp className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp
           </Button>
           <Button
             variant="outline"
@@ -518,7 +539,7 @@ export default function AdminQuotationDetail() {
             {company?.supportEmail && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">E-mail de atendimento</span><span>{company.supportEmail}</span></div>}
             {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço completo</span><span className="text-xs text-gray-600 leading-relaxed">{formatCompanyAddress(company)}</span></div>}
           </div>
-          {adminUser?.name && <p className="mt-2 pt-2 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{adminUser.name}</span></p>}
+          {q.responsibleName && <p className="mt-2 pt-2 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{q.responsibleName}</span></p>}
         </section>
 
         <section className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">

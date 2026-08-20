@@ -1798,6 +1798,7 @@ export const quotations = mysqlTable("quotations", {
   quotationNumber: varchar("quotationNumber", { length: 50 }).notNull().unique(),
   clientId: int("clientId").notNull(),
   operatorId: int("operatorId").notNull(), // Usuário que criou o orçamento
+  responsibleName: varchar("responsibleName", { length: 150 }), // Nome exibido como responsável pela emissão
   status: mysqlEnum("status", ["rascunho", "enviado", "em_negociacao", "aprovado", "recusado", "expirado", "cancelado"]).notNull().default("rascunho"),
   
   // Snapshot financeiro (imutável)
