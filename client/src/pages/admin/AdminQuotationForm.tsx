@@ -469,6 +469,7 @@ export default function AdminQuotationForm() {
   };
 
   const addCustomItemToQuote = (productName: string) => {
+    const newItemIndex = items.length;
     const newItem: QuotationItem = {
       productId: null,
       productName,
@@ -480,15 +481,17 @@ export default function AdminQuotationForm() {
       _specsParsed: { itemType: "custom" },
     };
     setItems((prev) => [...prev, newItem]);
-    setExpandedItems((prev) => { const next = new Set(prev); next.add(items.length); return next; });
+    setExpandedItems((prev) => { const next = new Set(prev); next.add(newItemIndex); return next; });
     setShowAddProduct(false);
     setProductSearch("");
     setShowCustomItemNameStep(false);
     setCustomItemName("");
+    toast.success(`Item \"${productName}\" adicionado ao orçamento.`, { id: "quotation-custom-item-added" });
   };
 
   const openCustomItemNameStep = () => {
     setCustomItemName("");
+    setShowAddProduct(true);
     setShowCustomItemNameStep(true);
   };
 
