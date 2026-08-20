@@ -3913,3 +3913,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover no configurador desktop o botão rosa Falar com a Maria, preservando apenas Ver normas para envio da arte
 - [x] Criar regressão e validar visualmente a permanência exclusiva do link de normas no desktop — inspeção confirmou somente o link de normas no Guia da Maria
+
+- [x] Mover o botão Ver normas para envio da arte para dentro do bloco Importante sobre a sua escolha
+- [x] Criar regressão e validar visualmente o novo posicionamento do link de normas — inspeção confirmou o link no bloco Importante sobre a sua escolha

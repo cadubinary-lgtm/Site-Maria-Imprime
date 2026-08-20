@@ -72,6 +72,8 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('href="#maria-guide-entrega"');
     expect(guide).toContain('HOME_PRIMARY_ACTION_CLASS} lg:hidden');
     expect(guide).toContain("Ver normas para envio de arte");
+    expect(guide).toContain("lg:grid-cols-[minmax(0,1fr)_9.5rem]");
+    expect(guide).toContain('lg:w-[9.5rem]');
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
