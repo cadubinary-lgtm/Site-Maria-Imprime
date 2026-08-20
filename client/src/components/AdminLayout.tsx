@@ -319,9 +319,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "LINHA DE PRODUÇÃO",
         icon: <Printer className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" />, badge: awaitingAnalysisCount || undefined },
+          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" /> },
           {
             label: "Pré-Impressão",
+            badge: awaitingAnalysisCount || undefined,
             children: [
               { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
               { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
