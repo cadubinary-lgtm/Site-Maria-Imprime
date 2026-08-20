@@ -719,13 +719,13 @@ export default function AdminQuotationForm() {
 
     return (
       <div key={`custom-${idx}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
-        <div className={`grid grid-cols-12 items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
-          <div className="col-span-1">
+        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_32px] items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
+          <div>
             <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
               <ImageIcon className="w-4 h-4 text-gray-400" />
             </div>
           </div>
-          <div className="col-span-3 flex min-w-0 items-center gap-1">
+          <div className="flex min-w-0 items-center gap-1">
             <span draggable onDragStart={(event) => startItemDrag(event, idx)} title="Arraste para reordenar" className="cursor-grab text-pink-500 hover:text-pink-700 active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
             <button
               type="button"
@@ -737,7 +737,7 @@ export default function AdminQuotationForm() {
               <span className="block truncate">{item.productName || "Item personalizado"}</span>
             </button>
           </div>
-          <div className="col-span-1 flex justify-center">
+          <div className="flex justify-center">
             {item.artFileUrl ? (
               <button
                 type="button"
@@ -758,17 +758,17 @@ export default function AdminQuotationForm() {
               </button>
             )}
           </div>
-          <div className="col-span-1 flex justify-center">
+          <div className="flex justify-center">
             <input
               type="number"
               min={1}
               aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
               value={item.quantity}
               onChange={(e) => updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
-              className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-sm text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+              className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
             />
           </div>
-          <div className="col-span-2 flex justify-end">
+          <div className="relative flex justify-end">
             <input
               type="text"
               inputMode="decimal"
@@ -784,13 +784,18 @@ export default function AdminQuotationForm() {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 const value = Math.max(0, parseFloat(raw) || 0);
                 updateItem(idx, { unitPrice: value });
-                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: fmt(value) }));
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="h-7 w-24 rounded-md border border-input bg-background px-2 text-right text-sm text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+              className={`h-8 w-full min-w-0 rounded-md border px-2 text-right text-sm font-medium tabular-nums transition-all focus:outline-none focus:ring-2 ${
+                autoRecalculatedUnitItems.has(idx)
+                  ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-200 motion-safe:animate-pulse"
+                  : "border-input bg-white text-foreground hover:border-pink-300 focus:border-pink-500 focus:ring-pink-100"
+              }`}
             />
+            {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário recalculado a partir do total do item personalizado.</span>}
           </div>
-          <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
+          <div className="flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
             <span>{fmt(item.totalPrice)}</span>
             <button
               type="button"
@@ -802,7 +807,7 @@ export default function AdminQuotationForm() {
               {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </button>
           </div>
-          <div className="col-span-1 flex justify-end gap-1">
+          <div className="flex justify-end gap-1">
             <button type="button" onClick={() => duplicateItem(idx)} className="text-gray-300 hover:text-pink-600 transition-colors" title="Duplicar item">
               <Copy className="w-3.5 h-3.5" />
             </button>
@@ -938,8 +943,8 @@ export default function AdminQuotationForm() {
               placeholder="R$ 0,00"
               onBlur={(e) => {
                 const value = Math.max(0, parseFloat(e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".")) || 0);
-                updateItem(idx, { unitPrice: value / Math.max(1, item.quantity), priceAdjustment: 0 });
-                e.target.value = value > 0 ? fmt(value) : "";
+                updateItem(idx, { priceAdjustment: value });
+                e.target.value = fmt(value);
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               className="h-8 mt-0.5 border-pink-100 bg-pink-50/30 text-sm font-semibold text-right transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:bg-white focus-visible:ring-pink-100"
@@ -1741,14 +1746,14 @@ export default function AdminQuotationForm() {
                       <h2 className="font-semibold text-gray-800">Itens personalizados</h2>
                       <span className="text-xs text-gray-400">— produto ou serviço fora do catálogo</span>
                     </div>
-                    <div className="grid grid-cols-12 gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      <div className="col-span-1">Img</div>
-                      <div className="col-span-3">Produto / Serviço</div>
-                      <div className="col-span-1 text-center">Arte</div>
-                      <div className="col-span-1 text-center">Qtd</div>
-                      <div className="col-span-2 text-right">Unit.</div>
-                      <div className="col-span-3 text-right">Total</div>
-                      <div className="col-span-1"></div>
+                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_32px] gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div>Img</div>
+                      <div>Produto / Serviço</div>
+                      <div className="text-center">Arte</div>
+                      <div className="text-center">Qtd</div>
+                      <div className="text-center">Unit.</div>
+                      <div className="text-right">Total</div>
+                      <div></div>
                     </div>
                     {items.map((item, idx) => item.isCustom ? renderCustomItemCard(item, idx) : null)}
                     <div className="pt-1">

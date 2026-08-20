@@ -3747,3 +3747,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ampliar os campos de QTD e UNIT. para manter números legíveis
 - [x] Destacar visualmente o UNIT. ao ser recalculado pelo Ajuste
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Padronizar a grade e os campos de QTD e UNIT. dos Itens personalizados
+- [x] Manter moeda com duas casas e aplicar feedback visual de recálculo nos itens personalizados
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
