@@ -36,10 +36,15 @@ describe("navegação lateral administrativa", () => {
     expect(appSource).toContain('path="/admin/relatorios" component={AdminDashboard}');
   });
 
-  it("mantém os dois acessos de Dados da Empresa em rotas distintas", () => {
+  it("mantém o submenu Sistema restrito a Usuários e preserva Dados da Empresa em Configurações do Site", () => {
     const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+    const systemMenuStart = source.indexOf('label: "SISTEMA"');
+    const siteSettingsStart = source.indexOf('// Configurações públicas');
+    const systemMenu = source.slice(systemMenuStart, siteSettingsStart);
 
-    expect(source).toContain('{ label: "Dados da Empresa", href: "/admin/dados-da-empresa" }');
+    expect(systemMenu).toContain('{ label: "Usuários", href: "/admin/usuarios" }');
+    expect(systemMenu).not.toContain('label: "Integrações"');
+    expect(systemMenu).not.toContain('label: "Dados da Empresa"');
     expect(source).toContain('{ label: "Dados da Empresa", href: "/admin/configuracoes-site/dados-da-empresa" }');
     expect(appSource).toContain('path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings}');
   });
