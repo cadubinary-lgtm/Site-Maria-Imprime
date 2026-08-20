@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import {
   automationLogs,
@@ -14,6 +14,7 @@ import {
   orders,
   orderStatusHistory,
   productionJobs,
+  productionStatusHistory,
   shipments,
 } from "../drizzle/schema";
 import { logAudit } from "./admin-auth";
@@ -21,10 +22,46 @@ import { getDb } from "./db";
 import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 
+function isUnavailableProductionStorage(error: unknown) {
+  const candidate = error as { code?: string; errno?: number; message?: string; cause?: { message?: string } };
+  const message = `${candidate?.message ?? ""} ${candidate?.cause?.message ?? ""}`;
+  return candidate?.code === "ER_NO_SUCH_TABLE"
+    || candidate?.errno === 1146
+    || /production(Job|StatusHistory)/i.test(message) && /doesn't exist|unknown table|not found/i.test(message);
+}
+
+async function deleteProductionDependenciesForOrder(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, orderId: number) {
+  let productionJobRows: Array<{ id: number }>;
+  try {
+    productionJobRows = await db.select({ id: productionJobs.id })
+      .from(productionJobs)
+      .where(eq(productionJobs.orderId, orderId));
+  } catch (error) {
+    if (isUnavailableProductionStorage(error)) return;
+    throw error;
+  }
+
+  const productionJobIds = productionJobRows.map((job) => job.id);
+  if (productionJobIds.length > 0) {
+    try {
+      await db.delete(productionStatusHistory)
+        .where(inArray(productionStatusHistory.productionJobId, productionJobIds));
+    } catch (error) {
+      if (!isUnavailableProductionStorage(error)) throw error;
+    }
+  }
+
+  try {
+    await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+  } catch (error) {
+    if (!isUnavailableProductionStorage(error)) throw error;
+  }
+}
+
 async function permanentlyDeleteOrder(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, orderId: number) {
   await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, orderId));
   await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, orderId));
-  await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+  await deleteProductionDependenciesForOrder(db, orderId);
   await db.delete(financialRecords).where(eq(financialRecords.orderId, orderId));
   await db.delete(fileValidations).where(eq(fileValidations.orderId, orderId));
   await db.delete(automationLogs).where(eq(automationLogs.orderId, orderId));

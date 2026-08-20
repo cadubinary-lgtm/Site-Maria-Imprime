@@ -3857,3 +3857,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Tornar a exclusão permanente de Contas Recebidas tolerante à indisponibilidade de dados de produção
 - [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da correção resiliente da lixeira
+
+- [x] Tornar a exclusão permanente de Pedidos tolerante à indisponibilidade de dados de produção
+- [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da correção de exclusão de Pedidos
