@@ -279,6 +279,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const { data: orders } = trpc.admin.getAllOrders.useQuery();
+  const { data: prepressIndicators } = trpc.admin.getPrepressMenuIndicators.useQuery(undefined, {
+    staleTime: 15 * 1000,
+  });
   const { data: products } = trpc.products.getAll.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
   });
@@ -289,8 +292,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ["pagamento_aprovado", "pagamento_retirada"].includes(o.status)
   ).length ?? 0;
 
-  // O Kanban deve alertar a linha de produção sobre os itens que ainda exigem análise.
-  const awaitingAnalysisCount = orders?.filter((o: any) => o.status === "analisando").length ?? 0;
   const menuIndicators = useMemo(
     () => getAdminMenuIndicators(orders as any[] ?? [], products?.length ?? 0),
     [orders, products],
@@ -322,10 +323,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" /> },
           {
             label: "Pré-Impressão",
-            badge: awaitingAnalysisCount || undefined,
             children: [
-              { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise" },
-              { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada" },
+              { label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise", badge: prepressIndicators?.liberadoParaAnalise || undefined },
+              { label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada", badge: prepressIndicators?.arteFinalAprovada || undefined },
             ],
           },
           {
@@ -337,7 +337,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               { label: "Acabamento Finalizado", href: "/admin/status-producao?status=acabamento_finalizado" },
             ],
           },
-          { label: "Produção Kanban", href: "/admin/producao/kanban", badge: awaitingAnalysisCount || undefined },
+          { label: "Produção Kanban", href: "/admin/producao/kanban" },
         ],
       },
     },

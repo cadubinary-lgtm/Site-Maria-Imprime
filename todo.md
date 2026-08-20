@@ -3844,3 +3844,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Revisar o Resumo financeiro e garantir o botão Receber pagamento com diálogo de confirmação vinculado ao pedido
 - [x] Sincronizar o recebimento confirmado com o Gerenciador Financeiro, incluindo atualizações de consulta e regressão
 - [x] Validar TypeScript, testes e salvar checkpoint publicável do fluxo de recebimento financeiro
+
+- [x] Remover o indicador geral de Pré-Impressão e adicionar contagens específicas em Liberado para Análise e Arte Final Aprovada
+- [x] Excluir pedidos e itens em produção de todas as contagens de Pré-Impressão
+- [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da nova regra de indicadores
