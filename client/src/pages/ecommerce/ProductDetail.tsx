@@ -1817,7 +1817,7 @@ export default function ProductDetail() {
                   <p className="text-sm text-red-700">{validationError}</p>
                 </div>
               )}
-              <MariaGuide compact />
+              <div className="hidden lg:block"><MariaGuide compact /></div>
             </div>
 
           </div>
@@ -2145,6 +2145,10 @@ export default function ProductDetail() {
               </div>
             </div>
 
+          </div>
+
+          <div className="lg:hidden">
+            <MariaGuide compact />
           </div>
 
         </div>
