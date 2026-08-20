@@ -29,4 +29,16 @@ describe("catálogo segmentado", () => {
     expect(source).toContain('aria-current={currentPage === i + 1 ? "page" : undefined}');
     expect(source).not.toContain('<img src={seg.icon}');
   });
+
+  it("separa segmentos e produtos somente no mobile, com retorno acessível", () => {
+    const source = readFileSync(resolve(root, "client/src/pages/public/Catalog.tsx"), "utf8");
+
+    expect(source).toContain('useState<"segments" | "products">');
+    expect(source).toContain('setMobileCatalogView("products")');
+    expect(source).toContain('setMobileCatalogView("segments")');
+    expect(source).toContain('aria-label="Voltar para segmentos"');
+    expect(source).toContain('className="hidden lg:grid lg:grid-cols-4 gap-6"');
+    expect(source).toContain('className="lg:hidden"');
+    expect(source).toContain('renderProductResults("grid grid-cols-1 sm:grid-cols-2")');
+  });
 });
