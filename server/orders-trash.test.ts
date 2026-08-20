@@ -7,12 +7,14 @@ const pagePath = resolve(process.cwd(), "client/src/pages/admin/AdminOrders.tsx"
 const schemaPath = resolve(process.cwd(), "drizzle/schema.ts");
 
 describe("lixeira de Todos os Pedidos", () => {
-  it("mantém operações de mover, restaurar e excluir permanentemente restritas a Superadmin", () => {
+  it("restaura a lixeira reversível para administradores e mantém a exclusão definitiva restrita", () => {
     const source = readFileSync(routerPath, "utf8");
     const schema = readFileSync(schemaPath, "utf8");
 
     expect(schema).toContain('mysqlTable("deletedOrders"');
-    expect(source).toContain('adminUser?.role !== "superadmin"');
+    expect(source).toContain("function requireAdmin(ctx: any)");
+    expect(source).toContain("function requireSuperadmin(ctx: any)");
+    expect(source).toContain('adminUser.role !== "superadmin"');
     expect(source).toContain("moveToTrash: adminOrManusAuthProcedure");
     expect(source).toContain("restore: adminOrManusAuthProcedure");
     expect(source).toContain("permanentlyDelete: adminOrManusAuthProcedure");
@@ -21,10 +23,12 @@ describe("lixeira de Todos os Pedidos", () => {
     expect(source).toContain('action: "permanently_delete_order_from_trash"');
   });
 
-  it("expõe no painel o motivo, a restauração e a confirmação de exclusão definitiva", () => {
+  it("reexibe no painel a lixeira reversível e preserva a exclusão definitiva protegida", () => {
     const source = readFileSync(pagePath, "utf8");
 
     expect(source).toContain("Lixeira de Todos os Pedidos");
+    expect(source).toContain("const canManageTrash = Boolean(adminUser);");
+    expect(source).toContain('const canPermanentlyDelete = adminUser?.role === "superadmin";');
     expect(source).toContain("Motivo da exclusão");
     expect(source).toContain("Confirmar restauração");
     expect(source).toContain("Excluir pedido permanentemente?");

@@ -30,6 +30,14 @@ function calcDiscount(
   return Math.min(discountValue, subtotal);
 }
 
+function requireQuotationAdmin(ctx: any) {
+  const adminUser = ctx.adminUser;
+  if (!adminUser) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "É necessário estar autenticado como administrador para acessar a lixeira de orçamentos." });
+  }
+  return adminUser;
+}
+
 // ─── Router ─────────────────────────────────────────────────────────────────
 
 export const quotationsRouter = router({
@@ -694,8 +702,7 @@ export const quotationsRouter = router({
 
   // ── Lixeira reversível de Orçamentos ───────────────────────────────────
   listTrash: adminAnyProcedure.query(async ({ ctx }) => {
-    const adminUser = (ctx as any).adminUser;
-    if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode acessar a lixeira de orçamentos." });
+    requireQuotationAdmin(ctx);
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
     const { quotations, clients, deletedQuotations } = await import("../drizzle/schema.js");
@@ -706,8 +713,7 @@ export const quotationsRouter = router({
   moveToTrash: adminAnyProcedure
     .input(z.object({ id: z.number().int().positive(), reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000) }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = (ctx as any).adminUser;
-      if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode mover orçamentos para a lixeira." });
+      const adminUser = requireQuotationAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, deletedQuotations } = await import("../drizzle/schema.js");
@@ -723,8 +729,7 @@ export const quotationsRouter = router({
   restoreFromTrash: adminAnyProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = (ctx as any).adminUser;
-      if (adminUser?.role !== "superadmin") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode restaurar orçamentos." });
+      const adminUser = requireQuotationAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { deletedQuotations } = await import("../drizzle/schema.js");
