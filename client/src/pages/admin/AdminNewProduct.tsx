@@ -322,8 +322,10 @@ export default function AdminNewProduct() {
     setAutoSaveState("saving");
     try {
       const result = await createProductMutation.mutateAsync(getCreatePayload());
-      const productId = (result as any)?.id;
-      if (!productId) throw new Error("O produto não retornou um identificador");
+      const productId = Number((result as { id?: unknown } | undefined)?.id);
+      if (!Number.isInteger(productId) || productId <= 0) {
+        throw new Error("O produto não retornou um identificador válido");
+      }
 
       const productName = createForm.name.trim();
       const wasDuplicatingDraft = isDuplicatingDraft;
