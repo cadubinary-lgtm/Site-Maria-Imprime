@@ -70,6 +70,8 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("HOME_PRIMARY_ACTION_CLASS");
     expect(guide).toContain('href="/documentos"');
     expect(guide).toContain('href="#maria-guide-entrega"');
+    expect(guide).toContain('HOME_PRIMARY_ACTION_CLASS} lg:hidden');
+    expect(guide).toContain("Ver normas para envio de arte");
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
