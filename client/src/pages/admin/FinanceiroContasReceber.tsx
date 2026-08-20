@@ -71,7 +71,8 @@ export default function FinanceiroContasReceber() {
   const [receiptContact, setReceiptContact] = useState("");
   const { adminUser } = useAdminAuth();
   const { company } = useCompanySettings();
-  const canDeleteReceivable = adminUser?.role === "superadmin";
+  const canManageReceivableTrash = Boolean(adminUser);
+  const canPermanentlyDeleteReceivable = adminUser?.role === "superadmin";
   const utils = trpc.useUtils();
 
   const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
@@ -85,7 +86,7 @@ export default function FinanceiroContasReceber() {
     { enabled: receiptActionDialog.open && Boolean(receiptActionDialog.receiptId) },
   );
   const { data: trashedAccounts = [], isLoading: isLoadingTrash } = trpc.financeiro.listDeletedContasRecebidas.useQuery(undefined, {
-    enabled: canDeleteReceivable && showTrash,
+    enabled: canManageReceivableTrash && showTrash,
   });
   const trashedReceivables = trashedAccounts.filter((item: any) => item.paymentStatus !== "pago" || item.paymentMethod === "pagar_na_retirada");
 
@@ -220,7 +221,7 @@ export default function FinanceiroContasReceber() {
           <p className="text-sm text-gray-500 mt-1">Pedidos aguardando confirmação de pagamento</p>
         </div>
         <div className="flex items-center gap-2">
-          {canDeleteReceivable && <Button type="button" variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} aria-pressed={showTrash} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : "border-pink-200 text-pink-700 hover:bg-pink-50"}><Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
+          {canManageReceivableTrash && <Button type="button" variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} aria-pressed={showTrash} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : "border-pink-200 text-pink-700 hover:bg-pink-50"}><Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}
           <Button type="button" variant="outline" size="sm" onClick={() => refetch()} className="border-pink-200 text-pink-700 hover:bg-pink-50">
             <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" />
             Atualizar
@@ -369,7 +370,7 @@ export default function FinanceiroContasReceber() {
                           >
                             <Send className="h-3 w-3" aria-hidden="true" />
                           </Button>
-                          {canDeleteReceivable && <Button
+                          {canManageReceivableTrash && <Button
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-xs text-red-500 hover:bg-red-50 hover:border-red-300"
@@ -407,11 +408,11 @@ export default function FinanceiroContasReceber() {
         </CardContent>
       </Card>
 
-      {canDeleteReceivable && showTrash && (
+      {canManageReceivableTrash && showTrash && (
         <Card className="border border-pink-200 shadow-sm">
           <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base text-gray-900"><Trash2 className="h-4 w-4 text-pink-600" />Lixeira de Contas a Receber</CardTitle></CardHeader>
           <CardContent className="p-0">
-            {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !trashedReceivables.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta a receber na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Usuário</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{trashedReceivables.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs text-gray-600">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-600">{item.deletedByAdminName || "Usuário não informado"}</td><td className="p-3 text-center"><div className="flex justify-center gap-1"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceivable.isPending} onClick={() => setRestoreDialog({ open: true, item })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button><Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${item.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${item.orderNumber}`} disabled={permanentlyDeleteReceivable.isPending} onClick={() => setPermanentDeleteDialog({ open: true, item })}><Trash2 className="h-3.5 w-3.5" /></Button></div></td></tr>)}</tbody></table></div>}
+            {isLoadingTrash ? <div className="p-8 text-center text-sm text-gray-400">Carregando lixeira...</div> : !trashedReceivables.length ? <div className="p-8 text-center text-sm text-gray-400">Nenhuma conta a receber na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-y bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Motivo</th><th className="p-3 text-left font-medium text-gray-600">Excluído em</th><th className="p-3 text-left font-medium text-gray-600">Usuário</th><th className="p-3 text-center font-medium text-gray-600">Ação</th></tr></thead><tbody className="divide-y divide-gray-100">{trashedReceivables.map((item: any) => <tr key={item.trashId}><td className="p-3 font-mono text-xs font-semibold text-pink-600">#{item.orderNumber}</td><td className="p-3 font-medium">{item.cliente}</td><td className="p-3 text-right font-semibold text-gray-700">{formatCurrency(item.valor)}</td><td className="max-w-60 p-3 text-xs text-gray-600">{item.deletionReason || "Motivo não informado"}</td><td className="whitespace-nowrap p-3 text-xs text-gray-600">{new Date(item.deletedAt).toLocaleString("pt-BR")}</td><td className="p-3 text-xs text-gray-600">{item.deletedByAdminName || "Usuário não informado"}</td><td className="p-3 text-center"><div className="flex justify-center gap-1"><Button size="sm" variant="outline" className="h-8 gap-1 text-xs" disabled={restoreReceivable.isPending} onClick={() => setRestoreDialog({ open: true, item })}><RotateCcw className="h-3.5 w-3.5" />Restaurar</Button>{canPermanentlyDeleteReceivable && <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title={`Excluir permanentemente o pedido ${item.orderNumber}`} aria-label={`Excluir permanentemente o pedido ${item.orderNumber}`} disabled={permanentlyDeleteReceivable.isPending} onClick={() => setPermanentDeleteDialog({ open: true, item })}><Trash2 className="h-3.5 w-3.5" /></Button>}</div></td></tr>)}</tbody></table></div>}
           </CardContent>
         </Card>
       )}

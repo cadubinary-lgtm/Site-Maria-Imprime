@@ -65,14 +65,15 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("Mover para lixeira");
   });
 
-  it("protege a exclusão de Contas a Receber com Superadmin, motivo e lixeira reversível", () => {
+  it("reexibe a lixeira reversível de Contas a Receber para administradores", () => {
     const routerSource = readFileSync(financeiroRouterPath, "utf8");
     const pageSource = readFileSync(receivableAccountsPagePath, "utf8");
 
     expect(routerSource).toContain("const deletedRows = await db.select({ orderId: deletedReceivedAccounts.orderId }).from(deletedReceivedAccounts);");
     expect(routerSource).toContain("moveContaRecebidaToTrash: adminOrManusAuthProcedure");
-    expect(pageSource).toContain('const canDeleteReceivable = adminUser?.role === "superadmin";');
-    expect(pageSource).toContain("{canDeleteReceivable && <Button");
+    expect(pageSource).toContain("const canManageReceivableTrash = Boolean(adminUser);");
+    expect(pageSource).toContain('const canPermanentlyDeleteReceivable = adminUser?.role === "superadmin";');
+    expect(pageSource).toContain("{canManageReceivableTrash && <Button");
     expect(pageSource).toContain("moveContaRecebidaToTrash.useMutation");
     expect(pageSource).toContain("Motivo da exclusão");
     expect(pageSource).toContain("deletionReason.trim().length < 3");

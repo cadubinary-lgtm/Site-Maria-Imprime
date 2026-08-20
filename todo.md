@@ -3823,3 +3823,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Comparar os controles de lixeira e ações entre o ambiente interno e o site oficial
 - [x] Sincronizar o ambiente interno ao comportamento oficial sem alterar a estrutura visual
 - [x] Criar regressões, validar TypeScript e salvar checkpoint publicável
+
+- [x] Mapear a divergência de sessão, perfil e versão entre site oficial e ambiente interno
+- [x] Sincronizar os controles administrativos do ambiente interno sem alterar a estrutura visual
+- [x] Criar regressões, validar a paridade das páginas afetadas e salvar checkpoint publicável
+
+- [x] Unificar a identidade Manus autenticada com o layout administrativo do ambiente interno
+- [x] Restaurar os controles reversíveis de administrador no preview, mantendo ações permanentes protegidas
