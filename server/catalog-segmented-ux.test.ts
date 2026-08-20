@@ -14,11 +14,14 @@ describe("catálogo segmentado", () => {
     expect(source).toContain("Abrir carrinho com ${cartCount}");
   });
 
-  it("expõe filtros e paginação com estados acessíveis sem mostrar ícones não configurados", () => {
+  it("mantém filtros úteis e paginação acessíveis sem exibir uma faixa de preço", () => {
     const source = readFileSync(resolve(root, "client/src/pages/public/Catalog.tsx"), "utf8");
 
     expect(source).toContain("aria-pressed={activeSegment === seg.id}");
-    expect(source).toContain('aria-label="Faixa de preço"');
+    expect(source).toContain('htmlFor="search"');
+    expect(source).not.toContain("Faixa de Preço");
+    expect(source).not.toContain("priceRange");
+    expect(source).not.toContain("setPriceRange");
     expect(source).toContain('aria-label="Página anterior"');
     expect(source).toContain('aria-label="Próxima página"');
     expect(source).toContain('aria-current={currentPage === i + 1 ? "page" : undefined}');
