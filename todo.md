@@ -3742,3 +3742,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir Ajuste para definir o valor total desejado e recalcular o unitário proporcional
 - [x] Limitar o arredondamento do valor unitário para evitar excesso de casas decimais
 - [x] Criar regressão de cálculo, validar e salvar checkpoint publicável
+
+- [x] Exibir o UNIT. sempre em moeda brasileira com duas casas decimais
+- [x] Ampliar os campos de QTD e UNIT. para manter números legíveis
+- [x] Destacar visualmente o UNIT. ao ser recalculado pelo Ajuste
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
