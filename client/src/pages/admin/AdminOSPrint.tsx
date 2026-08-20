@@ -276,7 +276,7 @@ export default function AdminOSPrint() {
             }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px", marginBottom: "10px" }}>
                 {company.printLogoUrl ? (
-                  <img src={company.printLogoUrl} alt={`Logotipo ${company.tradeName}`} style={{ width: "88px", height: "42px", objectFit: "contain", flexShrink: 0 }} />
+                  <img src={company.printLogoUrl} alt={`Logotipo ${company.tradeName}`} style={{ width: "108px", height: "50px", objectFit: "contain", objectPosition: "left bottom", flexShrink: 0, marginTop: "4px", marginBottom: "-4px" }} />
                 ) : (
                   <div style={{
                     width: "38px", height: "38px", backgroundColor: orange,
