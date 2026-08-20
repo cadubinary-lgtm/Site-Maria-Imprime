@@ -87,4 +87,16 @@ describe("lixeira de Contas Recebidas", () => {
     expect(pageSource).toContain("Excluir este item permanentemente?");
     expect(pageSource).toContain("Excluir permanentemente");
   });
+
+  it("remove o histórico de produção antes da ficha vinculada ao pedido", () => {
+    const routerSource = readFileSync(financeiroRouterPath, "utf8");
+    const helperStart = routerSource.indexOf("async function deleteProductionDependenciesForOrder");
+    const helperEnd = routerSource.indexOf("// ─── Router", helperStart);
+    const helperSource = routerSource.slice(helperStart, helperEnd);
+
+    expect(helperSource).toContain("productionStatusHistory");
+    expect(helperSource).toContain("inArray(productionStatusHistory.productionJobId, productionJobIds)");
+    expect(helperSource.indexOf("db.delete(productionStatusHistory)")).toBeLessThan(helperSource.indexOf("db.delete(productionJobs)"));
+    expect(routerSource.match(/await deleteProductionDependenciesForOrder\(db,/g)?.length).toBe(2);
+  });
 });

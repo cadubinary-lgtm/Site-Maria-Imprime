@@ -27,6 +27,7 @@ import {
   emailHistory,
   deletedReceivedAccounts,
   paymentReceipts,
+  productionStatusHistory,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull, inArray } from "drizzle-orm";
 import { sendPaymentReceiptEmail } from "./emailService";
@@ -146,6 +147,21 @@ async function ensurePaymentReceipt(db: any, order: any, financeiroId: number | 
   });
   const [receipt] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.orderId, order.id)).limit(1);
   return receipt;
+}
+
+async function deleteProductionDependenciesForOrder(db: any, orderId: number) {
+  const productionJobRows = await db
+    .select({ id: productionJobs.id })
+    .from(productionJobs)
+    .where(eq(productionJobs.orderId, orderId));
+  const productionJobIds = productionJobRows.map((job: { id: number }) => job.id);
+
+  if (productionJobIds.length > 0) {
+    await db.delete(productionStatusHistory)
+      .where(inArray(productionStatusHistory.productionJobId, productionJobIds));
+  }
+
+  await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -526,7 +542,7 @@ export const financeiroRouter = router({
 
       await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, input.orderId));
       await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, input.orderId));
-      await db.delete(productionJobs).where(eq(productionJobs.orderId, input.orderId));
+      await deleteProductionDependenciesForOrder(db, input.orderId);
       await db.delete(financialRecords).where(eq(financialRecords.orderId, input.orderId));
       await db.delete(fileValidations).where(eq(fileValidations.orderId, input.orderId));
       await db.delete(automationLogs).where(eq(automationLogs.orderId, input.orderId));
@@ -570,7 +586,7 @@ export const financeiroRouter = router({
       for (const { orderId } of trashItems) {
         await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, orderId));
         await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, orderId));
-        await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+        await deleteProductionDependenciesForOrder(db, orderId);
         await db.delete(financialRecords).where(eq(financialRecords.orderId, orderId));
         await db.delete(fileValidations).where(eq(fileValidations.orderId, orderId));
         await db.delete(automationLogs).where(eq(automationLogs.orderId, orderId));
