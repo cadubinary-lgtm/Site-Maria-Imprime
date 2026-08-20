@@ -3925,3 +3925,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o botão Falar com a Maria também no mobile do Guia da Maria
 - [x] Criar regressão e validar visualmente o bloco mobile apenas com o controle de normas — visualização em 390 px confirmou apenas o ícone compacto de normas
+
+- [x] Centralizar o botão Ver normas para envio da arte dentro do bloco Importante sobre a sua escolha
+- [x] Exibir o nome do botão em formato retangular compacto, mantendo legibilidade no mobile
+- [x] Criar regressão e validar visualmente o botão de normas centralizado — visualização em 390 px confirmou nome visível, formato retangular e alinhamento central

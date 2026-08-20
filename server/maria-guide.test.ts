@@ -75,9 +75,9 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("lg:grid-cols-[minmax(0,1fr)_3rem]");
     expect(guide).toContain('lg:w-12');
     expect(guide).toContain('aria-label="Ver normas para envio da arte"');
-    expect(guide).toContain('HOME_SECONDARY_ACTION_CLASS} h-8 w-12 shrink-0 p-0');
-    expect(guide).toContain('<span className="sr-only">Ver normas para envio de arte</span>');
-    expect(guide).toContain('className="flex w-full justify-end lg:w-12"');
+    expect(guide).toContain('HOME_SECONDARY_ACTION_CLASS} h-9 min-w-[9.5rem] shrink-0 gap-1 px-3 text-[10px]');
+    expect(guide).toContain('<span className="whitespace-nowrap font-semibold lg:sr-only">Ver normas para envio de arte</span>');
+    expect(guide).toContain('className="flex w-full justify-center lg:w-12 lg:justify-end"');
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
