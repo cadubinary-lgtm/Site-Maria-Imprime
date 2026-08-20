@@ -3910,3 +3910,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir a unidade metros abaixo do título Altura no configurador mobile, alinhando os campos de medidas pela base
 - [x] Criar regressão e validar visualmente o alinhamento de Largura e Altura no celular
 - [x] Abrir a etapa Medidas (metros) no configurador e confirmar que o texto desktop permanece em uma única linha
+
+- [x] Remover no configurador desktop o botão rosa Falar com a Maria, preservando apenas Ver normas para envio da arte
+- [x] Criar regressão e validar visualmente a permanência exclusiva do link de normas no desktop — inspeção confirmou somente o link de normas no Guia da Maria
