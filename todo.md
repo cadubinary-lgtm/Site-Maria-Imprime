@@ -3903,3 +3903,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar regressão e validar desktop e celular sem alterar o fluxo atual em telas maiores
 - [x] Inspecionar a etapa inicial no celular — lista de segmentos exibida sem produtos, com carrinho e categorias selecionáveis
 - [x] Inspecionar a etapa de produtos no celular — segmento Nome Final, busca, carrinho e seta de retorno exibidos sem a lista de segmentos
+
+- [x] Exibir dois produtos por linha na tela de produtos do catálogo mobile
+- [x] Criar regressão e validar visualmente a grade de dois produtos no celular — visualização em 390 px confirmou dois cards por linha no segmento Lonas

@@ -39,6 +39,6 @@ describe("catálogo segmentado", () => {
     expect(source).toContain('aria-label="Voltar para segmentos"');
     expect(source).toContain('className="hidden lg:grid lg:grid-cols-4 gap-6"');
     expect(source).toContain('className="lg:hidden"');
-    expect(source).toContain('renderProductResults("grid grid-cols-1 sm:grid-cols-2")');
+    expect(source).toContain('renderProductResults("grid grid-cols-2")');
   });
 });
