@@ -99,4 +99,14 @@ describe("lixeira de Contas Recebidas", () => {
     expect(helperSource.indexOf("db.delete(productionStatusHistory)")).toBeLessThan(helperSource.indexOf("db.delete(productionJobs)"));
     expect(routerSource.match(/await deleteProductionDependenciesForOrder\(db,/g)?.length).toBe(2);
   });
+
+  it("preserva o esvaziamento quando o armazenamento legado de produção não está disponível", () => {
+    const routerSource = readFileSync(financeiroRouterPath, "utf8");
+
+    expect(routerSource).toContain("function isUnavailableProductionStorage(error: unknown)");
+    expect(routerSource).toContain('candidate?.code === "ER_NO_SUCH_TABLE"');
+    expect(routerSource).toContain("candidate?.errno === 1146");
+    expect(routerSource).toContain("if (isUnavailableProductionStorage(error)) return;");
+    expect(routerSource).toContain("if (!isUnavailableProductionStorage(error)) throw error;");
+  });
 });

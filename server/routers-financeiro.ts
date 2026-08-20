@@ -149,19 +149,41 @@ async function ensurePaymentReceipt(db: any, order: any, financeiroId: number | 
   return receipt;
 }
 
+function isUnavailableProductionStorage(error: unknown) {
+  const candidate = error as { code?: string; errno?: number; message?: string; cause?: { message?: string } };
+  const message = `${candidate?.message ?? ""} ${candidate?.cause?.message ?? ""}`;
+  return candidate?.code === "ER_NO_SUCH_TABLE"
+    || candidate?.errno === 1146
+    || /production(Job|StatusHistory)/i.test(message) && /doesn't exist|unknown table|not found/i.test(message);
+}
+
 async function deleteProductionDependenciesForOrder(db: any, orderId: number) {
-  const productionJobRows = await db
-    .select({ id: productionJobs.id })
-    .from(productionJobs)
-    .where(eq(productionJobs.orderId, orderId));
+  let productionJobRows: Array<{ id: number }>;
+  try {
+    productionJobRows = await db
+      .select({ id: productionJobs.id })
+      .from(productionJobs)
+      .where(eq(productionJobs.orderId, orderId));
+  } catch (error) {
+    if (isUnavailableProductionStorage(error)) return;
+    throw error;
+  }
   const productionJobIds = productionJobRows.map((job: { id: number }) => job.id);
 
   if (productionJobIds.length > 0) {
-    await db.delete(productionStatusHistory)
-      .where(inArray(productionStatusHistory.productionJobId, productionJobIds));
+    try {
+      await db.delete(productionStatusHistory)
+        .where(inArray(productionStatusHistory.productionJobId, productionJobIds));
+    } catch (error) {
+      if (!isUnavailableProductionStorage(error)) throw error;
+    }
   }
 
-  await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+  try {
+    await db.delete(productionJobs).where(eq(productionJobs.orderId, orderId));
+  } catch (error) {
+    if (!isUnavailableProductionStorage(error)) throw error;
+  }
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
