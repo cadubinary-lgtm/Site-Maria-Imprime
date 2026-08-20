@@ -546,7 +546,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Main Content */}
         <main
           ref={mainRef}
-          className="flex-1 overflow-auto bg-white"
+          className="flex-1 min-h-0 overflow-y-scroll overscroll-contain bg-white"
         >
           {/* Barra de topo administrativa */}
           <div className="sticky top-0 z-40 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between shadow-sm">
