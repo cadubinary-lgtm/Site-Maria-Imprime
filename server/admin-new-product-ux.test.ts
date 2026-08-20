@@ -34,6 +34,10 @@ describe("cadastro administrativo de produtos", () => {
   it("padroniza os campos monetários em moeda brasileira e avanço de 1000 ms", () => {
     expect(source).toContain('const DEFAULT_BRL_PRICE = "0,00";');
     expect(source).toContain('toBrazilianPriceInput');
-    expect(source.match(/scheduleProductPriceAutoAdvance/g)?.length).toBeGreaterThanOrEqual(7);
+    expect(source.match(/scheduleProductPriceAutoAdvance/g)?.length).toBeGreaterThanOrEqual(11);
+    expect(source).toContain('id="create-weight"');
+    expect(source).toContain('id="create-log-width"');
+    expect(source).toContain('id="create-log-height"');
+    expect(source).toContain('id="create-log-length"');
   });
 });

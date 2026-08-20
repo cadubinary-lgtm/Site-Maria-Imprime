@@ -3791,3 +3791,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir todos os campos de preço do Novo Produto em moeda brasileira com duas casas decimais
 - [x] Aplicar avanço automático de 1000 ms aos campos monetários do Novo Produto
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Aplicar avanço automático de 1000 ms a peso, largura, altura e comprimento da logística
+- [x] Garantir que a nova digitação reinicie o tempo de confirmação logística
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
