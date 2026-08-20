@@ -28,4 +28,14 @@ describe("dashboard de linha de produção", () => {
       { status: "pagamento_aprovado" },
     ])).toEqual({ total: 5, inOperation: 3, ready: 1, needsAttention: 2 });
   });
+
+  it("atualiza as filas separadas quando o pedido sai de análise para produção", () => {
+    const beforeTransition = getProductionDashboardSummary([{ status: "analisando" }]);
+    const afterTransition = getProductionDashboardSummary([{ status: "em_producao" }]);
+
+    expect(beforeTransition.find((lane) => lane.id === "analysis")?.count).toBe(1);
+    expect(beforeTransition.find((lane) => lane.id === "production")?.count).toBe(0);
+    expect(afterTransition.find((lane) => lane.id === "analysis")?.count).toBe(0);
+    expect(afterTransition.find((lane) => lane.id === "production")?.count).toBe(1);
+  });
 });
