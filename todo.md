@@ -3897,3 +3897,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o título Segmento e aproximar os cards de categorias do topo da lateral do catálogo
 - [x] Criar regressão e validar visualmente a organização atualizada dos cards do catálogo — cards confirmados no topo da lateral, sem o título Segmento
+
+- [x] Criar no catálogo mobile uma tela inicial de segmentos e uma tela exclusiva de produtos após a seleção
+- [x] Adicionar seta acessível para retornar da tela de produtos à lista de segmentos no celular
+- [x] Criar regressão e validar desktop e celular sem alterar o fluxo atual em telas maiores
+- [x] Inspecionar a etapa inicial no celular — lista de segmentos exibida sem produtos, com carrinho e categorias selecionáveis
+- [x] Inspecionar a etapa de produtos no celular — segmento Nome Final, busca, carrinho e seta de retorno exibidos sem a lista de segmentos
