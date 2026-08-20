@@ -3717,3 +3717,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a rolagem vertical da página de Novo Produto/Novo Orçamento
 - [x] Preservar o layout e permitir acesso a todos os campos do formulário
 - [x] Validar a rolagem e salvar checkpoint publicável
+
+- [x] Corrigir o botão Adicionar novo item dos itens personalizados
+- [x] Criar e expandir o novo item sem perder os itens existentes
+- [x] Validar o fluxo e salvar checkpoint publicável
