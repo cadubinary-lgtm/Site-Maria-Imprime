@@ -3771,3 +3771,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar avanço automático de 800 ms à QTD de Produtos/Serviços e Itens personalizados
 - [x] Preservar a digitação de quantidades com mais de um dígito
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Fazer o indicador do Dashboard de Produção contar pedidos em Analisando
+- [x] Manter a contagem de pedidos Em produção no card de Status de Produção
+- [x] Atualizar regressão das métricas, validar e salvar checkpoint publicável
+
+- [x] Atualizar imediatamente as métricas ao mover pedido de Analisando para Em produção
+- [x] Cobrir a transição de status com regressão e salvar checkpoint publicável

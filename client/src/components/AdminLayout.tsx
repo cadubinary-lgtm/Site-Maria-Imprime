@@ -319,7 +319,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         label: "LINHA DE PRODUÇÃO",
         icon: <Printer className="w-4 h-4" />,
         children: [
-          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" />, badge: menuIndicators.inProduction || undefined },
+          { ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" />, badge: awaitingAnalysisCount || undefined },
           {
             label: "Pré-Impressão",
             children: [
@@ -329,6 +329,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           },
           {
             label: "Status de Produção",
+            badge: menuIndicators.inProduction || undefined,
             children: [
               { label: "Pendente", href: "/admin/status-producao?status=pendente" },
               { label: "Impresso", href: "/admin/status-producao?status=impresso" },
