@@ -3763,3 +3763,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar o avanço automático dos campos monetários do orçamento em 800 ms
 - [x] Cobrir Produtos/Serviços e Itens personalizados com regressão de tempo
 - [x] Validar e salvar checkpoint publicável
+
+- [x] Corrigir o avanço de 800 ms nos campos UNIT. visíveis de Produtos/Serviços e Itens personalizados
+- [x] Aplicar o mesmo avanço aos demais campos monetários editáveis do orçamento
+- [x] Validar funcionalmente a temporização antes de salvar um novo checkpoint

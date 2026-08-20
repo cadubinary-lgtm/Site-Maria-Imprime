@@ -61,10 +61,9 @@ describe("cabeçalho do orçamento", () => {
   });
 
   it("padroniza em 800 ms o avanço automático dos campos monetários", () => {
-    expect(formSource).toContain("const QUOTATION_AUTO_ADVANCE_MS = 800;");
-    expect(formSource.match(/QUOTATION_AUTO_ADVANCE_MS/g)?.length).toBeGreaterThanOrEqual(4);
-    expect(formSource).not.toContain("}, 500);");
-    expect(formSource).not.toContain("}, 1100);");
+    expect(formSource).toContain('scheduleQuotationAutoAdvance(e.currentTarget)');
+    expect(formSource.match(/scheduleQuotationAutoAdvance/g)?.length).toBeGreaterThanOrEqual(8);
+    expect(formSource).not.toContain("_ajusteTimer");
   });
 
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
