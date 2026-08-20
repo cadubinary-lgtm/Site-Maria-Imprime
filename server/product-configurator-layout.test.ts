@@ -28,4 +28,12 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain('border-pink-500 text-pink-700 hover:bg-pink-50');
     expect(source).toContain('border-pink-500 bg-pink-50 shadow-sm');
   });
+
+  it("alinha os rótulos de largura e altura no mobile sem alterar o texto desktop", () => {
+    const source = readFileSync(productDetailPath, "utf8");
+
+    expect(source).toContain('>Largura (metros)</Label>');
+    expect(source).toContain('<span>Altura</span>');
+    expect(source).toContain('<span className="block md:inline"> (metros)</span>');
+  });
 });
