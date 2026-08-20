@@ -28,6 +28,13 @@ describe("cabeçalho do orçamento", () => {
     expect(formSource).toContain("Nome que será exibido neste orçamento e na impressão.");
   });
 
+  it("inclui UNIT. após QTD e trata o ajuste como total desejado", () => {
+    expect(formSource).toContain('<div className="col-span-1 text-center">Unit.</div>');
+    expect(formSource).toContain('title="Informe o valor total desejado para este item"');
+    expect(formSource).toContain("const adjusted = resolveQuotationItemTotal(updates.priceAdjustment, quantity);");
+    expect(formSource).toContain("item.totalPrice = adjusted.totalPrice;");
+  });
+
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
     expect(detailSource).toContain("const companyAddress = formatCompanyAddress(company);");
     expect(detailSource).toContain("CNPJ: ${company.cnpj}");

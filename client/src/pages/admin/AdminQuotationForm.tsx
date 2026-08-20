@@ -42,6 +42,7 @@ import {
 import { toast } from "sonner";
 import { getAdminReturnTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { parseQuotationCurrency, resolveQuotationItemTotal, roundQuotationMoney } from "@/lib/quotationItemPricing";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface QuotationItem {
@@ -54,7 +55,7 @@ interface QuotationItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  priceAdjustment?: number; // Ajuste manual (+/-) somado ao total calculado
+  priceAdjustment?: number; // Valor total definido manualmente no campo Ajuste
   isCustom?: boolean; // Item fora do catálogo, com nome e valor definidos manualmente
   // UI only
   _specsParsed?: Record<string, string>;
@@ -558,38 +559,42 @@ export default function AdminQuotationForm() {
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
     setItems((prev) => {
       const next = [...prev];
-      next[idx] = { ...next[idx], ...updates };
-      // Recalculate total
+      const item = { ...next[idx], ...updates };
+      const quantity = Math.max(1, Math.trunc(item.quantity) || 1);
+      item.quantity = quantity;
+
+      if (updates.priceAdjustment !== undefined) {
+        const adjusted = resolveQuotationItemTotal(updates.priceAdjustment, quantity);
+        item.unitPrice = adjusted.unitPrice;
+        item.totalPrice = adjusted.totalPrice;
+        item.priceAdjustment = adjusted.totalPrice;
+        next[idx] = item;
+        return next;
+      }
+
+      if (updates.quantity !== undefined || updates.unitPrice !== undefined || updates.specifications !== undefined || updates._specsParsed !== undefined) {
+        item.priceAdjustment = undefined;
+      }
+
+      // Recalcula o total pelo valor unitário quando o operador altera quantidade ou unitário.
       if (updates.quantity !== undefined || updates.unitPrice !== undefined) {
-        const q = updates.quantity ?? next[idx].quantity;
-        const u = updates.unitPrice ?? next[idx].unitPrice;
-        next[idx].totalPrice = q * u + (next[idx].priceAdjustment ?? 0);
+        item.unitPrice = roundQuotationMoney(item.unitPrice);
+        item.totalPrice = roundQuotationMoney(quantity * item.unitPrice);
       }
       // Se specs ou quantidade mudaram, recalcular preço automaticamente
       if (updates.specifications !== undefined || updates._specsParsed !== undefined || updates.quantity !== undefined) {
-        const pricing = !next[idx].isCustom && next[idx].productId !== null
-          ? pricingCache[next[idx].productId]
+        const pricing = !item.isCustom && item.productId !== null
+          ? pricingCache[item.productId]
           : undefined;
         if (pricing) {
-          const { unitPrice: newUnit, totalPrice: newTotal } = calcItemPricing(next[idx], pricing);
+          const { unitPrice: newUnit, totalPrice: newTotal } = calcItemPricing(item, pricing);
           if (newUnit > 0) {
-            next[idx].unitPrice = newUnit;
-            next[idx].totalPrice = newTotal + (next[idx].priceAdjustment ?? 0);
+            item.unitPrice = roundQuotationMoney(newUnit);
+            item.totalPrice = roundQuotationMoney(newTotal);
           }
         }
       }
-      // Se o ajuste mudou, recalcular o total
-      if (updates.priceAdjustment !== undefined) {
-        const pricing = !next[idx].isCustom && next[idx].productId !== null
-          ? pricingCache[next[idx].productId]
-          : undefined;
-        if (pricing) {
-          const { totalPrice: baseTotal } = calcItemPricing(next[idx], pricing);
-          next[idx].totalPrice = (baseTotal > 0 ? baseTotal : next[idx].unitPrice * next[idx].quantity) + (updates.priceAdjustment ?? 0);
-        } else {
-          next[idx].totalPrice = next[idx].unitPrice * next[idx].quantity + (updates.priceAdjustment ?? 0);
-        }
-      }
+      next[idx] = item;
       return next;
     });
   }, [pricingCache]);
@@ -1299,8 +1304,9 @@ export default function AdminQuotationForm() {
                       <div className="col-span-3">Produto / Especificações</div>
                       <div className="col-span-1 text-center">Arte</div>
                       <div className="col-span-1 text-center">Qtd</div>
+                      <div className="col-span-1 text-center">Unit.</div>
                       <div className="col-span-2 text-center">Ajuste</div>
-                      <div className="col-span-3 text-right">Total</div>
+                      <div className="col-span-2 text-right">Total</div>
                       <div className="col-span-1"></div>
                     </div>
                     {items.map((item, idx) => {
@@ -1396,6 +1402,25 @@ export default function AdminQuotationForm() {
                             className="w-14 h-7 text-center text-sm"
                           />
                         </div>
+                        <div className="col-span-1 flex justify-center">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            aria-label={`Valor unitário de ${item.productName}`}
+                            value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
+                            placeholder="R$ 0,00"
+                            onChange={(e) => {
+                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
+                            }}
+                            onBlur={(e) => {
+                              const value = parseQuotationCurrency(e.target.value);
+                              updateItem(idx, { unitPrice: value });
+                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
+                            }}
+                            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                            className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-1 text-right text-[11px] text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+                          />
+                        </div>
                         <div className="col-span-2 flex justify-center">
                           {item.isCustom ? (
                             <span className="text-xs text-gray-300">—</span>
@@ -1403,25 +1428,25 @@ export default function AdminQuotationForm() {
                           <input
                             type="text"
                             inputMode="decimal"
-                            title="Adicione (+) ou desconte (-) um valor do total"
-                            defaultValue={item.priceAdjustment ? (item.priceAdjustment > 0 ? `+${item.priceAdjustment.toFixed(2).replace(".", ",")}` : item.priceAdjustment.toFixed(2).replace(".", ",")) : ""}
-                            placeholder="R$ 0,00"
+                            key={`product-adjustment-${idx}-${item.priceAdjustment ?? item.totalPrice}-${item.quantity}`}
+                            title="Informe o valor total desejado para este item"
+                            defaultValue={fmt(item.priceAdjustment ?? item.totalPrice)}
+                            placeholder="Total desejado"
                             onBlur={(e) => {
-                              const raw = e.target.value.replace(/[R$\s]/g, "").replace(",", ".");
-                              const val = parseFloat(raw);
-                              updateItem(idx, { priceAdjustment: isNaN(val) ? 0 : val });
-                              e.target.value = isNaN(val) || val === 0 ? "" : (val > 0 ? `+R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : `-R$ ${Math.abs(val).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+                              const total = parseQuotationCurrency(e.target.value);
+                              updateItem(idx, { priceAdjustment: total });
+                              e.target.value = total > 0 ? fmt(total) : "";
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                             onChange={(e) => {
                               clearTimeout((e.target as any)._ajusteTimer);
                               (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
                             }}
-                            className="w-28 h-7 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+                            className="h-7 w-full min-w-0 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
                           )}
                         </div>
-                        <div className="col-span-3 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
+                        <div className="col-span-2 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
                           <span>{fmt(item.totalPrice)}</span>
                           <button
                             type="button"
