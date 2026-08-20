@@ -765,7 +765,10 @@ export default function AdminQuotationForm() {
               min={1}
               aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
               value={item.quantity}
-              onChange={(e) => updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
+              onChange={(e) => {
+                updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) });
+                scheduleQuotationAutoAdvance(e.currentTarget);
+              }}
               className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
             />
           </div>
@@ -929,7 +932,17 @@ export default function AdminQuotationForm() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-gray-100 pt-3">
           <div>
             <label className="text-xs text-gray-500 font-medium">Quantidade</label>
-            <Input type="number" min={1} value={item.quantity} onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })} className="h-8 mt-0.5 text-sm transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:ring-pink-100" />
+            <Input
+              type="number"
+              min={1}
+              aria-label={`Quantidade inferior de ${item.productName || "item personalizado"}`}
+              value={item.quantity}
+              onChange={(e) => {
+                updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) });
+                scheduleQuotationAutoAdvance(e.currentTarget);
+              }}
+              className="h-8 mt-0.5 text-sm transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:ring-pink-100"
+            />
           </div>
           <div>
             <label className="text-xs text-gray-500 font-medium">Valor unitário</label>
@@ -1458,7 +1471,10 @@ export default function AdminQuotationForm() {
                             type="number"
                             min={1}
                             value={item.quantity}
-                            onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })}
+                            onChange={(e) => {
+                              updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) });
+                              scheduleQuotationAutoAdvance(e.currentTarget);
+                            }}
                             className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums"
                           />
                         </div>
@@ -1763,7 +1779,10 @@ export default function AdminQuotationForm() {
                                   min={1}
                                   aria-label={`Quantidade inferior de ${item.productName}`}
                                   value={item.quantity}
-                                  onChange={(event) => updateItem(idx, { quantity: Math.max(1, parseInt(event.target.value) || 1) })}
+                                  onChange={(event) => {
+                                    updateItem(idx, { quantity: Math.max(1, parseInt(event.target.value) || 1) });
+                                    scheduleQuotationAutoAdvance(event.currentTarget);
+                                  }}
                                   className="mt-0.5 h-8 bg-white text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:ring-pink-100"
                                 />
                               </div>

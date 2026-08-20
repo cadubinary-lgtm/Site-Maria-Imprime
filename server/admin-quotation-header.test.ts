@@ -62,8 +62,15 @@ describe("cabeçalho do orçamento", () => {
 
   it("padroniza em 800 ms o avanço automático dos campos monetários", () => {
     expect(formSource).toContain('scheduleQuotationAutoAdvance(e.currentTarget)');
-    expect(formSource.match(/scheduleQuotationAutoAdvance/g)?.length).toBeGreaterThanOrEqual(8);
+    expect(formSource.match(/scheduleQuotationAutoAdvance/g)?.length).toBeGreaterThanOrEqual(12);
     expect(formSource).not.toContain("_ajusteTimer");
+  });
+
+  it("inclui QTD de Produtos e Itens personalizados no avanço automático", () => {
+    expect(formSource).toContain('aria-label={`Quantidade de ${item.productName || "item personalizado"}`}');
+    expect(formSource).toContain('aria-label={`Quantidade inferior de ${item.productName || "item personalizado"}`}');
+    expect(formSource).toContain('aria-label={`Quantidade inferior de ${item.productName}`}');
+    expect(formSource.match(/scheduleQuotationAutoAdvance\((e|event)\.currentTarget\)/g)?.length).toBeGreaterThanOrEqual(10);
   });
 
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
