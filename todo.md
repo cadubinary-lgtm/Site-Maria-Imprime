@@ -3870,3 +3870,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Localizar e excluir permanentemente o lançamento do pedido PD-1780691222009-103 no Fluxo de Caixa
 - [x] Verificar a remoção e salvar checkpoint da exclusão do lançamento solicitado
+
+- [x] Mapear e corrigir o salvamento de Dados da Empresa no site oficial sem alterar a estrutura visual
+- [x] Criar regressão, validar TypeScript e salvar checkpoint da paridade de Dados da Empresa

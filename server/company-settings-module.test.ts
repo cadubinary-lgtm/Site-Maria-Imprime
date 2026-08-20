@@ -11,8 +11,9 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(schema).toContain('showWhatsappButton: boolean("showWhatsappButton").default(true).notNull()');
     expect(schema).toContain('useWhatsappBusinessHours: boolean("useWhatsappBusinessHours").default(false).notNull()');
     expect(router).toContain("getPublic: publicProcedure");
-    expect(router).toContain("getAdmin: adminProcedure");
-    expect(router).toContain("save: adminProcedure");
+    expect(router).toContain("getAdmin: adminOrManusAuthProcedure");
+    expect(router).toContain("save: adminOrManusAuthProcedure");
+    expect(router).toContain('import { adminOrManusAuthProcedure } from "./routers-admin-auth";');
     expect(router).toContain("sanitizeOsTerms");
   });
 
@@ -34,8 +35,8 @@ describe("Módulo isolado de Dados da Empresa", () => {
     expect(floatingButton).toContain("whastapp-branco_ab9ddb70.webp");
     expect(footer).toContain("getValidSocialUrl(company.instagramUrl, company.instagramActive)");
     expect(footer).toContain("getValidSocialUrl(company.youtubeUrl, company.youtubeActive)");
-    expect(footer).toContain('className="text-white hover:text-pink-300 transition-colors"');
-    expect(footer).toContain("whastapp-branco_ab9ddb70.webp");
+    expect(footer).toContain('className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-50 text-slate-500 transition-colors hover:bg-pink-100 hover:text-pink-600');
+    expect(footer).toContain('<MessageCircle className="h-5 w-5" />');
     expect(osPrint).toContain("company.printLogoUrl");
     expect(osPrint).toContain("company.osTerms");
   });

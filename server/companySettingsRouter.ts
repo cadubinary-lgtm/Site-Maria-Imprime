@@ -2,7 +2,8 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { companySettings } from "../drizzle/schema";
 import { getDb } from "./db";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router } from "./_core/trpc";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 
 const optionalSocialUrl = z.string().max(2000).refine((value) => !value || /^https?:\/\/.+/i.test(value), "Informe uma URL completa iniciando com http:// ou https://").optional().nullable();
 
@@ -74,7 +75,7 @@ export const companySettingsRouter = router({
     return settings ?? null;
   }),
 
-  getAdmin: adminProcedure.query(async () => {
+  getAdmin: adminOrManusAuthProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
 
@@ -87,7 +88,7 @@ export const companySettingsRouter = router({
     return settings ?? null;
   }),
 
-  save: adminProcedure.input(companySettingsInput).mutation(async ({ input }) => {
+  save: adminOrManusAuthProcedure.input(companySettingsInput).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
 
