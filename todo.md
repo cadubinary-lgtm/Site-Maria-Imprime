@@ -3851,3 +3851,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o indicador numérico do item Status de Produção na barra lateral administrativa
 - [x] Atualizar regressão, validar TypeScript e testes e salvar checkpoint da remoção do indicador de Status de Produção
+
+- [x] Corrigir a exclusão permanente da lixeira de Contas Recebidas para respeitar dependências de produção do pedido
+- [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da correção de esvaziamento da lixeira
