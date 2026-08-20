@@ -3725,3 +3725,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aumentar somente a logo do cabeçalho da Ordem de Serviço
 - [x] Reposicionar a logo para baixo junto ao final do CNPJ
 - [x] Validar o cabeçalho e salvar checkpoint publicável
+
+- [x] Adicionar botão de exportação em PDF no topo da Ordem de Serviço
+- [x] Corrigir o QR Code para preservar o padrão na impressão
+- [x] Validar exportação e impressão e salvar checkpoint publicável

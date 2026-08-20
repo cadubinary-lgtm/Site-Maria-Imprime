@@ -6,6 +6,7 @@ import { getCompanyAddressLine, getCompanyLocationLine, useCompanySettings } fro
 import { QRCodeSVG } from "qrcode.react";
 import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
 import { formatProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
+import { toast } from "sonner";
 import {
   Printer, ArrowLeft, Loader2, AlertCircle, FileText,
   Phone, MapPin, Package, DollarSign,
@@ -144,6 +145,7 @@ export default function AdminOSPrint() {
   const orderId = params.id ? parseInt(params.id) : undefined;
   const returnTarget = getAdminReturnTarget("/admin/os");
   const [printMode, setPrintMode] = useState<"a4" | "thermal">("a4");
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const { data, isLoading, error } = trpc.admin.getOrderWithItems.useQuery(
     { orderId: orderId! },
@@ -156,6 +158,45 @@ export default function AdminOSPrint() {
 
   const trackingUrl = `${window.location.origin}/acompanhar`;
   const handlePrint = useCallback(() => window.print(), []);
+  const handleExportPdf = useCallback(async () => {
+    const documentNode = document.getElementById("os-document");
+    if (!documentNode || isExportingPdf) return;
+
+    setIsExportingPdf(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(documentNode, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+      const margin = 8;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const printableWidth = pageWidth - margin * 2;
+      const printableHeight = pageHeight - margin * 2;
+      const renderedHeight = (canvas.height * printableWidth) / canvas.width;
+      const imageData = canvas.toDataURL("image/png");
+
+      for (let offset = 0; offset < renderedHeight; offset += printableHeight) {
+        if (offset > 0) pdf.addPage();
+        pdf.addImage(imageData, "PNG", margin, margin - offset, printableWidth, renderedHeight, undefined, "FAST");
+      }
+
+      pdf.save(`ordem-de-servico-${orderId ?? "documento"}.pdf`);
+      toast.success("PDF da Ordem de Serviço exportado.", { id: "os-pdf-export" });
+    } catch (exportError) {
+      console.error("Erro ao exportar Ordem de Serviço em PDF:", exportError);
+      toast.error("Não foi possível exportar o PDF da Ordem de Serviço.", { id: "os-pdf-export" });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }, [isExportingPdf, orderId]);
 
   if (isLoading) {
     return (
@@ -246,6 +287,9 @@ export default function AdminOSPrint() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "13px", color: "#6b7280" }}>OS #{o.orderNumber}</span>
+          <Button variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={handleExportPdf} disabled={isExportingPdf} aria-busy={isExportingPdf}>
+            <Download className="w-4 h-4 mr-1" aria-hidden="true" /> {isExportingPdf ? "Gerando PDF..." : "Exportar PDF"}
+          </Button>
           <Button variant="outline" size="sm" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={handlePrint}>
             <FileDown className="w-4 h-4 mr-1" aria-hidden="true" /> Abrir impressão
           </Button>
@@ -352,8 +396,8 @@ export default function AdminOSPrint() {
               padding: "10px 12px",
               display: "flex", flexDirection: "row", alignItems: "center", gap: "8px",
             }}>
-              <div style={{ flexShrink: 0 }}>
-                <QRCodeSVG value={trackingUrl} size={54} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} />
+              <div className="os-qr-code" style={{ flexShrink: 0 }}>
+                <QRCodeSVG className="os-qr-code-svg" value={trackingUrl} size={54} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin={false} style={{ display: "block", backgroundColor: "#ffffff" }} />
               </div>
               <div>
                 <div style={{ fontSize: "7px", fontWeight: 800, color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "3px" }}>RASTREAMENTO</div>
@@ -887,7 +931,12 @@ export default function AdminOSPrint() {
             overflow: visible !important;
             shape-rendering: geometricPrecision !important;
           }
-          svg path, svg circle, svg rect, svg polyline, svg line, svg polygon {
+          svg:not(.os-qr-code-svg) path,
+          svg:not(.os-qr-code-svg) circle,
+          svg:not(.os-qr-code-svg) rect,
+          svg:not(.os-qr-code-svg) polyline,
+          svg:not(.os-qr-code-svg) line,
+          svg:not(.os-qr-code-svg) polygon {
             stroke: inherit !important;
             fill: inherit !important;
           }
