@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2,
+  Loader2, ChevronLeft, Package, User, DollarSign, Truck, CheckCircle2, Banknote, CreditCard, QrCode,
   Download, FileImage, Upload, Trash2, Eye, ImagePlus, X, Printer, FileText,
   Ruler, Layers, Weight, StickyNote, AlertCircle, Clock, CheckCircle, PlayCircle, ChevronDown,
   ChevronUp,
@@ -104,6 +104,16 @@ const PRE_PRODUCTION_OPTIONS = [
   { value: "arte_final_aprovada",           label: "Arte Final Aprovada",             icon: CheckCircle, color: "bg-green-100 text-green-700" },
   { value: "em_producao",                   label: "Em Produção",                      icon: CheckCircle, color: "bg-blue-100 text-blue-700" },
 ];
+
+const RECEIVED_PAYMENT_OPTIONS = [
+  { value: "dinheiro", label: "Dinheiro", icon: Banknote },
+  { value: "pix", label: "Pix", icon: QrCode },
+  { value: "cartao_credito", label: "Crédito", icon: CreditCard },
+  { value: "cartao_debito", label: "Débito", icon: CreditCard },
+  { value: "transferencia", label: "Transferência", icon: DollarSign },
+] as const;
+
+type ReceivedPaymentMethod = (typeof RECEIVED_PAYMENT_OPTIONS)[number]["value"];
 
 /** Status do pedido que bloqueiam a pré-impressão */
 const LOCKED_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
@@ -1019,6 +1029,8 @@ export function OrderDetailContent({
   const [newStatus, setNewStatus] = useState<string>("");
   const [statusNotes, setStatusNotes] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
+  const [receivedPaymentMethod, setReceivedPaymentMethod] = useState<ReceivedPaymentMethod>("pix");
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [showSendToProductionConfirm, setShowSendToProductionConfirm] = useState(false);
@@ -1067,6 +1079,44 @@ export function OrderDetailContent({
       utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
       utils.checkout.getAllOrders.invalidate();
       utils.admin.getAllOrders.invalidate();
+    },
+  });
+
+  const confirmPaymentMutation = trpc.financeiro.confirmarPagamento.useMutation({
+    onSuccess: async (data) => {
+      setIsReceiveDialogOpen(false);
+      await Promise.all([
+        utils.checkout.getOrderById.invalidate({ id: orderId! }),
+        utils.checkout.getOrderHistory.invalidate({ orderId: orderId! }),
+        utils.checkout.getAllOrders.invalidate(),
+        utils.admin.getAllOrders.invalidate(),
+        utils.financeiro.getContasReceber.invalidate(),
+        utils.financeiro.getContasRecebidas.invalidate(),
+        utils.financeiro.getDashboard.invalidate(),
+        utils.financeiro.getFluxoCaixa.invalidate(),
+        utils.financeiro.getRecibos.invalidate(),
+        utils.gerenciadorFinanceiro.getDashboardMetrics.invalidate(),
+        utils.gerenciadorFinanceiro.getAccountsReceivable.invalidate(),
+        utils.gerenciadorFinanceiro.getAccountsReceived.invalidate(),
+        utils.gerenciadorFinanceiro.getCashFlow.invalidate(),
+      ]);
+      toast.success("Pagamento confirmado e recibo gerado", {
+        description: data.receiptEmailSent
+          ? `Recibo ${data.receiptNumber} enviado automaticamente por e-mail.`
+          : `Recibo ${data.receiptNumber} vinculado ao pedido e disponível no Gerenciador Financeiro.`,
+        position: "top-right",
+        duration: 4500,
+        action: {
+          label: "Ver recibo",
+          onClick: () => setLocation(`/admin/financeiro/recibos/${data.receiptId}/imprimir`),
+        },
+      });
+    },
+    onError: (error) => {
+      toast.error("Não foi possível confirmar o pagamento", {
+        description: error.message,
+        position: "top-right",
+      });
     },
   });
 
@@ -1729,9 +1779,96 @@ export function OrderDetailContent({
                     </div>
                   )}
                 </div>
+                {o.paymentStatus !== "pago" && o.paymentStatus !== "cancelado" && (
+                  <div className="border-t border-gray-100 bg-white px-4 py-3">
+                    <Button
+                      type="button"
+                      className="w-full bg-pink-600 hover:bg-pink-700 sm:w-auto"
+                      onClick={() => {
+                        setReceivedPaymentMethod("pix");
+                        setIsReceiveDialogOpen(true);
+                      }}
+                    >
+                      <DollarSign className="mr-2 h-4 w-4" aria-hidden="true" />
+                      Receber pagamento
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>}
+
+          {!isProductionRole && (
+            <Dialog open={isReceiveDialogOpen} onOpenChange={setIsReceiveDialogOpen}>
+              <DialogContent className="max-w-md" aria-describedby="receive-payment-description">
+                <DialogHeader>
+                  <DialogTitle>Confirmar Pagamento</DialogTitle>
+                </DialogHeader>
+                <p id="receive-payment-description" className="sr-only">Confirme a forma de pagamento recebida para registrar o recebimento do pedido.</p>
+                <div className="space-y-5">
+                  <div className="space-y-2 rounded-lg bg-gray-50 p-4">
+                    <div className="flex justify-between gap-4 text-sm">
+                      <span className="text-gray-500">Pedido</span>
+                      <span className="font-mono font-semibold text-right">#{o.orderNumber}</span>
+                    </div>
+                    <div className="flex justify-between gap-4 text-sm">
+                      <span className="text-gray-500">Cliente</span>
+                      <span className="text-right font-medium">{o.guestName || o.deliveryFullName || "Cliente"}</span>
+                    </div>
+                    <div className="flex justify-between gap-4 text-sm">
+                      <span className="text-gray-500">Valor</span>
+                      <span className="text-base font-bold text-green-600">{fmt(parseFloat(o.totalPrice || "0"))}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">Forma de Pagamento Recebida</p>
+                    <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Forma de pagamento recebida">
+                      {RECEIVED_PAYMENT_OPTIONS.map((option) => {
+                        const Icon = option.icon;
+                        const isSelected = receivedPaymentMethod === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={isSelected}
+                            aria-label={`${option.label}${isSelected ? ", selecionado" : ""}`}
+                            onClick={() => setReceivedPaymentMethod(option.value)}
+                            className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border-2 p-3 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 ${
+                              isSelected
+                                ? "border-pink-500 bg-pink-50 font-semibold text-pink-700 shadow-[0_0_0_3px_rgba(236,72,153,0.14)]"
+                                : "border-gray-200 text-gray-600 hover:border-pink-200 hover:bg-pink-50/40"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" aria-hidden="true" />
+                            <span>{option.label}</span>
+                            {isSelected && <span className="sr-only">Forma de pagamento selecionada</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsReceiveDialogOpen(false)} disabled={confirmPaymentMutation.isPending}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-pink-600 hover:bg-pink-700"
+                    disabled={confirmPaymentMutation.isPending}
+                    onClick={() => {
+                      if (!orderId) return;
+                      confirmPaymentMutation.mutate({ orderId, formaPagamento: receivedPaymentMethod });
+                    }}
+                  >
+                    {confirmPaymentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                    {confirmPaymentMutation.isPending ? "Confirmando..." : "Confirmar Pagamento"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
 
           {/* ── Logística e Entrega ── */}
           {!isProductionRole && <OrderShippingPanel
