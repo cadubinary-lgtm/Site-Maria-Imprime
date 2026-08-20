@@ -3837,3 +3837,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Comparar identidade, permissões e controles da Linha de Produção entre o site oficial e o ambiente interno
 - [x] Sincronizar os controles administrativos do ambiente interno sem alterar o fluxo de produção
 - [x] Criar regressões, validar a paridade funcional e salvar checkpoint publicável
+
+- [x] Remover os itens "Integrações" e "Dados da Empresa" do submenu Sistema na barra lateral administrativa
+- [x] Criar regressão, validar TypeScript e testes e salvar checkpoint publicável da alteração do submenu Sistema

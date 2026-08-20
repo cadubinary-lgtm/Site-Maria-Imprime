@@ -445,8 +445,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <Settings className="w-4 h-4" />,
         children: [
           { label: "Usuários", href: "/admin/usuarios" },
-          { label: "Integrações", href: "/admin/vincular-atributos" },
-          { label: "Dados da Empresa", href: "/admin/dados-da-empresa" },
         ],
       },
     },
