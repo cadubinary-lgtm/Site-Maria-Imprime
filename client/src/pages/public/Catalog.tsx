@@ -127,10 +127,9 @@ export default function Catalog() {
           {/* Sidebar com Filtros */}
           <div className="lg:col-span-1">
             <Card className="border-gray-200 lg:sticky lg:top-4">
-              <CardContent className="p-6 space-y-6">
+              <CardContent className="px-6 pb-6 pt-3 space-y-6">
                 {/* Segmentos */}
-                <div className="space-y-3">
-                  <Label className="font-semibold text-gray-900">Segmento</Label>
+                <div className="space-y-2">
                   <div className="space-y-2">
                     {segments.length === 0 ? (
                       <p className="text-sm text-gray-500">Nenhum segmento disponível</p>

@@ -3894,3 +3894,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o filtro visual de Faixa de Preço da página de catálogo, preservando os demais filtros
 - [x] Criar regressão e validar a remoção do filtro de faixa de preço do catálogo — inspeção visual confirmou Segmento, busca e contagem sem a faixa de preço
+
+- [x] Remover o título Segmento e aproximar os cards de categorias do topo da lateral do catálogo
+- [x] Criar regressão e validar visualmente a organização atualizada dos cards do catálogo — cards confirmados no topo da lateral, sem o título Segmento
