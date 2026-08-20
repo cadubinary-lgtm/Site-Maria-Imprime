@@ -3888,3 +3888,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Verificar os dados de frete e a validação de serviço para gerar a etiqueta do pedido 3150001
 - [x] Orientar ou corrigir o preenchimento da etiqueta sem gerar cobrança ou emissão sem confirmação
+
+- [x] Exibir o número comercial original do pedido nas Expedições Criadas e manter o ID interno como referência secundária
+- [x] Criar regressão, validar TypeScript e salvar checkpoint da identificação operacional de expedições

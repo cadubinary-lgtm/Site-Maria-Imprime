@@ -35,4 +35,11 @@ describe("gestão administrativa de envios", () => {
     expect(source).toContain("price: String(order.shippingPrice ?? '0')");
     expect(source).toContain("Serviço e transportadora carregados da opção escolhida pelo cliente no checkout.");
   });
+
+  it("prioriza o número comercial do pedido e preserva o ID interno para conferência", () => {
+    expect(routerSource).toContain("orderNumber: orders.orderNumber");
+    expect(routerSource).toContain("leftJoin(orders, eq(shipments.orderId, orders.id))");
+    expect(source).toContain("shipment.orderNumber ? `Pedido ${shipment.orderNumber}` : `Pedido interno #${shipment.orderId}`");
+    expect(source).toContain("ID interno: #{shipment.orderId}");
+  });
 });

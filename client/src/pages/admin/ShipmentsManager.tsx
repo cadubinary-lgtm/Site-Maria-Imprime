@@ -298,7 +298,10 @@ export function ShipmentsManager() {
                         <Truck className="w-5 h-5 text-pink-600" aria-hidden="true" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold">Pedido #{shipment.orderId}</p>
+                        <p className="font-semibold">{shipment.orderNumber ? `Pedido ${shipment.orderNumber}` : `Pedido interno #${shipment.orderId}`}</p>
+                        {shipment.orderNumber && (
+                          <p className="text-xs text-muted-foreground">ID interno: #{shipment.orderId}</p>
+                        )}
                         <p className="text-sm text-muted-foreground">
                           {shipment.companyName} — {shipment.serviceName}
                         </p>
