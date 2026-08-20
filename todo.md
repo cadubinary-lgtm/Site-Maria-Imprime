@@ -3873,3 +3873,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Mapear e corrigir o salvamento de Dados da Empresa no site oficial sem alterar a estrutura visual
 - [x] Criar regressão, validar TypeScript e salvar checkpoint da paridade de Dados da Empresa
+
+- [x] Adicionar lixeira com confirmação ao lado de Desativar em cada operador da página Usuários
+- [x] Proteger a exclusão de operador, validar regressão e salvar checkpoint publicável

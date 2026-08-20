@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   UserPlus, KeyRound, Power, Pencil, ShieldCheck, Shield, Wrench,
-  Loader2, Users, Lock, RefreshCw, ShieldAlert,
+  Loader2, Users, Lock, RefreshCw, ShieldAlert, Trash2,
 } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -232,6 +232,7 @@ export default function AdminUsuarios() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<{ id: number; name: string } | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string; role: string } | null>(null);
 
   // Estados de edição
   const [editOpen, setEditOpen] = useState(false);
@@ -285,6 +286,15 @@ export default function AdminUsuarios() {
 
   const resetPassword = trpc.adminAuth.resetAdminPassword.useMutation({
     onSuccess: () => { toast.success("Senha redefinida!"); refetch(); setResetOpen(false); setNewPassword(""); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const deleteAdmin = trpc.adminAuth.deleteAdmin.useMutation({
+    onSuccess: () => {
+      toast.success("Operador excluído permanentemente.");
+      refetch();
+      setDeleteTarget(null);
+    },
     onError: (e) => toast.error(e.message),
   });
 
@@ -437,6 +447,18 @@ export default function AdminUsuarios() {
                                     </AlertDialogContent>
                                   </AlertDialog>
                                 )}
+                                {/* Excluir permanentemente */}
+                                {isSuperAdmin && admin.id !== adminUser?.id && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-red-200 text-xs text-red-600 hover:bg-red-50"
+                                    aria-label={`Excluir operador ${admin.name}`}
+                                    onClick={() => setDeleteTarget({ id: admin.id, name: admin.name, role: admin.role })}
+                                  >
+                                    <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" /> Excluir
+                                  </Button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -450,6 +472,30 @@ export default function AdminUsuarios() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => { if (!open && !deleteAdmin.isPending) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir operador permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget ? `O acesso e as sessões de ${deleteTarget.name} serão removidos permanentemente. Esta ação não pode ser desfeita.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAdmin.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteAdmin.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                if (deleteTarget) deleteAdmin.mutate({ id: deleteTarget.id });
+              }}
+            >
+              {deleteAdmin.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Excluindo...</> : "Excluir permanentemente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Dialog: Criar Operador */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
