@@ -99,6 +99,7 @@ const specificationLabels: Record<string, string> = {
   finish: "Tipo de acabamento",
 };
 const CUSTOM_ITEM_NAME_MAX_LENGTH = 80;
+const QUOTATION_AUTO_ADVANCE_MS = 800;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
@@ -558,7 +559,7 @@ export default function AdminQuotationForm() {
     if (!formattedValue) return;
     acertoTotalAdvanceTimerRef.current = window.setTimeout(() => {
       acertoTotalInputRef.current?.blur();
-    }, 1100);
+    }, QUOTATION_AUTO_ADVANCE_MS);
   };
 
   const cancelCustomItemName = () => {
@@ -811,7 +812,7 @@ export default function AdminQuotationForm() {
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               onChange={(e) => {
                 clearTimeout((e.target as any)._ajusteTimer);
-                (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
+                (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), QUOTATION_AUTO_ADVANCE_MS);
               }}
               className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
             />
@@ -1502,7 +1503,7 @@ export default function AdminQuotationForm() {
                             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                             onChange={(e) => {
                               clearTimeout((e.target as any)._ajusteTimer);
-                              (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
+                              (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), QUOTATION_AUTO_ADVANCE_MS);
                             }}
                             className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />

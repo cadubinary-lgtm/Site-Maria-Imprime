@@ -60,6 +60,13 @@ describe("cabeçalho do orçamento", () => {
     expect(formSource).toContain("Valor unitário inferior recalculado a partir do ajuste.");
   });
 
+  it("padroniza em 800 ms o avanço automático dos campos monetários", () => {
+    expect(formSource).toContain("const QUOTATION_AUTO_ADVANCE_MS = 800;");
+    expect(formSource.match(/QUOTATION_AUTO_ADVANCE_MS/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(formSource).not.toContain("}, 500);");
+    expect(formSource).not.toContain("}, 1100);");
+  });
+
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
     expect(detailSource).toContain("const companyAddress = formatCompanyAddress(company);");
     expect(detailSource).toContain("CNPJ: ${company.cnpj}");
