@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(resolve(import.meta.dirname, "../client/src/pages/admin/ShipmentsManager.tsx"), "utf8");
+const routerSource = readFileSync(resolve(import.meta.dirname, "../server/routers-logistics.ts"), "utf8");
 
 describe("gestão administrativa de envios", () => {
   it("usa rosa para controles de expedição e preserva status logísticos semânticos", () => {
@@ -22,5 +23,16 @@ describe("gestão administrativa de envios", () => {
   it("protege a abertura de etiquetas em nova aba", () => {
     expect(source).toContain("'noopener,noreferrer'");
     expect(source).toContain('aria-label={`Imprimir etiqueta do pedido ${shipment.orderId} em nova aba`}');
+  });
+
+  it("pré-preenche a expedição com o serviço de frete escolhido no checkout", () => {
+    expect(routerSource).toContain("shippingMethod: orders.shippingMethod");
+    expect(routerSource).toContain("shippingCarrierId: orders.shippingCarrierId");
+    expect(source).toContain("const shippingServiceId = String(order.shippingMethod ?? '').trim();");
+    expect(source).toContain("serviceId: isNumericServiceId ? shippingServiceId : '',");
+    expect(source).toContain("serviceName: shippingServiceName || String(order.shippingLabel ?? ''),");
+    expect(source).toContain("companyName: shippingCompanyName");
+    expect(source).toContain("price: String(order.shippingPrice ?? '0')");
+    expect(source).toContain("Serviço e transportadora carregados da opção escolhida pelo cliente no checkout.");
   });
 });
