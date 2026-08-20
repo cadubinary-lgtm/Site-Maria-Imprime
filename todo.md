@@ -3916,3 +3916,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Mover o botão Ver normas para envio da arte para dentro do bloco Importante sobre a sua escolha
 - [x] Criar regressão e validar visualmente o novo posicionamento do link de normas — inspeção confirmou o link no bloco Importante sobre a sua escolha
+
+- [x] Reduzir o botão Ver normas para envio da arte para cerca de 30% do tamanho atual
+- [x] Criar regressão e validar visualmente o botão de normas compacto — inspeção confirmou o controle compacto com rótulo acessível
