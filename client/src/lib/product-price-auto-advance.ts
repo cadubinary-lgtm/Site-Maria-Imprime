@@ -5,7 +5,7 @@ export type ProductPriceAutoAdvanceTarget = {
   __productPriceAutoAdvanceTimer?: ReturnType<typeof globalThis.setTimeout>;
 };
 
-/** Confirma um campo monetário após 1000 ms sem nova digitação. */
+/** Confirma um campo editável após 1000 ms sem nova digitação. */
 export function scheduleProductPriceAutoAdvance(target: ProductPriceAutoAdvanceTarget) {
   if (target.__productPriceAutoAdvanceTimer) {
     globalThis.clearTimeout(target.__productPriceAutoAdvanceTimer);

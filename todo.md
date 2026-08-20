@@ -3795,3 +3795,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar avanço automático de 1000 ms a peso, largura, altura e comprimento da logística
 - [x] Garantir que a nova digitação reinicie o tempo de confirmação logística
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Auditar todos os campos editáveis do Novo Produto e seus componentes auxiliares quanto ao avanço de 1000 ms
+- [x] Aplicar o avanço automático de 1000 ms aos campos remanescentes identificados
+- [x] Ampliar as regressões, validar TypeScript e salvar checkpoint publicável
