@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { getProductPrice } from "@/lib/productPrice";
-import { Slider } from "@/components/ui/slider";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { PublicProductCard } from "@/components/products/PublicProductCard";
@@ -40,7 +38,6 @@ export default function Catalog() {
   // Definir segmento inicial: URL param > primeiro segmento disponível
   const [selectedSegment, setSelectedSegment] = useState<number | null>(urlSegmentId);
   const [currentPage, setCurrentPage] = useState(1);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchTerm, setSearchTerm] = useState("");
   const { openCart } = useCartDrawer();
   const { data: cartCount = 0 } = trpc.cart.getCount.useQuery();
@@ -67,18 +64,16 @@ export default function Catalog() {
     { enabled: !!activeSegment }
   );
 
-  // Filtrar produtos por preço e termo de busca
+  // Filtrar produtos apenas pelo termo de busca, sem limitar a faixa de preço.
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     return products.filter((p) => {
-      const price = getProductPrice(p, priceAudience).value;
-      const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
       const matchesSearch =
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-      return matchesPrice && matchesSearch && p.isActive;
+      return matchesSearch && p.isActive;
     });
-  }, [products, priceRange, searchTerm, priceAudience]);
+  }, [products, searchTerm]);
 
   // Paginação
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -177,24 +172,6 @@ export default function Catalog() {
                   </div>
                 </div>
 
-                {/* Faixa de Preço */}
-                <div className="space-y-3">
-                  <Label className="font-semibold text-gray-900">Faixa de Preço</Label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    aria-label="Faixa de preço"
-                    min={0}
-                    max={1000}
-                    step={50}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>R$ {priceRange[0]}</span>
-                    <span>R$ {priceRange[1]}</span>
-                  </div>
-                </div>
-
                 {/* Contagem */}
                 <div className="bg-pink-50 p-3 rounded-lg text-sm text-pink-700 border border-pink-100" aria-live="polite">
                   <p>
@@ -220,7 +197,6 @@ export default function Catalog() {
                     type="button"
                     onClick={() => {
                       setSearchTerm("");
-                      setPriceRange([0, 1000]);
                       setCurrentPage(1);
                     }}
                   >

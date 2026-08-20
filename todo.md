@@ -3891,3 +3891,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Exibir o número comercial original do pedido nas Expedições Criadas e manter o ID interno como referência secundária
 - [x] Criar regressão, validar TypeScript e salvar checkpoint da identificação operacional de expedições
+
+- [x] Remover o filtro visual de Faixa de Preço da página de catálogo, preservando os demais filtros
+- [x] Criar regressão e validar a remoção do filtro de faixa de preço do catálogo — inspeção visual confirmou Segmento, busca e contagem sem a faixa de preço
