@@ -9,6 +9,7 @@ import { GripVertical, Trash2, Edit2, Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { formatProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
+import { scheduleProductPriceAutoAdvance } from "@/lib/product-price-auto-advance";
 
 export interface DeliveryOptionData {
   id?: number;
@@ -289,6 +290,7 @@ export function DeliveryOptionsManager({
                     const nextValue = e.target.value;
                     setPriceInput(nextValue);
                     setFormData({ ...formData, pricePerM2: parseProductPriceInput(nextValue) || 0 });
+                    scheduleProductPriceAutoAdvance(e.currentTarget);
                   }}
                   onBlur={() => setPriceInput(formatProductPriceInput(priceInput))}
                   placeholder="0,00"

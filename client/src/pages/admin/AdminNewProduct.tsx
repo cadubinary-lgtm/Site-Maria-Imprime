@@ -18,6 +18,7 @@ import { EDIT_PRODUCT_MODAL_LAYOUT, NEW_PRODUCT_FIELD_LAYOUT, PRODUCT_FORM_PANEL
 import { getLegacySegmentFromSelection } from "@/lib/new-product-segment";
 import { getCardDescriptionLines, PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH, updateCardDescriptionLine } from "@/lib/product-card-description";
 import { formatProductPriceInput, normalizeProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
+import { scheduleProductPriceAutoAdvance } from "@/lib/product-price-auto-advance";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const DEFAULT_BRL_PRICE = "0,00";
+const toBrazilianPriceInput = (value: unknown) => {
+  const amount = parseProductPriceInput(String(value ?? 0));
+  return Number.isFinite(amount) && amount >= 0 ? formatProductPriceInput(String(amount)) : DEFAULT_BRL_PRICE;
+};
 
 const getInitialCreateLogistics = () => ({
   weight: "",
@@ -40,19 +47,19 @@ const getInitialCreateLogistics = () => ({
 const getInitialCreateForm = () => ({
   name: "",
   description: "",
-  price: "",
-  pixPrice: "",
-  cardPrice: "",
-  resellerPrice: "",
+  price: DEFAULT_BRL_PRICE,
+  pixPrice: DEFAULT_BRL_PRICE,
+  cardPrice: DEFAULT_BRL_PRICE,
+  resellerPrice: DEFAULT_BRL_PRICE,
   segment: "",
   imageUrl: "",
   imageKey: "",
   galleryUrls: [] as string[],
   calculationType: "unidade",
-  pricePerM2: "",
-  pixPricePerM2: "",
-  cardPricePerM2: "",
-  resellerPricePerM2: "",
+  pricePerM2: DEFAULT_BRL_PRICE,
+  pixPricePerM2: DEFAULT_BRL_PRICE,
+  cardPricePerM2: DEFAULT_BRL_PRICE,
+  resellerPricePerM2: DEFAULT_BRL_PRICE,
   minWidth: "",
   maxWidth: "",
   minHeight: "",
@@ -116,7 +123,18 @@ export default function AdminNewProduct() {
     try {
       const draft = JSON.parse(rawDraft);
         if (draft?.createForm?.name) {
-          setCreateForm((current) => ({ ...current, ...draft.createForm }));
+          setCreateForm((current) => ({
+            ...current,
+            ...draft.createForm,
+            price: toBrazilianPriceInput(draft.createForm.price),
+            pixPrice: toBrazilianPriceInput(draft.createForm.pixPrice),
+            cardPrice: toBrazilianPriceInput(draft.createForm.cardPrice),
+            resellerPrice: toBrazilianPriceInput(draft.createForm.resellerPrice),
+            pricePerM2: toBrazilianPriceInput(draft.createForm.pricePerM2),
+            pixPricePerM2: toBrazilianPriceInput(draft.createForm.pixPricePerM2),
+            cardPricePerM2: toBrazilianPriceInput(draft.createForm.cardPricePerM2),
+            resellerPricePerM2: toBrazilianPriceInput(draft.createForm.resellerPricePerM2),
+          }));
           if (draft.createLogistics) setCreateLogistics((current) => ({ ...current, ...draft.createLogistics }));
           if (Array.isArray(draft.createDeliveryOptions)) setCreateDeliveryOptions(draft.createDeliveryOptions);
           setAutoSaveState("waiting");
@@ -160,19 +178,19 @@ export default function AdminNewProduct() {
       ...getInitialCreateForm(),
       name: `Cópia de ${source.name}`,
       description: source.description || "",
-      price: toInputValue(source.price),
-      pixPrice: toInputValue(source.pixPrice ?? source.price),
-      cardPrice: toInputValue(source.cardPrice ?? source.price),
-      resellerPrice: toInputValue(source.resellerPrice),
+      price: toBrazilianPriceInput(source.price),
+      pixPrice: toBrazilianPriceInput(source.pixPrice ?? source.price),
+      cardPrice: toBrazilianPriceInput(source.cardPrice ?? source.price),
+      resellerPrice: toBrazilianPriceInput(source.resellerPrice),
       segment: source.segment || "geral",
       imageUrl: source.imageUrl || "",
       imageKey: source.imageKey || "",
       galleryUrls: parseJsonArray<string>(source.galleryUrls, []),
       calculationType: source.calculationType || "unidade",
-      pricePerM2: toInputValue(source.pricePerM2),
-      pixPricePerM2: toInputValue(source.pixPricePerM2 ?? source.pricePerM2),
-      cardPricePerM2: toInputValue(source.cardPricePerM2 ?? source.pricePerM2),
-      resellerPricePerM2: toInputValue(source.resellerPricePerM2),
+      pricePerM2: toBrazilianPriceInput(source.pricePerM2),
+      pixPricePerM2: toBrazilianPriceInput(source.pixPricePerM2 ?? source.pricePerM2),
+      cardPricePerM2: toBrazilianPriceInput(source.cardPricePerM2 ?? source.pricePerM2),
+      resellerPricePerM2: toBrazilianPriceInput(source.resellerPricePerM2),
       minWidth: toInputValue(source.minWidth),
       maxWidth: toInputValue(source.maxWidth),
       minHeight: toInputValue(source.minHeight),
@@ -250,13 +268,15 @@ export default function AdminNewProduct() {
     const pixPricePerM2 = normalizeProductPriceInput(createForm.pixPricePerM2);
     const cardPricePerM2 = normalizeProductPriceInput(createForm.cardPricePerM2);
     const resellerPricePerM2 = normalizeProductPriceInput(createForm.resellerPricePerM2);
+    const hasResellerPrice = parseProductPriceInput(createForm.resellerPrice) > 0;
+    const hasResellerPricePerM2 = parseProductPriceInput(createForm.resellerPricePerM2) > 0;
     return {
       name: createForm.name,
       description: createForm.description,
       price: isMeasureBased ? (normalizeProductPriceInput(createForm.price) || pixPricePerM2) : pixPrice,
       pixPrice,
       cardPrice,
-      resellerPrice: resellerPrice || undefined,
+      resellerPrice: hasResellerPrice ? resellerPrice : undefined,
       segment: createForm.segment?.trim() || "geral",
       imageUrl: createForm.imageUrl,
       imageKey: createForm.imageKey || undefined,
@@ -265,7 +285,7 @@ export default function AdminNewProduct() {
       pricePerM2: isMeasureBased ? pixPricePerM2 : undefined,
       pixPricePerM2: isMeasureBased ? pixPricePerM2 : undefined,
       cardPricePerM2: isMeasureBased ? cardPricePerM2 : undefined,
-      resellerPricePerM2: isMeasureBased ? resellerPricePerM2 || undefined : undefined,
+      resellerPricePerM2: isMeasureBased && hasResellerPricePerM2 ? resellerPricePerM2 : undefined,
       minWidth: isMeasureBased ? createForm.minWidth : undefined,
       maxWidth: isMeasureBased ? createForm.maxWidth : undefined,
       minHeight: isMeasureBased ? createForm.minHeight : undefined,
@@ -375,9 +395,7 @@ export default function AdminNewProduct() {
           id: `new-product-post-create-warning-${productId}`,
         });
       }
-      if (wasDuplicatingDraft) {
-        navigate(`/admin/produtos?destacar=${productId}`);
-      }
+      navigate(`/admin/produtos?destacar=${productId}`);
     } catch (error) {
       console.error("[new-product-create]", error);
       window.localStorage.setItem("maria-imprime-new-product-autosave", JSON.stringify({ createForm, createLogistics, createDeliveryOptions, savedAt: Date.now() }));
@@ -548,7 +566,10 @@ export default function AdminNewProduct() {
                       type="text"
                       inputMode="decimal"
                       value={createForm.pixPrice}
-                      onChange={(e) => setCreateForm({ ...createForm, pixPrice: e.target.value, price: e.target.value })}
+                      onChange={(e) => {
+                        setCreateForm({ ...createForm, pixPrice: e.target.value, price: e.target.value });
+                        scheduleProductPriceAutoAdvance(e.currentTarget);
+                      }}
                       onBlur={() => finalizeCreatePrice("pixPrice", true)}
                       placeholder="0,00"
                       required
@@ -558,13 +579,13 @@ export default function AdminNewProduct() {
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
                   <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                     <Label htmlFor="create-cardPrice">Preço via Cartão (R$) *</Label>
-                    <Input id="create-cardPrice" type="text" inputMode="decimal" value={createForm.cardPrice} onChange={(e) => setCreateForm({ ...createForm, cardPrice: e.target.value })} onBlur={() => finalizeCreatePrice("cardPrice")} placeholder="0,00" required />
+                    <Input id="create-cardPrice" type="text" inputMode="decimal" value={createForm.cardPrice} onChange={(e) => { setCreateForm({ ...createForm, cardPrice: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("cardPrice")} placeholder="0,00" required />
                   </div>
                 )}
                 {(createForm.calculationType === "unidade" || createForm.calculationType === "pacote") && (
                   <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                     <Label htmlFor="create-resellerPrice">Preço Revendedor (R$)</Label>
-                    <Input id="create-resellerPrice" type="text" inputMode="decimal" value={createForm.resellerPrice} onChange={(e) => setCreateForm({ ...createForm, resellerPrice: e.target.value })} onBlur={() => finalizeCreatePrice("resellerPrice")} placeholder="Opcional" />
+                    <Input id="create-resellerPrice" type="text" inputMode="decimal" value={createForm.resellerPrice} onChange={(e) => { setCreateForm({ ...createForm, resellerPrice: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("resellerPrice")} placeholder="0,00" />
                   </div>
                 )}
               </div>
@@ -575,19 +596,19 @@ export default function AdminNewProduct() {
                       <Label htmlFor="create-pixPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                       </Label>
-                      <Input id="create-pixPricePerM2" type="text" inputMode="decimal" value={createForm.pixPricePerM2} onChange={(e) => setCreateForm({ ...createForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value })} onBlur={() => finalizeCreatePrice("pixPricePerM2", true)} placeholder="45,00" />
+                      <Input id="create-pixPricePerM2" type="text" inputMode="decimal" value={createForm.pixPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("pixPricePerM2", true)} placeholder="0,00" />
                     </div>
                     <div className="sm:col-span-1 xl:col-span-2">
                       <Label htmlFor="create-cardPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
                       </Label>
-                      <Input id="create-cardPricePerM2" type="text" inputMode="decimal" value={createForm.cardPricePerM2} onChange={(e) => setCreateForm({ ...createForm, cardPricePerM2: e.target.value })} onBlur={() => finalizeCreatePrice("cardPricePerM2")} placeholder="45,00" />
+                      <Input id="create-cardPricePerM2" type="text" inputMode="decimal" value={createForm.cardPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, cardPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("cardPricePerM2")} placeholder="0,00" />
                     </div>
                     <div className="sm:col-span-1 xl:col-span-2">
                       <Label htmlFor="create-resellerPricePerM2">
                         {createForm.calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
                       </Label>
-                      <Input id="create-resellerPricePerM2" type="text" inputMode="decimal" value={createForm.resellerPricePerM2} onChange={(e) => setCreateForm({ ...createForm, resellerPricePerM2: e.target.value })} onBlur={() => finalizeCreatePrice("resellerPricePerM2")} placeholder="Opcional" />
+                      <Input id="create-resellerPricePerM2" type="text" inputMode="decimal" value={createForm.resellerPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, resellerPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("resellerPricePerM2")} placeholder="0,00" />
                     </div>
                   <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                     <div>
