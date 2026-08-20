@@ -106,8 +106,7 @@ export default function AdminQuotations() {
   const [permanentQuotation, setPermanentQuotation] = useState<any | null>(null);
   const [statusActionQuotation, setStatusActionQuotation] = useState<{ type: "cancel" | "restore"; quotation: any } | null>(null);
   const { adminUser } = useAdminAuth();
-  const canManageTrash = Boolean(adminUser);
-  const canPermanentlyDelete = adminUser?.role === "superadmin";
+  const canManageTrash = adminUser?.role === "superadmin";
   const hasActiveFilters = Boolean(search || statusFilter !== "all" || period !== "all");
   const presetRange = period === "this_month" ? getMonthRange(0) : period === "last_month" ? getMonthRange(-1) : { startDate: undefined, endDate: undefined };
   const startDate = period === "custom" ? customStartDate || undefined : presetRange.startDate;
@@ -396,14 +395,14 @@ export default function AdminQuotations() {
         )}
       </div>
 
-      {canManageTrash && showTrash && <div className="bg-white rounded-lg border border-pink-200 shadow-sm overflow-hidden"><div className="px-4 py-3 border-b"><h2 className="font-semibold">Lixeira de Orçamentos</h2></div>{isLoadingTrash ? <div className="p-8 text-center text-gray-400">Carregando lixeira...</div> : !trashedQuotations.length ? <div className="p-8 text-center text-gray-400">Nenhum orçamento na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b bg-gray-50">{["Nº", "Cliente", "Valor", "Motivo", "Excluído em", "Usuário", "Ação"].map((h) => <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500">{h}</th>)}</tr></thead><tbody>{trashedQuotations.map((q: any) => <tr key={q.trashId} className="border-b"><td className="px-4 py-3 font-mono text-xs text-pink-600">{q.quotationNumber}</td><td className="px-4 py-3">{q.clientName || "Cliente não informado"}</td><td className="px-4 py-3 font-semibold">{fmt(q.total)}</td><td className="px-4 py-3 text-xs">{q.deletionReason || "Motivo não informado"}</td><td className="px-4 py-3 text-xs">{new Date(q.deletedAt).toLocaleString("pt-BR")}</td><td className="px-4 py-3 text-xs">{q.deletedByAdminName || "Usuário não informado"}</td><td className="px-4 py-3"><div className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setRestoreQuotation(q)}><RotateCcw className="w-3.5 h-3.5 mr-1" />Restaurar</Button>{canPermanentlyDelete && <Button size="sm" variant="ghost" className="text-red-600" onClick={() => setPermanentQuotation(q)}><Trash2 className="w-4 h-4" /></Button>}</div></td></tr>)}</tbody></table></div>}</div>}
+      {canManageTrash && showTrash && <div className="bg-white rounded-lg border border-pink-200 shadow-sm overflow-hidden"><div className="px-4 py-3 border-b"><h2 className="font-semibold">Lixeira de Orçamentos</h2></div>{isLoadingTrash ? <div className="p-8 text-center text-gray-400">Carregando lixeira...</div> : !trashedQuotations.length ? <div className="p-8 text-center text-gray-400">Nenhum orçamento na lixeira.</div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b bg-gray-50">{["Nº", "Cliente", "Valor", "Motivo", "Excluído em", "Usuário", "Ação"].map((h) => <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500">{h}</th>)}</tr></thead><tbody>{trashedQuotations.map((q: any) => <tr key={q.trashId} className="border-b"><td className="px-4 py-3 font-mono text-xs text-pink-600">{q.quotationNumber}</td><td className="px-4 py-3">{q.clientName || "Cliente não informado"}</td><td className="px-4 py-3 font-semibold">{fmt(q.total)}</td><td className="px-4 py-3 text-xs">{q.deletionReason || "Motivo não informado"}</td><td className="px-4 py-3 text-xs">{new Date(q.deletedAt).toLocaleString("pt-BR")}</td><td className="px-4 py-3 text-xs">{q.deletedByAdminName || "Usuário não informado"}</td><td className="px-4 py-3"><div className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setRestoreQuotation(q)}><RotateCcw className="w-3.5 h-3.5 mr-1" />Restaurar</Button><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setPermanentQuotation(q)}><Trash2 className="w-4 h-4" /></Button></div></td></tr>)}</tbody></table></div>}</div>}
 
       <AlertDialog open={trashQuotation !== null} onOpenChange={(o) => !o && setTrashQuotation(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Mover orçamento para a lixeira?</AlertDialogTitle>
             <AlertDialogDescription>
-              O orçamento {trashQuotation?.quotationNumber} será ocultado da lista ativa e poderá ser restaurado por uma pessoa administradora.
+              O orçamento {trashQuotation?.quotationNumber} será ocultado da lista ativa e poderá ser restaurado por um Superadmin.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <textarea value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} placeholder="Motivo da exclusão (obrigatório)" className="min-h-24 w-full rounded-md border px-3 py-2 text-sm" />
