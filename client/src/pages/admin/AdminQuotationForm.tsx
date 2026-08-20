@@ -62,7 +62,12 @@ interface QuotationItem {
 }
 
 function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return roundQuotationMoney(v).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function parseManualTotal(value: string) {
@@ -113,6 +118,8 @@ export default function AdminQuotationForm() {
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [customUnitDrafts, setCustomUnitDrafts] = useState<Record<number, string>>({});
+  const [autoRecalculatedUnitItems, setAutoRecalculatedUnitItems] = useState<Set<number>>(new Set());
+  const unitRecalculationTimersRef = useRef<Record<number, number>>({});
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   const [discountType, setDiscountType] = useState<"percentual" | "fixo">("fixo");
@@ -174,6 +181,10 @@ export default function AdminQuotationForm() {
     setResponsibleName(adminUser.name);
     responsiblePrefilledRef.current = true;
   }, [adminUser?.name, isEdit]);
+
+  useEffect(() => () => {
+    Object.values(unitRecalculationTimersRef.current).forEach((timer) => window.clearTimeout(timer));
+  }, []);
 
   // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
   useEffect(() => {
@@ -556,7 +567,27 @@ export default function AdminQuotationForm() {
     setShowAddProduct(false);
   };
 
+  const highlightRecalculatedUnit = useCallback((idx: number) => {
+    setAutoRecalculatedUnitItems((previous) => new Set(previous).add(idx));
+    const existingTimer = unitRecalculationTimersRef.current[idx];
+    if (existingTimer !== undefined) window.clearTimeout(existingTimer);
+    unitRecalculationTimersRef.current[idx] = window.setTimeout(() => {
+      setAutoRecalculatedUnitItems((previous) => {
+        const next = new Set(previous);
+        next.delete(idx);
+        return next;
+      });
+      delete unitRecalculationTimersRef.current[idx];
+    }, 1400);
+  }, []);
+
   const updateItem = useCallback((idx: number, updates: Partial<QuotationItem>) => {
+    if (updates.priceAdjustment !== undefined) {
+      const currentItem = items[idx];
+      const adjusted = resolveQuotationItemTotal(updates.priceAdjustment, currentItem?.quantity ?? 1);
+      setCustomUnitDrafts((previous) => ({ ...previous, [idx]: fmt(adjusted.unitPrice) }));
+      highlightRecalculatedUnit(idx);
+    }
     setItems((prev) => {
       const next = [...prev];
       const item = { ...next[idx], ...updates };
@@ -597,7 +628,7 @@ export default function AdminQuotationForm() {
       next[idx] = item;
       return next;
     });
-  }, [pricingCache]);
+  }, [highlightRecalculatedUnit, items, pricingCache]);
 
   const removeItem = (idx: number) => {
     setItems((prev) => prev.filter((_, i) => i !== idx));
@@ -742,7 +773,7 @@ export default function AdminQuotationForm() {
               type="text"
               inputMode="decimal"
               aria-label={`Valor unitário no cabeçalho de ${item.productName || "item personalizado"}`}
-              value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
+              value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
               placeholder="R$ 0,00"
               onChange={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
@@ -1299,15 +1330,15 @@ export default function AdminQuotationForm() {
                 {items.some((item) => !item.isCustom) && (
                   <div className="space-y-2">
                     {/* Cabeçalho da tabela */}
-                    <div className="grid grid-cols-12 gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                      <div className="col-span-1">Img</div>
-                      <div className="col-span-3">Produto / Especificações</div>
-                      <div className="col-span-1 text-center">Arte</div>
-                      <div className="col-span-1 text-center">Qtd</div>
-                      <div className="col-span-1 text-center">Unit.</div>
-                      <div className="col-span-2 text-center">Ajuste</div>
-                      <div className="col-span-2 text-right">Total</div>
-                      <div className="col-span-1"></div>
+                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                      <div>Img</div>
+                      <div>Produto / Especificações</div>
+                      <div className="text-center">Arte</div>
+                      <div className="text-center">Qtd</div>
+                      <div className="text-center">Unit.</div>
+                      <div className="text-center">Ajuste</div>
+                      <div className="text-right">Total</div>
+                      <div></div>
                     </div>
                     {items.map((item, idx) => {
                   if (item.isCustom) return null;
@@ -1320,8 +1351,8 @@ export default function AdminQuotationForm() {
                   return (
                     <div key={idx} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`border border-gray-100 rounded-lg overflow-hidden transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
                       {/* Linha principal */}
-                      <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 bg-gray-50">
-                        <div className="col-span-1">
+                      <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 items-center px-2 py-2 bg-gray-50">
+                        <div>
                           {item.isCustom ? (
                             <div className="w-8 h-8" aria-hidden="true" />
                           ) : item.productImage ? (
@@ -1337,7 +1368,7 @@ export default function AdminQuotationForm() {
                             </div>
                           )}
                         </div>
-                        <div className="col-span-3 min-w-0">
+                        <div className="min-w-0">
                           {item.isCustom ? (
                             <div className="flex items-center gap-1">
                               <Input
@@ -1372,7 +1403,7 @@ export default function AdminQuotationForm() {
                             <p className="mt-1 text-[11px] leading-4 text-gray-500 line-clamp-2">{specificationSummary}</p>
                           )}
                         </div>
-                        <div className="col-span-1 flex justify-center">
+                        <div className="flex justify-center">
                           {item.artFileUrl ? (
                             <button
                               type="button"
@@ -1393,21 +1424,21 @@ export default function AdminQuotationForm() {
                             </button>
                           )}
                         </div>
-                        <div className="col-span-1 flex justify-center">
+                        <div className="flex justify-center">
                           <Input
                             type="number"
                             min={1}
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, { quantity: parseInt(e.target.value) || 1 })}
-                            className="w-14 h-7 text-center text-sm"
+                            className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums"
                           />
                         </div>
-                        <div className="col-span-1 flex justify-center">
+                        <div className="relative flex justify-center">
                           <input
                             type="text"
                             inputMode="decimal"
                             aria-label={`Valor unitário de ${item.productName}`}
-                            value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
+                            value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
                             placeholder="R$ 0,00"
                             onChange={(e) => {
                               setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
@@ -1415,13 +1446,18 @@ export default function AdminQuotationForm() {
                             onBlur={(e) => {
                               const value = parseQuotationCurrency(e.target.value);
                               updateItem(idx, { unitPrice: value });
-                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
+                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: fmt(value) }));
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                            className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-1 text-right text-[11px] text-foreground transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+                            className={`h-8 w-full min-w-0 rounded-md border px-2 text-right text-sm font-medium tabular-nums transition-all focus:outline-none focus:ring-2 ${
+                              autoRecalculatedUnitItems.has(idx)
+                                ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-200 motion-safe:animate-pulse"
+                                : "border-input bg-white text-foreground hover:border-pink-300 focus:border-pink-500 focus:ring-pink-100"
+                            }`}
                           />
+                          {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário recalculado a partir do ajuste.</span>}
                         </div>
-                        <div className="col-span-2 flex justify-center">
+                        <div className="flex justify-center">
                           {item.isCustom ? (
                             <span className="text-xs text-gray-300">—</span>
                           ) : (
@@ -1435,18 +1471,18 @@ export default function AdminQuotationForm() {
                             onBlur={(e) => {
                               const total = parseQuotationCurrency(e.target.value);
                               updateItem(idx, { priceAdjustment: total });
-                              e.target.value = total > 0 ? fmt(total) : "";
+                              e.target.value = fmt(total);
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                             onChange={(e) => {
                               clearTimeout((e.target as any)._ajusteTimer);
                               (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
                             }}
-                            className="h-7 w-full min-w-0 text-center text-sm border border-input rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+                            className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
                           />
                           )}
                         </div>
-                        <div className="col-span-2 flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
+                        <div className="flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
                           <span>{fmt(item.totalPrice)}</span>
                           <button
                             type="button"
@@ -1458,7 +1494,7 @@ export default function AdminQuotationForm() {
                             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           </button>
                         </div>
-                        <div className="col-span-1 flex justify-end gap-1">
+                        <div className="flex justify-end gap-1">
                           <button type="button" onClick={() => duplicateItem(idx)} className="text-gray-300 hover:text-pink-600 transition-colors" title="Duplicar item">
                             <Copy className="w-3.5 h-3.5" />
                           </button>

@@ -29,10 +29,19 @@ describe("cabeçalho do orçamento", () => {
   });
 
   it("inclui UNIT. após QTD e trata o ajuste como total desejado", () => {
-    expect(formSource).toContain('<div className="col-span-1 text-center">Unit.</div>');
+    expect(formSource).toContain('<div className="text-center">Unit.</div>');
     expect(formSource).toContain('title="Informe o valor total desejado para este item"');
     expect(formSource).toContain("const adjusted = resolveQuotationItemTotal(updates.priceAdjustment, quantity);");
     expect(formSource).toContain("item.totalPrice = adjusted.totalPrice;");
+  });
+
+  it("mantém UNIT. com duas casas, tamanho legível e feedback de recálculo", () => {
+    expect(formSource).toContain("minimumFractionDigits: 2");
+    expect(formSource).toContain("maximumFractionDigits: 2");
+    expect(formSource).toContain("grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px]");
+    expect(formSource).toContain("autoRecalculatedUnitItems.has(idx)");
+    expect(formSource).toContain("Valor unitário recalculado a partir do ajuste.");
+    expect(formSource).toContain("font-semibold tabular-nums");
   });
 
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
