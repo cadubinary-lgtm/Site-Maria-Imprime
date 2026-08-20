@@ -421,6 +421,53 @@ export const adminAuthRouter = router({
       return { success: true };
     }),
 
+  /**
+   * Excluir administrador permanentemente (apenas superadmin).
+   * Mantém os registros de auditoria e invalida todas as sessões do operador removido.
+   */
+  deleteAdmin: superAdminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = (await getDb())!;
+      const adminUser = (ctx as any).adminUser;
+
+      if (input.id === adminUser.adminId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Você não pode excluir sua própria conta." });
+      }
+
+      const target = await (db as any).query.adminAccounts.findFirst({
+        where: eq(adminAccounts.id, input.id),
+      });
+      if (!target) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Operador não encontrado." });
+      }
+
+      if (target.role === "superadmin") {
+        const [superadminCount] = await db
+          .select({ total: sql<number>`count(*)` })
+          .from(adminAccounts)
+          .where(eq(adminAccounts.role, "superadmin"));
+        if (Number(superadminCount?.total ?? 0) <= 1) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Mantenha pelo menos um Superadmin ativo no sistema." });
+        }
+      }
+
+      await db.delete(adminSessions).where(eq(adminSessions.adminId, input.id));
+      await db.delete(adminAccounts).where(eq(adminAccounts.id, input.id));
+
+      await logAudit({
+        adminId: adminUser.adminId,
+        adminName: adminUser.name,
+        action: "delete_admin",
+        entity: "adminAccounts",
+        entityId: String(input.id),
+        before: { name: target.name, email: target.email, role: target.role, status: target.status },
+        after: { permanentlyDeletedAt: Date.now() },
+      });
+
+      return { success: true };
+    }),
+
   // ─── Auditoria ──────────────────────────────────────────────────────────────
 
   /**
