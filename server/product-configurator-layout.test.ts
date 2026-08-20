@@ -19,8 +19,13 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain('<div className="hidden lg:block"><MariaGuide compact /></div>');
     expect(source).toContain('<div className="lg:hidden">\n            <MariaGuide compact />');
     expect(source.lastIndexOf('<div className="lg:hidden">\n            <MariaGuide compact />')).toBeGreaterThan(source.indexOf("Resumo do pedido"));
-    expect(source).toContain("leading-relaxed line-clamp-5");
+    expect(source).toContain("leading-relaxed lg:line-clamp-5");
     expect(source).toContain("TermsAcceptance checked={acceptedTerms}");
+    expect(source).toContain("const [isMobileProductInfoOpen, setIsMobileProductInfoOpen] = useState(false);");
+    expect(source).toContain('aria-controls="product-mobile-information"');
+    expect(source).toContain('aria-expanded={isMobileProductInfoOpen}');
+    expect(source).toContain('className={`space-y-3 ${isMobileProductInfoOpen ? "block" : "hidden"} lg:block`}');
+    expect(source).toContain('lg:line-clamp-5');
   });
 
   it("padroniza os controles interativos e CTAs do configurador na identidade rosa", () => {

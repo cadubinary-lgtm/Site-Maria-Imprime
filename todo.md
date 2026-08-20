@@ -3933,3 +3933,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir o Resumo do pedido e a ação de adicionar ao carrinho antes do Guia da Maria no configurador mobile
 - [x] Posicionar o Guia da Maria e o bloco Importante sobre a sua escolha abaixo do Resumo do pedido no mobile
 - [x] Criar regressão e validar visualmente a nova sequência do configurador em celular — visualização em 390 px confirmou Resumo e Adicionar ao carrinho antes do conteúdo orientativo
+
+- [x] Adicionar uma seta ao lado do nome do produto para expandir e fechar as informações no mobile
+- [x] Manter descrição e detalhes inferiores do produto fechados inicialmente no mobile
+- [x] Criar regressão e validar visualmente a redução de espaço até o configurador — visualização em 390 px confirmou título compacto, seta visível e Configurador logo abaixo
