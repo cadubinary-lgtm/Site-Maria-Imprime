@@ -52,6 +52,14 @@ describe("cabeçalho do orçamento", () => {
     expect(formSource).toContain('<div className="text-center">Ajuste</div>');
   });
 
+  it("oferece campos inferiores sincronizados para os Produtos e Serviços expandidos", () => {
+    expect(formSource).toContain('aria-label={`Quantidade inferior de ${item.productName}`}');
+    expect(formSource).toContain('aria-label={`Valor unitário inferior de ${item.productName}`}');
+    expect(formSource).toContain('aria-label={`Valor total inferior de ${item.productName}`}');
+    expect(formSource).toContain('key={`product-total-${idx}-${item.totalPrice}`}');
+    expect(formSource).toContain("Valor unitário inferior recalculado a partir do ajuste.");
+  });
+
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
     expect(detailSource).toContain("const companyAddress = formatCompanyAddress(company);");
     expect(detailSource).toContain("CNPJ: ${company.cnpj}");
