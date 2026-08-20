@@ -3876,3 +3876,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Adicionar lixeira com confirmação ao lado de Desativar em cada operador da página Usuários
 - [x] Proteger a exclusão de operador, validar regressão e salvar checkpoint publicável
+
+- [x] Remover o bloco Ambiente protegido e reorganizar Formas de pagamento e Segurança e proteção no rodapé
+- [x] Atualizar regressão, validar responsividade e salvar checkpoint da reorganização do rodapé

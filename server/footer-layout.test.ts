@@ -12,8 +12,8 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(source).toContain("footerContent.newsletterDescription");
     expect(source).toContain("Formas de pagamento");
     expect(source).toContain("Google Safe Browsing");
-    expect(source).toContain("Ambiente protegido");
-    expect(source).toContain("Navegação segura e proteção dos seus dados.");
+    expect(source).not.toContain("Ambiente protegido");
+    expect(source).not.toContain("Navegação segura e proteção dos seus dados.");
     expect(source).toContain('documentationPath("termos-venda")');
     expect(source).toContain('documentationPath("privacidade-lgpd")');
     expect(source).toContain('documentationPath("faq")');
@@ -74,13 +74,13 @@ describe("rodapé institucional da Maria Imprime", () => {
     expect(footer).toContain('/manus-storage/ssl-certificado_6ff35a41.png');
   });
 
-  it("organiza a faixa em três blocos proporcionais com selos ampliados", () => {
+  it("organiza a faixa em dois blocos proporcionais com selos ampliados", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
-    expect(footer).toContain('lg:grid-cols-[1.72fr_1fr_1.12fr]');
+    expect(footer).toContain('lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]');
     expect(footer).toContain('grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7');
     expect(footer).toContain('h-16 w-full min-w-0');
-    expect(footer).toContain('h-16 w-16');
-    expect(footer).toContain('grid grid-cols-1 gap-2.5 sm:gap-3');
+    expect(footer).not.toContain('h-16 w-16');
+    expect(footer).toContain('grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2');
     expect(footer).toContain('h-20 min-w-0 items-center');
     expect(footer).toContain('h-16 w-full object-contain');
     expect(footer).toContain('lg:border-l lg:border-t-0');

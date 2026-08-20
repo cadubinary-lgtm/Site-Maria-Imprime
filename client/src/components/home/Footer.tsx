@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ArrowRight,
-  BadgeCheck,
   CheckCircle2,
   CreditCard,
   FileText,
@@ -192,7 +191,7 @@ export function Footer() {
           </section>
         </div>
 
-        <section className="mt-12 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[1.72fr_1fr_1.12fr]" aria-label="Pagamentos e segurança">
+        <section className="mt-12 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" aria-label="Pagamentos e segurança">
           <div className="p-6 sm:p-7">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Formas de pagamento</h2>
             <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7">
@@ -208,14 +207,10 @@ export function Footer() {
           </div>
           <div className="border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Segurança e proteção</h2>
-            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <SecuritySealLink href="https://transparencyreport.google.com/safe-browsing/search?url=mariaimprime.com.br" label="Google Safe Browsing" src="/manus-storage/google-safe-browsing-large_347d2bfd.png" />
               <SecuritySealLink href="https://www.sslshopper.com/ssl-checker.html#hostname=mariaimprime.com.br" label="SSL Certificado" src="/manus-storage/ssl-certificado_6ff35a41.png" />
             </div>
-          </div>
-          <div className="flex items-center gap-5 border-t border-slate-200 p-6 sm:p-7 lg:border-l lg:border-t-0">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-pink-100 text-pink-600"><BadgeCheck className="h-8 w-8" /></div>
-            <div><h2 className="text-lg font-bold tracking-tight text-slate-900">Ambiente protegido</h2><p className="mt-1 text-sm leading-6 text-slate-600">Navegação segura e proteção dos seus dados.</p></div>
           </div>
         </section>
 
