@@ -26,4 +26,14 @@ describe("cadastro administrativo de produtos", () => {
     expect(source).toContain('position: "top-right"');
     expect(source).toContain('id: `new-product-created-${productId}`');
   });
+
+  it("redireciona para a lista destacando o novo produto", () => {
+    expect(source).toContain('navigate(`/admin/produtos?destacar=${productId}`);');
+  });
+
+  it("padroniza os campos monetários em moeda brasileira e avanço de 1000 ms", () => {
+    expect(source).toContain('const DEFAULT_BRL_PRICE = "0,00";');
+    expect(source).toContain('toBrazilianPriceInput');
+    expect(source.match(/scheduleProductPriceAutoAdvance/g)?.length).toBeGreaterThanOrEqual(7);
+  });
 });

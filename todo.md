@@ -3786,3 +3786,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a resposta de criação para sempre fornecer o identificador do novo produto
 - [x] Corrigir o tratamento do identificador no Novo Produto sem duplicar cadastros ou preservar rascunho criado
 - [x] Criar regressão de criação de produto, validar e salvar checkpoint publicável
+
+- [x] Redirecionar para a lista de produtos após criação bem-sucedida
+- [x] Exibir todos os campos de preço do Novo Produto em moeda brasileira com duas casas decimais
+- [x] Aplicar avanço automático de 1000 ms aos campos monetários do Novo Produto
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
