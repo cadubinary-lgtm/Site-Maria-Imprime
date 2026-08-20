@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { TrendingUp, RefreshCw, CheckCircle, Trash2, RotateCcw, Search } from "lucide-react";
+import { TrendingUp, RefreshCw, CheckCircle, Trash2, RotateCcw, Search, ReceiptText } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 type Periodo = "dia" | "semana" | "mes" | "ano";
 
 export default function FinanceiroContasRecebidas() {
+  const [, setLocation] = useLocation();
   const [page, setPage] = useState(1);
   const [periodo, setPeriodo] = useState<Periodo>("mes");
   const [search, setSearch] = useState("");
@@ -190,7 +192,7 @@ export default function FinanceiroContasRecebidas() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Data</th><th className="p-3 text-left font-medium text-gray-600">Pagamento</th><th className="p-3 text-left font-medium text-gray-600">Entrega</th><th className="p-3 text-left font-medium text-gray-600">Status</th>{canDeleteReceivedAccounts && <th className="p-3 text-center font-medium text-gray-600">Ações</th>}</tr></thead>
+                  <thead className="border-b bg-gray-50"><tr><th className="p-3 text-left font-medium text-gray-600">Pedido</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Data</th><th className="p-3 text-left font-medium text-gray-600">Pagamento</th><th className="p-3 text-left font-medium text-gray-600">Entrega</th><th className="p-3 text-left font-medium text-gray-600">Status</th><th className="p-3 text-center font-medium text-gray-600">Ações</th></tr></thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.data.map((item: any) => (
                       <tr key={item.pedidoId} className="hover:bg-gray-50">
@@ -201,7 +203,23 @@ export default function FinanceiroContasRecebidas() {
                         <td className="p-3"><Badge variant="outline" className="text-xs">{PAYMENT_LABELS[item.formaPagamento] || item.formaPagamento || "—"}</Badge></td>
                         <td className="p-3 text-xs text-gray-500">{item.formaEntrega === "retirada_loja" ? "Retirada" : item.formaEntrega || "—"}</td>
                         <td className="p-3"><Badge className="border-0 bg-green-100 text-xs text-green-700">Pago</Badge></td>
-                        {canDeleteReceivedAccounts && <td className="p-3 text-center"><Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setReceiptToDelete(item); }}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button></td>}
+                        <td className="p-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-pink-600 hover:bg-pink-50 hover:text-pink-700"
+                              aria-label={item.receiptId ? `Abrir recibo ${item.receiptNumber || `do pedido ${item.orderNumber}`}` : `Recibo do pedido ${item.orderNumber} ainda não está disponível`}
+                              title={item.receiptId ? "Abrir recibo" : "Recibo indisponível"}
+                              disabled={!item.receiptId}
+                              onClick={() => item.receiptId && setLocation(`/admin/financeiro/recibos/${item.receiptId}/imprimir`)}
+                            >
+                              <ReceiptText className="h-3.5 w-3.5" aria-hidden="true" />
+                            </Button>
+                            {canDeleteReceivedAccounts && <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" aria-label={`Mover o recebimento do pedido ${item.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setReceiptToDelete(item); }}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
