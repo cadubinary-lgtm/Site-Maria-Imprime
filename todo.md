@@ -3929,3 +3929,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Centralizar o botão Ver normas para envio da arte dentro do bloco Importante sobre a sua escolha
 - [x] Exibir o nome do botão em formato retangular compacto, mantendo legibilidade no mobile
 - [x] Criar regressão e validar visualmente o botão de normas centralizado — visualização em 390 px confirmou nome visível, formato retangular e alinhamento central
+
+- [x] Exibir o Resumo do pedido e a ação de adicionar ao carrinho antes do Guia da Maria no configurador mobile
+- [x] Posicionar o Guia da Maria e o bloco Importante sobre a sua escolha abaixo do Resumo do pedido no mobile
+- [x] Criar regressão e validar visualmente a nova sequência do configurador em celular — visualização em 390 px confirmou Resumo e Adicionar ao carrinho antes do conteúdo orientativo

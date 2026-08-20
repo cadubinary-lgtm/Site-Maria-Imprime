@@ -16,6 +16,9 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain('lg:grid-cols-[minmax(0,1fr)_280px]');
     expect(source).toContain('h-fit space-y-4 lg:sticky lg:top-4');
     expect(source).toContain("<MariaGuide compact />");
+    expect(source).toContain('<div className="hidden lg:block"><MariaGuide compact /></div>');
+    expect(source).toContain('<div className="lg:hidden">\n            <MariaGuide compact />');
+    expect(source.lastIndexOf('<div className="lg:hidden">\n            <MariaGuide compact />')).toBeGreaterThan(source.indexOf("Resumo do pedido"));
     expect(source).toContain("leading-relaxed line-clamp-5");
     expect(source).toContain("TermsAcceptance checked={acceptedTerms}");
   });
