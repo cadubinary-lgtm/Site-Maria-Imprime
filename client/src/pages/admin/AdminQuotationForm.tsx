@@ -1752,6 +1752,60 @@ export default function AdminQuotationForm() {
                                 </div>
                               )}
                             </div>
+                            <div className="col-span-2 grid grid-cols-1 gap-3 border-t border-gray-100 pt-3 sm:grid-cols-3">
+                              <div>
+                                <label className="text-xs font-medium text-gray-500">Quantidade</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  aria-label={`Quantidade inferior de ${item.productName}`}
+                                  value={item.quantity}
+                                  onChange={(event) => updateItem(idx, { quantity: Math.max(1, parseInt(event.target.value) || 1) })}
+                                  className="mt-0.5 h-8 bg-white text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:ring-pink-100"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium text-gray-500">Valor unitário</label>
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  aria-label={`Valor unitário inferior de ${item.productName}`}
+                                  value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
+                                  placeholder="R$ 0,00"
+                                  onChange={(event) => setCustomUnitDrafts((previous) => ({ ...previous, [idx]: event.target.value }))}
+                                  onBlur={(event) => {
+                                    const value = parseQuotationCurrency(event.target.value);
+                                    updateItem(idx, { unitPrice: value });
+                                    setCustomUnitDrafts((previous) => ({ ...previous, [idx]: fmt(value) }));
+                                  }}
+                                  onKeyDown={(event) => { if (event.key === "Enter") (event.target as HTMLInputElement).blur(); }}
+                                  className={`mt-0.5 h-8 w-full rounded-md border px-3 text-right text-sm font-medium tabular-nums transition-all focus:outline-none focus:ring-2 ${
+                                    autoRecalculatedUnitItems.has(idx)
+                                      ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-200 motion-safe:animate-pulse"
+                                      : "border-gray-200 bg-gray-50 text-gray-700 hover:border-pink-300 focus:border-pink-500 focus:bg-white focus:ring-pink-100"
+                                  }`}
+                                />
+                                {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário inferior recalculado a partir do ajuste.</span>}
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium text-gray-500">Valor total</label>
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  aria-label={`Valor total inferior de ${item.productName}`}
+                                  key={`product-total-${idx}-${item.totalPrice}`}
+                                  defaultValue={fmt(item.totalPrice)}
+                                  placeholder="R$ 0,00"
+                                  onBlur={(event) => {
+                                    const total = parseQuotationCurrency(event.target.value);
+                                    updateItem(idx, { priceAdjustment: total });
+                                    event.target.value = fmt(total);
+                                  }}
+                                  onKeyDown={(event) => { if (event.key === "Enter") (event.target as HTMLInputElement).blur(); }}
+                                  className="mt-0.5 h-8 border-pink-100 bg-pink-50/30 text-right text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus-visible:border-pink-500 focus-visible:bg-white focus-visible:ring-pink-100"
+                                />
+                              </div>
+                            </div>
                           </div>
                         );
                       })()}

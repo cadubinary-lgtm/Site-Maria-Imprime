@@ -3755,3 +3755,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar a coluna Ajuste entre UNIT. e TOTAL nos Itens personalizados
 - [x] Aplicar ao Ajuste personalizado a mesma lógica de total desejado e recálculo unitário
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Adicionar campos inferiores de Quantidade, Valor unitário e Valor total aos Produtos/Serviços
+- [x] Sincronizar os campos inferiores com a linha principal e o cálculo do item
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
