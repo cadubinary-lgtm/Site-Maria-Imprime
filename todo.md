@@ -3867,3 +3867,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Excluir permanentemente todos os pedidos presentes na lixeira de Todos os Pedidos e seus vínculos
 - [x] Verificar lixeira e subitens financeiros após a exclusão e salvar checkpoint da operação solicitada
+
+- [x] Localizar e excluir permanentemente o lançamento do pedido PD-1780691222009-103 no Fluxo de Caixa
+- [x] Verificar a remoção e salvar checkpoint da exclusão do lançamento solicitado
