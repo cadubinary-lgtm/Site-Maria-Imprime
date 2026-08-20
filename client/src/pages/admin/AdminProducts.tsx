@@ -24,8 +24,15 @@ import { getCardDescriptionLines, PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH, upda
 import { createProductEditSignature, hasUnsavedProductChanges, shouldInitializeProductEditSession } from "@/lib/product-edit-guard";
 import { getProductEditDraftKey, parseProductEditDraft, serializeProductEditDraft } from "@/lib/product-edit-draft";
 import { formatProductPriceInput, normalizeProductPriceInput, parseProductPriceInput } from "@/lib/product-price-input";
+import { scheduleProductPriceAutoAdvance } from "@/lib/product-price-auto-advance";
 
 type EditPriceField = "price" | "pixPrice" | "cardPrice" | "resellerPrice" | "pricePerM2" | "pixPricePerM2" | "cardPricePerM2" | "resellerPricePerM2";
+const DEFAULT_BRL_PRICE = "0,00";
+
+function toBrazilianEditPrice(value: unknown): string {
+  const formatted = formatProductPriceInput(String(value ?? ""));
+  return formatted || DEFAULT_BRL_PRICE;
+}
 
 export default function AdminProducts() {
   const [location, navigate] = useLocation();
@@ -193,7 +200,7 @@ export default function AdminProducts() {
 
   const finalizeEditPrice = useCallback((field: EditPriceField, syncBasePrice = false) => {
     setEditForm((prev) => {
-      const formatted = formatProductPriceInput(prev[field]);
+      const formatted = toBrazilianEditPrice(prev[field]);
       if (formatted === prev[field]) return prev;
       return {
         ...prev,
@@ -237,19 +244,19 @@ export default function AdminProducts() {
       ...prev,
       name: product.name,
       description: product.description || "",
-      price: formatProductPriceInput(product.price.toString()),
-      pixPrice: formatProductPriceInput(product.pixPrice ? product.pixPrice.toString() : product.price.toString()),
-      cardPrice: formatProductPriceInput(product.cardPrice ? product.cardPrice.toString() : product.price.toString()),
-      resellerPrice: product.resellerPrice ? formatProductPriceInput(product.resellerPrice.toString()) : "",
+      price: toBrazilianEditPrice(product.price),
+      pixPrice: toBrazilianEditPrice(product.pixPrice ?? product.price),
+      cardPrice: toBrazilianEditPrice(product.cardPrice ?? product.price),
+      resellerPrice: toBrazilianEditPrice(product.resellerPrice),
       imageUrl: product.imageUrl || "",
       imageKey: product.imageKey || "",
       galleryUrls: parsedGallery,
       segment: product.segment || "geral",
       calculationType: product.calculationType || "unidade",
-      pricePerM2: product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : "",
-      pixPricePerM2: product.pixPricePerM2 ? formatProductPriceInput(product.pixPricePerM2.toString()) : (product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : ""),
-      cardPricePerM2: product.cardPricePerM2 ? formatProductPriceInput(product.cardPricePerM2.toString()) : (product.pricePerM2 ? formatProductPriceInput(product.pricePerM2.toString()) : ""),
-      resellerPricePerM2: product.resellerPricePerM2 ? formatProductPriceInput(product.resellerPricePerM2.toString()) : "",
+      pricePerM2: toBrazilianEditPrice(product.pricePerM2),
+      pixPricePerM2: toBrazilianEditPrice(product.pixPricePerM2 ?? product.pricePerM2),
+      cardPricePerM2: toBrazilianEditPrice(product.cardPricePerM2 ?? product.pricePerM2),
+      resellerPricePerM2: toBrazilianEditPrice(product.resellerPricePerM2),
       minWidth: product.minWidth ? product.minWidth.toString() : "",
       maxWidth: product.maxWidth ? product.maxWidth.toString() : "",
       minHeight: product.minHeight ? product.minHeight.toString() : "",
@@ -305,9 +312,9 @@ export default function AdminProducts() {
     const measureBased = isMeasureBased(calculationType);
     setQuickEditingId(product.id);
     setQuickCalculationType(calculationType);
-    setQuickPixPrice(formatProductPriceInput(String(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 ?? "" : product.pixPrice ?? product.price ?? "")));
-    setQuickCardPrice(formatProductPriceInput(String(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 ?? "" : product.cardPrice ?? product.price ?? "")));
-    setQuickResellerPrice(formatProductPriceInput(String(measureBased ? product.resellerPricePerM2 ?? "" : product.resellerPrice ?? "")));
+    setQuickPixPrice(toBrazilianEditPrice(measureBased ? product.pixPricePerM2 ?? product.pricePerM2 : product.pixPrice ?? product.price));
+    setQuickCardPrice(toBrazilianEditPrice(measureBased ? product.cardPricePerM2 ?? product.pricePerM2 : product.cardPrice ?? product.price));
+    setQuickResellerPrice(toBrazilianEditPrice(measureBased ? product.resellerPricePerM2 : product.resellerPrice));
   };
 
   const toggleQuickEdit = (product: any) => {
@@ -325,7 +332,8 @@ export default function AdminProducts() {
     const normalizedResellerPrice = normalizePrice(quickResellerPrice);
     const numericPixPrice = Number.parseFloat(normalizedPixPrice);
     const numericCardPrice = Number.parseFloat(normalizedCardPrice);
-    const numericResellerPrice = normalizedResellerPrice ? Number.parseFloat(normalizedResellerPrice) : null;
+    const numericResellerPrice = normalizedResellerPrice ? Number.parseFloat(normalizedResellerPrice) : 0;
+    const hasResellerPrice = Number.isFinite(numericResellerPrice) && numericResellerPrice > 0;
 
     if (!Number.isFinite(numericPixPrice) || numericPixPrice <= 0) {
       toast.error("Informe um preço via Pix maior que R$ 0,00");
@@ -335,7 +343,7 @@ export default function AdminProducts() {
       toast.error("Informe um preço via cartão maior que R$ 0,00");
       return;
     }
-    if (numericResellerPrice !== null && (!Number.isFinite(numericResellerPrice) || numericResellerPrice <= 0)) {
+    if (!Number.isFinite(numericResellerPrice) || numericResellerPrice < 0) {
       toast.error("O preço revendedor deve ser maior que R$ 0,00 ou ficar em branco");
       return;
     }
@@ -349,14 +357,14 @@ export default function AdminProducts() {
         price: measureBased ? String(product.price ?? "0") : normalizedPixPrice,
         pixPrice: measureBased ? String(product.pixPrice ?? product.price ?? "0") : normalizedPixPrice,
         cardPrice: measureBased ? String(product.cardPrice ?? product.price ?? "0") : normalizedCardPrice,
-        resellerPrice: measureBased ? undefined : normalizedResellerPrice,
+        resellerPrice: measureBased ? undefined : (hasResellerPrice ? normalizedResellerPrice : ""),
         segment: product.segment || "geral",
         imageUrl: product.imageUrl || undefined,
         calculationType: quickCalculationType as "m2" | "metro_linear" | "pacote" | "unidade",
         pricePerM2: measureBased ? normalizedPixPrice : undefined,
         pixPricePerM2: measureBased ? normalizedPixPrice : undefined,
         cardPricePerM2: measureBased ? normalizedCardPrice : undefined,
-        resellerPricePerM2: measureBased ? normalizedResellerPrice : undefined,
+        resellerPricePerM2: measureBased ? (hasResellerPrice ? normalizedResellerPrice : "") : undefined,
       });
       await utils.products.getAll.invalidate();
       setQuickEditingId(null);
@@ -862,11 +870,11 @@ export default function AdminProducts() {
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.details}>
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.name}>
                               <Label htmlFor="edit-name">Nome</Label>
-                              <Input id="edit-name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                              <Input id="edit-name" value={editForm.name} onChange={(e) => { setEditForm({ ...editForm, name: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                             </div>
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.description}>
                               <Label htmlFor="edit-description">Descrição</Label>
-                              <Textarea id="edit-description" rows={2} className="min-h-[68px]" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+                              <Textarea id="edit-description" rows={2} className="min-h-[68px]" value={editForm.description} onChange={(e) => { setEditForm({ ...editForm, description: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                             </div>
                             {/* Tipo de Cobrança — sempre primeiro */}
                             <div className={EDIT_PRODUCT_MODAL_LAYOUT.calculation}>
@@ -890,19 +898,19 @@ export default function AdminProducts() {
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-pixPrice">Preço via Pix (R$)</Label>
-                                <Input id="edit-pixPrice" type="text" inputMode="decimal" value={(editForm as any).pixPrice} onChange={(e) => setEditForm({ ...editForm, pixPrice: e.target.value, price: e.target.value } as any)} onBlur={() => finalizeEditPrice("pixPrice", true)} placeholder="0,00" />
+                                <Input id="edit-pixPrice" type="text" inputMode="decimal" value={(editForm as any).pixPrice} onChange={(e) => { setEditForm({ ...editForm, pixPrice: e.target.value, price: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("pixPrice", true)} placeholder="0,00" />
                               </div>
                             )}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-cardPrice">Preço via Cartão (R$)</Label>
-                                <Input id="edit-cardPrice" type="text" inputMode="decimal" value={(editForm as any).cardPrice} onChange={(e) => setEditForm({ ...editForm, cardPrice: e.target.value } as any)} onBlur={() => finalizeEditPrice("cardPrice")} placeholder="0,00" />
+                                <Input id="edit-cardPrice" type="text" inputMode="decimal" value={(editForm as any).cardPrice} onChange={(e) => { setEditForm({ ...editForm, cardPrice: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("cardPrice")} placeholder="0,00" />
                               </div>
                             )}
                             {((editForm as any).calculationType === "unidade" || (editForm as any).calculationType === "pacote") && (
                               <div className={EDIT_PRODUCT_MODAL_LAYOUT.price}>
                                 <Label htmlFor="edit-resellerPrice">Preço Revendedor (R$)</Label>
-                                <Input id="edit-resellerPrice" type="text" inputMode="decimal" value={(editForm as any).resellerPrice || ""} onChange={(e) => setEditForm({ ...editForm, resellerPrice: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPrice")} placeholder="Opcional" />
+                                <Input id="edit-resellerPrice" type="text" inputMode="decimal" value={(editForm as any).resellerPrice || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, resellerPrice: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("resellerPrice")} placeholder="0,00" />
                               </div>
                             )}
                               </div>
@@ -913,36 +921,36 @@ export default function AdminProducts() {
                                 <Label htmlFor="edit-pixPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Pix por Metro Linear (R$)" : "Preço via Pix por m² (R$)"}
                                 </Label>
-                                <Input id="edit-pixPricePerM2" type="text" inputMode="decimal" value={(editForm as any).pixPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("pixPricePerM2")} placeholder="0,00" />
+                                <Input id="edit-pixPricePerM2" type="text" inputMode="decimal" value={(editForm as any).pixPricePerM2 || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, pixPricePerM2: e.target.value, pricePerM2: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("pixPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-cardPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço via Cartão por Metro Linear (R$)" : "Preço via Cartão por m² (R$)"}
                                 </Label>
-                                <Input id="edit-cardPricePerM2" type="text" inputMode="decimal" value={(editForm as any).cardPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("cardPricePerM2")} placeholder="0,00" />
+                                <Input id="edit-cardPricePerM2" type="text" inputMode="decimal" value={(editForm as any).cardPricePerM2 || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, cardPricePerM2: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("cardPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="sm:col-span-1 xl:col-span-2">
                                 <Label htmlFor="edit-resellerPricePerM2">
                                   {(editForm as any).calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
                                 </Label>
-                                <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || ""} onChange={(e) => setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any)} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="Opcional" />
+                                <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                                 <div>
                                   <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
-                                  <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => setEditForm({ ...editForm, minWidth: e.target.value } as any)} />
+                                  <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => { setEditForm({ ...editForm, minWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                                 </div>
                                 <div>
                                   <Label htmlFor="edit-maxWidth">Largura Máx (m)</Label>
-                                  <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => setEditForm({ ...editForm, maxWidth: e.target.value } as any)} />
+                                  <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => { setEditForm({ ...editForm, maxWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                                 </div>
                                 <div>
                                   <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
-                                  <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => setEditForm({ ...editForm, minHeight: e.target.value } as any)} />
+                                  <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => { setEditForm({ ...editForm, minHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                                 </div>
                                 <div>
                                   <Label htmlFor="edit-maxHeight">Altura Máx (m)</Label>
-                                  <Input id="edit-maxHeight" type="number" step="0.01" value={(editForm as any).maxHeight || ""} onChange={(e) => setEditForm({ ...editForm, maxHeight: e.target.value } as any)} />
+                                  <Input id="edit-maxHeight" type="number" step="0.01" value={(editForm as any).maxHeight || ""} onChange={(e) => { setEditForm({ ...editForm, maxHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                                 </div>
                               </div>
                             </div>
@@ -1033,7 +1041,7 @@ export default function AdminProducts() {
                                   <Input
                                     id="edit-card-description-line-1"
                                     value={getCardDescriptionLines((editForm as any).cardDescription)[0]}
-                                    onChange={(event) => setEditForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine((prev as any).cardDescription, 0, event.target.value) } as any))}
+                                    onChange={(event) => { setEditForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine((prev as any).cardDescription, 0, event.target.value) } as any)); scheduleProductPriceAutoAdvance(event.currentTarget); }}
                                     placeholder="Ex.: Produção no mesmo dia"
                                     maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
                                   />
@@ -1043,7 +1051,7 @@ export default function AdminProducts() {
                                   <Input
                                     id="edit-card-description-line-2"
                                     value={getCardDescriptionLines((editForm as any).cardDescription)[1]}
-                                    onChange={(event) => setEditForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine((prev as any).cardDescription, 1, event.target.value) } as any))}
+                                    onChange={(event) => { setEditForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine((prev as any).cardDescription, 1, event.target.value) } as any)); scheduleProductPriceAutoAdvance(event.currentTarget); }}
                                     placeholder="Ex.: Taxa de urgência de R$ 20,00/m²"
                                     maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
                                   />
@@ -1099,6 +1107,7 @@ export default function AdminProducts() {
                                     const updated = [...((editForm as any).specifications || [])];
                                     updated[idx] = { ...updated[idx], label: e.target.value, value: "" };
                                     setEditForm((prev) => ({ ...prev, specifications: updated } as any));
+                                    scheduleProductPriceAutoAdvance(e.currentTarget);
                                   }}
                                   className="flex-1"
                                 />
@@ -1163,8 +1172,8 @@ export default function AdminProducts() {
                           inputMode="decimal"
                           id={`quick-pix-${product.id}`}
                           value={quickPixPrice}
-                          onChange={(event) => setQuickPixPrice(event.target.value)}
-                          onBlur={() => setQuickPixPrice(formatProductPriceInput(quickPixPrice))}
+                          onChange={(event) => { setQuickPixPrice(event.target.value); scheduleProductPriceAutoAdvance(event.currentTarget); }}
+                          onBlur={() => setQuickPixPrice(toBrazilianEditPrice(quickPixPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
@@ -1185,8 +1194,8 @@ export default function AdminProducts() {
                           inputMode="decimal"
                           id={`quick-card-${product.id}`}
                           value={quickCardPrice}
-                          onChange={(event) => setQuickCardPrice(event.target.value)}
-                          onBlur={() => setQuickCardPrice(formatProductPriceInput(quickCardPrice))}
+                          onChange={(event) => { setQuickCardPrice(event.target.value); scheduleProductPriceAutoAdvance(event.currentTarget); }}
+                          onBlur={() => setQuickCardPrice(toBrazilianEditPrice(quickCardPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
@@ -1207,13 +1216,13 @@ export default function AdminProducts() {
                           inputMode="decimal"
                           id={`quick-reseller-${product.id}`}
                           value={quickResellerPrice}
-                          onChange={(event) => setQuickResellerPrice(event.target.value)}
-                          onBlur={() => setQuickResellerPrice(formatProductPriceInput(quickResellerPrice))}
+                          onChange={(event) => { setQuickResellerPrice(event.target.value); scheduleProductPriceAutoAdvance(event.currentTarget); }}
+                          onBlur={() => setQuickResellerPrice(toBrazilianEditPrice(quickResellerPrice))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") handleQuickPricingSave(product);
                           }}
                           className="mt-1 bg-white"
-                          placeholder="Opcional"
+                          placeholder="0,00"
                         />
                       </div>
                       <div className="flex gap-2 md:col-span-4 md:justify-end">
