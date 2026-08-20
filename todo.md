@@ -3721,3 +3721,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o botão Adicionar novo item dos itens personalizados
 - [x] Criar e expandir o novo item sem perder os itens existentes
 - [x] Validar o fluxo e salvar checkpoint publicável
+
+- [x] Aumentar somente a logo do cabeçalho da Ordem de Serviço
+- [x] Reposicionar a logo para baixo junto ao final do CNPJ
+- [x] Validar o cabeçalho e salvar checkpoint publicável
