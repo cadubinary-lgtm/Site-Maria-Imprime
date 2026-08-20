@@ -3767,3 +3767,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o avanço de 800 ms nos campos UNIT. visíveis de Produtos/Serviços e Itens personalizados
 - [x] Aplicar o mesmo avanço aos demais campos monetários editáveis do orçamento
 - [x] Validar funcionalmente a temporização antes de salvar um novo checkpoint
+
+- [x] Aplicar avanço automático de 800 ms à QTD de Produtos/Serviços e Itens personalizados
+- [x] Preservar a digitação de quantidades com mais de um dígito
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
