@@ -3879,3 +3879,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o bloco Ambiente protegido e reorganizar Formas de pagamento e Segurança e proteção no rodapé
 - [x] Atualizar regressão, validar responsividade e salvar checkpoint da reorganização do rodapé
+
+- [x] Verificar o envio do pedido PD-1787248838379-660 e o critério de entrada na Expedição
+- [x] Orientar ou corrigir o bloqueio de Expedição identificado sem emitir etiqueta sem confirmação
+
+- [x] Corrigir a etapa visual de Pronto para Entrega na linha de acompanhamento do pedido
+- [x] Criar regressão, validar TypeScript e salvar checkpoint da correção do acompanhamento
