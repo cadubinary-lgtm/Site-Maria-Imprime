@@ -1293,7 +1293,10 @@ export default function ProductDetail() {
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500 mb-1.5 block">Altura (metros)</Label>
+                      <Label className="text-xs text-gray-500 mb-1.5 block">
+                        <span>Altura</span>
+                        <span className="block md:inline"> (metros)</span>
+                      </Label>
                       <Input
                         type="number"
                         placeholder="0,00"

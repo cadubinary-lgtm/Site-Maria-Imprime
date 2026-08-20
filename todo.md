@@ -3906,3 +3906,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Exibir dois produtos por linha na tela de produtos do catálogo mobile
 - [x] Criar regressão e validar visualmente a grade de dois produtos no celular — visualização em 390 px confirmou dois cards por linha no segmento Lonas
+
+- [x] Exibir a unidade metros abaixo do título Altura no configurador mobile, alinhando os campos de medidas pela base
+- [x] Criar regressão e validar visualmente o alinhamento de Largura e Altura no celular
+- [x] Abrir a etapa Medidas (metros) no configurador e confirmar que o texto desktop permanece em uma única linha
