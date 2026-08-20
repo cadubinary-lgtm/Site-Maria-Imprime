@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request as ExpressRequest, Response as ExpressResponse } from "express";
+import { resolveInsertedProductId } from "./product-insert-result";
 
 /** Lê um cookie diretamente do header Cookie da requisição (sem cookie-parser) */
 function getCookieFromReq(req: ExpressRequest, name: string): string | undefined {
@@ -349,7 +350,7 @@ export const appRouter = router({
             isActive: true,
           } as any);
           
-          const newProductId = (result as any).insertId;
+          const newProductId = resolveInsertedProductId(result);
           const testProduct = await getProductByName('MODELO - Não Excluir');
           if (testProduct && testProduct.id) {
             try {
@@ -359,7 +360,7 @@ export const appRouter = router({
             }
           }
           
-          return { success: true, message: 'Produto criado com sucesso', id: newProductId as number };
+          return { success: true, message: 'Produto criado com sucesso', id: newProductId };
         } catch (error) {
           console.error('Error creating product:', error);
           throw new Error(`Erro ao criar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
