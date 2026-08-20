@@ -17,6 +17,17 @@ describe("cabeçalho do orçamento", () => {
     expect(formSource).toContain("responsibleName: responsibleName.trim()");
   });
 
+  it("mantém o campo de responsável visível no card de cliente antes dos produtos", () => {
+    const clientSection = formSource.indexOf("{/* Seção: Cliente */}");
+    const responsibleField = formSource.indexOf('id="quotation-responsible-name"');
+    const productsSection = formSource.indexOf("{/* Seção: Produtos */}");
+
+    expect(clientSection).toBeGreaterThan(-1);
+    expect(responsibleField).toBeGreaterThan(clientSection);
+    expect(responsibleField).toBeLessThan(productsSection);
+    expect(formSource).toContain("Nome que será exibido neste orçamento e na impressão.");
+  });
+
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
     expect(detailSource).toContain("const companyAddress = formatCompanyAddress(company);");
     expect(detailSource).toContain("CNPJ: ${company.cnpj}");

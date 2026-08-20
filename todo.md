@@ -3734,3 +3734,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o nome duplicado antes do CNPJ e usar o ícone oficial do WhatsApp no contato do orçamento
 - [x] Permitir informar e exibir o responsável emissor do orçamento na tela e na impressão
 - [x] Criar regressão, validar o cabeçalho do orçamento e salvar checkpoint publicável
+
+- [x] Reposicionar o campo Responsável pela emissão em área visível do Novo Orçamento
+- [x] Atualizar regressão de visibilidade, validar e salvar checkpoint publicável
