@@ -3830,3 +3830,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Unificar a identidade Manus autenticada com o layout administrativo do ambiente interno
 - [x] Restaurar os controles reversíveis de administrador no preview, mantendo ações permanentes protegidas
+
+- [x] Criar uma habilidade reutilizável para diagnosticar e sincronizar paridade entre ambiente interno e site oficial
+- [x] Validar a estrutura da habilidade e entregá-la para reutilização
+
+- [x] Comparar identidade, permissões e controles da Linha de Produção entre o site oficial e o ambiente interno
+- [x] Sincronizar os controles administrativos do ambiente interno sem alterar o fluxo de produção
+- [x] Criar regressões, validar a paridade funcional e salvar checkpoint publicável

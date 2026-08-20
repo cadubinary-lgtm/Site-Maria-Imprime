@@ -22,8 +22,22 @@ import {
 // Alias para compatibilidade interna
 const logAudit = logAuditAction;
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { ENV } from "./_core/env";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function resolveManusAdminUser(ctx: any) {
+  const manusUser = ctx.user;
+  if (!manusUser || (manusUser.role !== "admin" && manusUser.role !== "superadmin")) return null;
+
+  const isProjectOwner = Boolean(ENV.ownerOpenId) && manusUser.openId === ENV.ownerOpenId;
+  return {
+    adminId: manusUser.id,
+    name: manusUser.name || "Admin",
+    email: manusUser.email || "",
+    role: isProjectOwner ? "superadmin" : manusUser.role,
+  };
+}
 
 /**
  * Procedure que requer autenticação admin própria (não Manus OAuth)
@@ -51,15 +65,8 @@ export const adminOrManusAuthProcedure = publicProcedure.use(async ({ ctx, next 
   }
 
   // Tentar autenticação Manus OAuth
-  const manusUser = (ctx as any).user;
-  if (manusUser && (manusUser.role === "admin" || manusUser.role === "superadmin")) {
-    // Criar um objeto adminUser compatível para Manus OAuth
-    const adminUserFromManus = {
-      adminId: manusUser.id,
-      name: manusUser.name || "Admin",
-      email: manusUser.email || "",
-      role: manusUser.role || "admin",
-    };
+  const adminUserFromManus = resolveManusAdminUser(ctx);
+  if (adminUserFromManus) {
     return next({ ctx: { ...ctx, adminUser: adminUserFromManus, authType: "manus" } });
   }
 
@@ -144,7 +151,17 @@ export const adminAuthRouter = router({
    */
   me: publicProcedure.query(async ({ ctx }) => {
     const adminUser = await authenticateAdminRequest(ctx.req);
-    if (!adminUser) return null;
+    if (!adminUser) {
+      const manusAdminUser = resolveManusAdminUser(ctx);
+      if (!manusAdminUser) return null;
+      return {
+        id: manusAdminUser.adminId,
+        name: manusAdminUser.name,
+        email: manusAdminUser.email,
+        role: manusAdminUser.role,
+        lastLogin: null,
+      };
+    }
     // Buscar dados completos do banco para incluir lastLogin
     const db = (await getDb())!;
     const adminRow = await (db as any).query.adminAccounts.findFirst({
