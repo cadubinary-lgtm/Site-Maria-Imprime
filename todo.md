@@ -3799,3 +3799,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Auditar todos os campos editáveis do Novo Produto e seus componentes auxiliares quanto ao avanço de 1000 ms
 - [x] Aplicar o avanço automático de 1000 ms aos campos remanescentes identificados
 - [x] Ampliar as regressões, validar TypeScript e salvar checkpoint publicável
+
+- [x] Auditar todos os campos monetários e editáveis da página Editar Produto
+- [x] Padronizar os valores monetários de Editar Produto em moeda brasileira com duas casas e avanço de 1000 ms
+- [x] Correção de escopo: não alterar a página Editar Pedido, conforme orientação do usuário
+- [x] Preservar o salvamento automático já existente em Editar Produto durante a padronização
+- [x] Atualizar regressões, validar TypeScript e salvar checkpoint publicável

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import { scheduleProductPriceAutoAdvance } from '@/lib/product-price-auto-advance';
 
 interface ProductLogisticsTabProps {
   productId: number;
@@ -101,7 +102,7 @@ export function ProductLogisticsTab({ productId }: ProductLogisticsTabProps) {
                 step="0.01"
                 placeholder="Ex: 0.5"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => { setWeight(e.target.value); scheduleProductPriceAutoAdvance(e.currentTarget); }}
               />
             </div>
             <div>
@@ -112,7 +113,7 @@ export function ProductLogisticsTab({ productId }: ProductLogisticsTabProps) {
                 step="0.1"
                 placeholder="Ex: 20"
                 value={width}
-                onChange={(e) => setWidth(e.target.value)}
+                onChange={(e) => { setWidth(e.target.value); scheduleProductPriceAutoAdvance(e.currentTarget); }}
               />
             </div>
           </div>
@@ -125,7 +126,7 @@ export function ProductLogisticsTab({ productId }: ProductLogisticsTabProps) {
                 step="0.1"
                 placeholder="Ex: 30"
                 value={height}
-                onChange={(e) => setHeight(e.target.value)}
+                onChange={(e) => { setHeight(e.target.value); scheduleProductPriceAutoAdvance(e.currentTarget); }}
               />
             </div>
             <div>
@@ -136,7 +137,7 @@ export function ProductLogisticsTab({ productId }: ProductLogisticsTabProps) {
                 step="0.1"
                 placeholder="Ex: 10"
                 value={length}
-                onChange={(e) => setLength(e.target.value)}
+                onChange={(e) => { setLength(e.target.value); scheduleProductPriceAutoAdvance(e.currentTarget); }}
               />
             </div>
           </div>
