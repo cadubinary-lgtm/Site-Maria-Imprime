@@ -12,7 +12,8 @@ describe("badges da linha de produção", () => {
     expect(source).toContain('label: "Liberado para Análise", href: "/admin/pre-impressao?status=liberado_analise", badge: prepressIndicators?.liberadoParaAnalise || undefined');
     expect(source).toContain('label: "Arte Final Aprovada", href: "/admin/pre-impressao?status=arte_final_aprovada", badge: prepressIndicators?.arteFinalAprovada || undefined');
     expect(source).not.toContain('label: "Pré-Impressão",\n            badge:');
-    expect(source).toContain('label: "Status de Produção",\n            badge: menuIndicators.inProduction || undefined');
+    expect(source).toContain('label: "Status de Produção",\n            children:');
+    expect(source).not.toContain('label: "Status de Produção",\n            badge:');
     expect(source).toContain('{ ...ADMIN_DASHBOARD_LINKS.production, icon: <LayoutDashboard className="w-4 h-4" /> },');
   });
 
