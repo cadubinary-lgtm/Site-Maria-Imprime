@@ -3864,3 +3864,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover todos os registros financeiros vinculados quando um pedido for excluído permanentemente
 - [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da remoção financeira em cascata
 - [x] Preservar layout, menus, rotas e permissões durante a remoção financeira em cascata
+
+- [x] Excluir permanentemente todos os pedidos presentes na lixeira de Todos os Pedidos e seus vínculos
+- [x] Verificar lixeira e subitens financeiros após a exclusão e salvar checkpoint da operação solicitada
