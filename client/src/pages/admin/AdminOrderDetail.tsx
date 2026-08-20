@@ -86,7 +86,7 @@ function getAdminStatusSteps(order: any) {
   ];
   return isPickup
     ? [...base, { key: "pronto_retirada" }, { key: "entregue" }]
-    : [...base, { key: "saiu_entrega" }, { key: "em_transporte" }, { key: "entregue" }];
+    : [...base, { key: "pronto_entrega" }, { key: "saiu_entrega" }, { key: "em_transporte" }, { key: "entregue" }];
 }
 
 const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
