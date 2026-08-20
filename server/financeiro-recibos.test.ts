@@ -74,4 +74,15 @@ describe("central financeira de recibos", () => {
     expect(receiptHub).toContain('import { FaWhatsapp } from "react-icons/fa"');
     expect(receiptHub).toContain("<FaWhatsapp");
   });
+
+  it("reúne imprimir, PDF, WhatsApp e e-mail em ícones acessíveis no cabeçalho do recibo", () => {
+    expect(receiptPrint).toContain('aria-label="Ações do recibo"');
+    expect(receiptPrint).toContain('aria-label="Imprimir recibo"');
+    expect(receiptPrint).toContain('aria-label="Baixar recibo em PDF"');
+    expect(receiptPrint).toContain('aria-label="Preparar recibo no WhatsApp"');
+    expect(receiptPrint).toContain('aria-label="Enviar recibo por e-mail"');
+    expect(receiptPrint).toContain("exportReceiptPDF");
+    expect(receiptPrint).toContain("prepareReceiptWhatsApp");
+    expect(receiptPrint).toContain("sendReceiptEmail");
+  });
 });

@@ -3814,3 +3814,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar botão Receber no resumo financeiro com diálogo de confirmação de pagamento
 - [x] Vincular a confirmação da forma de pagamento ao status do pedido, contas a receber e recibo existente
 - [x] Criar regressões, validar TypeScript e salvar checkpoint publicável
+
+- [x] Mapear a lista de pedidos recebidos e as ações atuais no cabeçalho do recibo
+- [x] Adicionar atalho por ícone para abrir o recibo de cada pedido recebido
+- [x] Reunir imprimir, baixar PDF, WhatsApp e e-mail em ações de ícone no cabeçalho do recibo
+- [x] Criar regressões, validar TypeScript e salvar checkpoint publicável

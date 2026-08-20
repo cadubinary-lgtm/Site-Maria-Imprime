@@ -28,7 +28,7 @@ import {
   deletedReceivedAccounts,
   paymentReceipts,
 } from "../drizzle/schema";
-import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull } from "drizzle-orm";
+import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull, inArray } from "drizzle-orm";
 import { sendPaymentReceiptEmail } from "./emailService";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -309,11 +309,10 @@ export const financeiroRouter = router({
         .where(whereClause);
       const paginated = await db.select().from(orders)
         .where(whereClause)
-        .orderBy(desc(orders.createdAt))
+        .orderBy(desc(orders.updatedAt))
         .limit(input.limit)
         .offset(offset);
       const total = Number(summary?.total ?? 0);
-
       return {
         data: paginated.map(mapOrderToFinanceiro),
         total,
@@ -378,11 +377,25 @@ export const financeiroRouter = router({
         .orderBy(desc(orders.updatedAt))
         .limit(input.limit)
         .offset(offset);
+      const receiptRows = paginated.length > 0
+        ? await db.select({
+            orderId: paymentReceipts.orderId,
+            receiptId: paymentReceipts.id,
+            receiptNumber: paymentReceipts.receiptNumber,
+          })
+            .from(paymentReceipts)
+            .where(inArray(paymentReceipts.orderId, paginated.map((order) => order.id)))
+        : [];
+      const receiptByOrderId = new Map(receiptRows.map((receipt) => [receipt.orderId, receipt]));
       const total = Number(summary?.total ?? 0);
       const totalValor = Number(summary?.totalValor ?? 0);
 
       return {
-        data: paginated.map(mapOrderToFinanceiro),
+        data: paginated.map((order) => ({
+          ...mapOrderToFinanceiro(order),
+          receiptId: receiptByOrderId.get(order.id)?.receiptId ?? null,
+          receiptNumber: receiptByOrderId.get(order.id)?.receiptNumber ?? null,
+        })),
         total,
         totalValor,
         page: input.page,
