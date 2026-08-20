@@ -3737,3 +3737,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Reposicionar o campo Responsável pela emissão em área visível do Novo Orçamento
 - [x] Atualizar regressão de visibilidade, validar e salvar checkpoint publicável
+
+- [x] Adicionar a coluna UNIT. após QTD nos produtos e serviços do orçamento
+- [x] Corrigir Ajuste para definir o valor total desejado e recalcular o unitário proporcional
+- [x] Limitar o arredondamento do valor unitário para evitar excesso de casas decimais
+- [x] Criar regressão de cálculo, validar e salvar checkpoint publicável
