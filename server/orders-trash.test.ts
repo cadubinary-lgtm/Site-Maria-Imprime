@@ -35,4 +35,18 @@ describe("lixeira de Todos os Pedidos", () => {
     expect(source).toContain("ordersTrash.moveToTrash.useMutation");
     expect(source).toContain("ordersTrash.permanentlyDelete.useMutation");
   });
+
+  it("remove dependências de produção com segurança quando o armazenamento legado não está disponível", () => {
+    const source = readFileSync(routerPath, "utf8");
+    const cleanupStart = source.indexOf("async function deleteProductionDependenciesForOrder");
+    const cleanupEnd = source.indexOf("async function permanentlyDeleteOrder", cleanupStart);
+    const cleanupSource = source.slice(cleanupStart, cleanupEnd);
+
+    expect(source).toContain("function isUnavailableProductionStorage(error: unknown)");
+    expect(source).toContain('candidate?.code === "ER_NO_SUCH_TABLE"');
+    expect(cleanupSource).toContain("productionStatusHistory");
+    expect(cleanupSource).toContain("inArray(productionStatusHistory.productionJobId, productionJobIds)");
+    expect(cleanupSource.indexOf("db.delete(productionStatusHistory)")).toBeLessThan(cleanupSource.indexOf("db.delete(productionJobs)"));
+    expect(source).toContain("await deleteProductionDependenciesForOrder(db, orderId);");
+  });
 });
