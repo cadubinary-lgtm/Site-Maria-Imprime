@@ -263,7 +263,10 @@ export function DeliveryOptionsManager({
                 <label className="text-sm font-medium">Nome do Prazo</label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    scheduleProductPriceAutoAdvance(e.currentTarget);
+                  }}
                   placeholder="Ex: Prazo Normal, 24 Horas, Mesmo Dia"
                   className="mt-1"
                 />
@@ -273,9 +276,10 @@ export function DeliveryOptionsManager({
                 <Input
                   type="number"
                   value={formData.daysToDeliver}
-                  onChange={(e) =>
-                    setFormData({ ...formData, daysToDeliver: parseInt(e.target.value) || 0 })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, daysToDeliver: parseInt(e.target.value) || 0 });
+                    scheduleProductPriceAutoAdvance(e.currentTarget);
+                  }}
                   min="0"
                   className="mt-1"
                 />

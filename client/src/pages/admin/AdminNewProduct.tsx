@@ -523,7 +523,10 @@ export default function AdminNewProduct() {
                   <Input
                     id="create-name"
                     value={createForm.name}
-                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                    onChange={(e) => {
+                      setCreateForm({ ...createForm, name: e.target.value });
+                      scheduleProductPriceAutoAdvance(e.currentTarget);
+                    }}
                     placeholder="Ex: Adesivo Brilho"
                     required
                   />
@@ -534,7 +537,10 @@ export default function AdminNewProduct() {
                   <Textarea
                     id="create-description"
                     value={createForm.description}
-                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                    onChange={(e) => {
+                      setCreateForm({ ...createForm, description: e.target.value });
+                      scheduleProductPriceAutoAdvance(e.currentTarget);
+                    }}
                     placeholder="Descreva o produto"
                     rows={2}
                     className="min-h-[68px]"
@@ -613,19 +619,19 @@ export default function AdminNewProduct() {
                   <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
                     <div>
                       <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
-                      <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => setCreateForm({ ...createForm, minWidth: e.target.value })} placeholder="0.10" />
+                      <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => { setCreateForm({ ...createForm, minWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
                     </div>
                     <div>
                       <Label htmlFor="create-maxWidth">Largura Máxima (m)</Label>
-                      <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => setCreateForm({ ...createForm, maxWidth: e.target.value })} placeholder="5.00" />
+                      <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => { setCreateForm({ ...createForm, maxWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
                     </div>
                     <div>
                       <Label htmlFor="create-minHeight">Altura Mínima (m)</Label>
-                      <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => setCreateForm({ ...createForm, minHeight: e.target.value })} placeholder="0.10" />
+                      <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => { setCreateForm({ ...createForm, minHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
                     </div>
                     <div>
                       <Label htmlFor="create-maxHeight">Altura Máxima (m)</Label>
-                      <Input id="create-maxHeight" type="number" step="0.01" value={createForm.maxHeight} onChange={(e) => setCreateForm({ ...createForm, maxHeight: e.target.value })} placeholder="5.00" />
+                      <Input id="create-maxHeight" type="number" step="0.01" value={createForm.maxHeight} onChange={(e) => { setCreateForm({ ...createForm, maxHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
                     </div>
                   </div>
                 </div>
@@ -728,7 +734,10 @@ export default function AdminNewProduct() {
                           <Input
                             id="create-card-description-line-1"
                             value={getCardDescriptionLines(createForm.cardDescription)[0]}
-                            onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 0, event.target.value) }))}
+                            onChange={(event) => {
+                              setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 0, event.target.value) }));
+                              scheduleProductPriceAutoAdvance(event.currentTarget);
+                            }}
                             placeholder="Ex.: Produção no mesmo dia"
                             maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
                           />
@@ -738,7 +747,10 @@ export default function AdminNewProduct() {
                           <Input
                             id="create-card-description-line-2"
                             value={getCardDescriptionLines(createForm.cardDescription)[1]}
-                            onChange={(event) => setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 1, event.target.value) }))}
+                            onChange={(event) => {
+                              setCreateForm((prev) => ({ ...prev, cardDescription: updateCardDescriptionLine(prev.cardDescription, 1, event.target.value) }));
+                              scheduleProductPriceAutoAdvance(event.currentTarget);
+                            }}
                             placeholder="Ex.: Taxa de urgência de R$ 20,00/m²"
                             maxLength={PRODUCT_CARD_DESCRIPTION_LINE_MAX_LENGTH}
                           />
@@ -842,6 +854,7 @@ export default function AdminNewProduct() {
                         const updated = [...createForm.specifications];
                         updated[idx] = { ...updated[idx], label: e.target.value, value: "" };
                         setCreateForm((prev) => ({ ...prev, specifications: updated }));
+                        scheduleProductPriceAutoAdvance(e.currentTarget);
                       }}
                       className="flex-1"
                     />

@@ -34,7 +34,16 @@ describe("cadastro administrativo de produtos", () => {
   it("padroniza os campos monetários em moeda brasileira e avanço de 1000 ms", () => {
     expect(source).toContain('const DEFAULT_BRL_PRICE = "0,00";');
     expect(source).toContain('toBrazilianPriceInput');
-    expect(source.match(/scheduleProductPriceAutoAdvance/g)?.length).toBeGreaterThanOrEqual(11);
+    expect(source.match(/scheduleProductPriceAutoAdvance/g)?.length).toBeGreaterThanOrEqual(20);
+    expect(source).toContain('id="create-name"');
+    expect(source).toContain('id="create-description"');
+    expect(source).toContain('id="create-minWidth"');
+    expect(source).toContain('id="create-maxWidth"');
+    expect(source).toContain('id="create-minHeight"');
+    expect(source).toContain('id="create-maxHeight"');
+    expect(source).toContain('id="create-card-description-line-1"');
+    expect(source).toContain('id="create-card-description-line-2"');
+    expect(source).toContain('placeholder="Ex: Lona 440g impermeável, costura dupla, ilhós a cada 50cm..."');
     expect(source).toContain('id="create-weight"');
     expect(source).toContain('id="create-log-width"');
     expect(source).toContain('id="create-log-height"');
