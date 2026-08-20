@@ -15,7 +15,7 @@ import { z } from "zod";
 import { getDb } from "./db";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { logisticsSettings, carriers, shipments, orders, localDeliveryRules, customerAccounts, orderItems } from "../drizzle/schema";
-import { eq, and, like, or } from "drizzle-orm";
+import { eq, and, like, or, getTableColumns } from "drizzle-orm";
 import {
   getMeProfile,
   listShipmentCompanies,
@@ -567,8 +567,12 @@ const shipmentsRouter = router({
     .query(async ({ input }) => {
       const db = await requireDb();
       return db
-        .select()
+        .select({
+          ...getTableColumns(shipments),
+          orderNumber: orders.orderNumber,
+        })
         .from(shipments)
+        .leftJoin(orders, eq(shipments.orderId, orders.id))
         .orderBy(shipments.createdAt)
         .limit(input.pageSize)
         .offset((input.page - 1) * input.pageSize);
