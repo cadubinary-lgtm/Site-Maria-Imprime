@@ -3809,3 +3809,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Auditar todos os componentes internos carregados por Editar Produto quanto a campos de digitação sem avanço de 1000 ms
 - [x] Aplicar o avanço automático de 1000 ms aos campos internos remanescentes identificados
 - [x] Ampliar regressões, validar TypeScript e salvar checkpoint publicável
+
+- [x] Mapear o resumo financeiro do pedido, a confirmação de pagamento e o Gerenciador Financeiro existentes
+- [x] Adicionar botão Receber no resumo financeiro com diálogo de confirmação de pagamento
+- [x] Vincular a confirmação da forma de pagamento ao status do pedido, contas a receber e recibo existente
+- [x] Criar regressões, validar TypeScript e salvar checkpoint publicável
