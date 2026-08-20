@@ -528,6 +528,7 @@ function PreImpressaoColumn({
     onSuccess: () => {
       toast.success("Pré-impressão atualizada!");
       utils.checkout.getOrderById.invalidate({ id: orderId });
+      utils.admin.getPrepressMenuIndicators.invalidate();
     },
     onError: () => toast.error("Erro ao atualizar pré-impressão"),
   });
@@ -537,6 +538,7 @@ function PreImpressaoColumn({
       toast.success("▶ Item enviado para produção!");
       utils.checkout.getOrderById.invalidate({ id: orderId });
       utils.checkout.getOrderItemLogs.invalidate({ orderItemId });
+      utils.admin.getPrepressMenuIndicators.invalidate();
       // Colapsa automaticamente o card deste item após aprovar
       onCollapseItem?.();
     },
@@ -1079,6 +1081,7 @@ export function OrderDetailContent({
       utils.checkout.getOrderHistory.invalidate({ orderId: orderId! });
       utils.checkout.getAllOrders.invalidate();
       utils.admin.getAllOrders.invalidate();
+      utils.admin.getPrepressMenuIndicators.invalidate();
     },
   });
 

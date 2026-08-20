@@ -367,6 +367,37 @@ export const appRouter = router({
         }
       }),
     getAllOrders: adminAnyProcedure.query(() => getAllOrders()),
+    getPrepressMenuIndicators: adminAnyProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+      const itemRows = await db
+        .select({
+          orderStatus: orders.status,
+          preProductionStatus: orderItems.preProductionStatus,
+        })
+        .from(orderItems)
+        .innerJoin(orders, eq(orderItems.orderId, orders.id));
+
+      const completedOrderStatuses = new Set([
+        "em_producao",
+        "pronto_entrega",
+        "pronto_retirada",
+        "saiu_entrega",
+        "em_transporte",
+        "entregue",
+        "cancelado",
+      ]);
+      const activePrepressItems = itemRows.filter((item) =>
+        !completedOrderStatuses.has(item.orderStatus ?? "")
+        && item.preProductionStatus !== "em_producao"
+      );
+
+      return {
+        liberadoParaAnalise: activePrepressItems.filter((item) => item.preProductionStatus === "liberado_analise").length,
+        arteFinalAprovada: activePrepressItems.filter((item) => item.preProductionStatus === "arte_final_aprovada").length,
+      };
+    }),
     getOrderWithItems: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ input }) => {
