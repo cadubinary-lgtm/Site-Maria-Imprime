@@ -158,6 +158,7 @@ export default function ProductDetail() {
 
   // Acordeão
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({ 0: true });
+  const [isMobileProductInfoOpen, setIsMobileProductInfoOpen] = useState(false);
 
   // Frete dinâmico
   const [cep, setCep] = useState("");
@@ -1059,7 +1060,20 @@ export default function ProductDetail() {
               <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
                 <Star className="w-3 h-3 fill-orange-500" /> Mais vendido
               </span>
-              <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
+              <div className="flex items-center justify-between gap-3">
+                <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileProductInfoOpen((open) => !open)}
+                  className="rounded-lg p-1 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 lg:hidden"
+                  aria-expanded={isMobileProductInfoOpen}
+                  aria-controls="product-mobile-information"
+                  aria-label={isMobileProductInfoOpen ? "Fechar informações do produto" : "Expandir informações do produto"}
+                >
+                  {isMobileProductInfoOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </button>
+              </div>
+              <div id="product-mobile-information" className={`space-y-3 ${isMobileProductInfoOpen ? "block" : "hidden"} lg:block`}>
               {productRating && (
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <div className="flex items-center gap-0.5 flex-shrink-0" aria-label={`${productRating.rating} de 5 estrelas`}>
@@ -1071,7 +1085,7 @@ export default function ProductDetail() {
                 </div>
               )}
               {product.description && (
-                <p className="text-sm text-gray-600 leading-relaxed line-clamp-5">{product.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed lg:line-clamp-5">{product.description}</p>
               )}
 
               <div className="space-y-3 pt-1">
@@ -1117,6 +1131,7 @@ export default function ProductDetail() {
                     })()}
                   </div>
                 </details>
+              </div>
               </div>
             </div>
           </div>
