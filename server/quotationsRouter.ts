@@ -187,6 +187,7 @@ export const quotationsRouter = router({
           itemsSnapshot: quotations.itemsSnapshot,
           convertedOrderId: quotations.convertedOrderId,
           operatorId: quotations.operatorId,
+          responsibleName: quotations.responsibleName,
           sentAt: quotations.sentAt,
           approvedAt: quotations.approvedAt,
           expiresAt: quotations.expiresAt,
@@ -271,6 +272,7 @@ export const quotationsRouter = router({
       productionDeadline: z.number().default(0),
       quotationValidity: z.number().default(30),
       commercialNotes: z.string().optional(),
+      responsibleName: z.string().trim().min(1).max(150),
       saveAsDraft: z.boolean().default(true),
     }))
     .mutation(async ({ input, ctx }) => {
@@ -293,6 +295,7 @@ export const quotationsRouter = router({
         quotationNumber,
         clientId: input.clientId,
         operatorId,
+        responsibleName: input.responsibleName,
         status: input.saveAsDraft ? "rascunho" : "enviado",
         subtotal: subtotal.toFixed(2) as any,
         discountType: input.discountType,
@@ -363,6 +366,7 @@ export const quotationsRouter = router({
       productionDeadline: z.number().optional(),
       quotationValidity: z.number().optional(),
       commercialNotes: z.string().optional(),
+      responsibleName: z.string().trim().min(1).max(150).optional(),
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -386,6 +390,7 @@ export const quotationsRouter = router({
         updates.expiresAt = new Date(Date.now() + input.quotationValidity * 24 * 60 * 60 * 1000);
       }
       if (input.commercialNotes !== undefined) updates.commercialNotes = input.commercialNotes;
+      if (input.responsibleName !== undefined) updates.responsibleName = input.responsibleName;
 
       if (input.items) {
         const subtotal = input.items.reduce((acc, i) => acc + i.totalPrice, 0);

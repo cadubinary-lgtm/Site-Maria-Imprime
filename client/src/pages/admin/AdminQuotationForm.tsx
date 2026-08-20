@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAdminReturnTarget } from "@/lib/adminNavigation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface QuotationItem {
@@ -100,6 +101,7 @@ export default function AdminQuotationForm() {
   const params = useParams<{ id?: string }>();
   const isEdit = !!params.id;
   const quotationId = params.id ? parseInt(params.id) : undefined;
+  const { adminUser } = useAdminAuth();
 
   // ── Form state ──────────────────────────────────────────────────────────
   const [clientId, setClientId] = useState<number | null>(null);
@@ -124,6 +126,8 @@ export default function AdminQuotationForm() {
   const [productionDeadline, setProductionDeadline] = useState(3);
   const [quotationValidity, setQuotationValidity] = useState(30);
   const [commercialNotes, setCommercialNotes] = useState("");
+  const [responsibleName, setResponsibleName] = useState("");
+  const responsiblePrefilledRef = useRef(false);
 
   const [showAddProduct, setShowAddProduct] = useState(false);
   // Estado do formulário inline de cadastro de cliente
@@ -163,6 +167,12 @@ export default function AdminQuotationForm() {
   const [isEditingManualTotal, setIsEditingManualTotal] = useState(false);
   const acertoTotalInputRef = useRef<HTMLInputElement | null>(null);
   const acertoTotalAdvanceTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isEdit || responsiblePrefilledRef.current || !adminUser?.name) return;
+    setResponsibleName(adminUser.name);
+    responsiblePrefilledRef.current = true;
+  }, [adminUser?.name, isEdit]);
 
   // ── Pré-preencher a partir de query params (vindo do configurador de produto) ──
   useEffect(() => {
@@ -221,6 +231,8 @@ export default function AdminQuotationForm() {
     setProductionDeadline(q.productionDeadline ?? 3);
     setQuotationValidity(q.quotationValidity ?? 30);
     setCommercialNotes(q.commercialNotes ?? "");
+    setResponsibleName(q.responsibleName ?? "");
+    responsiblePrefilledRef.current = true;
     setItems(q.items.map((i: any) => {
       let parsedSpecs: Record<string, string> = {};
       try { parsedSpecs = JSON.parse(i.specifications); } catch {}
@@ -430,12 +442,14 @@ export default function AdminQuotationForm() {
     productionDeadline,
     quotationValidity,
     commercialNotes,
+    responsibleName: responsibleName.trim(),
     saveAsDraft,
   });
 
   const handleSave = (saveAsDraft: boolean) => {
     if (!clientId) { toast.error("Selecione um cliente."); return; }
     if (items.length === 0) { toast.error("Adicione pelo menos um produto."); return; }
+    if (!responsibleName.trim()) { toast.error("Informe o responsável pela emissão do orçamento."); return; }
 
     if (isEdit && quotationId) {
       updateMutation.mutate({ id: quotationId, ...buildPayload(saveAsDraft) });
@@ -1779,6 +1793,18 @@ export default function AdminQuotationForm() {
                   value={quotationValidity}
                   onChange={(e) => setQuotationValidity(parseInt(e.target.value) || 30)}
                   className="mt-0.5 h-9"
+                />
+              </div>
+              <div>
+                <label htmlFor="quotation-responsible-name" className="text-xs text-gray-500 font-medium">Responsável pela emissão</label>
+                <Input
+                  id="quotation-responsible-name"
+                  value={responsibleName}
+                  onChange={(e) => setResponsibleName(e.target.value)}
+                  className="mt-0.5 h-9"
+                  maxLength={150}
+                  placeholder="Nome de quem está criando o orçamento"
+                  required
                 />
               </div>
               <div className="col-span-2">

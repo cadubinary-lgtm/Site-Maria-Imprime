@@ -3729,3 +3729,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar botão de exportação em PDF no topo da Ordem de Serviço
 - [x] Corrigir o QR Code para preservar o padrão na impressão
 - [x] Validar exportação e impressão e salvar checkpoint publicável
+
+- [x] Adicionar endereço da Maria Imprime ao cabeçalho do orçamento sem alterar sua estrutura
+- [x] Remover o nome duplicado antes do CNPJ e usar o ícone oficial do WhatsApp no contato do orçamento
+- [x] Permitir informar e exibir o responsável emissor do orçamento na tela e na impressão
+- [x] Criar regressão, validar o cabeçalho do orçamento e salvar checkpoint publicável
