@@ -3778,3 +3778,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Atualizar imediatamente as métricas ao mover pedido de Analisando para Em produção
 - [x] Cobrir a transição de status com regressão e salvar checkpoint publicável
+
+- [x] Mover o badge de pedidos em Analisando do Dashboard de Produção para Pré-Impressão
+- [x] Manter o badge de Em produção em Status de Produção
+- [x] Atualizar regressão dos badges, validar e salvar checkpoint publicável
