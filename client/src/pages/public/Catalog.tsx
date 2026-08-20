@@ -377,7 +377,7 @@ export default function Catalog() {
                   </p>
                 </div>
 
-                {renderProductResults("grid grid-cols-1 sm:grid-cols-2")}
+                {renderProductResults("grid grid-cols-2")}
               </div>
             </>
           )}
