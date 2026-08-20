@@ -3840,3 +3840,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover os itens "Integrações" e "Dados da Empresa" do submenu Sistema na barra lateral administrativa
 - [x] Criar regressão, validar TypeScript e testes e salvar checkpoint publicável da alteração do submenu Sistema
+
+- [x] Revisar o Resumo financeiro e garantir o botão Receber pagamento com diálogo de confirmação vinculado ao pedido
+- [x] Sincronizar o recebimento confirmado com o Gerenciador Financeiro, incluindo atualizações de consulta e regressão
+- [x] Validar TypeScript, testes e salvar checkpoint publicável do fluxo de recebimento financeiro

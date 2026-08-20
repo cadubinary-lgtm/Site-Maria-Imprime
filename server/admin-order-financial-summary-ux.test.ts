@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(resolve(import.meta.dirname, "../client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
+const financeiroRouterSource = readFileSync(resolve(import.meta.dirname, "routers-financeiro.ts"), "utf8");
 
 describe("resumo financeiro administrativo", () => {
   it("formata métodos de pagamento sem expor identificadores técnicos", () => {
@@ -33,5 +34,15 @@ describe("resumo financeiro administrativo", () => {
     expect(source).toContain("utils.gerenciadorFinanceiro.getDashboardMetrics.invalidate()");
     expect(source).toContain("Pagamento confirmado e recibo gerado");
     expect(source).toContain("/admin/financeiro/recibos/${data.receiptId}/imprimir");
+  });
+
+  it("persiste o recebimento no pedido, nas contas financeiras e no recibo vinculado", () => {
+    expect(financeiroRouterSource).toContain("confirmarPagamento: adminOrManusAuthProcedure");
+    expect(financeiroRouterSource).toContain('paymentStatus: "pago"');
+    expect(financeiroRouterSource).toContain("paymentMethod: input.formaPagamento");
+    expect(financeiroRouterSource).toContain('status: "pago"');
+    expect(financeiroRouterSource).toContain("dataPagamento: paidAt");
+    expect(financeiroRouterSource).toContain("ensurePaymentReceipt(");
+    expect(financeiroRouterSource).toContain("receiptId: receipt.id");
   });
 });
