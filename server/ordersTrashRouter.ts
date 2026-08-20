@@ -37,17 +37,25 @@ async function permanentlyDeleteOrder(db: NonNullable<Awaited<ReturnType<typeof 
   await db.delete(deletedOrders).where(eq(deletedOrders.orderId, orderId));
 }
 
-function requireSuperadmin(ctx: any) {
+function requireAdmin(ctx: any) {
   const adminUser = ctx.adminUser;
-  if (adminUser?.role !== "superadmin") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode gerenciar a lixeira de pedidos." });
+  if (!adminUser) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "É necessário estar autenticado como administrador para acessar a lixeira de pedidos." });
+  }
+  return adminUser;
+}
+
+function requireSuperadmin(ctx: any) {
+  const adminUser = requireAdmin(ctx);
+  if (adminUser.role !== "superadmin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir pedidos permanentemente." });
   }
   return adminUser;
 }
 
 export const ordersTrashRouter = router({
   list: adminOrManusAuthProcedure.query(async ({ ctx }) => {
-    requireSuperadmin(ctx);
+    requireAdmin(ctx);
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
 
@@ -70,7 +78,7 @@ export const ordersTrashRouter = router({
   moveToTrash: adminOrManusAuthProcedure
     .input(z.object({ orderId: z.number().int().positive(), reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000) }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = requireSuperadmin(ctx);
+      const adminUser = requireAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
       const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
@@ -86,7 +94,7 @@ export const ordersTrashRouter = router({
   restore: adminOrManusAuthProcedure
     .input(z.object({ orderId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = requireSuperadmin(ctx);
+      const adminUser = requireAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
       const [trashItem] = await db.select().from(deletedOrders).where(eq(deletedOrders.orderId, input.orderId)).limit(1);
