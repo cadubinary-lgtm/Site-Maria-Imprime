@@ -1,11 +1,15 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 import {
   automationLogs,
+  cashFlowEntries,
+  deletedReceivedAccounts,
   deletedOrders,
   emailHistory,
   fileValidations,
+  financeiro,
+  financeiroNotificacoes,
   financialRecords,
   fiscalNotes,
   orderArtPreviews,
@@ -15,6 +19,7 @@ import {
   orderStatusHistory,
   productionJobs,
   productionStatusHistory,
+  paymentReceipts,
   shipments,
 } from "../drizzle/schema";
 import { logAudit } from "./admin-auth";
@@ -58,10 +63,44 @@ async function deleteProductionDependenciesForOrder(db: NonNullable<Awaited<Retu
   }
 }
 
+async function deleteFinancialDependenciesForOrder(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, orderId: number) {
+  const [financeiroRows, financialRecordRows] = await Promise.all([
+    db.select({ id: financeiro.id }).from(financeiro).where(eq(financeiro.pedidoId, orderId)),
+    db.select({ id: financialRecords.id }).from(financialRecords).where(eq(financialRecords.orderId, orderId)),
+  ]);
+  const financeiroIds = financeiroRows.map((record) => record.id);
+  const financialRecordIds = financialRecordRows.map((record) => record.id);
+
+  if (financeiroIds.length > 0) {
+    await db.delete(financeiroNotificacoes)
+      .where(inArray(financeiroNotificacoes.financeiroId, financeiroIds));
+  }
+
+  const cashFlowReferences = [
+    and(eq(cashFlowEntries.referenceType, "pedido"), eq(cashFlowEntries.referenceId, orderId)),
+    and(eq(cashFlowEntries.referenceType, "order"), eq(cashFlowEntries.referenceId, orderId)),
+  ];
+  if (financeiroIds.length > 0) {
+    cashFlowReferences.push(
+      and(eq(cashFlowEntries.referenceType, "financeiro"), inArray(cashFlowEntries.referenceId, financeiroIds)),
+    );
+  }
+  if (financialRecordIds.length > 0) {
+    cashFlowReferences.push(
+      and(eq(cashFlowEntries.referenceType, "financial_record"), inArray(cashFlowEntries.referenceId, financialRecordIds)),
+    );
+  }
+  await db.delete(cashFlowEntries).where(or(...cashFlowReferences));
+  await db.delete(paymentReceipts).where(eq(paymentReceipts.orderId, orderId));
+  await db.delete(financeiro).where(eq(financeiro.pedidoId, orderId));
+  await db.delete(deletedReceivedAccounts).where(eq(deletedReceivedAccounts.orderId, orderId));
+}
+
 async function permanentlyDeleteOrder(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, orderId: number) {
   await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, orderId));
   await db.delete(orderArtPreviews).where(eq(orderArtPreviews.orderId, orderId));
   await deleteProductionDependenciesForOrder(db, orderId);
+  await deleteFinancialDependenciesForOrder(db, orderId);
   await db.delete(financialRecords).where(eq(financialRecords.orderId, orderId));
   await db.delete(fileValidations).where(eq(fileValidations.orderId, orderId));
   await db.delete(automationLogs).where(eq(automationLogs.orderId, orderId));

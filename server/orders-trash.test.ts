@@ -49,4 +49,19 @@ describe("lixeira de Todos os Pedidos", () => {
     expect(cleanupSource.indexOf("db.delete(productionStatusHistory)")).toBeLessThan(cleanupSource.indexOf("db.delete(productionJobs)"));
     expect(source).toContain("await deleteProductionDependenciesForOrder(db, orderId);");
   });
+
+  it("remove os registros que alimentam todos os subitens financeiros antes do pedido", () => {
+    const source = readFileSync(routerPath, "utf8");
+    const helperStart = source.indexOf("async function deleteFinancialDependenciesForOrder");
+    const helperEnd = source.indexOf("async function permanentlyDeleteOrder", helperStart);
+    const helperSource = source.slice(helperStart, helperEnd);
+
+    expect(helperSource).toContain("financeiroNotificacoes");
+    expect(helperSource).toContain("cashFlowEntries");
+    expect(helperSource).toContain("paymentReceipts");
+    expect(helperSource).toContain("deletedReceivedAccounts");
+    expect(helperSource.indexOf("db.delete(financeiroNotificacoes)")).toBeLessThan(helperSource.indexOf("db.delete(financeiro)"));
+    expect(source).toContain("await deleteFinancialDependenciesForOrder(db, orderId);");
+    expect(source.indexOf("await deleteFinancialDependenciesForOrder(db, orderId);")).toBeLessThan(source.indexOf("await db.delete(orders).where(eq(orders.id, orderId));"));
+  });
 });
