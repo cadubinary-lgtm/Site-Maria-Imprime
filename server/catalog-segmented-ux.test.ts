@@ -22,6 +22,8 @@ describe("catálogo segmentado", () => {
     expect(source).not.toContain("Faixa de Preço");
     expect(source).not.toContain("priceRange");
     expect(source).not.toContain("setPriceRange");
+    expect(source).not.toContain('>Segmento</Label>');
+    expect(source).toContain('CardContent className="px-6 pb-6 pt-3 space-y-6"');
     expect(source).toContain('aria-label="Página anterior"');
     expect(source).toContain('aria-label="Próxima página"');
     expect(source).toContain('aria-current={currentPage === i + 1 ? "page" : undefined}');
