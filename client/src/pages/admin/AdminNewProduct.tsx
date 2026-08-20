@@ -771,19 +771,19 @@ export default function AdminNewProduct() {
                   <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     <div>
                       <Label htmlFor="create-weight">Peso (kg)</Label>
-                      <Input id="create-weight" type="number" step="0.01" placeholder="Ex: 0.5" value={createLogistics.weight} onChange={(e) => setCreateLogistics((prev) => ({ ...prev, weight: e.target.value }))} />
+                      <Input id="create-weight" type="number" step="0.01" placeholder="Ex: 0.5" value={createLogistics.weight} onChange={(e) => { setCreateLogistics((prev) => ({ ...prev, weight: e.target.value })); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                     </div>
                     <div>
                       <Label htmlFor="create-log-width">Largura (cm)</Label>
-                      <Input id="create-log-width" type="number" step="0.1" placeholder="Ex: 20" value={createLogistics.width} onChange={(e) => setCreateLogistics((prev) => ({ ...prev, width: e.target.value }))} />
+                      <Input id="create-log-width" type="number" step="0.1" placeholder="Ex: 20" value={createLogistics.width} onChange={(e) => { setCreateLogistics((prev) => ({ ...prev, width: e.target.value })); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                     </div>
                     <div>
                       <Label htmlFor="create-log-height">Altura (cm)</Label>
-                      <Input id="create-log-height" type="number" step="0.1" placeholder="Ex: 30" value={createLogistics.height} onChange={(e) => setCreateLogistics((prev) => ({ ...prev, height: e.target.value }))} />
+                      <Input id="create-log-height" type="number" step="0.1" placeholder="Ex: 30" value={createLogistics.height} onChange={(e) => { setCreateLogistics((prev) => ({ ...prev, height: e.target.value })); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                     </div>
                     <div>
                       <Label htmlFor="create-log-length">Comprimento (cm)</Label>
-                      <Input id="create-log-length" type="number" step="0.1" placeholder="Ex: 10" value={createLogistics.length} onChange={(e) => setCreateLogistics((prev) => ({ ...prev, length: e.target.value }))} />
+                      <Input id="create-log-length" type="number" step="0.1" placeholder="Ex: 10" value={createLogistics.length} onChange={(e) => { setCreateLogistics((prev) => ({ ...prev, length: e.target.value })); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
                     </div>
                   </div>
                 </div>
