@@ -719,7 +719,7 @@ export default function AdminQuotationForm() {
 
     return (
       <div key={`custom-${idx}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
-        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_32px] items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
+        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
           <div>
             <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
               <ImageIcon className="w-4 h-4 text-gray-400" />
@@ -794,6 +794,27 @@ export default function AdminQuotationForm() {
               }`}
             />
             {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário recalculado a partir do total do item personalizado.</span>}
+          </div>
+          <div className="flex justify-center">
+            <input
+              type="text"
+              inputMode="decimal"
+              key={`custom-adjustment-${idx}-${item.priceAdjustment ?? item.totalPrice}-${item.quantity}`}
+              title="Informe o valor total desejado para este item personalizado"
+              defaultValue={fmt(item.priceAdjustment ?? item.totalPrice)}
+              placeholder="Total desejado"
+              onBlur={(e) => {
+                const total = parseQuotationCurrency(e.target.value);
+                updateItem(idx, { priceAdjustment: total });
+                e.target.value = fmt(total);
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              onChange={(e) => {
+                clearTimeout((e.target as any)._ajusteTimer);
+                (e.target as any)._ajusteTimer = setTimeout(() => (e.target as HTMLInputElement).blur(), 500);
+              }}
+              className="h-8 w-full min-w-0 rounded-md border border-input bg-white px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-1 focus:ring-pink-400"
+            />
           </div>
           <div className="flex items-center justify-end gap-1 text-right text-sm font-semibold text-gray-800">
             <span>{fmt(item.totalPrice)}</span>
@@ -915,7 +936,7 @@ export default function AdminQuotationForm() {
               type="text"
               inputMode="decimal"
               aria-label={`Valor unitário de ${item.productName || "item personalizado"}`}
-              value={customUnitDrafts[idx] ?? (item.unitPrice > 0 ? fmt(item.unitPrice) : "")}
+              value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
               placeholder="R$ 0,00"
               onChange={(e) => {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
@@ -926,7 +947,7 @@ export default function AdminQuotationForm() {
                 const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
                 const value = Math.max(0, parseFloat(raw) || 0);
                 updateItem(idx, { unitPrice: value });
-                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: value > 0 ? fmt(value) : "" }));
+                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: fmt(value) }));
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               className="h-8 mt-0.5 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition-colors hover:border-pink-300 focus:border-pink-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-100"
@@ -939,7 +960,7 @@ export default function AdminQuotationForm() {
               inputMode="decimal"
               aria-label={`Valor total de ${item.productName || "item personalizado"}`}
               key={`custom-total-${idx}-${item.totalPrice}`}
-              defaultValue={item.totalPrice > 0 ? fmt(item.totalPrice) : ""}
+              defaultValue={fmt(item.totalPrice)}
               placeholder="R$ 0,00"
               onBlur={(e) => {
                 const value = Math.max(0, parseFloat(e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".")) || 0);
@@ -1746,12 +1767,13 @@ export default function AdminQuotationForm() {
                       <h2 className="font-semibold text-gray-800">Itens personalizados</h2>
                       <span className="text-xs text-gray-400">— produto ou serviço fora do catálogo</span>
                     </div>
-                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_32px] gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
                       <div>Img</div>
                       <div>Produto / Serviço</div>
                       <div className="text-center">Arte</div>
                       <div className="text-center">Qtd</div>
                       <div className="text-center">Unit.</div>
+                      <div className="text-center">Ajuste</div>
                       <div className="text-right">Total</div>
                       <div></div>
                     </div>

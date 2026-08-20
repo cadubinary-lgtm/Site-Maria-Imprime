@@ -3751,3 +3751,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Padronizar a grade e os campos de QTD e UNIT. dos Itens personalizados
 - [x] Manter moeda com duas casas e aplicar feedback visual de recálculo nos itens personalizados
 - [x] Atualizar regressões, validar e salvar checkpoint publicável
+
+- [x] Adicionar a coluna Ajuste entre UNIT. e TOTAL nos Itens personalizados
+- [x] Aplicar ao Ajuste personalizado a mesma lógica de total desejado e recálculo unitário
+- [x] Atualizar regressões, validar e salvar checkpoint publicável
