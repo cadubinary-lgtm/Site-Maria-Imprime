@@ -330,7 +330,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           },
           {
             label: "Status de Produção",
-            badge: menuIndicators.inProduction || undefined,
             children: [
               { label: "Pendente", href: "/admin/status-producao?status=pendente" },
               { label: "Impresso", href: "/admin/status-producao?status=impresso" },

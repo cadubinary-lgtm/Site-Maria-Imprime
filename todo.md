@@ -3848,3 +3848,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o indicador geral de Pré-Impressão e adicionar contagens específicas em Liberado para Análise e Arte Final Aprovada
 - [x] Excluir pedidos e itens em produção de todas as contagens de Pré-Impressão
 - [x] Criar regressão, validar TypeScript e testes e salvar checkpoint da nova regra de indicadores
+
+- [x] Remover o indicador numérico do item Status de Produção na barra lateral administrativa
+- [x] Atualizar regressão, validar TypeScript e testes e salvar checkpoint da remoção do indicador de Status de Produção
