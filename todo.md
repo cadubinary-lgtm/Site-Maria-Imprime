@@ -3919,3 +3919,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Reduzir o botão Ver normas para envio da arte para cerca de 30% do tamanho atual
 - [x] Criar regressão e validar visualmente o botão de normas compacto — inspeção confirmou o controle compacto com rótulo acessível
+
+- [x] Reduzir também no mobile o botão Ver normas para envio da arte, preservando Falar com a Maria
+- [x] Criar regressão e validar visualmente a organização dos dois botões no mobile — visualização em 390 px confirmou ícone compacto de normas e botão rosa de contato preservado
+
+- [x] Remover o botão Falar com a Maria também no mobile do Guia da Maria
+- [x] Criar regressão e validar visualmente o bloco mobile apenas com o controle de normas — visualização em 390 px confirmou apenas o ícone compacto de normas

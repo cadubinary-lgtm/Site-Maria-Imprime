@@ -67,15 +67,17 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("min-h-[104px]");
     expect(guide).toContain("const hasPinkBackground = isExpanded");
     expect(guide).toContain("HOME_SECONDARY_ACTION_CLASS");
-    expect(guide).toContain("HOME_PRIMARY_ACTION_CLASS");
     expect(guide).toContain('href="/documentos"');
-    expect(guide).toContain('href="#maria-guide-entrega"');
-    expect(guide).toContain('HOME_PRIMARY_ACTION_CLASS} lg:hidden');
+    expect(guide).not.toContain("HOME_PRIMARY_ACTION_CLASS");
+    expect(guide).not.toContain('href="#maria-guide-entrega"');
+    expect(guide).not.toContain("Falar com a Maria</a>");
     expect(guide).toContain("Ver normas para envio de arte");
     expect(guide).toContain("lg:grid-cols-[minmax(0,1fr)_3rem]");
     expect(guide).toContain('lg:w-12');
     expect(guide).toContain('aria-label="Ver normas para envio da arte"');
-    expect(guide).toContain('<span className="lg:sr-only">Ver normas para envio de arte</span>');
+    expect(guide).toContain('HOME_SECONDARY_ACTION_CLASS} h-8 w-12 shrink-0 p-0');
+    expect(guide).toContain('<span className="sr-only">Ver normas para envio de arte</span>');
+    expect(guide).toContain('className="flex w-full justify-end lg:w-12"');
   });
 
   it("oferece edição, ordenação, prévia e publicação no painel administrativo", () => {
