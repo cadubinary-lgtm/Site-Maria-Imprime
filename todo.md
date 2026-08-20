@@ -3885,3 +3885,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Corrigir a etapa visual de Pronto para Entrega na linha de acompanhamento do pedido
 - [x] Criar regressão, validar TypeScript e salvar checkpoint da correção do acompanhamento
+
+- [x] Verificar os dados de frete e a validação de serviço para gerar a etiqueta do pedido 3150001
+- [x] Orientar ou corrigir o preenchimento da etiqueta sem gerar cobrança ou emissão sem confirmação

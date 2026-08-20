@@ -531,6 +531,8 @@ const shipmentsRouter = router({
         shippingZipCode: orders.shippingZipCode,
         shippingLabel: orders.shippingLabel,
         shippingPrice: orders.shippingPrice,
+        shippingMethod: orders.shippingMethod,
+        shippingCarrierId: orders.shippingCarrierId,
         customerId: orders.customerId,
         createdAt: orders.createdAt,
         // Dados do cliente com conta (JOIN)

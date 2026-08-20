@@ -46,6 +46,7 @@ const EMPTY_FORM = {
   width: '30',
   length: '40',
   insuranceValue: '0',
+  price: '0',
 };
 
 export function ShipmentsManager() {
@@ -69,9 +70,19 @@ export function ShipmentsManager() {
       parseFloat(order.totalPrice || '0') - parseFloat(order.shippingPrice || '0'),
       1
     ).toFixed(2);
+    const shippingServiceId = String(order.shippingMethod ?? '').trim();
+    const isNumericServiceId = /^\d+$/.test(shippingServiceId);
+    const [shippingCompanyName = '', shippingServiceName = ''] = String(order.shippingLabel ?? '')
+      .split('—')
+      .map((value) => value.trim());
     setAddForm({
       ...EMPTY_FORM,
       orderId: String(order.id),
+      // A cotação escolhida no checkout já registra o ID de serviço retornado pelo Melhor Envio.
+      serviceId: isNumericServiceId ? shippingServiceId : '',
+      serviceName: shippingServiceName || String(order.shippingLabel ?? ''),
+      companyName: shippingCompanyName,
+      price: String(order.shippingPrice ?? '0'),
       // Dados do destinatário
       recipientName: order.deliveryFullName || order.guestName || '',
       recipientPhone: order.resolvedPhone || order.deliveryPhone || '',
@@ -94,8 +105,12 @@ export function ShipmentsManager() {
   };
 
   const handleAddToCart = async () => {
-    if (!addForm.orderId || !addForm.serviceId) {
-      toast.error('ID do Pedido e ID do Serviço são obrigatórios');
+    if (!addForm.orderId) {
+      toast.error('ID do Pedido é obrigatório');
+      return;
+    }
+    if (!addForm.serviceId) {
+      toast.error('O ID do serviço escolhido no checkout não foi identificado. Selecione uma cotação válida antes de gerar a etiqueta.');
       return;
     }
     try {
@@ -104,7 +119,7 @@ export function ShipmentsManager() {
         serviceId: parseInt(addForm.serviceId),
         serviceName: addForm.serviceName,
         companyName: addForm.companyName,
-        price: 0,
+        price: parseFloat(addForm.price || '0'),
         recipientName: addForm.recipientName,
         recipientDocument: addForm.recipientDocument,
         recipientEmail: addForm.recipientEmail,
@@ -370,6 +385,9 @@ export function ShipmentsManager() {
                   <Input placeholder="Correios" value={addForm.companyName} onChange={setField('companyName')} />
                 </div>
               </div>
+              {addForm.orderId && addForm.serviceId && (
+                <p className="-mt-1 text-xs text-emerald-700">Serviço e transportadora carregados da opção escolhida pelo cliente no checkout.</p>
+              )}
 
               <Separator />
               <p className="text-sm font-semibold">Destinatário</p>
