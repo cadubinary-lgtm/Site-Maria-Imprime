@@ -3819,3 +3819,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar atalho por ícone para abrir o recibo de cada pedido recebido
 - [x] Reunir imprimir, baixar PDF, WhatsApp e e-mail em ações de ícone no cabeçalho do recibo
 - [x] Criar regressões, validar TypeScript e salvar checkpoint publicável
+
+- [x] Comparar os controles de lixeira e ações entre o ambiente interno e o site oficial
+- [x] Sincronizar o ambiente interno ao comportamento oficial sem alterar a estrutura visual
+- [x] Criar regressões, validar TypeScript e salvar checkpoint publicável

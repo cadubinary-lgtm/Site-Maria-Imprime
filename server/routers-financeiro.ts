@@ -73,6 +73,14 @@ function mapOrderToFinanceiro(order: any) {
   };
 }
 
+function requireFinanceAdmin(ctx: any) {
+  const adminUser = ctx.adminUser;
+  if (!adminUser) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "É necessário estar autenticado como administrador para acessar a lixeira financeira." });
+  }
+  return adminUser;
+}
+
 function mapPaymentMethod(method: string | null): string {
   if (!method) return "outro";
   const map: Record<string, string> = {
@@ -407,10 +415,7 @@ export const financeiroRouter = router({
   moveContaRecebidaToTrash: adminOrManusAuthProcedure
     .input(z.object({ orderId: z.number().int().positive(), reason: z.string().trim().min(3, "Informe um motivo com pelo menos 3 caracteres.").max(1000) }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = (ctx as any).adminUser;
-      if (adminUser?.role !== "superadmin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir uma conta recebida." });
-      }
+      const adminUser = requireFinanceAdmin(ctx);
 
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
@@ -450,10 +455,7 @@ export const financeiroRouter = router({
 
   listDeletedContasRecebidas: adminOrManusAuthProcedure
     .query(async ({ ctx }) => {
-      const adminUser = (ctx as any).adminUser;
-      if (adminUser?.role !== "superadmin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode acessar a lixeira de contas recebidas." });
-      }
+      requireFinanceAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
 
@@ -481,10 +483,7 @@ export const financeiroRouter = router({
   restoreContaRecebida: adminOrManusAuthProcedure
     .input(z.object({ orderId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
-      const adminUser = (ctx as any).adminUser;
-      if (adminUser?.role !== "superadmin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode restaurar uma conta recebida." });
-      }
+      const adminUser = requireFinanceAdmin(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
 

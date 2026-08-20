@@ -7,7 +7,7 @@ const receivedAccountsPagePath = resolve(process.cwd(), "client/src/pages/admin/
 const receivableAccountsPagePath = resolve(process.cwd(), "client/src/pages/admin/FinanceiroContasReceber.tsx");
 
 describe("lixeira de Contas Recebidas", () => {
-  it("restringe a lixeira e a restauração ao perfil Superadmin no servidor", () => {
+  it("permite a lixeira reversível para administradores e preserva a exclusão definitiva protegida", () => {
     const source = readFileSync(financeiroRouterPath, "utf8");
 
     expect(source).toContain("moveContaRecebidaToTrash: adminOrManusAuthProcedure");
@@ -16,6 +16,8 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("emptyDeletedContasRecebidas: adminOrManusAuthProcedure");
     expect(source).toContain("permanentlyDeleteContaRecebida: adminOrManusAuthProcedure");
     expect(source).toContain("confirmation: z.literal(true)");
+    expect(source).toContain("function requireFinanceAdmin(ctx: any)");
+    expect(source).toContain("const adminUser = requireFinanceAdmin(ctx);");
     expect(source).toContain('adminUser?.role !== "superadmin"');
     expect(source).toContain('code: "FORBIDDEN"');
     expect(source).toContain('action: "move_receivable_account_to_trash"');
@@ -27,11 +29,13 @@ describe("lixeira de Contas Recebidas", () => {
     expect(source).toContain("deletionReason: deletedReceivedAccounts.deletionReason");
   });
 
-  it("exibe busca, filtros de data, lixeira e restauração somente para Superadmin", () => {
+  it("exibe busca, filtros de data, lixeira e restauração para administradores", () => {
     const source = readFileSync(receivedAccountsPagePath, "utf8");
 
-    expect(source).toContain('const canDeleteReceivedAccounts = adminUser?.role === "superadmin";');
-    expect(source).toContain("{canDeleteReceivedAccounts && <th");
+    expect(source).toContain("const canManageReceivedAccountsTrash = Boolean(adminUser);");
+    expect(source).toContain('const canPermanentlyDeleteReceivedAccounts = adminUser?.role === "superadmin";');
+    expect(source).toContain("{canManageReceivedAccountsTrash && (");
+    expect(source).toContain("{canPermanentlyDeleteReceivedAccounts && <Button");
     expect(source).toContain("<Trash2");
     expect(source).toContain("Buscar por pedido, cliente ou e-mail...");
     expect(source).toContain('type="date"');
