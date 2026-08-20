@@ -1240,6 +1240,30 @@ export default function AdminQuotationForm() {
                 </div>
               </div>
             )}
+
+            <div className="mt-4 rounded-lg border border-pink-100 bg-pink-50/40 px-3 py-2.5">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] sm:items-end">
+                <div>
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-gray-800">
+                    <User className="h-3.5 w-3.5 text-pink-600" aria-hidden="true" />
+                    Responsável pela emissão
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-500">Nome que será exibido neste orçamento e na impressão.</p>
+                </div>
+                <div>
+                  <label htmlFor="quotation-responsible-name" className="sr-only">Responsável pela emissão</label>
+                  <Input
+                    id="quotation-responsible-name"
+                    value={responsibleName}
+                    onChange={(e) => setResponsibleName(e.target.value)}
+                    className="h-9 bg-white"
+                    maxLength={150}
+                    placeholder="Nome de quem está criando o orçamento"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Seção: Produtos */}
@@ -1793,18 +1817,6 @@ export default function AdminQuotationForm() {
                   value={quotationValidity}
                   onChange={(e) => setQuotationValidity(parseInt(e.target.value) || 30)}
                   className="mt-0.5 h-9"
-                />
-              </div>
-              <div>
-                <label htmlFor="quotation-responsible-name" className="text-xs text-gray-500 font-medium">Responsável pela emissão</label>
-                <Input
-                  id="quotation-responsible-name"
-                  value={responsibleName}
-                  onChange={(e) => setResponsibleName(e.target.value)}
-                  className="mt-0.5 h-9"
-                  maxLength={150}
-                  placeholder="Nome de quem está criando o orçamento"
-                  required
                 />
               </div>
               <div className="col-span-2">
