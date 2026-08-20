@@ -10,6 +10,18 @@ const logisticsSource = readFileSync(
   resolve(import.meta.dirname, "../client/src/components/products/ProductLogisticsTab.tsx"),
   "utf8",
 );
+const deliveryOptionsSource = readFileSync(
+  resolve(import.meta.dirname, "../client/src/components/products/DeliveryOptionsManager.tsx"),
+  "utf8",
+);
+const imageUploaderSource = readFileSync(
+  resolve(import.meta.dirname, "../client/src/components/products/ProductImageUploader.tsx"),
+  "utf8",
+);
+const segmentSelectorSource = readFileSync(
+  resolve(import.meta.dirname, "../client/src/components/MultiSegmentSelector.tsx"),
+  "utf8",
+);
 
 describe("Editar Produto — moeda brasileira e avanço automático", () => {
   it("mantém todos os preços em R$ 0,00 quando não há valor cadastrado", () => {
@@ -45,6 +57,12 @@ describe("Editar Produto — moeda brasileira e avanço automático", () => {
   it("inclui Peso e Dimensões da logística no mesmo avanço de 1000 ms", () => {
     expect(logisticsSource).toContain("scheduleProductPriceAutoAdvance");
     expect(logisticsSource.match(/scheduleProductPriceAutoAdvance\(e\.currentTarget\)/g)?.length).toBe(4);
+  });
+
+  it("cobre também o gerenciador de prazos e confirma que os demais componentes não têm campos de digitação", () => {
+    expect(deliveryOptionsSource.match(/scheduleProductPriceAutoAdvance\(e\.currentTarget\)/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(imageUploaderSource).not.toMatch(/type="(?:text|number)"/);
+    expect(segmentSelectorSource).not.toMatch(/<(?:Input|Textarea|input|textarea)\b/);
   });
 
   it("preserva o salvamento automático do formulário Editar Produto", () => {
