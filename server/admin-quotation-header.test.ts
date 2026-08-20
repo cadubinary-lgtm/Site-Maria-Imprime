@@ -45,9 +45,11 @@ describe("cabeçalho do orçamento", () => {
   });
 
   it("aplica o mesmo padrão de QTD e UNIT. aos itens personalizados", () => {
-    expect(formSource).toContain("grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_32px]");
+    expect(formSource).toContain("grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px]");
     expect(formSource).toContain("Valor unitário recalculado a partir do total do item personalizado.");
     expect(formSource).toContain("updateItem(idx, { priceAdjustment: value });");
+    expect(formSource).toContain('title="Informe o valor total desejado para este item personalizado"');
+    expect(formSource).toContain('<div className="text-center">Ajuste</div>');
   });
 
   it("mostra endereço, CNPJ e responsável abaixo da logo sem repetir a marca", () => {
