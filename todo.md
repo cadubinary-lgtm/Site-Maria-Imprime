@@ -3963,3 +3963,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Aplicar uma transição visual mais suave na troca de imagens do carrossel
 - [x] Preservar o comportamento de prefers-reduced-motion e criar regressão do efeito — TypeScript sem erros e 5 testes aprovados
+
+- [x] Substituir o efeito de dissolução pela transição lateral entre imagens do carrossel
+- [x] Garantir que autoplay e navegação retornem à primeira imagem depois da última
+- [x] Criar regressão e validar a transição lateral com redução de movimento — TypeScript sem erros e 5 testes aprovados
