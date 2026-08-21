@@ -36,6 +36,20 @@ describe("navegação lateral administrativa", () => {
     expect(appSource).toContain('path="/admin/relatorios" component={AdminDashboard}');
   });
 
+  it("posiciona Produtos e CRM antes de Logística sem alterar os grupos", () => {
+    const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+    const productsIndex = source.indexOf('label: "PRODUTOS"');
+    const crmIndex = source.indexOf('label: "CRM - CLIENTES"');
+    const logisticsIndex = source.indexOf('label: "LOGÍSTICA"');
+
+    expect(productsIndex).toBeGreaterThan(-1);
+    expect(crmIndex).toBeGreaterThan(productsIndex);
+    expect(logisticsIndex).toBeGreaterThan(crmIndex);
+    expect(source).toContain('{ label: "Expedição", href: "/admin/logistica/expedicao" }');
+    expect(source).toContain('{ label: "Todos os Produtos", href: "/admin/produtos" }');
+    expect(source).toContain('{ label: "Todos os Clientes", href: "/admin/clientes" }');
+  });
+
   it("mantém o submenu Sistema restrito a Usuários e preserva Dados da Empresa em Configurações do Site", () => {
     const source = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
     const systemMenuStart = source.indexOf('label: "SISTEMA"');
