@@ -3941,3 +3941,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover Solicitar orçamento do resumo do configurador em desktop e mobile
 - [x] Remover o bloco Precisa de ajuda do resumo do configurador em desktop e mobile
 - [x] Criar regressão e validar visualmente o resumo simplificado nas duas resoluções — visualização em 390 px confirmou apenas a ação Adicionar ao carrinho e os avisos operacionais
+
+- [x] Posicionar Produtos e CRM — Clientes acima de Logística na barra lateral administrativa
+- [x] Criar regressão e validar a nova ordem da navegação sem alterar rotas ou permissões — teste confirmou Produtos → CRM — Clientes → Logística e preservação dos subitens

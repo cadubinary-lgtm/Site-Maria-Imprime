@@ -369,31 +369,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
     },
-    // Logística - Transformado em menu retrátil
-    {
-      item: {
-        label: "LOGÍSTICA",
-        icon: <Truck className="w-4 h-4" />,
-        children: [
-          { label: "Dashboard", href: "/admin/logistica" },
-          { label: "Configurações", href: "/admin/logistica/configuracoes" },
-          { label: "Transportadoras", href: "/admin/logistica/transportadoras" },
-          { label: "Regras de Frete", href: "/admin/logistica/regras-frete" },
-          { label: "Expedição", href: "/admin/logistica/expedicao" },
-          { label: "Rastreamento", href: "/admin/logistica/rastreamento" },
-        ],
-      },
-    },
-    // API Pagamentos - Transformado em menu retrátil
-    {
-      item: {
-        label: "API PAGAMENTOS",
-        icon: <CreditCard className="w-4 h-4" />,
-        children: [
-          { label: "Mercado Pago", href: "/admin/pagamentos/mercadopago" },
-        ],
-      },
-    },
     // Produtos - Transformado em menu retrátil
     {
       item: {
@@ -422,6 +397,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { label: "Clientes Balcão", href: "/admin/clientes-balcao" },
           { label: "Revendedores", href: "/admin/clientes-loja?tipo=revendedor" },
           { label: "Agências", href: "/admin/clientes-loja?tipo=agencia" },
+        ],
+      },
+    },
+    // Logística - Transformado em menu retrátil
+    {
+      item: {
+        label: "LOGÍSTICA",
+        icon: <Truck className="w-4 h-4" />,
+        children: [
+          { label: "Dashboard", href: "/admin/logistica" },
+          { label: "Configurações", href: "/admin/logistica/configuracoes" },
+          { label: "Transportadoras", href: "/admin/logistica/transportadoras" },
+          { label: "Regras de Frete", href: "/admin/logistica/regras-frete" },
+          { label: "Expedição", href: "/admin/logistica/expedicao" },
+          { label: "Rastreamento", href: "/admin/logistica/rastreamento" },
+        ],
+      },
+    },
+    // API Pagamentos - Transformado em menu retrátil
+    {
+      item: {
+        label: "API PAGAMENTOS",
+        icon: <CreditCard className="w-4 h-4" />,
+        children: [
+          { label: "Mercado Pago", href: "/admin/pagamentos/mercadopago" },
         ],
       },
     },
