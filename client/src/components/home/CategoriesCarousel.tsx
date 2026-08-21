@@ -39,6 +39,25 @@ export function CategoriesCarousel() {
     if (!container) return;
 
     const firstItem = container.querySelector("button[data-segment-card]") as HTMLElement | null;
+
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    if (isMobile && firstItem) {
+      const cards = Array.from(container.querySelectorAll<HTMLElement>("button[data-segment-card]"));
+      const viewportCenter = container.scrollLeft + container.clientWidth / 2;
+      const currentIndex = cards.reduce((closestIndex, card, index) => {
+        const closestCard = cards[closestIndex];
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const closestCenter = closestCard.offsetLeft + closestCard.offsetWidth / 2;
+        return Math.abs(cardCenter - viewportCenter) < Math.abs(closestCenter - viewportCenter) ? index : closestIndex;
+      }, 0);
+      const targetIndex = Math.max(0, Math.min(cards.length - 1, currentIndex + (direction === "left" ? -1 : 1)));
+      const targetCard = cards[targetIndex];
+      const targetLeft = Math.max(0, Math.min(container.scrollWidth - container.clientWidth, targetCard.offsetLeft - (container.clientWidth - targetCard.offsetWidth) / 2));
+
+      container.scrollTo({ left: targetLeft, behavior: "smooth" });
+      return;
+    }
+
     const gap = Number.parseFloat(getComputedStyle(container).gap || "16");
     const distance = firstItem
       ? firstItem.getBoundingClientRect().width + gap
@@ -60,7 +79,7 @@ export function CategoriesCarousel() {
             <div
               id="categories-container"
               ref={containerRef}
-              className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{borderRadius: '33px'}}
+              className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-[calc(50%_-_4.75rem)] py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-1" style={{borderRadius: '33px'}}
             >
               {(segments as any[]).map((segment) => (
                 <button
@@ -68,7 +87,7 @@ export function CategoriesCarousel() {
                   type="button"
                   data-segment-card
                   onClick={() => navigate(`/catalogo?segmentId=${segment.id}`)}
-                  className="group w-[9.5rem] shrink-0 snap-start rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 px-4 py-2.5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-40"
+                  className="group w-[9.5rem] shrink-0 snap-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 px-4 py-2.5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-pink-100 hover:to-pink-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 sm:w-40 sm:snap-start"
                 >
                   <span className="flex min-h-9 items-center justify-center gap-2.5">
                     {segment.icon && (

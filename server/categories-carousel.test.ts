@@ -31,4 +31,16 @@ describe("Carrossel de acesso rápido", () => {
     expect(source).toContain("flex h-8 w-8");
     expect(source).not.toContain("hidden h-10 w-10");
   });
+
+  it("centraliza somente no mobile o card selecionado pelas setas", () => {
+    const source = readFileSync(resolve(root, "client/src/components/home/CategoriesCarousel.tsx"), "utf8");
+
+    expect(source).toContain('window.matchMedia("(max-width: 639px)").matches');
+    expect(source).toContain("const viewportCenter = container.scrollLeft + container.clientWidth / 2");
+    expect(source).toContain("targetCard.offsetLeft - (container.clientWidth - targetCard.offsetWidth) / 2");
+    expect(source).toContain('container.scrollTo({ left: targetLeft, behavior: "smooth" })');
+    expect(source).toContain("snap-center");
+    expect(source).toContain("sm:snap-start");
+    expect(source).toContain("sm:px-1");
+  });
 });
