@@ -3937,3 +3937,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar uma seta ao lado do nome do produto para expandir e fechar as informações no mobile
 - [x] Manter descrição e detalhes inferiores do produto fechados inicialmente no mobile
 - [x] Criar regressão e validar visualmente a redução de espaço até o configurador — visualização em 390 px confirmou título compacto, seta visível e Configurador logo abaixo
+
+- [x] Remover Solicitar orçamento do resumo do configurador em desktop e mobile
+- [x] Remover o bloco Precisa de ajuda do resumo do configurador em desktop e mobile
+- [x] Criar regressão e validar visualmente o resumo simplificado nas duas resoluções — visualização em 390 px confirmou apenas a ação Adicionar ao carrinho e os avisos operacionais

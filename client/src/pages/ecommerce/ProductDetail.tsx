@@ -22,10 +22,9 @@ import { TermsAcceptance } from "@/components/TermsAcceptance";
 import { MariaGuide } from "@/components/products/MariaGuide";
 import { processRules, generateInitialState } from "@/lib/attributes-engine";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
-import { getCompanyWhatsAppMessage, getWhatsAppUrl, useCompanySettings, useWhatsAppButtonVisibility } from "@/hooks/useCompanySettings";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
-import { exportBudgetPDFWithValidation } from "@/lib/export-budget-pdf";
 import { getProductPaymentPrices } from "@/lib/productPrice";
 import { getOrderTotal, getShippingSummary } from "@/lib/shipping-summary";
 import { getProductRatingDisplay } from "@/lib/product-rating";
@@ -122,7 +121,6 @@ export default function ProductDetail() {
   const { user } = useAuth();
   const { customer } = useCustomerAuth();
   const { company } = useCompanySettings();
-  const showWhatsApp = useWhatsAppButtonVisibility(company);
   const isOperator = user?.role === "admin";
   const [, params] = useRoute("/produto/:id");
   const productId = params?.id ? parseInt(params.id) : null;
@@ -147,7 +145,6 @@ export default function ProductDetail() {
   const [notes, setNotes] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"pix" | "cartao">("pix");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<any>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -924,28 +921,6 @@ export default function ProductDetail() {
       toast.error("Erro ao adicionar ao carrinho");
     }
     finally { setIsProcessing(false); }
-  };
-
-  // ─── Export Budget ────────────────────────────────────────────────────────
-  const handleExportBudget = async () => {
-    if (!product) return;
-    setIsExporting(true);
-    try {
-      await exportBudgetPDFWithValidation({
-        productName: product.name,
-        productDescription: product.description || undefined,
-        basePrice: commercialProductPrice,
-        selectedAttributes: selectedAttrsForSummary,
-        quantity,
-        finalPrice: total,
-        deadline: selectedDeliveryOption?.name ?? "5 dias úteis",
-        notes,
-        customerName: "Cliente",
-        companyName: "Maria Imprime",
-      });
-      toast.success("Orçamento exportado!");
-    } catch { toast.error("Erro ao exportar orçamento"); }
-    finally { setIsExporting(false); }
   };
 
   const toggleStep = (idx: number) =>
@@ -2128,34 +2103,6 @@ export default function ProductDetail() {
                     </ul>
                     <p className="text-xs text-gray-700 mt-3 pt-3 border-t border-pink-100 italic">Após preencher todos os campos, o botão será ativado automaticamente.</p>
                   </div>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={handleExportBudget}
-                  disabled={isExporting}
-                  className="w-full border-pink-500 text-pink-700 hover:bg-pink-50 font-semibold py-3 rounded-xl h-12"
-                >
-                  {isExporting
-                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Gerando...</>
-                    : <><FileText className="w-4 h-4 mr-2" />Solicitar orçamento</>
-                  }
-                </Button>
-                {showWhatsApp && (
-                  <a
-                    href={getWhatsAppUrl(company.whatsappNumber, getCompanyWhatsAppMessage(company, product?.name))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4 text-green-500" />
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800">Precisa de ajuda?</p>
-                        <p className="text-xs text-gray-500">Fale com nosso especialista pelo WhatsApp</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </a>
                 )}
               </div>
             </div>
