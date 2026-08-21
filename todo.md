@@ -4014,3 +4014,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar setas acessíveis para expandir e encolher cada bloco de edição do rodapé
 - [x] Tornar visível o acesso de edição às Normas para envio de arte dentro de Configurações do site
 - [x] Criar regressão e validar a organização recolhível da página administrativa — TypeScript sem erros e 5 testes aprovados
+
+- [x] Remover o título Conheça nossos segmentos acima do carrossel de segmentos
+- [x] Remover o subtítulo Encontre a opção certa para o seu projeto sem alterar o carrossel
+- [x] Criar regressão e validar a preservação do contador, imagens e navegação do carrossel — TypeScript sem erros, 5 testes aprovados e conferência visual concluída
