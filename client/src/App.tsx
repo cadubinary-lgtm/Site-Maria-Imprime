@@ -65,6 +65,7 @@ import AdminOS from "./pages/admin/AdminOS";
 import AdminOSPrint from "./pages/admin/AdminOSPrint";
 import AdminCompanySettings from "./pages/admin/AdminCompanySettings";
 import AdminFooterInformation from "./pages/admin/AdminFooterInformation";
+import AdminArtworkGuidelines from "./pages/admin/AdminArtworkGuidelines";
 import AdminMariaGuide from "./pages/admin/AdminMariaGuide";
 import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
@@ -178,6 +179,7 @@ function AdminProtectedRoutesManus() {
 return (
 <Switch>
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+<Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
@@ -283,6 +285,7 @@ function AdminProtectedRoutes() {
 return (
 <Switch>
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
+<Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />

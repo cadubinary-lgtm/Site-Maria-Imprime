@@ -3992,3 +3992,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir somente no mobile os botões circulares das setas do carrossel
 - [x] Preservar tamanho, posição e navegação atuais das setas no desktop
 - [x] Criar regressão e validar as setas reduzidas no mobile — TypeScript sem erros e 5 testes aprovados
+
+- [x] Criar página pública separada de Normas para envio da arte com as orientações fornecidas
+- [x] Tornar o conteúdo das normas editável no painel administrativo
+- [x] Direcionar Ver normas para envio da arte do configurador, em desktop e mobile, para a nova página
+- [x] Criar regressões e validar rotas públicas, edição administrativa e permissões — TypeScript sem erros e 12 testes aprovados
