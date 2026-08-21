@@ -455,6 +455,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         icon: <Settings className="w-4 h-4" />,
         children: [
           { label: "Informações do rodapé", href: "/admin/configuracoes-site/rodape" },
+          { label: "Normas de arte", href: "/admin/configuracoes-site/normas-de-arte" },
           { label: "Guia da Maria", href: "/admin/configuracoes-site/guia-da-maria" },
           { label: "Dados da Empresa", href: "/admin/configuracoes-site/dados-da-empresa" },
         ],

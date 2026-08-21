@@ -1,9 +1,28 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ArrowLeft, ChevronRight, FileText, Search, ShieldCheck, X } from "lucide-react";
 import { Link, useRoute } from "wouter";
 import { Footer } from "@/components/home/Footer";
 import { trpc } from "@/lib/trpc";
 import { mergeFooterContent, mergePublicDocuments } from "@/lib/siteContent";
+
+function InlineDocumentText({ value }: { value: string }) {
+  return <>{value.split(/(\*\*[^*]+\*\*)/g).map((part, index) => part.startsWith("**") && part.endsWith("**") ? <strong key={index}>{part.slice(2, -2)}</strong> : <Fragment key={index}>{part}</Fragment>)}</>;
+}
+
+function ArtworkGuidelinesBody({ content }: { content: string }) {
+  return <div className="space-y-6 text-sm leading-7 text-slate-700 sm:text-base">
+    {content.trim().split(/\n{2,}/).map((block, index) => {
+      const lines = block.split("\n").filter(Boolean);
+      const heading = lines[0] ?? "";
+      if (heading.startsWith("# ") || heading.startsWith("## ")) return <section key={index} className="border-b border-pink-100 pb-3"><h2 className="text-xl font-bold text-slate-900 sm:text-2xl">{heading.replace(/^#{1,2}\s*/, "")}</h2></section>;
+      if (heading.startsWith("### ")) return <h3 key={index} className="pt-2 text-lg font-bold text-pink-700">{heading.replace(/^###\s*/, "")}</h3>;
+      if (lines.every((line) => line.startsWith("* [ ] "))) return <ul key={index} className="grid gap-2 rounded-2xl border border-pink-100 bg-pink-50/70 p-5 sm:grid-cols-2">{lines.map((line) => <li key={line} className="flex gap-2 text-sm text-slate-700"><span className="mt-1 h-4 w-4 shrink-0 rounded border-2 border-pink-500" aria-hidden="true" /><InlineDocumentText value={line.replace("* [ ] ", "")} /></li>)}</ul>;
+      if (lines.every((line) => line.startsWith("* "))) return <ul key={index} className="space-y-2 pl-5 marker:text-pink-600">{lines.map((line) => <li key={line}><InlineDocumentText value={line.replace("* ", "")} /></li>)}</ul>;
+      const isNotice = heading.startsWith("**Atenção:") || heading.startsWith("**Importante:");
+      return <p key={index} className={isNotice ? "rounded-2xl border border-pink-200 bg-pink-50 px-5 py-4 text-slate-700" : ""}>{lines.map((line, lineIndex) => <Fragment key={lineIndex}><InlineDocumentText value={line} />{lineIndex < lines.length - 1 && <br />}</Fragment>)}</p>;
+    })}
+  </div>;
+}
 
 export default function DocumentationPage() {
   const [, params] = useRoute("/documentos/:documentId");
@@ -116,7 +135,7 @@ export default function DocumentationPage() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
               <div className="flex items-start gap-4 border-b border-slate-100 pb-6"><div className="rounded-2xl bg-pink-50 p-3 text-pink-600"><FileText className="h-6 w-6" /></div><div><p className="text-sm font-semibold text-pink-600">Documentação da Maria Imprime</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{currentDocument.title}</h1></div></div>
-              <div className="mt-8 whitespace-pre-line text-sm leading-7 text-slate-700 sm:text-base">{currentDocument.content}</div>
+              {currentDocument.slug === "normas-envio-arte" ? <div className="mt-8"><ArtworkGuidelinesBody content={currentDocument.content} /></div> : <div className="mt-8 whitespace-pre-line text-sm leading-7 text-slate-700 sm:text-base">{currentDocument.content}</div>}
             </article>
             <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-6" aria-label="Outros documentos">
               <h2 className="text-sm font-bold text-slate-900">Outros documentos</h2>
