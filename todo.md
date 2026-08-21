@@ -3944,3 +3944,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Posicionar Produtos e CRM — Clientes acima de Logística na barra lateral administrativa
 - [x] Criar regressão e validar a nova ordem da navegação sem alterar rotas ou permissões — teste confirmou Produtos → CRM — Clientes → Logística e preservação dos subitens
+
+- [x] Criar persistência para até 6 imagens de carrossel, com imagem, ordem e destino por segmento
+- [x] Criar Produtos → Carrossel no painel administrativo para adicionar, editar, ordenar e remover imagens
+- [x] Inserir o carrossel automático entre Ver todos os produtos e Como funciona, respeitando o contêiner lateral do site
+- [x] Adicionar botão Ver opções sobre cada imagem, direcionando ao segmento configurado
+- [x] Pausar a rotação automática ao passar o mouse ou focar o carrossel e respeitar preferências de movimento reduzido
+- [x] Criar regressões e validar o fluxo administrativo, a navegação pública e a responsividade — TypeScript sem erros e 4 testes aprovados; o carrossel público aguardará o primeiro envio de imagem pelo painel

@@ -45,6 +45,7 @@ import OrderTracking from "./pages/cliente/OrderTracking";
 // ─── Páginas Administrativas ─────────────────────────────────────────────────
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminHomeCarousel from "./pages/admin/AdminHomeCarousel";
 import AdminProductsDashboard from "./pages/admin/AdminProductsDashboard";
 import AdminNewProduct from "./pages/admin/AdminNewProduct";
 import AdminVariations from "./pages/admin/AdminVariations";
@@ -185,6 +186,7 @@ return (
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
+      <Route path="/admin/produtos/carrossel" component={AdminHomeCarousel} />
       <Route path="/admin/produtos" component={AdminProducts} />
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />
@@ -289,6 +291,7 @@ return (
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
+      <Route path="/admin/produtos/carrossel" component={AdminHomeCarousel} />
       <Route path="/admin/produtos" component={AdminProducts} />
       <Route path="/admin/novo-produto" component={AdminNewProduct} />
       <Route path="/admin/variacoes" component={AdminVariations} />
