@@ -26,6 +26,10 @@ describe("layout do configurador de produto", () => {
     expect(source).toContain('aria-expanded={isMobileProductInfoOpen}');
     expect(source).toContain('className={`space-y-3 ${isMobileProductInfoOpen ? "block" : "hidden"} lg:block`}');
     expect(source).toContain('lg:line-clamp-5');
+    expect(source).not.toContain("Solicitar orçamento");
+    expect(source).not.toContain("Precisa de ajuda?");
+    expect(source).not.toContain("handleExportBudget");
+    expect(source).not.toContain("showWhatsApp");
   });
 
   it("padroniza os controles interativos e CTAs do configurador na identidade rosa", () => {
@@ -33,7 +37,7 @@ describe("layout do configurador de produto", () => {
 
     expect(source).toContain("backgroundColor: isCompleted ? undefined : '#ec4899'");
     expect(source).toContain('bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl text-base h-12');
-    expect(source).toContain('border-pink-500 text-pink-700 hover:bg-pink-50');
+    expect(source).toContain('border-pink-300 text-pink-700 hover:bg-pink-50');
     expect(source).toContain('border-pink-500 bg-pink-50 shadow-sm');
   });
 
