@@ -12,6 +12,9 @@ const MAX_SLIDES = 6;
 const slideInput = z.object({
   imageUrl: z.string().min(1).max(4000),
   imageKey: z.string().max(255).optional(),
+  imageScale: z.number().min(1).max(2).default(1),
+  imagePositionX: z.number().int().min(0).max(100).default(50),
+  imagePositionY: z.number().int().min(0).max(100).default(50),
   segmentId: z.number().int().positive(),
 });
 
@@ -31,6 +34,9 @@ export const homeCarouselRouter = router({
       .select({
         id: homeCarouselSlides.id,
         imageUrl: homeCarouselSlides.imageUrl,
+        imageScale: homeCarouselSlides.imageScale,
+        imagePositionX: homeCarouselSlides.imagePositionX,
+        imagePositionY: homeCarouselSlides.imagePositionY,
         segmentId: homeCarouselSlides.segmentId,
         segmentName: segments.name,
         segmentSlug: segments.slug,
@@ -50,6 +56,9 @@ export const homeCarouselRouter = router({
         id: homeCarouselSlides.id,
         imageUrl: homeCarouselSlides.imageUrl,
         imageKey: homeCarouselSlides.imageKey,
+        imageScale: homeCarouselSlides.imageScale,
+        imagePositionX: homeCarouselSlides.imagePositionX,
+        imagePositionY: homeCarouselSlides.imagePositionY,
         segmentId: homeCarouselSlides.segmentId,
         segmentName: segments.name,
         segmentSlug: segments.slug,
@@ -73,6 +82,9 @@ export const homeCarouselRouter = router({
     const result = await db.insert(homeCarouselSlides).values({
       imageUrl: input.imageUrl,
       imageKey: input.imageKey || null,
+      imageScale: input.imageScale.toFixed(2),
+      imagePositionX: input.imagePositionX,
+      imagePositionY: input.imagePositionY,
       segmentId: input.segmentId,
       position,
       isActive: true,
@@ -87,6 +99,9 @@ export const homeCarouselRouter = router({
     await db.update(homeCarouselSlides).set({
       imageUrl: input.imageUrl,
       imageKey: input.imageKey || null,
+      imageScale: input.imageScale.toFixed(2),
+      imagePositionX: input.imagePositionX,
+      imagePositionY: input.imagePositionY,
       segmentId: input.segmentId,
       updatedAt: new Date(),
     }).where(eq(homeCarouselSlides.id, input.id));

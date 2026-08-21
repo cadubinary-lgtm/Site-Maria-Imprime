@@ -3951,3 +3951,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar botão Ver opções sobre cada imagem, direcionando ao segmento configurado
 - [x] Pausar a rotação automática ao passar o mouse ou focar o carrossel e respeitar preferências de movimento reduzido
 - [x] Criar regressões e validar o fluxo administrativo, a navegação pública e a responsividade — TypeScript sem erros e 4 testes aprovados; o carrossel público aguardará o primeiro envio de imagem pelo painel
+
+- [x] Permitir ampliar e reposicionar manualmente a imagem no editor do carrossel, sem distorção
+- [x] Persistir o enquadramento configurado e aplicá-lo à imagem no carrossel público
+- [x] Informar no editor as dimensões recomendadas em pixels e a proporção horizontal do carrossel
+- [x] Criar regressão e validar o novo fluxo de enquadramento de imagem — banco confirmado, TypeScript sem erros e 5 testes aprovados

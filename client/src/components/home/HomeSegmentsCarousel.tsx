@@ -60,7 +60,7 @@ export function HomeSegmentsCarousel() {
         </div>
 
         <div className="relative overflow-hidden rounded-3xl border border-pink-100 bg-pink-50 shadow-sm">
-          <div className="relative aspect-[16/9] overflow-hidden sm:aspect-[16/6]">
+          <div className="relative aspect-[8/3] overflow-hidden">
             {slides.map((slide, index) => (
               <article
                 key={slide.id}
@@ -69,7 +69,7 @@ export function HomeSegmentsCarousel() {
                 aria-hidden={index !== activeIndex}
                 className={`absolute inset-0 transition-[opacity,transform] duration-500 motion-reduce:transition-none ${index === activeIndex ? "translate-x-0 opacity-100" : "translate-x-3 opacity-0 pointer-events-none"}`}
               >
-                <img src={slide.imageUrl} alt={`Conheça produtos do segmento ${slide.segmentName}`} className="h-full w-full object-cover" />
+                <img src={slide.imageUrl} alt={`Conheça produtos do segmento ${slide.segmentName}`} className="h-full w-full object-cover" style={{ objectPosition: `${slide.imagePositionX}% ${slide.imagePositionY}%`, transform: `scale(${Number(slide.imageScale)})`, transformOrigin: `${slide.imagePositionX}% ${slide.imagePositionY}%` }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/5 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-3 p-5 sm:p-8">
                   <p className="text-sm font-semibold text-white drop-shadow-sm sm:text-base">{slide.segmentName}</p>
