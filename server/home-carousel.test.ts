@@ -79,6 +79,9 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain('aria-roledescription="carrossel"');
     expect(publicCarousel).toContain("navigate(`/catalogo?segmentId=${slide.segmentId}`)");
     expect(publicCarousel).toContain(">Ver opções</button>");
+    expect(publicCarousel).toContain("items-end p-3 sm:items-start sm:p-8");
+    expect(publicCarousel).toContain("px-1.5 py-1 text-[9px]");
+    expect(publicCarousel).toContain("sm:px-5 sm:py-2.5 sm:text-sm");
     expect(publicCarousel).not.toContain(">{slide.segmentName}</p>");
     expect(home).toContain("<FeaturedProducts />");
     expect(home).toContain("<HomeSegmentsCarousel />");
