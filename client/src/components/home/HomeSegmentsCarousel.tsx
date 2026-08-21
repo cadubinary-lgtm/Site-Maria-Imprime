@@ -88,8 +88,7 @@ export function HomeSegmentsCarousel() {
               >
                 <img src={slide.imageUrl} alt={`Conheça produtos do segmento ${slide.segmentName}`} className="h-full w-full object-cover" style={{ objectPosition: `${slide.imagePositionX}% ${slide.imagePositionY}%`, transform: `scale(${Number(slide.imageScale)})`, transformOrigin: `${slide.imagePositionX}% ${slide.imagePositionY}%` }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/5 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-3 p-5 sm:p-8">
-                  <p className="text-sm font-semibold text-white drop-shadow-sm sm:text-base">{slide.segmentName}</p>
+                <div className="absolute inset-x-0 bottom-0 flex items-start p-5 sm:p-8">
                   <button type="button" onClick={() => navigate(`/catalogo?segmentId=${slide.segmentId}`)} tabIndex={index === activeIndex ? 0 : -1} className="rounded-full bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-pink-700 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-pink-600">Ver opções</button>
                 </div>
               </article>
