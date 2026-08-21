@@ -64,6 +64,10 @@ describe("carrossel administrável da página inicial", () => {
   it("insere um carrossel acessível, automático e pausável entre produtos e como funciona", () => {
     expect(publicCarousel).toContain("AUTOPLAY_INTERVAL_MS = 5000");
     expect(publicCarousel).toContain("prefers-reduced-motion: reduce");
+    expect(publicCarousel).toContain("transition-[opacity,transform,filter]");
+    expect(publicCarousel).toContain("duration-700");
+    expect(publicCarousel).toContain("ease-[cubic-bezier(0.22,1,0.36,1)]");
+    expect(publicCarousel).toContain("motion-reduce:transition-none");
     expect(publicCarousel).toContain("onMouseEnter={() => setIsPaused(true)}");
     expect(publicCarousel).toContain("onFocusCapture={() => setIsPaused(true)}");
     expect(publicCarousel).toContain('aria-roledescription="carrossel"');
