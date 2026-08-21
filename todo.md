@@ -3981,3 +3981,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Centralizar o card ativo somente no mobile ao navegar pelas setas do carrossel de Acesso rápido
 - [x] Preservar a navegação atual do desktop e criar regressão da centralização mobile — TypeScript sem erros e 3 testes aprovados
+
+- [x] Remover a mensagem de pausa e navegação exibida abaixo do carrossel em desktop e mobile
+- [x] Criar regressão e validar a ausência da mensagem de orientação — TypeScript sem erros e 5 testes aprovados

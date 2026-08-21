@@ -103,7 +103,6 @@ export function HomeSegmentsCarousel() {
             </div>
           </>}
         </div>
-        {totalSlides > 1 && <p className="mt-3 text-xs text-slate-500">A reprodução pausa ao passar o mouse ou navegar pelo carrossel.</p>}
       </div>
     </section>
   );
