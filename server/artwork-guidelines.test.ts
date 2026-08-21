@@ -16,8 +16,10 @@ describe("normas para envio de arte", () => {
 
   it("direciona o configurador para a página específica em todos os layouts", () => {
     const mariaGuide = read("client/src/components/products/MariaGuide.tsx");
+    const checklist = read("client/src/components/home/PrePrintChecklist.tsx");
     expect(mariaGuide).toContain('href="/documentos/normas-envio-arte"');
     expect(mariaGuide).toContain('aria-label="Ver normas para envio da arte"');
+    expect(checklist.match(/href="\/documentos\/normas-envio-arte"/g)?.length).toBe(2);
   });
 
   it("oferece edição administrativa dedicada com publicação e visualização pública", () => {

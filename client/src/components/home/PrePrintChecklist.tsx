@@ -65,7 +65,7 @@ export function PrePrintChecklist() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/documentos" className={`${HOME_SECONDARY_ACTION_CLASS} mt-7 w-fit px-4 py-2 text-sm`}>
+                <Link href="/documentos/normas-envio-arte" className={`${HOME_SECONDARY_ACTION_CLASS} mt-7 w-fit px-4 py-2 text-sm`}>
                   Ver normas para envio de arte
                 </Link>
               </div>
@@ -131,7 +131,7 @@ export function PrePrintChecklist() {
                   ))}
                 </ul>
               </div>
-              <Link href="/documentos" className={`${HOME_SECONDARY_ACTION_CLASS} mt-5 w-full px-4 py-2 text-center text-sm`}>
+              <Link href="/documentos/normas-envio-arte" className={`${HOME_SECONDARY_ACTION_CLASS} mt-5 w-full px-4 py-2 text-center text-sm`}>
                 Ver normas para envio de arte
               </Link>
             </div>
