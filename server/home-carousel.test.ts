@@ -13,6 +13,7 @@ describe("carrossel administrável da página inicial", () => {
   const home = read("client/src/pages/public/Home.tsx");
   const app = read("client/src/App.tsx");
   const navigation = read("client/src/components/AdminLayout.tsx");
+  const framingMigration = read("drizzle/0066_add_home_carousel_image_framing.sql");
 
   it("persiste imagem, posição e segmento de destino", () => {
     expect(schema).toContain('export const homeCarouselSlides = mysqlTable("homeCarouselSlides"');
@@ -32,6 +33,22 @@ describe("carrossel administrável da página inicial", () => {
     expect(router).toContain("update: adminAnyProcedure");
     expect(router).toContain("remove: adminAnyProcedure");
     expect(router).toContain("reorder: adminAnyProcedure");
+  });
+
+  it("persiste e aplica a escala e a posição escolhidas para enquadrar cada imagem", () => {
+    expect(schema).toContain('imageScale: decimal("imageScale", { precision: 4, scale: 2 }).notNull().default("1.00")');
+    expect(schema).toContain('imagePositionX: int("imagePositionX").notNull().default(50)');
+    expect(schema).toContain('imagePositionY: int("imagePositionY").notNull().default(50)');
+    expect(framingMigration).toContain("ADD COLUMN `imageScale` decimal(4,2) NOT NULL DEFAULT 1.00");
+    expect(router).toContain("imageScale: z.number().min(1).max(2).default(1)");
+    expect(router).toContain("imagePositionX: z.number().int().min(0).max(100).default(50)");
+    expect(router).toContain("imageScale: input.imageScale.toFixed(2)");
+    expect(adminPage).toContain("Tamanho recomendado: {RECOMMENDED_IMAGE_SIZE}");
+    expect(adminPage).toContain("Enquadramento da imagem");
+    expect(adminPage).toContain('id="carousel-image-scale"');
+    expect(adminPage).toContain("Redefinir");
+    expect(publicCarousel).toContain("transform: `scale(${Number(slide.imageScale)})`");
+    expect(publicCarousel).toContain("objectPosition: `${slide.imagePositionX}% ${slide.imagePositionY}%`");
   });
 
   it("inclui Produtos → Carrossel e a rota protegida nos dois ambientes", () => {
