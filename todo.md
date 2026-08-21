@@ -4022,3 +4022,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Afastar o título Como funciona do carrossel acima
 - [x] Aproximar o título Como funciona das etapas inferiores sem alterar os cards
 - [x] Criar regressão e validar o novo espaçamento da seção em desktop e mobile — TypeScript sem erros, 6 testes aprovados e conferência visual concluída
+
+- [x] Aplicar ao botão Ver normas para envio da arte o mesmo padrão visual do botão Fazer meu pedido
+- [x] Manter a ação de abrir as normas em desktop e mobile após a padronização
+- [x] Criar regressão e validar o botão padronizado em todas as resoluções — TypeScript sem erros e 4 testes aprovados

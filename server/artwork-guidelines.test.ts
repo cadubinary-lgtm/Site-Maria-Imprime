@@ -20,6 +20,9 @@ describe("normas para envio de arte", () => {
     expect(mariaGuide).toContain('href="/documentos/normas-envio-arte"');
     expect(mariaGuide).toContain('aria-label="Ver normas para envio da arte"');
     expect(checklist.match(/href="\/documentos\/normas-envio-arte"/g)?.length).toBe(2);
+    expect(checklist).toContain('import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles"');
+    expect(checklist.match(/\$\{HOME_PRIMARY_ACTION_CLASS\}/g)?.length).toBe(2);
+    expect(checklist).not.toContain("HOME_SECONDARY_ACTION_CLASS");
   });
 
   it("oferece edição administrativa dedicada com publicação e visualização pública", () => {
