@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const MASCOTE = "/manus-storage/mascote7v2_02cfb9a3.webp";
 const FUNDO   = "/manus-storage/fundorosa2_7ec48199.webp";
@@ -65,7 +65,7 @@ export function PrePrintChecklist() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/documentos/normas-envio-arte" className={`${HOME_SECONDARY_ACTION_CLASS} mt-7 w-fit px-4 py-2 text-sm`}>
+                <Link href="/documentos/normas-envio-arte" className={`${HOME_PRIMARY_ACTION_CLASS} mt-7 w-fit`}>
                   Ver normas para envio de arte
                 </Link>
               </div>
@@ -131,7 +131,7 @@ export function PrePrintChecklist() {
                   ))}
                 </ul>
               </div>
-              <Link href="/documentos/normas-envio-arte" className={`${HOME_SECONDARY_ACTION_CLASS} mt-5 w-full px-4 py-2 text-center text-sm`}>
+              <Link href="/documentos/normas-envio-arte" className={`${HOME_PRIMARY_ACTION_CLASS} mt-5 w-fit`}>
                 Ver normas para envio de arte
               </Link>
             </div>
