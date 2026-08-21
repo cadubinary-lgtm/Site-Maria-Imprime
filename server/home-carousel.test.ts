@@ -76,6 +76,8 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain("onFocusCapture={() => setIsPaused(true)}");
     expect(publicCarousel).toContain('aria-roledescription="carrossel"');
     expect(publicCarousel).toContain("navigate(`/catalogo?segmentId=${slide.segmentId}`)");
+    expect(publicCarousel).toContain(">Ver opções</button>");
+    expect(publicCarousel).not.toContain(">{slide.segmentName}</p>");
     expect(home).toContain("<FeaturedProducts />");
     expect(home).toContain("<HomeSegmentsCarousel />");
     expect(home).toContain("<HowItWorks />");

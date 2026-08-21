@@ -3967,3 +3967,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o efeito de dissolução pela transição lateral entre imagens do carrossel
 - [x] Garantir que autoplay e navegação retornem à primeira imagem depois da última
 - [x] Criar regressão e validar a transição lateral com redução de movimento — TypeScript sem erros e 5 testes aprovados
+
+- [x] Remover o nome do segmento exibido acima do botão Ver opções no carrossel
+- [x] Criar regressão e validar que o botão de ação permanece disponível — TypeScript sem erros e 5 testes aprovados
