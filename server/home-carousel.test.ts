@@ -86,6 +86,10 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain("sm:h-10 sm:w-10");
     expect(publicCarousel).toContain("h-3 w-3 sm:h-5 sm:w-5");
     expect(publicCarousel).not.toContain(">{slide.segmentName}</p>");
+    expect(publicCarousel).not.toContain("Conheça nossos segmentos");
+    expect(publicCarousel).not.toContain("Encontre a opção certa para o seu projeto");
+    expect(publicCarousel).toContain('aria-label="Carrossel de ofertas por segmento"');
+    expect(publicCarousel).toContain("{activeIndex + 1} de {totalSlides}");
     expect(home).toContain("<FeaturedProducts />");
     expect(home).toContain("<HomeSegmentsCarousel />");
     expect(home).toContain("<HowItWorks />");
