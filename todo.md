@@ -4030,3 +4030,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Igualar a largura e a altura do botão Ver normas ao botão Fazer meu pedido
 - [x] Centralizar o botão Ver normas no mesmo eixo vertical do botão Fazer meu pedido em desktop e mobile
 - [x] Criar regressão e validar a equivalência de medidas e alinhamento dos botões — TypeScript sem erros, 4 testes aprovados e comparação no navegador confirmada (160 × 44 px)
+
+- [x] Remover a sobreposição do botão Ver normas sobre as informações do checklist
+- [x] Manter o botão centralizado em uma área própria abaixo da lista de conferência
+- [x] Preservar dimensões idênticas ao botão Fazer meu pedido e validar o layout — TypeScript sem erros, 4 testes aprovados e 37,5 px de área livre confirmados no navegador

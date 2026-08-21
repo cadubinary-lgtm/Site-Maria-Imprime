@@ -37,7 +37,7 @@ export function PrePrintChecklist() {
                 DESKTOP / TABLET (md+) — layout original
                 Mascote absoluta à esquerda, conteúdo à direita
             ══════════════════════════════════════════ */}
-            <div className="hidden md:flex flex-row items-stretch" style={{ minHeight: "300px" }}>
+            <div className="hidden md:flex flex-row items-stretch" style={{ minHeight: "360px" }}>
               {/* Espaço reservado para a mascote */}
               <div className="flex-shrink-0" style={{ width: "280px" }} />
 
@@ -46,7 +46,7 @@ export function PrePrintChecklist() {
                 paddingLeft: 'clamp(1rem, 5vw, 165px)',
                 paddingRight: 'clamp(1rem, 5vw, 45px)',
                 paddingTop: '47px',
-                paddingBottom: '10px',
+                paddingBottom: '80px',
               }}>
                 <h2 className="mb-2 text-2xl font-black leading-tight text-gray-900 lg:text-3xl" style={{ fontFamily: FONT }}>
                   Antes de imprimir,{" "}
