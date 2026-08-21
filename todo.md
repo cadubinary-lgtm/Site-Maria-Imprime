@@ -3960,3 +3960,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover a seção “Por que escolher a Maria Imprime?” da página inicial
 - [x] Reposicionar o carrossel administrável exatamente no local da seção removida
 - [x] Criar regressão e validar a nova ordem da página inicial — TypeScript sem erros e 5 testes aprovados
+
+- [x] Aplicar uma transição visual mais suave na troca de imagens do carrossel
+- [x] Preservar o comportamento de prefers-reduced-motion e criar regressão do efeito — TypeScript sem erros e 5 testes aprovados
