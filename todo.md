@@ -3984,3 +3984,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover a mensagem de pausa e navegação exibida abaixo do carrossel em desktop e mobile
 - [x] Criar regressão e validar a ausência da mensagem de orientação — TypeScript sem erros e 5 testes aprovados
+
+- [x] Reduzir em aproximadamente 80% o botão Ver opções somente no carrossel mobile
+- [x] Reposicionar o botão reduzido um pouco mais abaixo no mobile, preservando o desktop
+- [x] Criar regressão e validar o novo botão mobile — TypeScript sem erros e 5 testes aprovados
