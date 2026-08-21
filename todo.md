@@ -4018,3 +4018,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover o título Conheça nossos segmentos acima do carrossel de segmentos
 - [x] Remover o subtítulo Encontre a opção certa para o seu projeto sem alterar o carrossel
 - [x] Criar regressão e validar a preservação do contador, imagens e navegação do carrossel — TypeScript sem erros, 5 testes aprovados e conferência visual concluída
+
+- [x] Afastar o título Como funciona do carrossel acima
+- [x] Aproximar o título Como funciona das etapas inferiores sem alterar os cards
+- [x] Criar regressão e validar o novo espaçamento da seção em desktop e mobile — TypeScript sem erros, 6 testes aprovados e conferência visual concluída

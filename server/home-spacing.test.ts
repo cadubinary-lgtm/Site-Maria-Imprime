@@ -16,7 +16,8 @@ describe("espaçamento vertical da página inicial", () => {
 
     expect(featuredProducts).toContain("pt-10 pb-3 sm:pt-12 sm:pb-4");
     expect(carousel).toContain("pt-0 pb-3 sm:px-6 sm:pt-0 sm:pb-5");
-    expect(howItWorks).toContain("pt-5 pb-3 lg:px-8 lg:pt-7 lg:pb-4");
+    expect(howItWorks).toContain("pt-5 pb-3 lg:px-8 lg:pt-12 lg:pb-4");
+    expect(howItWorks).toContain("mb-3 text-center lg:mb-2");
     expect(howItWorks).toContain("mx-auto max-w-7xl");
     expect(checklist).toContain("pt-3 pb-5 lg:px-8");
     expect(checklist).toContain("mx-auto max-w-7xl");
