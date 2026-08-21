@@ -4009,3 +4009,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a abertura no topo de DocumentationPage ao navegar entre documentos
 - [x] Garantir a abertura no topo nas páginas públicas acionadas pelo rodapé
 - [x] Criar regressão e validar a restauração de rolagem das páginas públicas — TypeScript sem erros e 5 testes aprovados
+
+- [x] Manter recolhidos por padrão os blocos internos da página Informações do rodapé
+- [x] Adicionar setas acessíveis para expandir e encolher cada bloco de edição do rodapé
+- [x] Tornar visível o acesso de edição às Normas para envio de arte dentro de Configurações do site
+- [x] Criar regressão e validar a organização recolhível da página administrativa — TypeScript sem erros e 5 testes aprovados
