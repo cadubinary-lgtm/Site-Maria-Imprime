@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -421,6 +422,18 @@ function AppLayout() {
   const { isOpen } = useCartDrawer();
   const [location] = useLocation();
   const isAdminRoute = location.startsWith("/admin") || location.startsWith("/producao");
+
+  useEffect(() => {
+    if (isAdminRoute) return;
+
+    const resetPublicScroll = () => {
+      document.getElementById("public-site-scroll-container")?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    };
+
+    const frameId = window.requestAnimationFrame(resetPublicScroll);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isAdminRoute, location]);
 
   // Rotas admin não usam o Header do e-commerce nem o CartSidePanel
   if (isAdminRoute) {

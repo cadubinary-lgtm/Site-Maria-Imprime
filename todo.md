@@ -4005,3 +4005,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir todos os controles Ver normas para envio da arte para /documentos/normas-envio-arte
 - [x] Confirmar o mesmo destino do link em desktop e mobile
 - [x] Criar regressão e validar os destinos específicos das normas de arte — TypeScript sem erros e 3 testes aprovados
+
+- [x] Corrigir a abertura no topo de DocumentationPage ao navegar entre documentos
+- [x] Garantir a abertura no topo nas páginas públicas acionadas pelo rodapé
+- [x] Criar regressão e validar a restauração de rolagem das páginas públicas — TypeScript sem erros e 5 testes aprovados
