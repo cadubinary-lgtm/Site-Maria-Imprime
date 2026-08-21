@@ -82,6 +82,9 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain("items-end p-3 sm:items-start sm:p-8");
     expect(publicCarousel).toContain("px-1.5 py-1 text-[9px]");
     expect(publicCarousel).toContain("sm:px-5 sm:py-2.5 sm:text-sm");
+    expect(publicCarousel).toContain("h-6 w-6");
+    expect(publicCarousel).toContain("sm:h-10 sm:w-10");
+    expect(publicCarousel).toContain("h-3 w-3 sm:h-5 sm:w-5");
     expect(publicCarousel).not.toContain(">{slide.segmentName}</p>");
     expect(home).toContain("<FeaturedProducts />");
     expect(home).toContain("<HomeSegmentsCarousel />");
