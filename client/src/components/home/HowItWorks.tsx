@@ -45,7 +45,7 @@ const ARROW_URL = "/manus-storage/SETA_e3737895.webp";
 
 export function HowItWorks() {
   return (
-    <section className="bg-white px-4 py-8 lg:px-8 lg:py-16" aria-labelledby="how-it-works-title">
+    <section className="bg-white px-4 pt-8 pb-5 lg:px-8 lg:pt-12 lg:pb-6" aria-labelledby="how-it-works-title">
       <div className="max-w-6xl mx-auto">
         {/* Título */}
         <div className="text-center mb-6 lg:mb-10">

@@ -27,7 +27,7 @@ export function FeaturedProducts() {
   const featured = (products ?? []).filter((product: any) => Boolean(product.isActive)).slice(0, 7);
 
   return (
-    <section className="bg-white px-4 py-16 sm:py-20" aria-labelledby="featured-products-title">
+    <section className="bg-white px-4 pt-16 pb-6 sm:pt-20 sm:pb-8" aria-labelledby="featured-products-title">
       <div className="mx-auto max-w-7xl">
         <h2 id="featured-products-title" className="mb-3 text-center text-3xl font-bold text-gray-900">Produtos em destaque</h2>
         <p className="mb-10 text-center text-sm text-gray-600 sm:mb-12">Conheça opções para os seus materiais de comunicação visual.</p>
