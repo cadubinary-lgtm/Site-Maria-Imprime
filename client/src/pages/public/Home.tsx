@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/home/HeroSection";
 import { CategoriesCarousel } from "@/components/home/CategoriesCarousel";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
+import { HomeSegmentsCarousel } from "@/components/home/HomeSegmentsCarousel";
 
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { HowItWorks } from "@/components/home/HowItWorks";
@@ -22,6 +23,9 @@ export default function Home() {
 
       {/* Why Choose Us */}
       <WhyChooseUs />
+
+      {/* Segment carousel */}
+      <HomeSegmentsCarousel />
 
       {/* How It Works */}
       <HowItWorks />

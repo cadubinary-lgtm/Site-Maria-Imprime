@@ -184,6 +184,24 @@ export type Segment = typeof segments.$inferSelect;
 export type InsertSegment = typeof segments.$inferInsert;
 
 /**
+ * Slides promocionais administráveis exibidos na página inicial.
+ * Cada slide é direcionado obrigatoriamente a um segmento do catálogo.
+ */
+export const homeCarouselSlides = mysqlTable("homeCarouselSlides", {
+  id: int("id").autoincrement().primaryKey(),
+  imageUrl: text("imageUrl").notNull(),
+  imageKey: varchar("imageKey", { length: 255 }),
+  segmentId: int("segmentId").notNull(),
+  position: int("position").notNull().default(0),
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type HomeCarouselSlide = typeof homeCarouselSlides.$inferSelect;
+export type InsertHomeCarouselSlide = typeof homeCarouselSlides.$inferInsert;
+
+/**
  * Categories table - categorias dentro de segmentos
  */
 export const categories = mysqlTable("categories", {
