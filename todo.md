@@ -3974,3 +3974,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o flash de um terceiro slide durante a troca lateral de imagens
 - [x] Garantir que somente a imagem de saída e a imagem de entrada participem da animação
 - [x] Criar regressão e validar a transição sem slides intermitentes — TypeScript sem erros e 5 testes aprovados
+
+- [x] Aproximar o carrossel do botão Ver todos os produtos na página inicial
+- [x] Reduzir o espaço branco após a seção Como funciona
+- [x] Criar regressão e validar os espaçamentos ajustados em desktop e mobile — TypeScript sem erros e 6 testes aprovados

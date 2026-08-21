@@ -50,7 +50,7 @@ export function HomeSegmentsCarousel() {
   };
 
   return (
-    <section className="bg-white px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="home-carousel-title">
+    <section className="bg-white px-4 pt-0 pb-6 sm:px-6 sm:pt-0 sm:pb-8 lg:px-8" aria-labelledby="home-carousel-title">
       <div
         className="mx-auto max-w-7xl"
         role="region"
