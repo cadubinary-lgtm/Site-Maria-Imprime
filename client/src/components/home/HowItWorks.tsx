@@ -45,10 +45,10 @@ const ARROW_URL = "/manus-storage/SETA_e3737895.webp";
 
 export function HowItWorks() {
   return (
-    <section className="bg-white px-4 pt-8 pb-5 lg:px-8 lg:pt-12 lg:pb-6" aria-labelledby="how-it-works-title">
-      <div className="max-w-6xl mx-auto">
+    <section className="bg-white px-4 pt-5 pb-3 lg:px-8 lg:pt-7 lg:pb-4" aria-labelledby="how-it-works-title">
+      <div className="mx-auto max-w-7xl">
         {/* Título */}
-        <div className="text-center mb-6 lg:mb-10">
+        <div className="mb-4 text-center lg:mb-6">
           <h2 id="how-it-works-title" className="mb-3 text-2xl font-bold text-gray-800 lg:text-4xl">
             Como funciona
           </h2>
@@ -143,7 +143,7 @@ export function HowItWorks() {
         </div>
 
         {/* Botão CTA */}
-        <div className="flex justify-center mt-6 lg:mt-12">
+        <div className="mt-4 flex justify-center lg:mt-8">
           <Link href="/catalogo" className={`${HOME_PRIMARY_ACTION_CLASS} px-7 sm:px-8`}>
             Fazer meu pedido
           </Link>

@@ -18,9 +18,9 @@ const FONT = "'Bahnschrift', 'Segoe UI', sans-serif";
 
 export function PrePrintChecklist() {
   return (
-    <section className="w-full bg-white px-4 pt-5 pb-10 lg:px-8" aria-label="Conferência de arquivo antes da produção">
-      <div className="max-w-6xl mx-auto">
-        <div className="relative" style={{ paddingTop: '19px' }}>
+    <section className="w-full bg-white px-4 pt-3 pb-5 lg:px-8" aria-label="Conferência de arquivo antes da produção">
+      <div className="mx-auto max-w-7xl">
+        <div className="relative" style={{ paddingTop: '12px' }}>
 
           {/* ── CARD ROSA ── */}
           <div

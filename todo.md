@@ -3997,3 +3997,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Tornar o conteúdo das normas editável no painel administrativo
 - [x] Direcionar Ver normas para envio da arte do configurador, em desktop e mobile, para a nova página
 - [x] Criar regressões e validar rotas públicas, edição administrativa e permissões — TypeScript sem erros e 12 testes aprovados
+
+- [x] Compactar os espaços verticais entre as seções da página inicial sem alterar a estrutura
+- [x] Alinhar os limites laterais das seções principais em desktop e mobile
+- [x] Criar regressão e validar o novo ritmo visual responsivo da home — TypeScript sem erros e 1 teste aprovado
