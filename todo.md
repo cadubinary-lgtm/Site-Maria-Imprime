@@ -3988,3 +3988,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir em aproximadamente 80% o botão Ver opções somente no carrossel mobile
 - [x] Reposicionar o botão reduzido um pouco mais abaixo no mobile, preservando o desktop
 - [x] Criar regressão e validar o novo botão mobile — TypeScript sem erros e 5 testes aprovados
+
+- [x] Reduzir somente no mobile os botões circulares das setas do carrossel
+- [x] Preservar tamanho, posição e navegação atuais das setas no desktop
+- [x] Criar regressão e validar as setas reduzidas no mobile — TypeScript sem erros e 5 testes aprovados
