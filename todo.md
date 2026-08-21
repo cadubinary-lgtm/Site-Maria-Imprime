@@ -4001,3 +4001,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Compactar os espaços verticais entre as seções da página inicial sem alterar a estrutura
 - [x] Alinhar os limites laterais das seções principais em desktop e mobile
 - [x] Criar regressão e validar o novo ritmo visual responsivo da home — TypeScript sem erros e 1 teste aprovado
+
+- [x] Corrigir todos os controles Ver normas para envio da arte para /documentos/normas-envio-arte
+- [x] Confirmar o mesmo destino do link em desktop e mobile
+- [x] Criar regressão e validar os destinos específicos das normas de arte — TypeScript sem erros e 3 testes aprovados
