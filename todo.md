@@ -3970,3 +3970,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Remover o nome do segmento exibido acima do botão Ver opções no carrossel
 - [x] Criar regressão e validar que o botão de ação permanece disponível — TypeScript sem erros e 5 testes aprovados
+
+- [x] Corrigir o flash de um terceiro slide durante a troca lateral de imagens
+- [x] Garantir que somente a imagem de saída e a imagem de entrada participem da animação
+- [x] Criar regressão e validar a transição sem slides intermitentes — TypeScript sem erros e 5 testes aprovados

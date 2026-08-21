@@ -71,6 +71,7 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain("ease-[cubic-bezier(0.22,1,0.36,1)]");
     expect(publicCarousel).toContain('"translate-x-full"');
     expect(publicCarousel).toContain('"-translate-x-full"');
+    expect(publicCarousel).toContain("invisible ${incomingPosition} pointer-events-none");
     expect(publicCarousel).toContain("motion-reduce:transition-none");
     expect(publicCarousel).toContain("onMouseEnter={() => setIsPaused(true)}");
     expect(publicCarousel).toContain("onFocusCapture={() => setIsPaused(true)}");
