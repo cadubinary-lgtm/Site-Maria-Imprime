@@ -84,7 +84,7 @@ export function HomeSegmentsCarousel() {
                 aria-roledescription="slide"
                 aria-label={`${index + 1} de ${totalSlides}: ${slide.segmentName}`}
                 aria-hidden={!isActive}
-                className={`absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isActive ? "translate-x-0" : isLeaving ? `${leavingPosition} pointer-events-none` : `${incomingPosition} pointer-events-none`}`}
+                className={`absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isActive ? "translate-x-0" : isLeaving ? `${leavingPosition} pointer-events-none` : `invisible ${incomingPosition} pointer-events-none`}`}
               >
                 <img src={slide.imageUrl} alt={`Conheça produtos do segmento ${slide.segmentName}`} className="h-full w-full object-cover" style={{ objectPosition: `${slide.imagePositionX}% ${slide.imagePositionY}%`, transform: `scale(${Number(slide.imageScale)})`, transformOrigin: `${slide.imagePositionX}% ${slide.imagePositionY}%` }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/5 to-transparent" />
