@@ -65,9 +65,6 @@ export function PrePrintChecklist() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/documentos/normas-envio-arte" className={`${HOME_PRIMARY_ACTION_CLASS} mt-7 w-fit`}>
-                  Ver normas para envio de arte
-                </Link>
               </div>
             </div>
 
@@ -89,6 +86,10 @@ export function PrePrintChecklist() {
               }}
               draggable={false}
             />
+
+            <Link href="/documentos/normas-envio-arte" aria-label="Ver normas para envio da arte" className={`${HOME_PRIMARY_ACTION_CLASS} absolute bottom-4 left-1/2 hidden w-40 -translate-x-1/2 !px-0 md:inline-flex`}>
+              Ver normas
+            </Link>
 
             {/* ══════════════════════════════════════════
                 MOBILE (<md) — layout da imagem enviada:
@@ -131,9 +132,9 @@ export function PrePrintChecklist() {
                   ))}
                 </ul>
               </div>
-              <Link href="/documentos/normas-envio-arte" className={`${HOME_PRIMARY_ACTION_CLASS} mt-5 w-fit`}>
-                Ver normas para envio de arte
-              </Link>
+              <div className="mt-5 flex justify-center"><Link href="/documentos/normas-envio-arte" aria-label="Ver normas para envio da arte" className={`${HOME_PRIMARY_ACTION_CLASS} w-40 !px-0`}>
+                Ver normas
+              </Link></div>
             </div>
 
           </div>

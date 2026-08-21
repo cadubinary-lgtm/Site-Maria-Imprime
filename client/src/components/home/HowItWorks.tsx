@@ -144,7 +144,7 @@ export function HowItWorks() {
 
         {/* Botão CTA */}
         <div className="mt-4 flex justify-center lg:mt-8">
-          <Link href="/catalogo" className={`${HOME_PRIMARY_ACTION_CLASS} px-7 sm:px-8`}>
+          <Link href="/catalogo" className={`${HOME_PRIMARY_ACTION_CLASS} w-40 !px-0`}>
             Fazer meu pedido
           </Link>
         </div>

@@ -4026,3 +4026,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aplicar ao botão Ver normas para envio da arte o mesmo padrão visual do botão Fazer meu pedido
 - [x] Manter a ação de abrir as normas em desktop e mobile após a padronização
 - [x] Criar regressão e validar o botão padronizado em todas as resoluções — TypeScript sem erros e 4 testes aprovados
+
+- [x] Igualar a largura e a altura do botão Ver normas ao botão Fazer meu pedido
+- [x] Centralizar o botão Ver normas no mesmo eixo vertical do botão Fazer meu pedido em desktop e mobile
+- [x] Criar regressão e validar a equivalência de medidas e alinhamento dos botões — TypeScript sem erros, 4 testes aprovados e comparação no navegador confirmada (160 × 44 px)
