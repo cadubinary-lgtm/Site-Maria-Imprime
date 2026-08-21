@@ -75,6 +75,7 @@ describe("carrossel administrável da página inicial", () => {
     expect(publicCarousel).toContain("motion-reduce:transition-none");
     expect(publicCarousel).toContain("onMouseEnter={() => setIsPaused(true)}");
     expect(publicCarousel).toContain("onFocusCapture={() => setIsPaused(true)}");
+    expect(publicCarousel).not.toContain("A reprodução pausa ao passar o mouse ou navegar pelo carrossel.");
     expect(publicCarousel).toContain('aria-roledescription="carrossel"');
     expect(publicCarousel).toContain("navigate(`/catalogo?segmentId=${slide.segmentId}`)");
     expect(publicCarousel).toContain(">Ver opções</button>");
