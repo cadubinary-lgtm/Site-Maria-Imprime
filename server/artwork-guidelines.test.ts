@@ -26,6 +26,8 @@ describe("normas para envio de arte", () => {
     expect(checklist.match(/w-40/g)?.length).toBe(2);
     expect(checklist.match(/!px-0/g)?.length).toBe(2);
     expect(checklist).toContain("absolute bottom-4 left-1/2 hidden w-40 -translate-x-1/2 !px-0 md:inline-flex");
+    expect(checklist).toContain('style={{ minHeight: "360px" }}');
+    expect(checklist).toContain("paddingBottom: '80px'");
     expect(checklist).toContain('<div className="mt-5 flex justify-center">');
     expect(checklist.match(/>\s*Ver normas\s*</g)?.length).toBe(2);
     const howItWorks = read("client/src/components/home/HowItWorks.tsx");
