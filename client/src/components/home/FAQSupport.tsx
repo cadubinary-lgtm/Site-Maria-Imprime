@@ -25,7 +25,7 @@ export function FAQSupport() {
   ];
 
   return (
-    <section className="relative px-4 py-14 sm:py-16 lg:px-8 lg:py-20" aria-labelledby="faq-support-title">
+    <section className="relative px-4 py-8 sm:py-10 lg:px-8 lg:py-12" aria-labelledby="faq-support-title">
       {/* Fundo com gradiente rosa suave */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-pink-50 -z-10" />
 

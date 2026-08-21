@@ -50,7 +50,7 @@ export function HomeSegmentsCarousel() {
   };
 
   return (
-    <section className="bg-white px-4 pt-0 pb-6 sm:px-6 sm:pt-0 sm:pb-8 lg:px-8" aria-labelledby="home-carousel-title">
+    <section className="bg-white px-4 pt-0 pb-3 sm:px-6 sm:pt-0 sm:pb-5 lg:px-8" aria-labelledby="home-carousel-title">
       <div
         className="mx-auto max-w-7xl"
         role="region"
@@ -63,7 +63,7 @@ export function HomeSegmentsCarousel() {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false);
         }}
       >
-        <div className="mb-4 flex items-end justify-between gap-4">
+        <div className="mb-3 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-pink-600">Conheça nossos segmentos</p>
             <h2 id="home-carousel-title" className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Encontre a opção certa para o seu projeto</h2>
