@@ -71,6 +71,7 @@ describe("carrossel administrável da página inicial", () => {
     expect(home).toContain("<FeaturedProducts />");
     expect(home).toContain("<HomeSegmentsCarousel />");
     expect(home).toContain("<HowItWorks />");
+    expect(home).not.toContain("WhyChooseUs");
     expect(home.indexOf("<FeaturedProducts />")).toBeLessThan(home.indexOf("<HomeSegmentsCarousel />"));
     expect(home.indexOf("<HomeSegmentsCarousel />")).toBeLessThan(home.indexOf("<HowItWorks />"));
   });

@@ -3956,3 +3956,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Persistir o enquadramento configurado e aplicá-lo à imagem no carrossel público
 - [x] Informar no editor as dimensões recomendadas em pixels e a proporção horizontal do carrossel
 - [x] Criar regressão e validar o novo fluxo de enquadramento de imagem — banco confirmado, TypeScript sem erros e 5 testes aprovados
+
+- [x] Remover a seção “Por que escolher a Maria Imprime?” da página inicial
+- [x] Reposicionar o carrossel administrável exatamente no local da seção removida
+- [x] Criar regressão e validar a nova ordem da página inicial — TypeScript sem erros e 5 testes aprovados

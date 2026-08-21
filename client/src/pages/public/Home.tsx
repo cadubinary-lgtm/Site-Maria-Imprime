@@ -3,7 +3,6 @@ import { CategoriesCarousel } from "@/components/home/CategoriesCarousel";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { HomeSegmentsCarousel } from "@/components/home/HomeSegmentsCarousel";
 
-import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { PrePrintChecklist } from "@/components/home/PrePrintChecklist";
 import { FAQSupport } from "@/components/home/FAQSupport";
@@ -21,10 +20,7 @@ export default function Home() {
       {/* Featured Products */}
       <FeaturedProducts />
 
-      {/* Why Choose Us */}
-      <WhyChooseUs />
-
-      {/* Segment carousel */}
+      {/* Segment carousel — substitui a seção Por que escolher a Maria Imprime? */}
       <HomeSegmentsCarousel />
 
       {/* How It Works */}
