@@ -4044,3 +4044,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir ordenar as formas de pagamento selecionadas e limitar a quantidade exibida
 - [x] Persistir a configuração e refletir a seleção na grade pública de pagamentos
 - [x] Criar regressão e validar a gestão administrativa das formas de pagamento — banco migrado, TypeScript sem erros e 7 testes aprovados
+
+- [x] Remover as características técnicas genéricas exibidas em todos os produtos
+- [x] Preservar as informações específicas configuradas individualmente por produto
+- [x] Criar regressão e validar a ausência de alegações genéricas nas páginas de produto — TypeScript sem erros, regressão específica aprovada e página pública conferida

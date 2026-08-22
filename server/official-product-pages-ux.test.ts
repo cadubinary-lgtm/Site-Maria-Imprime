@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const newProduct = readFileSync("client/src/pages/admin/AdminNewProduct.tsx", "utf8");
 const products = readFileSync("client/src/pages/admin/AdminProducts.tsx", "utf8");
 const deliveryOptions = readFileSync("client/src/components/products/DeliveryOptionsManager.tsx", "utf8");
+const productDetail = readFileSync("client/src/pages/ecommerce/ProductDetail.tsx", "utf8");
 const router = readFileSync("server/routers.ts", "utf8");
 
 describe("páginas oficiais de produto", () => {
@@ -31,5 +32,13 @@ describe("páginas oficiais de produto", () => {
   it("aceita a sessão administrativa oficial para excluir produtos", () => {
     expect(router).toContain("deleteMultipleProducts: adminAnyProcedure");
     expect(router).toContain("deleteProduct: adminAnyProcedure");
+  });
+
+  it("não apresenta alegações técnicas genéricas que possam contrariar o material do produto", () => {
+    expect(productDetail).not.toContain("PRODUCT_FEATURES");
+    expect(productDetail).not.toContain("Material resistente ao sol e chuva");
+    expect(productDetail).not.toContain("Alta resistência");
+    expect(productDetail).not.toContain("Uso versátil");
+    expect(productDetail).toContain("Ver especificações técnicas");
   });
 });
