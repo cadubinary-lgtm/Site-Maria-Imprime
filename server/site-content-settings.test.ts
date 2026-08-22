@@ -12,15 +12,20 @@ describe("configurações públicas do rodapé", () => {
 
     expect(schema).toContain('mysqlTable("siteFooterSettings"');
     expect(schema).toContain('footerProductSegmentIds: text("footerProductSegmentIds")');
+    expect(schema).toContain('footerPaymentMethodIds: text("footerPaymentMethodIds")');
     expect(schema).toContain('mysqlTable("siteDocuments"');
     expect(router).toContain("saveFooter: adminProcedure");
     expect(router).toContain("saveFooterProductSegments: adminProcedure");
+    expect(router).toContain("saveFooterPaymentMethods: adminProcedure");
+    expect(router).toContain('z.enum(["visa", "mastercard", "elo", "hipercard", "american-express", "cabal", "diners-club"])');
     expect(router).toContain("segmentIds: z.array(z.number().int().positive()).min(1");
     expect(router).toContain("inArray(segments.id, input.segmentIds)");
     expect(router).toContain("saveDocuments: adminProcedure");
     expect(router).toContain("getPublicDocuments: publicProcedure");
     expect(content).toContain("mergeFooterContent");
     expect(content).toContain("parseFooterProductSegmentIds");
+    expect(content).toContain("FOOTER_PAYMENT_METHODS");
+    expect(content).toContain("parseFooterPaymentMethodIds");
     expect(content).toContain("overrides?.introduction ?? FOOTER_CONTENT_FALLBACK.introduction");
   });
 
@@ -38,6 +43,9 @@ describe("configurações públicas do rodapé", () => {
     expect(page).toContain("Salvar produtos do rodapé");
     expect(page).toContain("MAX_FOOTER_PRODUCT_SEGMENTS = 8");
     expect(page).toContain("moveFooterSegment");
+    expect(page).toContain("Formas de pagamento exibidas");
+    expect(page).toContain("Salvar formas de pagamento");
+    expect(page).toContain("moveFooterPaymentMethod");
     expect(page).toContain('id: "site-footer-content-save"');
     expect(page).toContain('id: "site-documents-save"');
   });
@@ -49,5 +57,13 @@ describe("configurações públicas do rodapé", () => {
     expect(footer).toContain("parseFooterProductSegmentIds(savedFooterContent?.footerProductSegmentIds)");
     expect(footer).toContain("footerProductSegments.length > 0");
     expect(footer).toContain("href={`/catalogo?segmentId=${segment.id}`}");
+  });
+
+  it("reflete no rodapé público as formas de pagamento configuradas em sua ordem persistida", () => {
+    const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
+
+    expect(footer).toContain("parseFooterPaymentMethodIds(savedFooterContent?.footerPaymentMethodIds)");
+    expect(footer).toContain("footerPaymentMethodIds.map");
+    expect(footer).toContain("paymentMethodVisuals[paymentMethodId]");
   });
 });

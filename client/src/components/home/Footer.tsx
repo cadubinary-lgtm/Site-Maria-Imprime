@@ -29,7 +29,7 @@ import {
   useWhatsAppButtonVisibility,
 } from "@/hooks/useCompanySettings";
 import { trpc } from "@/lib/trpc";
-import { mergeFooterContent, parseFooterProductSegmentIds } from "@/lib/siteContent";
+import { FOOTER_PAYMENT_METHODS, mergeFooterContent, parseFooterPaymentMethodIds, parseFooterProductSegmentIds, type FooterPaymentMethodId } from "@/lib/siteContent";
 
 const documentationPath = (documentId?: string) => documentId ? `/documentos/${documentId}` : "/documentos";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -61,6 +61,16 @@ const productLinks = [
   { label: "Adesivos e etiquetas", icon: Tag },
   { label: "Embalagens", icon: Package },
 ];
+
+const paymentMethodVisuals: Record<FooterPaymentMethodId, React.ReactNode> = {
+  visa: <SiVisa aria-hidden className="h-7 w-12 text-[#1434CB]" />,
+  mastercard: <SiMastercard aria-hidden className="h-8 w-12 text-[#EB001B]" />,
+  elo: <img src="/manus-storage/elo_78934248.png" alt="" aria-hidden className="h-8 w-full object-contain" />,
+  hipercard: <img src="/manus-storage/hipercard_0e7a4bf3.png" alt="" aria-hidden className="h-8 w-full object-contain" />,
+  "american-express": <SiAmericanexpress aria-hidden className="h-9 w-12 text-[#2E77BC]" />,
+  cabal: <img src="/manus-storage/cabal_27d82c64.png" alt="" aria-hidden className="h-8 w-full object-contain" />,
+  "diners-club": <SiDinersclub aria-hidden className="h-9 w-12 text-[#0079BE]" />,
+};
 
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -117,6 +127,10 @@ export function Footer() {
       return segment ? [segment] : [];
     });
   }, [allSegments, savedFooterContent?.footerProductSegmentIds]);
+  const footerPaymentMethodIds = useMemo(() => {
+    const configuredIds = parseFooterPaymentMethodIds(savedFooterContent?.footerPaymentMethodIds);
+    return configuredIds.length > 0 ? configuredIds : FOOTER_PAYMENT_METHODS.map((method) => method.id);
+  }, [savedFooterContent?.footerPaymentMethodIds]);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "error" | "success">("idle");
@@ -205,13 +219,10 @@ export function Footer() {
           <div className="p-6 sm:p-7">
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Formas de pagamento</h2>
             <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 lg:grid-cols-7">
-              <PaymentBadge label="Visa"><SiVisa aria-hidden className="h-7 w-12 text-[#1434CB]" /></PaymentBadge>
-              <PaymentBadge label="Mastercard"><SiMastercard aria-hidden className="h-8 w-12 text-[#EB001B]" /></PaymentBadge>
-              <PaymentBadge label="Elo"><img src="/manus-storage/elo_78934248.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge label="Hipercard"><img src="/manus-storage/hipercard_0e7a4bf3.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge label="American Express"><SiAmericanexpress aria-hidden className="h-9 w-12 text-[#2E77BC]" /></PaymentBadge>
-              <PaymentBadge label="Cabal"><img src="/manus-storage/cabal_27d82c64.png" alt="" aria-hidden className="h-8 w-full object-contain" /></PaymentBadge>
-              <PaymentBadge label="Diners Club"><SiDinersclub aria-hidden className="h-9 w-12 text-[#0079BE]" /></PaymentBadge>
+              {footerPaymentMethodIds.map((paymentMethodId) => {
+                const paymentMethod = FOOTER_PAYMENT_METHODS.find((method) => method.id === paymentMethodId);
+                return paymentMethod ? <PaymentBadge key={paymentMethodId} label={paymentMethod.label}>{paymentMethodVisuals[paymentMethodId]}</PaymentBadge> : null;
+              })}
             </div>
             <p className="mt-4 text-xs leading-5 text-slate-500">Pagamentos parcelados terão acréscimo de juros da operadora. Nota fiscal sujeita a emissão de acordo com prestador de serviço, conforme legislação pertinente.</p>
           </div>

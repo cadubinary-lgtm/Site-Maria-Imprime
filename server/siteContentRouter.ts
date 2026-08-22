@@ -19,6 +19,12 @@ const footerProductSegmentsInput = z.object({
   }),
 });
 
+const footerPaymentMethodsInput = z.object({
+  paymentMethodIds: z.array(z.enum(["visa", "mastercard", "elo", "hipercard", "american-express", "cabal", "diners-club"])).min(1, "Selecione ao menos uma forma de pagamento").max(7, "Escolha no máximo 7 formas de pagamento").superRefine((paymentMethodIds, ctx) => {
+    if (new Set(paymentMethodIds).size !== paymentMethodIds.length) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cada forma de pagamento pode aparecer apenas uma vez" });
+  }),
+});
+
 const documentInput = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use letras minúsculas, números e hífens no endereço").min(2).max(120),
   title: z.string().min(1).max(255),
@@ -123,6 +129,16 @@ export const siteContentRouter = router({
     if (existing) await db.update(siteFooterSettings).set({ footerProductSegmentIds }).where(eq(siteFooterSettings.id, 1));
     else await db.insert(siteFooterSettings).values({ id: 1, footerProductSegmentIds });
     return { success: true, saved: input.segmentIds.length } as const;
+  }),
+
+  saveFooterPaymentMethods: adminProcedure.input(footerPaymentMethodsInput).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const footerPaymentMethodIds = JSON.stringify(input.paymentMethodIds);
+    const [existing] = await db.select({ id: siteFooterSettings.id }).from(siteFooterSettings).where(eq(siteFooterSettings.id, 1)).limit(1);
+    if (existing) await db.update(siteFooterSettings).set({ footerPaymentMethodIds }).where(eq(siteFooterSettings.id, 1));
+    else await db.insert(siteFooterSettings).values({ id: 1, footerPaymentMethodIds });
+    return { success: true, saved: input.paymentMethodIds.length } as const;
   }),
 
   getPublicDocuments: publicProcedure.query(async () => {

@@ -33,6 +33,34 @@ export function parseFooterProductSegmentIds(value?: string | null): number[] {
   }
 }
 
+export const FOOTER_PAYMENT_METHODS = [
+  { id: "visa", label: "Visa" },
+  { id: "mastercard", label: "Mastercard" },
+  { id: "elo", label: "Elo" },
+  { id: "hipercard", label: "Hipercard" },
+  { id: "american-express", label: "American Express" },
+  { id: "cabal", label: "Cabal" },
+  { id: "diners-club", label: "Diners Club" },
+] as const;
+
+export type FooterPaymentMethodId = (typeof FOOTER_PAYMENT_METHODS)[number]["id"];
+
+export function parseFooterPaymentMethodIds(value?: string | null): FooterPaymentMethodId[] {
+  if (!value) return [];
+  const validIds = new Set<string>(FOOTER_PAYMENT_METHODS.map((method) => method.id));
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    const selected: FooterPaymentMethodId[] = [];
+    for (const id of parsed) {
+      if (typeof id === "string" && validIds.has(id) && !selected.includes(id as FooterPaymentMethodId)) selected.push(id as FooterPaymentMethodId);
+    }
+    return selected;
+  } catch {
+    return [];
+  }
+}
+
 export const DOCUMENT_SUMMARIES: Record<string, string> = {
   "termos-venda": "Regras aplicáveis às compras e aos serviços da Maria Imprime.",
   "aprovacao-arte": "Orientações para conferir e aprovar a arte antes da produção.",
