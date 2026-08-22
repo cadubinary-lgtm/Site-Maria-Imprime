@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -29,7 +29,7 @@ import {
   useWhatsAppButtonVisibility,
 } from "@/hooks/useCompanySettings";
 import { trpc } from "@/lib/trpc";
-import { mergeFooterContent } from "@/lib/siteContent";
+import { mergeFooterContent, parseFooterProductSegmentIds } from "@/lib/siteContent";
 
 const documentationPath = (documentId?: string) => documentId ? `/documentos/${documentId}` : "/documentos";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -108,7 +108,15 @@ function SecuritySealLink({ href, label, src }: { href: string; label: string; s
 export function Footer() {
   const { company } = useCompanySettings();
   const { data: savedFooterContent } = trpc.siteContent.getPublicFooter.useQuery(undefined, { staleTime: 60_000 });
+  const { data: allSegments = [] } = trpc.segments.list.useQuery(undefined, { staleTime: 60_000 });
   const footerContent = mergeFooterContent(savedFooterContent);
+  const footerProductSegments = useMemo(() => {
+    const segmentsById = new Map(allSegments.map((segment) => [segment.id, segment]));
+    return parseFooterProductSegmentIds(savedFooterContent?.footerProductSegmentIds).flatMap((id) => {
+      const segment = segmentsById.get(id);
+      return segment ? [segment] : [];
+    });
+  }, [allSegments, savedFooterContent?.footerProductSegmentIds]);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "error" | "success">("idle");
@@ -174,7 +182,9 @@ export function Footer() {
 
           <FooterColumn title="Produtos">
             <ul className="space-y-3 text-sm">
-              {productLinks.map(({ label, icon: Icon }) => <li key={label}><a href="/catalogo" className="flex items-center gap-2.5 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600"><Icon className="h-4 w-4 text-pink-500" />{label}</a></li>)}
+              {footerProductSegments.length > 0
+                ? footerProductSegments.map((segment) => <li key={segment.id}><a href={`/catalogo?segmentId=${segment.id}`} className="flex items-center gap-2.5 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600"><ShoppingBag className="h-4 w-4 text-pink-500" />{segment.name}</a></li>)
+                : productLinks.map(({ label, icon: Icon }) => <li key={label}><a href="/catalogo" className="flex items-center gap-2.5 transition-colors hover:text-pink-600 focus-visible:outline-none focus-visible:text-pink-600"><Icon className="h-4 w-4 text-pink-500" />{label}</a></li>)}
             </ul>
             <a href="/catalogo" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-pink-600 transition-colors hover:text-pink-700">Ver todos os produtos <ArrowRight className="h-4 w-4" /></a>
           </FooterColumn>

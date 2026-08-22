@@ -1,6 +1,6 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { siteDocuments, siteFooterSettings, siteMariaGuideSettings } from "../drizzle/schema";
+import { segments, siteDocuments, siteFooterSettings, siteMariaGuideSettings } from "../drizzle/schema";
 import { getDb } from "./db";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 
@@ -11,6 +11,12 @@ const footerContentInput = z.object({
   businessHours: z.string().min(1).max(1000),
   documentsTitle: z.string().min(1).max(160),
   documentsDescription: z.string().min(1).max(1000),
+});
+
+const footerProductSegmentsInput = z.object({
+  segmentIds: z.array(z.number().int().positive()).min(1, "Selecione ao menos um segmento").max(8, "Escolha no máximo 8 segmentos").superRefine((segmentIds, ctx) => {
+    if (new Set(segmentIds).size !== segmentIds.length) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cada segmento pode aparecer apenas uma vez" });
+  }),
 });
 
 const documentInput = z.object({
@@ -105,6 +111,18 @@ export const siteContentRouter = router({
     if (existing) await db.update(siteFooterSettings).set(values).where(eq(siteFooterSettings.id, 1));
     else await db.insert(siteFooterSettings).values({ id: 1, ...values });
     return { success: true } as const;
+  }),
+
+  saveFooterProductSegments: adminProcedure.input(footerProductSegmentsInput).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+    const availableSegments = await db.select({ id: segments.id }).from(segments).where(inArray(segments.id, input.segmentIds));
+    if (availableSegments.length !== input.segmentIds.length) throw new Error("Um ou mais segmentos selecionados não estão mais disponíveis");
+    const footerProductSegmentIds = JSON.stringify(input.segmentIds);
+    const [existing] = await db.select({ id: siteFooterSettings.id }).from(siteFooterSettings).where(eq(siteFooterSettings.id, 1)).limit(1);
+    if (existing) await db.update(siteFooterSettings).set({ footerProductSegmentIds }).where(eq(siteFooterSettings.id, 1));
+    else await db.insert(siteFooterSettings).values({ id: 1, footerProductSegmentIds });
+    return { success: true, saved: input.segmentIds.length } as const;
   }),
 
   getPublicDocuments: publicProcedure.query(async () => {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Building2, FileText, Globe2, Loader2, Save, Settings2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Building2, Check, FileText, Globe2, ListFilter, Loader2, Save, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { FOOTER_CONTENT_FALLBACK, getDefaultPublicDocuments, mergeManagedDocuments, type ManagedPublicDocument } from "@/lib/siteContent";
+import { FOOTER_CONTENT_FALLBACK, getDefaultPublicDocuments, mergeManagedDocuments, parseFooterProductSegmentIds, type ManagedPublicDocument } from "@/lib/siteContent";
 
 type FooterForm = typeof FOOTER_CONTENT_FALLBACK;
 
 const DOCUMENT_LIMIT = 50_000;
+const MAX_FOOTER_PRODUCT_SEGMENTS = 8;
 const FOOTER_FIELD_LIMITS = {
   introduction: 1000,
   newsletterTitle: 120,
@@ -28,10 +29,13 @@ export default function AdminFooterInformation() {
   const utils = trpc.useUtils();
   const { data: savedFooter, isLoading: isLoadingFooter } = trpc.siteContent.getAdminFooter.useQuery();
   const { data: savedDocuments, isLoading: isLoadingDocuments } = trpc.siteContent.getAdminDocuments.useQuery();
+  const { data: allSegments = [], isLoading: isLoadingSegments } = trpc.segments.list.useQuery();
   const saveFooter = trpc.siteContent.saveFooter.useMutation();
   const saveDocuments = trpc.siteContent.saveDocuments.useMutation();
+  const saveFooterProductSegments = trpc.siteContent.saveFooterProductSegments.useMutation();
   const [footer, setFooter] = useState<FooterForm>(FOOTER_CONTENT_FALLBACK);
   const [documents, setDocuments] = useState<ManagedPublicDocument[]>(getDefaultPublicDocuments());
+  const [footerProductSegmentIds, setFooterProductSegmentIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (!savedFooter) return;
@@ -49,11 +53,47 @@ export default function AdminFooterInformation() {
     if (savedDocuments) setDocuments(mergeManagedDocuments(savedDocuments));
   }, [savedDocuments]);
 
-  const isLoading = isLoadingFooter || isLoadingDocuments;
+  useEffect(() => {
+    if (!savedFooter || allSegments.length === 0) return;
+    const persistedIds = parseFooterProductSegmentIds(savedFooter.footerProductSegmentIds);
+    setFooterProductSegmentIds(persistedIds.length > 0 ? persistedIds : allSegments.slice(0, Math.min(5, MAX_FOOTER_PRODUCT_SEGMENTS)).map((segment) => segment.id));
+  }, [allSegments, savedFooter]);
+
+  const isLoading = isLoadingFooter || isLoadingDocuments || isLoadingSegments;
   const activeDocuments = useMemo(() => documents.filter((document) => document.isPublished).length, [documents]);
+  const selectedFooterSegments = useMemo(() => footerProductSegmentIds.flatMap((id) => {
+    const segment = allSegments.find((item) => item.id === id);
+    return segment ? [segment] : [];
+  }), [allSegments, footerProductSegmentIds]);
 
   const setFooterField = <K extends keyof FooterForm>(field: K, value: FooterForm[K]) => setFooter((current) => ({ ...current, [field]: value }));
   const updateDocument = (slug: string, patch: Partial<ManagedPublicDocument>) => setDocuments((current) => current.map((document) => document.slug === slug ? { ...document, ...patch } : document));
+
+  const toggleFooterSegment = (segmentId: number) => {
+    setFooterProductSegmentIds((current) => {
+      if (current.includes(segmentId)) {
+        if (current.length === 1) {
+          toast.error("Mantenha ao menos um segmento no rodapé.", { position: "top-right", id: "footer-product-segments-minimum" });
+          return current;
+        }
+        return current.filter((id) => id !== segmentId);
+      }
+      if (current.length >= MAX_FOOTER_PRODUCT_SEGMENTS) {
+        toast.error(`Escolha no máximo ${MAX_FOOTER_PRODUCT_SEGMENTS} segmentos para o rodapé.`, { position: "top-right", id: "footer-product-segments-limit" });
+        return current;
+      }
+      return [...current, segmentId];
+    });
+  };
+
+  const moveFooterSegment = (segmentId: number, direction: -1 | 1) => setFooterProductSegmentIds((current) => {
+    const index = current.indexOf(segmentId);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= current.length) return current;
+    const next = [...current];
+    [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+    return next;
+  });
 
   const handleSaveFooter = async () => {
     const invalidField = (Object.keys(FOOTER_FIELD_LIMITS) as Array<keyof FooterForm>).find((field) => {
@@ -90,6 +130,18 @@ export default function AdminFooterInformation() {
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível salvar os documentos", { position: "top-right", id: "site-documents-save-error" });
+    }
+  };
+
+  const handleSaveFooterProductSegments = async () => {
+    if (footerProductSegmentIds.length === 0) return;
+    try {
+      await saveFooterProductSegments.mutateAsync({ segmentIds: footerProductSegmentIds });
+      await Promise.all([utils.siteContent.getAdminFooter.invalidate(), utils.siteContent.getPublicFooter.invalidate()]);
+      toast.success("Produtos do rodapé salvos", { description: `${footerProductSegmentIds.length} segmentos serão exibidos na coluna Produtos.`, position: "top-right", duration: 3500, id: "footer-product-segments-save" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível salvar os produtos do rodapé", { position: "top-right", id: "footer-product-segments-save-error" });
     }
   };
 
@@ -139,6 +191,24 @@ export default function AdminFooterInformation() {
                       </AccordionItem>)}
                     </Accordion>
                     <div className="flex justify-end"><Button onClick={handleSaveDocuments} disabled={saveDocuments.isPending} aria-busy={saveDocuments.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveDocuments.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar documentos públicos</Button></div>
+                  </CardContent>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <Accordion type="multiple">
+              <AccordionItem value="footer-products" className="border-0">
+                <AccordionTrigger aria-label="Expandir ou encolher produtos exibidos no rodapé" className="px-6 py-5 hover:bg-pink-50/60 hover:no-underline">
+                  <div className="flex items-center gap-3"><ListFilter className="h-5 w-5 text-pink-600" /><div><CardTitle>Produtos exibidos no rodapé</CardTitle><CardDescription>Escolha e ordene os segmentos que aparecem na coluna Produtos da loja.</CardDescription></div></div>
+                </AccordionTrigger>
+                <AccordionContent className="border-t border-slate-100">
+                  <CardContent className="space-y-6 p-6">
+                    <div className="flex flex-col gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Seleção do rodapé</p><p className="mt-1 text-sm text-slate-600">Escolha de 1 a {MAX_FOOTER_PRODUCT_SEGMENTS} segmentos. A ordem abaixo será a mesma exibida no site.</p></div><span className="w-fit rounded-full bg-white px-3 py-1 text-sm font-bold text-pink-600 shadow-sm">{selectedFooterSegments.length}/{MAX_FOOTER_PRODUCT_SEGMENTS}</span></div>
+                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Segmentos disponíveis</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{allSegments.map((segment) => { const selected = footerProductSegmentIds.includes(segment.id); return <button key={segment.id} type="button" onClick={() => toggleFooterSegment(segment.id)} aria-pressed={selected} className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${selected ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-slate-700 hover:border-pink-200 hover:bg-pink-50/50"}`}><span className="truncate pr-3">{segment.name}</span>{selected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}</button>; })}</div></div>
+                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Ordem no rodapé</p><div className="space-y-2">{selectedFooterSegments.map((segment, index) => <div key={segment.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-700">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{segment.name}</span><div className="flex gap-1"><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterSegment(segment.id, -1)} disabled={index === 0} aria-label={`Mover ${segment.name} para cima`}><ArrowUp className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterSegment(segment.id, 1)} disabled={index === selectedFooterSegments.length - 1} aria-label={`Mover ${segment.name} para baixo`}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</div></div>
+                    <div className="flex justify-end"><Button onClick={handleSaveFooterProductSegments} disabled={saveFooterProductSegments.isPending || footerProductSegmentIds.length === 0} aria-busy={saveFooterProductSegments.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooterProductSegments.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar produtos do rodapé</Button></div>
                   </CardContent>
                 </AccordionContent>
               </AccordionItem>
