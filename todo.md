@@ -4122,3 +4122,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reduzir o bloco recomendado para o rótulo Gabarito e o ícone de download
 - [x] Remover nome de arquivo e descrição do acesso no configurador
 - [x] Preservar download acessível, responsivo e com regressão coberta
+
+## Espaço em Branco em Novo Produto
+- [x] Eliminar o espaço em branco entre Gabarito recomendado e Tags do Produto
+- [x] Manter os cards alinhados sem lacunas na grade de dois colunas

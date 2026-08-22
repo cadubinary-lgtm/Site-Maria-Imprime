@@ -682,23 +682,24 @@ export default function AdminNewProduct() {
                     </CardContent>
                   </Card>
 
-                  <Card className={PRODUCT_FORM_PANEL.card}>
-                    <CardContent className={PRODUCT_FORM_PANEL.content}>
-                      <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
-                      <p className="mb-3 text-sm text-gray-500">Vincule o arquivo correto deste produto para que o cliente possa baixá-lo na página do produto.</p>
-                      <Label htmlFor="create-template-id" className="sr-only">Gabarito recomendado</Label>
-                      <Select value={createForm.templateId ? String(createForm.templateId) : "none"} onValueChange={(value) => setCreateForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
-                        <SelectTrigger id="create-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
-                          {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <p className="mt-2 text-xs leading-5 text-slate-500">Gerencie os arquivos em Configurações do site → Gabaritos.</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <div className="flex flex-col gap-4 self-start sm:col-start-2">
+                 <Card className={PRODUCT_FORM_PANEL.card}>
+                   <CardContent className={PRODUCT_FORM_PANEL.content}>
+                     <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
+                     <p className="mb-3 text-sm text-gray-500">Vincule o arquivo correto deste produto para que o cliente possa baixá-lo na página do produto.</p>
+                     <Label htmlFor="create-template-id" className="sr-only">Gabarito recomendado</Label>
+                     <Select value={createForm.templateId ? String(createForm.templateId) : "none"} onValueChange={(value) => setCreateForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
+                       <SelectTrigger id="create-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
+                         {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
+                       </SelectContent>
+                     </Select>
+                     <p className="mt-2 text-xs leading-5 text-slate-500">Gerencie os arquivos em Configurações do site → Gabaritos.</p>
+                   </CardContent>
+                 </Card>
+                
+                  {/* Tags e Descrição do Card — segunda coluna, abaixo do Gabarito */}
+                  <div className="flex flex-col gap-4 self-start sm:col-start-2 sm:row-start-2">
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
