@@ -29,6 +29,14 @@ describe("layout horizontal de Novo Produto", () => {
     expect(newProductSource).toContain("EDIT_PRODUCT_MODAL_LAYOUT.secondary");
     expect(newProductSource).not.toContain("${NEW_PRODUCT_FIELD_LAYOUT.segmentsAlignment}");
   });
+
+  it("mantém o cabeçalho fixo com ações responsivas durante a rolagem", () => {
+    expect(newProductSource).toContain("sticky top-0 z-30");
+    expect(newProductSource).toContain("bg-white/95");
+    expect(newProductSource).toContain("backdrop-blur");
+    expect(newProductSource).toContain("flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between");
+    expect(newProductSource).toContain("flex flex-wrap items-center gap-2 xl:justify-end");
+  });
 });
 
 describe("layout de Editar Produto", () => {
