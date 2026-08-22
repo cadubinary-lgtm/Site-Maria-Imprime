@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Printer,
   FileText,
+  Building2,
   User,
   Package,
   Truck,
@@ -208,13 +209,17 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; }
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; border-bottom:3px solid #e91e8c; padding-bottom:8px; }
-  .brand { max-width:50%; }
-  .brand h1 { font-size:24px; font-weight:800; color:#e91e8c; }
-  .brand img { height:52px; object-fit:contain; display:block; }
-  .doc-info { text-align:right; width:48%; max-width:none; }
-  .doc-info .num { font-size:18px; font-weight:700; color:#1a1a1a; }
-  .doc-info .date { font-size:11px; color:#666; margin-top:2px; }
+  .header { margin-bottom:10px; border:1px solid #f0d6e5; border-radius:10px; overflow:hidden; }
+  .header-top { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:10px 12px; background:linear-gradient(135deg,#fff7fb 0%,#ffffff 64%); border-bottom:1px solid #f5e5ee; }
+  .brand { display:flex; align-items:center; gap:10px; max-width:58%; }
+  .brand img { width:78px; height:42px; object-fit:contain; display:block; }
+  .header-kicker { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#e91e8c; }
+  .header-title { margin-top:1px; font-size:20px; font-weight:800; color:#1a1a1a; line-height:1.05; }
+  .header-description { margin-top:2px; font-size:9px; line-height:1.3; color:#666; }
+  .doc-info { text-align:right; width:42%; max-width:none; }
+  .doc-info .doc-label { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#8f225e; }
+  .doc-info .num { margin-top:1px; font-size:16px; font-weight:800; color:#1a1a1a; }
+  .doc-info .date { font-size:9px; color:#666; margin-top:2px; }
   .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-left:6px; vertical-align:middle; }
   .section { margin-bottom:12px; }
   .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
@@ -236,8 +241,13 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .totals { margin-top:8px; border-top:2px solid #e0e0e0; padding-top:8px; }
   .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
-  .company-meta { font-size:9px; color:#555; line-height:1.3; margin-top:4px; max-width:360px; }
-  .company-meta p { margin:1px 0; }
+  .header-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:9px 12px 11px; }
+  .info-panel { border:1px solid #ececf0; border-radius:7px; padding:7px 8px; }
+  .info-panel-title { display:flex; align-items:center; gap:5px; margin-bottom:6px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#8f225e; }
+  .info-panel-title::before { content:""; width:4px; height:4px; border-radius:999px; background:#e91e8c; }
+  .info-panel .info-grid { gap:4px 8px; }
+  .info-panel .info-item label { font-size:8px; }
+  .info-panel .info-item span { font-size:9px; }
   .whatsapp-icon { width:8px; height:8px; vertical-align:-1px; fill:#e91e8c; margin-right:2px; }
   .commerce-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; margin-bottom:10px; }
   .commerce-grid .section { border:1px solid #e5e7eb; border-radius:8px; padding-top:8px !important; padding-bottom:8px !important; padding-left:8px; padding-right:8px; margin:0; }
@@ -252,26 +262,46 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 </head>
 <body>
 <div class="page">
-  <div class="header">
-    <div class="brand">
-      <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
-      <div class="company-meta">
-        ${company?.cnpj ? `<p>CNPJ: ${company.cnpj}</p>` : ""}
-        ${contactPhone ? `<p>${whatsappIconMarkup}WhatsApp: ${formattedContactPhone}</p>` : ""}
-        ${company?.supportEmail ? `<p>${company.supportEmail}</p>` : ""}
-        ${companyAddress ? `<p>${companyAddress}</p>` : ""}
-        ${responsibleName ? `<p><strong>Responsável:</strong> ${responsibleName}</p>` : ""}
-      </div>
-    </div>
-	    <div class="doc-info">
-	      <div class="num">${q.quotationNumber}<span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span></div>
-	      <div class="date">Emitido em ${fmtDate(q.createdAt)} | Válido até ${fmtDate(q.expiresAt)}</div>
-	      ${(q.clientName || q.clientEmail || q.clientPhone || q.clientWhatsapp) ? `<div class="client-summary">
-	        ${q.clientName ? `<p><strong>Cliente:</strong> ${q.clientName}</p>` : ""}
-	        ${q.clientEmail || q.clientPhone || q.clientWhatsapp ? `<p class="client-contact">${[q.clientEmail, q.clientPhone ?? q.clientWhatsapp].filter(Boolean).join(" | ")}</p>` : ""}
-	      </div>` : ""}
+	  <header class="header">
+	    <div class="header-top">
+	      <div class="brand">
+	        <img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" />
+	        <div>
+	          <div class="header-kicker">Proposta comercial</div>
+	          <div class="header-title">Orçamento</div>
+	          <p class="header-description">Detalhamento de produtos, condições e valores preparados para sua aprovação.</p>
+	        </div>
+	      </div>
+	      <div class="doc-info">
+	        <div class="doc-label">Identificação do orçamento</div>
+	        <div class="num">${q.quotationNumber}<span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span></div>
+	        <div class="date">Emitido em ${fmtDate(q.createdAt)} · Válido até ${fmtDate(q.expiresAt)}</div>
+	      </div>
 	    </div>
-	  </div>
+	    <div class="header-details">
+	      <section class="info-panel">
+	        <div class="info-panel-title">Dados da Empresa</div>
+	        <div class="info-grid">
+	          <div class="info-item"><label>Empresa</label><span>${company?.tradeName ?? "Maria Imprime"}</span></div>
+	          ${company?.cnpj ? `<div class="info-item"><label>CNPJ / Inscrição Estadual</label><span>${company.cnpj}${company.stateRegistration ? ` · IE ${company.stateRegistration}` : ""}</span></div>` : ""}
+	          ${contactPhone ? `<div class="info-item"><label>WhatsApp</label><span>${formattedContactPhone}</span></div>` : ""}
+	          ${company?.supportEmail ? `<div class="info-item"><label>E-mail</label><span>${company.supportEmail}</span></div>` : ""}
+	          ${companyAddress ? `<div class="info-item" style="grid-column:1 / -1"><label>Endereço</label><span>${companyAddress}</span></div>` : ""}
+	          ${responsibleName ? `<div class="info-item" style="grid-column:1 / -1"><label>Responsável</label><span>${responsibleName}</span></div>` : ""}
+	        </div>
+	      </section>
+	      <section class="info-panel">
+	        <div class="info-panel-title">Cliente</div>
+	        <div class="info-grid">
+	          ${q.clientName ? `<div class="info-item"><label>Nome / Razão Social</label><span>${q.clientName}</span></div>` : ""}
+	          ${q.clientEmail ? `<div class="info-item"><label>E-mail</label><span>${q.clientEmail}</span></div>` : ""}
+	          ${q.clientCpfCnpj ? `<div class="info-item"><label>CPF / CNPJ</label><span>${q.clientCpfCnpj}</span></div>` : ""}
+	          ${q.clientPhone || q.clientWhatsapp ? `<div class="info-item"><label>Telefone / WhatsApp</label><span>${formatBrazilPhone(q.clientPhone ?? q.clientWhatsapp)}</span></div>` : ""}
+	          ${(q.clientStreet || q.clientCity || q.clientZipCode) ? `<div class="info-item" style="grid-column:1 / -1"><label>Endereço</label><span>${[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/"), q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>` : ""}
+	        </div>
+	      </section>
+	    </div>
+	  </header>
 		
 	  <div class="section">
     <div class="section-title">Produtos / Serviços</div>
@@ -432,31 +462,28 @@ export default function AdminQuotationDetail() {
   return (
     <AdminLayout>
     <div className="admin-visual-system p-6 max-w-5xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
+      {/* Cabeçalho do documento */}
+      <header className="rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50/80 via-white to-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-pink-100 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
+          <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-center">
           <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">
             <ArrowLeft className="w-4 h-4" aria-hidden="true" /> {returnTarget.label}
           </Button>
-          <div>
-            <img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-8 object-contain mb-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">{q.quotationNumber}</h1>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.cls}`} aria-live="polite">
-                {sc.label}
-              </span>
-              {alreadyConverted && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700">
-                  Convertido em Pedido
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-500 mt-0.5">Criado em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-pink-600"><FileText className="h-3.5 w-3.5" aria-hidden="true" /> Proposta comercial</div>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-950">Orçamento</h1>
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-gray-500">Detalhamento de produtos, condições e valores preparados para sua aprovação.</p>
           </div>
+        </div>
+        <div className="w-full text-left sm:w-auto sm:shrink-0 sm:text-right">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">Identificação</p>
+          <div className="mt-1 flex flex-wrap items-center justify-start gap-2 sm:justify-end"><span className="text-lg font-extrabold text-gray-900">{q.quotationNumber}</span><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
+          <p className="mt-1 text-xs text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p>
+        </div>
         </div>
 
         {/* Ações */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 px-4 py-3 sm:px-5">
           <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
             <Printer className="w-3.5 h-3.5" aria-hidden="true" /> Imprimir PDF
           </Button>
@@ -526,11 +553,11 @@ export default function AdminQuotationDetail() {
             </Button>
           )}
         </div>
-      </div>
+      </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-          <h2 className="font-semibold text-gray-800 mb-2">Dados da Empresa</h2>
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4 flex items-center gap-2"><div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-50 text-pink-600"><Building2 className="h-4 w-4" aria-hidden="true" /></div><div><h2 className="font-semibold text-gray-900">Dados da Empresa</h2><p className="text-xs text-gray-500">Informações comerciais e de atendimento.</p></div></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
             {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
@@ -542,8 +569,8 @@ export default function AdminQuotationDetail() {
           {q.responsibleName && <p className="mt-2 pt-2 border-t text-xs text-gray-500">Responsável pela emissão: <span className="font-medium text-gray-700">{q.responsibleName}</span></p>}
         </section>
 
-        <section className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-          <div className="flex items-center gap-2 mb-2"><User className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Cliente</h2></div>
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4 flex items-center gap-2"><div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-50 text-pink-600"><User className="h-4 w-4" aria-hidden="true" /></div><div><h2 className="font-semibold text-gray-900">Cliente</h2><p className="text-xs text-gray-500">Dados de contato e faturamento.</p></div></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
             {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}

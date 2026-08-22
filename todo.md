@@ -4204,3 +4204,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exigir confirmação individual antes da exclusão definitiva
 - [x] Atualizar a listagem após excluir um registro
 - [x] Cobrir a exclusão individual com regressão e validar TypeScript antes do checkpoint
+
+## Cabeçalho Corporativo do Orçamento
+- [x] Reorganizar somente o cabeçalho visual do orçamento
+- [x] Adicionar título, descrição e identificação do orçamento com hierarquia clara
+- [x] Exibir Dados da Empresa e Cliente em blocos organizados no cabeçalho
+- [x] Preservar itens, valores e todo o restante do documento
+- [x] Validar tela, impressão e regressões antes do checkpoint
