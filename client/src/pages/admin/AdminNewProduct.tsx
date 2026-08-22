@@ -614,13 +614,17 @@ export default function AdminNewProduct() {
                       </Label>
                       <Input id="create-cardPricePerM2" type="text" inputMode="decimal" value={createForm.cardPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, cardPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("cardPricePerM2")} placeholder="0,00" />
                     </div>
-                    <div className="sm:col-span-1 xl:col-span-2">
-                      <Label htmlFor="create-resellerPricePerM2">
-                        {createForm.calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
-                      </Label>
-                      <Input id="create-resellerPricePerM2" type="text" inputMode="decimal" value={createForm.resellerPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, resellerPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("resellerPricePerM2")} placeholder="0,00" />
-                    </div>
-                  <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
+	                    <div className="sm:col-span-1 xl:col-span-2">
+	                      <Label htmlFor="create-resellerPricePerM2">
+	                        {createForm.calculationType === "metro_linear" ? "Preço Revendedor por Metro Linear (R$)" : "Preço Revendedor por m² (R$)"}
+	                      </Label>
+	                      <Input id="create-resellerPricePerM2" type="text" inputMode="decimal" value={createForm.resellerPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, resellerPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("resellerPricePerM2")} placeholder="0,00" />
+	                    </div>
+	                </div>
+	              )}
+	              {/* Limites de medidas disponíveis para todos os tipos de cobrança. */}
+	              <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
+	                  <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
 	                    <div>
 	                      <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
 	                      <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => { setCreateForm({ ...createForm, minWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
@@ -637,9 +641,8 @@ export default function AdminNewProduct() {
 	                      <Label htmlFor="create-maxHeight">Altura Máxima (m)</Label>
 	                      <Input id="create-maxHeight" type="number" step="0.01" value={createForm.maxHeight} onChange={(e) => { setCreateForm({ ...createForm, maxHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
 	                    </div>
-                  </div>
-                </div>
-              )}
+	                  </div>
+	              </div>
               <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                 <div className="space-y-4">
                  {/* Fotos + Segmentos lado a lado */}

@@ -939,6 +939,10 @@ export default function AdminProducts() {
                                 </Label>
                                 <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="0,00" />
                               </div>
+                            </div>
+                              )}
+                            {/* Limites de medidas disponíveis para todos os tipos de cobrança. */}
+                            <div className={EDIT_PRODUCT_MODAL_LAYOUT.measureFields}>
                               <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
 	                                <div>
 	                                  <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
@@ -958,7 +962,6 @@ export default function AdminProducts() {
 	                                </div>
                               </div>
                             </div>
-                              )}
                             </CardContent>
                           </Card>
 
