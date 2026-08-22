@@ -4157,3 +4157,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Trocar a posição visual de Largura Máx (m) e Altura Mín (m) em Editar Produto
 - [x] Preservar IDs, salvamento, autoavanço e lógica dos campos existentes
 - [x] Atualizar regressão e validar TypeScript antes do checkpoint
+
+## Restauração da Linha de Medidas nos Formulários
+- [x] Restaurar a linha de campos de medidas em Novo Produto
+- [x] Restaurar a linha de campos de medidas em Editar Produto
+- [x] Manter a ordem: Largura Mín, Altura Mín, Largura Máx e Altura Máx
+- [x] Validar TypeScript e a regressão dos dois formulários antes do checkpoint

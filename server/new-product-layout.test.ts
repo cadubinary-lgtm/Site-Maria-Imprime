@@ -68,6 +68,27 @@ describe("ordem dos campos de medidas de produto", () => {
     expect(editMaxWidth).toBeGreaterThan(editMinHeight);
     expect(editMaxHeight).toBeGreaterThan(editMaxWidth);
   });
+
+  it("mantém a linha de medidas fora da condição exclusiva de m² e metro linear", () => {
+    const createConditionalPrices = newProductSource.indexOf(
+      '{(createForm.calculationType === "m2" || createForm.calculationType === "metro_linear") && ('
+    );
+    const createMeasureRow = newProductSource.indexOf("/* Limites de medidas disponíveis para todos os tipos de cobrança. */");
+    const editConditionalPrices = editProductSource.indexOf(
+      '{((editForm as any).calculationType === "m2" || (editForm as any).calculationType === "metro_linear") && ('
+    );
+    const editMeasureRow = editProductSource.indexOf("/* Limites de medidas disponíveis para todos os tipos de cobrança. */");
+
+    expect(createConditionalPrices).toBeGreaterThanOrEqual(0);
+    expect(createMeasureRow).toBeGreaterThan(createConditionalPrices);
+    expect(newProductSource.slice(createConditionalPrices, createMeasureRow)).toContain(")}");
+    expect(newProductSource.slice(createMeasureRow)).toContain('id="create-minWidth"');
+
+    expect(editConditionalPrices).toBeGreaterThanOrEqual(0);
+    expect(editMeasureRow).toBeGreaterThan(editConditionalPrices);
+    expect(editProductSource.slice(editConditionalPrices, editMeasureRow)).toContain(")}");
+    expect(editProductSource.slice(editMeasureRow)).toContain('id="edit-minWidth"');
+  });
 });
 
 describe("padrão de painéis dos formulários de produto", () => {
