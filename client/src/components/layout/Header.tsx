@@ -7,7 +7,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, LogOut, User, Settings, ShoppingCart, UserCircle, Package } from "lucide-react";
+import { Search, Menu, X, LogOut, User, ShoppingCart, UserCircle, Package } from "lucide-react";
 import { toast } from "sonner";
 import { formatProductPrice } from "@/lib/productPrice";
 import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
@@ -237,11 +237,6 @@ export default function Header() {
             {/* Admin logado via Manus OAuth */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <Link href="/admin">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition" title="Painel Admin">
-                    <Settings className="w-5 h-5 text-gray-600" />
-                  </button>
-                </Link>
                 <button
                   onClick={handleAdminLogout}
                   className="p-2 hover:bg-gray-100 rounded-lg transition" title="Sair"
@@ -286,14 +281,6 @@ export default function Header() {
             ) : (
               /* Visitante */
               <>
-                {!isManus && (
-                  <Link href="/admin/login">
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 text-xs border border-gray-200">
-                      <Settings className="w-3 h-3 mr-1" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
                 <Link href="/login-cliente">
                   <Button variant="ghost" size="sm">
                     Login
@@ -396,17 +383,6 @@ export default function Header() {
               /* Admin */
               <div className="space-y-2">
                 <div className="text-sm text-gray-700" translate="no">{user.name || user.email}</div>
-                <Link href="/admin">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Painel Admin
-                  </Button>
-                </Link>
                 <Button
                   onClick={handleAdminLogout}
                   variant="ghost"
