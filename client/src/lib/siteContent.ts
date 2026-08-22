@@ -33,7 +33,14 @@ export function parseFooterProductSegmentIds(value?: string | null): number[] {
   }
 }
 
-export const FOOTER_PAYMENT_METHODS = [
+export type FooterPaymentMethod = {
+  id: string;
+  label: string;
+  /** undefined preserva o visual padrão; null remove a logo e usa o ícone genérico. */
+  logoUrl?: string | null;
+};
+
+export const FOOTER_PAYMENT_METHODS: FooterPaymentMethod[] = [
   { id: "visa", label: "Visa" },
   { id: "mastercard", label: "Mastercard" },
   { id: "elo", label: "Elo" },
@@ -41,9 +48,9 @@ export const FOOTER_PAYMENT_METHODS = [
   { id: "american-express", label: "American Express" },
   { id: "cabal", label: "Cabal" },
   { id: "diners-club", label: "Diners Club" },
-] as const;
+];
 
-export type FooterPaymentMethodId = (typeof FOOTER_PAYMENT_METHODS)[number]["id"];
+export type FooterPaymentMethodId = string;
 
 export function parseFooterPaymentMethodIds(value?: string | null): FooterPaymentMethodId[] {
   if (!value) return [];
@@ -59,6 +66,46 @@ export function parseFooterPaymentMethodIds(value?: string | null): FooterPaymen
   } catch {
     return [];
   }
+}
+
+export function getDefaultFooterPaymentMethods(): FooterPaymentMethod[] {
+  return FOOTER_PAYMENT_METHODS.map((method) => ({ ...method }));
+}
+
+export function parseFooterPaymentMethods(value?: string | null, legacyIds?: string | null): FooterPaymentMethod[] {
+  if (value) {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        const seenIds = new Set<string>();
+        const methods: FooterPaymentMethod[] = [];
+        for (const item of parsed) {
+          if (!item || typeof item !== "object") continue;
+          const candidate = item as Record<string, unknown>;
+          const id = typeof candidate.id === "string" ? candidate.id.trim() : "";
+          const label = typeof candidate.label === "string" ? candidate.label.trim() : "";
+          const rawLogoUrl = candidate.logoUrl;
+          const logoUrl = typeof rawLogoUrl === "string" && rawLogoUrl.trim()
+            ? rawLogoUrl.trim()
+            : rawLogoUrl === null ? null : undefined;
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) || id.length > 80 || !label || label.length > 80 || seenIds.has(id)) continue;
+          seenIds.add(id);
+          methods.push({ id, label, logoUrl });
+        }
+        if (methods.length > 0) return methods;
+      }
+    } catch {
+      // Usa a configuração compatível abaixo quando o conteúdo salvo for inválido.
+    }
+  }
+
+  const legacySelectedIds = parseFooterPaymentMethodIds(legacyIds);
+  const fallback = getDefaultFooterPaymentMethods();
+  if (legacySelectedIds.length === 0) return fallback;
+  return legacySelectedIds.flatMap((id) => {
+    const method = fallback.find((item) => item.id === id);
+    return method ? [method] : [];
+  });
 }
 
 export const DOCUMENT_SUMMARIES: Record<string, string> = {

@@ -4180,3 +4180,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Encaminhar Pix e cartão aprovados diretamente para Contas Recebidas
 - [x] Ocultar a ação Receber quando o lançamento já estiver pago
 - [x] Cobrir o fluxo com regressões e validar TypeScript antes do checkpoint
+
+## Gestão de Cartões e Logos no Rodapé
+- [x] Permitir cadastrar uma nova forma de pagamento exibida no rodapé
+- [x] Permitir excluir uma forma de pagamento cadastrada
+- [x] Permitir enviar, substituir e remover a logo de cada forma de pagamento
+- [x] Manter a ordenação e a estrutura atual das Informações do Rodapé
+- [x] Validar administração, rodapé público e regressões antes do checkpoint

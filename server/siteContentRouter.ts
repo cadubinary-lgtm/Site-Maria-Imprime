@@ -1,8 +1,10 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 import { segments, siteDocuments, siteFooterSettings, siteMariaGuideSettings } from "../drizzle/schema";
 import { getDb } from "./db";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import { storagePut } from "./storage";
 
 const footerContentInput = z.object({
   introduction: z.string().min(1).max(1000),
@@ -19,10 +21,22 @@ const footerProductSegmentsInput = z.object({
   }),
 });
 
+const footerPaymentMethodInput = z.object({
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use letras minúsculas, números e hífens no identificador").min(2).max(80),
+  label: z.string().trim().min(1, "Informe o nome do cartão").max(80),
+  logoUrl: z.string().trim().max(2048).refine((value) => value.startsWith("/manus-storage/"), "A logo precisa estar armazenada no sistema").nullable().optional(),
+});
+
 const footerPaymentMethodsInput = z.object({
-  paymentMethodIds: z.array(z.enum(["visa", "mastercard", "elo", "hipercard", "american-express", "cabal", "diners-club"])).min(1, "Selecione ao menos uma forma de pagamento").max(7, "Escolha no máximo 7 formas de pagamento").superRefine((paymentMethodIds, ctx) => {
-    if (new Set(paymentMethodIds).size !== paymentMethodIds.length) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cada forma de pagamento pode aparecer apenas uma vez" });
+  paymentMethods: z.array(footerPaymentMethodInput).min(1, "Cadastre ao menos uma forma de pagamento").max(24, "Cadastre no máximo 24 formas de pagamento").superRefine((paymentMethods, ctx) => {
+    if (new Set(paymentMethods.map((method) => method.id)).size !== paymentMethods.length) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cada forma de pagamento precisa ter um identificador único" });
   }),
+});
+
+const footerPaymentLogoInput = z.object({
+  fileName: z.string().min(1).max(180),
+  contentType: z.enum(["image/png", "image/jpeg", "image/webp"]),
+  dataBase64: z.string().min(1).max(3_000_000),
 });
 
 const documentInput = z.object({
@@ -134,11 +148,25 @@ export const siteContentRouter = router({
   saveFooterPaymentMethods: adminProcedure.input(footerPaymentMethodsInput).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
-    const footerPaymentMethodIds = JSON.stringify(input.paymentMethodIds);
+    const paymentMethods = input.paymentMethods.map((method) => ({
+      id: method.id,
+      label: method.label.trim(),
+      logoUrl: method.logoUrl === null ? null : method.logoUrl?.trim() || undefined,
+    }));
+    const footerPaymentMethods = JSON.stringify(paymentMethods);
+    const footerPaymentMethodIds = JSON.stringify(paymentMethods.map((method) => method.id));
     const [existing] = await db.select({ id: siteFooterSettings.id }).from(siteFooterSettings).where(eq(siteFooterSettings.id, 1)).limit(1);
-    if (existing) await db.update(siteFooterSettings).set({ footerPaymentMethodIds }).where(eq(siteFooterSettings.id, 1));
-    else await db.insert(siteFooterSettings).values({ id: 1, footerPaymentMethodIds });
-    return { success: true, saved: input.paymentMethodIds.length } as const;
+    if (existing) await db.update(siteFooterSettings).set({ footerPaymentMethods, footerPaymentMethodIds }).where(eq(siteFooterSettings.id, 1));
+    else await db.insert(siteFooterSettings).values({ id: 1, footerPaymentMethods, footerPaymentMethodIds });
+    return { success: true, saved: paymentMethods.length } as const;
+  }),
+
+  uploadFooterPaymentLogo: adminProcedure.input(footerPaymentLogoInput).mutation(async ({ input }) => {
+    const data = Buffer.from(input.dataBase64, "base64");
+    if (!data.length || data.length > 2 * 1024 * 1024) throw new Error("A logo precisa ser uma imagem de até 2 MB");
+    const extension = input.contentType === "image/png" ? "png" : input.contentType === "image/jpeg" ? "jpg" : "webp";
+    const { url } = await storagePut(`site/footer-payment-logos/${Date.now()}-${randomUUID()}.${extension}`, data, input.contentType);
+    return { url } as const;
   }),
 
   getPublicDocuments: publicProcedure.query(async () => {

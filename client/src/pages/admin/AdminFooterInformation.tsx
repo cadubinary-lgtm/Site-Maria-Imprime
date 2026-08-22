@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Building2, Check, CreditCard, FileText, Globe2, ListFilter, Loader2, Save, Settings2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Building2, Check, CreditCard, FileText, Globe2, ImagePlus, ListFilter, Loader2, Plus, Save, Settings2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { FOOTER_CONTENT_FALLBACK, FOOTER_PAYMENT_METHODS, getDefaultPublicDocuments, mergeManagedDocuments, parseFooterPaymentMethodIds, parseFooterProductSegmentIds, type FooterPaymentMethodId, type ManagedPublicDocument } from "@/lib/siteContent";
+import { FOOTER_CONTENT_FALLBACK, getDefaultPublicDocuments, mergeManagedDocuments, parseFooterPaymentMethods, parseFooterProductSegmentIds, type FooterPaymentMethod, type ManagedPublicDocument } from "@/lib/siteContent";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 type FooterForm = typeof FOOTER_CONTENT_FALLBACK;
 
 const DOCUMENT_LIMIT = 50_000;
 const MAX_FOOTER_PRODUCT_SEGMENTS = 8;
-const MAX_FOOTER_PAYMENT_METHODS = FOOTER_PAYMENT_METHODS.length;
+const MAX_FOOTER_PAYMENT_METHODS = 24;
 const FOOTER_FIELD_LIMITS = {
   introduction: 1000,
   newsletterTitle: 120,
@@ -35,10 +36,12 @@ export default function AdminFooterInformation() {
   const saveDocuments = trpc.siteContent.saveDocuments.useMutation();
   const saveFooterProductSegments = trpc.siteContent.saveFooterProductSegments.useMutation();
   const saveFooterPaymentMethods = trpc.siteContent.saveFooterPaymentMethods.useMutation();
+  const uploadFooterPaymentLogo = trpc.siteContent.uploadFooterPaymentLogo.useMutation();
   const [footer, setFooter] = useState<FooterForm>(FOOTER_CONTENT_FALLBACK);
   const [documents, setDocuments] = useState<ManagedPublicDocument[]>(getDefaultPublicDocuments());
   const [footerProductSegmentIds, setFooterProductSegmentIds] = useState<number[]>([]);
-  const [footerPaymentMethodIds, setFooterPaymentMethodIds] = useState<FooterPaymentMethodId[]>([]);
+  const [footerPaymentMethods, setFooterPaymentMethods] = useState<FooterPaymentMethod[]>([]);
+  const [paymentMethodPendingDeletion, setPaymentMethodPendingDeletion] = useState<FooterPaymentMethod | null>(null);
 
   useEffect(() => {
     if (!savedFooter) return;
@@ -63,8 +66,7 @@ export default function AdminFooterInformation() {
   }, [allSegments, savedFooter]);
 
   useEffect(() => {
-    const persistedIds = parseFooterPaymentMethodIds(savedFooter?.footerPaymentMethodIds);
-    setFooterPaymentMethodIds(persistedIds.length > 0 ? persistedIds : FOOTER_PAYMENT_METHODS.map((method) => method.id));
+    setFooterPaymentMethods(parseFooterPaymentMethods(savedFooter?.footerPaymentMethods, savedFooter?.footerPaymentMethodIds));
   }, [savedFooter]);
 
   const isLoading = isLoadingFooter || isLoadingDocuments || isLoadingSegments;
@@ -73,10 +75,6 @@ export default function AdminFooterInformation() {
     const segment = allSegments.find((item) => item.id === id);
     return segment ? [segment] : [];
   }), [allSegments, footerProductSegmentIds]);
-  const selectedFooterPaymentMethods = useMemo(() => footerPaymentMethodIds.flatMap((id) => {
-    const paymentMethod = FOOTER_PAYMENT_METHODS.find((method) => method.id === id);
-    return paymentMethod ? [paymentMethod] : [];
-  }), [footerPaymentMethodIds]);
 
   const setFooterField = <K extends keyof FooterForm>(field: K, value: FooterForm[K]) => setFooter((current) => ({ ...current, [field]: value }));
   const updateDocument = (slug: string, patch: Partial<ManagedPublicDocument>) => setDocuments((current) => current.map((document) => document.slug === slug ? { ...document, ...patch } : document));
@@ -107,27 +105,62 @@ export default function AdminFooterInformation() {
     return next;
   });
 
-  const toggleFooterPaymentMethod = (paymentMethodId: FooterPaymentMethodId) => {
-    setFooterPaymentMethodIds((current) => {
-      if (current.includes(paymentMethodId)) {
-        if (current.length === 1) {
-          toast.error("Mantenha ao menos uma forma de pagamento no rodapé.", { position: "top-right", id: "footer-payment-methods-minimum" });
-          return current;
-        }
-        return current.filter((id) => id !== paymentMethodId);
-      }
-      return [...current, paymentMethodId];
-    });
-  };
+  const updateFooterPaymentMethod = (paymentMethodId: string, patch: Partial<FooterPaymentMethod>) => setFooterPaymentMethods((current) => current.map((method) => method.id === paymentMethodId ? { ...method, ...patch } : method));
 
-  const moveFooterPaymentMethod = (paymentMethodId: FooterPaymentMethodId, direction: -1 | 1) => setFooterPaymentMethodIds((current) => {
-    const index = current.indexOf(paymentMethodId);
+  const moveFooterPaymentMethod = (paymentMethodId: string, direction: -1 | 1) => setFooterPaymentMethods((current) => {
+    const index = current.findIndex((method) => method.id === paymentMethodId);
     const targetIndex = index + direction;
     if (index < 0 || targetIndex < 0 || targetIndex >= current.length) return current;
     const next = [...current];
     [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
     return next;
   });
+
+  const handleAddFooterPaymentMethod = () => {
+    if (footerPaymentMethods.length >= MAX_FOOTER_PAYMENT_METHODS) {
+      toast.error(`Cadastre no máximo ${MAX_FOOTER_PAYMENT_METHODS} formas de pagamento.`, { position: "top-right", id: "footer-payment-methods-limit" });
+      return;
+    }
+    const uniqueId = `cartao-${Date.now().toString(36)}`;
+    setFooterPaymentMethods((current) => [...current, { id: uniqueId, label: "Novo cartão", logoUrl: null }]);
+  };
+
+  const confirmRemoveFooterPaymentMethod = () => {
+    if (!paymentMethodPendingDeletion) return;
+    if (footerPaymentMethods.length === 1) {
+      toast.error("Mantenha ao menos uma forma de pagamento no rodapé.", { position: "top-right", id: "footer-payment-methods-minimum" });
+      setPaymentMethodPendingDeletion(null);
+      return;
+    }
+    setFooterPaymentMethods((current) => current.filter((method) => method.id !== paymentMethodPendingDeletion.id));
+    setPaymentMethodPendingDeletion(null);
+  };
+
+  const handleFooterPaymentLogoUpload = async (paymentMethodId: string, file: File | undefined, input: HTMLInputElement) => {
+    if (!file) return;
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowedTypes.includes(file.type) || file.size > 2 * 1024 * 1024) {
+      toast.error("Envie uma imagem PNG, JPG ou WEBP de até 2 MB.", { position: "top-right", id: "footer-payment-logo-validation" });
+      input.value = "";
+      return;
+    }
+    try {
+      const dataBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const { url } = await uploadFooterPaymentLogo.mutateAsync({ fileName: file.name, contentType: file.type as "image/png" | "image/jpeg" | "image/webp", dataBase64 });
+      updateFooterPaymentMethod(paymentMethodId, { logoUrl: url });
+      toast.success("Logo adicionada", { description: "Salve as formas de pagamento para publicar a alteração.", position: "top-right", id: "footer-payment-logo-upload" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível enviar a logo", { position: "top-right", id: "footer-payment-logo-upload-error" });
+    } finally {
+      input.value = "";
+    }
+  };
 
   const handleSaveFooter = async () => {
     const invalidField = (Object.keys(FOOTER_FIELD_LIMITS) as Array<keyof FooterForm>).find((field) => {
@@ -180,11 +213,14 @@ export default function AdminFooterInformation() {
   };
 
   const handleSaveFooterPaymentMethods = async () => {
-    if (footerPaymentMethodIds.length === 0) return;
+    if (footerPaymentMethods.length === 0 || footerPaymentMethods.some((method) => !method.label.trim())) {
+      toast.error("Informe o nome de todas as formas de pagamento antes de salvar.", { position: "top-right", id: "footer-payment-methods-name-required" });
+      return;
+    }
     try {
-      await saveFooterPaymentMethods.mutateAsync({ paymentMethodIds: footerPaymentMethodIds });
+      await saveFooterPaymentMethods.mutateAsync({ paymentMethods: footerPaymentMethods.map((method) => ({ ...method, label: method.label.trim() })) });
       await Promise.all([utils.siteContent.getAdminFooter.invalidate(), utils.siteContent.getPublicFooter.invalidate()]);
-      toast.success("Formas de pagamento salvas", { description: `${footerPaymentMethodIds.length} opções serão exibidas no rodapé.`, position: "top-right", duration: 3500, id: "footer-payment-methods-save" });
+      toast.success("Formas de pagamento salvas", { description: `${footerPaymentMethods.length} opções serão exibidas no rodapé.`, position: "top-right", duration: 3500, id: "footer-payment-methods-save" });
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível salvar as formas de pagamento", { position: "top-right", id: "footer-payment-methods-save-error" });
@@ -269,10 +305,10 @@ export default function AdminFooterInformation() {
                 </AccordionTrigger>
                 <AccordionContent className="border-t border-slate-100">
                   <CardContent className="space-y-6 p-6">
-                    <div className="flex flex-col gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Seleção de pagamentos</p><p className="mt-1 text-sm text-slate-600">Escolha de 1 a {MAX_FOOTER_PAYMENT_METHODS} opções. A ordem abaixo será a mesma exibida no site.</p></div><span className="w-fit rounded-full bg-white px-3 py-1 text-sm font-bold text-pink-600 shadow-sm">{selectedFooterPaymentMethods.length}/{MAX_FOOTER_PAYMENT_METHODS}</span></div>
-                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Formas disponíveis</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{FOOTER_PAYMENT_METHODS.map((paymentMethod) => { const selected = footerPaymentMethodIds.includes(paymentMethod.id); return <button key={paymentMethod.id} type="button" onClick={() => toggleFooterPaymentMethod(paymentMethod.id)} aria-pressed={selected} className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${selected ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-slate-700 hover:border-pink-200 hover:bg-pink-50/50"}`}><span className="truncate pr-3">{paymentMethod.label}</span>{selected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}</button>; })}</div></div>
-                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Ordem no rodapé</p><div className="space-y-2">{selectedFooterPaymentMethods.map((paymentMethod, index) => <div key={paymentMethod.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-700">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{paymentMethod.label}</span><div className="flex gap-1"><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, -1)} disabled={index === 0} aria-label={`Mover ${paymentMethod.label} para cima`}><ArrowUp className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, 1)} disabled={index === selectedFooterPaymentMethods.length - 1} aria-label={`Mover ${paymentMethod.label} para baixo`}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</div></div>
-                    <div className="flex justify-end"><Button onClick={handleSaveFooterPaymentMethods} disabled={saveFooterPaymentMethods.isPending || footerPaymentMethodIds.length === 0} aria-busy={saveFooterPaymentMethods.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooterPaymentMethods.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar formas de pagamento</Button></div>
+                    <div className="flex flex-col gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Cartões e formas de pagamento</p><p className="mt-1 text-sm text-slate-600">Cadastre, ordene e defina a logo que aparecerá em cada card do rodapé.</p></div><span className="w-fit rounded-full bg-white px-3 py-1 text-sm font-bold text-pink-600 shadow-sm">{footerPaymentMethods.length}/{MAX_FOOTER_PAYMENT_METHODS}</span></div>
+                    <div className="flex justify-end"><Button type="button" variant="outline" onClick={handleAddFooterPaymentMethod} disabled={footerPaymentMethods.length >= MAX_FOOTER_PAYMENT_METHODS} className="border-pink-200 text-pink-700 hover:bg-pink-50"><Plus className="mr-2 h-4 w-4" aria-hidden="true" />Adicionar cartão</Button></div>
+                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Ordem no rodapé</p><div className="space-y-3">{footerPaymentMethods.map((paymentMethod, index) => <div key={paymentMethod.id} className="rounded-xl border border-slate-200 bg-white p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-center"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-700">{index + 1}</span><div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2">{typeof paymentMethod.logoUrl === "string" ? <img src={paymentMethod.logoUrl} alt={`Logo ${paymentMethod.label}`} className="h-full w-full object-contain" /> : <CreditCard className="h-7 w-7 text-slate-400" aria-hidden="true" />}</div><div className="min-w-0 flex-1 space-y-2"><Label htmlFor={`footer-payment-label-${paymentMethod.id}`}>Nome exibido</Label><Input id={`footer-payment-label-${paymentMethod.id}`} value={paymentMethod.label} maxLength={80} onChange={(event) => updateFooterPaymentMethod(paymentMethod.id, { label: event.target.value })} /></div><div className="flex flex-wrap items-center gap-2 lg:w-[340px] lg:justify-end"><label htmlFor={`footer-payment-logo-${paymentMethod.id}`} className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"><ImagePlus className="h-4 w-4" aria-hidden="true" />{typeof paymentMethod.logoUrl === "string" ? "Trocar logo" : "Enviar logo"}<Input id={`footer-payment-logo-${paymentMethod.id}`} type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => handleFooterPaymentLogoUpload(paymentMethod.id, event.target.files?.[0], event.currentTarget)} /></label><Button type="button" variant="ghost" size="sm" onClick={() => updateFooterPaymentMethod(paymentMethod.id, { logoUrl: null })} disabled={paymentMethod.logoUrl === null} className="text-slate-600 hover:text-slate-900"><X className="mr-1 h-4 w-4" aria-hidden="true" />Remover logo</Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, -1)} disabled={index === 0} aria-label={`Mover ${paymentMethod.label} para cima`}><ArrowUp className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, 1)} disabled={index === footerPaymentMethods.length - 1} aria-label={`Mover ${paymentMethod.label} para baixo`}><ArrowDown className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => setPaymentMethodPendingDeletion(paymentMethod)} disabled={footerPaymentMethods.length === 1} className="text-red-600 hover:bg-red-50 hover:text-red-700"><Trash2 className="mr-1 h-4 w-4" aria-hidden="true" />Excluir</Button></div></div></div>)}</div></div>
+                    <div className="flex justify-end"><Button onClick={handleSaveFooterPaymentMethods} disabled={saveFooterPaymentMethods.isPending || footerPaymentMethods.length === 0} aria-busy={saveFooterPaymentMethods.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooterPaymentMethods.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar formas de pagamento</Button></div>
                   </CardContent>
                 </AccordionContent>
               </AccordionItem>
@@ -280,6 +316,7 @@ export default function AdminFooterInformation() {
           </Card>
 
           <Card className="border-slate-200"><CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3"><Building2 className="mt-0.5 h-5 w-5 text-pink-600" /><div><h2 className="font-bold text-slate-900">Dados da empresa, contatos e redes sociais</h2><p className="mt-1 text-sm text-slate-600">Logo, CNPJ, endereço, telefone, e-mail e redes sociais continuam centralizados na tela de Dados da Empresa.</p></div></div><a href="/admin/dados-da-empresa" className="inline-flex items-center justify-center rounded-lg border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-600 transition hover:bg-pink-50">Abrir Dados da Empresa</a></CardContent></Card>
+          <AlertDialog open={Boolean(paymentMethodPendingDeletion)} onOpenChange={(open) => { if (!open) setPaymentMethodPendingDeletion(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir forma de pagamento?</AlertDialogTitle><AlertDialogDescription>{paymentMethodPendingDeletion ? `“${paymentMethodPendingDeletion.label}” deixará de aparecer no rodapé depois que você salvar as alterações.` : ""}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={confirmRemoveFooterPaymentMethod} className="bg-red-600 hover:bg-red-700">Excluir cartão</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
         </>}
       </div>
     </AdminLayout>
