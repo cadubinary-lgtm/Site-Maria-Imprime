@@ -54,6 +54,17 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('"fita-dupla-face"');
     expect(guide).toContain('"verniz-brilho-lona"');
     expect(guide).toContain('"laminacao-fosca-lona"');
+    expect(guide).toContain('selectedFinish && <div className="border-b border-pink-100 bg-pink-50/40 px-3 py-3');
+    expect(guide).toContain('aria-live="polite"');
+    expect(guide).not.toContain("selectedFinish?.illustration &&");
+    expect(guide).not.toContain("selectedFinish && !selectedFinish.illustration");
+    [
+      "refile:", '"corte-especial":', '"meio-corte":', '"laminacao-brilho":', '"laminacao-fosca":',
+      '"verniz-localizado":', '"uv-localizado":', "ilhos:", "bastao:", "ponteira:", "solda:", "dobra:",
+      "vinco:", "furo:", "enobrecimentos:", "aplicacao:", "embalagem:", "numeracao:", '"hot-stamping":',
+      "serrilha:", '"borda-arredondada":', '"fita-dupla-face":', '"verniz-brilho-lona":', '"verniz-fosco-lona":',
+      '"laminacao-brilho-lona":', '"laminacao-fosca-lona":',
+    ].forEach((drawingKey) => expect(guide).toContain(drawingKey));
     expect(guide).toContain("compact = false");
     expect(guide).toContain("grid-cols-2 md:grid-cols-4");
     expect(guide).toContain("responsivePanelGridClass");

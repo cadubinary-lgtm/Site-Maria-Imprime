@@ -4063,3 +4063,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar ícones próprios e consistentes para os novos acabamentos sem alterar a estrutura do guia
 - [x] Preservar a grade, o comportamento de seleção e o painel de descrição existentes
 - [x] Criar regressão e validar a grade completa de acabamentos no layout atual (TypeScript e Vitest aprovados; inspeção visual requer produto disponível no preview)
+
+- [x] Manter os desenhos em todos os acabamentos e exibir a descrição técnica do item selecionado abaixo da grade
+- [x] Criar regressão para assegurar que acabamentos com ilustração também mostrem a descrição
