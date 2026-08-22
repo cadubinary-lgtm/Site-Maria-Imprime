@@ -4094,3 +4094,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Verificar o download de gabarito pela página pública acessível no rodapé
 - [x] Criar ou ampliar regressões para cobrir os fluxos completos
 - [x] Publicar e repetir o teste real após corrigir a autorização administrativa dos gabaritos
+
+## Simplificação e ZIP de Gabaritos
+- [x] Simplificar os atalhos de cadastro para remover redundância na Biblioteca de arquivos
+- [x] Aceitar arquivos ZIP no seletor, na validação de upload e na descrição de formatos aceitos
+- [x] Verificar novamente o vínculo de gabaritos na página pública de produtos
+- [x] Criar regressões para os atalhos simplificados, o formato ZIP e o vínculo público

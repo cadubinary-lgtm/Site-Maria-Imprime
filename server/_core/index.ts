@@ -139,12 +139,14 @@ async function startServer() {
         'application/octet-stream', // .cdr, .ai, .psd genérico
         'application/x-coreldraw',
         'application/vnd.corel-draw',
+        'application/zip',
+        'application/x-zip-compressed',
       ];
       // Também verificar extensão para formatos que chegam como octet-stream
       const ext = originalname.split('.').pop()?.toLowerCase() ?? '';
-      const allowedExts = ['pdf', 'ai', 'cdr', 'psd', 'eps', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'tif', 'tiff'];
+      const allowedExts = ['pdf', 'ai', 'cdr', 'psd', 'eps', 'zip', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'tif', 'tiff'];
       if (!allowedMimeTypes.includes(mimetype) && !allowedExts.includes(ext)) {
-        return res.status(400).json({ error: 'Formato não suportado. Use PDF, AI, CDR, PSD, EPS, JPG ou PNG' });
+        return res.status(400).json({ error: 'Formato não suportado. Use PDF, AI, CDR, PSD, EPS, ZIP, JPG ou PNG' });
       }
       const timestamp = Date.now();
       // Sanitizar nome: substituir espaços e caracteres especiais por underscores
