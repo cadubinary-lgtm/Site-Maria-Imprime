@@ -55,8 +55,6 @@ describe("Central de Gabaritos", () => {
     const adminPage = read("client/src/pages/admin/AdminPrintTemplates.tsx");
     const uploadEndpoint = read("server/_core/index.ts");
     expect(adminPage).toContain('"zip"');
-    expect(adminPage).toContain(".zip");
-    expect(adminPage).toContain("application/zip");
     expect(adminPage).toContain("PDF, AI, CDR, PSD, EPS, ZIP, SVG");
     expect(adminPage).not.toContain("Adicionar à biblioteca");
     expect(uploadEndpoint).toContain("'application/zip'");
@@ -82,6 +80,11 @@ describe("Central de Gabaritos", () => {
     expect(adminPage).toContain('htmlFor="template-file-input"');
     expect(adminPage).toContain('id="template-file-input"');
     expect(adminPage).toContain("cursor-pointer opacity-0");
+    expect(adminPage).toContain("const handleFileDrop");
+    expect(adminPage).toContain("onDrop={handleFileDrop}");
+    expect(adminPage).toContain("Selecionar arquivo ou arrastar aqui");
+    expect(adminPage).toContain("Arraste o arquivo para a área acima ou clique para selecionar.");
+    expect(adminPage).not.toContain('accept=".pdf');
     expect(adminPage).not.toContain("fileInputRef.current?.click()");
   });
 });

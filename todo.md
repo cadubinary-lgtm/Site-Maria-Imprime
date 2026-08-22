@@ -4100,3 +4100,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Aceitar arquivos ZIP no seletor, na validação de upload e na descrição de formatos aceitos
 - [x] Verificar novamente o vínculo de gabaritos na página pública de produtos
 - [x] Criar regressões para os atalhos simplificados, o formato ZIP e o vínculo público
+
+## Compatibilidade do Seletor de Gabaritos
+- [x] Substituir o acionamento que abre a janela vazia por um fluxo de seleção compatível
+- [x] Preservar formatos permitidos, validações e feedback de upload no novo fluxo
+- [x] Criar regressão e validar a abertura do seletor de arquivo
