@@ -4134,3 +4134,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Registrar rota e item de menu na sidebar
 - [x] Integrar prazos globais no DeliveryOptionsManager de novo produto
 - [x] Criar regressão cobrindo o fluxo completo
+
+## Layout de Editar Produto Igual ao Novo Produto
+- [x] Mapear a estrutura atual da página Editar Produto e comparar com Novo Produto
+- [x] Reorganizar Editar Produto para usar o mesmo layout visual de Novo Produto sem remover campos existentes
+- [x] Manter Fotos do Produto e Segmentos lado a lado e demais campos alinhados verticalmente conforme Novo Produto
+- [x] Criar regressão cobrindo a equivalência de layout entre Editar Produto e Novo Produto
+- [x] Validar TypeScript e salvar checkpoint publicável

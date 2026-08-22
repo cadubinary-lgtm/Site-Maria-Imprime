@@ -963,9 +963,9 @@ export default function AdminProducts() {
                           </Card>
 
                           <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
-                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-stretch">
 
-                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-1 sm:row-start-2 self-start`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-2 sm:row-start-1`}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
                               <MultiSegmentSelector
@@ -976,7 +976,7 @@ export default function AdminProducts() {
                             </CardContent>
                           </Card>
 
-                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-1 sm:row-start-3 self-start`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-span-2 sm:row-start-2`}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
                               <p className="mb-3 text-sm text-gray-500">Defina o arquivo que ficará disponível para download na página deste produto.</p>
@@ -993,7 +993,7 @@ export default function AdminProducts() {
                           </Card>
 
                           {/* Upload de Fotos */}
-                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-span-2 sm:row-start-1`}>
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-1 sm:row-start-1`}>
                             <CardContent className="px-4">
                               <ProductImageUploader
                                 mainImageUrl={editForm.imageUrl}
@@ -1005,7 +1005,7 @@ export default function AdminProducts() {
                             </CardContent>
                           </Card>
 
-                          <div className="flex flex-col gap-4 self-start sm:col-start-2 sm:row-start-2">
+                          <div className="flex flex-col gap-4 sm:col-span-2 sm:row-start-3">
                           <Card className={PRODUCT_FORM_PANEL.card}>
                             <CardContent className={PRODUCT_FORM_PANEL.content}>
                               <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
