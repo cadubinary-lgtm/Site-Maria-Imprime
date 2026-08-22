@@ -16,7 +16,7 @@ export const EDIT_PRODUCT_MODAL_LAYOUT = {
   price: "xl:col-span-2",
   description: "xl:col-span-12",
   measureFields: "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6",
-  secondary: "grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start",
+  secondary: "flex flex-col gap-4",
 } as const;
 
 export const PRODUCT_FORM_PANEL = {
