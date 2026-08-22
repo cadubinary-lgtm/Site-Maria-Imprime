@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { ArrowDown, ArrowUp, Download, FileUp, FileText, Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import type { DragEvent } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -59,18 +60,14 @@ export default function AdminPrintTemplates() {
     setDialogOpen(true);
   };
 
-  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const uploadTemplateFile = async (file: File) => {
     const extension = extensionOf(file.name);
     if (!ALLOWED_EXTENSIONS.has(extension)) {
       toast.error("Formato não suportado", { description: "Use PDF, AI, CDR, PSD, EPS, ZIP, SVG ou imagem gráfica." });
-      event.target.value = "";
       return;
     }
     if (file.size > MAX_TEMPLATE_SIZE) {
       toast.error("Arquivo muito grande", { description: "O gabarito deve ter no máximo 25 MB." });
-      event.target.value = "";
       return;
     }
     setIsUploading(true);
@@ -86,8 +83,20 @@ export default function AdminPrintTemplates() {
       toast.error("Não foi possível enviar o gabarito", { description: error instanceof Error ? error.message : "Tente novamente." });
     } finally {
       setIsUploading(false);
-      event.target.value = "";
     }
+  };
+
+  const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) void uploadTemplateFile(file);
+  };
+
+  const handleFileDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    if (isUploading) return;
+    const file = event.dataTransfer.files?.[0];
+    if (file) void uploadTemplateFile(file);
   };
 
   const handleSave = async () => {
@@ -157,7 +166,7 @@ export default function AdminPrintTemplates() {
       </main>
 
       <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setDraft(EMPTY_DRAFT); }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{draft.id ? "Editar gabarito" : "Adicionar gabarito"}</DialogTitle><DialogDescription>Inclua um nome claro para que a equipe encontre e vincule o arquivo correto ao produto.</DialogDescription></DialogHeader><div className="space-y-5 py-2"><div className="space-y-2"><Label htmlFor="template-title">Título *</Label><Input id="template-title" value={draft.title} maxLength={160} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} placeholder="Ex.: Cartão de visita 9 × 5 cm" /></div><div className="space-y-2"><Label htmlFor="template-description">Descrição</Label><Textarea id="template-description" value={draft.description} maxLength={2000} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} placeholder="Explique quando este gabarito deve ser usado." rows={3} /></div><div className="space-y-2"><Label htmlFor="template-file-input">Arquivo do gabarito *</Label><label htmlFor="template-file-input" aria-disabled={isUploading} className={`relative flex w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-8 text-sm font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-pink-500 ${isUploading ? "cursor-wait border-slate-200 bg-slate-100 text-slate-400" : "cursor-pointer border-slate-300 bg-slate-50 text-slate-600 hover:border-pink-300 hover:bg-pink-50"}`}><input id="template-file-input" type="file" accept=".pdf,.ai,.cdr,.psd,.eps,.zip,.svg,.jpg,.jpeg,.png,.gif,.webp,.tif,.tiff,application/pdf,application/postscript,application/zip,application/x-zip-compressed,image/svg+xml" className="absolute inset-0 h-full w-full cursor-pointer opacity-0" disabled={isUploading} onChange={handleUpload} />{isUploading ? <Loader2 className="h-5 w-5 animate-spin text-pink-600" /> : <Upload className="h-5 w-5 text-pink-600" />}{isUploading ? "Enviando arquivo..." : draft.file ? "Selecionar outro arquivo" : "Selecionar arquivo"}</label><p className="text-xs leading-5 text-slate-500">PDF, AI, CDR, PSD, EPS, ZIP, SVG ou imagem gráfica, com até 25 MB.</p>{draft.file && <div className="flex items-center gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-3"><FileText className="h-5 w-5 shrink-0 text-pink-600" /><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{draft.file.fileName}</span><span className="text-xs text-slate-500">{formatFileSize(draft.file.fileSize)}</span></div>}</div><div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"><div><Label htmlFor="template-published" className="font-semibold text-slate-900">Publicar no site</Label><p className="mt-1 text-xs leading-5 text-slate-600">Quando oculto, o arquivo continua disponível apenas para seleção administrativa.</p></div><Switch id="template-published" checked={draft.isPublished} onCheckedChange={(isPublished) => setDraft((current) => ({ ...current, isPublished }))} /></div></div><DialogFooter><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button><Button onClick={handleSave} disabled={isSaving || isUploading} className="bg-pink-600 hover:bg-pink-700">{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}{draft.id ? "Salvar alterações" : "Adicionar gabarito"}</Button></DialogFooter></DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{draft.id ? "Editar gabarito" : "Adicionar gabarito"}</DialogTitle><DialogDescription>Inclua um nome claro para que a equipe encontre e vincule o arquivo correto ao produto.</DialogDescription></DialogHeader><div className="space-y-5 py-2"><div className="space-y-2"><Label htmlFor="template-title">Título *</Label><Input id="template-title" value={draft.title} maxLength={160} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} placeholder="Ex.: Cartão de visita 9 × 5 cm" /></div><div className="space-y-2"><Label htmlFor="template-description">Descrição</Label><Textarea id="template-description" value={draft.description} maxLength={2000} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} placeholder="Explique quando este gabarito deve ser usado." rows={3} /></div><div className="space-y-2"><Label htmlFor="template-file-input">Arquivo do gabarito *</Label><label htmlFor="template-file-input" aria-disabled={isUploading} onDragOver={(event) => event.preventDefault()} onDrop={handleFileDrop} className={`relative flex w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-8 text-sm font-semibold transition focus-within:outline-none focus-within:ring-2 focus-within:ring-pink-500 ${isUploading ? "cursor-wait border-slate-200 bg-slate-100 text-slate-400" : "cursor-pointer border-slate-300 bg-slate-50 text-slate-600 hover:border-pink-300 hover:bg-pink-50"}`}><input id="template-file-input" type="file" className="absolute inset-0 h-full w-full cursor-pointer opacity-0" disabled={isUploading} onChange={handleUpload} />{isUploading ? <Loader2 className="h-5 w-5 animate-spin text-pink-600" /> : <Upload className="h-5 w-5 text-pink-600" />}{isUploading ? "Enviando arquivo..." : draft.file ? "Selecionar outro arquivo ou arrastar aqui" : "Selecionar arquivo ou arrastar aqui"}</label><p className="text-xs leading-5 text-slate-500">Arraste o arquivo para a área acima ou clique para selecionar. PDF, AI, CDR, PSD, EPS, ZIP, SVG ou imagem gráfica, com até 25 MB.</p>{draft.file && <div className="flex items-center gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-3"><FileText className="h-5 w-5 shrink-0 text-pink-600" /><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{draft.file.fileName}</span><span className="text-xs text-slate-500">{formatFileSize(draft.file.fileSize)}</span></div>}</div><div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"><div><Label htmlFor="template-published" className="font-semibold text-slate-900">Publicar no site</Label><p className="mt-1 text-xs leading-5 text-slate-600">Quando oculto, o arquivo continua disponível apenas para seleção administrativa.</p></div><Switch id="template-published" checked={draft.isPublished} onCheckedChange={(isPublished) => setDraft((current) => ({ ...current, isPublished }))} /></div></div><DialogFooter><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button><Button onClick={handleSave} disabled={isSaving || isUploading} className="bg-pink-600 hover:bg-pink-700">{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}{draft.id ? "Salvar alterações" : "Adicionar gabarito"}</Button></DialogFooter></DialogContent>
       </Dialog>
 
       <AlertDialog open={Boolean(templateToRemove)} onOpenChange={(open) => !open && setTemplateToRemove(null)}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir este gabarito?</AlertDialogTitle><AlertDialogDescription>O arquivo deixará de aparecer no site e todos os produtos que o utilizam ficarão sem um gabarito vinculado. Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleRemove} className="bg-red-600 hover:bg-red-700">{removeTemplate.isPending ? "Excluindo..." : "Excluir gabarito"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
