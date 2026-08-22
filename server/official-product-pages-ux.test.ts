@@ -41,4 +41,10 @@ describe("páginas oficiais de produto", () => {
     expect(productDetail).not.toContain("Uso versátil");
     expect(productDetail).toContain("Ver especificações técnicas");
   });
+
+  it("destaca a frase de dúvidas em rosa e preserva o acesso às especificações", () => {
+    expect(productDetail).toContain('className="mb-1 text-sm font-semibold text-pink-600">Dúvidas sobre o produto?</p>');
+    expect(productDetail).toContain("Ver especificações técnicas");
+    expect(productDetail).toContain('<details className="group">');
+  });
 });
