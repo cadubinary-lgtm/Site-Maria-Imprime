@@ -642,63 +642,64 @@ export default function AdminNewProduct() {
               )}
               <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                 <div className="space-y-4">
-                  {/* Upload de Fotos */}
-                  <Card className={PRODUCT_FORM_PANEL.card}>
-                    <CardContent className="px-4">
-                      {isDuplicatingDraft && !autoCreatedProductId && (
-                        <div className="flex justify-end pb-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={!createForm.imageUrl && createForm.galleryUrls.length === 0}
-                            className="text-gray-500 hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600"
-                            onClick={() => setIsClearDuplicateImagesDialogOpen(true)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Limpar imagens
-                          </Button>
-                        </div>
-                      )}
-                      <ProductImageUploader
-                        mainImageUrl={createForm.imageUrl}
-                        galleryUrls={createForm.galleryUrls}
-                        onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
-                        onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
-                        compact
-                      />
-                    </CardContent>
-                  </Card>
-                  <div className="flex flex-col gap-4">
-                  {/* Segmentos */}
+                  {/* Fotos + Segmentos lado a lado */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
+                    {/* Upload de Fotos */}
+                    <Card className={PRODUCT_FORM_PANEL.card}>
+                      <CardContent className="px-4">
+                        {isDuplicatingDraft && !autoCreatedProductId && (
+                          <div className="flex justify-end pb-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={!createForm.imageUrl && createForm.galleryUrls.length === 0}
+                              className="text-gray-500 hover:bg-pink-50 hover:text-pink-600 focus-visible:bg-pink-50 focus-visible:text-pink-600"
+                              onClick={() => setIsClearDuplicateImagesDialogOpen(true)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Limpar imagens
+                            </Button>
+                          </div>
+                        )}
+                        <ProductImageUploader
+                          mainImageUrl={createForm.imageUrl}
+                          galleryUrls={createForm.galleryUrls}
+                          onMainImageChange={(url, key) => setCreateForm({ ...createForm, imageUrl: url, imageKey: key || "" })}
+                          onGalleryChange={(urls) => setCreateForm({ ...createForm, galleryUrls: urls })}
+                          compact
+                        />
+                      </CardContent>
+                    </Card>
+                    {/* Segmentos */}
+                    <Card className={`${PRODUCT_FORM_PANEL.card} self-start`}>
+                      <CardContent className={PRODUCT_FORM_PANEL.content}>
+                        <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
+                        <MultiSegmentSelector
+                          productId={autoCreatedProductId || 0}
+                          selectedSegmentIds={createForm.segmentIds}
+                          onSegmentsChange={handleCreateSegmentsChange}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                  {/* Gabarito recomendado */}
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
-                      <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
-                      <MultiSegmentSelector
-                        productId={autoCreatedProductId || 0}
-                        selectedSegmentIds={createForm.segmentIds}
-                        onSegmentsChange={handleCreateSegmentsChange}
-                      />
+                      <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
+                      <p className="mb-3 text-sm text-gray-500">Vincule o arquivo correto deste produto para que o cliente possa baixá-lo na página do produto.</p>
+                      <Label htmlFor="create-template-id" className="sr-only">Gabarito recomendado</Label>
+                      <Select value={createForm.templateId ? String(createForm.templateId) : "none"} onValueChange={(value) => setCreateForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
+                        <SelectTrigger id="create-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
+                          {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">Gerencie os arquivos em Configurações do site → Gabaritos.</p>
                     </CardContent>
                   </Card>
-
-                 <Card className={PRODUCT_FORM_PANEL.card}>
-                   <CardContent className={PRODUCT_FORM_PANEL.content}>
-                     <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
-                     <p className="mb-3 text-sm text-gray-500">Vincule o arquivo correto deste produto para que o cliente possa baixá-lo na página do produto.</p>
-                     <Label htmlFor="create-template-id" className="sr-only">Gabarito recomendado</Label>
-                     <Select value={createForm.templateId ? String(createForm.templateId) : "none"} onValueChange={(value) => setCreateForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
-                       <SelectTrigger id="create-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
-                         {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
-                       </SelectContent>
-                     </Select>
-                     <p className="mt-2 text-xs leading-5 text-slate-500">Gerencie os arquivos em Configurações do site → Gabaritos.</p>
-                   </CardContent>
-                </Card>
-               
-                  {/* Tags e Descrição do Card — segunda coluna, abaixo do Gabarito */}
+                  {/* Tags do Produto */}
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Tags do Produto</h3>
@@ -744,6 +745,7 @@ export default function AdminNewProduct() {
                       )}
                     </CardContent>
                   </Card>
+                  {/* Descrição do Card */}
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>
                       <h3 className={PRODUCT_FORM_PANEL.title}>Descrição do Card</h3>
@@ -779,7 +781,6 @@ export default function AdminNewProduct() {
                     </CardContent>
                   </Card>
                   </div>
-                </div>
                 <div className="space-y-4">
                   {/* Prazos de Produção */}
                   <DeliveryOptionsManager
