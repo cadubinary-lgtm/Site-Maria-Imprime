@@ -720,9 +720,9 @@ export default function AdminQuotationForm() {
 
     return (
       <div key={`custom-${idx}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
-        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] items-center gap-2 bg-gray-100 px-2 py-2 ${isExpanded ? "border-b border-gray-200" : ""}`}>
-          <div>
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
+        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_96px_96px_32px] items-center gap-2 bg-gray-100 px-2 py-2 ${isExpanded ? "border-b border-gray-200" : ""}`}>
+         <div>
+           <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
               <ImageIcon className="w-4 h-4 text-gray-400" />
             </div>
           </div>
@@ -758,49 +758,21 @@ export default function AdminQuotationForm() {
                 <ImageIcon className="h-4 w-4" />
               </button>
             )}
-          </div>
-          <div className="flex justify-center">
-            <input
-              type="number"
-              min={1}
-              aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
-              value={item.quantity}
-              onChange={(e) => {
-                updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) });
-                scheduleQuotationAutoAdvance(e.currentTarget);
-              }}
-              className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
-            />
-          </div>
-          <div className="relative flex justify-end">
-            <input
-              type="text"
-              inputMode="decimal"
-              aria-label={`Valor unitário no cabeçalho de ${item.productName || "item personalizado"}`}
-              value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
-              placeholder="R$ 0,00"
-              onChange={(e) => {
-                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
-                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
-                updateItem(idx, { unitPrice: Math.max(0, parseFloat(raw) || 0) });
-                scheduleQuotationAutoAdvance(e.currentTarget);
-              }}
-              onBlur={(e) => {
-                const raw = e.target.value.replace(/[^0-9,.-]/g, "").replace(",", ".");
-                const value = Math.max(0, parseFloat(raw) || 0);
-                updateItem(idx, { unitPrice: value });
-                setCustomUnitDrafts((prev) => ({ ...prev, [idx]: fmt(value) }));
-              }}
-              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className={`h-8 w-full min-w-0 rounded-md border px-2 text-right text-sm font-medium tabular-nums transition-all focus:outline-none focus:ring-2 ${
-                autoRecalculatedUnitItems.has(idx)
-                  ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-200 motion-safe:animate-pulse"
-                  : "border-input bg-white text-foreground hover:border-pink-300 focus:border-pink-500 focus:ring-pink-100"
-              }`}
-            />
-            {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário recalculado a partir do total do item personalizado.</span>}
-          </div>
-          <div className="flex justify-center">
+         </div>
+         <div className="flex justify-center">
+           <input
+             type="number"
+             min={1}
+             aria-label={`Quantidade de ${item.productName || "item personalizado"}`}
+             value={item.quantity}
+             onChange={(e) => {
+               updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value) || 1) });
+               scheduleQuotationAutoAdvance(e.currentTarget);
+             }}
+             className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums transition-colors hover:border-pink-300 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+           />
+         </div>
+         <div className="flex justify-center">
             <input
               type="text"
               inputMode="decimal"
@@ -1847,12 +1819,11 @@ export default function AdminQuotationForm() {
                       <h2 className="font-semibold text-gray-800">Itens personalizados</h2>
                       <span className="text-xs text-gray-400">— produto ou serviço fora do catálogo</span>
                     </div>
-                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_96px_96px_32px] gap-2 border-b border-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
                       <div>Img</div>
                       <div>Produto / Serviço</div>
                       <div className="text-center">Arte</div>
                       <div className="text-center">Qtd</div>
-                      <div className="text-center">Unit.</div>
                       <div className="text-center">Ajuste</div>
                       <div className="text-right">Total</div>
                       <div></div>
