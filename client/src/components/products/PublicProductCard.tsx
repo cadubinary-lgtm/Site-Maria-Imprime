@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductTagBadges } from "@/components/products/ProductTagBadges";
-import { trpc } from "@/lib/trpc";
 import { getProductPaymentPrices, type ProductPriceAudience } from "@/lib/productPrice";
 import { getVisibleCardDescriptionLines } from "@/lib/product-card-description";
 import { Award, Box, ImageOff, Store, Tag, Zap } from "lucide-react";
@@ -32,13 +31,6 @@ type ProductCardData = {
   resellerPricePerM2?: string | number | null;
 };
 
-type ProductDeliveryOption = {
-  name?: string | null;
-  daysToDeliver?: number | string | null;
-  pricePerM2?: number | string | null;
-  isActive?: boolean | null;
-};
-
 type RealSpecification = { label: string; value: string };
 
 function formatCurrency(value: number, suffix = "") {
@@ -66,16 +58,9 @@ function parseSpecifications(specifications?: string | null): RealSpecification[
 }
 
 export function PublicProductCard({ product, priceAudience = "final" }: { product: ProductCardData; priceAudience?: ProductPriceAudience }) {
-  const { data: deliveryOptions = [] } = trpc.deliveryOptions.getByProduct.useQuery({ productId: product.id });
   const paymentPrices = getProductPaymentPrices(product, priceAudience);
   const specifications = parseSpecifications(product.specifications);
-  const calculationType = product.calculationType || "unidade";
   const isReseller = priceAudience === "reseller";
-  const sameDayUrgency = calculationType === "m2"
-    ? (deliveryOptions as ProductDeliveryOption[]).find((option) =>
-        option.isActive !== false && Number(option.daysToDeliver) === 0 && Number(option.pricePerM2) > 0
-      )
-    : null;
   const cardDescriptionLines = getVisibleCardDescriptionLines(product.cardDescription);
 
   return (
@@ -147,16 +132,12 @@ export function PublicProductCard({ product, priceAudience = "final" }: { produc
           )}
         </div>
 
-        {(cardDescriptionLines.length > 0 || sameDayUrgency) && (
+        {cardDescriptionLines.length > 0 && (
           <div className="product-card-urgency mt-2 flex min-w-0 items-start gap-1 text-[9px] font-semibold leading-[1.2] tracking-[-0.015em] text-pink-700">
             <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
-            {cardDescriptionLines.length > 0 ? (
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                {cardDescriptionLines.map((line, index) => <span key={`${line}-${index}`} className="truncate" title={line}>{line}</span>)}
-              </span>
-            ) : (
-              <span className="product-card-urgency-content min-w-0 break-words">Produção no mesmo dia · taxa de urgência de {formatCurrency(Number(sameDayUrgency?.pricePerM2))}<span className="product-card-area-unit">/m²</span></span>
-            )}
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              {cardDescriptionLines.map((line, index) => <span key={`${line}-${index}`} className="truncate" title={line}>{line}</span>)}
+            </span>
           </div>
         )}
 

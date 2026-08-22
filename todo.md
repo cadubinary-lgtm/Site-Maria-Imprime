@@ -4146,3 +4146,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o card público para exibir sempre o rótulo A PARTIR DE no Pix e no Cartão, inclusive para produtos por pacote
 - [x] Preservar valores, unidade comercial e layout existente do card
 - [x] Criar regressão e validar TypeScript antes do checkpoint
+
+## Descrição do Card Público Vazia
+- [x] Impedir que o card público exiba texto automático de urgência quando a Descrição do Card estiver vazia
+- [x] Preservar a exibição apenas quando o operador preencher Linha 1 ou Linha 2 em Novo Produto ou Editar Produto
+- [x] Atualizar regressão e validar TypeScript antes do checkpoint
