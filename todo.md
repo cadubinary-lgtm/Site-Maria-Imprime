@@ -4048,3 +4048,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover as características técnicas genéricas exibidas em todos os produtos
 - [x] Preservar as informações específicas configuradas individualmente por produto
 - [x] Criar regressão e validar a ausência de alegações genéricas nas páginas de produto — TypeScript sem erros, regressão específica aprovada e página pública conferida
+
+- [x] Destacar em rosa a frase Dúvidas sobre o produto nas páginas públicas de produto
+- [x] Preservar o link e o painel de especificações técnicas existentes
+- [x] Criar regressão e validar o destaque visual — TypeScript sem erros, regressão específica aprovada e página pública conferida

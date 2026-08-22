@@ -1056,7 +1056,7 @@ export default function ProductDetail() {
               )}
 
               <div className="pt-1">
-                <p className="text-sm text-gray-500 mb-1">Dúvidas sobre o produto?</p>
+                <p className="mb-1 text-sm font-semibold text-pink-600">Dúvidas sobre o produto?</p>
                 <details className="group">
                   <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-gray-700 py-1 select-none list-none">
                     Ver especificações técnicas
