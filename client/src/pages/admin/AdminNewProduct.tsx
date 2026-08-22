@@ -621,22 +621,22 @@ export default function AdminNewProduct() {
                       <Input id="create-resellerPricePerM2" type="text" inputMode="decimal" value={createForm.resellerPricePerM2} onChange={(e) => { setCreateForm({ ...createForm, resellerPricePerM2: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeCreatePrice("resellerPricePerM2")} placeholder="0,00" />
                     </div>
                   <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
-                    <div>
-                      <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
-                      <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => { setCreateForm({ ...createForm, minWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
-                    </div>
-                    <div>
-                      <Label htmlFor="create-maxWidth">Largura Máxima (m)</Label>
-                      <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => { setCreateForm({ ...createForm, maxWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
-                    </div>
-                    <div>
-                      <Label htmlFor="create-minHeight">Altura Mínima (m)</Label>
-                      <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => { setCreateForm({ ...createForm, minHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
-                    </div>
-                    <div>
-                      <Label htmlFor="create-maxHeight">Altura Máxima (m)</Label>
-                      <Input id="create-maxHeight" type="number" step="0.01" value={createForm.maxHeight} onChange={(e) => { setCreateForm({ ...createForm, maxHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
-                    </div>
+	                    <div>
+	                      <Label htmlFor="create-minWidth">Largura Mínima (m)</Label>
+	                      <Input id="create-minWidth" type="number" step="0.01" value={createForm.minWidth} onChange={(e) => { setCreateForm({ ...createForm, minWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="create-minHeight">Altura Mínima (m)</Label>
+	                      <Input id="create-minHeight" type="number" step="0.01" value={createForm.minHeight} onChange={(e) => { setCreateForm({ ...createForm, minHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="0.10" />
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="create-maxWidth">Largura Máxima (m)</Label>
+	                      <Input id="create-maxWidth" type="number" step="0.01" value={createForm.maxWidth} onChange={(e) => { setCreateForm({ ...createForm, maxWidth: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="create-maxHeight">Altura Máxima (m)</Label>
+	                      <Input id="create-maxHeight" type="number" step="0.01" value={createForm.maxHeight} onChange={(e) => { setCreateForm({ ...createForm, maxHeight: e.target.value }); scheduleProductPriceAutoAdvance(e.currentTarget); }} placeholder="5.00" />
+	                    </div>
                   </div>
                 </div>
               )}

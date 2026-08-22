@@ -940,22 +940,22 @@ export default function AdminProducts() {
                                 <Input id="edit-resellerPricePerM2" type="text" inputMode="decimal" value={(editForm as any).resellerPricePerM2 || DEFAULT_BRL_PRICE} onChange={(e) => { setEditForm({ ...editForm, resellerPricePerM2: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} onBlur={() => finalizeEditPrice("resellerPricePerM2")} placeholder="0,00" />
                               </div>
                               <div className="grid grid-cols-2 gap-3 sm:col-span-2 xl:col-span-6 xl:grid-cols-4">
-                                <div>
-                                  <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
-                                  <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => { setEditForm({ ...editForm, minWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-maxWidth">Largura Máx (m)</Label>
-                                  <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => { setEditForm({ ...editForm, maxWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
-                                  <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => { setEditForm({ ...editForm, minHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-maxHeight">Altura Máx (m)</Label>
-                                  <Input id="edit-maxHeight" type="number" step="0.01" value={(editForm as any).maxHeight || ""} onChange={(e) => { setEditForm({ ...editForm, maxHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
-                                </div>
+	                                <div>
+	                                  <Label htmlFor="edit-minWidth">Largura Mín (m)</Label>
+	                                  <Input id="edit-minWidth" type="number" step="0.01" value={(editForm as any).minWidth || ""} onChange={(e) => { setEditForm({ ...editForm, minWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
+	                                </div>
+	                                <div>
+	                                  <Label htmlFor="edit-minHeight">Altura Mín (m)</Label>
+	                                  <Input id="edit-minHeight" type="number" step="0.01" value={(editForm as any).minHeight || ""} onChange={(e) => { setEditForm({ ...editForm, minHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
+	                                </div>
+	                                <div>
+	                                  <Label htmlFor="edit-maxWidth">Largura Máx (m)</Label>
+	                                  <Input id="edit-maxWidth" type="number" step="0.01" value={(editForm as any).maxWidth || ""} onChange={(e) => { setEditForm({ ...editForm, maxWidth: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
+	                                </div>
+	                                <div>
+	                                  <Label htmlFor="edit-maxHeight">Altura Máx (m)</Label>
+	                                  <Input id="edit-maxHeight" type="number" step="0.01" value={(editForm as any).maxHeight || ""} onChange={(e) => { setEditForm({ ...editForm, maxHeight: e.target.value } as any); scheduleProductPriceAutoAdvance(e.currentTarget); }} />
+	                                </div>
                               </div>
                             </div>
                               )}
