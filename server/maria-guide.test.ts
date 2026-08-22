@@ -54,7 +54,10 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain('"fita-dupla-face"');
     expect(guide).toContain('"verniz-brilho-lona"');
     expect(guide).toContain('"laminacao-fosca-lona"');
-    expect(guide).toContain('selectedFinish && <div className="border-b border-pink-100 bg-pink-50/40 px-3 py-3');
+    expect(guide).toContain("const finishRows = Array.from");
+    expect(guide).toContain("selectedFinishInRow = row.find");
+    expect(guide).toContain('className="contents"');
+    expect(guide).toContain('col-span-3 border-b border-pink-200 bg-pink-50 px-3 py-3');
     expect(guide).toContain('aria-live="polite"');
     expect(guide).not.toContain("selectedFinish?.illustration &&");
     expect(guide).not.toContain("selectedFinish && !selectedFinish.illustration");
