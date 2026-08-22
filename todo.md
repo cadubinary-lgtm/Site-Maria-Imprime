@@ -4141,3 +4141,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter Fotos do Produto e Segmentos lado a lado e demais campos alinhados verticalmente conforme Novo Produto
 - [x] Criar regressão cobrindo a equivalência de layout entre Editar Produto e Novo Produto
 - [x] Validar TypeScript e salvar checkpoint publicável
+
+## Rótulo de Preço do Card Público
+- [x] Corrigir o card público para exibir sempre o rótulo A PARTIR DE no Pix e no Cartão, inclusive para produtos por pacote
+- [x] Preservar valores, unidade comercial e layout existente do card
+- [x] Criar regressão e validar TypeScript antes do checkpoint
