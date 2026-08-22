@@ -22,11 +22,19 @@ describe("impressão de Orçamentos", () => {
   });
 
   it("organiza o cabeçalho com proposta, identificação e blocos de empresa e cliente", () => {
-    expect(source).toContain("Proposta comercial");
-    expect(source).toContain("Detalhamento de produtos, condições e valores preparados para sua aprovação.");
+    expect(source).toContain("Proposta Comercial");
     expect(source).toContain('class="header-details"');
     expect(source).toContain('class="info-panel-title">Dados da Empresa');
     expect(source).toContain('class="info-panel-title">Cliente');
-    expect(source).toContain("Identificação do orçamento");
+    expect(source).toContain("Identificação do Orçamento");
+  });
+
+  it("mantém a composição de referência com três colunas, divisórias e respiro dos cartões", () => {
+    expect(source).toContain("grid-template-columns:30% 40% 30%");
+    expect(source).toContain('class="proposal-block"');
+    expect(source).toContain("border-left:2px solid #b9b9b9");
+    expect(source).toContain('className="grid min-h-[160px]');
+    expect(source).toContain("md:border-r-2 md:border-gray-300");
+    expect(source).toContain("min-h-[230px]");
   });
 });
