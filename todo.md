@@ -4211,3 +4211,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir Dados da Empresa e Cliente em blocos organizados no cabeçalho
 - [x] Preservar itens, valores e todo o restante do documento
 - [x] Validar tela, impressão e regressões antes do checkpoint
+
+## Alinhamento Rigoroso do Cabeçalho de Orçamento
+- [x] Replicar a composição de três colunas: logo, proposta comercial e identificação
+- [x] Replicar margens, divisórias e respiros internos do layout de referência
+- [x] Replicar os cartões de Dados da Empresa e Cliente abaixo da faixa superior
+- [x] Aplicar a mesma composição e espaçamento no PDF de impressão
+- [x] Validar visualmente em tela e em impressão antes do checkpoint
