@@ -36,7 +36,7 @@ describe("Central de Gabaritos", () => {
     expect(editProduct).toContain("Gabarito recomendado");
     expect(editProduct).toContain("templateId: (editForm as any).templateId ?? null");
     expect(detail).toContain("trpc.printTemplates.getPublicForProduct.useQuery");
-    expect(detail).toContain("Gabarito para este produto");
+    expect(detail).toContain(">Gabarito</span>");
   });
 
   it("preserva o gabarito ao editar o produto e disponibiliza o arquivo publicado para download", () => {
@@ -70,6 +70,15 @@ describe("Central de Gabaritos", () => {
     expect(publicPage).toContain('text-sm leading-6 text-slate-900');
     expect(publicPage).toContain('bg-pink-50 text-pink-600');
     expect(publicPage).not.toContain('bg-gradient-to-br from-pink-600 to-pink-500');
+  });
+
+  it("exibe o Gabarito no configurador como botão compacto com rótulo e ícone de download", () => {
+    const detail = read("client/src/pages/ecommerce/ProductDetail.tsx");
+    expect(detail).toContain('trpc.printTemplates.getPublicForProduct.useQuery');
+    expect(detail).toContain('>Gabarito</span>');
+    expect(detail).toContain('aria-label={`Baixar gabarito ${productTemplate.title}`}');
+    expect(detail).not.toContain('Gabarito para este produto');
+    expect(detail).not.toContain('productTemplate.title}</span>');
   });
 
   it("aceita ZIP no upload de gabaritos sem manter atalhos redundantes na biblioteca", () => {
