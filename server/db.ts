@@ -1452,6 +1452,13 @@ export async function getDeletedAbandonedCartHistory(limit = 100): Promise<Delet
   }));
 }
 
+export async function clearDeletedAbandonedCartHistory() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.execute(sql`DELETE FROM deletedAbandonedCarts`) as any;
+  return { deletedRecords: Number(result[0]?.affectedRows ?? result.affectedRows ?? 0) };
+}
+
 export async function recordAbandonedCartReminder(
   identity: AbandonedCartIdentity,
   channel: "email" | "whatsapp",

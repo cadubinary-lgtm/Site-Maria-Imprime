@@ -4192,3 +4192,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover links e ícones do Painel Admin expostos no site público
 - [x] Preservar acesso direto à rota /admin/login para a equipe administrativa
 - [x] Validar cabeçalho público em desktop e mobile antes do checkpoint
+
+## Lixeira do Histórico de Carrinhos Excluídos
+- [x] Adicionar ação de esvaziar o Histórico de carrinhos excluídos
+- [x] Exigir confirmação antes da exclusão definitiva do histórico
+- [x] Atualizar a listagem e os totais após a limpeza
+- [x] Cobrir a exclusão com regressão e validar TypeScript antes do checkpoint

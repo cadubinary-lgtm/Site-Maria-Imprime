@@ -29,6 +29,7 @@ export default function AdminAbandonedCarts() {
   const [selectedCart, setSelectedCart] = useState<{ cartKey: string; userId: number | null; sessionId: string | null } | null>(null);
   const [cartToDelete, setCartToDelete] = useState<{ cartKey: string; userId: number | null; sessionId: string | null } | null>(null);
   const [cartToRemind, setCartToRemind] = useState<{ cartKey: string; userId: number | null; sessionId: string | null; clientName: string | null; clientEmail: string | null } | null>(null);
+  const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
   const utils = trpc.useUtils();
   const { data: carts = [], isLoading } = trpc.abandonedCarts.list.useQuery();
   const { data: deletedHistory = [] } = trpc.abandonedCarts.history.useQuery();
@@ -56,6 +57,17 @@ export default function AdminAbandonedCarts() {
       utils.abandonedCarts.list.invalidate();
     },
     onError: (error) => toast.error(error.message || "Não foi possível excluir o carrinho."),
+  });
+  const clearHistoryMutation = trpc.abandonedCarts.clearHistory.useMutation({
+    onSuccess: ({ deletedRecords }) => {
+      toast.success(
+        deletedRecords > 0 ? `${deletedRecords} registro(s) removido(s) do histórico.` : "O histórico já estava vazio.",
+        { position: "top-right", duration: 3500, id: "abandoned-carts-history-clear" }
+      );
+      setClearHistoryDialogOpen(false);
+      utils.abandonedCarts.history.invalidate();
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível limpar o histórico."),
   });
   const emailReminderMutation = trpc.abandonedCarts.sendEmailReminder.useMutation({
     onSuccess: ({ email }) => {
@@ -195,9 +207,14 @@ export default function AdminAbandonedCarts() {
 
         <Card className="mt-6">
           <CardContent className="pt-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Histórico de carrinhos excluídos</h2>
-              <p className="text-sm text-gray-500">Registro preservado antes da exclusão definitiva por prazo de 48 horas ou ação manual.</p>
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Histórico de carrinhos excluídos</h2>
+                <p className="text-sm text-gray-500">Registro preservado antes da exclusão definitiva por prazo de 48 horas ou ação manual.</p>
+              </div>
+              <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setClearHistoryDialogOpen(true)} disabled={deletedHistory.length === 0 || clearHistoryMutation.isPending} aria-busy={clearHistoryMutation.isPending}>
+                {clearHistoryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />}Esvaziar histórico
+              </Button>
             </div>
             {deletedHistory.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-500">Nenhum carrinho excluído foi registrado desde a ativação do histórico.</p>
@@ -269,6 +286,18 @@ export default function AdminAbandonedCarts() {
               <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
               <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteMutation.isPending} aria-busy={deleteMutation.isPending} onClick={(event) => { event.preventDefault(); if (cartToDelete) deleteMutation.mutate({ userId: cartToDelete.userId, sessionId: cartToDelete.sessionId }); }}>
                 {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />}Excluir carrinho
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={clearHistoryDialogOpen} onOpenChange={setClearHistoryDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader><AlertDialogTitle>Esvaziar histórico de carrinhos?</AlertDialogTitle><AlertDialogDescription>{deletedHistory.length} registro(s) do histórico serão excluídos definitivamente. Esta ação não poderá ser desfeita.</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={clearHistoryMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={clearHistoryMutation.isPending} aria-busy={clearHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); clearHistoryMutation.mutate(); }}>
+                {clearHistoryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />}Esvaziar histórico
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
