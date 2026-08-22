@@ -413,9 +413,8 @@ async function startServer() {
       console.log('[MP Webhook] Evento autenticado:', type, signedDataId);
 
       if ((type === 'payment' || type === 'payment.updated') && signedDataId) {
-        const { orders: ordersT, orderPayments: orderPaymentsT } = await import('../../drizzle/schema.js');
+        const { orderPayments: orderPaymentsT } = await import('../../drizzle/schema.js');
         const { eq: eqOp } = await import('drizzle-orm');
-        const { updateOrderStatus } = await import('../db.js');
 
         // Get access token from DB or env
         let accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN || '';
@@ -441,7 +440,9 @@ async function startServer() {
 
         if (payment.status === 'approved' && payment.external_reference) {
           const orderId = Number(payment.external_reference);
-          await updateOrderStatus(orderId, 'pagamento_aprovado', 'Pagamento aprovado via Mercado Pago (webhook)');
+          const { settleApprovedOnlinePayment } = await import('../payment-settlement.js');
+          const paymentMethod = payment.payment_method_id === 'pix' ? 'pix' : 'cartao_credito';
+          await settleApprovedOnlinePayment(db, { orderId, paymentMethod });
           console.log(`[MP Webhook] Pedido ${orderId} aprovado`);
 
           // Disparar e-mail de confirmação de pagamento PIX com identidade visual rosa

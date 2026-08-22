@@ -12,6 +12,7 @@ import {
   createCardPayment,
   getPaymentStatus,
 } from "./mercadopago";
+import { settleApprovedOnlinePayment } from "./payment-settlement";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -91,6 +92,10 @@ export const paymentRouter = router({
         createdAt: Date.now(),
       });
 
+      if (result.status === "approved") {
+        await settleApprovedOnlinePayment(db, { orderId: order.id, paymentMethod: "pix" });
+      }
+
       return result;
     }),
 
@@ -138,12 +143,9 @@ export const paymentRouter = router({
         createdAt: Date.now(),
       });
 
-      // If approved immediately, update order status
+      // A aprovação imediata precisa também alimentar as contas recebidas.
       if (result.status === "approved") {
-        await db
-          .update(orders)
-          .set({ status: "pagamento_aprovado", paymentStatus: "pago" })
-          .where(eq(orders.id, order.id));
+        await settleApprovedOnlinePayment(db, { orderId: order.id, paymentMethod: "cartao_credito" });
       }
 
       return result;
@@ -155,7 +157,24 @@ export const paymentRouter = router({
     .input(z.object({ paymentId: z.string() }))
     .query(async ({ input }) => {
       const accessToken = await getMPAccessToken();
-      return getPaymentStatus(input.paymentId, accessToken);
+      const result = await getPaymentStatus(input.paymentId, accessToken);
+      const db = await requireDb();
+      const [paymentRecord] = await db.select()
+        .from(orderPayments)
+        .where(eq(orderPayments.paymentId, input.paymentId))
+        .limit(1);
+
+      if (paymentRecord) {
+        await db.update(orderPayments)
+          .set({ status: result.status, updatedAt: Date.now() })
+          .where(eq(orderPayments.id, paymentRecord.id));
+
+        if (result.status === "approved" && paymentRecord.method === "pix") {
+          await settleApprovedOnlinePayment(db, { orderId: paymentRecord.orderId, paymentMethod: "pix" });
+        }
+      }
+
+      return result;
     }),
 
   // ── Get payment for order ─────────────────────────────────────────────────

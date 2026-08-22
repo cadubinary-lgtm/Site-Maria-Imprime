@@ -4173,3 +4173,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Posicionar o cabeçalho fixo abaixo da barra geral do Painel Admin
 - [x] Garantir que título e ações permaneçam visíveis durante a rolagem real
 - [x] Validar o comportamento com a página preenchida e salvar checkpoint
+
+## Correção de Pagamentos Pix e Cartão
+- [x] Identificar por que pagamentos aprovados por Pix e cartão chegam como pendentes
+- [x] Exibir status Pago e o método de pagamento correto em pedidos e detalhes
+- [x] Encaminhar Pix e cartão aprovados diretamente para Contas Recebidas
+- [x] Ocultar a ação Receber quando o lançamento já estiver pago
+- [x] Cobrir o fluxo com regressões e validar TypeScript antes do checkpoint

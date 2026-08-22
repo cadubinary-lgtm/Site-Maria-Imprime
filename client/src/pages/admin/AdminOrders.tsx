@@ -27,6 +27,22 @@ export const ORDER_STATUS: Record<string, { label: string; color: string; icon: 
   cancelado:           { label: "Cancelado",               color: "bg-red-100 text-red-800",       icon: "❌" },
 };
 
+const PAYMENT_STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  pago: { label: "Pago", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  pendente: { label: "Pendente", className: "border-amber-200 bg-amber-50 text-amber-700" },
+  falhou: { label: "Falhou", className: "border-red-200 bg-red-50 text-red-700" },
+};
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  pix: "Pix",
+  cartao_credito: "Cartão de crédito",
+  cartao_debito: "Cartão de débito",
+  pagar_na_retirada: "Pagamento na retirada",
+  dinheiro: "Dinheiro",
+  transferencia: "Transferência",
+  boleto: "Boleto",
+};
+
 const FILTER_OPTIONS = [
   { id: "todos",              label: "Todos" },
   { id: "pagamento_aprovado", label: "Pagamento Aprovado" },
@@ -231,6 +247,8 @@ export default function AdminOrders() {
                   <tbody>
                     {filtered.map((order: any) => {
                       const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.analisando;
+                      const payment = PAYMENT_STATUS_LABELS[order.paymentStatus] ?? PAYMENT_STATUS_LABELS.pendente;
+                      const paymentMethod = PAYMENT_METHOD_LABELS[order.paymentMethod] ?? "Método não informado";
                       return (
                         <tr key={order.id} className="border-b hover:bg-gray-50 transition">
                           <td className="px-4 py-3 font-mono font-semibold text-gray-900">{order.orderNumber}</td>
@@ -242,7 +260,10 @@ export default function AdminOrders() {
                             {fmt(parseFloat(order.totalPrice))}
                           </td>
                           <td className="px-4 py-3">
-                            <Badge variant="outline" className="text-xs">{order.paymentStatus || "Pendente"}</Badge>
+                            <div className="space-y-1">
+                              <Badge variant="outline" className={`text-xs ${payment.className}`}>{payment.label}</Badge>
+                              <p className="text-xs text-gray-500">{paymentMethod}</p>
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <Badge className={`${sc.color} text-xs`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge>

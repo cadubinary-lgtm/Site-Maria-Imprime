@@ -1160,6 +1160,8 @@ export function OrderDetailContent({
       card: "Cartão de débito/crédito",
       credit_card: "Cartão de débito/crédito",
       debit_card: "Cartão de débito/crédito",
+      cartao_credito: "Cartão de crédito",
+      cartao_debito: "Cartão de débito",
       pagar_na_retirada: "Pagamento na retirada",
       cash_on_pickup: "Pagamento na retirada",
       boleto: "Boleto",
