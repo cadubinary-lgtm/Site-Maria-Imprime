@@ -10,7 +10,7 @@ import {
   Loader2, Upload, AlertCircle, CheckCircle2,
   ChevronLeft, ChevronRight, Star, Shield,
   Package, ChevronDown, ChevronUp, Link2, Search,
-  ShoppingCart, FileText, MessageCircle,
+  ShoppingCart, Download, FileText, MessageCircle,
   Truck, CreditCard, Clock,
   Store, Zap, Lightbulb,
   AlertTriangle, CheckSquare
@@ -171,6 +171,9 @@ export default function ProductDetail() {
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: product, isLoading } = trpc.products.getById.useQuery(
     { id: productId || 0 }, { enabled: !!productId }
+  );
+  const { data: productTemplate } = trpc.printTemplates.getPublicForProduct.useQuery(
+    { productId: productId || 0 }, { enabled: !!productId }
   );
   const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
   const paymentProductPrices = useMemo(
@@ -1054,6 +1057,14 @@ export default function ProductDetail() {
               )}
               {product.description && (
                 <p className="text-sm text-gray-600 leading-relaxed lg:line-clamp-5">{product.description}</p>
+              )}
+
+              {productTemplate && (
+                <a href={productTemplate.fileUrl} target="_blank" rel="noopener noreferrer" download className="flex items-center gap-3 rounded-xl border border-pink-200 bg-pink-50/60 p-3 transition hover:border-pink-300 hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-pink-600 shadow-sm"><FileText className="h-4 w-4" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-pink-700">Gabarito para este produto</span><span className="block truncate text-sm font-bold text-slate-800">{productTemplate.title}</span></span>
+                  <Download className="h-4 w-4 shrink-0 text-pink-600" aria-hidden="true" />
+                </a>
               )}
 
               <div className="pt-1">

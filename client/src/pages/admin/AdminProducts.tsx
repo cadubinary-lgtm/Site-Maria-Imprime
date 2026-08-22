@@ -87,6 +87,7 @@ export default function AdminProducts() {
     tags: [] as string[],
     tagPosition: "top-right" as string,
     cardDescription: "",
+    templateId: null as number | null,
   });
   const lastCommittedEditFormRef = useRef<typeof editForm | null>(null);
   const [undoEditForm, setUndoEditForm] = useState<typeof editForm | null>(null);
@@ -103,6 +104,7 @@ export default function AdminProducts() {
     { enabled: selectedSegmentId !== null },
   );
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
+  const { data: templatesData = [] } = trpc.printTemplates.listAdmin.useQuery();
 
   const adminSegments = useMemo(() => {
     if (!availableSegments || availableSegments.length === 0) return [];
@@ -269,6 +271,7 @@ export default function AdminProducts() {
       })(),
       tagPosition: product.tagPosition || "top-right",
       cardDescription: product.cardDescription || "",
+      templateId: product.templateId ?? null,
     }));
   };
 
@@ -426,6 +429,7 @@ export default function AdminProducts() {
         tags: (editForm as any).tags !== undefined ? JSON.stringify((editForm as any).tags || []) : undefined,
         tagPosition: (editForm as any).tagPosition || "top-right",
         cardDescription: (editForm as any).cardDescription?.trim() || "",
+        templateId: (editForm as any).templateId ?? null,
       });
       await updateSegmentsMutation.mutateAsync({
         productId: editingId,
@@ -969,6 +973,22 @@ export default function AdminProducts() {
                                 selectedSegmentIds={editForm.segmentIds}
                                 onSegmentsChange={handleSegmentsChange}
                               />
+                            </CardContent>
+                          </Card>
+
+                          <Card className={`${PRODUCT_FORM_PANEL.card} sm:col-start-1 sm:row-start-3 self-start`}>
+                            <CardContent className={PRODUCT_FORM_PANEL.content}>
+                              <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
+                              <p className="mb-3 text-sm text-gray-500">Defina o arquivo que ficará disponível para download na página deste produto.</p>
+                              <Label htmlFor="edit-template-id" className="sr-only">Gabarito recomendado</Label>
+                              <Select value={(editForm as any).templateId ? String((editForm as any).templateId) : "none"} onValueChange={(value) => setEditForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
+                                <SelectTrigger id="edit-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
+                                  {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <p className="mt-2 text-xs leading-5 text-slate-500">Para cadastrar ou alterar arquivos, use Configurações do site → Gabaritos.</p>
                             </CardContent>
                           </Card>
 

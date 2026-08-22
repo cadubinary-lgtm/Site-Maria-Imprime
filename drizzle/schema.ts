@@ -60,12 +60,36 @@ export const products = mysqlTable("products", {
   tags: longtext("tags"), // JSON array de tags: ["Mais vendido", "Promoção", "Destaque", "Novo"]
   tagPosition: varchar("tag_position", { length: 30 }).$default(() => "top-right"), // Posição das tags no card
   cardDescription: varchar("cardDescription", { length: 180 }), // Texto comercial exibido abaixo dos preços no card público
+  templateId: int("templateId"), // Gabarito recomendado para o produto
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Biblioteca de gabaritos disponibilizados para download no site.
+ * O arquivo em si permanece no S3; esta tabela armazena apenas os metadados
+ * necessários para publicação, ordenação e associação a produtos.
+ */
+export const printTemplates = mysqlTable("printTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 160 }).notNull(),
+  description: text("description"),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  fileKey: varchar("fileKey", { length: 512 }).notNull(),
+  mimeType: varchar("mimeType", { length: 120 }).notNull(),
+  fileSize: int("fileSize").notNull().default(0),
+  position: int("position").notNull().default(0),
+  isPublished: boolean("isPublished").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PrintTemplate = typeof printTemplates.$inferSelect;
+export type InsertPrintTemplate = typeof printTemplates.$inferInsert;
 
 /**
  * Configuração institucional singleton da empresa.

@@ -99,6 +99,7 @@ import { variationsCvRouter } from "./variationsCvRouter";
 import { variationsOffsetRouter } from "./variationsOffsetRouter";
 import { companySettingsRouter } from "./companySettingsRouter";
 import { siteContentRouter } from "./siteContentRouter";
+import { printTemplatesRouter } from "./printTemplatesRouter";
 import { abandonedCartsRouter } from "./abandonedCartsRouter";
 import { preImpressaoHistoryRouter } from "./preImpressaoHistoryRouter";
 import { ordersTrashRouter } from "./ordersTrashRouter";
@@ -137,6 +138,7 @@ export const appRouter = router({
   variationsOffset: variationsOffsetRouter,
   companySettings: companySettingsRouter,
   siteContent: siteContentRouter,
+  printTemplates: printTemplatesRouter,
   abandonedCarts: abandonedCartsRouter,
   preImpressaoHistory: preImpressaoHistoryRouter,
   ordersTrash: ordersTrashRouter,
@@ -309,6 +311,7 @@ export const appRouter = router({
         tags: z.string().optional(), // JSON array de tags
         tagPosition: z.string().optional(), // Posição das tags no card
         cardDescription: z.string().max(180).optional(), // Texto comercial abaixo dos preços no card
+        templateId: z.number().int().positive().nullable().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -349,6 +352,7 @@ export const appRouter = router({
             tags: input.tags || null,
             tagPosition: input.tagPosition || "top-right",
             cardDescription: input.cardDescription?.trim() || null,
+            templateId: input.templateId ?? null,
             isActive: true,
           } as any);
           
@@ -574,6 +578,7 @@ export const appRouter = router({
         tags: z.string().optional(), // JSON array de tags
         tagPosition: z.string().optional(), // Posição das tags no card
         cardDescription: z.string().max(180).optional(), // Texto comercial abaixo dos preços no card
+        templateId: z.number().int().positive().nullable().optional(),
         // Campos de logística
         weight: z.number().optional(),
         logisticsWidth: z.number().optional(),
@@ -612,6 +617,7 @@ export const appRouter = router({
         if (input.tags !== undefined) updateData.tags = input.tags || null;
         if (input.tagPosition !== undefined) updateData.tagPosition = input.tagPosition || "top-right";
         if (input.cardDescription !== undefined) updateData.cardDescription = input.cardDescription.trim() || null;
+        if (input.templateId !== undefined) updateData.templateId = input.templateId;
         // Campos de logística
         if (input.weight !== undefined) updateData.weight = input.weight;
         if (input.logisticsWidth !== undefined) updateData.width = input.logisticsWidth;

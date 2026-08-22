@@ -69,6 +69,7 @@ const getInitialCreateForm = () => ({
   tags: [] as string[],
   tagPosition: "top-right" as string,
   cardDescription: "",
+  templateId: null as number | null,
 });
 
 type CreatePriceField = "price" | "pixPrice" | "cardPrice" | "resellerPrice" | "pricePerM2" | "pixPricePerM2" | "cardPricePerM2" | "resellerPricePerM2";
@@ -97,6 +98,7 @@ export default function AdminNewProduct() {
 
   const { data: segmentsData } = trpc.segments.getAll.useQuery();
   const { data: carriersData } = trpc.logistics.carriers.list.useQuery();
+  const { data: templatesData = [] } = trpc.printTemplates.listAdmin.useQuery();
   const { data: duplicateSourceProduct, isLoading: isDuplicateSourceLoading } = trpc.products.getById.useQuery(
     { id: duplicateProductId || 0 },
     { enabled: duplicateProductId !== null },
@@ -200,6 +202,7 @@ export default function AdminNewProduct() {
       tags: parseJsonArray<string>(source.tags, []),
       tagPosition: source.tagPosition || "top-right",
       cardDescription: source.cardDescription || "",
+      templateId: source.templateId ?? null,
     };
     const duplicatedLogistics = {
       weight: toInputValue(source.weight),
@@ -299,6 +302,7 @@ export default function AdminNewProduct() {
       tags: createForm.tags.length > 0 ? JSON.stringify(createForm.tags) : undefined,
       tagPosition: createForm.tagPosition || "top-right",
       cardDescription: createForm.cardDescription.trim(),
+      templateId: createForm.templateId,
     };
   }, [createForm, createLogistics]);
 
@@ -678,6 +682,22 @@ export default function AdminNewProduct() {
                     </CardContent>
                   </Card>
 
+                  <Card className={PRODUCT_FORM_PANEL.card}>
+                    <CardContent className={PRODUCT_FORM_PANEL.content}>
+                      <h3 className={PRODUCT_FORM_PANEL.title}>Gabarito recomendado</h3>
+                      <p className="mb-3 text-sm text-gray-500">Vincule o arquivo correto deste produto para que o cliente possa baixá-lo na página do produto.</p>
+                      <Label htmlFor="create-template-id" className="sr-only">Gabarito recomendado</Label>
+                      <Select value={createForm.templateId ? String(createForm.templateId) : "none"} onValueChange={(value) => setCreateForm((current) => ({ ...current, templateId: value === "none" ? null : Number(value) }))}>
+                        <SelectTrigger id="create-template-id"><SelectValue placeholder="Nenhum gabarito vinculado" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhum gabarito vinculado</SelectItem>
+                          {templatesData.map((template) => <SelectItem key={template.id} value={String(template.id)}>{template.title}{template.isPublished ? "" : " (oculto no site)"}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">Gerencie os arquivos em Configurações do site → Gabaritos.</p>
+                    </CardContent>
+                  </Card>
+                  
                   <div className="flex flex-col gap-4 self-start sm:col-start-2">
                   <Card className={PRODUCT_FORM_PANEL.card}>
                     <CardContent className={PRODUCT_FORM_PANEL.content}>

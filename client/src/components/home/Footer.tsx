@@ -47,6 +47,7 @@ const institutionalLinks = [
 
 const supportLinks = [
   { label: "Dúvidas frequentes", href: documentationPath("faq") },
+  { label: "Gabaritos", href: "/gabaritos" },
   { label: "Termo de aprovação de arte", href: documentationPath("aprovacao-arte") },
   { label: "Prazos de produção", href: documentationPath("producao-prazos") },
   { label: "Formas de pagamento", href: documentationPath("formas-pagamento") },

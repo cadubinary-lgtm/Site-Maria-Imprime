@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..");
+const read = (path: string) => readFileSync(resolve(root, path), "utf8");
+
+describe("Central de Gabaritos", () => {
+  it("persiste a biblioteca de arquivos e o vínculo opcional no produto", () => {
+    const schema = read("drizzle/schema.ts");
+    const migration = read("drizzle/0069_create_print_templates.sql");
+    expect(schema).toContain('export const printTemplates = mysqlTable("printTemplates"');
+    expect(schema).toContain('templateId: int("templateId")');
+    expect(migration).toContain("CREATE TABLE `printTemplates`");
+    expect(migration).toContain("ALTER TABLE `products` ADD COLUMN `templateId` int");
+  });
+
+  it("protege a administração e entrega apenas gabaritos publicados ao cliente", () => {
+    const router = read("server/printTemplatesRouter.ts");
+    expect(router).toContain("listAdmin: adminProcedure");
+    expect(router).toContain("create: adminProcedure");
+    expect(router).toContain("remove: adminProcedure");
+    expect(router).toContain("listPublic: publicProcedure");
+    expect(router).toContain("getPublicForProduct: publicProcedure");
+    expect(router).toContain("eq(printTemplates.isPublished, true)");
+    expect(router).toContain("await db.update(products).set({ templateId: null })");
+  });
+
+  it("oferece o vínculo no novo produto, na edição e no detalhe público", () => {
+    const newProduct = read("client/src/pages/admin/AdminNewProduct.tsx");
+    const editProduct = read("client/src/pages/admin/AdminProducts.tsx");
+    const detail = read("client/src/pages/ecommerce/ProductDetail.tsx");
+    expect(newProduct).toContain("Gabarito recomendado");
+    expect(newProduct).toContain("templateId: createForm.templateId");
+    expect(editProduct).toContain("Gabarito recomendado");
+    expect(editProduct).toContain("templateId: (editForm as any).templateId ?? null");
+    expect(detail).toContain("trpc.printTemplates.getPublicForProduct.useQuery");
+    expect(detail).toContain("Gabarito para este produto");
+  });
+
+  it("expõe a página pública no rodapé e a gestão nas configurações do site", () => {
+    const app = read("client/src/App.tsx");
+    const footer = read("client/src/components/home/Footer.tsx");
+    const sidebar = read("client/src/components/AdminLayout.tsx");
+    const publicPage = read("client/src/pages/public/PrintTemplatesPage.tsx");
+    const adminPage = read("client/src/pages/admin/AdminPrintTemplates.tsx");
+    expect(app).toContain('path="/gabaritos" component={PrintTemplatesPage}');
+    expect(app).toContain('path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates}');
+    expect(footer).toContain('{ label: "Gabaritos", href: "/gabaritos" }');
+    expect(sidebar).toContain('{ label: "Gabaritos", href: "/admin/configuracoes-site/gabaritos" }');
+    expect(publicPage).toContain("Baixar gabarito");
+    expect(adminPage).toContain("Adicionar gabarito");
+    expect(adminPage).toContain("AlertDialog");
+  });
+});
