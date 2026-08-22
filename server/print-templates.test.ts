@@ -17,9 +17,10 @@ describe("Central de Gabaritos", () => {
 
   it("protege a administração e entrega apenas gabaritos publicados ao cliente", () => {
     const router = read("server/printTemplatesRouter.ts");
-    expect(router).toContain("listAdmin: adminProcedure");
-    expect(router).toContain("create: adminProcedure");
-    expect(router).toContain("remove: adminProcedure");
+    expect(router).toContain("listAdmin: adminOrManusAuthProcedure");
+    expect(router).toContain("create: adminOrManusAuthProcedure");
+    expect(router).toContain("remove: adminOrManusAuthProcedure");
+    expect(router).toContain('import { adminOrManusAuthProcedure } from "./routers-admin-auth"');
     expect(router).toContain("listPublic: publicProcedure");
     expect(router).toContain("getPublicForProduct: publicProcedure");
     expect(router).toContain("eq(printTemplates.isPublished, true)");
@@ -36,6 +37,18 @@ describe("Central de Gabaritos", () => {
     expect(editProduct).toContain("templateId: (editForm as any).templateId ?? null");
     expect(detail).toContain("trpc.printTemplates.getPublicForProduct.useQuery");
     expect(detail).toContain("Gabarito para este produto");
+  });
+
+  it("preserva o gabarito ao editar o produto e disponibiliza o arquivo publicado para download", () => {
+    const editProduct = read("client/src/pages/admin/AdminProducts.tsx");
+    const publicPage = read("client/src/pages/public/PrintTemplatesPage.tsx");
+    const router = read("server/printTemplatesRouter.ts");
+    expect(editProduct).toContain("templateId: product.templateId ?? null");
+    expect(editProduct).toContain('value={(editForm as any).templateId ? String((editForm as any).templateId) : "none"}');
+    expect(editProduct).toContain("templateId: (editForm as any).templateId ?? null");
+    expect(publicPage).toContain("trpc.printTemplates.listPublic.useQuery");
+    expect(publicPage).toContain('href={template.fileUrl} target="_blank" rel="noopener noreferrer" download');
+    expect(router).toContain("eq(printTemplates.isPublished, true)");
   });
 
   it("expõe a página pública no rodapé e a gestão nas configurações do site", () => {
