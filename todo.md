@@ -4066,3 +4066,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 
 - [x] Manter os desenhos em todos os acabamentos e exibir a descrição técnica do item selecionado abaixo da grade
 - [x] Criar regressão para assegurar que acabamentos com ilustração também mostrem a descrição
+
+- [x] Exibir a descrição técnica imediatamente abaixo da linha do acabamento selecionado, preservando a grade de três colunas
+- [x] Criar regressão para garantir a posição contextual da descrição na grade de acabamentos
+- [x] Aplicar ao bloco de descrição a mesma tonalidade rosa suave do acabamento selecionado
