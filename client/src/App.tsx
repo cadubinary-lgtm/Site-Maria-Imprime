@@ -70,6 +70,7 @@ import AdminFooterInformation from "./pages/admin/AdminFooterInformation";
 import AdminArtworkGuidelines from "./pages/admin/AdminArtworkGuidelines";
 import AdminMariaGuide from "./pages/admin/AdminMariaGuide";
 import AdminPrintTemplates from "./pages/admin/AdminPrintTemplates";
+import AdminGlobalDeliveryOptions from "./pages/admin/AdminGlobalDeliveryOptions";
 import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
 import ClientsManager from "./pages/admin/ClientsManager";
@@ -292,6 +293,7 @@ return (
 <Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
 <Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
+<Route path="/admin/configuracoes-site/prazos-padrao" component={AdminGlobalDeliveryOptions} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
