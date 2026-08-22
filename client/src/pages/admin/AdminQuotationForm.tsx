@@ -1344,12 +1344,11 @@ export default function AdminQuotationForm() {
                 {items.some((item) => !item.isCustom) && (
                   <div className="space-y-2">
                     {/* Cabeçalho da tabela */}
-                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                    <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_96px_96px_32px] gap-2 px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
                       <div>Img</div>
                       <div>Produto / Especificações</div>
                       <div className="text-center">Arte</div>
                       <div className="text-center">Qtd</div>
-                      <div className="text-center">Unit.</div>
                       <div className="text-center">Ajuste</div>
                       <div className="text-right">Total</div>
                       <div></div>
@@ -1365,7 +1364,7 @@ export default function AdminQuotationForm() {
                   return (
                     <div key={idx} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`border border-gray-100 rounded-lg overflow-hidden transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
                       {/* Linha principal */}
-                      <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 items-center px-2 py-2 bg-gray-100">
+                      <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_96px_96px_32px] gap-2 items-center px-2 py-2 bg-gray-100">
                         <div>
                           {item.isCustom ? (
                             <div className="w-8 h-8" aria-hidden="true" />
@@ -1449,31 +1448,6 @@ export default function AdminQuotationForm() {
                             }}
                             className="h-8 w-full min-w-0 bg-white px-2 text-center text-sm font-semibold tabular-nums"
                           />
-                        </div>
-                        <div className="relative flex justify-center">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            aria-label={`Valor unitário de ${item.productName}`}
-                            value={customUnitDrafts[idx] ?? fmt(item.unitPrice)}
-                            placeholder="R$ 0,00"
-                            onChange={(e) => {
-                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: e.target.value }));
-                              scheduleQuotationAutoAdvance(e.currentTarget);
-                            }}
-                            onBlur={(e) => {
-                              const value = parseQuotationCurrency(e.target.value);
-                              updateItem(idx, { unitPrice: value });
-                              setCustomUnitDrafts((prev) => ({ ...prev, [idx]: fmt(value) }));
-                            }}
-                            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                            className={`h-8 w-full min-w-0 rounded-md border px-2 text-right text-sm font-medium tabular-nums transition-all focus:outline-none focus:ring-2 ${
-                              autoRecalculatedUnitItems.has(idx)
-                                ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-200 motion-safe:animate-pulse"
-                                : "border-input bg-white text-foreground hover:border-pink-300 focus:border-pink-500 focus:ring-pink-100"
-                            }`}
-                          />
-                          {autoRecalculatedUnitItems.has(idx) && <span className="sr-only" role="status">Valor unitário recalculado a partir do ajuste.</span>}
                         </div>
                         <div className="flex justify-center">
                           {item.isCustom ? (
