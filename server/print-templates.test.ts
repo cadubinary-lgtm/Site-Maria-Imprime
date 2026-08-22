@@ -51,6 +51,19 @@ describe("Central de Gabaritos", () => {
     expect(router).toContain("eq(printTemplates.isPublished, true)");
   });
 
+  it("aceita ZIP no upload de gabaritos sem manter atalhos redundantes na biblioteca", () => {
+    const adminPage = read("client/src/pages/admin/AdminPrintTemplates.tsx");
+    const uploadEndpoint = read("server/_core/index.ts");
+    expect(adminPage).toContain('"zip"');
+    expect(adminPage).toContain(".zip");
+    expect(adminPage).toContain("application/zip");
+    expect(adminPage).toContain("PDF, AI, CDR, PSD, EPS, ZIP, SVG");
+    expect(adminPage).not.toContain("Adicionar à biblioteca");
+    expect(uploadEndpoint).toContain("'application/zip'");
+    expect(uploadEndpoint).toContain("'application/x-zip-compressed'");
+    expect(uploadEndpoint).toContain("'zip'");
+  });
+
   it("expõe a página pública no rodapé e a gestão nas configurações do site", () => {
     const app = read("client/src/App.tsx");
     const footer = read("client/src/components/home/Footer.tsx");
@@ -63,7 +76,7 @@ describe("Central de Gabaritos", () => {
     expect(sidebar).toContain('{ label: "Gabaritos", href: "/admin/configuracoes-site/gabaritos" }');
     expect(publicPage).toContain("Baixar gabarito");
     expect(adminPage).toContain("Adicionar gabarito");
-    expect(adminPage).toContain("Adicionar à biblioteca");
+    expect(adminPage).not.toContain("Adicionar à biblioteca");
     expect(adminPage).toContain('onClick={openNewTemplate}');
     expect(adminPage).toContain("AlertDialog");
     expect(adminPage).toContain('htmlFor="template-file-input"');
