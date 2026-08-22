@@ -483,7 +483,7 @@ export default function AdminQuotationForm() {
       _specsParsed: {},
     };
     setItems((prev) => [...prev, newItem]);
-    setExpandedItems((prev) => { const s = new Set(prev); s.add(items.length); return s; });
+    setExpandedItems(new Set([items.length]));
     setShowAddProduct(false);
     setProductSearch("");
     // Carregar opções e pricing do produto
@@ -508,7 +508,7 @@ export default function AdminQuotationForm() {
       _specsParsed: { itemType: "custom" },
     };
     setItems((prev) => [...prev, newItem]);
-    setExpandedItems((prev) => { const next = new Set(prev); next.add(newItemIndex); return next; });
+    setExpandedItems(new Set([newItemIndex]));
     setShowAddProduct(false);
     setProductSearch("");
     setShowCustomItemNameStep(false);
