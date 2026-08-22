@@ -90,14 +90,14 @@ export default function MultiSegmentSelector({
 
       {/* Segmentos Disponíveis */}
       <Card className="border-gray-200 bg-white">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 pt-3">
           <CardTitle className="text-sm">Adicionar Segmentos</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pb-3">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
             {unselectedSegments.length > 0 ? (
               unselectedSegments.map((segment) => (
-                <div key={segment.id} className="flex items-center space-x-2">
+                <div key={segment.id} className="flex items-center gap-1.5">
                   <Checkbox
                     id={`segment-${segment.id}`}
                     checked={localSelected.includes(segment.id)}
@@ -105,7 +105,7 @@ export default function MultiSegmentSelector({
                   />
                   <Label
                     htmlFor={`segment-${segment.id}`}
-                    className="cursor-pointer flex-1 text-sm"
+                    className="cursor-pointer text-sm leading-tight"
                   >
                     {segment.name}
                   </Label>
