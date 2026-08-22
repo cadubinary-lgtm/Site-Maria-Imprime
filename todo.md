@@ -4105,3 +4105,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o acionamento que abre a janela vazia por um fluxo de seleção compatível
 - [x] Preservar formatos permitidos, validações e feedback de upload no novo fluxo
 - [x] Criar regressão e validar a abertura do seletor de arquivo
+
+## Biblioteca Pública de Gabaritos Pesquisável
+- [x] Substituir os cartões largos por uma lista vertical compacta de arquivos
+- [x] Adicionar busca instantânea por nome, descrição e formato do gabarito
+- [x] Preservar download, metadados, estados vazios e responsividade na nova biblioteca
+- [x] Criar regressão e validar a página pública com a busca

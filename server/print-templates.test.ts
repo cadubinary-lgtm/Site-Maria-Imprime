@@ -51,6 +51,18 @@ describe("Central de Gabaritos", () => {
     expect(router).toContain("eq(printTemplates.isPublished, true)");
   });
 
+  it("permite pesquisar a biblioteca pública em uma lista vertical compacta", () => {
+    const publicPage = read("client/src/pages/public/PrintTemplatesPage.tsx");
+    expect(publicPage).toContain('const [searchTerm, setSearchTerm] = useState("")');
+    expect(publicPage).toContain("const filteredTemplates = useMemo");
+    expect(publicPage).toContain('id="template-search"');
+    expect(publicPage).toContain("Buscar por nome, produto ou formato do arquivo");
+    expect(publicPage).toContain('role="list"');
+    expect(publicPage).toContain('role="listitem"');
+    expect(publicPage).toContain("Nenhum gabarito encontrado");
+    expect(publicPage).not.toContain("sm:grid-cols-2 lg:grid-cols-3");
+  });
+
   it("aceita ZIP no upload de gabaritos sem manter atalhos redundantes na biblioteca", () => {
     const adminPage = read("client/src/pages/admin/AdminPrintTemplates.tsx");
     const uploadEndpoint = read("server/_core/index.ts");
@@ -72,7 +84,8 @@ describe("Central de Gabaritos", () => {
     expect(app).toContain('path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates}');
     expect(footer).toContain('{ label: "Gabaritos", href: "/gabaritos" }');
     expect(sidebar).toContain('{ label: "Gabaritos", href: "/admin/configuracoes-site/gabaritos" }');
-    expect(publicPage).toContain("Baixar gabarito");
+    expect(publicPage).toContain('download className="inline-flex min-h-10');
+    expect(publicPage).toContain("/>Baixar</a>");
     expect(adminPage).toContain("Adicionar gabarito");
     expect(adminPage).not.toContain("Adicionar à biblioteca");
     expect(adminPage).toContain('onClick={openNewTemplate}');
