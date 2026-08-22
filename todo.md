@@ -4039,3 +4039,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir ordenar os segmentos selecionados e limitar a quantidade exibida
 - [x] Persistir a configuração e refletir a seleção no rodapé público
 - [x] Criar regressão e validar a gestão administrativa dos segmentos do rodapé — banco migrado, TypeScript sem erros e 6 testes aprovados
+
+- [x] Permitir selecionar quais formas de pagamento aparecem no rodapé
+- [x] Permitir ordenar as formas de pagamento selecionadas e limitar a quantidade exibida
+- [x] Persistir a configuração e refletir a seleção na grade pública de pagamentos
+- [x] Criar regressão e validar a gestão administrativa das formas de pagamento — banco migrado, TypeScript sem erros e 7 testes aprovados

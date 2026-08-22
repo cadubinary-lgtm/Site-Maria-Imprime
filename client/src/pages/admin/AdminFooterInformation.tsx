@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Building2, Check, FileText, Globe2, ListFilter, Loader2, Save, Settings2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Building2, Check, CreditCard, FileText, Globe2, ListFilter, Loader2, Save, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { FOOTER_CONTENT_FALLBACK, getDefaultPublicDocuments, mergeManagedDocuments, parseFooterProductSegmentIds, type ManagedPublicDocument } from "@/lib/siteContent";
+import { FOOTER_CONTENT_FALLBACK, FOOTER_PAYMENT_METHODS, getDefaultPublicDocuments, mergeManagedDocuments, parseFooterPaymentMethodIds, parseFooterProductSegmentIds, type FooterPaymentMethodId, type ManagedPublicDocument } from "@/lib/siteContent";
 
 type FooterForm = typeof FOOTER_CONTENT_FALLBACK;
 
 const DOCUMENT_LIMIT = 50_000;
 const MAX_FOOTER_PRODUCT_SEGMENTS = 8;
+const MAX_FOOTER_PAYMENT_METHODS = FOOTER_PAYMENT_METHODS.length;
 const FOOTER_FIELD_LIMITS = {
   introduction: 1000,
   newsletterTitle: 120,
@@ -33,9 +34,11 @@ export default function AdminFooterInformation() {
   const saveFooter = trpc.siteContent.saveFooter.useMutation();
   const saveDocuments = trpc.siteContent.saveDocuments.useMutation();
   const saveFooterProductSegments = trpc.siteContent.saveFooterProductSegments.useMutation();
+  const saveFooterPaymentMethods = trpc.siteContent.saveFooterPaymentMethods.useMutation();
   const [footer, setFooter] = useState<FooterForm>(FOOTER_CONTENT_FALLBACK);
   const [documents, setDocuments] = useState<ManagedPublicDocument[]>(getDefaultPublicDocuments());
   const [footerProductSegmentIds, setFooterProductSegmentIds] = useState<number[]>([]);
+  const [footerPaymentMethodIds, setFooterPaymentMethodIds] = useState<FooterPaymentMethodId[]>([]);
 
   useEffect(() => {
     if (!savedFooter) return;
@@ -54,10 +57,15 @@ export default function AdminFooterInformation() {
   }, [savedDocuments]);
 
   useEffect(() => {
-    if (!savedFooter || allSegments.length === 0) return;
-    const persistedIds = parseFooterProductSegmentIds(savedFooter.footerProductSegmentIds);
+    if (allSegments.length === 0) return;
+    const persistedIds = parseFooterProductSegmentIds(savedFooter?.footerProductSegmentIds);
     setFooterProductSegmentIds(persistedIds.length > 0 ? persistedIds : allSegments.slice(0, Math.min(5, MAX_FOOTER_PRODUCT_SEGMENTS)).map((segment) => segment.id));
   }, [allSegments, savedFooter]);
+
+  useEffect(() => {
+    const persistedIds = parseFooterPaymentMethodIds(savedFooter?.footerPaymentMethodIds);
+    setFooterPaymentMethodIds(persistedIds.length > 0 ? persistedIds : FOOTER_PAYMENT_METHODS.map((method) => method.id));
+  }, [savedFooter]);
 
   const isLoading = isLoadingFooter || isLoadingDocuments || isLoadingSegments;
   const activeDocuments = useMemo(() => documents.filter((document) => document.isPublished).length, [documents]);
@@ -65,6 +73,10 @@ export default function AdminFooterInformation() {
     const segment = allSegments.find((item) => item.id === id);
     return segment ? [segment] : [];
   }), [allSegments, footerProductSegmentIds]);
+  const selectedFooterPaymentMethods = useMemo(() => footerPaymentMethodIds.flatMap((id) => {
+    const paymentMethod = FOOTER_PAYMENT_METHODS.find((method) => method.id === id);
+    return paymentMethod ? [paymentMethod] : [];
+  }), [footerPaymentMethodIds]);
 
   const setFooterField = <K extends keyof FooterForm>(field: K, value: FooterForm[K]) => setFooter((current) => ({ ...current, [field]: value }));
   const updateDocument = (slug: string, patch: Partial<ManagedPublicDocument>) => setDocuments((current) => current.map((document) => document.slug === slug ? { ...document, ...patch } : document));
@@ -88,6 +100,28 @@ export default function AdminFooterInformation() {
 
   const moveFooterSegment = (segmentId: number, direction: -1 | 1) => setFooterProductSegmentIds((current) => {
     const index = current.indexOf(segmentId);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= current.length) return current;
+    const next = [...current];
+    [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+    return next;
+  });
+
+  const toggleFooterPaymentMethod = (paymentMethodId: FooterPaymentMethodId) => {
+    setFooterPaymentMethodIds((current) => {
+      if (current.includes(paymentMethodId)) {
+        if (current.length === 1) {
+          toast.error("Mantenha ao menos uma forma de pagamento no rodapé.", { position: "top-right", id: "footer-payment-methods-minimum" });
+          return current;
+        }
+        return current.filter((id) => id !== paymentMethodId);
+      }
+      return [...current, paymentMethodId];
+    });
+  };
+
+  const moveFooterPaymentMethod = (paymentMethodId: FooterPaymentMethodId, direction: -1 | 1) => setFooterPaymentMethodIds((current) => {
+    const index = current.indexOf(paymentMethodId);
     const targetIndex = index + direction;
     if (index < 0 || targetIndex < 0 || targetIndex >= current.length) return current;
     const next = [...current];
@@ -142,6 +176,18 @@ export default function AdminFooterInformation() {
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível salvar os produtos do rodapé", { position: "top-right", id: "footer-product-segments-save-error" });
+    }
+  };
+
+  const handleSaveFooterPaymentMethods = async () => {
+    if (footerPaymentMethodIds.length === 0) return;
+    try {
+      await saveFooterPaymentMethods.mutateAsync({ paymentMethodIds: footerPaymentMethodIds });
+      await Promise.all([utils.siteContent.getAdminFooter.invalidate(), utils.siteContent.getPublicFooter.invalidate()]);
+      toast.success("Formas de pagamento salvas", { description: `${footerPaymentMethodIds.length} opções serão exibidas no rodapé.`, position: "top-right", duration: 3500, id: "footer-payment-methods-save" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível salvar as formas de pagamento", { position: "top-right", id: "footer-payment-methods-save-error" });
     }
   };
 
@@ -209,6 +255,24 @@ export default function AdminFooterInformation() {
                     <div><p className="mb-3 text-sm font-semibold text-slate-900">Segmentos disponíveis</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{allSegments.map((segment) => { const selected = footerProductSegmentIds.includes(segment.id); return <button key={segment.id} type="button" onClick={() => toggleFooterSegment(segment.id)} aria-pressed={selected} className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${selected ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-slate-700 hover:border-pink-200 hover:bg-pink-50/50"}`}><span className="truncate pr-3">{segment.name}</span>{selected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}</button>; })}</div></div>
                     <div><p className="mb-3 text-sm font-semibold text-slate-900">Ordem no rodapé</p><div className="space-y-2">{selectedFooterSegments.map((segment, index) => <div key={segment.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-700">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{segment.name}</span><div className="flex gap-1"><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterSegment(segment.id, -1)} disabled={index === 0} aria-label={`Mover ${segment.name} para cima`}><ArrowUp className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterSegment(segment.id, 1)} disabled={index === selectedFooterSegments.length - 1} aria-label={`Mover ${segment.name} para baixo`}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</div></div>
                     <div className="flex justify-end"><Button onClick={handleSaveFooterProductSegments} disabled={saveFooterProductSegments.isPending || footerProductSegmentIds.length === 0} aria-busy={saveFooterProductSegments.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooterProductSegments.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar produtos do rodapé</Button></div>
+                  </CardContent>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <Accordion type="multiple">
+              <AccordionItem value="footer-payment-methods" className="border-0">
+                <AccordionTrigger aria-label="Expandir ou encolher formas de pagamento exibidas no rodapé" className="px-6 py-5 hover:bg-pink-50/60 hover:no-underline">
+                  <div className="flex items-center gap-3"><CreditCard className="h-5 w-5 text-pink-600" /><div><CardTitle>Formas de pagamento exibidas</CardTitle><CardDescription>Escolha e ordene os meios de pagamento visíveis na grade do rodapé.</CardDescription></div></div>
+                </AccordionTrigger>
+                <AccordionContent className="border-t border-slate-100">
+                  <CardContent className="space-y-6 p-6">
+                    <div className="flex flex-col gap-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Seleção de pagamentos</p><p className="mt-1 text-sm text-slate-600">Escolha de 1 a {MAX_FOOTER_PAYMENT_METHODS} opções. A ordem abaixo será a mesma exibida no site.</p></div><span className="w-fit rounded-full bg-white px-3 py-1 text-sm font-bold text-pink-600 shadow-sm">{selectedFooterPaymentMethods.length}/{MAX_FOOTER_PAYMENT_METHODS}</span></div>
+                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Formas disponíveis</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{FOOTER_PAYMENT_METHODS.map((paymentMethod) => { const selected = footerPaymentMethodIds.includes(paymentMethod.id); return <button key={paymentMethod.id} type="button" onClick={() => toggleFooterPaymentMethod(paymentMethod.id)} aria-pressed={selected} className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${selected ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-slate-700 hover:border-pink-200 hover:bg-pink-50/50"}`}><span className="truncate pr-3">{paymentMethod.label}</span>{selected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}</button>; })}</div></div>
+                    <div><p className="mb-3 text-sm font-semibold text-slate-900">Ordem no rodapé</p><div className="space-y-2">{selectedFooterPaymentMethods.map((paymentMethod, index) => <div key={paymentMethod.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-700">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{paymentMethod.label}</span><div className="flex gap-1"><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, -1)} disabled={index === 0} aria-label={`Mover ${paymentMethod.label} para cima`}><ArrowUp className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" onClick={() => moveFooterPaymentMethod(paymentMethod.id, 1)} disabled={index === selectedFooterPaymentMethods.length - 1} aria-label={`Mover ${paymentMethod.label} para baixo`}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</div></div>
+                    <div className="flex justify-end"><Button onClick={handleSaveFooterPaymentMethods} disabled={saveFooterPaymentMethods.isPending || footerPaymentMethodIds.length === 0} aria-busy={saveFooterPaymentMethods.isPending} className="bg-pink-600 hover:bg-pink-700 focus-visible:ring-pink-300">{saveFooterPaymentMethods.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="mr-2 h-4 w-4" aria-hidden="true" />}Salvar formas de pagamento</Button></div>
                   </CardContent>
                 </AccordionContent>
               </AccordionItem>

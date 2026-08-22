@@ -126,6 +126,7 @@ export const siteFooterSettings = mysqlTable("siteFooterSettings", {
   documentsTitle: varchar("documentsTitle", { length: 160 }),
   documentsDescription: text("documentsDescription"),
   footerProductSegmentIds: text("footerProductSegmentIds"),
+  footerPaymentMethodIds: text("footerPaymentMethodIds"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
