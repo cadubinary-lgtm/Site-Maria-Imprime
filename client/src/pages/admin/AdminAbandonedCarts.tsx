@@ -30,6 +30,7 @@ export default function AdminAbandonedCarts() {
   const [cartToDelete, setCartToDelete] = useState<{ cartKey: string; userId: number | null; sessionId: string | null } | null>(null);
   const [cartToRemind, setCartToRemind] = useState<{ cartKey: string; userId: number | null; sessionId: string | null; clientName: string | null; clientEmail: string | null } | null>(null);
   const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
+  const [historyItemToDelete, setHistoryItemToDelete] = useState<{ id: number; clientName: string | null; products: string } | null>(null);
   const utils = trpc.useUtils();
   const { data: carts = [], isLoading } = trpc.abandonedCarts.list.useQuery();
   const { data: deletedHistory = [] } = trpc.abandonedCarts.history.useQuery();
@@ -68,6 +69,17 @@ export default function AdminAbandonedCarts() {
       utils.abandonedCarts.history.invalidate();
     },
     onError: (error) => toast.error(error.message || "Não foi possível limpar o histórico."),
+  });
+  const deleteHistoryItemMutation = trpc.abandonedCarts.deleteHistoryItem.useMutation({
+    onSuccess: ({ deletedRecords }) => {
+      toast.success(
+        deletedRecords > 0 ? "Registro removido do histórico." : "Este registro já não está disponível.",
+        { position: "top-right", duration: 3500, id: "abandoned-carts-history-delete-item" }
+      );
+      setHistoryItemToDelete(null);
+      utils.abandonedCarts.history.invalidate();
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível excluir o registro."),
   });
   const emailReminderMutation = trpc.abandonedCarts.sendEmailReminder.useMutation({
     onSuccess: ({ email }) => {
@@ -220,10 +232,10 @@ export default function AdminAbandonedCarts() {
               <p className="py-8 text-center text-sm text-gray-500">Nenhum carrinho excluído foi registrado desde a ativação do histórico.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[720px] text-sm">
-                  <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500"><tr><th scope="col" className="px-4 py-3 font-medium">Cliente</th><th scope="col" className="px-4 py-3 font-medium">Produtos</th><th scope="col" className="px-4 py-3 font-medium">Itens</th><th scope="col" className="px-4 py-3 font-medium">Valor</th><th scope="col" className="px-4 py-3 font-medium">Motivo</th><th scope="col" className="px-4 py-3 font-medium">Excluído em</th></tr></thead>
+                <table className="w-full min-w-[800px] text-sm">
+                  <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500"><tr><th scope="col" className="px-4 py-3 font-medium">Cliente</th><th scope="col" className="px-4 py-3 font-medium">Produtos</th><th scope="col" className="px-4 py-3 font-medium">Itens</th><th scope="col" className="px-4 py-3 font-medium">Valor</th><th scope="col" className="px-4 py-3 font-medium">Motivo</th><th scope="col" className="px-4 py-3 font-medium">Excluído em</th><th scope="col" className="px-4 py-3 text-right font-medium">Ações</th></tr></thead>
                   <tbody className="divide-y divide-gray-100">
-                    {deletedHistory.map((cart) => <tr key={cart.id}><td className="px-4 py-3 font-medium text-gray-900">{cart.clientName || "Visitante"}<p className="mt-0.5 text-xs font-normal text-gray-400">{cart.clientEmail || cart.cartKey}</p></td><td className="max-w-[300px] px-4 py-3 text-gray-600"><span className="line-clamp-2">{cart.products}</span></td><td className="px-4 py-3">{cart.itemCount}</td><td className="px-4 py-3 font-semibold">{currency.format(Number(cart.totalValue))}</td><td className="px-4 py-3"><Badge variant="outline">{cart.deletionReason === "automatic" ? "48 horas" : "Manual"}</Badge></td><td className="px-4 py-3 text-gray-600">{new Date(cart.deletedAt).toLocaleString("pt-BR")}</td></tr>)}
+                    {deletedHistory.map((cart) => <tr key={cart.id}><td className="px-4 py-3 font-medium text-gray-900">{cart.clientName || "Visitante"}<p className="mt-0.5 text-xs font-normal text-gray-400">{cart.clientEmail || cart.cartKey}</p></td><td className="max-w-[300px] px-4 py-3 text-gray-600"><span className="line-clamp-2">{cart.products}</span></td><td className="px-4 py-3">{cart.itemCount}</td><td className="px-4 py-3 font-semibold">{currency.format(Number(cart.totalValue))}</td><td className="px-4 py-3"><Badge variant="outline">{cart.deletionReason === "automatic" ? "48 horas" : "Manual"}</Badge></td><td className="px-4 py-3 text-gray-600">{new Date(cart.deletedAt).toLocaleString("pt-BR")}</td><td className="px-4 py-3 text-right"><Button size="icon" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" aria-label={`Excluir registro de ${cart.clientName || "visitante"}`} onClick={() => setHistoryItemToDelete({ id: cart.id, clientName: cart.clientName, products: cart.products })}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button></td></tr>)}
                   </tbody>
                 </table>
               </div>
@@ -298,6 +310,18 @@ export default function AdminAbandonedCarts() {
               <AlertDialogCancel disabled={clearHistoryMutation.isPending}>Cancelar</AlertDialogCancel>
               <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={clearHistoryMutation.isPending} aria-busy={clearHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); clearHistoryMutation.mutate(); }}>
                 {clearHistoryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />}Esvaziar histórico
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={Boolean(historyItemToDelete)} onOpenChange={(open) => !open && setHistoryItemToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader><AlertDialogTitle>Excluir este registro do histórico?</AlertDialogTitle><AlertDialogDescription>{historyItemToDelete ? `O registro de ${historyItemToDelete.clientName || "visitante"}, referente a ${historyItemToDelete.products}, será excluído definitivamente. Esta ação não poderá ser desfeita.` : ""}</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteHistoryItemMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteHistoryItemMutation.isPending} aria-busy={deleteHistoryItemMutation.isPending} onClick={(event) => { event.preventDefault(); if (historyItemToDelete) deleteHistoryItemMutation.mutate({ id: historyItemToDelete.id }); }}>
+                {deleteHistoryItemMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />}Excluir registro
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
