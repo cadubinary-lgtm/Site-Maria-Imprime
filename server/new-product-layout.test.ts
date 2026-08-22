@@ -31,7 +31,7 @@ describe("layout horizontal de Novo Produto", () => {
   });
 
   it("mantém o cabeçalho fixo com ações responsivas durante a rolagem", () => {
-    expect(newProductSource).toContain("sticky top-0 z-30");
+    expect(newProductSource).toContain("sticky top-16 z-30");
     expect(newProductSource).toContain("bg-white/95");
     expect(newProductSource).toContain("backdrop-blur");
     expect(newProductSource).toContain("flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between");

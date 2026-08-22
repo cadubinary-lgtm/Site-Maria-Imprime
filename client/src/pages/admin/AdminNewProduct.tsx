@@ -482,7 +482,7 @@ export default function AdminNewProduct() {
     <AdminLayout>
       <div className="admin-visual-system min-h-full space-y-4 xl:space-y-5">
         {/* Cabeçalho */}
-        <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85">
+        <div className="sticky top-16 z-30 border-b border-gray-200 bg-white/95 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Novo Produto</h1>

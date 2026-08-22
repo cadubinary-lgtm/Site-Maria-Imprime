@@ -4168,3 +4168,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Fixar título, status e ações no topo durante a rolagem da página Novo Produto
 - [x] Preservar os controles existentes e impedir sobreposição dos campos do formulário
 - [x] Validar o comportamento em desktop e mobile antes do checkpoint
+
+## Correção de Posição do Cabeçalho Fixo em Novo Produto
+- [x] Posicionar o cabeçalho fixo abaixo da barra geral do Painel Admin
+- [x] Garantir que título e ações permaneçam visíveis durante a rolagem real
+- [x] Validar o comportamento com a página preenchida e salvar checkpoint
