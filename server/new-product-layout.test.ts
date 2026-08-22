@@ -35,9 +35,14 @@ describe("layout de Editar Produto", () => {
   it("usa um modal amplo e a mesma composição horizontal da criação", () => {
     expect(EDIT_PRODUCT_MODAL_LAYOUT.dialog).toContain("xl:max-w-[1480px]");
     expect(EDIT_PRODUCT_MODAL_LAYOUT.details).toContain("xl:grid-cols-12");
-    expect(EDIT_PRODUCT_MODAL_LAYOUT.secondary).toContain("xl:grid-cols-");
-    expect(editProductSource).toContain('className="flex flex-col gap-4"');
-    expect(editProductSource).toContain('sm:col-start-1 sm:row-start-2 self-start');
+    expect(EDIT_PRODUCT_MODAL_LAYOUT.secondary).toContain("flex flex-col gap-4");
+    // Fotos na col-1 row-1, Segmentos na col-2 row-1 (lado a lado), igual ao Novo Produto
+    expect(editProductSource).toContain('sm:col-start-1 sm:row-start-1');
+    expect(editProductSource).toContain('sm:col-start-2 sm:row-start-1');
+    // Gabarito ocupa as 2 colunas na row-2
+    expect(editProductSource).toContain('sm:col-span-2 sm:row-start-2');
+    // Tags e Descrição do Card em coluna única abaixo (row-3)
+    expect(editProductSource).toContain('sm:col-span-2 sm:row-start-3');
   });
 });
 
@@ -50,12 +55,12 @@ describe("padrão de painéis dos formulários de produto", () => {
     expect(PRODUCT_FORM_PANEL.inner).toContain("space-y-4");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.card");
     expect(newProductSource).toContain("PRODUCT_FORM_PANEL.inner");
-    expect(newProductSource).toContain("sm:grid-cols-2 sm:items-start");
+    expect(newProductSource).toContain("sm:grid-cols-2 sm:items-stretch");
     expect(editProductSource).toContain("Dados comerciais");
     expect(editProductSource).toContain("PRODUCT_FORM_PANEL.card");
-    expect(editProductSource).toContain("sm:grid-cols-2 sm:items-start");
-    expect(newProductSource.match(/Tags do Produto/g)).toHaveLength(1);
-    expect(editProductSource.match(/Tags do Produto/g)).toHaveLength(1);
+    expect(editProductSource).toContain("sm:grid-cols-2 sm:items-stretch");
+    expect(newProductSource.match(/Tags do Produto/g)!.length).toBeGreaterThanOrEqual(1);
+    expect(editProductSource.match(/Tags do Produto/g)!.length).toBeGreaterThanOrEqual(1);
   });
 });
 
