@@ -458,6 +458,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { label: "Normas de arte", href: "/admin/configuracoes-site/normas-de-arte" },
           { label: "Guia da Maria", href: "/admin/configuracoes-site/guia-da-maria" },
           { label: "Gabaritos", href: "/admin/configuracoes-site/gabaritos" },
+          { label: "Prazos Padrão", href: "/admin/configuracoes-site/prazos-padrao" },
           { label: "Dados da Empresa", href: "/admin/configuracoes-site/dados-da-empresa" },
         ],
       },

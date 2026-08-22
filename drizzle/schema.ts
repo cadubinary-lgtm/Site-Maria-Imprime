@@ -1216,6 +1216,23 @@ export type ProductDeliveryOption = typeof productDeliveryOptions.$inferSelect;
 export type InsertProductDeliveryOption = typeof productDeliveryOptions.$inferInsert;
 
 /**
+ * Global Delivery Options - Biblioteca de prazos reutilizáveis em novos produtos
+ */
+export const globalDeliveryOptions = mysqlTable("globalDeliveryOptions", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  daysToDeliver: int("daysToDeliver").notNull(),
+  pricePerM2: decimal("pricePerM2", { precision: 10, scale: 2 }).default("0").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  order: int("order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GlobalDeliveryOption = typeof globalDeliveryOptions.$inferSelect;
+export type InsertGlobalDeliveryOption = typeof globalDeliveryOptions.$inferInsert;
+
+/**
  * Cart Items - Itens no carrinho do cliente
  */
 export const cartItems = mysqlTable("cartItems", {

@@ -34,11 +34,7 @@ interface DeliveryOptionsManagerProps {
   compact?: boolean;
 }
 
-const DEFAULT_OPTIONS: DeliveryOptionData[] = [
-  { name: "Prazo Normal", daysToDeliver: 5, pricePerM2: 0, isActive: true, order: 0 },
-  { name: "24 Horas", daysToDeliver: 1, pricePerM2: 10, isActive: true, order: 1 },
-  { name: "Mesmo Dia", daysToDeliver: 0, pricePerM2: 20, isActive: true, order: 2 },
-];
+// DEFAULT_OPTIONS removido: os prazos padrão agora vêm da tabela globalDeliveryOptions
 
 export function DeliveryOptionsManager({
   productId,
@@ -64,7 +60,8 @@ export function DeliveryOptionsManager({
 
   const [options, setOptions] = useState<DeliveryOptionData[]>(() => {
     if (isOfflineMode) {
-      return initialOptions ?? DEFAULT_OPTIONS.map((o, i) => ({ ...o, id: -(i + 1) }));
+      // Quando há initialOptions, usa-as; caso contrário começa vazio (será preenchido pelos globais)
+      return initialOptions ?? [];
     }
     return [];
   });
@@ -84,6 +81,28 @@ export function DeliveryOptionsManager({
     { productId: productId! },
     { enabled: !isOfflineMode }
   );
+
+  // Modo offline sem initialOptions: buscar prazos globais como padrão
+  const { data: globalDefaults } = trpc.globalDeliveryOptions.getAll.useQuery(undefined, {
+    enabled: isOfflineMode && (!initialOptions || initialOptions.length === 0),
+  });
+
+  // Quando os prazos globais chegam e ainda não há opções, pré-carrega
+  useEffect(() => {
+    if (isOfflineMode && globalDefaults && globalDefaults.length > 0 && options.length === 0) {
+      const mapped: DeliveryOptionData[] = globalDefaults
+        .filter((g) => g.isActive)
+        .map((g, i) => ({
+          id: -(i + 1),
+          name: g.name,
+          daysToDeliver: g.daysToDeliver,
+          pricePerM2: parseFloat(g.pricePerM2) || 0,
+          isActive: true,
+          order: g.order,
+        }));
+      setOptions(mapped);
+    }
+  }, [globalDefaults, isOfflineMode, options.length]);
 
   useEffect(() => {
     if (!isOfflineMode && deliveryOptions) {

@@ -4126,3 +4126,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Espaço em Branco em Novo Produto
 - [x] Eliminar o espaço em branco entre Gabarito recomendado e Tags do Produto
 - [x] Manter os cards alinhados sem lacunas na grade de dois colunas
+
+## Biblioteca de Prazos Globais
+- [x] Criar tabela globalDeliveryOptions no schema e migração SQL
+- [x] Criar router tRPC globalDeliveryOptions com CRUD administrativo
+- [x] Criar página admin Configurações do site → Prazos Padrão
+- [x] Registrar rota e item de menu na sidebar
+- [x] Integrar prazos globais no DeliveryOptionsManager de novo produto
+- [x] Criar regressão cobrindo o fluxo completo
