@@ -4187,3 +4187,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir enviar, substituir e remover a logo de cada forma de pagamento
 - [x] Manter a ordenação e a estrutura atual das Informações do Rodapé
 - [x] Validar administração, rodapé público e regressões antes do checkpoint
+
+## Ocultação do Acesso Administrativo Público
+- [x] Remover links e ícones do Painel Admin expostos no site público
+- [x] Preservar acesso direto à rota /admin/login para a equipe administrativa
+- [x] Validar cabeçalho público em desktop e mobile antes do checkpoint
