@@ -23,6 +23,11 @@ describe("Guia da Maria global", () => {
     expect(content).toContain('id: "entrega"');
     expect(content).toContain('"lona-sanet"');
     expect(content).toContain("Lona Ortofônica / Sanet — Perfurada");
+    expect(content).toContain("O corte linear padrão realizado em guilhotinas de alta precisão");
+    expect(content).toContain("Película plástica opaca e acetinada que elimina reflexos de luz");
+    expect(content).toContain("Laminação Fosca para Lona");
+    expect(content).toContain("Hot Stamping");
+    expect(content).toContain("Fita Dupla Face Aplicada");
     expect(router).toContain('"lona-sanet"');
   });
 
@@ -43,6 +48,12 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("laminacao:");
     expect(guide).toContain('"meio-corte"');
     expect(guide).toContain('"lona-sanet"');
+    expect(guide).toContain('"hot-stamping"');
+    expect(guide).toContain("serrilha:");
+    expect(guide).toContain('"borda-arredondada"');
+    expect(guide).toContain('"fita-dupla-face"');
+    expect(guide).toContain('"verniz-brilho-lona"');
+    expect(guide).toContain('"laminacao-fosca-lona"');
     expect(guide).toContain("compact = false");
     expect(guide).toContain("grid-cols-2 md:grid-cols-4");
     expect(guide).toContain("responsivePanelGridClass");
@@ -67,7 +78,7 @@ describe("Guia da Maria global", () => {
     expect(guide).toContain("min-h-[104px]");
     expect(guide).toContain("const hasPinkBackground = isExpanded");
     expect(guide).toContain("HOME_SECONDARY_ACTION_CLASS");
-    expect(guide).toContain('href="/documentos"');
+    expect(guide).toContain('href="/documentos/normas-envio-arte"');
     expect(guide).not.toContain("HOME_PRIMARY_ACTION_CLASS");
     expect(guide).not.toContain('href="#maria-guide-entrega"');
     expect(guide).not.toContain("Falar com a Maria</a>");

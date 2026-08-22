@@ -32,6 +32,14 @@ function FinishSymbol({ id }: { id: string }) {
     aplicacao: <><path d="M13 17h32v25H13z" {...common} /><path d="m35 46 11-8M39 51l11-8" {...common} /></>,
     embalagem: <><path d="m11 20 21-10 21 10v24L32 55 11 44z" {...common} /><path d="M11 20l21 12 21-12M32 32v23" {...common} /></>,
     numeracao: <><rect x="10" y="16" width="44" height="25" rx="3" {...common} /><text x="18" y="33" fontSize="12" fill="currentColor">1 2 3</text></>,
+    "hot-stamping": <><rect x="11" y="17" width="42" height="28" rx="3" {...common} /><path d="m32 11 4 8 8 4-8 4-4 8-4-8-8-4 8-4z" {...common} /><path d="M17 39h30" {...common} /></>,
+    serrilha: <><path d="M10 18h44v28H10z" {...common} /><path d="M10 32h44" {...common} strokeDasharray="3 3" /><path d="m19 25 4 4-4 4m26-8-4 4 4 4" {...common} /></>,
+    "borda-arredondada": <><rect x="12" y="14" width="40" height="35" rx="8" {...common} /><path d="M18 22h28M18 41h20" {...common} /><path d="M48 15v9h-9" {...common} /></>,
+    "fita-dupla-face": <><path d="m10 35 36-16 8 8-36 16z" {...common} /><path d="m14 42 36-16" {...common} strokeDasharray="3 2" /><path d="M12 17h16M36 12h16" {...common} /></>,
+    "verniz-brilho-lona": <><path d="M10 37 42 19l12 8-32 18z" {...common} /><path d="m43 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3z" {...common} /></>,
+    "verniz-fosco-lona": <><path d="M10 37 42 19l12 8-32 18z" {...common} /><path d="M18 20h28" {...common} strokeDasharray="2 3" /><path d="M45 12v9M40 16h10" {...common} /></>,
+    "laminacao-brilho-lona": <><path d="M9 35 42 17l13 8-33 18z" {...common} /><path d="M13 27 42 11l12 7" {...common} /><path d="m46 8 3 5 5 3-5 3-3 5-3-5-5-3 5-3z" {...common} /></>,
+    "laminacao-fosca-lona": <><path d="M9 35 42 17l13 8-33 18z" {...common} /><path d="M13 27 42 11l12 7" {...common} strokeDasharray="2 3" /><path d="M20 44h23" {...common} /></>,
   };
   return <svg viewBox="0 0 64 64" className="h-9 w-9 text-slate-900" aria-hidden>{drawings[id] ?? <Scissors className="h-8 w-8" />}</svg>;
 }

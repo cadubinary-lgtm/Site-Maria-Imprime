@@ -4057,3 +4057,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Inserir marcador rosa e destaque sutil em cada informação técnica organizada
 - [x] Melhorar espaçamento e legibilidade da lista inteligente no mobile e desktop
 - [x] Criar regressão e validar a lista inteligente de especificações por produto — TypeScript sem erros, 3 testes aprovados e página pública conferida
+
+- [x] Atualizar as descrições de todos os acabamentos existentes com os textos fornecidos
+- [x] Adicionar Hot Stamping, Serrilha, Borda Arredondada, Fita Dupla Face e acabamentos de lona ausentes
+- [x] Criar ícones próprios e consistentes para os novos acabamentos sem alterar a estrutura do guia
+- [x] Preservar a grade, o comportamento de seleção e o painel de descrição existentes
+- [x] Criar regressão e validar a grade completa de acabamentos no layout atual (TypeScript e Vitest aprovados; inspeção visual requer produto disponível no preview)
