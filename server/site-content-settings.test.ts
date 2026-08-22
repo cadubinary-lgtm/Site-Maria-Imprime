@@ -13,11 +13,12 @@ describe("configurações públicas do rodapé", () => {
     expect(schema).toContain('mysqlTable("siteFooterSettings"');
     expect(schema).toContain('footerProductSegmentIds: text("footerProductSegmentIds")');
     expect(schema).toContain('footerPaymentMethodIds: text("footerPaymentMethodIds")');
+    expect(schema).toContain('footerPaymentMethods: text("footerPaymentMethods")');
     expect(schema).toContain('mysqlTable("siteDocuments"');
     expect(router).toContain("saveFooter: adminProcedure");
     expect(router).toContain("saveFooterProductSegments: adminProcedure");
     expect(router).toContain("saveFooterPaymentMethods: adminProcedure");
-    expect(router).toContain('z.enum(["visa", "mastercard", "elo", "hipercard", "american-express", "cabal", "diners-club"])');
+    expect(router).toContain("paymentMethods: z.array(footerPaymentMethodInput)");
     expect(router).toContain("segmentIds: z.array(z.number().int().positive()).min(1");
     expect(router).toContain("inArray(segments.id, input.segmentIds)");
     expect(router).toContain("saveDocuments: adminProcedure");
@@ -26,6 +27,7 @@ describe("configurações públicas do rodapé", () => {
     expect(content).toContain("parseFooterProductSegmentIds");
     expect(content).toContain("FOOTER_PAYMENT_METHODS");
     expect(content).toContain("parseFooterPaymentMethodIds");
+    expect(content).toContain("parseFooterPaymentMethods");
     expect(content).toContain("overrides?.introduction ?? FOOTER_CONTENT_FALLBACK.introduction");
   });
 
@@ -62,8 +64,8 @@ describe("configurações públicas do rodapé", () => {
   it("reflete no rodapé público as formas de pagamento configuradas em sua ordem persistida", () => {
     const footer = readFileSync(resolve(root, "client/src/components/home/Footer.tsx"), "utf8");
 
-    expect(footer).toContain("parseFooterPaymentMethodIds(savedFooterContent?.footerPaymentMethodIds)");
-    expect(footer).toContain("footerPaymentMethodIds.map");
-    expect(footer).toContain("paymentMethodVisuals[paymentMethodId]");
+    expect(footer).toContain("parseFooterPaymentMethods(savedFooterContent?.footerPaymentMethods, savedFooterContent?.footerPaymentMethodIds)");
+    expect(footer).toContain("footerPaymentMethods.map");
+    expect(footer).toContain("paymentMethodVisuals[paymentMethod.id]");
   });
 });

@@ -151,6 +151,7 @@ export const siteFooterSettings = mysqlTable("siteFooterSettings", {
   documentsDescription: text("documentsDescription"),
   footerProductSegmentIds: text("footerProductSegmentIds"),
   footerPaymentMethodIds: text("footerPaymentMethodIds"),
+  footerPaymentMethods: text("footerPaymentMethods"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
