@@ -720,7 +720,7 @@ export default function AdminQuotationForm() {
 
     return (
       <div key={`custom-${idx}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`overflow-hidden rounded-lg border border-gray-100 bg-white transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
-        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] items-center gap-2 bg-gray-50 px-2 py-2 ${isExpanded ? "border-b border-gray-100" : ""}`}>
+        <div className={`grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] items-center gap-2 bg-gray-100 px-2 py-2 ${isExpanded ? "border-b border-gray-200" : ""}`}>
           <div>
             <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200">
               <ImageIcon className="w-4 h-4 text-gray-400" />
@@ -1393,7 +1393,7 @@ export default function AdminQuotationForm() {
                   return (
                     <div key={idx} onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropItem(event, idx)} className={`border border-gray-100 rounded-lg overflow-hidden transition-opacity ${draggedItemIndex === idx ? "opacity-50" : ""}`}>
                       {/* Linha principal */}
-                      <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 items-center px-2 py-2 bg-gray-50">
+                      <div className="grid grid-cols-[32px_minmax(108px,1fr)_32px_58px_92px_96px_96px_32px] gap-2 items-center px-2 py-2 bg-gray-100">
                         <div>
                           {item.isCustom ? (
                             <div className="w-8 h-8" aria-hidden="true" />
