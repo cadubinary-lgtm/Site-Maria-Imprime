@@ -345,7 +345,7 @@ export function ProductImageUploader({
                   isDragOver && dragIndex !== slot ? "scale-105 rounded-lg bg-pink-50 ring-2 ring-pink-500 shadow-md" : "",
                   !url && !isDragging && !isDragOver ? "hover:border-pink-400" : "",
                 ].join(" ")}
-                style={{ height: compact ? 56 : 80 }}
+                style={{ aspectRatio: "1 / 1", height: undefined }}
                 onClick={() => !isUploading && !uploadingGallery && (url ? setPreviewUrl(url) : openGalleryPicker(slot))}
               >
                 {url ? (
