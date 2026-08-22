@@ -11,7 +11,6 @@ import {
   ChevronLeft, ChevronRight, Star, Shield,
   Package, ChevronDown, ChevronUp, Link2, Search,
   ShoppingCart, FileText, MessageCircle,
-  ShieldCheck, Droplets, Scissors, LayoutGrid,
   Truck, CreditCard, Clock,
   Store, Zap, Lightbulb,
   AlertTriangle, CheckSquare
@@ -52,13 +51,6 @@ interface SelectedArtFile {
 
 const ART_ALLOWED_EXTENSIONS = ["pdf", "ai", "cdr", "psd", "eps", "jpg", "jpeg", "png", "tiff", "tif", "svg"];
 const ART_MAX_FILE_SIZE = 100 * 1024 * 1024;
-
-const PRODUCT_FEATURES = [
-  { Icon: ShieldCheck, bg: "bg-green-50",  color: "text-green-600",  label: "Alta resistência",        desc: "Material resistente ao sol e chuva" },
-  { Icon: Droplets,   bg: "bg-blue-50",   color: "text-blue-600",   label: "Cores vivas",             desc: "Impressão digital de alta definição" },
-  { Icon: Scissors,   bg: "bg-pink-50",   color: "text-pink-600",   label: "Acabamento profissional", desc: "Diversas opções de acabamento" },
-  { Icon: LayoutGrid, bg: "bg-pink-50",   color: "text-pink-600",   label: "Uso versátil",            desc: "Eventos, fachadas, promoções e muito mais" },
-];
 
 // ─── Utilitários de data/prazo ─────────────────────────────────────────────
 function addBusinessDays(startDate: Date, days: number): Date {
@@ -1062,20 +1054,6 @@ export default function ProductDetail() {
               {product.description && (
                 <p className="text-sm text-gray-600 leading-relaxed lg:line-clamp-5">{product.description}</p>
               )}
-
-              <div className="space-y-3 pt-1">
-                {PRODUCT_FEATURES.map(({ Icon, bg, color, label, desc }) => (
-                  <div key={label} className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-4 h-4 ${color}`} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800">{label}</p>
-                      <p className="text-xs text-gray-500">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               <div className="pt-1">
                 <p className="text-sm text-gray-500 mb-1">Dúvidas sobre o produto?</p>
