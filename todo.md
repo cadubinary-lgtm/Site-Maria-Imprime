@@ -4079,3 +4079,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar campo de gabarito recomendado no cadastro e na edição de produtos
 - [x] Exibir o gabarito vinculado na página pública do produto para download pelo cliente
 - [x] Criar regressões e validar TypeScript, permissões administrativas e downloads
+
+## Correção do Upload de Gabaritos
+- [x] Corrigir a abertura do seletor de arquivos na janela de adicionar gabarito
+- [x] Validar o envio de arquivo e o feedback após a seleção
+- [x] Criar regressão e validar a correção técnica do upload

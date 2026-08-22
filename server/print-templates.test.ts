@@ -51,5 +51,9 @@ describe("Central de Gabaritos", () => {
     expect(publicPage).toContain("Baixar gabarito");
     expect(adminPage).toContain("Adicionar gabarito");
     expect(adminPage).toContain("AlertDialog");
+    expect(adminPage).toContain('htmlFor="template-file-input"');
+    expect(adminPage).toContain('id="template-file-input"');
+    expect(adminPage).toContain("cursor-pointer opacity-0");
+    expect(adminPage).not.toContain("fileInputRef.current?.click()");
   });
 });
