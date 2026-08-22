@@ -4052,3 +4052,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Destacar em rosa a frase Dúvidas sobre o produto nas páginas públicas de produto
 - [x] Preservar o link e o painel de especificações técnicas existentes
 - [x] Criar regressão e validar o destaque visual — TypeScript sem erros, regressão específica aprovada e página pública conferida
+
+- [x] Separar automaticamente especificações por títulos, sentenças e separadores técnicos reconhecidos
+- [x] Inserir marcador rosa e destaque sutil em cada informação técnica organizada
+- [x] Melhorar espaçamento e legibilidade da lista inteligente no mobile e desktop
+- [x] Criar regressão e validar a lista inteligente de especificações por produto — TypeScript sem erros, 3 testes aprovados e página pública conferida

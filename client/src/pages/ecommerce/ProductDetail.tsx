@@ -30,6 +30,7 @@ import { getProductRatingDisplay } from "@/lib/product-rating";
 import { PENDING_FIELDS_NOTICE_MOTION } from "@/lib/pending-fields-notice";
 import { formatProductionDeadlineSurcharge, getProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 import { getProductSeoMetadata, getProductSeoScript } from "@shared/productSeo";
+import { formatProductSpecificationItems } from "@/lib/product-specifications";
 
 // ─── Tipos de frete dinâmico ─────────────────────────────────────────────────
 interface ShippingQuote {
@@ -1062,25 +1063,20 @@ export default function ProductDetail() {
                     Ver especificações técnicas
                     <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
                   </summary>
-                  <div className="mt-2 space-y-1 text-xs text-gray-600">
+                  <div className="mt-3 rounded-xl border border-pink-100 bg-pink-50/30 p-3 text-xs leading-relaxed text-slate-600">
                     {/* Especificações cadastradas pelo admin */}
                     {(() => {
                       try {
                         const specs = product.specifications ? JSON.parse(product.specifications) : [];
-                        if (specs.length > 0) {
-                          return specs.map((spec: { label: string; value: string }, i: number) => (
-                            <p key={i} className="flex items-start gap-1"><span className="text-orange-500 mt-0.5">•</span> {spec.label}</p>
-                          ));
+                        if (Array.isArray(specs) && specs.length > 0) {
+                          const items = specs.flatMap((spec: { label?: string; value?: string }) => formatProductSpecificationItems([spec.label, spec.value].filter(Boolean).join(": ")));
+                          if (items.length > 0) {
+                            return <ul className="space-y-2.5">{items.map((item, i) => <li key={`${item.label ?? item.text}-${i}`} className={`flex items-start gap-2 ${item.isSection ? "pt-1 font-bold text-slate-800" : ""}`}><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-pink-500" aria-hidden="true" /><span>{item.label && <strong className="font-semibold text-slate-800">{item.label}: </strong>}{item.text}</span></li>)}</ul>;
+                          }
                         }
                       } catch {}
                       // Fallback: exibir dados padrão do produto
-                      return (
-                        <>
-                          <p><span className="font-medium">Cálculo:</span> {product.calculationType === "m2" ? "Por m²" : product.calculationType === "metro_linear" ? "Metro linear" : product.calculationType === "pacote" ? "Pacote" : "Unidade"}</p>
-                          {product.unit && <p><span className="font-medium">Unidade:</span> {product.unit}</p>}
-                          {product.category && <p><span className="font-medium">Categoria:</span> {product.category}</p>}
-                        </>
-                      );
+                      return <ul className="space-y-2.5"><li className="flex items-start gap-2"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-pink-500" aria-hidden="true" /><span><strong className="font-semibold text-slate-800">Cálculo: </strong>{product.calculationType === "m2" ? "Por m²" : product.calculationType === "metro_linear" ? "Metro linear" : product.calculationType === "pacote" ? "Pacote" : "Unidade"}</span></li>{product.unit && <li className="flex items-start gap-2"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-pink-500" aria-hidden="true" /><span><strong className="font-semibold text-slate-800">Unidade: </strong>{product.unit}</span></li>}{product.category && <li className="flex items-start gap-2"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-pink-500" aria-hidden="true" /><span><strong className="font-semibold text-slate-800">Categoria: </strong>{product.category}</span></li>}</ul>;
                     })()}
                   </div>
                 </details>

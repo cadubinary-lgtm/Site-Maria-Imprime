@@ -6,3 +6,4 @@
 - 2026-08-21: A comparação no navegador confirmou que Fazer meu pedido e Ver normas possuem a mesma largura de 160 px, a mesma altura de 44 px e o mesmo centro horizontal (632,5 px) no desktop.
 - 2026-08-21: Após reservar espaço próprio no card de conferência, a verificação no navegador confirmou que o botão Ver normas começa 37,5 px abaixo do checklist, sem sobrepor textos; ele preserva 160 × 44 px e o eixo central.
 - 2026-08-22: A página pública de produto foi conferida após o ajuste de destaque; a frase “Dúvidas sobre o produto?” aparece em rosa e o controle “Ver especificações técnicas” permanece disponível logo abaixo.
+- 2026-08-22: A página pública de produto foi conferida após a lista inteligente; as especificações agora são apresentadas como itens separados, com marcadores rosas, títulos técnicos destacados e seções próprias para Diferenciais do Produto e Especificações Técnicas.
