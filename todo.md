@@ -4034,3 +4034,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover a sobreposição do botão Ver normas sobre as informações do checklist
 - [x] Manter o botão centralizado em uma área própria abaixo da lista de conferência
 - [x] Preservar dimensões idênticas ao botão Fazer meu pedido e validar o layout — TypeScript sem erros, 4 testes aprovados e 37,5 px de área livre confirmados no navegador
+
+- [x] Permitir selecionar quais segmentos aparecem na coluna Produtos do rodapé
+- [x] Permitir ordenar os segmentos selecionados e limitar a quantidade exibida
+- [x] Persistir a configuração e refletir a seleção no rodapé público
+- [x] Criar regressão e validar a gestão administrativa dos segmentos do rodapé — banco migrado, TypeScript sem erros e 6 testes aprovados

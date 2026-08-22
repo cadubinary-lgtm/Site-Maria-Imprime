@@ -20,6 +20,19 @@ export function mergeFooterContent(overrides?: Partial<Record<keyof typeof FOOTE
   };
 }
 
+export function parseFooterProductSegmentIds(value?: string | null): number[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    const unique = new Set<number>();
+    for (const id of parsed) if (Number.isInteger(id) && id > 0) unique.add(id);
+    return Array.from(unique);
+  } catch {
+    return [];
+  }
+}
+
 export const DOCUMENT_SUMMARIES: Record<string, string> = {
   "termos-venda": "Regras aplicáveis às compras e aos serviços da Maria Imprime.",
   "aprovacao-arte": "Orientações para conferir e aprovar a arte antes da produção.",
