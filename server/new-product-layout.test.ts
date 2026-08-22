@@ -46,6 +46,30 @@ describe("layout de Editar Produto", () => {
   });
 });
 
+describe("ordem dos campos de medidas de produto", () => {
+  it("mantém Altura Mín antes de Largura Máx em Novo Produto e Editar Produto", () => {
+    const newMinWidth = newProductSource.indexOf("Largura Mínima (m)");
+    const newMinHeight = newProductSource.indexOf("Altura Mínima (m)");
+    const newMaxWidth = newProductSource.indexOf("Largura Máxima (m)");
+    const newMaxHeight = newProductSource.indexOf("Altura Máxima (m)");
+
+    expect(newMinWidth).toBeGreaterThanOrEqual(0);
+    expect(newMinHeight).toBeGreaterThan(newMinWidth);
+    expect(newMaxWidth).toBeGreaterThan(newMinHeight);
+    expect(newMaxHeight).toBeGreaterThan(newMaxWidth);
+
+    const editMinWidth = editProductSource.indexOf("Largura Mín (m)");
+    const editMinHeight = editProductSource.indexOf("Altura Mín (m)");
+    const editMaxWidth = editProductSource.indexOf("Largura Máx (m)");
+    const editMaxHeight = editProductSource.indexOf("Altura Máx (m)");
+
+    expect(editMinWidth).toBeGreaterThanOrEqual(0);
+    expect(editMinHeight).toBeGreaterThan(editMinWidth);
+    expect(editMaxWidth).toBeGreaterThan(editMinHeight);
+    expect(editMaxHeight).toBeGreaterThan(editMaxWidth);
+  });
+});
+
 describe("padrão de painéis dos formulários de produto", () => {
   it("centraliza o acabamento retangular reutilizado pelos dois fluxos", () => {
     expect(PRODUCT_FORM_PANEL.card).toContain("rounded-xl");

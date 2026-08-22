@@ -4151,3 +4151,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Impedir que o card público exiba texto automático de urgência quando a Descrição do Card estiver vazia
 - [x] Preservar a exibição apenas quando o operador preencher Linha 1 ou Linha 2 em Novo Produto ou Editar Produto
 - [x] Atualizar regressão e validar TypeScript antes do checkpoint
+
+## Ordem dos Campos de Medidas em Produtos
+- [x] Trocar a posição visual de Largura Máx (m) e Altura Mín (m) em Novo Produto
+- [x] Trocar a posição visual de Largura Máx (m) e Altura Mín (m) em Editar Produto
+- [x] Preservar IDs, salvamento, autoavanço e lógica dos campos existentes
+- [x] Atualizar regressão e validar TypeScript antes do checkpoint
