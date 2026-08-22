@@ -4111,3 +4111,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar busca instantânea por nome, descrição e formato do gabarito
 - [x] Preservar download, metadados, estados vazios e responsividade na nova biblioteca
 - [x] Criar regressão e validar a página pública com a busca
+
+## Cabeçalho Compacto da Biblioteca de Gabaritos
+- [x] Remover o fundo rosa intenso do cabeçalho público
+- [x] Posicionar ícone e informações em uma linha compacta sobre fundo branco
+- [x] Aplicar título em rosa e descrição em preto, preservando a responsividade
+- [x] Criar regressão e validar visualmente o novo cabeçalho

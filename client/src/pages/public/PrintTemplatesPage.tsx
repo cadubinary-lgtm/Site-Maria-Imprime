@@ -23,10 +23,12 @@ export default function PrintTemplatesPage() {
       <main className="bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <nav aria-label="Navegação estrutural" className="mb-6 text-sm text-slate-500"><Link href="/" className="hover:text-pink-600">Início</Link><span className="mx-2">/</span><span className="text-slate-700">Gabaritos</span></nav>
-          <section className="rounded-3xl bg-gradient-to-br from-pink-600 to-pink-500 px-6 py-10 text-white shadow-sm sm:px-10 sm:py-12">
-            <PackageCheck className="h-10 w-10" aria-hidden="true" />
-            <h1 className="mt-4 text-3xl font-bold sm:text-4xl">Gabaritos para impressão</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-pink-50 sm:text-base">Baixe o gabarito correto antes de montar a sua arte. Assim, medidas, sangria e áreas de segurança ficam prontas para produção.</p>
+          <section className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:items-center sm:px-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-pink-50 text-pink-600"><PackageCheck className="h-7 w-7" aria-hidden="true" /></div>
+            <div>
+              <h1 className="text-2xl font-bold text-pink-600 sm:text-3xl">Gabaritos para impressão</h1>
+              <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-900 sm:text-base">Baixe o gabarito correto antes de montar a sua arte. Assim, medidas, sangria e áreas de segurança ficam prontas para produção.</p>
+            </div>
           </section>
 
           <section className="mt-8" aria-labelledby="templates-title">

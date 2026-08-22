@@ -63,6 +63,15 @@ describe("Central de Gabaritos", () => {
     expect(publicPage).not.toContain("sm:grid-cols-2 lg:grid-cols-3");
   });
 
+  it("usa um cabeçalho branco compacto com título rosa e descrição escura", () => {
+    const publicPage = read("client/src/pages/public/PrintTemplatesPage.tsx");
+    expect(publicPage).toContain('flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5');
+    expect(publicPage).toContain('text-2xl font-bold text-pink-600');
+    expect(publicPage).toContain('text-sm leading-6 text-slate-900');
+    expect(publicPage).toContain('bg-pink-50 text-pink-600');
+    expect(publicPage).not.toContain('bg-gradient-to-br from-pink-600 to-pink-500');
+  });
+
   it("aceita ZIP no upload de gabaritos sem manter atalhos redundantes na biblioteca", () => {
     const adminPage = read("client/src/pages/admin/AdminPrintTemplates.tsx");
     const uploadEndpoint = read("server/_core/index.ts");
