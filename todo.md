@@ -4090,7 +4090,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar regressão para os dois gatilhos de adição de gabarito
 
 ## Validação Ponta a Ponta de Gabaritos
-- [ ] Verificar o vínculo e o salvamento de gabarito na edição de produtos
-- [ ] Verificar o download de gabarito pela página pública acessível no rodapé
-- [ ] Criar ou ampliar regressões para cobrir os fluxos completos
-- [ ] Publicar e repetir o teste real após corrigir a autorização administrativa dos gabaritos
+- [x] Verificar o vínculo e o salvamento de gabarito na edição de produtos
+- [x] Verificar o download de gabarito pela página pública acessível no rodapé
+- [x] Criar ou ampliar regressões para cobrir os fluxos completos
+- [x] Publicar e repetir o teste real após corrigir a autorização administrativa dos gabaritos
