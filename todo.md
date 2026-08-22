@@ -4117,3 +4117,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Posicionar ícone e informações em uma linha compacta sobre fundo branco
 - [x] Aplicar título em rosa e descrição em preto, preservando a responsividade
 - [x] Criar regressão e validar visualmente o novo cabeçalho
+
+## Acesso Compacto ao Gabarito no Configurador
+- [x] Reduzir o bloco recomendado para o rótulo Gabarito e o ícone de download
+- [x] Remover nome de arquivo e descrição do acesso no configurador
+- [x] Preservar download acessível, responsivo e com regressão coberta
