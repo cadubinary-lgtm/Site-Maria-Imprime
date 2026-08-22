@@ -1,7 +1,7 @@
 import { router } from "./_core/trpc";
 import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 import { z } from "zod";
-import { cleanupExpiredAbandonedCarts, clearDeletedAbandonedCartHistory, deleteAbandonedCart, getAbandonedCartDetails, getAbandonedCartSummaries, getDeletedAbandonedCartHistory, recordAbandonedCartReminder } from "./db";
+import { cleanupExpiredAbandonedCarts, clearDeletedAbandonedCartHistory, deleteAbandonedCart, deleteDeletedAbandonedCartHistoryItem, getAbandonedCartDetails, getAbandonedCartSummaries, getDeletedAbandonedCartHistory, recordAbandonedCartReminder } from "./db";
 import { sendAbandonedCartReminderEmail } from "./emailService";
 import { TRPCError } from "@trpc/server";
 
@@ -43,4 +43,5 @@ export const abandonedCartsRouter = router({
   }),
   cleanupExpired: adminProcedure.mutation(async () => cleanupExpiredAbandonedCarts()),
   clearHistory: adminProcedure.mutation(async () => clearDeletedAbandonedCartHistory()),
+  deleteHistoryItem: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => deleteDeletedAbandonedCartHistoryItem(input.id)),
 });

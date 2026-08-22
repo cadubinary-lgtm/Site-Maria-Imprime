@@ -41,6 +41,7 @@ describe("módulo de carrinhos abandonados", () => {
     expect(source).toContain("cleanupExpired: adminProcedure.mutation");
     expect(source).toContain("history: adminProcedure.query");
     expect(source).toContain("clearHistory: adminProcedure.mutation");
+    expect(source).toContain("deleteHistoryItem: adminProcedure.input");
   });
 
   it("expõe a página no menu de Vendas e mostra a política de retenção", () => {
@@ -97,9 +98,12 @@ describe("módulo de carrinhos abandonados", () => {
     expect(dbSource).toContain("archiveCartRows");
     expect(dbSource).toContain("getDeletedAbandonedCartHistory");
     expect(dbSource).toContain("clearDeletedAbandonedCartHistory");
+    expect(dbSource).toContain("deleteDeletedAbandonedCartHistoryItem");
     expect(dbSource).toContain('archiveCartRows(rowsToArchive, "automatic")');
     expect(pageSource).toContain("Histórico de carrinhos excluídos");
     expect(pageSource).toContain("Esvaziar histórico de carrinhos?");
     expect(pageSource).toContain("trpc.abandonedCarts.clearHistory.useMutation");
+    expect(pageSource).toContain("trpc.abandonedCarts.deleteHistoryItem.useMutation");
+    expect(pageSource).toContain("Excluir este registro do histórico?");
   });
 });

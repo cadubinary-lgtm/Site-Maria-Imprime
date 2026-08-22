@@ -4198,3 +4198,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exigir confirmação antes da exclusão definitiva do histórico
 - [x] Atualizar a listagem e os totais após a limpeza
 - [x] Cobrir a exclusão com regressão e validar TypeScript antes do checkpoint
+
+## Lixeira Individual do Histórico de Carrinhos
+- [x] Adicionar ação de excluir em cada registro do histórico de carrinhos
+- [x] Exigir confirmação individual antes da exclusão definitiva
+- [x] Atualizar a listagem após excluir um registro
+- [x] Cobrir a exclusão individual com regressão e validar TypeScript antes do checkpoint
