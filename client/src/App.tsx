@@ -23,6 +23,7 @@ import SearchResults from "./pages/public/SearchResults";
 import CalculadoraDemo from "./pages/public/CalculadoraDemo";
 import DocumentationPage from "./pages/public/DocumentationPage";
 import ContactPage from "./pages/public/ContactPage";
+import PrintTemplatesPage from "./pages/public/PrintTemplatesPage";
 
 // ─── Páginas de E-commerce ───────────────────────────────────────────────────
 import ProductDetail from "./pages/ecommerce/ProductDetail";
@@ -68,6 +69,7 @@ import AdminCompanySettings from "./pages/admin/AdminCompanySettings";
 import AdminFooterInformation from "./pages/admin/AdminFooterInformation";
 import AdminArtworkGuidelines from "./pages/admin/AdminArtworkGuidelines";
 import AdminMariaGuide from "./pages/admin/AdminMariaGuide";
+import AdminPrintTemplates from "./pages/admin/AdminPrintTemplates";
 import AdminPreImpressao from "./pages/admin/AdminPreImpressao";
 import AdminStatusProducao from "./pages/admin/AdminStatusProducao";
 import ClientsManager from "./pages/admin/ClientsManager";
@@ -182,6 +184,7 @@ return (
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
 <Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+<Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
@@ -288,6 +291,7 @@ return (
 <Route path="/admin/configuracoes-site/rodape" component={AdminFooterInformation} />
 <Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
+<Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
@@ -382,6 +386,7 @@ function Router() {
       {/* ── Rotas Públicas ─────────────────────────────────────────────── */}
       <Route path="/" component={Home} />
       <Route path="/catalogo" component={Catalog} />
+      <Route path="/gabaritos" component={PrintTemplatesPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />

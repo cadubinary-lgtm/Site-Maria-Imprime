@@ -4070,3 +4070,12 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir a descrição técnica imediatamente abaixo da linha do acabamento selecionado, preservando a grade de três colunas
 - [x] Criar regressão para garantir a posição contextual da descrição na grade de acabamentos
 - [x] Aplicar ao bloco de descrição a mesma tonalidade rosa suave do acabamento selecionado
+
+## Central de Gabaritos
+- [x] Mapear o rodapé, o fluxo de novo/editar produto e o armazenamento de arquivos existentes
+- [x] Criar estrutura persistida para cadastrar, ordenar, publicar e despublicar gabaritos
+- [x] Criar página pública de Gabaritos acessível pelo rodapé, com download seguro dos arquivos
+- [x] Criar área administrativa em Configurações do site para gerenciar gabaritos e arquivos
+- [x] Adicionar campo de gabarito recomendado no cadastro e na edição de produtos
+- [x] Exibir o gabarito vinculado na página pública do produto para download pelo cliente
+- [x] Criar regressões e validar TypeScript, permissões administrativas e downloads
