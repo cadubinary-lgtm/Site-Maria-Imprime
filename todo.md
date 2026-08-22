@@ -4088,3 +4088,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Correção da Biblioteca de Arquivos
 - [x] Corrigir a abertura do formulário de adicionar gabarito pela seção Biblioteca de arquivos
 - [x] Criar regressão para os dois gatilhos de adição de gabarito
+
+## Validação Ponta a Ponta de Gabaritos
+- [ ] Verificar o vínculo e o salvamento de gabarito na edição de produtos
+- [ ] Verificar o download de gabarito pela página pública acessível no rodapé
+- [ ] Criar ou ampliar regressões para cobrir os fluxos completos
+- [ ] Publicar e repetir o teste real após corrigir a autorização administrativa dos gabaritos

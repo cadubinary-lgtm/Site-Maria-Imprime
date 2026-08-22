@@ -2,7 +2,8 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { printTemplates, products } from "../drizzle/schema";
 import { getDb } from "./db";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router } from "./_core/trpc";
+import { adminOrManusAuthProcedure } from "./routers-admin-auth";
 
 const templateFileInput = z.object({
   fileName: z.string().min(1).max(255),
@@ -37,7 +38,7 @@ export const printTemplatesRouter = router({
     }).from(printTemplates).where(eq(printTemplates.isPublished, true)).orderBy(asc(printTemplates.position), asc(printTemplates.title));
   }),
 
-  listAdmin: adminProcedure.query(async () => {
+  listAdmin: adminOrManusAuthProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     return db.select().from(printTemplates).orderBy(asc(printTemplates.position), asc(printTemplates.title));
@@ -60,7 +61,7 @@ export const printTemplatesRouter = router({
     return template ?? null;
   }),
 
-  create: adminProcedure.input(templateInput).mutation(async ({ input }) => {
+  create: adminOrManusAuthProcedure.input(templateInput).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     const [lastTemplate] = await db.select({ position: printTemplates.position }).from(printTemplates).orderBy(desc(printTemplates.position)).limit(1);
@@ -78,7 +79,7 @@ export const printTemplatesRouter = router({
     return { success: true, id: Number((result as any).insertId) } as const;
   }),
 
-  update: adminProcedure.input(templateUpdateInput).mutation(async ({ input }) => {
+  update: adminOrManusAuthProcedure.input(templateUpdateInput).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     await db.update(printTemplates).set({
@@ -95,7 +96,7 @@ export const printTemplatesRouter = router({
     return { success: true } as const;
   }),
 
-  reorder: adminProcedure.input(z.object({ ids: z.array(z.number().int().positive()).min(1).max(300) })).mutation(async ({ input }) => {
+  reorder: adminOrManusAuthProcedure.input(z.object({ ids: z.array(z.number().int().positive()).min(1).max(300) })).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     if (new Set(input.ids).size !== input.ids.length) throw new Error("Cada gabarito pode aparecer apenas uma vez na ordenação");
@@ -103,7 +104,7 @@ export const printTemplatesRouter = router({
     return { success: true } as const;
   }),
 
-  remove: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+  remove: adminOrManusAuthProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     await db.update(products).set({ templateId: null }).where(eq(products.templateId, input.id));
