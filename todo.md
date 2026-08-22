@@ -4163,3 +4163,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a linha de campos de medidas em Editar Produto
 - [x] Manter a ordem: Largura Mín, Altura Mín, Largura Máx e Altura Máx
 - [x] Validar TypeScript e a regressão dos dois formulários antes do checkpoint
+
+## Cabeçalho Fixo em Novo Produto
+- [x] Fixar título, status e ações no topo durante a rolagem da página Novo Produto
+- [x] Preservar os controles existentes e impedir sobreposição dos campos do formulário
+- [x] Validar o comportamento em desktop e mobile antes do checkpoint

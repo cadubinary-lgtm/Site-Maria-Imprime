@@ -482,12 +482,13 @@ export default function AdminNewProduct() {
     <AdminLayout>
       <div className="admin-visual-system min-h-full space-y-4 xl:space-y-5">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Novo Produto</h1>
-            <p className="text-sm text-gray-500 mt-1">Preencha os dados para criar um novo produto no catálogo</p>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Novo Produto</h1>
+              <p className="mt-1 text-sm text-gray-500">Preencha os dados para criar um novo produto no catálogo</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 xl:justify-end">
             {autoSaveState !== "idle" && (
               <span role="status" className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                 autoSaveState === "error" ? "bg-red-50 text-red-700" : autoSaveState === "waiting" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
@@ -514,6 +515,7 @@ export default function AdminNewProduct() {
             <Button variant="outline" onClick={() => navigate("/admin/produtos")}>
               ← Voltar para Produtos
             </Button>
+            </div>
           </div>
         </div>
 
