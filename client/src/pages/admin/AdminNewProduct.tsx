@@ -642,10 +642,11 @@ export default function AdminNewProduct() {
               )}
               <div className={EDIT_PRODUCT_MODAL_LAYOUT.secondary}>
                 <div className="space-y-4">
-                  {/* Fotos + Segmentos lado a lado */}
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
+                 {/* Fotos + Segmentos lado a lado */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-stretch">
                     {/* Upload de Fotos */}
                     <Card className={PRODUCT_FORM_PANEL.card}>
+                      {/* h-full para igualar altura ao card de Segmentos */}
                       <CardContent className="px-4">
                         {isDuplicatingDraft && !autoCreatedProductId && (
                           <div className="flex justify-end pb-2">
@@ -672,7 +673,7 @@ export default function AdminNewProduct() {
                       </CardContent>
                     </Card>
                     {/* Segmentos */}
-                    <Card className={`${PRODUCT_FORM_PANEL.card} self-start`}>
+                    <Card className={PRODUCT_FORM_PANEL.card}>
                       <CardContent className={PRODUCT_FORM_PANEL.content}>
                         <h3 className={PRODUCT_FORM_PANEL.title}>Segmentos</h3>
                         <MultiSegmentSelector
