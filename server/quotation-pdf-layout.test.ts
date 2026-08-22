@@ -20,4 +20,13 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain('class="art-image"');
     expect(source).toContain('.col-image { width:8%; }');
   });
+
+  it("organiza o cabeçalho com proposta, identificação e blocos de empresa e cliente", () => {
+    expect(source).toContain("Proposta comercial");
+    expect(source).toContain("Detalhamento de produtos, condições e valores preparados para sua aprovação.");
+    expect(source).toContain('class="header-details"');
+    expect(source).toContain('class="info-panel-title">Dados da Empresa');
+    expect(source).toContain('class="info-panel-title">Cliente');
+    expect(source).toContain("Identificação do orçamento");
+  });
 });
