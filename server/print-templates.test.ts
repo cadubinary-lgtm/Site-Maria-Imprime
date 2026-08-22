@@ -50,6 +50,8 @@ describe("Central de Gabaritos", () => {
     expect(sidebar).toContain('{ label: "Gabaritos", href: "/admin/configuracoes-site/gabaritos" }');
     expect(publicPage).toContain("Baixar gabarito");
     expect(adminPage).toContain("Adicionar gabarito");
+    expect(adminPage).toContain("Adicionar à biblioteca");
+    expect(adminPage).toContain('onClick={openNewTemplate}');
     expect(adminPage).toContain("AlertDialog");
     expect(adminPage).toContain('htmlFor="template-file-input"');
     expect(adminPage).toContain('id="template-file-input"');
