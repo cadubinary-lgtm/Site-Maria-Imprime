@@ -4084,3 +4084,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir a abertura do seletor de arquivos na janela de adicionar gabarito
 - [x] Validar o envio de arquivo e o feedback após a seleção
 - [x] Criar regressão e validar a correção técnica do upload
+
+## Correção da Biblioteca de Arquivos
+- [x] Corrigir a abertura do formulário de adicionar gabarito pela seção Biblioteca de arquivos
+- [x] Criar regressão para os dois gatilhos de adição de gabarito
