@@ -4267,3 +4267,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a conectividade sem alterar dados nem esquema
 - [x] Validar carregamento público e ausência de erros recentes
 - [x] Validar regressões e salvar checkpoint
+
+## Revisão das Edições Visuais do Cabeçalho de Orçamento
+- [x] Revisar a ampliação da logo e as cores solicitadas no cabeçalho
+- [x] Remover atributos duplicados e garantir JSX válido
+- [x] Preservar composição, leitura e versão de impressão
+- [x] Validar tela, regressões e salvar checkpoint
