@@ -4286,3 +4286,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar o último texto salvo ao cancelar ou não salvar
 - [x] Refletir o conteúdo salvo na tela e na impressão
 - [x] Validar fluxos, regressões e checkpoint
+
+## Consentimento de Cookies
+- [x] Mapear cookies e integrações opcionais atuais
+- [x] Adicionar banner público com aceitar, recusar e configurar
+- [x] Permitir escolher categorias de preferências e salvar a decisão
+- [x] Garantir que cookies essenciais permaneçam ativos e opcionais respeitem a escolha
+- [x] Adicionar acesso para revisar preferências após a decisão
+- [x] Validar fluxos, responsividade e checkpoint
