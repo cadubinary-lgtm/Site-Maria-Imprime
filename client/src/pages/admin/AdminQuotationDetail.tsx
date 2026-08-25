@@ -534,7 +534,7 @@ export default function AdminQuotationDetail() {
         </div>
         <div className="grid grid-cols-1 gap-2 border-t border-pink-100 bg-white p-3 lg:grid-cols-2">
           <section className="min-h-[170px] rounded-xl border border-gray-200 bg-white p-3">
-            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
+            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-black"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
             <div className="grid grid-cols-1 gap-x-5 gap-y-2 text-[12px] sm:grid-cols-2">
               <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
               {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
@@ -545,7 +545,7 @@ export default function AdminQuotationDetail() {
             </div>
           </section>
           <section className="min-h-[170px] rounded-xl border border-gray-200 bg-white p-3">
-            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
+            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-black"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
             <div className="grid grid-cols-1 gap-x-5 gap-y-2 text-[12px] sm:grid-cols-2">
               {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
               {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}

@@ -4273,3 +4273,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Remover atributos duplicados e garantir JSX válido
 - [x] Preservar composição, leitura e versão de impressão
 - [x] Validar tela, regressões e salvar checkpoint
+
+## Títulos Pretos nos Cartões do Cabeçalho de Orçamento
+- [x] Consolidar os títulos Dados da Empresa e Cliente em preto
+- [x] Preservar os pontos marcadores em rosa
+- [x] Validar tela, impressão e regressões antes do checkpoint
