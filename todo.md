@@ -4286,9 +4286,3 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar o último texto salvo ao cancelar ou não salvar
 - [x] Refletir o conteúdo salvo na tela e na impressão
 - [x] Validar fluxos, regressões e checkpoint
-
-## Margens do Resumo de Valores do Orçamento
-- [x] Consolidar as margens laterais internas do resumo de subtotal, frete e total
-- [x] Remover estilos duplicados adicionados pela edição visual
-- [x] Preservar valores, estrutura e versão de impressão
-- [x] Validar o resumo e regressões antes do checkpoint
