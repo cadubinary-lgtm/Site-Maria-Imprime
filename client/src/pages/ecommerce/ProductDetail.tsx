@@ -83,7 +83,7 @@ function AccordionStep({
         onClick={onToggle}
         className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
       >
-        <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
+        <div className={`w-3 h-3 rounded-full text-[7px] leading-none font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
           isCompleted ? 'bg-gray-200 text-gray-500' : 'text-white'
         }`}
           style={{ backgroundColor: isCompleted ? undefined : '#ec4899' }}
