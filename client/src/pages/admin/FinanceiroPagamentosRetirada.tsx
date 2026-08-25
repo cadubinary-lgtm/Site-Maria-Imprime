@@ -23,7 +23,7 @@ type StatusRetirada = "aguardando_producao" | "pronto_retirada" | "pago" | "reti
 const STATUS_CONFIG: Record<StatusRetirada, { label: string; color: string; icon: any }> = {
   aguardando_producao: { label: "Em Produção", color: "bg-blue-100 text-blue-700", icon: Clock },
   pronto_retirada: { label: "Pronto p/ Retirada", color: "bg-yellow-100 text-yellow-700", icon: Package },
-  pago: { label: "Pago", color: "bg-green-100 text-green-700", icon: CheckCircle },
+  pago: { label: "A Receber", color: "bg-green-100 text-green-700", icon: CheckCircle },
   retirado_cliente: { label: "Retirado (Cliente)", color: "bg-emerald-100 text-emerald-700", icon: User },
   retirado_terceiros: { label: "Retirado (Terceiros)", color: "bg-teal-100 text-teal-700", icon: Users },
 };
