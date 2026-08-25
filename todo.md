@@ -4250,3 +4250,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preservar legibilidade e todos os dados exibidos
 - [x] Aplicar a mesma compactação no PDF de impressão
 - [x] Validar visualmente e por regressão antes do checkpoint
+
+## Segunda Compactação do Cabeçalho para Impressão
+- [x] Reduzir novamente as alturas e os espaços verticais seguros
+- [x] Compactar cartões mantendo a leitura de todos os dados
+- [x] Replicar os novos espaçamentos no PDF
+- [x] Validar densidade visual e regressões antes do checkpoint

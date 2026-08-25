@@ -207,18 +207,18 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; }
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
-  .header { margin-bottom:8px; border:1px solid #edd7e5; border-radius:10px; overflow:hidden; }
-  .header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:70px; background:#fff; border-bottom:1px solid #f1e2eb; }
-  .brand { position:relative; display:flex; align-items:center; padding:8px 12px; }
-  .brand img { width:136px; height:48px; object-fit:contain; object-position:left center; display:block; }
-  .brand::after, .proposal-block::after { content:""; position:absolute; top:12px; bottom:12px; right:0; width:1px; background:#b9b9b9; }
-  .proposal-block { position:relative; display:flex; align-items:center; justify-content:center; padding:8px 12px; }
-  .proposal-block h1 { font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:#171717; }
-  .doc-info { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:8px 12px; text-align:right; }
+  .header { margin-bottom:6px; border:1px solid #edd7e5; border-radius:10px; overflow:hidden; }
+  .header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:64px; background:#fff; border-bottom:1px solid #f1e2eb; }
+  .brand { position:relative; display:flex; align-items:center; padding:6px 10px; }
+  .brand img { width:126px; height:44px; object-fit:contain; object-position:left center; display:block; }
+  .brand::after, .proposal-block::after { content:""; position:absolute; top:10px; bottom:10px; right:0; width:1px; background:#b9b9b9; }
+  .proposal-block { position:relative; display:flex; align-items:center; justify-content:center; padding:6px 10px; }
+  .proposal-block h1 { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:#171717; }
+  .doc-info { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:6px 10px; text-align:right; }
   .doc-info .doc-label { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#8f225e; }
   .doc-info .num { margin-top:2px; font-size:15px; font-weight:800; color:#171717; }
   .doc-info .date { font-size:8px; color:#666; margin-top:3px; white-space:nowrap; }
-  .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-top:4px; }
+  .status-badge { display:inline-block; padding:1px 7px; border-radius:10px; font-size:8px; font-weight:600; background:#e91e8c; color:#fff; margin-top:3px; }
   .section { margin-bottom:12px; }
   .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
   .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
@@ -239,11 +239,11 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .totals { margin-top:8px; border-top:2px solid #e0e0e0; padding-top:8px; }
   .total-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
   .total-row.grand { background:#e91e8c; color:#fff; padding:2px 10px; min-height:24px; border-radius:7px; margin-top:4px; font-size:13px; line-height:1.05; font-weight:700; }
-  .header-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:8px 10px 10px; }
-  .info-panel { min-height:120px; border:1px solid #e9e9ec; border-radius:8px; padding:8px 9px; }
-  .info-panel-title { display:flex; align-items:center; gap:5px; margin-bottom:5px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.09em; color:#8f225e; }
+  .header-details { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:6px 8px 8px; }
+  .info-panel { min-height:105px; border:1px solid #e9e9ec; border-radius:8px; padding:6px 8px; }
+  .info-panel-title { display:flex; align-items:center; gap:4px; margin-bottom:4px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.09em; color:#8f225e; }
   .info-panel-title::before { content:""; width:4px; height:4px; border-radius:999px; background:#e91e8c; }
-  .info-panel .info-grid { gap:3px 6px; }
+  .info-panel .info-grid { gap:2px 5px; }
   .info-panel .info-item label { font-size:8px; }
   .info-panel .info-item span { font-size:10px; }
   .whatsapp-icon { width:8px; height:8px; vertical-align:-1px; fill:#e91e8c; margin-right:2px; }
@@ -527,15 +527,15 @@ export default function AdminQuotationDetail() {
       </div>
       {/* Cabeçalho do documento — composição baseada na referência enviada */}
       <header className="overflow-hidden rounded-[22px] border border-pink-100 bg-white">
-        <div className="grid min-h-[142px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
-          <div className="relative flex items-center px-5 py-4"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-16 w-44 object-contain object-left" /><span aria-hidden="true" className="absolute inset-y-6 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
-          <div className="relative flex items-center justify-center border-y border-pink-100 px-5 py-4 text-center md:border-y-0"><h1 className="whitespace-nowrap text-base font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-lg">Proposta Comercial</h1><span aria-hidden="true" className="absolute inset-y-6 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
-          <div className="flex flex-col items-start justify-center px-5 py-4 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 whitespace-nowrap text-[clamp(0.95rem,1.1vw,1.25rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-1 whitespace-nowrap text-[clamp(0.65rem,0.75vw,0.78rem)] text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
+        <div className="grid min-h-[128px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
+          <div className="relative flex items-center px-4 py-3"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-14 w-40 object-contain object-left" /><span aria-hidden="true" className="absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
+          <div className="relative flex items-center justify-center border-y border-pink-100 px-4 py-3 text-center md:border-y-0"><h1 className="whitespace-nowrap text-[15px] font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-base">Proposta Comercial</h1><span aria-hidden="true" className="absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
+          <div className="flex flex-col items-start justify-center px-4 py-3 text-left md:items-end md:text-right"><p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-0.5 whitespace-nowrap text-[clamp(0.9rem,1vw,1.15rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-0.5 whitespace-nowrap text-[clamp(0.62rem,0.72vw,0.75rem)] text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
         </div>
-        <div className="grid grid-cols-1 gap-3 border-t border-pink-100 bg-white p-4 lg:grid-cols-2">
-          <section className="min-h-[190px] rounded-xl border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-2.5 text-[13px] sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 border-t border-pink-100 bg-white p-3 lg:grid-cols-2">
+          <section className="min-h-[170px] rounded-xl border border-gray-200 bg-white p-3">
+            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
+            <div className="grid grid-cols-1 gap-x-5 gap-y-2 text-[12px] sm:grid-cols-2">
               <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
               {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
               {company?.whatsappNumber && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{company.whatsappNumber}</span></div>}
@@ -544,9 +544,9 @@ export default function AdminQuotationDetail() {
               {q.responsibleName && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Responsável</span><span>{q.responsibleName}</span></div>}
             </div>
           </section>
-          <section className="min-h-[190px] rounded-xl border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-2.5 text-[13px] sm:grid-cols-2">
+          <section className="min-h-[170px] rounded-xl border border-gray-200 bg-white p-3">
+            <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
+            <div className="grid grid-cols-1 gap-x-5 gap-y-2 text-[12px] sm:grid-cols-2">
               {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
               {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
               {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
