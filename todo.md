@@ -4224,3 +4224,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Renovar a conexão do servidor sem alterar tabelas ou dados existentes
 - [x] Confirmar o carregamento de rodapé, carrossel, produtos, segmentos e empresa
 - [x] Validar TypeScript e regressões antes do checkpoint
+
+## Correção da Faixa de Ações do Orçamento
+- [x] Reposicionar Imprimir, WhatsApp, E-mail, Duplicar, Aprovar e Recusar no topo da tela
+- [x] Manter exatamente a composição de três colunas do cabeçalho de referência
+- [x] Preservar todas as lógicas e ocultar controles de ação no PDF
+- [x] Validar visualmente em tela, impressão e regressões antes do checkpoint
