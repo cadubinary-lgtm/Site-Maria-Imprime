@@ -37,4 +37,15 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain("md:border-r-2 md:border-gray-300");
     expect(source).toContain("min-h-[230px]");
   });
+
+  it("mantém a faixa de ações no topo da tela e fora da impressão", () => {
+    const detailStart = source.indexOf("return (");
+    const actionsIndex = source.indexOf("Imprimir PDF", detailStart);
+    const headerIndex = source.indexOf('<header className="overflow-hidden', detailStart);
+
+    expect(actionsIndex).toBeGreaterThan(detailStart);
+    expect(actionsIndex).toBeLessThan(headerIndex);
+    expect(source).toContain('className="no-print flex flex-wrap items-center gap-2 border-b');
+    expect(source).toContain('aria-label="Ações do orçamento"');
+  });
 });

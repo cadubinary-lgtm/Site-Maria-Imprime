@@ -453,40 +453,7 @@ export default function AdminQuotationDetail() {
   return (
     <AdminLayout>
     <div className="admin-visual-system p-6 max-w-5xl mx-auto space-y-6">
-      {/* Cabeçalho do documento — composição baseada na referência enviada */}
-      <header className="overflow-hidden rounded-2xl border border-pink-100 bg-white shadow-sm">
-        <div className="grid min-h-[160px] grid-cols-1 md:grid-cols-[minmax(220px,1fr)_minmax(280px,1.2fr)_minmax(260px,1fr)]">
-          <div className="flex items-center px-6 py-5 md:border-r-2 md:border-gray-300"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-20 w-48 object-contain object-left" /></div>
-          <div className="flex items-center justify-center border-y-2 border-gray-300 px-6 py-5 text-center md:border-y-0"><h1 className="whitespace-nowrap text-lg font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-xl">Proposta Comercial</h1></div>
-          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 text-xl font-extrabold text-gray-950">{q.quotationNumber}</p><p className="mt-1 text-sm text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
-        </div>
-        <div className="grid grid-cols-1 gap-5 border-t border-pink-100 bg-white p-5 lg:grid-cols-2">
-          <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2.5 w-2.5 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
-            <div className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
-              <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
-              {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
-              {company?.whatsappNumber && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{company.whatsappNumber}</span></div>}
-              {company?.supportEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{company.supportEmail}</span></div>}
-              {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span className="leading-relaxed">{formatCompanyAddress(company)}</span></div>}
-              {q.responsibleName && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Responsável</span><span>{q.responsibleName}</span></div>}
-            </div>
-          </section>
-          <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2.5 w-2.5 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
-            <div className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
-              {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
-              {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
-              {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
-              {(q.clientPhone || q.clientWhatsapp) && <div><span className="text-gray-400 text-xs block">Telefone / WhatsApp</span><span>{q.clientPhone || q.clientWhatsapp}</span></div>}
-              {(q.clientStreet || q.clientCity || q.clientZipCode) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span className="leading-relaxed">{[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/"), q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>}
-            </div>
-          </section>
-        </div>
-      </header>
-
-      {/* Ações administrativas, fora da composição impressa do cabeçalho */}
-      <div className="flex flex-wrap gap-2">
+      <div className="no-print flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3" aria-label="Ações do orçamento">
           <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
             <Printer className="w-3.5 h-3.5" aria-hidden="true" /> Imprimir PDF
           </Button>
@@ -556,6 +523,37 @@ export default function AdminQuotationDetail() {
             </Button>
           )}
       </div>
+      {/* Cabeçalho do documento — composição baseada na referência enviada */}
+      <header className="overflow-hidden rounded-2xl border border-pink-100 bg-white shadow-sm">
+        <div className="grid min-h-[160px] grid-cols-1 md:grid-cols-[minmax(220px,1fr)_minmax(280px,1.2fr)_minmax(260px,1fr)]">
+          <div className="flex items-center px-6 py-5 md:border-r-2 md:border-gray-300"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-20 w-48 object-contain object-left" /></div>
+          <div className="flex items-center justify-center border-y-2 border-gray-300 px-6 py-5 text-center md:border-y-0"><h1 className="whitespace-nowrap text-lg font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-xl">Proposta Comercial</h1></div>
+          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 text-xl font-extrabold text-gray-950">{q.quotationNumber}</p><p className="mt-1 text-sm text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
+        </div>
+        <div className="grid grid-cols-1 gap-5 border-t border-pink-100 bg-white p-5 lg:grid-cols-2">
+          <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2.5 w-2.5 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <div><span className="text-gray-400 text-xs block">Empresa</span><span className="font-medium">{company?.tradeName ?? "Maria Imprime"}</span>{company?.legalName && <span className="block text-xs text-gray-500">{company.legalName}</span>}</div>
+              {company?.cnpj && <div><span className="text-gray-400 text-xs block">CNPJ / Inscrição Estadual</span><span>{company.cnpj}</span>{company.stateRegistration && <span className="block text-xs text-gray-500">IE: {company.stateRegistration}</span>}</div>}
+              {company?.whatsappNumber && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{company.whatsappNumber}</span></div>}
+              {company?.supportEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{company.supportEmail}</span></div>}
+              {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span className="leading-relaxed">{formatCompanyAddress(company)}</span></div>}
+              {q.responsibleName && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Responsável</span><span>{q.responsibleName}</span></div>}
+            </div>
+          </section>
+          <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold uppercase tracking-[0.09em] text-pink-800"><span className="h-2.5 w-2.5 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              {q.clientName && <div><span className="text-gray-400 text-xs block">Nome / Razão Social</span><span className="font-medium">{q.clientName}</span></div>}
+              {q.clientEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{q.clientEmail}</span></div>}
+              {q.clientCpfCnpj && <div><span className="text-gray-400 text-xs block">CPF / CNPJ</span><span>{q.clientCpfCnpj}</span></div>}
+              {(q.clientPhone || q.clientWhatsapp) && <div><span className="text-gray-400 text-xs block">Telefone / WhatsApp</span><span>{q.clientPhone || q.clientWhatsapp}</span></div>}
+              {(q.clientStreet || q.clientCity || q.clientZipCode) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span className="leading-relaxed">{[q.clientStreet, q.clientNumber, q.clientComplement, q.clientNeighborhood, [q.clientCity, q.clientState].filter(Boolean).join("/"), q.clientZipCode ? `CEP ${q.clientZipCode}` : ""].filter(Boolean).join(", ")}</span></div>}
+            </div>
+          </section>
+        </div>
+      </header>
 
       <section className="bg-white rounded-lg border border-gray-200 p-3">
         <div className="flex items-center gap-2 mb-2"><Package className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Produtos / Serviços</h2></div>
