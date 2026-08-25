@@ -4230,3 +4230,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter exatamente a composição de três colunas do cabeçalho de referência
 - [x] Preservar todas as lógicas e ocultar controles de ação no PDF
 - [x] Validar visualmente em tela, impressão e regressões antes do checkpoint
+
+## Referência Definitiva do Cabeçalho de Orçamento
+- [x] Ajustar a altura e a largura visual da faixa superior à referência definitiva
+- [x] Ajustar as três colunas, divisórias e alinhamentos internos à referência
+- [x] Ajustar logo, título, identificação, datas e status nas proporções da referência
+- [x] Replicar as mesmas medidas no cabeçalho do PDF sem alterar a lógica
+- [x] Validar a equivalência visual antes do checkpoint

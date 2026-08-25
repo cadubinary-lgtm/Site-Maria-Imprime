@@ -30,11 +30,13 @@ describe("impressão de Orçamentos", () => {
   });
 
   it("mantém a composição de referência com três colunas, divisórias e respiro dos cartões", () => {
-    expect(source).toContain("grid-template-columns:30% 40% 30%");
+    expect(source).toContain("grid-template-columns:31% 38% 31%");
     expect(source).toContain('class="proposal-block"');
-    expect(source).toContain("border-left:2px solid #b9b9b9");
-    expect(source).toContain('className="grid min-h-[160px]');
-    expect(source).toContain("md:border-r-2 md:border-gray-300");
+    expect(source).toContain(".brand::after, .proposal-block::after");
+    expect(source).toContain("top:14px; bottom:14px");
+    expect(source).toContain('className="grid min-h-[160px] grid-cols-1 md:grid-cols-[31%_38%_31%]');
+    expect(source).toContain('absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9]');
+    expect(source).not.toContain("md:border-r-2 md:border-gray-300");
     expect(source).toContain("min-h-[230px]");
   });
 

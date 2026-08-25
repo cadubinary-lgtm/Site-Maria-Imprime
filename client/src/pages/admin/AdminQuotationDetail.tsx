@@ -208,16 +208,17 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
   .header { margin-bottom:10px; border:1px solid #edd7e5; border-radius:10px; overflow:hidden; }
-  .header-top { display:grid; grid-template-columns:30% 40% 30%; min-height:76px; background:#fff; border-bottom:1px solid #f1e2eb; }
-  .brand { display:flex; align-items:center; padding:10px 14px; }
+  .header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:76px; background:#fff; border-bottom:1px solid #f1e2eb; }
+  .brand { position:relative; display:flex; align-items:center; padding:10px 14px; }
   .brand img { width:150px; height:54px; object-fit:contain; object-position:left center; display:block; }
-  .proposal-block { display:flex; align-items:center; justify-content:center; padding:10px 14px; border-left:2px solid #b9b9b9; border-right:2px solid #b9b9b9; }
+  .brand::after, .proposal-block::after { content:""; position:absolute; top:14px; bottom:14px; right:0; width:1px; background:#b9b9b9; }
+  .proposal-block { position:relative; display:flex; align-items:center; justify-content:center; padding:10px 14px; }
   .proposal-block h1 { font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:#171717; }
   .doc-info { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:10px 14px; text-align:right; }
   .doc-info .doc-label { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#8f225e; }
   .doc-info .num { margin-top:2px; font-size:15px; font-weight:800; color:#171717; }
   .doc-info .date { font-size:9px; color:#666; margin-top:3px; }
-  .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-left:6px; vertical-align:middle; }
+  .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-top:5px; }
   .section { margin-bottom:12px; }
   .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
   .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
@@ -263,11 +264,12 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	    <div class="header-top">
 	      <div class="brand"><img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" /></div>
 	      <div class="proposal-block"><h1>Proposta Comercial</h1></div>
-	      <div class="doc-info">
-	        <div class="doc-label">Identificação do orçamento</div>
-	        <div class="num">${q.quotationNumber}<span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span></div>
-	        <div class="date">Emitido em ${fmtDate(q.createdAt)} · Válido até ${fmtDate(q.expiresAt)}</div>
-	      </div>
+        <div class="doc-info">
+          <div class="doc-label">Identificação do orçamento</div>
+          <div class="num">${q.quotationNumber}</div>
+          <div class="date">Emitido em ${fmtDate(q.createdAt)} · Válido até ${fmtDate(q.expiresAt)}</div>
+          <span class="status-badge">${STATUS_CONFIG[q.status]?.label ?? q.status}</span>
+        </div>
 	    </div>
 	    <div class="header-details">
 	      <section class="info-panel">
@@ -524,11 +526,11 @@ export default function AdminQuotationDetail() {
           )}
       </div>
       {/* Cabeçalho do documento — composição baseada na referência enviada */}
-      <header className="overflow-hidden rounded-2xl border border-pink-100 bg-white shadow-sm">
-        <div className="grid min-h-[160px] grid-cols-1 md:grid-cols-[minmax(220px,1fr)_minmax(280px,1.2fr)_minmax(260px,1fr)]">
-          <div className="flex items-center px-6 py-5 md:border-r-2 md:border-gray-300"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-20 w-48 object-contain object-left" /></div>
-          <div className="flex items-center justify-center border-y-2 border-gray-300 px-6 py-5 text-center md:border-y-0"><h1 className="whitespace-nowrap text-lg font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-xl">Proposta Comercial</h1></div>
-          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 text-xl font-extrabold text-gray-950">{q.quotationNumber}</p><p className="mt-1 text-sm text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
+      <header className="overflow-hidden rounded-[22px] border border-pink-100 bg-white">
+        <div className="grid min-h-[160px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
+          <div className="relative flex items-center px-6 py-5"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-20 w-48 object-contain object-left" /><span aria-hidden="true" className="absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
+          <div className="relative flex items-center justify-center border-y border-pink-100 px-6 py-5 text-center md:border-y-0"><h1 className="whitespace-nowrap text-lg font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-xl">Proposta Comercial</h1><span aria-hidden="true" className="absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
+          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 whitespace-nowrap text-[clamp(0.95rem,1.1vw,1.25rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-1 text-sm text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
         </div>
         <div className="grid grid-cols-1 gap-5 border-t border-pink-100 bg-white p-5 lg:grid-cols-2">
           <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">
