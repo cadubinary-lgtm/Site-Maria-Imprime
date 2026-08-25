@@ -61,6 +61,37 @@ const PAYMENT_LABELS: Record<string, string> = {
   transferencia: "Transferência",
 };
 
+const DEFAULT_QUOTATION_LEGAL_TERMS = `Início da produção: após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.
+
+Arte e aprovação: o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.
+
+Variação de cores: as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.
+
+Aceite do orçamento: ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.`;
+
+function resolveQuotationLegalTerms(legalTerms?: string | null) {
+  return legalTerms?.trim() || DEFAULT_QUOTATION_LEGAL_TERMS;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character] ?? character));
+}
+
+function formatLegalTermsForPrint(legalTerms: string) {
+  return legalTerms
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => {
+      const escaped = escapeHtml(paragraph.replace(/\s*\n\s*/g, " "));
+      const separatorIndex = escaped.indexOf(":");
+      return separatorIndex >= 0
+        ? `<p><strong>${escaped.slice(0, separatorIndex + 1)}</strong>${escaped.slice(separatorIndex + 1)}</p>`
+        : `<p>${escaped}</p>`;
+    })
+    .join("");
+}
+
 // ─── Mapa de tradução de chaves de especificação ─────────────────────────────
 const SPEC_LABELS: Record<string, string> = {
   width: "Largura (m)",
@@ -193,6 +224,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   const contactPhone = company?.whatsappNumber ?? company?.commercialPhone;
   const formattedContactPhone = formatBrazilPhone(contactPhone);
   const responsibleName = q.responsibleName?.trim() || responsible?.trim();
+  const legalTermsHtml = formatLegalTermsForPrint(resolveQuotationLegalTerms(q.legalTerms));
   const specs = (s: string) => buildSpecPairs(s)
     .map(({ label, value }) => `<div>${label ? `<span style="color:#777">${label}</span> ` : ""}<span>${value}</span></div>`)
     .join("");
@@ -352,10 +384,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	    </div>
 	  </div>
 	  <div class="legal-notes">
-	    <p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p>
-	    <p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após aprovação podem gerar novo prazo e/ou custos adicionais.</p>
-	    <p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p>
-	    <p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>
+	    ${legalTermsHtml}
 	  </div>
 	  ${q.commercialNotes ? `<div class="custom-notes"><strong>Observações / Termos personalizados:</strong><br>${q.commercialNotes}</div>` : ""}
 
@@ -383,6 +412,9 @@ export default function AdminQuotationDetail() {
 
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [showLegalTermsSaveConfirm, setShowLegalTermsSaveConfirm] = useState(false);
+  const [isEditingLegalTerms, setIsEditingLegalTerms] = useState(false);
+  const [legalTermsDraft, setLegalTermsDraft] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   const { data: quotation, isLoading, refetch } = trpc.quotations.getById.useQuery(
@@ -422,6 +454,22 @@ export default function AdminQuotationDetail() {
     onError: (error) => toast.error(error.message),
   });
 
+  const updateLegalTerms = trpc.quotations.update.useMutation({
+    onSuccess: async () => {
+      await refetch();
+      setShowLegalTermsSaveConfirm(false);
+      setIsEditingLegalTerms(false);
+      setLegalTermsDraft("");
+      toast.success("Condições do orçamento salvas.", {
+        description: "O texto atualizado será mantido na tela e na impressão.",
+        position: "top-right",
+        duration: 3500,
+        id: `quotation-legal-terms-${quotationId}`,
+      });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   if (isLoading) {
     return <AdminLayout><div className="p-8 text-center text-gray-400" role="status">Carregando orçamento...</div></AdminLayout>;
   }
@@ -434,6 +482,9 @@ export default function AdminQuotationDetail() {
   const isApproved = q.status === "aprovado";
   const isDraft = q.status === "rascunho";
   const isEditable = ["rascunho", "em_negociacao"].includes(q.status);
+  const canEditLegalTerms = ["rascunho", "enviado", "em_negociacao"].includes(q.status);
+  const currentLegalTerms = resolveQuotationLegalTerms(q.legalTerms);
+  const legalTermsParagraphs = currentLegalTerms.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const alreadyConverted = !!q.convertedOrderId;
   const shareQuotationOnWhatsapp = () => {
     const phone = q.clientWhatsapp || q.clientPhone;
@@ -587,7 +638,43 @@ export default function AdminQuotationDetail() {
         <section className="bg-white rounded-lg border border-gray-200 p-3"><div className="flex items-center gap-2 mb-2"><CreditCard className="w-4 h-4 text-pink-600" /><h2 className="font-semibold text-gray-800">Condições Comerciais</h2></div><div className="grid grid-cols-2 gap-2 text-sm"><div><span className="text-gray-400 text-xs block">Forma de pagamento</span><span>{PAYMENT_LABELS[q.paymentMethod ?? ""] ?? q.paymentMethod ?? ""}</span></div>{q.productionDeadline && <div><span className="text-gray-400 text-xs block">Prazo de produção</span><span>{q.productionDeadline} dias úteis</span></div>}{q.quotationValidity && <div><span className="text-gray-400 text-xs block">Validade</span><span>{q.quotationValidity} dias</span></div>}<div><span className="text-gray-400 text-xs block">Expira em</span><span>{fmtDate(q.expiresAt)}</span></div></div></section>
       </div>
 
-      <section className="pt-2 text-[11px] text-gray-600 leading-snug space-y-0.5"><p><strong>Início da produção:</strong> após aprovação da arte, confirmação do pagamento e disponibilidade dos materiais.</p><p><strong>Arte e aprovação:</strong> o cliente é responsável pela conferência de textos, imagens, medidas, cores e demais informações presentes na arte. Alterações após a aprovação podem gerar novo prazo e/ou custos adicionais.</p><p><strong>Variação de cores:</strong> as cores visualizadas em tela podem variar em relação ao resultado final impresso devido às diferenças entre monitores, arquivos e processos de impressão.</p><p><strong>Aceite do orçamento:</strong> ao aprovar este orçamento, o cliente declara concordar com produtos, quantidades, especificações, valores, prazos e condições comerciais apresentados.</p>{q.commercialNotes && <div className="mt-2 rounded border border-pink-100 bg-pink-50/40 px-3 py-2 whitespace-pre-line text-gray-700"><strong>Observações / Termos personalizados:</strong><br />{q.commercialNotes}</div>}</section>
+      <section id="quotation-legal-terms" className="pt-2 text-[11px] text-gray-600 leading-snug space-y-0.5" aria-label="Condições fixas do orçamento">
+        <div className="no-print mb-2 flex items-center justify-between gap-3">
+          <p className="text-xs font-semibold text-gray-700">Condições do orçamento</p>
+          {canEditLegalTerms && !isEditingLegalTerms && <Button type="button" variant="outline" size="sm" className="h-7 gap-1 border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => { setLegalTermsDraft(currentLegalTerms); setIsEditingLegalTerms(true); }}><Edit className="h-3.5 w-3.5" aria-hidden="true" />Editar condições</Button>}
+        </div>
+        {isEditingLegalTerms ? (
+          <div className="no-print rounded-lg border border-pink-200 bg-pink-50/40 p-3">
+            <label htmlFor="quotation-legal-terms" className="mb-2 block text-xs font-semibold text-gray-800">Condições exibidas na tela e na impressão</label>
+            <textarea id="quotation-legal-terms" value={legalTermsDraft} onChange={(event) => setLegalTermsDraft(event.target.value)} className="min-h-44 w-full resize-y rounded-md border border-pink-200 bg-white p-3 text-sm leading-6 text-gray-800 outline-none focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-100" aria-describedby="quotation-legal-terms-help" />
+            <p id="quotation-legal-terms-help" className="mt-2 text-xs text-gray-500">Use uma linha em branco para separar os parágrafos. As alterações só serão aplicadas após confirmação.</p>
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowLegalTermsSaveConfirm(true)}>Concluir edição</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-0.5">
+            {legalTermsParagraphs.map((paragraph, index) => {
+              const separatorIndex = paragraph.indexOf(":");
+              return <p key={`${index}-${paragraph.slice(0, 24)}`}>{separatorIndex >= 0 ? <><strong>{paragraph.slice(0, separatorIndex + 1)}</strong>{paragraph.slice(separatorIndex + 1)}</> : paragraph}</p>;
+            })}
+          </div>
+        )}
+        {q.commercialNotes && <div className="mt-2 rounded border border-pink-100 bg-pink-50/40 px-3 py-2 whitespace-pre-line text-gray-700"><strong>Observações / Termos personalizados:</strong><br />{q.commercialNotes}</div>}
+      </section>
+
+      <AlertDialog open={showLegalTermsSaveConfirm} onOpenChange={setShowLegalTermsSaveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Salvar alterações das condições?</AlertDialogTitle>
+            <AlertDialogDescription>Ao salvar, o novo texto ficará registrado neste orçamento e será usado tanto na tela quanto na impressão. Se não salvar, será mantido o último texto registrado.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateLegalTerms.isPending} onClick={() => { setLegalTermsDraft(currentLegalTerms); setIsEditingLegalTerms(false); }}>Não salvar</AlertDialogCancel>
+            <AlertDialogAction className="bg-pink-600 hover:bg-pink-700" disabled={updateLegalTerms.isPending || !legalTermsDraft.trim()} onClick={() => updateLegalTerms.mutate({ id: q.id, legalTerms: legalTermsDraft.trim() })} aria-busy={updateLegalTerms.isPending}>{updateLegalTerms.isPending ? "Salvando..." : "Salvar alterações"}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Modal de conversão */}
       <AlertDialog open={showConvertConfirm} onOpenChange={setShowConvertConfirm}>

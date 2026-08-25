@@ -4278,3 +4278,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Consolidar os títulos Dados da Empresa e Cliente em preto
 - [x] Preservar os pontos marcadores em rosa
 - [x] Validar tela, impressão e regressões antes do checkpoint
+
+## Edição Confirmada das Condições do Orçamento
+- [x] Manter as condições atuais como conteúdo padrão do orçamento
+- [x] Permitir edição controlada do bloco de condições na tela administrativa
+- [x] Exigir confirmação explícita para salvar alterações
+- [x] Restaurar o último texto salvo ao cancelar ou não salvar
+- [x] Refletir o conteúdo salvo na tela e na impressão
+- [x] Validar fluxos, regressões e checkpoint

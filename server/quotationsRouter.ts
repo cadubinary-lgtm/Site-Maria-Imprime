@@ -192,6 +192,7 @@ export const quotationsRouter = router({
           productionDeadline: quotations.productionDeadline,
           quotationValidity: quotations.quotationValidity,
           commercialNotes: quotations.commercialNotes,
+          legalTerms: quotations.legalTerms,
           itemsSnapshot: quotations.itemsSnapshot,
           convertedOrderId: quotations.convertedOrderId,
           operatorId: quotations.operatorId,
@@ -374,6 +375,7 @@ export const quotationsRouter = router({
       productionDeadline: z.number().optional(),
       quotationValidity: z.number().optional(),
       commercialNotes: z.string().optional(),
+      legalTerms: z.string().trim().min(1).max(12000).optional(),
       responsibleName: z.string().trim().min(1).max(150).optional(),
     }))
     .mutation(async ({ input }) => {
@@ -398,6 +400,7 @@ export const quotationsRouter = router({
         updates.expiresAt = new Date(Date.now() + input.quotationValidity * 24 * 60 * 60 * 1000);
       }
       if (input.commercialNotes !== undefined) updates.commercialNotes = input.commercialNotes;
+      if (input.legalTerms !== undefined) updates.legalTerms = input.legalTerms;
       if (input.responsibleName !== undefined) updates.responsibleName = input.responsibleName;
 
       if (input.items) {

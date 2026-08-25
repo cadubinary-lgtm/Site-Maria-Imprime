@@ -1886,6 +1886,7 @@ export const quotations = mysqlTable("quotations", {
   productionDeadline: int("productionDeadline").default(0), // Dias de produção
   quotationValidity: int("quotationValidity").default(30), // Dias de validade
   commercialNotes: longtext("commercialNotes"), // Observações comerciais
+  legalTerms: longtext("legalTerms"), // Condições padrão editáveis do orçamento
   
   // Snapshot JSON (preserva todas as configurações)
   itemsSnapshot: longtext("itemsSnapshot").notNull(), // JSON com array de itens
