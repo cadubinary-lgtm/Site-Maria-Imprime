@@ -50,4 +50,9 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain('className="no-print flex flex-wrap items-center gap-2 border-b');
     expect(source).toContain('aria-label="Ações do orçamento"');
   });
+
+  it("mantém emissão e validade em uma única linha na tela e na impressão", () => {
+    expect(source).toContain(".doc-info .date { font-size:8px; color:#666; margin-top:3px; white-space:nowrap; }");
+    expect(source).toContain('whitespace-nowrap text-[clamp(0.65rem,0.75vw,0.78rem)] text-gray-500');
+  });
 });

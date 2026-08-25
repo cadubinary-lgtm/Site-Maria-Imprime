@@ -217,7 +217,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   .doc-info { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:10px 14px; text-align:right; }
   .doc-info .doc-label { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#8f225e; }
   .doc-info .num { margin-top:2px; font-size:15px; font-weight:800; color:#171717; }
-  .doc-info .date { font-size:9px; color:#666; margin-top:3px; }
+  .doc-info .date { font-size:8px; color:#666; margin-top:3px; white-space:nowrap; }
   .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:600; background:#e91e8c; color:#fff; margin-top:5px; }
   .section { margin-bottom:12px; }
   .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#e91e8c; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #f0f0f0; }
@@ -530,7 +530,7 @@ export default function AdminQuotationDetail() {
         <div className="grid min-h-[160px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
           <div className="relative flex items-center px-6 py-5"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-20 w-48 object-contain object-left" /><span aria-hidden="true" className="absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
           <div className="relative flex items-center justify-center border-y border-pink-100 px-6 py-5 text-center md:border-y-0"><h1 className="whitespace-nowrap text-lg font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-xl">Proposta Comercial</h1><span aria-hidden="true" className="absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
-          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 whitespace-nowrap text-[clamp(0.95rem,1.1vw,1.25rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-1 text-sm text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
+          <div className="flex flex-col items-start justify-center px-6 py-5 text-left md:items-end md:text-right"><p className="text-xs font-extrabold uppercase tracking-[0.12em] text-pink-800">Identificação do Orçamento</p><p className="mt-1 whitespace-nowrap text-[clamp(0.95rem,1.1vw,1.25rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-1 whitespace-nowrap text-[clamp(0.65rem,0.75vw,0.78rem)] text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
         </div>
         <div className="grid grid-cols-1 gap-5 border-t border-pink-100 bg-white p-5 lg:grid-cols-2">
           <section className="min-h-[230px] rounded-xl border border-gray-200 bg-white p-5">

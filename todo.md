@@ -4237,3 +4237,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ajustar logo, título, identificação, datas e status nas proporções da referência
 - [x] Replicar as mesmas medidas no cabeçalho do PDF sem alterar a lógica
 - [x] Validar a equivalência visual antes do checkpoint
+
+## Linha Única de Datas no Cabeçalho de Orçamento
+- [x] Manter emissão e validade em uma única linha no cabeçalho da tela
+- [x] Ajustar a tipografia sem alterar o restante da composição
+- [x] Replicar a linha única no cabeçalho do PDF
+- [x] Validar visualmente e por regressão antes do checkpoint
