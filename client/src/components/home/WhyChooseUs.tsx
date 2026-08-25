@@ -13,8 +13,8 @@ export function WhyChooseUs() {
     },
     {
       id: 2,
-      title: "Entrega para todo o Brasil",
-      description: "com diversas opções de frete",
+      title: "Enviamos para diversas cidades do Brasil",
+      description: "Consulte o envio para a sua região",
       icon: (
         <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="#E6005C" strokeWidth="2" aria-hidden="true">
           <rect x="2" y="7" width="20" height="10" rx="2" />

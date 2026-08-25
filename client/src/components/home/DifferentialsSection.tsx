@@ -8,8 +8,8 @@ const DIFFERENTIALS = [
   },
   {
     icon: "🚚",
-    title: "Entrega para todo o Brasil",
-    description: "com diversas opções de frete",
+    title: "Enviamos para diversas cidades do Brasil",
+    description: "consulte o envio para a sua região",
   },
   {
     icon: "📋",

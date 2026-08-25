@@ -4302,3 +4302,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Usar a localização apenas nesta sessão para sugerir entrega e retirada
 - [x] Preservar a navegação normal quando a permissão for recusada
 - [x] Validar transparência, responsividade e regressões antes do checkpoint
+
+## Comunicação Regional de Entrega
+- [x] Localizar textos e metadados públicos que prometem entrega para todo o Brasil
+- [x] Substituir somente a mensagem por “Enviamos para diversas cidades do Brasil. Consulte o envio para a sua região.”
+- [x] Preservar integralmente estrutura, rotas, cálculos e lógica de frete
+- [x] Validar conteúdo indexável, regressões e checkpoint

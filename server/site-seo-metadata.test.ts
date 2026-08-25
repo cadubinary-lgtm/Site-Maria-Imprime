@@ -9,7 +9,11 @@ describe("metadados de SEO e compartilhamento", () => {
     const indexHtml = readFileSync(indexHtmlPath, "utf8");
 
     expect(indexHtml).toContain("<title>Maria Imprime | Gráfica Online: Adesivos, Banners e Mais</title>");
-    expect(indexHtml).toContain('name="description" content="Gráfica online para adesivos, banners, cartões de visita, fachadas e lonas. Orçamento rápido, produção própria e entrega para todo o Brasil."');
+    const regionalDeliveryCopy = "Enviamos para diversas cidades do Brasil. Consulte o envio para a sua região.";
+    expect(indexHtml).toContain(`name="description" content="Gráfica online para adesivos, banners, cartões de visita, fachadas e lonas. Orçamento rápido e produção própria. ${regionalDeliveryCopy}"`);
+    expect(indexHtml).toContain(`property="og:description" content="Gráfica online para adesivos, banners, cartões de visita, fachadas e lonas. Orçamento rápido e produção própria. ${regionalDeliveryCopy}"`);
+    expect(indexHtml).toContain(`name="twitter:description" content="Gráfica online para adesivos, banners, cartões de visita, fachadas e lonas. Orçamento rápido e produção própria. ${regionalDeliveryCopy}"`);
+    expect(indexHtml).not.toContain("entrega para todo o Brasil");
     expect(indexHtml).toContain('rel="canonical" href="https://mariaimprime.com.br/"');
     expect(indexHtml).toContain('name="robots" content="index, follow"');
   });

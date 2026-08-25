@@ -602,9 +602,9 @@ Não. O prazo de produção corresponde à fabricação. O transporte possui pra
 
 Quando a opção estiver disponível, o cliente poderá escolher a retirada durante o processo de compra.
 
-16. A Maria Imprime entrega em todo o Brasil?
+16. Para quais regiões a Maria Imprime envia?
 
-As regiões atendidas dependerão das modalidades de entrega disponíveis para cada pedido. As opções serão apresentadas durante a compra.
+Enviamos para diversas cidades do Brasil. Consulte o envio para a sua região. As modalidades disponíveis podem variar conforme o CEP e o pedido.
 
 17. Posso acompanhar meu pedido?
 
