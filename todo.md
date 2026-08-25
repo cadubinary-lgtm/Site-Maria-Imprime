@@ -4261,3 +4261,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir o ícone genérico de conversa pelo ícone oficial do WhatsApp
 - [x] Preservar tamanho, alinhamento, acessibilidade e link já configurado
 - [x] Validar o rodapé em tela antes do checkpoint
+
+## Restauração de Consultas Públicas da Homepage
+- [x] Diagnosticar a falha simultânea de companySettings, segmentos, rodapé, carrossel e produtos
+- [x] Restaurar a conectividade sem alterar dados nem esquema
+- [x] Validar carregamento público e ausência de erros recentes
+- [x] Validar regressões e salvar checkpoint
