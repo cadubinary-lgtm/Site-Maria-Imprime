@@ -10,6 +10,7 @@ import { getLoginUrl } from "./const";
 import Header from "@/components/layout/Header";
 import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton";
 import { CartSidePanel } from "./components/CartSidePanel";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { useCartDrawer } from "./contexts/CartDrawerContext";
 
 // ─── Páginas Públicas ────────────────────────────────────────────────────────
@@ -456,6 +457,7 @@ function AppLayout() {
           <Router />
         </div>
         <FloatingWhatsAppButton />
+        <CookieConsentBanner />
       </div>
       {/* Coluna do carrinho: 30% fixo quando aberto */}
       {isOpen && <CartSidePanel />}
