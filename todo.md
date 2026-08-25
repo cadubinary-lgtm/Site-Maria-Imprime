@@ -4337,3 +4337,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir a tag no Kanban e no acompanhamento do pedido
 - [x] Remover a tag em Pronto para Entrega, Pronto para Retirada, Entregue e Cancelado
 - [x] Validar transições e regressões sem alterar cálculos ou fluxos existentes
+
+## Correção de Atualização de Status de Produção
+- [x] Diagnosticar e corrigir a incompatibilidade do banco ao salvar Impresso
+- [x] Validar a atualização para Impresso e as regressões do fluxo de produção

@@ -6,6 +6,7 @@ const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8"
 const database = read("server/db.ts");
 const router = read("server/routers.ts");
 const schema = read("drizzle/schema.ts");
+const productionStatusMigration = read("drizzle/0074_expand_order_production_status.sql");
 const kanban = read("client/src/pages/admin/AdminKanban.tsx");
 const orderDetail = read("client/src/pages/admin/AdminOrderDetail.tsx");
 const productionScreen = read("client/src/pages/admin/AdminStatusProducao.tsx");
@@ -15,6 +16,12 @@ describe("tags e histórico de status de produção", () => {
     expect(schema).toContain('orderProductionStatusHistory = mysqlTable("orderProductionStatusHistory"');
     expect(database).toContain("recordProductionStatusHistory");
     expect(router).toContain("getProductionStatusHistory:");
+  });
+
+  it("mantém a coluna de produção compatível com todos os estágios operacionais", () => {
+    expect(productionStatusMigration).toContain("MODIFY COLUMN `productionStatus` varchar(50) NULL DEFAULT 'pendente'");
+    expect(productionStatusMigration).toContain("SET `productionStatus` = 'pendente'");
+    expect(productionStatusMigration).toContain("'pronto_entrega', 'pronto_retirada', 'entregue', 'cancelado'");
   });
 
   it("insere Pendente ao entrar em produção e encerra a tag nos estados finais", () => {
