@@ -38,6 +38,8 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain('absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9]');
     expect(source).not.toContain("md:border-r-2 md:border-gray-300");
     expect(source).toContain("min-h-[170px]");
+    expect(source).toContain('className="h-[79px] w-[221px] max-w-full object-contain object-left"');
+    expect(source).toContain('className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-black"');
   });
 
   it("mantém a faixa de ações no topo da tela e fora da impressão", () => {
