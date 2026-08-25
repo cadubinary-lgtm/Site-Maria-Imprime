@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,8 @@ export default function FinanceiroContasReceber() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [formaPagamento, setFormaPagamento] = useState<string>("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [pixDialog, setPixDialog] = useState<{ open: boolean; order: any | null }>({ open: false, order: null });
   const [selectedPayment, setSelectedPayment] = useState<"dinheiro" | "pix" | "cartao_credito" | "cartao_debito" | "transferencia">("pix");
@@ -75,12 +77,15 @@ export default function FinanceiroContasReceber() {
   const canPermanentlyDeleteReceivable = adminUser?.role === "superadmin";
   const utils = trpc.useUtils();
 
-  const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery({
+  const queryInput = useMemo(() => ({
     page,
     limit: 20,
-    search: search || undefined,
+    search: search.trim() || undefined,
     formaPagamento: formaPagamento || undefined,
-  });
+    startDate: startDate ? new Date(`${startDate}T00:00:00`).getTime() : undefined,
+    endDate: endDate ? new Date(`${endDate}T23:59:59.999`).getTime() : undefined,
+  }), [page, search, formaPagamento, startDate, endDate]);
+  const { data, isLoading, refetch } = trpc.financeiro.getContasReceber.useQuery(queryInput);
   const { data: receiptPdfData, isLoading: isLoadingReceiptPdf } = trpc.financeiro.getRecibo.useQuery(
     { receiptId: receiptActionDialog.receiptId || 0 },
     { enabled: receiptActionDialog.open && Boolean(receiptActionDialog.receiptId) },
@@ -192,6 +197,15 @@ export default function FinanceiroContasReceber() {
     setPage(1);
   };
 
+  const clearFilters = () => {
+    setSearch("");
+    setSearchInput("");
+    setFormaPagamento("");
+    setStartDate("");
+    setEndDate("");
+    setPage(1);
+  };
+
   const downloadReceiptPdf = async () => {
     if (!receiptPdfData?.receipt) return;
     try {
@@ -232,7 +246,7 @@ export default function FinanceiroContasReceber() {
       {/* Filtros */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <div className="flex gap-2 flex-1 min-w-[200px]">
               <Input
                 aria-label="Buscar contas a receber"
@@ -240,14 +254,22 @@ export default function FinanceiroContasReceber() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="flex-1"
+                className="h-9 flex-1"
               />
               <Button type="button" onClick={handleSearch} size="sm" className="bg-pink-600 hover:bg-pink-700" aria-label="Aplicar busca de contas a receber">
                 <Search className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
+            <label className="grid gap-1 text-xs font-medium text-gray-600">
+              Data inicial
+              <Input id="receivable-start-date" type="date" value={startDate} onChange={(event) => { setStartDate(event.target.value); setPage(1); }} className="h-9" />
+            </label>
+            <label className="grid gap-1 text-xs font-medium text-gray-600">
+              Data final
+              <Input id="receivable-end-date" type="date" value={endDate} onChange={(event) => { setEndDate(event.target.value); setPage(1); }} className="h-9" />
+            </label>
             <Select value={formaPagamento} onValueChange={(v) => { setFormaPagamento(v === "todos" ? "" : v); setPage(1); }}>
-              <SelectTrigger className="w-48" aria-label="Filtrar por forma de pagamento">
+              <SelectTrigger className="h-9 w-48" aria-label="Filtrar por forma de pagamento">
                 <SelectValue placeholder="Forma de Pagamento" />
               </SelectTrigger>
               <SelectContent>
@@ -257,6 +279,7 @@ export default function FinanceiroContasReceber() {
                 ))}
               </SelectContent>
             </Select>
+            {(search || searchInput || startDate || endDate || formaPagamento) && <Button type="button" variant="ghost" size="sm" className="h-9 text-pink-700 hover:bg-pink-50 hover:text-pink-800" onClick={clearFilters}>Limpar filtros</Button>}
           </div>
         </CardContent>
       </Card>

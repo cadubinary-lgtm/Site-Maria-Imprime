@@ -4341,3 +4341,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Correção de Atualização de Status de Produção
 - [x] Diagnosticar e corrigir a incompatibilidade do banco ao salvar Impresso
 - [x] Validar a atualização para Impresso e as regressões do fluxo de produção
+
+## Filtro de Data em Contas a Receber
+- [x] Localizar o padrão de data usado em Contas Recebidas e a lista de Contas a Receber
+- [x] Adicionar filtros de data inicial e final sem alterar busca, pagamento ou ações existentes
+- [x] Validar filtragem por período, responsividade e regressões financeiras
