@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,15 +14,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link, useSearch } from "wouter";
-import { Search, ChevronRight, Printer, Loader2 } from "lucide-react";
+import { Search, ChevronRight, Printer, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductionQuickDetailsDialog } from "@/components/admin/ProductionQuickDetailsDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const PRODUCTION_STATUS: Record<string, { label: string; color: string }> = {
   pendente:               { label: "Pendente",               color: "bg-gray-100 text-gray-800 border-gray-200" },
   impresso:               { label: "Impresso",               color: "bg-blue-100 text-blue-800 border-blue-200" },
   acabamento_finalizado:  { label: "Acabamento Finalizado",  color: "bg-green-100 text-green-800 border-green-200" },
+  encerrado:              { label: "Encerrado",              color: "bg-slate-100 text-slate-700 border-slate-200" },
 };
+
+const normalizeProductionStatus = (status?: string | null) =>
+  status === "pending" ? "pendente" : status || "pendente";
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   pagamento_aprovado: "Pagamento Aprovado",
@@ -47,6 +53,9 @@ export default function AdminStatusProducao() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>(urlStatus);
   const [quickDetailsStatus, setQuickDetailsStatus] = useState<string | null>(null);
+  const [historyEntryToDelete, setHistoryEntryToDelete] = useState<any | null>(null);
+  const { adminUser } = useAdminAuth();
+  const canDeleteHistory = adminUser?.role === "admin" || adminUser?.role === "superadmin";
 
   useEffect(() => {
     const s = new URLSearchParams(searchStr).get("status") || "todos";
@@ -55,20 +64,32 @@ export default function AdminStatusProducao() {
   const utils = trpc.useUtils();
 
   const { data: allOrders = [], isLoading } = trpc.checkout.getAllOrders.useQuery();
+  const { data: productionHistory = [], isLoading: isLoadingHistory } = trpc.admin.getProductionStatusHistory.useQuery();
 
   const updateProductionMutation = trpc.admin.updateProductionStatus.useMutation({
-    onSuccess: (_data, variables) => {
+    onSuccess: async (_data, variables) => {
       toast.success(variables.productionStatus === "acabamento_finalizado" ? "Produção finalizada: pedido encaminhado para retirada ou entrega." : "Status de produção atualizado!");
-      utils.checkout.getAllOrders.invalidate();
+      await Promise.all([
+        utils.checkout.getAllOrders.invalidate(),
+        utils.admin.getProductionStatusHistory.invalidate(),
+      ]);
     },
     onError: (err) => toast.error(err.message || "Erro ao atualizar status"),
+  });
+  const deleteProductionHistoryMutation = trpc.admin.deleteProductionStatusHistory.useMutation({
+    onSuccess: async () => {
+      toast.success("Registro removido do Histórico de Status de Produção.");
+      setHistoryEntryToDelete(null);
+      await utils.admin.getProductionStatusHistory.invalidate();
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível excluir o registro histórico."),
   });
 
   const filtered = useMemo(() => {
     return (allOrders as any[])
       .filter((o) => {
         if (o.status !== "em_producao") return false;
-        const matchStatus = filterStatus === "todos" || (o.productionStatus || "pendente") === filterStatus;
+        const matchStatus = filterStatus === "todos" || normalizeProductionStatus(o.productionStatus) === filterStatus;
         const matchSearch =
           !search ||
           o.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
@@ -86,9 +107,9 @@ export default function AdminStatusProducao() {
   const productionOrdersByStatus = useMemo(() => {
     const activeOrders = (allOrders as any[]).filter((o) => o.status === "em_producao");
     return {
-      pendente: activeOrders.filter((o) => (o.productionStatus || "pendente") === "pendente"),
-      impresso: activeOrders.filter((o) => o.productionStatus === "impresso"),
-      acabamento_finalizado: activeOrders.filter((o) => o.productionStatus === "acabamento_finalizado"),
+      pendente: activeOrders.filter((o) => normalizeProductionStatus(o.productionStatus) === "pendente"),
+      impresso: activeOrders.filter((o) => normalizeProductionStatus(o.productionStatus) === "impresso"),
+      acabamento_finalizado: activeOrders.filter((o) => normalizeProductionStatus(o.productionStatus) === "acabamento_finalizado"),
     } as Record<string, any[]>;
   }, [allOrders]);
 
@@ -179,7 +200,7 @@ export default function AdminStatusProducao() {
         ) : (
           <div className="space-y-3">
             {filtered.map((order: any) => {
-              const currentProdStatus = order.productionStatus || "pendente";
+              const currentProdStatus = normalizeProductionStatus(order.productionStatus);
               const statusCfg = PRODUCTION_STATUS[currentProdStatus];
               return (
                 <Card key={order.orderId ?? order.id} className="hover:shadow-md transition-shadow">
@@ -249,10 +270,24 @@ export default function AdminStatusProducao() {
         <Card>
           <CardContent className="pt-5 pb-5">
             <h2 className="text-base font-semibold text-gray-900">Histórico de Status de Produção</h2>
-            <p className="mt-1 text-sm text-gray-500">Pedidos que concluíram acabamento e seguiram para retirada ou entrega.</p>
-            {history.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma produção finalizada registrada.</p> : <div className="mt-4 space-y-2" aria-live="polite">{history.map((order: any) => <div key={`history-${order.orderId ?? order.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-sm"><span className="font-medium">#{order.orderNumber} · {order.deliveryFullName}</span><Badge className="bg-green-100 text-green-700">{ORDER_STATUS_LABEL[order.status]}</Badge></div>)}</div>}
+            <p className="mt-1 text-sm text-gray-500">Todas as mudanças de estágio, incluindo a retirada automática da tag nos estados finais.</p>
+            {isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-pink-600" /></div> : productionHistory.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma alteração de produção registrada.</p> : <div className="mt-4 space-y-2" aria-live="polite">{productionHistory.map((entry: any) => { const statusCfg = PRODUCTION_STATUS[entry.newStatus] ?? PRODUCTION_STATUS.encerrado; return <div key={`production-history-${entry.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="font-medium">#{entry.orderNumber ?? entry.orderId} · {entry.deliveryFullName || "Cliente não informado"}</span><Badge className={`border ${statusCfg.color}`}>{statusCfg.label}</Badge></div><p className="mt-1 text-xs text-gray-500">{fmtDate(entry.createdAt)} às {fmtTime(entry.createdAt)}{entry.changedByName ? ` · ${entry.changedByName}` : ""}</p>{entry.notes && <p className="mt-1 text-xs text-gray-600">{entry.notes}</p>}</div>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title="Excluir registro do histórico" aria-label={`Excluir registro de produção do pedido ${entry.orderNumber ?? entry.orderId}`} onClick={() => setHistoryEntryToDelete(entry)}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}</div>; })}</div>}
           </CardContent>
         </Card>
+        <AlertDialog open={Boolean(historyEntryToDelete)} onOpenChange={(open) => !open && setHistoryEntryToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir este registro do Histórico de Status de Produção?</AlertDialogTitle>
+              <AlertDialogDescription>Esta exclusão remove somente o evento selecionado do histórico e não altera o status atual do pedido.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteProductionHistoryMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" disabled={deleteProductionHistoryMutation.isPending} onClick={(event) => { event.preventDefault(); if (historyEntryToDelete?.id) deleteProductionHistoryMutation.mutate({ id: historyEntryToDelete.id }); }}>
+                {deleteProductionHistoryMutation.isPending ? "Excluindo..." : "Excluir registro"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <ProductionQuickDetailsDialog
           open={Boolean(quickDetailsStatus)}
           onOpenChange={(open) => !open && setQuickDetailsStatus(null)}

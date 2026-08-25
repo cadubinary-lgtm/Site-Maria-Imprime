@@ -25,6 +25,7 @@ import {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  recordProductionStatusHistory,
   createOrder,
   getDb,
   getAllSegments,
@@ -75,9 +76,9 @@ import {
   getEmailHistoryByOrderItem,
   addEmailToHistory,
 } from "./db";
-import { inArray } from "drizzle-orm";
+import { desc, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { products, orders, orderItems, segments } from "../drizzle/schema";
+import { products, orders, orderItems, orderProductionStatusHistory, segments } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { crmRouter } from "./routers-crm";
 import { customerAuthRouter } from "./routers/customerAuth";
@@ -461,8 +462,12 @@ export const appRouter = router({
         newStatus: z.enum(["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]),
         notes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
-        return await updateOrderStatus(input.orderId, input.newStatus, input.notes);
+      .mutation(async ({ input, ctx }) => {
+        const adminUser = (ctx as any).adminUser;
+        return await updateOrderStatus(input.orderId, input.newStatus, input.notes, {
+          id: adminUser?.adminId ?? adminUser?.id,
+          name: adminUser?.name,
+        });
       }),
     updatePreProductionStatus: adminAnyProcedure
       .input(z.object({
@@ -503,8 +508,15 @@ export const appRouter = router({
           .where(eq(orderItemsT.orderId, input.orderId));
         if (allItemsOfOrder.length === 1) {
           await db.update(ordersT)
-            .set({ status: "em_producao" } as any)
+            .set({ status: "em_producao", productionStatus: "pendente" } as any)
             .where(eq(ordersT.id, input.orderId));
+          await recordProductionStatusHistory(
+            input.orderId,
+            null,
+            "pendente",
+            { id: (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id, name: (ctx as any).adminUser?.name },
+            "Entrada automática no Status de Produção ao iniciar Em Produção.",
+          );
         }
         // 3. Registrar log de auditoria
         try {
@@ -531,15 +543,32 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orders: ordersT, orderItems: orderItemsT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
+        const [order] = await db.select({ productionStatus: ordersT.productionStatus, shippingMethod: ordersT.shippingMethod }).from(ordersT).where(eq(ordersT.id, input.orderId)).limit(1);
+        const previousProductionStatus = order?.productionStatus ?? "pendente";
         await db.update(ordersT)
           .set({ productionStatus: input.productionStatus } as any)
           .where(eq(ordersT.id, input.orderId));
-        const [order] = await db.select({ shippingMethod: ordersT.shippingMethod }).from(ordersT).where(eq(ordersT.id, input.orderId)).limit(1);
+        if (previousProductionStatus !== input.productionStatus) {
+          await recordProductionStatusHistory(
+            input.orderId,
+            previousProductionStatus,
+            input.productionStatus,
+            { id: (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id, name: (ctx as any).adminUser?.name },
+            `Status de Produção atualizado para ${input.productionStatus}.`,
+          );
+        }
         const [firstItem] = await db.select({ id: orderItemsT.id }).from(orderItemsT).where(eq(orderItemsT.orderId, input.orderId)).limit(1);
         const isPickup = String(order?.shippingMethod ?? "").toLowerCase().includes("retirada") || String(order?.shippingMethod ?? "").toLowerCase().includes("pickup");
         const finalStatus = isPickup ? "pronto_retirada" : "pronto_entrega";
         if (input.productionStatus === "acabamento_finalizado") {
-          await db.update(ordersT).set({ status: finalStatus } as any).where(eq(ordersT.id, input.orderId));
+          await db.update(ordersT).set({ status: finalStatus, productionStatus: null } as any).where(eq(ordersT.id, input.orderId));
+          await recordProductionStatusHistory(
+            input.orderId,
+            input.productionStatus,
+            "encerrado",
+            { id: (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id, name: (ctx as any).adminUser?.name },
+            `Status de Produção removido ao encaminhar para ${isPickup ? "Pronto para Retirada" : "Pronto para Entrega"}.`,
+          );
         }
         if (firstItem) {
           await db.insert(orderItemLogsT).values({
@@ -552,6 +581,45 @@ export const appRouter = router({
             createdAt: Date.now(),
           } as any);
         }
+        return { success: true };
+      }),
+    getProductionStatusHistory: adminAnyProcedure
+      .input(z.object({ orderId: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        const fields = {
+          id: orderProductionStatusHistory.id,
+          orderId: orderProductionStatusHistory.orderId,
+          previousStatus: orderProductionStatusHistory.previousStatus,
+          newStatus: orderProductionStatusHistory.newStatus,
+          changedBy: orderProductionStatusHistory.changedBy,
+          changedByName: orderProductionStatusHistory.changedByName,
+          notes: orderProductionStatusHistory.notes,
+          createdAt: orderProductionStatusHistory.createdAt,
+          orderNumber: orders.orderNumber,
+          deliveryFullName: orders.deliveryFullName,
+        };
+        const query = db.select(fields)
+          .from(orderProductionStatusHistory)
+          .leftJoin(orders, eq(orderProductionStatusHistory.orderId, orders.id));
+        if (input?.orderId) {
+          return query.where(eq(orderProductionStatusHistory.orderId, input.orderId)).orderBy(desc(orderProductionStatusHistory.createdAt));
+        }
+        return query.orderBy(desc(orderProductionStatusHistory.createdAt)).limit(200);
+      }),
+    deleteProductionStatusHistory: adminAnyProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const adminUser = (ctx as any).adminUser;
+        if (!adminUser || !["admin", "superadmin"].includes(adminUser.role)) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Admin ou Super Admin podem excluir registros do Histórico de Status de Produção." });
+        }
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        const [entry] = await db.select({ id: orderProductionStatusHistory.id }).from(orderProductionStatusHistory).where(eq(orderProductionStatusHistory.id, input.id)).limit(1);
+        if (!entry) throw new TRPCError({ code: "NOT_FOUND", message: "Registro do Histórico de Status de Produção não encontrado." });
+        await db.delete(orderProductionStatusHistory).where(eq(orderProductionStatusHistory.id, input.id));
         return { success: true };
       }),
     updateProduct: adminAnyProcedure
@@ -2374,7 +2442,7 @@ export const appRouter = router({
      */
     sendToProduction: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems, orders } = await import("../drizzle/schema.js");
@@ -2407,8 +2475,15 @@ export const appRouter = router({
           .where(eq(orderItems.orderId, input.orderId));
 
         await db.update(orders)
-          .set({ status: "em_producao" } as any)
+          .set({ status: "em_producao", productionStatus: "pendente" } as any)
           .where(eq(orders.id, input.orderId));
+        await recordProductionStatusHistory(
+          input.orderId,
+          null,
+          "pendente",
+          { id: (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id, name: (ctx as any).adminUser?.name },
+          "Entrada automática no Status de Produção ao enviar o pedido para produção.",
+        );
 
         return { success: true };
       }),

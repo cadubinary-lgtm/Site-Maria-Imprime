@@ -20,7 +20,7 @@ describe("alertas e detalhes rápidos da Linha de Produção", () => {
     const prePrint = readFileSync(prePrintPath, "utf8");
     const production = readFileSync(productionPath, "utf8");
 
-    expect(prePrint).toContain('onClick={() => setQuickDetailsStatus(s)}');
+    expect(prePrint).toContain('onClick={() => setQuickDetailsStatus(status)}');
     expect(prePrint).toContain("<ProductionQuickDetailsDialog");
     expect(production).toContain('onClick={() => setQuickDetailsStatus(s)}');
     expect(production).toContain("<ProductionQuickDetailsDialog");
@@ -38,10 +38,10 @@ describe("alertas e detalhes rápidos da Linha de Produção", () => {
     const prePrint = readFileSync(prePrintPath, "utf8");
     const production = readFileSync(productionPath, "utf8");
 
-    for (const source of [prePrint, production]) {
-      expect(source).toContain('new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })');
-      expect(source).toContain("{fmtTime(order.createdAt)} • {fmtDate(order.createdAt)}");
-      expect(source).not.toContain("fmt(Number(order.totalAmount ?? order.totalPrice ?? 0))");
-    }
+    expect(prePrint).toContain('new Date(date).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })');
+    expect(production).toContain('new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })');
+    for (const source of [prePrint, production]) expect(source).not.toContain("fmt(Number(order.totalAmount ?? order.totalPrice ?? 0))");
+    expect(prePrint).toContain("criado em {fmtDate(order.createdAt)} às {fmtTime(order.createdAt)}");
+    expect(production).toContain("{fmtTime(order.createdAt)} • {fmtDate(order.createdAt)}");
   });
 });

@@ -33,6 +33,7 @@ type Order = {
   id: number;
   orderNumber: string;
   status: string;
+  productionStatus?: string | null;
   totalPrice: string | number;
   createdAt: string | number | Date;
   clientId?: number;
@@ -43,6 +44,12 @@ type Order = {
 };
 
 type ArtState = "waiting" | "approved" | "refused" | "none";
+
+const PRODUCTION_TAGS: Record<string, { label: string; className: string }> = {
+  pendente: { label: "Produção: Pendente", className: "border-gray-200 bg-gray-100 text-gray-700" },
+  impresso: { label: "Produção: Impresso", className: "border-blue-200 bg-blue-50 text-blue-700" },
+  acabamento_finalizado: { label: "Produção: Acabamento Finalizado", className: "border-green-200 bg-green-50 text-green-700" },
+};
 
 // ─── Tag visual de estado da arte ────────────────────────────────────────────
 function ArtStateTag({ state }: { state: ArtState }) {
@@ -128,6 +135,11 @@ function KanbanCard({ order, artState, onAdvance, isUpdating, onDragStart, onDra
       )}
 
       {artState !== "none" && <ArtStateTag state={artState} />}
+
+      {order.status === "em_producao" && (() => {
+        const productionTag = PRODUCTION_TAGS[order.productionStatus === "pending" ? "pendente" : order.productionStatus || "pendente"];
+        return productionTag ? <span className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${productionTag.className}`}>{productionTag.label}</span> : null;
+      })()}
 
       {/* Linha 4: Link Ver pedido + Drag Handle */}
       <div className="flex items-center justify-between">

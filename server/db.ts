@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import * as schema from "../drizzle/schema";
-import { InsertUser, users, products, orders, orderItems, orderStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks, customerAccounts } from "../drizzle/schema";
+import { InsertUser, users, products, orders, orderItems, orderStatusHistory, orderProductionStatusHistory, segments, categories, productCategories, variationTypes, variationOptions, orderItemVariations, fileChecks, customerAccounts } from "../drizzle/schema";
 import { productSegments } from "../drizzle/schema";
 import type { InsertVariationType, InsertVariationOption, InsertOrderItemVariation, InsertFileCheck } from "../drizzle/schema";
 import type { InsertOrder } from "../drizzle/schema";
@@ -353,16 +353,52 @@ export async function createOrder(order: InsertOrder) {
   return result;
 }
 
-export async function updateOrderStatus(orderId: number, status: string, notes?: string) {
+type ProductionHistoryActor = { id?: number | null; name?: string | null };
+
+export const PRODUCTION_TERMINAL_ORDER_STATUSES = new Set([
+  "pronto_entrega",
+  "pronto_retirada",
+  "entregue",
+  "cancelado",
+]);
+
+export async function recordProductionStatusHistory(
+  orderId: number,
+  previousStatus: string | null,
+  newStatus: string,
+  actor?: ProductionHistoryActor,
+  notes?: string,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(orderProductionStatusHistory).values({
+    orderId,
+    previousStatus,
+    newStatus,
+    changedBy: actor?.id ?? null,
+    changedByName: actor?.name ?? "Sistema",
+    notes: notes ?? null,
+  } as any);
+}
+
+export async function updateOrderStatus(orderId: number, status: string, notes?: string, actor?: ProductionHistoryActor) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   // Buscar status atual + dados do pedido para notificação
   const currentOrderRows = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
   const currentOrder = currentOrderRows[0] ?? null;
   const previousStatus = currentOrder?.status ?? null;
+  const enteredProduction = status === "em_producao" && previousStatus !== "em_producao";
+  const exitedProduction = Boolean(previousStatus === "em_producao" && PRODUCTION_TERMINAL_ORDER_STATUSES.has(status));
   // Atualizar status do pedido
   await db.update(orders)
-    .set({ status: status as any, updatedAt: new Date() })
+    .set({
+      status: status as any,
+      ...(enteredProduction ? { productionStatus: "pendente" } : {}),
+      ...(exitedProduction ? { productionStatus: null } : {}),
+      updatedAt: new Date(),
+    } as any)
     .where(eq(orders.id, orderId));
   // Registrar no histórico
   await db.insert(orderStatusHistory).values({
@@ -371,6 +407,23 @@ export async function updateOrderStatus(orderId: number, status: string, notes?:
     newStatus: status as any,
     notes: notes ?? `Status alterado para ${status}`,
   });
+  if (enteredProduction) {
+    await recordProductionStatusHistory(
+      orderId,
+      null,
+      "pendente",
+      actor,
+      "Entrada automática no Status de Produção ao iniciar Em Produção.",
+    );
+  } else if (exitedProduction) {
+    await recordProductionStatusHistory(
+      orderId,
+      (currentOrder as any)?.productionStatus ?? "pendente",
+      "encerrado",
+      actor,
+      `Status de Produção removido ao mudar o pedido para ${status}.`,
+    );
+  }
   // Enviar notificação por e-mail ao cliente (não bloqueia o fluxo)
   if (currentOrder) {
     try {

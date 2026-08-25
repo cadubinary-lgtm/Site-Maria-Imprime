@@ -94,6 +94,13 @@ const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
   label: `${cfg.icon} ${cfg.label}`,
 }));
 
+const PRODUCTION_TAGS: Record<string, { label: string; className: string }> = {
+  pendente: { label: "Pendente", className: "border-gray-200 bg-gray-100 text-gray-700" },
+  impresso: { label: "Impresso", className: "border-blue-200 bg-blue-50 text-blue-700" },
+  acabamento_finalizado: { label: "Acabamento Finalizado", className: "border-green-200 bg-green-50 text-green-700" },
+  encerrado: { label: "Encerrado", className: "border-slate-200 bg-slate-50 text-slate-600" },
+};
+
 const PRE_PRODUCTION_OPTIONS = [
   { value: "aguardando_liberacao_comercial", label: "Aguardando Liberação Comercial", icon: Clock, color: "bg-gray-100 text-gray-500" },
   { value: "liberado_analise",              label: "Liberado para Análise",          icon: Clock,       color: "bg-yellow-100 text-yellow-700" },
@@ -1072,6 +1079,9 @@ export function OrderDetailContent({
   const { data: history, isLoading: histLoading } = trpc.checkout.getOrderHistory.useQuery(
     { orderId: orderId! }, { enabled: !!orderId }
   );
+  const { data: productionHistory = [] } = trpc.admin.getProductionStatusHistory.useQuery(
+    { orderId: orderId! }, { enabled: !!orderId }
+  );
   // Prévias são carregadas por item individualmente via ItemPreviewCard
 
   const updateMutation = trpc.checkout.updateOrderStatus.useMutation({
@@ -1261,6 +1271,10 @@ export function OrderDetailContent({
                 <div>
                   <p className="text-xs text-indigo-600 font-medium">Status atual</p>
                   <p className="font-bold text-indigo-900">{sc.label}</p>
+                  {o.status === "em_producao" && (() => {
+                    const productionTag = PRODUCTION_TAGS[o.productionStatus === "pending" ? "pendente" : o.productionStatus || "pendente"];
+                    return productionTag ? <Badge variant="outline" className={`mt-1.5 ${productionTag.className}`}>Produção: {productionTag.label}</Badge> : null;
+                  })()}
                 </div>
               </div>
 
@@ -1366,6 +1380,25 @@ export function OrderDetailContent({
                   <p className="text-gray-400 text-sm">Nenhum histórico disponível</p>
                 ))}
               </div>
+
+              {productionHistory.length > 0 && (
+                <div className="border-t pt-4">
+                  <p className="text-sm font-semibold text-gray-700">Histórico de Status de Produção</p>
+                  <div className="mt-3 space-y-2">
+                    {productionHistory.map((entry: any) => {
+                      const productionTag = PRODUCTION_TAGS[entry.newStatus] ?? PRODUCTION_TAGS.encerrado;
+                      return <div key={entry.id} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className={productionTag.className}>{productionTag.label}</Badge>
+                          <span className="text-xs text-slate-500">{fmtDate(entry.createdAt)}</span>
+                          {entry.changedByName && <span className="text-xs text-slate-500">por {entry.changedByName}</span>}
+                        </div>
+                        {entry.notes && <p className="mt-1 text-xs text-slate-600">{entry.notes}</p>}
+                      </div>;
+                    })}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>}
 
