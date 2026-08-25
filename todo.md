@@ -4346,3 +4346,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Localizar o padrão de data usado em Contas Recebidas e a lista de Contas a Receber
 - [x] Adicionar filtros de data inicial e final sem alterar busca, pagamento ou ações existentes
 - [x] Validar filtragem por período, responsividade e regressões financeiras
+
+## Análise de Pagamento na Retirada
+- [ ] Mapear o significado dos estágios de retirada e o vínculo com Contas a Receber
+- [ ] Confirmar a nomenclatura recomendada antes de alterar qualquer status ou fluxo
+
+## Rótulo de Pagamento na Retirada
+- [x] Alterar somente o nome visual Pago para A Receber no painel de retirada
+- [x] Validar que regras, transições e integrações financeiras permanecem inalteradas
