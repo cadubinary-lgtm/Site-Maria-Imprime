@@ -40,6 +40,8 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain("min-h-[170px]");
     expect(source).toContain('className="h-[79px] w-[221px] max-w-full object-contain object-left"');
     expect(source).toContain('className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-black"');
+    expect(source).toContain('<h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-black"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Dados da Empresa</h2>');
+    expect(source).toContain('<h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-[0.09em] text-black"><span className="h-2 w-2 rounded-full bg-pink-600" aria-hidden="true" />Cliente</h2>');
   });
 
   it("mantém a faixa de ações no topo da tela e fora da impressão", () => {
