@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
+import { MapView } from "@/components/Map";
 import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 import {
   ChevronRight, ChevronLeft, ChevronDown, ShoppingBag, MapPin,
@@ -129,6 +130,10 @@ export default function CheckoutPage() {
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [stateUF, setStateUF] = useState("");
+  const [locationCoordinates, setLocationCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
+  const [locationMessage, setLocationMessage] = useState("");
+  const locationGeocodeAttemptedRef = useRef(false);
 
   // Frete
   const [selectedFrete, setSelectedFrete] = useState<FreteOption | null>(null);
@@ -255,6 +260,69 @@ export default function CheckoutPage() {
         setStateUF(data.uf || "");
       }
     } catch { /* silencioso */ }
+  };
+
+  const requestDeliveryLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMessage("Seu navegador não disponibiliza localização. Preencha o endereço manualmente.");
+      return;
+    }
+
+    locationGeocodeAttemptedRef.current = false;
+    setIsRequestingLocation(true);
+    setLocationMessage("Aguardando sua autorização no navegador…");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationCoordinates({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationMessage("Localização autorizada. Buscando uma sugestão de endereço…");
+        setIsRequestingLocation(false);
+      },
+      (error) => {
+        const message = error.code === error.PERMISSION_DENIED
+          ? "Localização não autorizada. Você pode preencher o endereço manualmente."
+          : "Não foi possível usar sua localização agora. Você pode preencher o endereço manualmente.";
+        setLocationMessage(message);
+        setIsRequestingLocation(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 },
+    );
+  };
+
+  const suggestAddressFromLocation = () => {
+    if (!locationCoordinates || locationGeocodeAttemptedRef.current || !window.google?.maps) return;
+
+    locationGeocodeAttemptedRef.current = true;
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: locationCoordinates }, (results, status) => {
+      setLocationCoordinates(null);
+
+      if (status !== "OK" || !results?.[0]) {
+        setLocationMessage("Não encontramos um endereço para esta localização. Preencha os campos manualmente.");
+        return;
+      }
+
+      const parts = results[0].address_components ?? [];
+      const part = (type: string, useShortName = false) => {
+        const match = parts.find((item) => item.types.includes(type));
+        return match ? (useShortName ? match.short_name : match.long_name) : "";
+      };
+      const suggestedZipCode = part("postal_code").replace(/\D/g, "");
+      const suggestedStreet = part("route");
+      const suggestedNumber = part("street_number");
+      const suggestedNeighborhood = part("sublocality_level_1") || part("sublocality") || part("neighborhood");
+      const suggestedCity = part("administrative_area_level_2") || part("locality");
+      const suggestedState = part("administrative_area_level_1", true);
+
+      if (suggestedZipCode) setZipCode(suggestedZipCode.length === 8 ? `${suggestedZipCode.slice(0, 5)}-${suggestedZipCode.slice(5)}` : suggestedZipCode);
+      if (suggestedStreet) setStreet(suggestedStreet);
+      if (suggestedNumber) setNumber(suggestedNumber);
+      if (suggestedNeighborhood) setNeighborhood(suggestedNeighborhood);
+      if (suggestedCity) setCity(suggestedCity);
+      if (suggestedState) setStateUF(suggestedState);
+
+      setLocationMessage("Sugestão aplicada. Confira os campos de endereço antes de continuar.");
+    });
   };
 
   const formatCardNumber = (val: string) =>
@@ -900,6 +968,17 @@ export default function CheckoutPage() {
                         <span>Endereço preenchido automaticamente com os dados do seu cadastro. Você pode editar se necessário.</span>
                       </div>
                     )}
+                    <div className="relative overflow-hidden rounded-xl border border-pink-200 bg-pink-50/60 p-4">
+                      {locationCoordinates && <MapView className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0" initialCenter={locationCoordinates} initialZoom={15} onMapReady={suggestAddressFromLocation} />}
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pink-100 text-pink-700"><MapPin className="h-4 w-4" aria-hidden="true" /></div>
+                          <div><p className="text-sm font-semibold text-slate-900">Preencher endereço pela sua localização</p><p className="mt-1 text-xs leading-5 text-slate-600">Opcional. Ao clicar, o navegador pedirá sua autorização. A coordenada serve somente para sugerir o endereço nesta sessão e não é salva no pedido.</p></div>
+                        </div>
+                        <Button type="button" variant="outline" className="shrink-0 border-pink-200 bg-white text-pink-700 hover:bg-pink-100" onClick={requestDeliveryLocation} disabled={isRequestingLocation}>{isRequestingLocation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}Usar minha localização</Button>
+                      </div>
+                      {locationMessage && <p className="mt-3 rounded-lg bg-white/80 px-3 py-2 text-xs text-slate-600" role="status">{locationMessage}</p>}
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="zipCode">CEP *</Label>
                       <Input id="zipCode" placeholder="00000-000" value={zipCode} onChange={(e) => setZipCode(e.target.value)} onBlur={handleCepBlur} maxLength={9} />

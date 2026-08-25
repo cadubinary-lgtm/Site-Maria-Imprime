@@ -4294,3 +4294,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Garantir que cookies essenciais permaneçam ativos e opcionais respeitem a escolha
 - [x] Adicionar acesso para revisar preferências após a decisão
 - [x] Validar fluxos, responsividade e checkpoint
+
+## Política Própria e Localização Opcional
+- [x] Revisar e tornar própria a Política de Privacidade da Maria Imprime
+- [x] Manter o link público da política no rodapé e no consentimento de cookies
+- [x] Adicionar uma solicitação voluntária de localização com finalidade explicada
+- [x] Usar a localização apenas nesta sessão para sugerir entrega e retirada
+- [x] Preservar a navegação normal quando a permissão for recusada
+- [x] Validar transparência, responsividade e regressões antes do checkpoint

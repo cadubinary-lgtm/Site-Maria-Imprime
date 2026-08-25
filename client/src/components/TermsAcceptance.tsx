@@ -306,6 +306,8 @@ Cada solicitação será analisada individualmente, observando-se as caracterís
 
 export const PRIVACY_POLICY_CONTENT = `MARIA IMPRIME – SUA GRÁFICA ONLINE
 
+Última atualização: 25 de agosto de 2026
+
 1. Apresentação
 
 A Maria Imprime valoriza a privacidade e a proteção dos dados pessoais de seus clientes e usuários.
@@ -340,9 +342,13 @@ Dependendo da utilização do site, poderão ser coletados dados de cadastro (no
 
 Arquivos enviados: quando o cliente enviar uma arte, o arquivo poderá ser armazenado para possibilitar a produção e o atendimento do pedido.
 
+Localização opcional: no checkout, o visitante poderá escolher “Usar minha localização” para sugerir o preenchimento de cidade, estado e CEP do endereço de entrega. Essa solicitação é voluntária, depende da autorização do navegador e a coordenada é usada apenas durante a sessão para consultar o endereço aproximado; a Maria Imprime não armazena a coordenada geográfica como dado do pedido.
+
 4. Finalidades do Tratamento
 
 Os dados poderão ser utilizados para criar e administrar contas, processar pedidos e pagamentos, produzir pedidos, realizar entregas, emitir documentos fiscais, entrar em contato com o cliente, prestar atendimento, acompanhar pedidos, prevenir fraudes, manter a segurança do site, cumprir obrigações legais e melhorar os serviços.
+
+Quando o visitante optar pelo uso da localização no checkout, a informação será utilizada exclusivamente para sugerir dados do endereço e facilitar a seleção de entrega ou retirada. A recusa da permissão não impede a navegação nem a conclusão da compra, pois o endereço poderá ser informado manualmente.
 
 5. Bases Legais
 
