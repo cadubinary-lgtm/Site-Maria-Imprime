@@ -4218,3 +4218,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Replicar os cartões de Dados da Empresa e Cliente abaixo da faixa superior
 - [x] Aplicar a mesma composição e espaçamento no PDF de impressão
 - [x] Validar visualmente em tela e em impressão antes do checkpoint
+
+## Correção de Consultas Públicas do Site
+- [x] Diagnosticar a falha de autenticação temporária do servidor com o banco de dados
+- [x] Renovar a conexão do servidor sem alterar tabelas ou dados existentes
+- [x] Confirmar o carregamento de rodapé, carrossel, produtos, segmentos e empresa
+- [x] Validar TypeScript e regressões antes do checkpoint
