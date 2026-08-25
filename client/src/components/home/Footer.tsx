@@ -10,7 +10,6 @@ import {
   LockKeyhole,
   Mail,
   MapPin,
-  MessageCircle,
   Package,
   Phone,
   Send,
@@ -18,7 +17,7 @@ import {
   Tag,
   Youtube,
 } from "lucide-react";
-import { SiAmericanexpress, SiDinersclub, SiMastercard, SiVisa } from "react-icons/si";
+import { SiAmericanexpress, SiDinersclub, SiMastercard, SiVisa, SiWhatsapp } from "react-icons/si";
 import {
   getCompanyAddressLine,
   getCompanyLocationLine,
@@ -172,7 +171,7 @@ export function Footer() {
             <div className="mt-6 flex flex-wrap gap-3">
               {instagramHref && <SocialLink href={instagramHref} label="Instagram da Maria Imprime"><Instagram className="h-5 w-5" /></SocialLink>}
               {facebookHref && <SocialLink href={facebookHref} label="Facebook da Maria Imprime"><Facebook className="h-5 w-5" /></SocialLink>}
-              {showWhatsApp && <SocialLink href={whatsappHref} label="WhatsApp da Maria Imprime"><MessageCircle className="h-5 w-5" /></SocialLink>}
+              {showWhatsApp && <SocialLink href={whatsappHref} label="WhatsApp da Maria Imprime"><SiWhatsapp aria-hidden className="h-5 w-5" /></SocialLink>}
               <a href={`mailto:${company.supportEmail}`} aria-label="Enviar e-mail para a Maria Imprime" className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-50 text-slate-500 transition-colors hover:bg-pink-100 hover:text-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"><Mail className="h-5 w-5" /></a>
               {youtubeHref && <SocialLink href={youtubeHref} label="YouTube da Maria Imprime"><Youtube className="h-5 w-5" /></SocialLink>}
               {otherSocialHref && <SocialLink href={otherSocialHref} label="Outro canal oficial da Maria Imprime"><ArrowRight className="h-5 w-5" /></SocialLink>}
