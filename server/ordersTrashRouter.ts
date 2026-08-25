@@ -17,6 +17,7 @@ import {
   orderPayments,
   orders,
   orderStatusHistory,
+  orderProductionStatusHistory,
   productionJobs,
   productionStatusHistory,
   paymentReceipts,
@@ -36,6 +37,9 @@ function isUnavailableProductionStorage(error: unknown) {
 }
 
 async function deleteProductionDependenciesForOrder(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, orderId: number) {
+  await db.delete(orderProductionStatusHistory)
+    .where(eq(orderProductionStatusHistory.orderId, orderId));
+
   let productionJobRows: Array<{ id: number }>;
   try {
     productionJobRows = await db.select({ id: productionJobs.id })

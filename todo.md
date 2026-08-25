@@ -4319,3 +4319,21 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Localizar os círculos rosas de numeração das etapas
 - [x] Reduzir os círculos em 50% sem alterar o conteúdo ou a interação
 - [x] Validar o configurador e as regressões antes do checkpoint
+
+## Tags e Histórico de Status de Produção
+- [x] Mapear o status de pedido, estágios de produção, Kanban e acompanhamento atuais
+- [x] Inserir automaticamente Pendente ao pedido entrar em Em Produção
+- [x] Atualizar as tags para Impresso e Acabamento Finalizado conforme o operador avançar
+- [x] Exibir tags no Kanban e no acompanhamento do pedido
+- [x] Remover tags ao chegar em Pronto para Entrega, Pronto para Retirada, Entregue ou Cancelado
+- [x] Registrar cada mudança no Histórico de Status de Produção
+- [x] Permitir exclusão confirmada do histórico apenas para Admin e Super Admin
+- [x] Validar transições, permissões e regressões antes do checkpoint
+
+## Tags Automáticas de Status de Produção
+- [x] Mapear o status de pedido, os estágios de produção e os componentes do Kanban e acompanhamento
+- [x] Marcar automaticamente como Pendente ao entrar em Em Produção
+- [x] Atualizar a tag para Impresso e Acabamento Finalizado conforme o operador avançar
+- [x] Exibir a tag no Kanban e no acompanhamento do pedido
+- [x] Remover a tag em Pronto para Entrega, Pronto para Retirada, Entregue e Cancelado
+- [x] Validar transições e regressões sem alterar cálculos ou fluxos existentes

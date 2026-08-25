@@ -761,6 +761,24 @@ export type ProductionJob = typeof productionJobs.$inferSelect;
 export type InsertProductionJob = typeof productionJobs.$inferInsert;
 
 /**
+ * Histórico operacional dos estágios de produção por pedido.
+ * Independente da ficha técnica legada para garantir rastreabilidade de todo pedido.
+ */
+export const orderProductionStatusHistory = mysqlTable("orderProductionStatusHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  previousStatus: varchar("previousStatus", { length: 100 }),
+  newStatus: varchar("newStatus", { length: 100 }).notNull(),
+  changedBy: int("changedBy"),
+  changedByName: varchar("changedByName", { length: 255 }),
+  notes: longtext("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderProductionStatusHistory = typeof orderProductionStatusHistory.$inferSelect;
+export type InsertOrderProductionStatusHistory = typeof orderProductionStatusHistory.$inferInsert;
+
+/**
  * Financial Records - Registro de transações financeiras
  */
 export const financialRecords = mysqlTable("financialRecords", {
