@@ -4256,3 +4256,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Compactar cartões mantendo a leitura de todos os dados
 - [x] Replicar os novos espaçamentos no PDF
 - [x] Validar densidade visual e regressões antes do checkpoint
+
+## Ícone Oficial do WhatsApp no Rodapé
+- [x] Substituir o ícone genérico de conversa pelo ícone oficial do WhatsApp
+- [x] Preservar tamanho, alinhamento, acessibilidade e link já configurado
+- [x] Validar o rodapé em tela antes do checkpoint
