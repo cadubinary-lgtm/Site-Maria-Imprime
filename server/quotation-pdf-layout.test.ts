@@ -33,11 +33,11 @@ describe("impressão de Orçamentos", () => {
     expect(source).toContain("grid-template-columns:31% 38% 31%");
     expect(source).toContain('class="proposal-block"');
     expect(source).toContain(".brand::after, .proposal-block::after");
-    expect(source).toContain("top:14px; bottom:14px");
-    expect(source).toContain('className="grid min-h-[160px] grid-cols-1 md:grid-cols-[31%_38%_31%]');
-    expect(source).toContain('absolute inset-y-7 right-0 hidden w-px bg-[#b9b9b9]');
+    expect(source).toContain("top:12px; bottom:12px");
+    expect(source).toContain('className="grid min-h-[142px] grid-cols-1 md:grid-cols-[31%_38%_31%]');
+    expect(source).toContain('absolute inset-y-6 right-0 hidden w-px bg-[#b9b9b9]');
     expect(source).not.toContain("md:border-r-2 md:border-gray-300");
-    expect(source).toContain("min-h-[230px]");
+    expect(source).toContain("min-h-[190px]");
   });
 
   it("mantém a faixa de ações no topo da tela e fora da impressão", () => {
@@ -54,5 +54,12 @@ describe("impressão de Orçamentos", () => {
   it("mantém emissão e validade em uma única linha na tela e na impressão", () => {
     expect(source).toContain(".doc-info .date { font-size:8px; color:#666; margin-top:3px; white-space:nowrap; }");
     expect(source).toContain('whitespace-nowrap text-[clamp(0.65rem,0.75vw,0.78rem)] text-gray-500');
+  });
+
+  it("compacta o cabeçalho e os cartões sem ocultar informações", () => {
+    expect(source).toContain(".header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:70px;");
+    expect(source).toContain(".header-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:8px 10px 10px; }");
+    expect(source).toContain(".info-panel { min-height:120px;");
+    expect(source).toContain('grid grid-cols-1 gap-3 border-t border-pink-100 bg-white p-4 lg:grid-cols-2');
   });
 });

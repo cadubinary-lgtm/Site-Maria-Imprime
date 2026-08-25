@@ -4243,3 +4243,10 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ajustar a tipografia sem alterar o restante da composição
 - [x] Replicar a linha única no cabeçalho do PDF
 - [x] Validar visualmente e por regressão antes do checkpoint
+
+## Compactação do Cabeçalho para Impressão
+- [x] Reduzir os espaços brancos da faixa superior do orçamento
+- [x] Reduzir margens, alturas e respiros dos cartões de empresa e cliente
+- [x] Preservar legibilidade e todos os dados exibidos
+- [x] Aplicar a mesma compactação no PDF de impressão
+- [x] Validar visualmente e por regressão antes do checkpoint
