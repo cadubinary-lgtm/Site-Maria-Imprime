@@ -4308,3 +4308,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Substituir somente a mensagem por “Enviamos para diversas cidades do Brasil. Consulte o envio para a sua região.”
 - [x] Preservar integralmente estrutura, rotas, cálculos e lógica de frete
 - [x] Validar conteúdo indexável, regressões e checkpoint
+
+## Verificação de Segurança do Domínio
+- [x] Verificar certificado HTTPS e redirecionamentos de mariaimprime.com.br
+- [x] Confirmar a resposta pública e os cabeçalhos de segurança essenciais
+- [x] Interpretar o resultado do Google Navegação Segura sem assumir bloqueio inexistente
+- [x] Corrigir somente falha técnica confirmada ou registrar a orientação necessária

@@ -50,6 +50,7 @@ describe("proteção HTTPS e cabeçalhos", () => {
     expect(res.setHeader).toHaveBeenCalledWith("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     expect(res.setHeader).toHaveBeenCalledWith("X-Content-Type-Options", "nosniff");
     expect(res.setHeader).toHaveBeenCalledWith("Referrer-Policy", "strict-origin-when-cross-origin");
+    expect(res.setHeader).toHaveBeenCalledWith("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
     expect(res.setHeader).toHaveBeenCalledWith("Content-Security-Policy-Report-Only", expect.stringContaining("report-uri /api/security/csp-report"));
     expect(next).toHaveBeenCalledOnce();
   });
