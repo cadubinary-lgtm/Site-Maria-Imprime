@@ -4314,3 +4314,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Confirmar a resposta pública e os cabeçalhos de segurança essenciais
 - [x] Interpretar o resultado do Google Navegação Segura sem assumir bloqueio inexistente
 - [x] Corrigir somente falha técnica confirmada ou registrar a orientação necessária
+
+## Marcadores das Etapas do Configurador
+- [x] Localizar os círculos rosas de numeração das etapas
+- [x] Reduzir os círculos em 50% sem alterar o conteúdo ou a interação
+- [x] Validar o configurador e as regressões antes do checkpoint
