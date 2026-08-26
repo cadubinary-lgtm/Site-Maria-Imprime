@@ -4439,3 +4439,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a regra de status do painel administrativo e do acompanhamento do cliente
 - [x] Unificar a exibição do status e das etapas para o mesmo pedido
 - [x] Validar a sincronização em cenários de entrega e retirada
+
+## Correção de Registros Financeiros do Pedido
+- [x] Diagnosticar a consulta à tabela financialRecords ao operar pedidos
+- [x] Corrigir a compatibilidade do vínculo financeiro sem alterar os fluxos
+- [x] Validar as ações de pedido e as regressões financeiras

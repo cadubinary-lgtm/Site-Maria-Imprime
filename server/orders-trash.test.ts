@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 const routerPath = resolve(process.cwd(), "server/ordersTrashRouter.ts");
 const pagePath = resolve(process.cwd(), "client/src/pages/admin/AdminOrders.tsx");
 const schemaPath = resolve(process.cwd(), "drizzle/schema.ts");
+const financialRecordsMigrationPath = resolve(process.cwd(), "drizzle/0077_ensure_financial_records.sql");
 
 describe("lixeira de Todos os Pedidos", () => {
   it("restaura a lixeira reversível para administradores e mantém a exclusão definitiva restrita", () => {
@@ -52,10 +53,15 @@ describe("lixeira de Todos os Pedidos", () => {
 
   it("remove os registros que alimentam todos os subitens financeiros antes do pedido", () => {
     const source = readFileSync(routerPath, "utf8");
+    const schema = readFileSync(schemaPath, "utf8");
+    const migration = readFileSync(financialRecordsMigrationPath, "utf8");
     const helperStart = source.indexOf("async function deleteFinancialDependenciesForOrder");
     const helperEnd = source.indexOf("async function permanentlyDeleteOrder", helperStart);
     const helperSource = source.slice(helperStart, helperEnd);
 
+    expect(schema).toContain('mysqlTable("financialRecords"');
+    expect(migration).toContain("CREATE TABLE IF NOT EXISTS `financialRecords`");
+    expect(helperSource).toContain("financialRecords.orderId");
     expect(helperSource).toContain("financeiroNotificacoes");
     expect(helperSource).toContain("cashFlowEntries");
     expect(helperSource).toContain("paymentReceipts");
