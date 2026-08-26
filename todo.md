@@ -4444,3 +4444,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Diagnosticar a consulta à tabela financialRecords ao operar pedidos
 - [x] Corrigir a compatibilidade do vínculo financeiro sem alterar os fluxos
 - [x] Validar as ações de pedido e as regressões financeiras
+
+## Correção de Exclusão Permanente de Orçamentos
+- [x] Diagnosticar a origem da ação permanente executada fora da lixeira
+- [x] Corrigir o vínculo entre a lixeira e a exclusão permanente
+- [x] Validar as exclusões reversível e permanente de orçamentos

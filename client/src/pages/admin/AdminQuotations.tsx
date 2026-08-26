@@ -94,6 +94,7 @@ const OPERATIONAL_CARD_TONES = {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotations() {
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [period, setPeriod] = useState<"all" | "this_month" | "last_month" | "custom">("all");
@@ -153,9 +154,12 @@ export default function AdminQuotations() {
     onError: (e) => toast.error(e.message),
   });
 
-  const moveToTrash = trpc.quotations.moveToTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento movido para a lixeira."); setTrashQuotation(null); setDeletionReason(""); await refetch(); }, onError: (e) => toast.error(e.message) });
-  const restoreFromTrash = trpc.quotations.restoreFromTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento restaurado."); setRestoreQuotation(null); await refetch(); }, onError: (e) => toast.error(e.message) });
-  const permanentlyDelete = trpc.quotations.permanentlyDeleteFromTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento removido permanentemente."); setPermanentQuotation(null); await refetch(); }, onError: (e) => toast.error(e.message) });
+  const refreshQuotationLists = async () => {
+    await Promise.all([refetch(), utils.quotations.listTrash.invalidate()]);
+  };
+  const moveToTrash = trpc.quotations.moveToTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento movido para a lixeira."); setTrashQuotation(null); setDeletionReason(""); await refreshQuotationLists(); }, onError: (e) => toast.error(e.message) });
+  const restoreFromTrash = trpc.quotations.restoreFromTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento restaurado."); setRestoreQuotation(null); await refreshQuotationLists(); }, onError: (e) => toast.error(e.message) });
+  const permanentlyDelete = trpc.quotations.permanentlyDeleteFromTrash.useMutation({ onSuccess: async () => { toast.success("Orçamento removido permanentemente."); setPermanentQuotation(null); await refreshQuotationLists(); }, onError: async (e) => { if (e.message.includes("Apenas orçamentos na lixeira")) { setPermanentQuotation(null); await refreshQuotationLists(); toast.error("Este orçamento não está mais na lixeira. A lista foi atualizada."); return; } toast.error(e.message); } });
 
   const convertToOrder = trpc.quotations.convertToOrder.useMutation({
     onSuccess: (res) => {

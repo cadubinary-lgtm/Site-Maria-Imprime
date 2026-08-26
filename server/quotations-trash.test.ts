@@ -27,4 +27,14 @@ describe("lixeira e dashboard de orçamentos", () => {
     expect(source).toContain("Confirmar restauração");
     expect(source).toContain("Excluir orçamento permanentemente?");
   });
+
+  it("atualiza a lixeira após mover, restaurar ou excluir definitivamente um orçamento", () => {
+    const source = readFileSync(pagePath, "utf8");
+
+    expect(source).toContain("const refreshQuotationLists = async () =>");
+    expect(source).toContain("utils.quotations.listTrash.invalidate()");
+    expect(source).toContain("await refreshQuotationLists();");
+    expect(source).toContain('e.message.includes("Apenas orçamentos na lixeira")');
+    expect(source).toContain("Este orçamento não está mais na lixeira. A lista foi atualizada.");
+  });
 });
