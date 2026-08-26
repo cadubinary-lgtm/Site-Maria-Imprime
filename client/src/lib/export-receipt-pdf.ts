@@ -1,6 +1,6 @@
 export type ReceiptPdfData = {
   receiptNumber: string;
-  orderNumber: string;
+  orderNumber?: string | null;
   customerName: string;
   customerEmail?: string | null;
   amount: string | number;
@@ -52,7 +52,9 @@ export async function exportReceiptPDF(data: ReceiptPdfData): Promise<void> {
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...slate);
   doc.setFontSize(11);
-  const statement = `Recebemos de ${data.customerName} a quantia de ${formatCurrency(data.amount)}, referente ao pagamento do pedido #${data.orderNumber}.`;
+  const statement = data.orderNumber
+    ? `Recebemos de ${data.customerName} a quantia de ${formatCurrency(data.amount)}, referente ao pagamento do pedido #${data.orderNumber}.`
+    : `Recebemos de ${data.customerName} a quantia de ${formatCurrency(data.amount)}, referente aos itens discriminados neste recibo.`;
   doc.text(doc.splitTextToSize(statement, contentWidth - 12), margin + 6, y + 10);
   doc.setFontSize(9);
   doc.setTextColor(...muted);
@@ -63,7 +65,7 @@ export async function exportReceiptPDF(data: ReceiptPdfData): Promise<void> {
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...slate);
   doc.setFontSize(11);
-  doc.text("ITENS DO PEDIDO", margin, y);
+  doc.text(data.orderNumber ? "ITENS DO PEDIDO" : "ITENS DO RECIBO", margin, y);
   y += 7;
   doc.setFillColor(248, 250, 252);
   doc.rect(margin, y, contentWidth, 8, "F");

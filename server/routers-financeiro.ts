@@ -33,7 +33,7 @@ import {
   productionStatusHistory,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull, inArray } from "drizzle-orm";
-import { sendPaymentReceiptEmail } from "./emailService";
+import { sendPaymentReceiptEmail, sendStandaloneReceiptEmail } from "./emailService";
 import { ensurePaymentReceipt } from "./payment-receipts";
 import { randomUUID } from "node:crypto";
 
@@ -1032,6 +1032,38 @@ export const financeiroRouter = router({
         ipAddress: ctx.req.ip,
       });
       return { whatsappUrl: `https://wa.me/55${phone.replace(/^55/, "")}?text=${encodeURIComponent(message)}` };
+    }),
+
+  sendReciboAvulsoEmail: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), email: z.string().email().optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(standaloneReceipts)
+        .where(eq(standaloneReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado." });
+      if (receipt.status === "cancelado") throw new TRPCError({ code: "BAD_REQUEST", message: "Recibos cancelados não podem ser enviados por e-mail." });
+      const recipientEmail = input.email || receipt.customerEmail;
+      if (!recipientEmail) throw new TRPCError({ code: "BAD_REQUEST", message: "Informe o e-mail do cliente para enviar o recibo." });
+      const result = await sendStandaloneReceiptEmail(recipientEmail, {
+        customerName: receipt.customerName,
+        receiptNumber: receipt.receiptNumber,
+        amount: formatReceiptCurrency(receipt.amount),
+        paymentMethod: RECEIPT_PAYMENT_LABELS[receipt.paymentMethod] || receipt.paymentMethod,
+        paidAt: formatReceiptDate(receipt.paidAt),
+      });
+      if (!result.success) throw new TRPCError({ code: "BAD_GATEWAY", message: result.error || "Não foi possível enviar o e-mail do recibo." });
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "standalone_receipt_email_sent",
+        entity: "standaloneReceipts",
+        entityId: String(receipt.id),
+        after: { receiptNumber: receipt.receiptNumber, recipientEmail },
+        ipAddress: ctx.req.ip,
+      });
+      return { success: true, recipientEmail };
     }),
 
   getRecibos: adminOrManusAuthProcedure

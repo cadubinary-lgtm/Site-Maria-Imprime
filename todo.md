@@ -4375,3 +4375,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar envio do recibo avulso pelo WhatsApp do cliente
 - [x] Remover a palavra Avulso do cabeçalho de impressão e manter a identificação do documento
 - [x] Validar as ações, impressão, permissões e regressões dos recibos existentes
+
+## Ações de Recibos Avulsos
+- [x] Mapear os ícones de impressão, PDF, WhatsApp e e-mail dos recibos emitidos
+- [x] Adicionar as mesmas ações à listagem de recibos avulsos
+- [x] Preservar o bloqueio de ações em documentos cancelados
+- [x] Validar ações, interface e regressões financeiras
