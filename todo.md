@@ -4404,3 +4404,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear todos os indicadores, contagens e atalhos do dashboard
 - [x] Remover estados inexistentes e alinhar cada indicador aos estágios atuais da Linha de Produção
 - [x] Validar contagens, navegação e regressões operacionais
+
+## Estágios de Status no Dashboard de Produção
+- [x] Incluir as contagens de Pendente, Impresso e Acabamento Finalizado
+- [x] Vincular cada indicador aos pedidos em produção e aos atalhos corretos
+- [x] Validar a exibição e a responsividade dos novos indicadores

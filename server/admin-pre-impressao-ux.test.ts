@@ -42,4 +42,14 @@ describe("painel administrativo de pré-impressão", () => {
     expect(source).toContain('const currentPreStatus = order.status === "em_producao" ? "em_producao"');
     expect(source).toContain('!["pronto_entrega", "pronto_retirada", "entregue", "cancelado"].includes(order.status)');
   });
+
+  it("resume os três estágios atuais de produção com atalhos para a fila operacional", () => {
+    expect(source).toContain("const PRODUCTION_DASHBOARD_STAGES = [");
+    expect(source).toContain('label: "Pendente"');
+    expect(source).toContain('label: "Impresso"');
+    expect(source).toContain('label: "Acabamento Finalizado"');
+    expect(source).toContain('href: "/admin/status-producao?status=pendente"');
+    expect(source).toContain('const stage = order.productionStatus === "pending" ? "pendente" : order.productionStatus || "pendente";');
+    expect(source).toContain('aria-label="Status de produção"');
+  });
 });

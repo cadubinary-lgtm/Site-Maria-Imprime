@@ -18,6 +18,12 @@ const PRE_PRODUCTION_STATUS: Record<string, { label: string; color: string }> = 
   em_producao: { label: "Arte Final Aprovada", color: "bg-green-100 text-green-800 border-green-200" },
 };
 
+const PRODUCTION_DASHBOARD_STAGES = [
+  { key: "pendente", label: "Pendente", description: "Aguardando início da impressão", color: "border-slate-200 bg-slate-50 text-slate-700", href: "/admin/status-producao?status=pendente" },
+  { key: "impresso", label: "Impresso", description: "Aguardando acabamento", color: "border-blue-200 bg-blue-50 text-blue-700", href: "/admin/status-producao?status=impresso" },
+  { key: "acabamento_finalizado", label: "Acabamento Finalizado", description: "Conferência final em andamento", color: "border-green-200 bg-green-50 text-green-700", href: "/admin/status-producao?status=acabamento_finalizado" },
+] as const;
+
 const ORDER_STATUS_LABEL: Record<string, string> = {
   pagamento_aprovado: "Pagamento Aprovado",
   pagamento_retirada: "Pagamento Retirada",
@@ -115,6 +121,15 @@ export default function AdminPreImpressao() {
     approved: activeOrders.filter((order) => order.status === "em_producao" || ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "")).length,
   }), [activeOrders]);
 
+  const productionSummary = useMemo(() => {
+    const counts = { pendente: 0, impresso: 0, acabamento_finalizado: 0 };
+    activeOrders.filter((order) => order.status === "em_producao").forEach((order) => {
+      const stage = order.productionStatus === "pending" ? "pendente" : order.productionStatus || "pendente";
+      if (stage in counts) counts[stage as keyof typeof counts] += 1;
+    });
+    return counts;
+  }, [activeOrders]);
+
   const hasActiveFilters = Boolean(search) || filterStatus !== "todos";
   const clearFilters = () => {
     setSearch("");
@@ -156,6 +171,25 @@ export default function AdminPreImpressao() {
             <PrePressMetric label="Pedidos ativos" value={prePressSummary.active} description="Ainda na linha de pré-impressão" icon={Layers} tone="pink" />
             <PrePressMetric label="Liberado p/ Análise" value={prePressSummary.inAnalysis} description="Prontos para revisão da arte" icon={CircleAlert} tone="slate" />
             <PrePressMetric label="Arte aprovada" value={prePressSummary.approved} description="Aguardando sequência operacional" icon={CheckCircle2} tone="green" />
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" aria-label="Status de produção">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Status de Produção</h2>
+                <p className="mt-1 text-xs text-slate-500">Pedidos em produção organizados por etapa operacional.</p>
+              </div>
+              <Link href="/admin/status-producao" className="text-xs font-medium text-pink-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300">Ver Status de Produção →</Link>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {PRODUCTION_DASHBOARD_STAGES.map((stage) => (
+                <Link key={stage.key} href={stage.href} className={`rounded-xl border p-3 transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 ${stage.color}`} aria-label={`Ver ${productionSummary[stage.key]} pedido(s) em ${stage.label}`}>
+                  <p className="text-xs font-semibold">{stage.label}</p>
+                  <p className="mt-1 text-2xl font-bold">{productionSummary[stage.key]}</p>
+                  <p className="mt-1 text-xs opacity-80">{stage.description}</p>
+                </Link>
+              ))}
+            </div>
           </section>
 
           <Card className="border-pink-100 shadow-sm">
