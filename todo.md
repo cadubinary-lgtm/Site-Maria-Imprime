@@ -4390,3 +4390,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear os filtros e as contagens de Liberado para Análise e Arte Final Aprovada
 - [x] Classificar pedidos em produção somente como Arte Final Aprovada na Pré-impressão
 - [x] Validar filtros, contagens e regressões dos fluxos de pré-impressão e produção
+
+## Alinhamento do Status de Pré-impressão
+- [x] Reposicionar o rótulo Pré-impressão e o status na mesma linha do cartão
+- [x] Validar que o alinhamento preserva filtros, regras e responsividade
