@@ -4381,3 +4381,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar as mesmas ações à listagem de recibos avulsos
 - [x] Preservar o bloqueio de ações em documentos cancelados
 - [x] Validar ações, interface e regressões financeiras
+
+## Alinhamento das Tabelas de Recibos
+- [x] Alinhar as colunas visíveis de Recibos Emitidos e Recibos Avulsos
+- [x] Validar que somente a organização visual foi alterada
