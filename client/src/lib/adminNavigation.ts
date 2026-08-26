@@ -34,6 +34,27 @@ const RETURN_LABELS: Record<string, string> = {
   "/admin/gerenciador-financeiro/relatorios": "Voltar para Relatórios Financeiros",
 };
 
+const ADMIN_RETURN_FALLBACKS: Array<[RegExp, string]> = [
+  [/^\/admin\/produtos$/, "/admin"],
+  [/^\/admin\/produtos\/(?:dashboard|carrossel)$/, "/admin/produtos"],
+  [/^\/admin\/(?:novo-produto|variacoes(?:offset|comunicacaovisual)?|atributos|vincular-atributos|regras-builder|regras-dinamicas|segmentos)$/, "/admin/produtos"],
+  [/^\/admin\/pedidos$/, "/admin"],
+  [/^\/admin\/pedidos\/(?:novos|kanban|\d+)$/, "/admin/pedidos"],
+  [/^\/admin\/producao\/kanban$/, "/admin"],
+  [/^\/admin\/(?:pre-impressao|status-producao)$/, "/admin"],
+  [/^\/admin\/orcamentos$/, "/admin"],
+  [/^\/admin\/orcamentos\/(?:novo|\d+(?:\/editar)?)$/, "/admin/orcamentos"],
+  [/^\/admin\/os$/, "/admin"],
+  [/^\/admin\/os\/\d+$/, "/admin/os"],
+  [/^\/admin\/financeiro\/recibos(?:\/avulso\/(?:novo|\d+(?:\/(?:editar|imprimir))?)|\/\d+\/imprimir)?$/, "/admin/financeiro/recibos"],
+  [/^\/admin\/financeiro\/.+$/, "/admin/financeiro-dashboard"],
+  [/^\/admin\/gerenciador-financeiro\/.+$/, "/admin/gerenciador-financeiro"],
+  [/^\/admin\/fiscal\/.+$/, "/admin/fiscal"],
+  [/^\/admin\/logistica\/.+$/, "/admin/logistica"],
+  [/^\/admin\/configuracoes-site\/.+$/, "/admin"],
+  [/^\/producao(?:\/.+)?$/, "/admin"],
+];
+
 function normalizeAdminPath(value: string | null | undefined): string | null {
   if (!value) return null;
   const path = value.split("?")[0] ?? "";
@@ -62,10 +83,18 @@ export function createAdminDetailLocation(target: string, origin: string): strin
   return `${target}${separator}from=${encodeURIComponent(safeOrigin)}`;
 }
 
-export function getAdminReturnTarget(fallbackPath: string): AdminReturnTarget {
-  let origin: string | null = null;
+export function getAdminFallbackPath(currentPath: string): string {
+  const safePath = normalizeAdminPath(currentPath) ?? "/admin";
+  if (safePath === "/admin") return "/admin";
 
-  if (typeof window !== "undefined") {
+  const matchedFallback = ADMIN_RETURN_FALLBACKS.find(([pattern]) => pattern.test(safePath));
+  return matchedFallback?.[1] ?? "/admin";
+}
+
+export function getAdminReturnTarget(fallbackPath: string, preferredOrigin?: string | null): AdminReturnTarget {
+  let origin = normalizeAdminPath(preferredOrigin);
+
+  if (!origin && typeof window !== "undefined") {
     const from = new URLSearchParams(window.location.search).get("from");
     origin = from === "kanban" ? "/admin/pedidos/kanban" : normalizeAdminPath(from);
 
@@ -78,9 +107,24 @@ export function getAdminReturnTarget(fallbackPath: string): AdminReturnTarget {
     }
   }
 
-  const path = origin ?? fallbackPath;
+  const path = origin ?? normalizeAdminPath(fallbackPath) ?? "/admin";
   return {
     path,
     label: RETURN_LABELS[path] ?? "Voltar",
   };
+}
+
+export function getAdminContextualReturnTarget(currentPath: string, preferredOrigin?: string | null): AdminReturnTarget {
+  const safeCurrentPath = normalizeAdminPath(currentPath) ?? "/admin";
+  const fallbackPath = getAdminFallbackPath(safeCurrentPath);
+  const target = getAdminReturnTarget(fallbackPath, preferredOrigin);
+
+  if (target.path === safeCurrentPath) {
+    return {
+      path: fallbackPath,
+      label: RETURN_LABELS[fallbackPath] ?? "Voltar",
+    };
+  }
+
+  return target;
 }
