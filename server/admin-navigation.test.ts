@@ -5,6 +5,7 @@ import {
   createAdminDetailLocation,
   getAdminContextualReturnTarget,
   getAdminFallbackPath,
+  getAdminMenuParentTarget,
   getAdminReturnTarget,
   isAdminDetailPath,
 } from "../client/src/lib/adminNavigation";
@@ -43,6 +44,18 @@ describe("navegação contextual administrativa", () => {
     expect(getAdminFallbackPath("/admin/novo-produto")).toBe("/admin/produtos");
     expect(getAdminFallbackPath("/admin/financeiro/recibos/42/imprimir")).toBe("/admin/financeiro/recibos");
     expect(getAdminFallbackPath("/admin/configuracoes-site/prazos-padrao")).toBe("/admin");
+    expect(getAdminFallbackPath("/admin/pre-impressao")).toBe("/producao");
+  });
+
+  it("permite que a seta Voltar siga somente o menu-pai da subpágina", () => {
+    expect(getAdminMenuParentTarget("/admin/pre-impressao")).toEqual({
+      path: "/producao",
+      label: "Voltar",
+    });
+    expect(getAdminMenuParentTarget("/admin/novo-produto")).toEqual({
+      path: "/admin/produtos",
+      label: "Voltar para Produtos",
+    });
   });
 
   it("prioriza a página visitada anteriormente e evita retorno para a própria tela", () => {
@@ -108,16 +121,17 @@ describe("navegação contextual administrativa", () => {
     expect(source).toContain("const isActive = item.href ? currentLocation === item.href : false;");
   });
 
-  it("oferece retorno global em todas as páginas que usam o layout administrativo", () => {
+  it("oferece retorno global ao menu-pai em todas as páginas que usam o layout administrativo", () => {
     const source = readFileSync(adminLayoutPath, "utf8");
 
-    expect(source).toContain("getAdminContextualReturnTarget(location, previousAdminLocation)");
+    expect(source).toContain("getAdminMenuParentTarget(location)");
+    expect(source).not.toContain("previousAdminLocation");
     expect(source).toContain("aria-label={`Voltar: ${returnTarget.label}`}");
-    expect(source).toContain("rememberAdminOrigin(currentLocation)");
+    expect(source).not.toContain("rememberAdminOrigin");
   });
 
-  it("mantém retorno contextual nas exceções com cabeçalho próprio", () => {
-    expect(readFileSync(globalDeliveryOptionsPath, "utf8")).toContain("getAdminContextualReturnTarget(location)");
+  it("mantém retorno ao menu-pai nas exceções com cabeçalho próprio", () => {
+    expect(readFileSync(globalDeliveryOptionsPath, "utf8")).toContain("getAdminMenuParentTarget(location)");
     expect(readFileSync(receiptPrintPath, "utf8")).toContain("onClick={() => setLocation(returnTarget.path)}");
   });
 

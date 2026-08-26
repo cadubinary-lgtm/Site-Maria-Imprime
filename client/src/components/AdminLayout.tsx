@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { ADMIN_MENU_GROUP_ICON_CLASS, getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
 import { shouldShowAdminMenuItemIcon } from "@/lib/admin-menu-item-visibility";
-import { getAdminContextualReturnTarget, rememberAdminOrigin } from "@/lib/adminNavigation";
+import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { isNewOrderStatus } from "@/lib/newOrderStatus";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
@@ -134,7 +134,6 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
 
   // Salva a posição do scroll no localStorage ANTES de navegar
   const saveScrollPosition = () => {
-    rememberAdminOrigin(currentLocation);
     if (ctx?.navRef.current) {
       const scrollTop = ctx.navRef.current.scrollTop;
       try {
@@ -212,10 +211,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const mainRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [location, setLocation] = useLocation();
-  const previousAdminLocationRef = useRef<string | null>(null);
-  const [previousAdminLocation, setPreviousAdminLocation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const returnTarget = getAdminContextualReturnTarget(location, previousAdminLocation);
+  const returnTarget = getAdminMenuParentTarget(location);
   const shouldShowReturn = location !== "/admin";
 
   // Buscar permissões do operador logado (null = acesso total, [] = sem acesso, [...] = lista de chaves)
@@ -247,13 +244,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (myPermissions as string[]).includes(key);
   };
 
-  // Ao mudar de rota, mantém a origem anterior para o retorno contextual e restaura a sidebar.
+  // Ao mudar de rota, restaura a posição da sidebar e reinicia o conteúdo no topo.
   useEffect(() => {
-    const previousLocation = previousAdminLocationRef.current;
-    if (previousLocation && previousLocation !== location) {
-      setPreviousAdminLocation(previousLocation);
-    }
-    previousAdminLocationRef.current = location;
     // Reseta scroll do conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;

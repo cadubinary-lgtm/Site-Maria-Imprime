@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { getCompanyAddressLine, getCompanyLocationLine, useCompanySettings } from "@/hooks/useCompanySettings";
 import { QRCodeSVG } from "qrcode.react";
-import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
+import { createAdminDetailLocation, getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { formatProductionDeadlineSurcharge } from "@/lib/production-deadline-pricing";
 import { toast } from "sonner";
 import {
@@ -143,7 +143,7 @@ export default function AdminOSPrint() {
   const [, setLocation] = useLocation();
   const { company } = useCompanySettings();
   const orderId = params.id ? parseInt(params.id) : undefined;
-  const returnTarget = getAdminReturnTarget("/admin/os");
+  const returnTarget = getAdminMenuParentTarget(`/admin/os/${orderId ?? "0"}`);
   const [printMode, setPrintMode] = useState<"a4" | "thermal">("a4");
   const [isExportingPdf, setIsExportingPdf] = useState(false);
 

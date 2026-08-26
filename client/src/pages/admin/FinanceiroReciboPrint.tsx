@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { exportReceiptPDF } from "@/lib/export-receipt-pdf";
-import { getAdminContextualReturnTarget } from "@/lib/adminNavigation";
+import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { toast } from "sonner";
 
 const paymentLabels: Record<string, string> = { dinheiro: "Dinheiro", pix: "Pix", cartao_credito: "Cartão de crédito", cartao_debito: "Cartão de débito", transferencia: "Transferência", boleto: "Boleto", pagar_na_retirada: "Pagamento na retirada", outro: "Outro" };
@@ -17,7 +17,7 @@ const formatCurrency = (value: string | number) => new Intl.NumberFormat("pt-BR"
 export default function FinanceiroReciboPrint() {
   const params = useParams<{ id: string }>();
   const [location, setLocation] = useLocation();
-  const returnTarget = getAdminContextualReturnTarget(location);
+  const returnTarget = getAdminMenuParentTarget(location);
   const receiptId = Number(params.id);
   const { company } = useCompanySettings();
   const [contactDialog, setContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email" }>({ open: false, channel: "whatsapp" });

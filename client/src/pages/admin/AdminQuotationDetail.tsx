@@ -33,7 +33,7 @@ import {
   Mail,
 } from "lucide-react";
 import { toast } from "sonner";
-import { createAdminDetailLocation, getAdminReturnTarget } from "@/lib/adminNavigation";
+import { createAdminDetailLocation, getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
 import { formatCompanyAddress } from "@/lib/companyQuotationDetails";
@@ -406,9 +406,9 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationDetail() {
   const [, navigate] = useLocation();
-  const returnTarget = getAdminReturnTarget("/admin/orcamentos");
   const params = useParams<{ id: string }>();
   const quotationId = parseInt(params.id);
+  const returnTarget = getAdminMenuParentTarget(`/admin/orcamentos/${quotationId}`);
 
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);

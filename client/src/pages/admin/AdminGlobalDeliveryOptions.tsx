@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Loader2, Clock, ArrowUp, ArrowDown, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { getAdminContextualReturnTarget } from "@/lib/adminNavigation";
+import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
 
 type GlobalDeliveryOption = {
   id: number;
@@ -24,7 +24,7 @@ const EMPTY_DRAFT = { id: 0, name: "", daysToDeliver: 0, pricePerM2: "0", isActi
 
 export default function AdminGlobalDeliveryOptions() {
   const [location, setLocation] = useLocation();
-  const returnTarget = getAdminContextualReturnTarget(location);
+  const returnTarget = getAdminMenuParentTarget(location);
   const utils = trpc.useUtils();
   const { data: options = [], isLoading } = trpc.globalDeliveryOptions.getAll.useQuery();
 
