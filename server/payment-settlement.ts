@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { financeiro, orders } from "../drizzle/schema";
+import { ensurePaymentReceipt } from "./payment-receipts";
 
 export type ApprovedOnlinePaymentMethod = "pix" | "cartao_credito";
 
@@ -62,5 +63,18 @@ export async function settleApprovedOnlinePayment(
     });
   }
 
-  return { orderId: order.id, paymentMethod: input.paymentMethod, paidAt };
+  const [financeiroRecord] = await db.select({ id: financeiro.id })
+    .from(financeiro)
+    .where(eq(financeiro.pedidoId, input.orderId))
+    .limit(1);
+  const receipt = await ensurePaymentReceipt(
+    db,
+    order,
+    financeiroRecord?.id ?? null,
+    input.paymentMethod,
+    paidAt,
+    { name: "Pagamento online" },
+  );
+
+  return { orderId: order.id, paymentMethod: input.paymentMethod, paidAt, receiptId: receipt.id };
 }

@@ -4354,3 +4354,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Rótulo de Pagamento na Retirada
 - [x] Alterar somente o nome visual Pago para A Receber no painel de retirada
 - [x] Validar que regras, transições e integrações financeiras permanecem inalteradas
+
+## Correção da Geração de Recibos
+- [x] Diagnosticar a falha de geração ou vínculo de recibo após a confirmação de pagamento
+- [x] Corrigir a criação do recibo sem alterar o registro financeiro ou o status de pagamento
+- [x] Validar a confirmação de pagamento, geração e abertura do recibo
