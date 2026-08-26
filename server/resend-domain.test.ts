@@ -32,6 +32,15 @@ describe("Resend Integration", () => {
     expect(typeof resend.emails.send).toBe("function");
   });
 
+  it("deve autenticar a chave em uma consulta leve sem disparar e-mails", async () => {
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const response = await resend.domains.list();
+
+    expect(response.error).toBeNull();
+    expect(Array.isArray(response.data?.data)).toBe(true);
+  });
+
   it("deve validar formato do remetente profissional", () => {
     const from = process.env.RESEND_FROM_EMAIL;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
