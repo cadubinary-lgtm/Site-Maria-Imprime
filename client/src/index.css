@@ -618,3 +618,53 @@
     }
   }
 }
+
+/* Alinhamento exclusivo das colunas compartilhadas em Recibos Emitidos e Avulsos. */
+@media (min-width: 1024px) {
+  .financeiro-recibos .receipt-table {
+    table-layout: fixed;
+  }
+
+  .financeiro-recibos .receipt-table--linked th:nth-child(1),
+  .financeiro-recibos .receipt-table--linked td:nth-child(1) { width: 9%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(2),
+  .financeiro-recibos .receipt-table--linked td:nth-child(2) { width: 14%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(3),
+  .financeiro-recibos .receipt-table--linked td:nth-child(3),
+  .financeiro-recibos .receipt-table--standalone th:nth-child(2),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(2) { width: 25%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(4),
+  .financeiro-recibos .receipt-table--linked td:nth-child(4),
+  .financeiro-recibos .receipt-table--standalone th:nth-child(3),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(3) { width: 17%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(5),
+  .financeiro-recibos .receipt-table--linked td:nth-child(5),
+  .financeiro-recibos .receipt-table--standalone th:nth-child(4),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(4) { width: 10%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(6),
+  .financeiro-recibos .receipt-table--linked td:nth-child(6),
+  .financeiro-recibos .receipt-table--standalone th:nth-child(5),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(5) { width: 10%; }
+  .financeiro-recibos .receipt-table--linked th:nth-child(7),
+  .financeiro-recibos .receipt-table--linked td:nth-child(7),
+  .financeiro-recibos .receipt-table--standalone th:nth-child(6),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(6) { width: 15%; }
+  .financeiro-recibos .receipt-table--standalone th:nth-child(1),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(1) { width: 23%; }
+
+  .financeiro-recibos .receipt-table td:last-child > div {
+    gap: 0.25rem;
+  }
+
+  .financeiro-recibos .receipt-table td:last-child button {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding-inline: 0;
+  }
+
+  .financeiro-recibos .receipt-table--linked td:nth-child(6),
+  .financeiro-recibos .receipt-table--standalone td:nth-child(5) {
+    white-space: normal;
+    line-height: 1.25;
+  }
+}
