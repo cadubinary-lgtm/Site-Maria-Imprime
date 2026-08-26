@@ -4424,3 +4424,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear o menu-pai correspondente a cada grupo de subpáginas administrativas
 - [x] Fazer a seta Voltar abrir o menu-pai da subpágina, sem depender do histórico
 - [x] Validar os destinos e a interface do retorno determinístico
+
+## Exportação do Código para GitHub
+- [x] Criar o repositório público Site Maria Imprime na conta do usuário
+- [x] Enviar todos os arquivos de código da versão atual ao repositório
+- [x] Confirmar o endereço e a integridade do envio
+
+## Correção de Segurança do E-mail
+- [x] Localizar e remover qualquer chave do Resend exposta no código versionado
+- [x] Configurar o envio para usar exclusivamente RESEND_API_KEY segura no ambiente
+- [ ] Validar a lógica de e-mail sem segredos no código e sincronizar a correção ao GitHub
