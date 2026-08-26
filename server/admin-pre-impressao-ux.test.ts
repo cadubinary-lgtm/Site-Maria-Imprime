@@ -32,4 +32,10 @@ describe("painel administrativo de pré-impressão", () => {
     expect(source).toContain("const clearFilters = () => {");
     expect(source).toContain("Limpar filtros");
   });
+
+  it("classifica pedidos em produção somente como Arte Final Aprovada", () => {
+    expect(source).toContain('const effectivePreProductionStatus = order.status === "em_producao"');
+    expect(source).toContain('order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise"');
+    expect(source).toContain('const currentPreStatus = order.status === "em_producao" ? "em_producao"');
+  });
 });
