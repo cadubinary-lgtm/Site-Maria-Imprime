@@ -33,6 +33,8 @@ function getTimelineSteps(order: any) {
   } else {
     return [
       ...base,
+      { key: 'pronto_entrega', label: 'Pronto para Entrega', icon: Box },
+      { key: 'saiu_entrega', label: 'Saiu para Entrega', icon: Truck },
       { key: 'em_transporte', label: 'Em Transporte', icon: Truck },
       { key: 'entregue', label: 'Entregue', icon: Home },
     ];
@@ -93,6 +95,8 @@ export default function OrderConfirmation() {
     em_producao:         "Em Produção",
     pronto_entrega:      "Pronto para Entrega",
     pronto_retirada:     "Pronto para Retirada",
+    saiu_entrega:        "Saiu para Entrega",
+    em_transporte:       "Em Transporte",
     entregue:            "Entregue",
     cancelado:           "Cancelado",
   };

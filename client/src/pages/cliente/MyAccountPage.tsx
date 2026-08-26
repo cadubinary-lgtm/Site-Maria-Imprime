@@ -53,6 +53,8 @@ const STATUS_LABELS: Record<string, string> = {
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",
   pronto_retirada:     "Pronto para Retirada",
+  saiu_entrega:        "Saiu para Entrega",
+  em_transporte:       "Em Transporte",
   entregue:            "Entregue",
   cancelado:           "Cancelado",
 };
@@ -65,6 +67,8 @@ const STATUS_COLORS: Record<string, string> = {
   em_producao:         "bg-orange-100 text-orange-700",
   pronto_entrega:      "bg-teal-100 text-teal-700",
   pronto_retirada:     "bg-cyan-100 text-cyan-700",
+  saiu_entrega:        "bg-indigo-100 text-indigo-700",
+  em_transporte:       "bg-orange-100 text-orange-700",
   entregue:            "bg-emerald-100 text-emerald-700",
   cancelado:           "bg-red-100 text-red-700",
 };

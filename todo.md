@@ -4434,3 +4434,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Localizar e remover qualquer chave do Resend exposta no código versionado
 - [x] Configurar o envio para usar exclusivamente RESEND_API_KEY segura no ambiente
 - [x] Validar a lógica de e-mail sem segredos no código e sincronizar a correção ao GitHub
+
+## Sincronização de Status do Pedido
+- [x] Mapear a regra de status do painel administrativo e do acompanhamento do cliente
+- [x] Unificar a exibição do status e das etapas para o mesmo pedido
+- [x] Validar a sincronização em cenários de entrega e retirada
