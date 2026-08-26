@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { exportReceiptPDF } from "@/lib/export-receipt-pdf";
+import { getAdminContextualReturnTarget } from "@/lib/adminNavigation";
 import { toast } from "sonner";
 
 const paymentLabels: Record<string, string> = { dinheiro: "Dinheiro", pix: "Pix", cartao_credito: "Cartão de crédito", cartao_debito: "Cartão de débito", transferencia: "Transferência", boleto: "Boleto", pagar_na_retirada: "Pagamento na retirada", outro: "Outro" };
@@ -15,7 +16,8 @@ const formatCurrency = (value: string | number) => new Intl.NumberFormat("pt-BR"
 
 export default function FinanceiroReciboPrint() {
   const params = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const returnTarget = getAdminContextualReturnTarget(location);
   const receiptId = Number(params.id);
   const { company } = useCompanySettings();
   const [contactDialog, setContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email" }>({ open: false, channel: "whatsapp" });
@@ -43,7 +45,7 @@ export default function FinanceiroReciboPrint() {
   });
 
   if (isLoading) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-pink-600" aria-label="Carregando recibo" /></div>;
-  if (error || !data) return <div className="flex min-h-screen flex-col items-center justify-center gap-4"><p className="text-gray-600">Recibo não encontrado.</p><Button type="button" className="bg-pink-600 hover:bg-pink-700" onClick={() => setLocation("/admin/financeiro/recibos")}>Voltar aos recibos</Button></div>;
+  if (error || !data) return <div className="flex min-h-screen flex-col items-center justify-center gap-4"><p className="text-gray-600">Recibo não encontrado.</p><Button type="button" className="bg-pink-600 hover:bg-pink-700" onClick={() => setLocation(returnTarget.path)}>{returnTarget.label}</Button></div>;
 
   const { receipt, items } = data;
   const paidAt = new Date(receipt.paidAt).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" });
@@ -85,8 +87,8 @@ export default function FinanceiroReciboPrint() {
   return (
     <>
       <div className="no-print sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-white px-4 py-3 shadow-sm">
-        <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setLocation("/admin/financeiro/recibos")}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />Voltar
+        <Button type="button" variant="outline" className="border-pink-200 text-pink-700 hover:bg-pink-50" onClick={() => setLocation(returnTarget.path)}>
+          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />{returnTarget.label}
         </Button>
         <div className="flex items-center gap-1" aria-label="Ações do recibo">
           <Button type="button" variant="outline" className={actionButtonClass} onClick={handlePrint} aria-label="Imprimir recibo" title="Imprimir recibo">

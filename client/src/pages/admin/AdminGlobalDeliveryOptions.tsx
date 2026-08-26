@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Loader2, Clock, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Clock, ArrowUp, ArrowDown, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { getAdminContextualReturnTarget } from "@/lib/adminNavigation";
 
 type GlobalDeliveryOption = {
   id: number;
@@ -21,6 +23,8 @@ type GlobalDeliveryOption = {
 const EMPTY_DRAFT = { id: 0, name: "", daysToDeliver: 0, pricePerM2: "0", isActive: true };
 
 export default function AdminGlobalDeliveryOptions() {
+  const [location, setLocation] = useLocation();
+  const returnTarget = getAdminContextualReturnTarget(location);
   const utils = trpc.useUtils();
   const { data: options = [], isLoading } = trpc.globalDeliveryOptions.getAll.useQuery();
 
@@ -76,16 +80,21 @@ export default function AdminGlobalDeliveryOptions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Prazos Padrão</h1>
           <p className="mt-1 text-sm text-gray-500">
             Prazos cadastrados aqui aparecem automaticamente ao criar um novo produto.
           </p>
         </div>
-        <Button onClick={openCreate} className="gap-1.5 bg-pink-600 hover:bg-pink-700 text-white">
-          <Plus className="h-4 w-4" /> Novo Prazo
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => setLocation(returnTarget.path)} className="gap-1.5 border-pink-200 text-pink-700 hover:bg-pink-50">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar
+          </Button>
+          <Button onClick={openCreate} className="gap-1.5 bg-pink-600 hover:bg-pink-700 text-white">
+            <Plus className="h-4 w-4" /> Novo Prazo
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

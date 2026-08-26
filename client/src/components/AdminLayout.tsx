@@ -7,7 +7,7 @@ import {
   Kanban, BarChart3, Zap, Tag, Layers, FileCheck, Link2,
   Sliders, UserCheck, ClipboardList, Briefcase, TrendingUp,
   AlertCircle, Menu, X, Printer, Truck, Receipt, Calculator,
-  ShieldCheck, ScrollText, UserCircle, Plus, CreditCard, X as XIcon
+  ShieldCheck, ScrollText, UserCircle, Plus, CreditCard, X as XIcon, ArrowLeft
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { ADMIN_MENU_GROUP_ICON_CLASS, getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
 import { shouldShowAdminMenuItemIcon } from "@/lib/admin-menu-item-visibility";
-import { rememberAdminOrigin } from "@/lib/adminNavigation";
+import { getAdminContextualReturnTarget, rememberAdminOrigin } from "@/lib/adminNavigation";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
@@ -209,8 +209,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const mainRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const previousAdminLocationRef = useRef<string | null>(null);
+  const [previousAdminLocation, setPreviousAdminLocation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const returnTarget = getAdminContextualReturnTarget(location, previousAdminLocation);
+  const shouldShowReturn = location !== "/admin";
 
   // Buscar permissões do operador logado (null = acesso total, [] = sem acesso, [...] = lista de chaves)
   const { data: myPermissions } = trpc.adminAuth.myPermissions.useQuery(undefined, {
@@ -241,9 +245,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (myPermissions as string[]).includes(key);
   };
 
-  // Ao montar o layout E ao mudar de rota: restaura posição do scroll da sidebar
+  // Ao mudar de rota, mantém a origem anterior para o retorno contextual e restaura a sidebar.
   useEffect(() => {
-    rememberAdminOrigin(location);
+    const previousLocation = previousAdminLocationRef.current;
+    if (previousLocation && previousLocation !== location) {
+      rememberAdminOrigin(previousLocation);
+      setPreviousAdminLocation(previousLocation);
+    }
+    previousAdminLocationRef.current = location;
     // Reseta scroll do conteúdo principal
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;
@@ -560,6 +569,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
+              {shouldShowReturn ? (
+                <button
+                  type="button"
+                  onClick={() => setLocation(returnTarget.path)}
+                  className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+                  aria-label={`Voltar: ${returnTarget.label}`}
+                  title={returnTarget.label}
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  <span className="hidden md:inline">Voltar</span>
+                </button>
+              ) : null}
               <div>
                 <p className="text-xs text-gray-400 leading-none">Painel Admin</p>
                 <p className="text-sm font-semibold text-gray-800 leading-tight mt-0.5">

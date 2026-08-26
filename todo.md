@@ -4409,3 +4409,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Incluir as contagens de Pendente, Impresso e Acabamento Finalizado
 - [x] Vincular cada indicador aos pedidos em produção e aos atalhos corretos
 - [x] Validar a exibição e a responsividade dos novos indicadores
+
+## Retorno Contextual no Painel Administrativo
+- [x] Mapear todas as rotas e subrotas administrativas sem retorno explícito
+- [x] Implementar um retorno contextual e acessível sem alterar os fluxos existentes
+- [x] Cobrir a navegação de retorno com regressões e validar as telas principais
