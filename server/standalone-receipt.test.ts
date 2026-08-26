@@ -59,4 +59,13 @@ describe("recibos avulsos", () => {
     expect(printable).toContain("<span className=\"text-sm font-bold tracking-[0.18em]\">RECIBO</span>");
     expect(printable).not.toContain("RECIBO AVULSO");
   });
+
+  it("disponibiliza e-mail e PDF sem exigir um pedido vinculado", () => {
+    expect(router).toContain("sendReciboAvulsoEmail: adminOrManusAuthProcedure");
+    expect(router).toContain("standalone_receipt_email_sent");
+    expect(readFileSync(resolve(process.cwd(), "server/emailService.ts"), "utf8")).toContain("sendStandaloneReceiptEmail");
+    const pdf = readFileSync(resolve(process.cwd(), "client/src/lib/export-receipt-pdf.ts"), "utf8");
+    expect(pdf).toContain("orderNumber?: string | null");
+    expect(pdf).toContain("ITENS DO RECIBO");
+  });
 });

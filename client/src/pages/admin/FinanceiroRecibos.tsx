@@ -27,6 +27,8 @@ export default function FinanceiroRecibos() {
   const [search, setSearch] = useState("");
   const [contactDialog, setContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email"; receipt: any | null }>({ open: false, channel: "whatsapp", receipt: null });
   const [contact, setContact] = useState("");
+  const [standaloneContactDialog, setStandaloneContactDialog] = useState<{ open: boolean; channel: "whatsapp" | "email"; receipt: any | null }>({ open: false, channel: "whatsapp", receipt: null });
+  const [standaloneContact, setStandaloneContact] = useState("");
   const [downloadingReceiptId, setDownloadingReceiptId] = useState<number | null>(null);
   const { company } = useCompanySettings();
   const utils = trpc.useUtils();
@@ -49,6 +51,23 @@ export default function FinanceiroRecibos() {
       setContactDialog({ open: false, channel: "email", receipt: null });
       setContact("");
       refetch();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const prepareStandaloneWhatsApp = trpc.financeiro.prepareReciboAvulsoWhatsApp.useMutation({
+    onSuccess: (result, variables) => {
+      window.open(result.whatsappUrl, "_blank", "noopener,noreferrer");
+      toast.success("Recibo preparado no WhatsApp", { description: "Revise a mensagem e envie-a ao cliente.", position: "top-right", duration: 3500, id: `standalone-receipt-whatsapp-${variables.receiptId}` });
+      setStandaloneContactDialog({ open: false, channel: "whatsapp", receipt: null });
+      setStandaloneContact("");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const sendStandaloneEmail = trpc.financeiro.sendReciboAvulsoEmail.useMutation({
+    onSuccess: (result, variables) => {
+      toast.success("Recibo enviado por e-mail", { description: `Enviado para ${result.recipientEmail}.`, position: "top-right", duration: 3500, id: `standalone-receipt-email-${variables.receiptId}` });
+      setStandaloneContactDialog({ open: false, channel: "email", receipt: null });
+      setStandaloneContact("");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -86,6 +105,41 @@ export default function FinanceiroRecibos() {
     }
   };
 
+  const downloadStandaloneReceiptPdf = async (receiptId: number) => {
+    setDownloadingReceiptId(receiptId);
+    try {
+      const receiptData = await utils.financeiro.getReciboAvulso.fetch({ receiptId });
+      await exportReceiptPDF({
+        ...receiptData.receipt,
+        orderNumber: null,
+        items: receiptData.items.map((item: any) => ({ id: item.id, productName: item.description, quantity: item.quantity, priceAtOrder: item.unitPrice })),
+        companyName: company.tradeName || "Maria Imprime",
+        legalName: company.legalName,
+        cnpj: company.cnpj || "34.528.399/0001-08",
+        commercialPhone: company.commercialPhone,
+        supportEmail: company.supportEmail,
+      });
+      toast.success("PDF do recibo baixado", { position: "top-right", duration: 3500, id: `standalone-receipt-list-pdf-${receiptId}` });
+    } catch (error) {
+      console.error("Erro ao gerar PDF do recibo", error);
+      toast.error("Não foi possível gerar o PDF do recibo.", { position: "top-right", duration: 3500, id: `standalone-receipt-list-pdf-${receiptId}` });
+    } finally {
+      setDownloadingReceiptId(null);
+    }
+  };
+
+  const openStandaloneContact = (receipt: any, channel: "whatsapp" | "email") => {
+    if (receipt.status === "cancelado") return;
+    const defaultContact = channel === "whatsapp" ? String(receipt.customerPhone || "").replace(/\D/g, "") : receipt.customerEmail || "";
+    if (channel === "whatsapp" ? defaultContact.length >= 10 : Boolean(defaultContact)) {
+      if (channel === "whatsapp") prepareStandaloneWhatsApp.mutate({ receiptId: receipt.id, phone: defaultContact });
+      else sendStandaloneEmail.mutate({ receiptId: receipt.id, email: defaultContact });
+      return;
+    }
+    setStandaloneContact("");
+    setStandaloneContactDialog({ open: true, channel, receipt });
+  };
+
   return <AdminLayout><div className="space-y-6 p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900"><ReceiptText className="h-6 w-6 text-pink-600" aria-hidden="true" />Recibos</h1><p className="mt-1 text-sm text-gray-500">Comprovantes gerados automaticamente após a confirmação de pagamentos.</p></div>
@@ -97,8 +151,9 @@ export default function FinanceiroRecibos() {
       {data && data.totalPages > 1 && <div className="flex items-center justify-between border-t p-4"><span className="text-sm text-gray-500">Página {page} de {data.totalPages}</span><div className="flex gap-2"><Button type="button" variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>Anterior</Button><Button type="button" variant="outline" size="sm" disabled={page === data.totalPages} onClick={() => setPage((current) => current + 1)}>Próxima</Button></div></div>}
     </CardContent></Card>
     <Card className="border-0 shadow-sm"><CardHeader className="pb-2"><CardTitle className="text-base">{standaloneData ? `${standaloneData.total} recibo(s) avulso(s) emitido(s)` : "Carregando recibos avulsos..."}</CardTitle></CardHeader><CardContent className="p-0">
-      {standaloneLoading ? <div className="p-8 text-center text-gray-400">Carregando recibos avulsos...</div> : !standaloneData?.data.length ? <div className="p-8 text-center text-gray-400"><ReceiptText className="mx-auto mb-2 h-10 w-10 opacity-30" aria-hidden="true" /><p>Nenhum recibo avulso emitido ainda.</p><p className="mt-1 text-xs">Use Criar recibo para emitir um documento sem pedido vinculado.</p></div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-b bg-pink-50/60"><tr><th className="p-3 text-left font-medium text-gray-600">Recibo</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-left font-medium text-gray-600">Pagamento</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Recebido em</th><th className="p-3 text-center font-medium text-gray-600">Ações</th></tr></thead><tbody className="divide-y divide-gray-100">{standaloneData.data.map((receipt: any) => <tr key={receipt.id} className="transition-colors hover:bg-gray-50"><td className="p-3 font-mono text-xs font-semibold text-pink-600">{receipt.receiptNumber}<Badge variant="outline" className="ml-2 text-[10px]">Avulso</Badge></td><td className="p-3 font-medium">{receipt.customerName}</td><td className="p-3"><Badge variant="outline" className="text-xs">{paymentLabels[receipt.paymentMethod] || receipt.paymentMethod}</Badge></td><td className="p-3 text-right font-semibold text-green-700">{formatCurrency(receipt.amount)}</td><td className="whitespace-nowrap p-3 text-xs text-gray-500">{formatDate(receipt.paidAt)}</td><td className="p-3"><div className="flex justify-center"><Button type="button" size="sm" variant="outline" className="h-8 border-pink-200 px-2 text-pink-700 hover:bg-pink-50" onClick={() => setLocation(`/admin/financeiro/recibos/avulso/${receipt.id}/imprimir`)} aria-label={`Imprimir recibo avulso ${receipt.receiptNumber}`}><Printer className="h-3.5 w-3.5" aria-hidden="true" /></Button></div></td></tr>)}</tbody></table></div>}
+      {standaloneLoading ? <div className="p-8 text-center text-gray-400">Carregando recibos avulsos...</div> : !standaloneData?.data.length ? <div className="p-8 text-center text-gray-400"><ReceiptText className="mx-auto mb-2 h-10 w-10 opacity-30" aria-hidden="true" /><p>Nenhum recibo avulso emitido ainda.</p><p className="mt-1 text-xs">Use Criar recibo para emitir um documento sem pedido vinculado.</p></div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-b bg-pink-50/60"><tr><th className="p-3 text-left font-medium text-gray-600">Recibo</th><th className="p-3 text-left font-medium text-gray-600">Cliente</th><th className="p-3 text-left font-medium text-gray-600">Pagamento</th><th className="p-3 text-right font-medium text-gray-600">Valor</th><th className="p-3 text-left font-medium text-gray-600">Recebido em</th><th className="p-3 text-center font-medium text-gray-600">Ações</th></tr></thead><tbody className="divide-y divide-gray-100">{standaloneData.data.map((receipt: any) => { const isCancelled = receipt.status === "cancelado"; return <tr key={receipt.id} className="transition-colors hover:bg-gray-50"><td className="p-3 font-mono text-xs font-semibold text-pink-600">{receipt.receiptNumber}{isCancelled && <Badge variant="outline" className="ml-2 border-red-200 text-[10px] text-red-600">Cancelado</Badge>}</td><td className="p-3 font-medium">{receipt.customerName}</td><td className="p-3"><Badge variant="outline" className="text-xs">{paymentLabels[receipt.paymentMethod] || receipt.paymentMethod}</Badge></td><td className="p-3 text-right font-semibold text-green-700">{formatCurrency(receipt.amount)}</td><td className="whitespace-nowrap p-3 text-xs text-gray-500">{formatDate(receipt.paidAt)}</td><td className="p-3"><div className="flex justify-center gap-1"><Button type="button" size="sm" variant="outline" className="h-8 border-pink-200 px-2 text-pink-700 hover:bg-pink-50" disabled={isCancelled} onClick={() => setLocation(`/admin/financeiro/recibos/avulso/${receipt.id}/imprimir`)} aria-label={`Imprimir recibo ${receipt.receiptNumber}`}><Printer className="h-3.5 w-3.5" aria-hidden="true" /></Button><Button type="button" size="sm" variant="outline" className="h-8 border-pink-200 px-2 text-pink-700 hover:bg-pink-50" disabled={isCancelled || downloadingReceiptId === receipt.id} onClick={() => downloadStandaloneReceiptPdf(receipt.id)} aria-label={`Baixar recibo ${receipt.receiptNumber} em PDF`}><Download className="h-3.5 w-3.5" aria-hidden="true" /></Button><Button type="button" size="sm" variant="outline" className="h-8 border-green-200 px-2 text-green-700 hover:bg-green-50" disabled={isCancelled || prepareStandaloneWhatsApp.isPending} onClick={() => openStandaloneContact(receipt, "whatsapp")} aria-label={`Preparar recibo ${receipt.receiptNumber} no WhatsApp`}><FaWhatsapp className="h-4 w-4" aria-hidden="true" /></Button><Button type="button" size="sm" variant="outline" className="h-8 border-pink-200 px-2 text-pink-700 hover:bg-pink-50" disabled={isCancelled || sendStandaloneEmail.isPending} onClick={() => openStandaloneContact(receipt, "email")} aria-label={`Enviar recibo ${receipt.receiptNumber} por e-mail`}><Mail className="h-3.5 w-3.5" aria-hidden="true" /></Button></div></td></tr>; })}</tbody></table></div>}
     </CardContent></Card>
     <Dialog open={contactDialog.open} onOpenChange={(open) => !open && setContactDialog({ open: false, channel: "whatsapp", receipt: null })}><DialogContent><DialogHeader><DialogTitle>{contactDialog.channel === "email" ? "Enviar recibo por e-mail" : "Preparar recibo no WhatsApp"}</DialogTitle></DialogHeader><div className="space-y-2"><label htmlFor="receipt-recipient" className="text-sm font-medium text-gray-700">{contactDialog.channel === "email" ? "E-mail do cliente" : "WhatsApp do cliente"}</label><Input id="receipt-recipient" type={contactDialog.channel === "email" ? "email" : "tel"} value={contact} onChange={(event) => setContact(contactDialog.channel === "whatsapp" ? event.target.value.replace(/\D/g, "") : event.target.value)} placeholder={contactDialog.channel === "email" ? "cliente@exemplo.com" : "Ex.: 11999999999"} /></div><DialogFooter><Button type="button" variant="outline" onClick={() => setContactDialog({ open: false, channel: "whatsapp", receipt: null })}>Cancelar</Button><Button type="button" disabled={!contact.trim() || prepareWhatsApp.isPending || sendEmail.isPending} className={contactDialog.channel === "email" ? "bg-pink-600 hover:bg-pink-700" : "bg-green-600 hover:bg-green-700"} onClick={() => { if (!contactDialog.receipt) return; if (contactDialog.channel === "email") sendEmail.mutate({ receiptId: contactDialog.receipt.id, email: contact.trim() }); else prepareWhatsApp.mutate({ receiptId: contactDialog.receipt.id, phone: contact }); }}>{contactDialog.channel === "email" ? "Enviar e-mail" : "Abrir WhatsApp"}</Button></DialogFooter></DialogContent></Dialog>
+    <Dialog open={standaloneContactDialog.open} onOpenChange={(open) => !open && setStandaloneContactDialog({ open: false, channel: "whatsapp", receipt: null })}><DialogContent><DialogHeader><DialogTitle>{standaloneContactDialog.channel === "email" ? "Enviar recibo por e-mail" : "Preparar recibo no WhatsApp"}</DialogTitle></DialogHeader><div className="space-y-2"><label htmlFor="standalone-receipt-recipient" className="text-sm font-medium text-gray-700">{standaloneContactDialog.channel === "email" ? "E-mail do cliente" : "WhatsApp do cliente"}</label><Input id="standalone-receipt-recipient" type={standaloneContactDialog.channel === "email" ? "email" : "tel"} value={standaloneContact} onChange={(event) => setStandaloneContact(standaloneContactDialog.channel === "whatsapp" ? event.target.value.replace(/\D/g, "") : event.target.value)} placeholder={standaloneContactDialog.channel === "email" ? "cliente@exemplo.com" : "Ex.: 11999999999"} /></div><DialogFooter><Button type="button" variant="outline" onClick={() => setStandaloneContactDialog({ open: false, channel: "whatsapp", receipt: null })}>Cancelar</Button><Button type="button" disabled={!standaloneContact.trim() || prepareStandaloneWhatsApp.isPending || sendStandaloneEmail.isPending} className={standaloneContactDialog.channel === "email" ? "bg-pink-600 hover:bg-pink-700" : "bg-green-600 hover:bg-green-700"} onClick={() => { if (!standaloneContactDialog.receipt) return; if (standaloneContactDialog.channel === "email") sendStandaloneEmail.mutate({ receiptId: standaloneContactDialog.receipt.id, email: standaloneContact.trim() }); else prepareStandaloneWhatsApp.mutate({ receiptId: standaloneContactDialog.receipt.id, phone: standaloneContact }); }}>{standaloneContactDialog.channel === "email" ? "Enviar e-mail" : "Abrir WhatsApp"}</Button></DialogFooter></DialogContent></Dialog>
   </div></AdminLayout>;
 }

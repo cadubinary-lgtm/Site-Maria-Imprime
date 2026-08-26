@@ -11,15 +11,16 @@ const navigation = readFileSync(resolve(import.meta.dirname, "../client/src/comp
 const app = readFileSync(resolve(import.meta.dirname, "../client/src/App.tsx"), "utf8");
 const emailService = readFileSync(resolve(import.meta.dirname, "../server/emailService.ts"), "utf8");
 const receiptPdf = readFileSync(resolve(import.meta.dirname, "../client/src/lib/export-receipt-pdf.ts"), "utf8");
+const receiptHelper = readFileSync(resolve(import.meta.dirname, "../server/payment-receipts.ts"), "utf8");
 
 describe("central financeira de recibos", () => {
   it("cria recibos únicos vinculados ao pedido confirmado", () => {
     expect(schema).toContain('export const paymentReceipts = mysqlTable("paymentReceipts"');
     expect(schema).toContain('orderId: int("orderId").notNull().unique()');
     expect(financeRouter).toContain("ensurePaymentReceipt");
-    expect(financeRouter).toContain("receiptNumber = `REC-");
-    expect(financeRouter).toContain("receiptId: receipt.id");
-    expect(financeRouter).toContain("receiptNumber: receipt.receiptNumber");
+    expect(receiptHelper).toContain("const receiptNumber = `REC-");
+    expect(receiptHelper).toContain("orderId: order.id");
+    expect(receiptHelper).toContain("return receipt");
   });
 
   it("mantém ações explícitas de impressão, WhatsApp preparado e e-mail enviado", () => {
