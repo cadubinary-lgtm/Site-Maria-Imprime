@@ -4399,3 +4399,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar seta para expandir e recolher o histórico de produção
 - [x] Manter o histórico recolhido inicialmente sem alterar registros ou permissões
 - [x] Validar a interação e a responsividade do histórico
+
+## Sincronização do Dashboard de Produção
+- [x] Mapear todos os indicadores, contagens e atalhos do dashboard
+- [x] Remover estados inexistentes e alinhar cada indicador aos estágios atuais da Linha de Produção
+- [x] Validar contagens, navegação e regressões operacionais
