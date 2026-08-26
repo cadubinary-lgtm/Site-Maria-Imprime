@@ -20,15 +20,18 @@ describe("painel administrativo de pré-impressão", () => {
     expect(source).toContain('aria-label="Carregando pedidos da pré-impressão"');
   });
 
-  it("comunica o bloqueio comercial e nomeia a continuidade para o pedido", () => {
-    expect(source).toContain("Aguardando Liberação Comercial");
+  it("nomeia a continuidade da arte sem exibir uma etapa comercial inexistente", () => {
+    expect(source).not.toContain("Aguardando Liberação Comercial");
+    expect(source).not.toContain('label="Aguardando liberação"');
+    expect(source).not.toContain("awaitingRelease:");
+    expect(source).toContain('label="Liberado p/ Análise"');
     expect(source).toContain('aria-label={`Ver detalhes do pedido ${order.orderNumber}`}');
     expect(source).toContain('aria-busy={deleteHistoryMutation.isPending}');
   });
 
   it("organiza indicadores e oferece uma forma explícita de limpar filtros", () => {
     expect(source).toContain('aria-label="Indicadores da pré-impressão"');
-    expect(source).toContain('label="Aguardando liberação"');
+    expect(source).toContain('section className="grid grid-cols-1 gap-3 sm:grid-cols-3"');
     expect(source).toContain("const clearFilters = () => {");
     expect(source).toContain("Limpar filtros");
   });
@@ -37,5 +40,6 @@ describe("painel administrativo de pré-impressão", () => {
     expect(source).toContain('const effectivePreProductionStatus = order.status === "em_producao"');
     expect(source).toContain('order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise"');
     expect(source).toContain('const currentPreStatus = order.status === "em_producao" ? "em_producao"');
+    expect(source).toContain('!["pronto_entrega", "pronto_retirada", "entregue", "cancelado"].includes(order.status)');
   });
 });

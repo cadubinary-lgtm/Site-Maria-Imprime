@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link, useSearch } from "wouter";
-import { Search, ChevronRight, Layers, Loader2, Trash2, Clock3, CheckCircle2, CircleAlert, RotateCcw } from "lucide-react";
+import { Search, ChevronRight, Layers, Loader2, Trash2, CheckCircle2, CircleAlert, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { ProductionQuickDetailsDialog } from "@/components/admin/ProductionQuickDetailsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -79,7 +79,7 @@ export default function AdminPreImpressao() {
   });
 
   const activeOrders = useMemo(
-    () => (allOrders as any[]).filter((order) => !["pronto_entrega", "pronto_retirada", "entregue"].includes(order.status)),
+    () => (allOrders as any[]).filter((order) => !["pronto_entrega", "pronto_retirada", "entregue", "cancelado"].includes(order.status)),
     [allOrders]
   );
 
@@ -111,8 +111,7 @@ export default function AdminPreImpressao() {
 
   const prePressSummary = useMemo(() => ({
     active: activeOrders.length,
-    awaitingRelease: activeOrders.filter((order) => ["pagamento_aprovado", "pagamento_retirada"].includes(order.status)).length,
-    inAnalysis: activeOrders.filter((order) => order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise" && !["pagamento_aprovado", "pagamento_retirada"].includes(order.status)).length,
+    inAnalysis: activeOrders.filter((order) => order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise").length,
     approved: activeOrders.filter((order) => order.status === "em_producao" || ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "")).length,
   }), [activeOrders]);
 
@@ -145,7 +144,7 @@ export default function AdminPreImpressao() {
                 </span>
                 Pré-Impressão
               </h1>
-              <p className="mt-2 text-sm text-slate-600">Acompanhe as artes liberadas, as aprovações e os pedidos que aguardam a liberação comercial.</p>
+              <p className="mt-2 text-sm text-slate-600">Acompanhe as artes em análise, aprovadas e os pedidos já encaminhados para produção.</p>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 px-3 py-2 text-xs font-medium text-pink-700">
               <Layers className="h-4 w-4" aria-hidden="true" />
@@ -153,10 +152,9 @@ export default function AdminPreImpressao() {
             </div>
           </header>
 
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores da pré-impressão">
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Indicadores da pré-impressão">
             <PrePressMetric label="Pedidos ativos" value={prePressSummary.active} description="Ainda na linha de pré-impressão" icon={Layers} tone="pink" />
-            <PrePressMetric label="Aguardando liberação" value={prePressSummary.awaitingRelease} description="Pagamento confirmado pelo comercial" icon={Clock3} tone="amber" />
-            <PrePressMetric label="Em análise" value={prePressSummary.inAnalysis} description="Prontos para revisão da arte" icon={CircleAlert} tone="slate" />
+            <PrePressMetric label="Liberado p/ Análise" value={prePressSummary.inAnalysis} description="Prontos para revisão da arte" icon={CircleAlert} tone="slate" />
             <PrePressMetric label="Arte aprovada" value={prePressSummary.approved} description="Aguardando sequência operacional" icon={CheckCircle2} tone="green" />
           </section>
 
@@ -229,8 +227,6 @@ export default function AdminPreImpressao() {
               {filtered.map((order: any) => {
                 const currentPreStatus = order.status === "em_producao" ? "em_producao" : (order.preProductionStatus || "liberado_analise");
                 const statusConfig = PRE_PRODUCTION_STATUS[currentPreStatus];
-                // Regra protegida: pedidos pagos aguardam liberação comercial antes da análise da arte.
-                const isAwaitingRelease = order.status === "pagamento_aprovado" || order.status === "pagamento_retirada";
                 return (
                   <Card key={order.orderId ?? order.id} className="border-slate-200 bg-white transition-shadow hover:shadow-md">
                     <CardContent className="p-4 sm:p-5">
@@ -248,11 +244,7 @@ export default function AdminPreImpressao() {
 
                         <div className="flex w-full items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 lg:w-auto lg:min-w-[230px]">
                           <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">Pré-impressão</span>
-                          {isAwaitingRelease ? (
-                            <Badge className="border border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100">Aguardando Liberação Comercial</Badge>
-                          ) : (
-                            <Badge className={`border ${statusConfig?.color}`}>{statusConfig?.label ?? currentPreStatus}</Badge>
-                          )}
+                          <Badge className={`border ${statusConfig?.color}`}>{statusConfig?.label ?? currentPreStatus}</Badge>
                         </div>
 
                         <Button variant="outline" size="sm" className="h-9 gap-1 border-pink-200 bg-white text-pink-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-800" asChild>
