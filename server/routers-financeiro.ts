@@ -32,6 +32,7 @@ import {
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull, inArray } from "drizzle-orm";
 import { sendPaymentReceiptEmail } from "./emailService";
+import { ensurePaymentReceipt } from "./payment-receipts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -124,30 +125,6 @@ function formatReceiptCurrency(value: string | number) {
 
 function formatReceiptDate(value: number) {
   return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-}
-
-async function ensurePaymentReceipt(db: any, order: any, financeiroId: number | null, paymentMethod: string, paidAt: number, adminUser: any) {
-  const [existing] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.orderId, order.id)).limit(1);
-  if (existing) return existing;
-
-  const receiptNumber = `REC-${new Date(paidAt).getFullYear()}-${String(order.id).padStart(6, "0")}`;
-  await db.insert(paymentReceipts).values({
-    receiptNumber,
-    orderId: order.id,
-    financeiroId,
-    orderNumber: order.orderNumber,
-    customerName: order.guestName || order.deliveryFullName || "Cliente",
-    customerEmail: order.guestEmail || null,
-    customerPhone: order.deliveryPhone || null,
-    amount: order.totalPrice,
-    paymentMethod,
-    paidAt,
-    issuedAt: Date.now(),
-    issuedByAdminId: adminUser?.adminId ?? null,
-    issuedByAdminName: adminUser?.name ?? "Administrador",
-  });
-  const [receipt] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.orderId, order.id)).limit(1);
-  return receipt;
 }
 
 function isUnavailableProductionStorage(error: unknown) {
@@ -954,6 +931,8 @@ export const financeiroRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new Error("Database not available");
+      const paidAt = Date.now();
+      const confirmsPayment = input.status === "pago" || input.status === "retirado_cliente" || input.status === "retirado_terceiros";
 
       // Mapeia status do financeiro para status do pedido
       const orderStatusMap: Record<string, any> = {
@@ -969,7 +948,7 @@ export const financeiroRouter = router({
         await db.update(orders)
           .set({
             status: newOrderStatus,
-            paymentStatus: input.status === "pago" || input.status === "retirado_cliente" || input.status === "retirado_terceiros" ? "pago" : "pendente",
+            paymentStatus: confirmsPayment ? "pago" : "pendente",
             updatedAt: new Date(),
           })
           .where(eq(orders.id, input.orderId));
@@ -984,8 +963,8 @@ export const financeiroRouter = router({
         observacoes: input.observacoes,
         atualizadoEm: new Date(),
       };
-      if (input.status === "pago" || input.status === "retirado_cliente" || input.status === "retirado_terceiros") {
-        finData.dataPagamento = Date.now();
+      if (confirmsPayment) {
+        finData.dataPagamento = paidAt;
       }
 
       if (existing.length > 0) {
@@ -1007,6 +986,24 @@ export const financeiroRouter = router({
             observacoes: input.observacoes,
             criadoPor: ctx.adminUser.adminId,
           });
+        }
+      }
+
+      if (confirmsPayment) {
+        const [paidOrder] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+        const [financeiroRecord] = await db.select({ id: financeiro.id })
+          .from(financeiro)
+          .where(eq(financeiro.pedidoId, input.orderId))
+          .limit(1);
+        if (paidOrder) {
+          await ensurePaymentReceipt(
+            db,
+            paidOrder,
+            financeiroRecord?.id ?? null,
+            paidOrder.paymentMethod || "pagar_na_retirada",
+            paidAt,
+            (ctx as any).adminUser,
+          );
         }
       }
 
