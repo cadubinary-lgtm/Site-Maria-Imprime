@@ -1702,6 +1702,45 @@ export type PaymentReceipt = typeof paymentReceipts.$inferSelect;
 export type InsertPaymentReceipt = typeof paymentReceipts.$inferInsert;
 
 /**
+ * standaloneReceipts - recibos emitidos manualmente, sem vínculo com pedido ou ordem de serviço.
+ * Mantém os recibos financeiros existentes intactos e registra um snapshot independente do cliente e do pagamento.
+ */
+export const standaloneReceipts = mysqlTable("standaloneReceipts", {
+  id: int("id").autoincrement().primaryKey(),
+  receiptNumber: varchar("receiptNumber", { length: 80 }).notNull().unique(),
+  customerName: varchar("customerName", { length: 255 }).notNull(),
+  customerDocument: varchar("customerDocument", { length: 30 }),
+  customerEmail: varchar("customerEmail", { length: 255 }),
+  customerPhone: varchar("customerPhone", { length: 30 }),
+  paymentMethod: varchar("paymentMethod", { length: 50 }).notNull(),
+  paidAt: bigint("paidAt", { mode: "number" }).notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  notes: longtext("notes"),
+  issuedAt: bigint("issuedAt", { mode: "number" }).notNull(),
+  issuedByAdminId: int("issuedByAdminId"),
+  issuedByAdminName: varchar("issuedByAdminName", { length: 150 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type StandaloneReceipt = typeof standaloneReceipts.$inferSelect;
+export type InsertStandaloneReceipt = typeof standaloneReceipts.$inferInsert;
+
+/** Itens discriminados no recibo avulso, armazenados como snapshot do documento emitido. */
+export const standaloneReceiptItems = mysqlTable("standaloneReceiptItems", {
+  id: int("id").autoincrement().primaryKey(),
+  standaloneReceiptId: int("standaloneReceiptId").notNull().references(() => standaloneReceipts.id, { onDelete: "cascade" }),
+  description: varchar("description", { length: 255 }).notNull(),
+  quantity: int("quantity").notNull(),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type StandaloneReceiptItem = typeof standaloneReceiptItems.$inferSelect;
+export type InsertStandaloneReceiptItem = typeof standaloneReceiptItems.$inferInsert;
+
+/**
  * financeiroNotificacoes - Alertas e notificações financeiras
  */
 export const financeiroNotificacoes = mysqlTable("financeiroNotificacoes", {

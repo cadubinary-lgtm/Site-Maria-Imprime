@@ -104,6 +104,8 @@ import FinanceiroFluxoCaixa from "./pages/admin/FinanceiroFluxoCaixa";
 import FinanceiroRelatorios from "./pages/admin/FinanceiroRelatorios";
 import FinanceiroRecibos from "./pages/admin/FinanceiroRecibos";
 import FinanceiroReciboPrint from "./pages/admin/FinanceiroReciboPrint";
+import FinanceiroReciboAvulso from "./pages/admin/FinanceiroReciboAvulso";
+import FinanceiroReciboAvulsoPrint from "./pages/admin/FinanceiroReciboAvulsoPrint";
 
 // ─── Gestão Fiscal ───────────────────────────────────────────────────────────
 import GestaoFiscalDashboard from "./pages/admin/GestaoFiscalDashboard";
@@ -189,8 +191,10 @@ return (
 <Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
-      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
+      <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
+      <Route path="/admin/financeiro/recibos/avulso/:id/imprimir" component={FinanceiroReciboAvulsoPrint} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
+      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
@@ -297,8 +301,10 @@ return (
 <Route path="/admin/configuracoes-site/prazos-padrao" component={AdminGlobalDeliveryOptions} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
-      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
+      <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
+      <Route path="/admin/financeiro/recibos/avulso/:id/imprimir" component={FinanceiroReciboAvulsoPrint} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
+      <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
       {/* Rotas acessíveis para todos os roles admin */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produtos/dashboard" component={AdminProductsDashboard} />
