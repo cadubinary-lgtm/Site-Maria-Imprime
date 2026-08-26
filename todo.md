@@ -4433,4 +4433,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Correção de Segurança do E-mail
 - [x] Localizar e remover qualquer chave do Resend exposta no código versionado
 - [x] Configurar o envio para usar exclusivamente RESEND_API_KEY segura no ambiente
-- [ ] Validar a lógica de e-mail sem segredos no código e sincronizar a correção ao GitHub
+- [x] Validar a lógica de e-mail sem segredos no código e sincronizar a correção ao GitHub
