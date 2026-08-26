@@ -28,11 +28,14 @@ import {
   emailHistory,
   deletedReceivedAccounts,
   paymentReceipts,
+  standaloneReceipts,
+  standaloneReceiptItems,
   productionStatusHistory,
 } from "../drizzle/schema";
 import { eq, ne, and, gte, lte, lt, desc, sql, or, like, isNull, isNotNull, inArray } from "drizzle-orm";
 import { sendPaymentReceiptEmail } from "./emailService";
 import { ensurePaymentReceipt } from "./payment-receipts";
+import { randomUUID } from "node:crypto";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -126,6 +129,24 @@ function formatReceiptCurrency(value: string | number) {
 function formatReceiptDate(value: number) {
   return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
+
+const standaloneReceiptItemSchema = z.object({
+  description: z.string().trim().min(1, "Informe a descrição do item.").max(255),
+  quantity: z.number().int().positive("A quantidade deve ser maior que zero."),
+  unitPrice: z.number().finite().nonnegative("O valor unitário não pode ser negativo."),
+});
+
+const standaloneReceiptSchema = z.object({
+  customerName: z.string().trim().min(2, "Informe o nome do cliente.").max(255),
+  customerDocument: z.string().trim().max(30).optional(),
+  customerEmail: z.string().trim().email("Informe um e-mail válido.").optional().or(z.literal("")),
+  customerPhone: z.string().trim().max(30).optional(),
+  paymentMethod: z.enum(["dinheiro", "pix", "cartao_credito", "cartao_debito", "transferencia", "boleto", "pagar_na_retirada", "outro"]),
+  paidAt: z.number().int().positive().optional(),
+  discount: z.number().finite().nonnegative().default(0),
+  notes: z.string().trim().max(2000).optional(),
+  items: z.array(standaloneReceiptItemSchema).min(1, "Inclua ao menos um item no recibo."),
+});
 
 function isUnavailableProductionStorage(error: unknown) {
   const candidate = error as { code?: string; errno?: number; message?: string; cause?: { message?: string } };
@@ -787,6 +808,105 @@ export const financeiroRouter = router({
     }),
 
   // ── Recibos ──────────────────────────────────────────────────────────────────
+  criarReciboAvulso: adminOrManusAuthProcedure
+    .input(standaloneReceiptSchema)
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+
+      const subtotalInCents = input.items.reduce((total, item) => total + Math.round(item.quantity * item.unitPrice * 100), 0);
+      const discountInCents = Math.round(input.discount * 100);
+      if (discountInCents > subtotalInCents) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "O desconto não pode ser maior que o subtotal dos itens." });
+      }
+
+      const paidAt = input.paidAt ?? Date.now();
+      const issuedAt = Date.now();
+      const receiptNumber = `RAV-${new Date(issuedAt).getFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
+      const subtotal = (subtotalInCents / 100).toFixed(2);
+      const discount = (discountInCents / 100).toFixed(2);
+      const amount = ((subtotalInCents - discountInCents) / 100).toFixed(2);
+
+      const receipt = await db.transaction(async (tx: any) => {
+        await tx.insert(standaloneReceipts).values({
+          receiptNumber,
+          customerName: input.customerName,
+          customerDocument: input.customerDocument || null,
+          customerEmail: input.customerEmail || null,
+          customerPhone: input.customerPhone || null,
+          paymentMethod: input.paymentMethod,
+          paidAt,
+          subtotal,
+          discount,
+          amount,
+          notes: input.notes || null,
+          issuedAt,
+          issuedByAdminId: (ctx as any).adminUser?.adminId ?? null,
+          issuedByAdminName: (ctx as any).adminUser?.name || "Administrador",
+        });
+        const [createdReceipt] = await tx.select().from(standaloneReceipts)
+          .where(eq(standaloneReceipts.receiptNumber, receiptNumber))
+          .limit(1);
+        if (!createdReceipt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Não foi possível emitir o recibo avulso." });
+        await tx.insert(standaloneReceiptItems).values(input.items.map((item) => ({
+          standaloneReceiptId: createdReceipt.id,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: Math.round(item.unitPrice * 100) / 100,
+          subtotal: Math.round(item.quantity * item.unitPrice * 100) / 100,
+        })));
+        return createdReceipt;
+      });
+
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "standalone_receipt_created",
+        entity: "standaloneReceipts",
+        entityId: String(receipt.id),
+        after: { receiptNumber: receipt.receiptNumber, customerName: receipt.customerName, amount: receipt.amount, itemCount: input.items.length },
+        ipAddress: ctx.req.ip,
+      });
+      return { success: true, receiptId: receipt.id, receiptNumber: receipt.receiptNumber };
+    }),
+
+  getRecibosAvulsos: adminOrManusAuthProcedure
+    .input(z.object({
+      page: z.number().int().positive().default(1),
+      limit: z.number().int().min(1).max(100).default(20),
+      search: z.string().trim().max(255).optional(),
+    }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const whereClause = input.search ? or(
+        like(standaloneReceipts.receiptNumber, `%${input.search}%`),
+        like(standaloneReceipts.customerName, `%${input.search}%`),
+        like(standaloneReceipts.customerDocument, `%${input.search}%`),
+      ) : undefined;
+      const offset = (input.page - 1) * input.limit;
+      const [summary] = await db.select({ total: sql<number>`count(*)` }).from(standaloneReceipts).where(whereClause);
+      const data = await db.select().from(standaloneReceipts).where(whereClause)
+        .orderBy(desc(standaloneReceipts.issuedAt)).limit(input.limit).offset(offset);
+      const total = Number(summary?.total ?? 0);
+      return { data, total, page: input.page, totalPages: Math.max(1, Math.ceil(total / input.limit)) };
+    }),
+
+  getReciboAvulso: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(standaloneReceipts)
+        .where(eq(standaloneReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo avulso não encontrado." });
+      const items = await db.select().from(standaloneReceiptItems)
+        .where(eq(standaloneReceiptItems.standaloneReceiptId, receipt.id))
+        .orderBy(standaloneReceiptItems.id);
+      return { receipt, items };
+    }),
+
   getRecibos: adminOrManusAuthProcedure
     .input(z.object({
       page: z.number().int().positive().default(1),

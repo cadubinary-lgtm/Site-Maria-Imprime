@@ -4359,3 +4359,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Diagnosticar a falha de geração ou vínculo de recibo após a confirmação de pagamento
 - [x] Corrigir a criação do recibo sem alterar o registro financeiro ou o status de pagamento
 - [x] Validar a confirmação de pagamento, geração e abertura do recibo
+
+## Recibo Avulso
+- [x] Mapear a estrutura atual de recibos, impressão e permissões administrativas
+- [x] Criar persistência separada para recibos avulsos e seus itens editáveis
+- [x] Emitir recibo avulso com cliente, contato, pagamento, observações e total calculado
+- [x] Permitir adicionar e remover itens, com quantidade, valor unitário e subtotal automático
+- [x] Adicionar o botão Criar recibo e acesso ao recibo avulso na página de Recibos
+- [x] Validar emissão, listagem, abertura, cálculos e responsividade sem alterar recibos de pedidos
