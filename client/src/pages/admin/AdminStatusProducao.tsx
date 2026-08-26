@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link, useSearch } from "wouter";
-import { Search, ChevronRight, Printer, Loader2, Trash2 } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Printer, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductionQuickDetailsDialog } from "@/components/admin/ProductionQuickDetailsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -54,6 +54,7 @@ export default function AdminStatusProducao() {
   const [filterStatus, setFilterStatus] = useState<string>(urlStatus);
   const [quickDetailsStatus, setQuickDetailsStatus] = useState<string | null>(null);
   const [historyEntryToDelete, setHistoryEntryToDelete] = useState<any | null>(null);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const { adminUser } = useAdminAuth();
   const canDeleteHistory = adminUser?.role === "admin" || adminUser?.role === "superadmin";
 
@@ -269,9 +270,16 @@ export default function AdminStatusProducao() {
 
         <Card>
           <CardContent className="pt-5 pb-5">
-            <h2 className="text-base font-semibold text-gray-900">Histórico de Status de Produção</h2>
-            <p className="mt-1 text-sm text-gray-500">Todas as mudanças de estágio, incluindo a retirada automática da tag nos estados finais.</p>
-            {isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-pink-600" /></div> : productionHistory.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma alteração de produção registrada.</p> : <div className="mt-4 space-y-2" aria-live="polite">{productionHistory.map((entry: any) => { const statusCfg = PRODUCTION_STATUS[entry.newStatus] ?? PRODUCTION_STATUS.encerrado; return <div key={`production-history-${entry.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="font-medium">#{entry.orderNumber ?? entry.orderId} · {entry.deliveryFullName || "Cliente não informado"}</span><Badge className={`border ${statusCfg.color}`}>{statusCfg.label}</Badge></div><p className="mt-1 text-xs text-gray-500">{fmtDate(entry.createdAt)} às {fmtTime(entry.createdAt)}{entry.changedByName ? ` · ${entry.changedByName}` : ""}</p>{entry.notes && <p className="mt-1 text-xs text-gray-600">{entry.notes}</p>}</div>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title="Excluir registro do histórico" aria-label={`Excluir registro de produção do pedido ${entry.orderNumber ?? entry.orderId}`} onClick={() => setHistoryEntryToDelete(entry)}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}</div>; })}</div>}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">Histórico de Status de Produção</h2>
+                <p className="mt-1 text-sm text-gray-500">Todas as mudanças de estágio, incluindo a retirada automática da tag nos estados finais.</p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0 text-pink-700 hover:bg-pink-50 hover:text-pink-800" onClick={() => setIsHistoryExpanded((expanded) => !expanded)} aria-expanded={isHistoryExpanded} aria-controls="production-status-history" aria-label={isHistoryExpanded ? "Recolher Histórico de Status de Produção" : "Expandir Histórico de Status de Produção"} title={isHistoryExpanded ? "Recolher histórico" : "Expandir histórico"}>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isHistoryExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
+              </Button>
+            </div>
+            {isHistoryExpanded && <div id="production-status-history">{isLoadingHistory ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-pink-600" /></div> : productionHistory.length === 0 ? <p className="py-6 text-center text-sm text-gray-400">Nenhuma alteração de produção registrada.</p> : <div className="mt-4 space-y-2" aria-live="polite">{productionHistory.map((entry: any) => { const statusCfg = PRODUCTION_STATUS[entry.newStatus] ?? PRODUCTION_STATUS.encerrado; return <div key={`production-history-${entry.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2 text-sm"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="font-medium">#{entry.orderNumber ?? entry.orderId} · {entry.deliveryFullName || "Cliente não informado"}</span><Badge className={`border ${statusCfg.color}`}>{statusCfg.label}</Badge></div><p className="mt-1 text-xs text-gray-500">{fmtDate(entry.createdAt)} às {fmtTime(entry.createdAt)}{entry.changedByName ? ` · ${entry.changedByName}` : ""}</p>{entry.notes && <p className="mt-1 text-xs text-gray-600">{entry.notes}</p>}</div>{canDeleteHistory && <Button type="button" variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0 text-red-500 hover:bg-red-50 hover:text-red-600" title="Excluir registro do histórico" aria-label={`Excluir registro de produção do pedido ${entry.orderNumber ?? entry.orderId}`} onClick={() => setHistoryEntryToDelete(entry)}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}</div>; })}</div>}</div>}
           </CardContent>
         </Card>
         <AlertDialog open={Boolean(historyEntryToDelete)} onOpenChange={(open) => !open && setHistoryEntryToDelete(null)}>

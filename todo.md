@@ -4394,3 +4394,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Alinhamento do Status de Pré-impressão
 - [x] Reposicionar o rótulo Pré-impressão e o status na mesma linha do cartão
 - [x] Validar que o alinhamento preserva filtros, regras e responsividade
+
+## Recolhimento do Histórico de Status de Produção
+- [x] Adicionar seta para expandir e recolher o histórico de produção
+- [x] Manter o histórico recolhido inicialmente sem alterar registros ou permissões
+- [x] Validar a interação e a responsividade do histórico

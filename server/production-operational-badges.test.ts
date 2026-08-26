@@ -44,4 +44,12 @@ describe("alertas e detalhes rápidos da Linha de Produção", () => {
     expect(prePrint).toContain("criado em {fmtDate(order.createdAt)} às {fmtTime(order.createdAt)}");
     expect(production).toContain("{fmtTime(order.createdAt)} • {fmtDate(order.createdAt)}");
   });
+
+  it("mantém o Histórico de Status de Produção recolhido até a ação explícita do operador", () => {
+    const production = readFileSync(productionPath, "utf8");
+
+    expect(production).toContain("const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);");
+    expect(production).toContain('aria-controls="production-status-history"');
+    expect(production).toContain("{isHistoryExpanded && <div id=\"production-status-history\">");
+  });
 });
