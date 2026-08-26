@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
+import { isNewOrderStatus } from "@/lib/newOrderStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +10,10 @@ import { Search, ChevronRight, Package, X, Loader2, Trash2, Clock, RefreshCw } f
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 
-// Novos pedidos = pedidos que acabaram de chegar e precisam de atenção
-// Inclui: pagamento_aprovado, pagamento_retirada
+// Novos pedidos = pedidos recém-aprovados que acabaram de chegar e precisam de atenção.
+// Pedidos de pagamento na retirada seguem o fluxo financeiro e não permanecem nesta fila.
 // Ao clicar em "Abrir", apenas navega para o pedido — NÃO muda o status automaticamente
 // O operador deve mudar o status manualmente para "Analisando" quando começar a trabalhar
-const NEW_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "bg-green-100 text-green-800 border-green-200",   icon: "💳" },
@@ -81,7 +81,7 @@ export default function NewOrders() {
     if (!allOrders) return [];
     const q = search.toLowerCase().trim();
     return (allOrders as any[])
-      .filter((o) => NEW_ORDER_STATUSES.includes(o.status))
+      .filter((o) => isNewOrderStatus(o.status))
       .filter((o) => {
         if (!q) return true;
         return (
