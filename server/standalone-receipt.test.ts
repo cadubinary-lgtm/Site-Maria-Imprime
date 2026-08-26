@@ -7,6 +7,7 @@ const router = readFileSync(resolve(process.cwd(), "server/routers-financeiro.ts
 const form = readFileSync(resolve(process.cwd(), "client/src/pages/admin/FinanceiroReciboAvulso.tsx"), "utf8");
 const list = readFileSync(resolve(process.cwd(), "client/src/pages/admin/FinanceiroRecibos.tsx"), "utf8");
 const app = readFileSync(resolve(process.cwd(), "client/src/App.tsx"), "utf8");
+const printable = readFileSync(resolve(process.cwd(), "client/src/pages/admin/FinanceiroReciboAvulsoPrint.tsx"), "utf8");
 
 describe("recibos avulsos", () => {
   it("mantém recibos avulsos e itens em tabelas separadas dos recibos de pedidos", () => {
@@ -28,14 +29,34 @@ describe("recibos avulsos", () => {
     expect(router).toContain("getReciboAvulso: adminOrManusAuthProcedure");
   });
 
+  it("permite editar, cancelar de modo auditável e preparar o WhatsApp sem apagar o documento", () => {
+    expect(router).toContain("editarReciboAvulso: adminOrManusAuthProcedure");
+    expect(router).toContain("standalone_receipt_updated");
+    expect(router).toContain("cancelarReciboAvulso: adminOrManusAuthProcedure");
+    expect(router).toContain('status: "cancelado"');
+    expect(router).toContain("standalone_receipt_cancelled");
+    expect(router).toContain("prepareReciboAvulsoWhatsApp: adminOrManusAuthProcedure");
+    expect(router).toContain("standalone_receipt_whatsapp_prepared");
+  });
+
   it("oferece criação editável, itens dinâmicos e acesso pela página de recibos", () => {
     expect(form).toContain("const addItem");
     expect(form).toContain("const removeItem");
     expect(form).toContain("Novo item");
-    expect(form).toContain("Emitir recibo avulso");
+    expect(form).toContain('isEditing ? "Salvar alterações" : "Emitir recibo"');
     expect(list).toContain("Criar recibo");
     expect(list).toContain("getRecibosAvulsos.useQuery");
     expect(app).toContain('path="/admin/financeiro/recibos/avulso/novo"');
     expect(app).toContain('path="/admin/financeiro/recibos/avulso/:id/imprimir"');
+  });
+
+  it("oferece ações de edição, WhatsApp e cancelamento confirmado sem imprimir o rótulo Avulso", () => {
+    expect(form).toContain("editarReciboAvulso.useMutation");
+    expect(app).toContain('path="/admin/financeiro/recibos/avulso/:id/editar"');
+    expect(printable).toContain("prepareReciboAvulsoWhatsApp.useMutation");
+    expect(printable).toContain("cancelarReciboAvulso.useMutation");
+    expect(printable).toContain("Cancelar este recibo?");
+    expect(printable).toContain("<span className=\"text-sm font-bold tracking-[0.18em]\">RECIBO</span>");
+    expect(printable).not.toContain("RECIBO AVULSO");
   });
 });

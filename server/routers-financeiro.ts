@@ -907,6 +907,133 @@ export const financeiroRouter = router({
       return { receipt, items };
     }),
 
+  editarReciboAvulso: adminOrManusAuthProcedure
+    .input(standaloneReceiptSchema.extend({ receiptId: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [current] = await db.select().from(standaloneReceipts)
+        .where(eq(standaloneReceipts.id, input.receiptId))
+        .limit(1);
+      if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo avulso não encontrado." });
+      if (current.status === "cancelado") throw new TRPCError({ code: "BAD_REQUEST", message: "Recibos cancelados não podem ser editados." });
+
+      const subtotalInCents = input.items.reduce((total, item) => total + Math.round(item.quantity * item.unitPrice * 100), 0);
+      const discountInCents = Math.round(input.discount * 100);
+      if (discountInCents > subtotalInCents) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "O desconto não pode ser maior que o subtotal dos itens." });
+      }
+      const subtotal = (subtotalInCents / 100).toFixed(2);
+      const discount = (discountInCents / 100).toFixed(2);
+      const amount = ((subtotalInCents - discountInCents) / 100).toFixed(2);
+      const paidAt = input.paidAt ?? current.paidAt;
+
+      await db.transaction(async (tx: any) => {
+        await tx.update(standaloneReceipts).set({
+          customerName: input.customerName,
+          customerDocument: input.customerDocument || null,
+          customerEmail: input.customerEmail || null,
+          customerPhone: input.customerPhone || null,
+          paymentMethod: input.paymentMethod,
+          paidAt,
+          subtotal,
+          discount,
+          amount,
+          notes: input.notes || null,
+          updatedAt: new Date(),
+        }).where(eq(standaloneReceipts.id, input.receiptId));
+        await tx.delete(standaloneReceiptItems).where(eq(standaloneReceiptItems.standaloneReceiptId, input.receiptId));
+        await tx.insert(standaloneReceiptItems).values(input.items.map((item) => ({
+          standaloneReceiptId: input.receiptId,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: Math.round(item.unitPrice * 100) / 100,
+          subtotal: Math.round(item.quantity * item.unitPrice * 100) / 100,
+        })));
+      });
+
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "standalone_receipt_updated",
+        entity: "standaloneReceipts",
+        entityId: String(input.receiptId),
+        after: { receiptNumber: current.receiptNumber, customerName: input.customerName, amount, itemCount: input.items.length },
+        ipAddress: ctx.req.ip,
+      });
+      return { success: true, receiptId: input.receiptId, receiptNumber: current.receiptNumber };
+    }),
+
+  cancelarReciboAvulso: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), reason: z.string().trim().max(1000).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(standaloneReceipts)
+        .where(eq(standaloneReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo avulso não encontrado." });
+      if (receipt.status === "cancelado") return { success: true, alreadyCancelled: true };
+
+      const cancelledAt = Date.now();
+      await db.update(standaloneReceipts).set({
+        status: "cancelado",
+        cancelledAt,
+        cancelledByAdminId: (ctx as any).adminUser?.adminId ?? null,
+        cancelledByAdminName: (ctx as any).adminUser?.name || "Administrador",
+        cancelReason: input.reason || null,
+        updatedAt: new Date(),
+      }).where(eq(standaloneReceipts.id, input.receiptId));
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "standalone_receipt_cancelled",
+        entity: "standaloneReceipts",
+        entityId: String(input.receiptId),
+        after: { receiptNumber: receipt.receiptNumber, cancelledAt, reason: input.reason || null },
+        ipAddress: ctx.req.ip,
+      });
+      return { success: true, alreadyCancelled: false };
+    }),
+
+  prepareReciboAvulsoWhatsApp: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), phone: z.string().trim().min(10).max(30).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [receipt] = await db.select().from(standaloneReceipts)
+        .where(eq(standaloneReceipts.id, input.receiptId))
+        .limit(1);
+      if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo avulso não encontrado." });
+      if (receipt.status === "cancelado") throw new TRPCError({ code: "BAD_REQUEST", message: "Recibos cancelados não podem ser enviados pelo WhatsApp." });
+      const phone = (input.phone || receipt.customerPhone || "").replace(/\D/g, "");
+      if (phone.length < 10) throw new TRPCError({ code: "BAD_REQUEST", message: "Informe um número de WhatsApp válido." });
+      const message = [
+        `Olá, ${receipt.customerName}!`,
+        "",
+        "Segue o seu recibo de pagamento.",
+        `Recibo: ${receipt.receiptNumber}`,
+        `Valor recebido: ${formatReceiptCurrency(receipt.amount)}`,
+        `Forma de pagamento: ${RECEIPT_PAYMENT_LABELS[receipt.paymentMethod] || receipt.paymentMethod}`,
+        `Data: ${formatReceiptDate(receipt.paidAt)}`,
+        "",
+        "Maria Imprime",
+      ].join("\n");
+      const preparedAt = Date.now();
+      await db.update(standaloneReceipts).set({ whatsappPreparedAt: preparedAt })
+        .where(eq(standaloneReceipts.id, receipt.id));
+      await logAudit({
+        adminId: (ctx as any).adminUser?.adminId,
+        adminName: (ctx as any).adminUser?.name || "Administrador",
+        action: "standalone_receipt_whatsapp_prepared",
+        entity: "standaloneReceipts",
+        entityId: String(receipt.id),
+        after: { receiptNumber: receipt.receiptNumber, phone, preparedAt },
+        ipAddress: ctx.req.ip,
+      });
+      return { whatsappUrl: `https://wa.me/55${phone.replace(/^55/, "")}?text=${encodeURIComponent(message)}` };
+    }),
+
   getRecibos: adminOrManusAuthProcedure
     .input(z.object({
       page: z.number().int().positive().default(1),

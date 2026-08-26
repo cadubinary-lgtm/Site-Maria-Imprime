@@ -4367,3 +4367,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir adicionar e remover itens, com quantidade, valor unitário e subtotal automático
 - [x] Adicionar o botão Criar recibo e acesso ao recibo avulso na página de Recibos
 - [x] Validar emissão, listagem, abertura, cálculos e responsividade sem alterar recibos de pedidos
+
+## Gestão de Recibos Avulsos
+- [x] Mapear os pontos de edição, cancelamento e compartilhamento do recibo avulso
+- [x] Adicionar edição de dados e itens com recálculo seguro e auditoria
+- [x] Adicionar cancelamento confirmado, sem excluir o histórico do documento
+- [x] Adicionar envio do recibo avulso pelo WhatsApp do cliente
+- [x] Remover a palavra Avulso do cabeçalho de impressão e manter a identificação do documento
+- [x] Validar as ações, impressão, permissões e regressões dos recibos existentes

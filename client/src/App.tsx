@@ -192,6 +192,7 @@ return (
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
+      <Route path="/admin/financeiro/recibos/avulso/:id/editar" component={FinanceiroReciboAvulso} />
       <Route path="/admin/financeiro/recibos/avulso/:id/imprimir" component={FinanceiroReciboAvulsoPrint} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
@@ -302,6 +303,7 @@ return (
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
+      <Route path="/admin/financeiro/recibos/avulso/:id/editar" component={FinanceiroReciboAvulso} />
       <Route path="/admin/financeiro/recibos/avulso/:id/imprimir" component={FinanceiroReciboAvulsoPrint} />
       <Route path="/admin/financeiro/recibos/:id/imprimir" component={FinanceiroReciboPrint} />
       <Route path="/admin/financeiro/recibos" component={FinanceiroRecibos} />
