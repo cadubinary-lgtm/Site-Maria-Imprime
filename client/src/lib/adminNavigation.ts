@@ -120,6 +120,10 @@ export function getAdminContextualReturnTarget(currentPath: string, preferredOri
   const target = getAdminReturnTarget(fallbackPath, preferredOrigin);
 
   if (target.path === safeCurrentPath) {
+    const persistedTarget = getAdminReturnTarget(fallbackPath);
+    if (persistedTarget.path !== safeCurrentPath) {
+      return persistedTarget;
+    }
     return {
       path: fallbackPath,
       label: RETURN_LABELS[fallbackPath] ?? "Voltar",

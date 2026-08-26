@@ -56,6 +56,18 @@ describe("navegação contextual administrativa", () => {
     });
   });
 
+  it("recupera a origem persistida quando o estado transitório aponta para a própria tela", () => {
+    vi.stubGlobal("window", {
+      location: { search: "" },
+      sessionStorage: { getItem: () => "/admin/pedidos" },
+    });
+
+    expect(getAdminContextualReturnTarget("/admin/pre-impressao", "/admin/pre-impressao")).toEqual({
+      path: "/admin/pedidos",
+      label: "Voltar para Pedidos",
+    });
+  });
+
   it("mantém rótulos específicos para os submenus operacionais e financeiros", () => {
     expect(createAdminDetailLocation("/admin/pedidos/42", "/admin/pre-impressao"))
       .toContain("from=%2Fadmin%2Fpre-impressao");
@@ -101,7 +113,7 @@ describe("navegação contextual administrativa", () => {
 
     expect(source).toContain("getAdminContextualReturnTarget(location, previousAdminLocation)");
     expect(source).toContain("aria-label={`Voltar: ${returnTarget.label}`}");
-    expect(source).toContain("rememberAdminOrigin(previousLocation)");
+    expect(source).toContain("rememberAdminOrigin(currentLocation)");
   });
 
   it("mantém retorno contextual nas exceções com cabeçalho próprio", () => {

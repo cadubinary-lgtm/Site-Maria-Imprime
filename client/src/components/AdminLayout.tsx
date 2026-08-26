@@ -16,6 +16,7 @@ import { trpc } from "@/lib/trpc";
 import { ADMIN_MENU_GROUP_ICON_CLASS, getAdminMenuGroupColors } from "@/lib/admin-menu-group-colors";
 import { shouldShowAdminMenuItemIcon } from "@/lib/admin-menu-item-visibility";
 import { getAdminContextualReturnTarget, rememberAdminOrigin } from "@/lib/adminNavigation";
+import { isNewOrderStatus } from "@/lib/newOrderStatus";
 import { ADMIN_DASHBOARD_LINKS } from "@/lib/admin-dashboard-links";
 import { getAdminMenuIndicators } from "@/lib/admin-menu-indicators";
 import { ADMIN_VISUAL_SYSTEM } from "@/lib/admin-visual-system";
@@ -133,6 +134,7 @@ function NavLink({ item, depth = 0, searchQuery }: { item: NavItem; depth?: numb
 
   // Salva a posição do scroll no localStorage ANTES de navegar
   const saveScrollPosition = () => {
+    rememberAdminOrigin(currentLocation);
     if (ctx?.navRef.current) {
       const scrollTop = ctx.navRef.current.scrollTop;
       try {
@@ -249,7 +251,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     const previousLocation = previousAdminLocationRef.current;
     if (previousLocation && previousLocation !== location) {
-      rememberAdminOrigin(previousLocation);
       setPreviousAdminLocation(previousLocation);
     }
     previousAdminLocationRef.current = location;
@@ -295,11 +296,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     staleTime: 5 * 60 * 1000,
   });
 
-  // Badge de Novos Pedidos: apenas status iniciais de criação
-  // Ao mudar para "analisando" ou posterior, o pedido sai desta contagem automaticamente
-  const pendingCount = orders?.filter((o: any) =>
-    ["pagamento_aprovado", "pagamento_retirada"].includes(o.status)
-  ).length ?? 0;
+  // Badge de Novos Pedidos: apenas pedidos recém-aprovados aguardando a primeira triagem.
+  // Pedidos de pagamento na retirada seguem o fluxo financeiro e não devem permanecer como novos.
+  const pendingCount = orders?.filter((o: any) => isNewOrderStatus(o.status)).length ?? 0;
 
   const menuIndicators = useMemo(
     () => getAdminMenuIndicators(orders as any[] ?? [], products?.length ?? 0),

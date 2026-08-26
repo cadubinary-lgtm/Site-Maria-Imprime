@@ -4414,3 +4414,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear todas as rotas e subrotas administrativas sem retorno explícito
 - [x] Implementar um retorno contextual e acessível sem alterar os fluxos existentes
 - [x] Cobrir a navegação de retorno com regressões e validar as telas principais
+
+## Correção do Retorno e de Novos Pedidos
+- [x] Corrigir o retorno para usar a página administrativa anterior ou o submenu de origem
+- [x] Revisar a regra do indicador de Novos Pedidos e remover a contagem incorreta
+- [x] Validar a navegação e os indicadores sem alterar fluxos existentes
