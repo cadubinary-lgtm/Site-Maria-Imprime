@@ -41,7 +41,7 @@ const ADMIN_RETURN_FALLBACKS: Array<[RegExp, string]> = [
   [/^\/admin\/pedidos$/, "/admin"],
   [/^\/admin\/pedidos\/(?:novos|kanban|\d+)$/, "/admin/pedidos"],
   [/^\/admin\/producao\/kanban$/, "/admin"],
-  [/^\/admin\/(?:pre-impressao|status-producao)$/, "/admin"],
+  [/^\/admin\/(?:pre-impressao|status-producao)$/, "/producao"],
   [/^\/admin\/orcamentos$/, "/admin"],
   [/^\/admin\/orcamentos\/(?:novo|\d+(?:\/editar)?)$/, "/admin/orcamentos"],
   [/^\/admin\/os$/, "/admin"],
@@ -89,6 +89,14 @@ export function getAdminFallbackPath(currentPath: string): string {
 
   const matchedFallback = ADMIN_RETURN_FALLBACKS.find(([pattern]) => pattern.test(safePath));
   return matchedFallback?.[1] ?? "/admin";
+}
+
+export function getAdminMenuParentTarget(currentPath: string): AdminReturnTarget {
+  const path = getAdminFallbackPath(currentPath);
+  return {
+    path,
+    label: RETURN_LABELS[path] ?? "Voltar",
+  };
 }
 
 export function getAdminReturnTarget(fallbackPath: string, preferredOrigin?: string | null): AdminReturnTarget {

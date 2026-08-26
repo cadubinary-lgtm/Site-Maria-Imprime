@@ -24,7 +24,7 @@ import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
 import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
 import AdminLayout from "@/components/AdminLayout";
-import { getAdminReturnTarget } from "@/lib/adminNavigation";
+import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -1969,7 +1969,7 @@ export function OrderDetailContent({
 export default function AdminOrderDetail() {
   const [, params] = useRoute("/admin/pedidos/:id");
   const orderId = params?.id ? parseInt(params.id) : null;
-  const { path: backRoute, label: backLabel } = getAdminReturnTarget("/admin/pedidos");
+  const { path: backRoute, label: backLabel } = getAdminMenuParentTarget(`/admin/pedidos/${orderId ?? "0"}`);
   return (
     <AdminLayout>
       <OrderDetailContent orderId={orderId} backRoute={backRoute} backLabel={backLabel} />

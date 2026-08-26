@@ -40,7 +40,7 @@ import {
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getAdminReturnTarget } from "@/lib/adminNavigation";
+import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { parseQuotationCurrency, resolveQuotationItemTotal, roundQuotationMoney } from "@/lib/quotationItemPricing";
 import { QUOTATION_AUTO_ADVANCE_MS, scheduleQuotationAutoAdvance } from "@/lib/quotationAutoAdvance";
@@ -104,10 +104,10 @@ const CUSTOM_ITEM_NAME_MAX_LENGTH = 80;
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function AdminQuotationForm() {
   const [, navigate] = useLocation();
-  const returnTarget = getAdminReturnTarget("/admin/orcamentos");
   const params = useParams<{ id?: string }>();
   const isEdit = !!params.id;
   const quotationId = params.id ? parseInt(params.id) : undefined;
+  const returnTarget = getAdminMenuParentTarget(isEdit ? `/admin/orcamentos/${quotationId}/editar` : "/admin/orcamentos/novo");
   const { adminUser } = useAdminAuth();
 
   // ── Form state ──────────────────────────────────────────────────────────

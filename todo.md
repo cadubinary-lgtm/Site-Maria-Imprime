@@ -4419,3 +4419,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o retorno para usar a página administrativa anterior ou o submenu de origem
 - [x] Revisar a regra do indicador de Novos Pedidos e remover a contagem incorreta
 - [x] Validar a navegação e os indicadores sem alterar fluxos existentes
+
+## Retorno ao Menu-Pai Administrativo
+- [x] Mapear o menu-pai correspondente a cada grupo de subpáginas administrativas
+- [x] Fazer a seta Voltar abrir o menu-pai da subpágina, sem depender do histórico
+- [x] Validar os destinos e a interface do retorno determinístico
