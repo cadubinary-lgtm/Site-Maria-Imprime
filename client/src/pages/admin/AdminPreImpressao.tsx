@@ -246,12 +246,12 @@ export default function AdminPreImpressao() {
                           <p className="mt-1 text-xs text-slate-500">{order.deliveryPhone || "Telefone não informado"} <span aria-hidden="true">•</span> criado em {fmtDate(order.createdAt)} às {fmtTime(order.createdAt)}</p>
                         </div>
 
-                        <div className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 lg:w-auto lg:min-w-[230px]">
-                          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Pré-impressão</span>
+                        <div className="flex w-full items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 lg:w-auto lg:min-w-[230px]">
+                          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">Pré-impressão</span>
                           {isAwaitingRelease ? (
-                            <Badge className="mt-1.5 border border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100">Aguardando Liberação Comercial</Badge>
+                            <Badge className="border border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100">Aguardando Liberação Comercial</Badge>
                           ) : (
-                            <Badge className={`mt-1.5 border ${statusConfig?.color}`}>{statusConfig?.label ?? currentPreStatus}</Badge>
+                            <Badge className={`border ${statusConfig?.color}`}>{statusConfig?.label ?? currentPreStatus}</Badge>
                           )}
                         </div>
 
