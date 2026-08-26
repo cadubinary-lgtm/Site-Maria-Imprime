@@ -208,12 +208,16 @@ export default function CartPage() {
   const [recalculating, setRecalculating] = useState<number | null>(null);
 
   const updateQty = trpc.cart.updateQuantity.useMutation({
-    onSuccess: async (_, variables) => {
+    onSuccess: async (result, variables) => {
       await refetch();
-      // Verificar se o frete foi recalculado (item com CEP e transportadora)
+      // Usa a confirmação do servidor para não depender de dados anteriores ao refetch.
       const item = cartItems.find(i => i.id === variables.id);
       if (item?.cepDestino && item?.shippingMethod && item.shippingMethod !== 'retirada' && !item.shippingMethod.startsWith('local_')) {
-        toast.success("Quantidade e frete atualizados!");
+        if (result.shippingRecalculated) {
+          toast.success("Quantidade e frete atualizados!");
+        } else {
+          toast.warning("Quantidade atualizada. Não foi possível recalcular o frete agora; tente alterar a forma de envio.");
+        }
       }
       setRecalculating(null);
     },

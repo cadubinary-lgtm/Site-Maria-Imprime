@@ -1207,8 +1207,11 @@ export const appRouter = router({
                 };
                 const activeCarriers = await db.select().from(carriers).where(eqOp(carriers.isActive, true));
                 const activeCarrierMap = new Map(activeCarriers.map((c: any) => [c.companyId, true]));
-                const quotes = await calcME(settings.accessToken, settings.sandbox, payload);
                 const targetMethod = String(cartRow.shippingMethod);
+                const quotes = await calcME(settings.accessToken, settings.sandbox, {
+                  ...payload,
+                  services: targetMethod,
+                });
                 const matched = quotes.find((q: any) => !q.error && activeCarrierMap.has(q.company.id) && String(q.id) === targetMethod);
                 if (matched) {
                   newShippingPrice = parseFloat((matched as any).custom_price || (matched as any).price);
@@ -1220,7 +1223,7 @@ export const appRouter = router({
           // Silencioso: falha no recálculo não bloqueia a atualização de quantidade
         }
         await updateCartItemQuantity(input.id, userId, input.quantity, sessionId, newShippingPrice);
-        return { success: true };
+        return { success: true, shippingRecalculated: newShippingPrice !== null, shippingPrice: newShippingPrice };
       }),
 
     removeItem: publicProcedure

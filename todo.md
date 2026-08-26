@@ -4449,3 +4449,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Diagnosticar a origem da ação permanente executada fora da lixeira
 - [x] Corrigir o vínculo entre a lixeira e a exclusão permanente
 - [x] Validar as exclusões reversível e permanente de orçamentos
+
+## Recálculo de Frete por Quantidade
+- [x] Mapear a atualização de quantidade e as dependências do cálculo de frete
+- [x] Corrigir o recálculo de frete quando a quantidade for alterada
+- [x] Validar o frete e o total em diferentes quantidades

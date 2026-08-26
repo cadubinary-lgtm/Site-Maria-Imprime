@@ -1032,7 +1032,7 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
         FROM cartItems ci
         JOIN products p ON ci.productId = p.id
         WHERE ci.userId = ${userId}
-        ORDER BY ci.createdAt DESC
+        ORDER BY ci.updatedAt DESC, ci.id DESC
       `
     ) as any;
   } else if (sessionId) {
@@ -1050,7 +1050,7 @@ export async function getCartByUser(userId: number | null, sessionId?: string | 
         FROM cartItems ci
         JOIN products p ON ci.productId = p.id
         WHERE ci.sessionId = ${sessionId}
-        ORDER BY ci.createdAt DESC
+        ORDER BY ci.updatedAt DESC, ci.id DESC
       `
     ) as any;
   } else {
