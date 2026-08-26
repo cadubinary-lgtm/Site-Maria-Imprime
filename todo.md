@@ -4385,3 +4385,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 ## Alinhamento das Tabelas de Recibos
 - [x] Alinhar as colunas visíveis de Recibos Emitidos e Recibos Avulsos
 - [x] Validar que somente a organização visual foi alterada
+
+## Correção de Pré-impressão em Produção
+- [x] Mapear os filtros e as contagens de Liberado para Análise e Arte Final Aprovada
+- [x] Classificar pedidos em produção somente como Arte Final Aprovada na Pré-impressão
+- [x] Validar filtros, contagens e regressões dos fluxos de pré-impressão e produção

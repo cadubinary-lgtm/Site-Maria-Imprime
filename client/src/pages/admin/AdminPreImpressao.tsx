@@ -86,12 +86,15 @@ export default function AdminPreImpressao() {
   const filtered = useMemo(() => {
     return activeOrders
       .filter((order) => {
-        const isApprovedOrProducing = ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "") || order.status === "em_producao";
+        const effectivePreProductionStatus = order.status === "em_producao"
+          ? "em_producao"
+          : (order.preProductionStatus || "liberado_analise");
+        const isApprovedOrProducing = ["arte_final_aprovada", "em_producao"].includes(effectivePreProductionStatus);
         const matchesStatus = filterStatus === "todos"
           ? true
           : filterStatus === "arte_final_aprovada"
             ? isApprovedOrProducing
-            : (order.preProductionStatus || "liberado_analise") === filterStatus;
+            : effectivePreProductionStatus === filterStatus;
         const matchesSearch = !search
           || order.orderNumber?.toLowerCase().includes(search.toLowerCase())
           || order.deliveryFullName?.toLowerCase().includes(search.toLowerCase())
@@ -102,15 +105,15 @@ export default function AdminPreImpressao() {
   }, [activeOrders, filterStatus, search]);
 
   const preProductionOrdersByStatus = useMemo(() => ({
-    liberado_analise: activeOrders.filter((order) => (order.preProductionStatus || "liberado_analise") === "liberado_analise"),
-    arte_final_aprovada: activeOrders.filter((order) => ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "") || order.status === "em_producao"),
+    liberado_analise: activeOrders.filter((order) => order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise"),
+    arte_final_aprovada: activeOrders.filter((order) => order.status === "em_producao" || ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "")),
   }) as Record<string, any[]>, [activeOrders]);
 
   const prePressSummary = useMemo(() => ({
     active: activeOrders.length,
     awaitingRelease: activeOrders.filter((order) => ["pagamento_aprovado", "pagamento_retirada"].includes(order.status)).length,
-    inAnalysis: activeOrders.filter((order) => (order.preProductionStatus || "liberado_analise") === "liberado_analise" && !["pagamento_aprovado", "pagamento_retirada"].includes(order.status)).length,
-    approved: activeOrders.filter((order) => ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "") || order.status === "em_producao").length,
+    inAnalysis: activeOrders.filter((order) => order.status !== "em_producao" && (order.preProductionStatus || "liberado_analise") === "liberado_analise" && !["pagamento_aprovado", "pagamento_retirada"].includes(order.status)).length,
+    approved: activeOrders.filter((order) => order.status === "em_producao" || ["arte_final_aprovada", "em_producao"].includes(order.preProductionStatus || "")).length,
   }), [activeOrders]);
 
   const hasActiveFilters = Boolean(search) || filterStatus !== "todos";
@@ -224,7 +227,7 @@ export default function AdminPreImpressao() {
           ) : (
             <section className="space-y-3" aria-label="Pedidos ativos de pré-impressão">
               {filtered.map((order: any) => {
-                const currentPreStatus = order.preProductionStatus || "liberado_analise";
+                const currentPreStatus = order.status === "em_producao" ? "em_producao" : (order.preProductionStatus || "liberado_analise");
                 const statusConfig = PRE_PRODUCTION_STATUS[currentPreStatus];
                 // Regra protegida: pedidos pagos aguardam liberação comercial antes da análise da arte.
                 const isAwaitingRelease = order.status === "pagamento_aprovado" || order.status === "pagamento_retirada";
