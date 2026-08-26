@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "wouter";
-import { ArrowLeft, Plus, ReceiptText, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useParams } from "wouter";
+import { ArrowLeft, Loader2, Plus, ReceiptText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -16,26 +16,52 @@ const PAYMENT_OPTIONS = [
 ] as const;
 
 type DraftItem = { id: number; description: string; quantity: number; unitPrice: number };
+type PaymentMethod = (typeof PAYMENT_OPTIONS)[number][0];
 const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function FinanceiroReciboAvulso() {
   const [, setLocation] = useLocation();
+  const params = useParams<{ id?: string }>();
+  const receiptId = Number(params.id);
+  const isEditing = Number.isInteger(receiptId) && receiptId > 0;
   const [customerName, setCustomerName] = useState("");
   const [customerDocument, setCustomerDocument] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<(typeof PAYMENT_OPTIONS)[number][0]>("pix");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [paidDate, setPaidDate] = useState(today);
   const [discount, setDiscount] = useState(0);
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<DraftItem[]>([{ id: 1, description: "", quantity: 1, unitPrice: 0 }]);
+  const receiptQuery = trpc.financeiro.getReciboAvulso.useQuery({ receiptId }, { enabled: isEditing });
+
+  useEffect(() => {
+    if (!receiptQuery.data) return;
+    const { receipt, items: savedItems } = receiptQuery.data;
+    setCustomerName(receipt.customerName || "");
+    setCustomerDocument(receipt.customerDocument || "");
+    setCustomerEmail(receipt.customerEmail || "");
+    setCustomerPhone(receipt.customerPhone || "");
+    setPaymentMethod(receipt.paymentMethod as PaymentMethod);
+    setPaidDate(new Date(receipt.paidAt).toISOString().slice(0, 10));
+    setDiscount(Number(receipt.discount) || 0);
+    setNotes(receipt.notes || "");
+    setItems(savedItems.map((item: any) => ({ id: item.id, description: item.description, quantity: item.quantity, unitPrice: Number(item.unitPrice) })));
+  }, [receiptQuery.data]);
 
   const subtotal = useMemo(() => items.reduce((total, item) => total + item.quantity * item.unitPrice, 0), [items]);
   const total = Math.max(0, subtotal - discount);
   const createReceipt = trpc.financeiro.criarReciboAvulso.useMutation({
     onSuccess: (data) => {
-      toast.success("Recibo avulso emitido", { description: `${data.receiptNumber} foi criado com sucesso.`, position: "top-right" });
+      toast.success("Recibo emitido", { description: `${data.receiptNumber} foi criado com sucesso.`, position: "top-right" });
+      setLocation(`/admin/financeiro/recibos/avulso/${data.receiptId}/imprimir`);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const editReceipt = trpc.financeiro.editarReciboAvulso.useMutation({
+    onSuccess: (data) => {
+      toast.success("Recibo atualizado", { description: `${data.receiptNumber} foi salvo com sucesso.`, position: "top-right" });
       setLocation(`/admin/financeiro/recibos/avulso/${data.receiptId}/imprimir`);
     },
     onError: (error) => toast.error(error.message),
@@ -50,18 +76,26 @@ export default function FinanceiroReciboAvulso() {
     if (items.some((item) => !item.description.trim() || item.quantity <= 0)) return toast.error("Preencha a descrição e a quantidade de todos os itens.");
     if (subtotal <= 0) return toast.error("Informe ao menos um valor de item maior que zero.");
     if (discount > subtotal) return toast.error("O desconto não pode ser maior que o subtotal.");
-    createReceipt.mutate({
+    const payload = {
       customerName: customerName.trim(), customerDocument: customerDocument.trim() || undefined,
       customerEmail: customerEmail.trim() || undefined, customerPhone: customerPhone.trim() || undefined,
       paymentMethod, paidAt: new Date(`${paidDate}T12:00:00`).getTime(), discount,
       notes: notes.trim() || undefined,
       items: items.map(({ description, quantity, unitPrice }) => ({ description: description.trim(), quantity, unitPrice })),
-    });
+    };
+    if (isEditing) editReceipt.mutate({ receiptId, ...payload });
+    else createReceipt.mutate(payload);
   };
 
+  const isBusy = createReceipt.isPending || editReceipt.isPending;
+  if (isEditing && receiptQuery.isLoading) return <AdminLayout><div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-pink-600" aria-label="Carregando recibo" /></div></AdminLayout>;
+  if (isEditing && (receiptQuery.error || !receiptQuery.data)) return <AdminLayout><div className="flex min-h-[60vh] flex-col items-center justify-center gap-4"><p className="text-gray-600">Recibo não encontrado.</p><Button type="button" onClick={() => setLocation("/admin/financeiro/recibos")} className="bg-pink-600 hover:bg-pink-700">Voltar aos recibos</Button></div></AdminLayout>;
+  if (isEditing && receiptQuery.data?.receipt.status === "cancelado") return <AdminLayout><div className="flex min-h-[60vh] flex-col items-center justify-center gap-4"><ReceiptText className="h-10 w-10 text-red-500" aria-hidden="true" /><p className="font-semibold text-gray-800">Este recibo está cancelado e não pode ser editado.</p><Button type="button" onClick={() => setLocation(`/admin/financeiro/recibos/avulso/${receiptId}/imprimir`)} className="bg-pink-600 hover:bg-pink-700">Ver recibo</Button></div></AdminLayout>;
+
+  const title = isEditing ? "Editar recibo" : "Criar recibo";
   return <AdminLayout><div className="mx-auto max-w-6xl space-y-6 p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900"><ReceiptText className="h-6 w-6 text-pink-600" aria-hidden="true" />Criar recibo avulso</h1><p className="mt-1 text-sm text-gray-500">Emita um recibo independente, sem pedido ou ordem de serviço vinculados.</p></div>
+      <div><h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900"><ReceiptText className="h-6 w-6 text-pink-600" aria-hidden="true" />{title}</h1><p className="mt-1 text-sm text-gray-500">{isEditing ? "Atualize as informações e os itens registrados neste recibo." : "Emita um recibo independente, sem pedido ou ordem de serviço vinculados."}</p></div>
       <Button type="button" variant="outline" onClick={() => setLocation("/admin/financeiro/recibos")} className="border-pink-200 text-pink-700 hover:bg-pink-50"><ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />Voltar aos recibos</Button>
     </div>
 
@@ -85,14 +119,14 @@ export default function FinanceiroReciboAvulso() {
         </CardContent></Card>
 
         <Card className="border-0 shadow-sm"><CardHeader className="border-b pb-4"><CardTitle className="text-base">Pagamento e observações</CardTitle></CardHeader><CardContent className="grid gap-4 pt-5 sm:grid-cols-2">
-          <label className="space-y-1.5"><span className="text-sm font-medium text-gray-700">Forma de pagamento *</span><select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as typeof paymentMethod)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50">{PAYMENT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className="space-y-1.5"><span className="text-sm font-medium text-gray-700">Forma de pagamento *</span><select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50">{PAYMENT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
           <label className="space-y-1.5"><span className="text-sm font-medium text-gray-700">Data do recebimento *</span><Input type="date" value={paidDate} onChange={(event) => setPaidDate(event.target.value)} /></label>
           <label className="space-y-1.5"><span className="text-sm font-medium text-gray-700">Desconto (R$)</span><Input type="number" min="0" max={subtotal} step="0.01" value={discount || ""} onChange={(event) => setDiscount(Math.max(0, Number(event.target.value) || 0))} placeholder="0,00" /></label>
           <label className="space-y-1.5 sm:col-span-2"><span className="text-sm font-medium text-gray-700">Observações</span><Textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Informações complementares que devem constar no recibo." rows={4} /></label>
         </CardContent></Card>
       </div>
 
-      <aside className="h-fit rounded-2xl border border-pink-100 bg-pink-50/70 p-5 shadow-sm lg:sticky lg:top-6"><p className="text-xs font-bold uppercase tracking-[0.16em] text-pink-700">Resumo do recibo</p><dl className="mt-5 space-y-3 text-sm"><div className="flex justify-between gap-3"><dt className="text-gray-600">Subtotal</dt><dd className="font-medium text-gray-900">{formatCurrency(subtotal)}</dd></div><div className="flex justify-between gap-3"><dt className="text-gray-600">Desconto</dt><dd className="font-medium text-gray-900">− {formatCurrency(discount)}</dd></div><div className="border-t border-pink-200 pt-3"><div className="flex justify-between gap-3"><dt className="font-bold text-gray-900">Total recebido</dt><dd className="text-xl font-black text-pink-700">{formatCurrency(total)}</dd></div></div></dl><Button type="button" className="mt-6 w-full bg-pink-600 hover:bg-pink-700" disabled={createReceipt.isPending || total <= 0} onClick={submit}>{createReceipt.isPending ? "Emitindo recibo..." : "Emitir recibo avulso"}</Button><p className="mt-3 text-center text-xs leading-5 text-gray-500">O recibo será salvo como documento independente e não altera pedidos, ordens de serviço ou contas existentes.</p></aside>
+      <aside className="h-fit rounded-2xl border border-pink-100 bg-pink-50/70 p-5 shadow-sm lg:sticky lg:top-6"><p className="text-xs font-bold uppercase tracking-[0.16em] text-pink-700">Resumo do recibo</p><dl className="mt-5 space-y-3 text-sm"><div className="flex justify-between gap-3"><dt className="text-gray-600">Subtotal</dt><dd className="font-medium text-gray-900">{formatCurrency(subtotal)}</dd></div><div className="flex justify-between gap-3"><dt className="text-gray-600">Desconto</dt><dd className="font-medium text-gray-900">− {formatCurrency(discount)}</dd></div><div className="border-t border-pink-200 pt-3"><div className="flex justify-between gap-3"><dt className="font-bold text-gray-900">Total recebido</dt><dd className="text-xl font-black text-pink-700">{formatCurrency(total)}</dd></div></div></dl><Button type="button" className="mt-6 w-full bg-pink-600 hover:bg-pink-700" disabled={isBusy || total <= 0} onClick={submit}>{isBusy ? "Salvando..." : isEditing ? "Salvar alterações" : "Emitir recibo"}</Button><p className="mt-3 text-center text-xs leading-5 text-gray-500">O recibo é salvo como documento independente e não altera pedidos, ordens de serviço ou contas existentes.</p></aside>
     </div>
   </div></AdminLayout>;
 }
