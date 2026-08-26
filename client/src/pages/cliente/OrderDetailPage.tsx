@@ -602,6 +602,8 @@ function getStatusSteps(order: any) {
   } else {
     return [
       ...base,
+      { key: 'pronto_entrega', label: 'Pronto para\nEntrega', emoji: '📦' },
+      { key: 'saiu_entrega', label: 'Saiu para\nEntrega', emoji: '🚚' },
       { key: 'em_transporte', label: 'Em\nTransporte', emoji: '🚛' },
       { key: 'entregue', label: 'Entregue', emoji: '✅' },
     ];
@@ -616,6 +618,8 @@ const STATUS_LABELS: Record<string, string> = {
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",
   pronto_retirada:     "Pronto para Retirada",
+  saiu_entrega:        "Saiu para Entrega",
+  em_transporte:       "Em Transporte",
   entregue:            "Entregue",
   cancelado:           "Cancelado",
 };

@@ -15,6 +15,8 @@ const STEPS_ENTREGA = [
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
   { key: "em_producao",         label: "Em Produção",            icon: Printer },
   { key: "pronto_entrega",      label: "Pronto para Entrega",    icon: Truck },
+  { key: "saiu_entrega",        label: "Saiu para Entrega",      icon: Truck },
+  { key: "em_transporte",       label: "Em Transporte",          icon: Truck },
   { key: "entregue",            label: "Entregue",               icon: Home },
 ];
 
@@ -49,6 +51,8 @@ const STATUS_LABELS: Record<string, string> = {
   em_producao:         "Em Produção",
   pronto_entrega:      "Pronto para Entrega",
   pronto_retirada:     "Pronto para Retirada",
+  saiu_entrega:        "Saiu para Entrega",
+  em_transporte:       "Em Transporte",
   entregue:            "Entregue",
   cancelado:           "Cancelado",
 };
