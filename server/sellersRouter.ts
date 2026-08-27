@@ -3,6 +3,7 @@ import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   adminAccounts,
+  adminSessions,
   clients,
   orderItems,
   orders,
@@ -129,6 +130,9 @@ export const sellersRouter = router({
             throw new TRPCError({ code: "CONFLICT", message: "Esta conta já está vinculada a um vendedor." });
           }
           let adminAccountId = existing?.id;
+          if (existing && existing.role === "superadmin") {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Uma conta Superadmin não pode ser convertida em vendedor. Crie uma conta comercial exclusiva." });
+          }
           if (!adminAccountId) {
             const [accountResult] = await tx.insert(adminAccounts).values({
               name: input.name,
@@ -142,6 +146,14 @@ export const sellersRouter = router({
               permissions: JSON.stringify([]),
             } as any);
             adminAccountId = Number(accountResult.insertId);
+          } else {
+            await tx.update(adminAccounts).set({
+              name: input.name,
+              role: "seller",
+              status: "active",
+              permissions: JSON.stringify([]),
+              updatedAt: now,
+            }).where(eq(adminAccounts.id, adminAccountId));
           }
           const [sellerResult] = await tx.insert(sellers).values({
             adminAccountId,
@@ -170,6 +182,7 @@ export const sellersRouter = router({
         id: z.number().int().positive(),
         name: z.string().trim().min(2).max(150).optional(),
         email: z.string().trim().email().max(255).optional(),
+        password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres.").optional(),
         commissionRate: z.number().min(0).max(100).optional(),
         status: z.enum(["active", "inactive"]).optional(),
       }))
@@ -184,12 +197,25 @@ export const sellersRouter = router({
         if (input.status !== undefined) sellerUpdate.status = input.status;
         const accountUpdate: Record<string, unknown> = { updatedAt: now };
         if (input.name !== undefined) accountUpdate.name = input.name;
-        if (input.email !== undefined) accountUpdate.email = input.email.toLowerCase();
+        if (input.email !== undefined) {
+          const [sameEmail] = await db.select({ id: adminAccounts.id }).from(adminAccounts)
+            .where(eq(adminAccounts.email, input.email.toLowerCase())).limit(1);
+          if (sameEmail && sameEmail.id !== existing.adminAccountId) {
+            throw new TRPCError({ code: "CONFLICT", message: "Já existe uma conta cadastrada com este e-mail." });
+          }
+          accountUpdate.email = input.email.toLowerCase();
+        }
+        if (input.password !== undefined) accountUpdate.passwordHash = await hashPassword(input.password);
+        accountUpdate.role = "seller";
+        accountUpdate.permissions = JSON.stringify([]);
         if (input.status !== undefined) accountUpdate.status = input.status;
 
         await (db as any).transaction(async (tx: any) => {
           await tx.update(sellers).set(sellerUpdate).where(eq(sellers.id, input.id));
           await tx.update(adminAccounts).set(accountUpdate).where(eq(adminAccounts.id, existing.adminAccountId));
+          if (input.password !== undefined || input.status === "inactive") {
+            await tx.delete(adminSessions).where(eq(adminSessions.adminId, existing.adminAccountId));
+          }
         });
         const adminUser = (ctx as any).adminUser;
         await logAudit({
@@ -201,6 +227,30 @@ export const sellersRouter = router({
           before: { commissionRate: existing.commissionRate, status: existing.status },
           after: input,
         });
+        return { success: true };
+      }),
+
+    delete: salesAdminProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+        const [seller] = await db.select().from(sellers).where(eq(sellers.id, input.id)).limit(1);
+        if (!seller) throw new TRPCError({ code: "NOT_FOUND", message: "Vendedor não encontrado." });
+        const [commission] = await db.select({ id: sellerCommissions.id }).from(sellerCommissions)
+          .where(eq(sellerCommissions.sellerId, seller.id)).limit(1);
+        if (commission) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Este vendedor possui comissões registradas. Desative-o para preservar o histórico financeiro." });
+        }
+        await (db as any).transaction(async (tx: any) => {
+          await tx.update(orders).set({ sellerId: null, updatedAt: new Date() }).where(eq(orders.sellerId, seller.id));
+          await tx.update(quotations).set({ sellerId: null, updatedAt: new Date() }).where(eq(quotations.sellerId, seller.id));
+          await tx.delete(adminSessions).where(eq(adminSessions.adminId, seller.adminAccountId));
+          await tx.delete(sellers).where(eq(sellers.id, seller.id));
+          await tx.delete(adminAccounts).where(eq(adminAccounts.id, seller.adminAccountId));
+        });
+        const adminUser = (ctx as any).adminUser;
+        await logAudit({ adminId: adminUser.adminId, adminName: adminUser.name, action: "delete_seller", entity: "sellers", entityId: String(seller.id), before: { adminAccountId: seller.adminAccountId, status: seller.status }, after: { permanentlyDeletedAt: Date.now() } });
         return { success: true };
       }),
 

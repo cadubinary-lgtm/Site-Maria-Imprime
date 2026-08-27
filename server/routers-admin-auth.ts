@@ -661,7 +661,9 @@ export const adminAuthRouter = router({
     const result = await (db as any).query.adminAccounts.findMany({
       orderBy: (t: any, { desc }: any) => desc(t.createdAt),
     });
-    return result.map((a: any) => ({
+    const sellerProfiles = await db.select({ adminAccountId: sellers.adminAccountId }).from(sellers);
+    const sellerAccountIds = new Set(sellerProfiles.map((seller: any) => seller.adminAccountId));
+    return result.filter((a: any) => !sellerAccountIds.has(a.id)).map((a: any) => ({
       id: a.id,
       name: a.name,
       email: a.email,

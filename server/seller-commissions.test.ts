@@ -12,6 +12,7 @@ const appSource = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
 const adminNavigationSource = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
 const customerLoginSource = readFileSync(resolve(root, "client/src/pages/ecommerce/CustomerLogin.tsx"), "utf8");
 const adminAuthRouterSource = readFileSync(resolve(root, "server/routers-admin-auth.ts"), "utf8");
+const adminSellersSource = readFileSync(resolve(root, "client/src/pages/admin/AdminSellers.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -84,5 +85,14 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(adminAuthRouterSource).toContain("Este vendedor possui histórico de comissões");
     expect(adminAuthRouterSource).toContain("await tx.delete(sellers).where(eq(sellers.id, sellerProfile.id))");
     expect(adminAuthRouterSource).toContain("removedSellerProfile: Boolean(sellerProfile)");
+  });
+
+  it("separa vendedores da lista de operadores e permite à gestão comercial editar ou excluir com confirmação", () => {
+    expect(adminAuthRouterSource).toContain("const sellerAccountIds = new Set");
+    expect(adminAuthRouterSource).toContain("!sellerAccountIds.has(a.id)");
+    expect(sellerRouterSource).toContain("delete: salesAdminProcedure");
+    expect(sellerRouterSource).toContain("input.password !== undefined");
+    expect(adminSellersSource).toContain("Nova senha");
+    expect(adminSellersSource).toContain("Excluir vendedor permanentemente?");
   });
 });
