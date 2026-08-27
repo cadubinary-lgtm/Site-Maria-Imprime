@@ -16,6 +16,9 @@ const adminSellersSource = readFileSync(resolve(root, "client/src/pages/admin/Ad
 const sellerOrdersSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrders.tsx"), "utf8");
 const checkoutRouterSource = readFileSync(resolve(root, "server/routers.ts"), "utf8");
 const checkoutPageSource = readFileSync(resolve(root, "client/src/pages/ecommerce/CheckoutPage.tsx"), "utf8");
+const quotationsRouterSource = readFileSync(resolve(root, "server/quotationsRouter.ts"), "utf8");
+const quotationFormSource = readFileSync(resolve(root, "client/src/pages/admin/AdminQuotationForm.tsx"), "utf8");
+const sellerQuotationFormSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotationForm.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -150,5 +153,23 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(checkoutPageSource).toContain("{canUsePickupPayment && (");
     expect(adminSellersSource).toContain("Liberar retirada");
     expect(adminSellersSource).toContain("Pagamento na retirada");
+  });
+
+  it("reutiliza o formulário profissional de orçamentos na central do vendedor", () => {
+    expect(sellerQuotationFormSource).toContain("<AdminQuotationForm />");
+    expect(sellerQuotationFormSource).toContain("<SellerLayout");
+    expect(appSource).toContain('path="/vendedor/orcamentos/novo" component={SellerQuotationForm}');
+    expect(quotationFormSource).toContain('window.location.pathname.startsWith("/vendedor/")');
+    expect(quotationFormSource).toContain("Vendedor responsável");
+    expect(quotationFormSource).toContain("disabled={isSellerMode}");
+  });
+
+  it("vincula autoria e impede acesso de vendedor a orçamento de outra carteira", () => {
+    expect(quotationsRouterSource).toContain("getSellerQuotationScope");
+    expect(quotationsRouterSource).toContain("sellerId: seller?.id");
+    expect(quotationsRouterSource).toContain('"Você só pode acessar seus próprios orçamentos."');
+    expect(quotationsRouterSource).toContain('"Você só pode editar seus próprios orçamentos."');
+    expect(quotationsRouterSource).toContain('"Você só pode converter seus próprios orçamentos."');
+    expect(quotationsRouterSource).toContain("responsibleName: seller?.name ?? input.responsibleName");
   });
 });

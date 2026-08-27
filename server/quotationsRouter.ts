@@ -39,6 +39,20 @@ function requireQuotationAdmin(ctx: any) {
   return adminUser;
 }
 
+/** Obtém o perfil comercial ativo quando a sessão pertence a um vendedor. */
+async function getSellerQuotationScope(ctx: any, db: any) {
+  if (ctx.adminUser?.role !== "seller") return null;
+  const { sellers, adminAccounts } = await import("../drizzle/schema.js");
+  const [seller] = await db
+    .select({ id: sellers.id, name: adminAccounts.name })
+    .from(sellers)
+    .innerJoin(adminAccounts, eq(sellers.adminAccountId, adminAccounts.id))
+    .where(and(eq(sellers.adminAccountId, ctx.adminUser.adminId), eq(sellers.status, "active")))
+    .limit(1);
+  if (!seller) throw new TRPCError({ code: "FORBIDDEN", message: "Perfil de vendedor indisponível." });
+  return seller;
+}
+
 // ─── Router ─────────────────────────────────────────────────────────────────
 
 export const quotationsRouter = router({
@@ -53,7 +67,7 @@ export const quotationsRouter = router({
       page: z.number().default(1),
       limit: z.number().default(20),
     }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, clients, deletedQuotations } = await import("../drizzle/schema.js");
@@ -62,6 +76,8 @@ export const quotationsRouter = router({
 
       // Build where conditions
       const conditions: any[] = [sql`NOT EXISTS (SELECT 1 FROM deletedQuotations dq WHERE dq.quotationId = ${quotations.id})`];
+      const seller = await getSellerQuotationScope(ctx, db);
+      if (seller) conditions.push(eq(quotations.sellerId, seller.id));
       const startAt = input.startDate ? new Date(`${input.startDate}T00:00:00.000`) : undefined;
       const endAt = input.endDate ? new Date(`${input.endDate}T23:59:59.999`) : undefined;
       if (startAt && !Number.isNaN(startAt.getTime())) conditions.push(gte(quotations.createdAt, startAt));
@@ -168,7 +184,7 @@ export const quotationsRouter = router({
   // ── Buscar orçamento por ID ─────────────────────────────────────────────
   getById: adminAnyProcedure
     .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems, clients, customerAccounts, users } = await import("../drizzle/schema.js");
@@ -205,6 +221,7 @@ export const quotationsRouter = router({
           createdAt: quotations.createdAt,
           updatedAt: quotations.updatedAt,
           clientId: quotations.clientId,
+          sellerId: quotations.sellerId,
           clientName: clients.name,
           clientEmail: clients.email,
           clientPhone: clients.phone,
@@ -223,6 +240,10 @@ export const quotationsRouter = router({
         .where(eq(quotations.id, input.id));
 
       if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const seller = await getSellerQuotationScope(ctx, db);
+      if (seller && quotation.sellerId !== seller.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Você só pode acessar seus próprios orçamentos." });
+      }
 
       let resolvedClient = quotation;
       if (!quotation.clientName && quotation.clientId) {
@@ -289,8 +310,9 @@ export const quotationsRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems } = await import("../drizzle/schema.js");
+      const seller = await getSellerQuotationScope(ctx, db);
 
-      const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.id ?? 1;
+      const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id ?? 1;
       const quotationNumber = generateQuotationNumber();
 
       const subtotal = input.items.reduce((acc, i) => acc + i.totalPrice, 0);
@@ -305,7 +327,8 @@ export const quotationsRouter = router({
         quotationNumber,
         clientId: input.clientId,
         operatorId,
-        responsibleName: input.responsibleName,
+        responsibleName: seller?.name ?? input.responsibleName,
+        sellerId: seller?.id,
         status: input.saveAsDraft ? "rascunho" : "enviado",
         subtotal: subtotal.toFixed(2) as any,
         discountType: input.discountType,
@@ -379,13 +402,17 @@ export const quotationsRouter = router({
       legalTerms: z.string().trim().min(1).max(12000).optional(),
       responsibleName: z.string().trim().min(1).max(150).optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems } = await import("../drizzle/schema.js");
 
-      const [existing] = await db.select({ status: quotations.status }).from(quotations).where(eq(quotations.id, input.id));
+      const [existing] = await db.select({ status: quotations.status, sellerId: quotations.sellerId }).from(quotations).where(eq(quotations.id, input.id));
       if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const seller = await getSellerQuotationScope(ctx, db);
+      if (seller && existing.sellerId !== seller.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Você só pode editar seus próprios orçamentos." });
+      }
       const updates: Record<string, any> = {};
       if (input.clientId !== undefined) updates.clientId = input.clientId;
       if (input.discountType !== undefined) updates.discountType = input.discountType;
@@ -402,7 +429,7 @@ export const quotationsRouter = router({
       }
       if (input.commercialNotes !== undefined) updates.commercialNotes = input.commercialNotes;
       if (input.legalTerms !== undefined) updates.legalTerms = input.legalTerms;
-      if (input.responsibleName !== undefined) updates.responsibleName = input.responsibleName;
+      if (input.responsibleName !== undefined) updates.responsibleName = seller?.name ?? input.responsibleName;
 
       if (input.items) {
         const subtotal = input.items.reduce((acc, i) => acc + i.totalPrice, 0);
@@ -626,6 +653,7 @@ export const quotationsRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems, orders, orderItems, clients } = await import("../drizzle/schema.js");
+      const seller = await getSellerQuotationScope(ctx, db);
 
       const [quotation] = await db
         .select()
@@ -640,9 +668,12 @@ export const quotationsRouter = router({
 
       const q = (quotation as any).quotations;
       const c = (quotation as any).clients;
+      if (seller && q.sellerId !== seller.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Você só pode converter seus próprios orçamentos." });
+      }
 
       const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.id ?? 1;
+      const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.adminId ?? (ctx as any).adminUser?.id ?? 1;
 
       const [orderResult] = await db.insert(orders).values({
         clientId: q.clientId,

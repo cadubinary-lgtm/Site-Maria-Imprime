@@ -33,6 +33,7 @@ import OrderConfirmation from "./pages/ecommerce/OrderConfirmation";
 import GuestOrderTracking from "./pages/ecommerce/GuestOrderTracking";
 import CustomerRegister from "./pages/ecommerce/CustomerRegister";
 import CustomerLogin from "./pages/ecommerce/CustomerLogin";
+import SellerQuotationForm from "./pages/seller/SellerQuotationForm";
 import VerifyEmail from "./pages/ecommerce/VerifyEmail";
 import ForgotPassword from "./pages/ecommerce/ForgotPassword";
 import ResetPassword from "./pages/ecommerce/ResetPassword";
@@ -182,6 +183,8 @@ function SellerRoutes() {
       <Route path="/vendedor" component={SellerOrders} />
       <Route path="/vendedor/pedidos" component={SellerOrders} />
       <Route path="/vendedor/orcamentos" component={SellerQuotations} />
+      <Route path="/vendedor/orcamentos/novo" component={SellerQuotationForm} />
+      <Route path="/vendedor/orcamentos/:id/editar" component={SellerQuotationForm} />
       <Route path="/vendedor/vendas/nova" component={SellerNewSale} />
       <Route path="/vendedor/comissoes" component={SellerOrders} />
     </Switch>

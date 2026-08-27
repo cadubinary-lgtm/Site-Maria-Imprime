@@ -4530,3 +4530,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir restaurar recibos da lixeira sem alterar o pedido ou lançamento financeiro
 - [x] Exigir confirmação para mover recibo à lixeira e excluir definitivamente
 - [x] Permitir exclusão permanente apenas dentro da lixeira de recibos
+- [x] Reutilizar o layout e recursos do formulário administrativo de orçamentos para vendedores
+- [x] Vincular automaticamente o vendedor como responsável pela emissão do orçamento
+- [x] Restringir edição, visualização e conversão a pedidos aos orçamentos próprios do vendedor

@@ -107,7 +107,10 @@ export default function AdminQuotationForm() {
   const params = useParams<{ id?: string }>();
   const isEdit = !!params.id;
   const quotationId = params.id ? parseInt(params.id) : undefined;
-  const returnTarget = getAdminMenuParentTarget(isEdit ? `/admin/orcamentos/${quotationId}/editar` : "/admin/orcamentos/novo");
+  const isSellerMode = window.location.pathname.startsWith("/vendedor/");
+  const returnTarget = isSellerMode
+    ? { path: "/vendedor/orcamentos", label: "Voltar para Orçamentos" }
+    : getAdminMenuParentTarget(isEdit ? `/admin/orcamentos/${quotationId}/editar` : "/admin/orcamentos/novo");
   const { adminUser } = useAdminAuth();
 
   // ── Form state ──────────────────────────────────────────────────────────
@@ -966,13 +969,13 @@ export default function AdminQuotationForm() {
   };
 
   return (
-    <div className="admin-visual-system h-screen overflow-y-scroll overscroll-contain p-6 pb-12 max-w-6xl mx-auto space-y-6">
+    <div className={`admin-visual-system ${isSellerMode ? "p-0 pb-6" : "h-screen overflow-y-scroll overscroll-contain p-6 pb-12"} max-w-6xl mx-auto space-y-6`}>
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="gap-1">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="shrink-0 gap-1">
           <ArrowLeft className="w-4 h-4" /> {returnTarget.label}
         </Button>
-        <div>
+        <div className="min-w-0 sm:flex-1">
           <h1 className="text-xl font-bold text-gray-900">
             {isEdit ? `Editar Orçamento #${existingQuotation?.quotationNumber ?? "..."}` : "Novo Orçamento"}
           </h1>
@@ -1296,7 +1299,7 @@ export default function AdminQuotationForm() {
                 <div>
                   <div className="flex items-center gap-1.5 text-sm font-medium text-gray-800">
                     <User className="h-3.5 w-3.5 text-pink-600" aria-hidden="true" />
-                    Responsável pela emissão
+                    {isSellerMode ? "Vendedor responsável" : "Responsável pela emissão"}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">Nome que será exibido neste orçamento e na impressão.</p>
                 </div>
@@ -1310,6 +1313,7 @@ export default function AdminQuotationForm() {
                     maxLength={150}
                     placeholder="Nome de quem está criando o orçamento"
                     required
+                    disabled={isSellerMode}
                   />
                 </div>
               </div>
