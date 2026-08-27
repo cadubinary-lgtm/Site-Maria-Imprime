@@ -1,16 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { BarChart3, ClipboardList, FileText, LogOut, Menu, PlusCircle, ReceiptText, X } from "lucide-react";
+import { ClipboardList, FileText, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
 const navigation = [
-  { href: "/vendedor", label: "Visão geral", icon: BarChart3 },
-  { href: "/vendedor/vendas/nova", label: "Nova venda", icon: PlusCircle },
-  { href: "/vendedor/pedidos", label: "Meus pedidos", icon: ClipboardList },
+  { href: "/vendedor/pedidos", label: "Meus Pedidos / Minhas Vendas", icon: ClipboardList },
   { href: "/vendedor/orcamentos", label: "Meus orçamentos", icon: FileText },
-  { href: "/vendedor/comissoes", label: "Minhas comissões", icon: ReceiptText },
 ];
 
 export default function SellerLayout({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {

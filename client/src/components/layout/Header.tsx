@@ -42,6 +42,7 @@ export default function Header() {
   // No Manus: usar Manus OAuth | No site: usar sistema próprio
   const isAuthenticated = isManus ? isManusAuth : !!adminUser;
   const user = isManus ? manusUser : (adminUser ? { name: adminUser.name, email: adminUser.email } : null);
+  const isSellerSession = !isManus && adminUser?.role === "seller";
   const { customer, isAuthenticated: isCustomerAuth, refetch: refetchCustomer } = useCustomerAuth();
   const priceAudience = customer?.priceTier === "reseller" ? "reseller" : "final";
   const [searchQuery, setSearchQuery] = useState("");
@@ -234,8 +235,23 @@ export default function Header() {
             {/* Carrinho sempre visível */}
             <CartIcon />
 
-            {/* Admin logado via Manus OAuth */}
-            {isAuthenticated && user ? (
+            {/* Sessão comercial do vendedor */}
+            {isSellerSession && adminUser ? (
+              <div className="flex items-center gap-2">
+                <Link href="/vendedor/pedidos">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-gray-700 hover:text-pink-600">
+                    <Package className="w-4 h-4" />
+                    Minhas Vendas
+                  </Button>
+                </Link>
+                <span className="rounded-full border border-pink-200 bg-pink-50 px-3 py-1.5 text-xs font-semibold text-pink-700" translate="no">
+                  Modo vendedor: {adminUser.name}
+                </span>
+                <Button onClick={handleAdminLogout} variant="ghost" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700" title="Sair do modo vendedor">
+                  <LogOut className="mr-1 h-4 w-4" />Sair
+                </Button>
+              </div>
+            ) : isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleAdminLogout}
@@ -281,7 +297,7 @@ export default function Header() {
             ) : (
               /* Visitante */
               <>
-                <Link href="/login-cliente">
+                <Link href="/login">
                   <Button variant="ghost" size="sm">
                     Login
                   </Button>
@@ -379,7 +395,19 @@ export default function Header() {
             </div>
 
             {/* Mobile User Menu */}
-            {isAuthenticated && user ? (
+            {isSellerSession && adminUser ? (
+              <div className="space-y-2">
+                <div className="rounded-lg bg-pink-50 px-3 py-2 text-sm font-medium text-pink-700" translate="no">Modo vendedor: {adminUser.name}</div>
+                <Link href="/vendedor/pedidos">
+                  <Button variant="outline" size="sm" className={`w-full justify-start ${HOME_SECONDARY_ACTION_CLASS}`} onClick={() => setMobileMenuOpen(false)}>
+                    <Package className="mr-2 h-4 w-4" />Minhas Vendas
+                  </Button>
+                </Link>
+                <Button onClick={handleAdminLogout} variant="ghost" size="sm" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700">
+                  <LogOut className="mr-2 h-4 w-4" />Sair
+                </Button>
+              </div>
+            ) : isAuthenticated && user ? (
               /* Admin */
               <div className="space-y-2">
                 <div className="text-sm text-gray-700" translate="no">{user.name || user.email}</div>
@@ -435,7 +463,7 @@ export default function Header() {
             ) : (
               /* Visitante */
               <div className="space-y-2">
-                <Link href="/login-cliente">
+                <Link href="/login">
                   <Button
                     variant="outline"
                     size="sm"

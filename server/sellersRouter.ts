@@ -22,8 +22,8 @@ import { publicProcedure, router } from "./_core/trpc";
 
 const salesAdminProcedure = adminOrManusAuthProcedure.use(({ ctx, next }) => {
   const role = (ctx as any).adminUser?.role;
-  if (role !== "admin" && role !== "superadmin") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem gerenciar vendedores e comissões." });
+  if (role !== "superadmin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas o Superadmin pode gerenciar vendedores e visualizar a carteira global de comissões." });
   }
   return next({ ctx });
 });
@@ -395,8 +395,14 @@ export const sellersRouter = router({
         total: orders.totalPrice,
         shippingPrice: orders.shippingPrice,
         createdAt: orders.createdAt,
-        clientName: clients.name,
-      }).from(orders).leftJoin(clients, eq(orders.clientId, clients.id)).where(and(...conditions)).orderBy(desc(orders.createdAt));
+        clientName: sql<string>`COALESCE(${clients.name}, ${orders.guestName}, ${orders.deliveryFullName}, 'Cliente')`,
+        customerEmail: orders.guestEmail,
+        commissionAmount: sellerCommissions.commissionAmount,
+        commissionStatus: sellerCommissions.status,
+      }).from(orders)
+        .leftJoin(clients, eq(orders.clientId, clients.id))
+        .leftJoin(sellerCommissions, eq(sellerCommissions.orderId, orders.id))
+        .where(and(...conditions)).orderBy(desc(orders.createdAt));
     }),
 
     quotations: sellerProcedure.input(dateFilters).query(async ({ input, ctx }) => {

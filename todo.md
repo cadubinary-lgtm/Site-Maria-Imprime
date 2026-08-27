@@ -4498,3 +4498,15 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir ao administrador editar todos os dados comerciais e de acesso do vendedor
 - [x] Permitir ao administrador excluir o vendedor com confirmação e preservação de histórico financeiro
 - [x] Limpar os campos ao abrir o cadastro de novo vendedor
+- [x] Autenticar vendedores pelo login público e manter sua sessão comercial na loja
+- [x] Exibir identificação de vendedor e acesso a Minhas Vendas no cabeçalho público
+- [x] Exigir nome e e-mail do cliente no checkout quando houver sessão de vendedor
+- [x] Vincular automaticamente ID e nome do vendedor ao pedido criado pelo checkout público
+- [x] Preservar frete, pagamento e notificações para o e-mail do cliente informado pelo vendedor
+- [x] Unificar vendas e comissões próprias na página Minhas Vendas do vendedor
+- [x] Restringir relatório global, cadastro, edição, senha e exclusão de vendedores ao superadmin
+- [x] Integrar o vendedor autenticado ao catálogo, configurador, carrinho e checkout públicos
+- [x] Permitir informar e vincular os dados do cliente no checkout realizado pelo vendedor
+- [x] Associar automaticamente o vendedor ao pedido criado na jornada pública
+- [x] Preservar entrega, pagamento e comunicações ao cliente no fluxo comercial do vendedor
+- [x] Exibir apenas vendas e comissões próprias na área exclusiva do vendedor

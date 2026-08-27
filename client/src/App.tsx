@@ -16,7 +16,6 @@ import { useCartDrawer } from "./contexts/CartDrawerContext";
 // ─── Páginas Públicas ────────────────────────────────────────────────────────
 import Home from "./pages/public/Home";
 import NotFound from "./pages/public/NotFound";
-import LoginPage from "./pages/public/LoginPage";
 import SignupPage from "./pages/public/SignupPage";
 import Catalog from "./pages/public/Catalog";
 import AllProducts from "./pages/public/AllProducts";
@@ -180,11 +179,11 @@ function SellerRoutes() {
   }
   return (
     <Switch>
-      <Route path="/vendedor" component={SellerDashboard} />
+      <Route path="/vendedor" component={SellerOrders} />
       <Route path="/vendedor/pedidos" component={SellerOrders} />
       <Route path="/vendedor/orcamentos" component={SellerQuotations} />
       <Route path="/vendedor/vendas/nova" component={SellerNewSale} />
-      <Route path="/vendedor/comissoes" component={SellerCommissions} />
+      <Route path="/vendedor/comissoes" component={SellerOrders} />
     </Switch>
   );
 }
@@ -440,7 +439,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/catalogo" component={Catalog} />
       <Route path="/gabaritos" component={PrintTemplatesPage} />
-      <Route path="/login" component={LoginPage} />
+      <Route path="/login" component={CustomerLogin} />
       <Route path="/todos-produtos" component={AllProducts} />
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/confirmacao/:orderNumber" component={OrderConfirmation} />

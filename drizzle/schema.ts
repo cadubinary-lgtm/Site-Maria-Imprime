@@ -267,6 +267,7 @@ export const orders = mysqlTable("orders", {
   userId: int("userId"), // Relacionamento com usuário Manus OAuth (admin)
   customerId: int("customerId"), // Relacionamento com cliente da loja (customer auth)
   sellerId: int("sellerId"), // Perfil comercial responsável pelo pedido; nulo para vendas diretas do site
+  sellerName: varchar("sellerName", { length: 255 }), // Nome comercial congelado no momento da venda
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   status: mysqlEnum("status", ["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]).notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),

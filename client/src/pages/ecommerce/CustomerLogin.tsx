@@ -49,7 +49,7 @@ export default function CustomerLogin() {
 
     try {
       await commercialLogin.mutateAsync(form);
-      window.location.assign("/vendedor");
+      window.location.assign("/");
       return;
     } catch {
       // Credenciais que não pertencem ao backoffice seguem para a Área do Cliente.
@@ -66,8 +66,8 @@ export default function CustomerLogin() {
             <ArrowLeft className="w-4 h-4" />
             Voltar para o site
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Área do Cliente</h1>
-          <p className="text-gray-500 mt-1">Acesse sua conta para acompanhar seus pedidos</p>
+          <h1 className="text-3xl font-bold text-gray-900">Entrar</h1>
+          <p className="text-gray-500 mt-1">Acesse sua conta ou a sua área comercial</p>
         </div>
 
         <Card className="shadow-xl border-0">
@@ -192,7 +192,7 @@ export default function CustomerLogin() {
                 </Link>
               </p>
               <p className="text-center text-xs text-gray-500 pt-1">
-                É vendedor? Use as mesmas credenciais: o acesso será direcionado para a Central do Vendedor.
+                É vendedor? Use estas credenciais para navegar no site em modo de venda.
               </p>
             </form>
           </CardContent>

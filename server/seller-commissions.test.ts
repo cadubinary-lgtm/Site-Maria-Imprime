@@ -13,6 +13,9 @@ const adminNavigationSource = readFileSync(resolve(root, "client/src/components/
 const customerLoginSource = readFileSync(resolve(root, "client/src/pages/ecommerce/CustomerLogin.tsx"), "utf8");
 const adminAuthRouterSource = readFileSync(resolve(root, "server/routers-admin-auth.ts"), "utf8");
 const adminSellersSource = readFileSync(resolve(root, "client/src/pages/admin/AdminSellers.tsx"), "utf8");
+const sellerOrdersSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrders.tsx"), "utf8");
+const checkoutRouterSource = readFileSync(resolve(root, "server/routers.ts"), "utf8");
+const checkoutPageSource = readFileSync(resolve(root, "client/src/pages/ecommerce/CheckoutPage.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -59,23 +62,25 @@ describe("garantias de rastreabilidade comercial", () => {
   it("mantém a navegação comercial em barra isolada", () => {
     expect(sellerLayoutSource).toContain("Central do Vendedor");
     expect(sellerLayoutSource).toContain('href: "/vendedor/pedidos"');
-    expect(sellerLayoutSource).toContain('href: "/vendedor/comissoes"');
+    expect(sellerLayoutSource).toContain('href: "/vendedor/pedidos"');
     expect(appSource).toContain("function SellerRoutes()");
+    expect(appSource).toContain('<Route path="/vendedor/comissoes" component={SellerOrders} />');
     expect(appSource).toContain('window.location.replace("/vendedor")');
     expect(adminNavigationSource).toContain('{ label: "Vendedores", href: "/admin/vendedores" }');
     expect(adminNavigationSource).toContain('{ label: "Comissões", href: "/admin/comissoes" }');
   });
 
-  it("vincula uma conta existente sem recriar senha, papel ou credenciais", () => {
+  it("vincula uma conta existente sem recriar senha e a converte para o acesso comercial", () => {
     expect(sellerRouterSource).toContain("linkedExistingAccount: Boolean(existing)");
     expect(sellerRouterSource).toContain("if (!existing && !input.password)");
     expect(sellerRouterSource).toContain("if (!adminAccountId)");
+    expect(sellerRouterSource).toContain('role: "seller"');
     expect(sellerRouterSource).toContain('action: created.linkedExistingAccount ? "link_existing_account_to_seller" : "create_seller"');
   });
 
-  it("direciona credenciais de vendedor usadas no login público para a Central do Vendedor", () => {
+  it("mantém vendedor autenticado no site público após o login comercial", () => {
     expect(customerLoginSource).toContain("trpc.adminAuth.loginSeller.useMutation()");
-    expect(customerLoginSource).toContain('window.location.assign("/vendedor")');
+    expect(customerLoginSource).toContain('window.location.assign("/")');
     expect(adminAuthRouterSource).toContain("loginSeller: publicProcedure");
     expect(adminAuthRouterSource).toContain("sellerOnly: true");
   });
@@ -99,5 +104,41 @@ describe("garantias de rastreabilidade comercial", () => {
   it("limpa o formulário antes de cada novo cadastro de vendedor", () => {
     expect(adminSellersSource).toContain("const handleCreateOpenChange = (open: boolean) => { setCreateOpen(open); if (open) setForm(blank); };");
     expect(adminSellersSource).toContain("onOpenChange={handleCreateOpenChange}");
+  });
+
+  it("mantém o escopo do vendedor e retorna cliente e comissão da própria venda", () => {
+    expect(sellerRouterSource).toContain("eq(orders.sellerId, seller.id)");
+    expect(sellerRouterSource).toContain("COALESCE(${clients.name}, ${orders.guestName}, ${orders.deliveryFullName}, 'Cliente')");
+    expect(sellerRouterSource).toContain("commissionAmount: sellerCommissions.commissionAmount");
+  });
+
+  it("concentra as vendas e as comissões do vendedor em uma única carteira", () => {
+    expect(sellerOrdersSource).toContain("Meus Pedidos / Minhas Vendas");
+    expect(sellerOrdersSource).toContain("Comissões a receber");
+    expect(sellerOrdersSource).toContain("Comissões recebidas");
+    expect(sellerOrdersSource).toContain("commissionAmount");
+  });
+
+  it("vincula a sessão de vendedor ao pedido público sem aceitar identificação vinda do navegador", () => {
+    expect(checkoutRouterSource).toContain("async function getCheckoutSeller");
+    expect(checkoutRouterSource).toContain("const checkoutSeller = await getCheckoutSeller(req)");
+    expect(checkoutRouterSource).toContain("sellerId: checkoutSeller?.id ?? null");
+    expect(checkoutRouterSource).toContain("sellerName: checkoutSeller?.name ?? null");
+    expect(checkoutRouterSource).toContain('ensureSellerCommissionForOrder(commissionDb, orderId, { source: "seller_order" })');
+    expect(checkoutRouterSource).toContain('`seller_${cartSeller.id}`');
+    expect(checkoutRouterSource).toContain('`seller_${checkoutSeller.id}`');
+  });
+
+  it("exige nome e e-mail do cliente quando o checkout está em modo vendedor", () => {
+    expect(checkoutPageSource).toContain("const isSellerCheckout = adminUser?.role === \"seller\"");
+    expect(checkoutPageSource).toContain('"Nome do Cliente"');
+    expect(checkoutPageSource).toContain('"E-mail do Cliente"');
+    expect(checkoutPageSource).toContain("O cliente receberá a confirmação e as atualizações do pedido neste e-mail.");
+  });
+
+  it("reserva a carteira global e o cadastro de vendedores ao Superadmin", () => {
+    expect(sellerRouterSource).toContain('if (role !== "superadmin")');
+    expect(adminNavigationSource).toContain('user?.role === "superadmin"');
+    expect(adminSellersSource).toContain('adminUser?.role === "superadmin"');
   });
 });

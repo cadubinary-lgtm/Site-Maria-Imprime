@@ -11,6 +11,7 @@ import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSele
 import { OrderItemSpecs } from "@/components/OrderItemSpecs";
 import { MapView } from "@/components/Map";
 import { HOME_PRIMARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   ChevronRight, ChevronLeft, ChevronDown, ShoppingBag, MapPin,
   ClipboardList, CheckCircle2, Loader2, Truck, CreditCard,
@@ -153,6 +154,8 @@ export default function CheckoutPage() {
   const [guestEmail, setGuestEmail] = useState("");
   const [createAccountPassword, setCreateAccountPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { adminUser } = useAdminAuth();
+  const isSellerCheckout = adminUser?.role === "seller";
 
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
@@ -205,7 +208,7 @@ export default function CheckoutPage() {
 
   // Pré-preencher com dados do perfil do cliente quando carregarem
   useEffect(() => {
-    if (!customerProfile) return;
+    if (!customerProfile || isSellerCheckout) return;
     const { firstName, lastName, phone: cPhone, addressZipCode, addressStreet, addressNumber, addressComplement, addressNeighborhood, addressCity, addressState } = customerProfile;
     if (firstName || lastName) setFullName(`${firstName ?? ""} ${lastName ?? ""}`.trim());
     if (cPhone) setPhone(cPhone);
@@ -219,7 +222,7 @@ export default function CheckoutPage() {
     if (addressNeighborhood) setNeighborhood(addressNeighborhood);
     if (addressCity) setCity(addressCity);
     if (addressState) setStateUF(addressState);
-  }, [customerProfile]);
+  }, [customerProfile, isSellerCheckout]);
 
   const getSelectedItemUnitPrice = (item: any) => paymentMethod === "cartao"
       ? Number(item.cardPriceAtCart ?? item.priceAtCart)
@@ -335,11 +338,11 @@ export default function CheckoutPage() {
   };
 
   const validateDados = () => {
-    if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Informe seu nome completo"); return false; }
+    if (!fullName.trim() || fullName.trim().length < 3) { toast.error(isSellerCheckout ? "Informe o nome completo do cliente" : "Informe seu nome completo"); return false; }
     if (!phone.trim() || phone.replace(/\D/g, "").length < 8) { toast.error("Informe um telefone válido"); return false; }
-    if (!customerProfile) {
-      if (!guestEmail.trim() || !/^[^@]+@[^@]+\.[^@]+$/.test(guestEmail.trim())) { toast.error("Informe um e-mail válido"); return false; }
-      if (createAccountPassword && createAccountPassword.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return false; }
+    if (!customerProfile || isSellerCheckout) {
+      if (!guestEmail.trim() || !/^[^@]+@[^@]+\.[^@]+$/.test(guestEmail.trim())) { toast.error(isSellerCheckout ? "Informe o e-mail do cliente" : "Informe um e-mail válido"); return false; }
+      if (!isSellerCheckout && createAccountPassword && createAccountPassword.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return false; }
     }
     return true;
   };
@@ -378,7 +381,7 @@ export default function CheckoutPage() {
     if (step === "dados") {
       if (!validateDados()) return;
       // Verificar se e-mail já está cadastrado antes de avançar
-      if (!customerProfile && guestEmail.trim()) {
+      if (!isSellerCheckout && !customerProfile && guestEmail.trim()) {
         try {
           const result = await trpcUtils.customerAuth.checkEmailExists.fetch({ email: guestEmail.trim() });
           if (result.exists) {
@@ -514,7 +517,7 @@ export default function CheckoutPage() {
         notes: notes || undefined,
         guestEmail: guestEmail.trim() || undefined,
         guestName: fullName.trim() || undefined,
-        accountPassword: createAccountPassword.trim() || undefined,
+        accountPassword: isSellerCheckout ? undefined : createAccountPassword.trim() || undefined,
         paymentMethod: paymentMethod === "pix" ? "pix" : paymentMethod === "cartao" ? "cartao_credito" : paymentMethod === "retirada_loja" ? "pagar_na_retirada" : undefined,
         termsVersion: localStorage.getItem("maria_imprime_terms_version") ?? "",
       };
@@ -541,7 +544,7 @@ export default function CheckoutPage() {
             orderId,
             payerCpf: payerCpf.replace(/\D/g, "") || undefined,
             // Dados do formulário para checkout como visitante (guest)
-            payerEmail: customerProfile?.email || guestEmail.trim() || undefined,
+            payerEmail: isSellerCheckout ? guestEmail.trim() || undefined : customerProfile?.email || guestEmail.trim() || undefined,
             payerName: fullName.trim() || undefined,
           });
           setPixData({
@@ -584,7 +587,7 @@ export default function CheckoutPage() {
             issuerId: tokenData.issuerId || undefined,
             payerCpf: payerCpf.replace(/\D/g, "") || undefined,
             // Dados do formulário para checkout como visitante (guest)
-            payerEmail: customerProfile?.email || guestEmail.trim() || undefined,
+            payerEmail: isSellerCheckout ? guestEmail.trim() || undefined : customerProfile?.email || guestEmail.trim() || undefined,
             payerName: fullName.trim() || undefined,
           });
           if (cardResult.status === "approved") {
@@ -853,7 +856,7 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {STEPS[stepIndex].icon}
-                  {step === "dados"     && "Dados para Entrega"}
+                  {step === "dados"     && (isSellerCheckout ? "Dados do Cliente" : "Dados para Entrega")}
                   {step === "endereco"  && "Endereço de Entrega"}
                   {step === "entrega"   && "Opções de Entrega"}
                   {step === "pagamento" && "Forma de Pagamento"}
@@ -871,20 +874,25 @@ export default function CheckoutPage() {
                 {/* ETAPA 1: Dados */}
                 {step === "dados" && (
                   <>
+                    {isSellerCheckout && (
+                      <div className="rounded-lg border border-pink-200 bg-pink-50 px-3 py-2 text-sm text-pink-800">
+                        Venda registrada por <strong translate="no">{adminUser?.name}</strong>. Os dados abaixo serão usados para identificar e notificar o cliente.
+                      </div>
+                    )}
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">Nome Completo *</Label>
-                      <Input id="fullName" placeholder="Seu nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                      <Label htmlFor="fullName">{isSellerCheckout ? "Nome do Cliente" : "Nome Completo"} *</Label>
+                      <Input id="fullName" placeholder={isSellerCheckout ? "Nome completo do cliente" : "Seu nome completo"} value={fullName} onChange={(e) => setFullName(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone / WhatsApp *</Label>
                       <Input id="phone" placeholder="(11) 99999-9999" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
 
-                    {/* E-mail para convidados (se não estiver logado) */}
-                    {!customerProfile && (
+                    {/* E-mail para convidados ou cliente atendido por vendedor */}
+                    {(!customerProfile || isSellerCheckout) && (
                       <>
                         <div className="space-y-2">
-                          <Label htmlFor="guestEmail">E-mail *</Label>
+                          <Label htmlFor="guestEmail">{isSellerCheckout ? "E-mail do Cliente" : "E-mail"} *</Label>
                           {/* Campo oculto para enganar o gerenciador de senhas do browser */}
                           <input type="text" name="fake-username" style={{display:'none'}} readOnly tabIndex={-1} />
                           <Input
@@ -892,14 +900,14 @@ export default function CheckoutPage() {
                             type="email"
                             name="guest-email"
                             autoComplete="email"
-                            placeholder="seu@email.com"
+                            placeholder={isSellerCheckout ? "cliente@email.com" : "seu@email.com"}
                             value={guestEmail}
                             onChange={(e) => setGuestEmail(e.target.value)}
                           />
-                          <p className="text-xs text-gray-500">Você receberá a confirmação e o link de acompanhamento neste e-mail</p>
+                          <p className="text-xs text-gray-500">{isSellerCheckout ? "O cliente receberá a confirmação e as atualizações do pedido neste e-mail." : "Você receberá a confirmação e o link de acompanhamento neste e-mail"}</p>
                         </div>
 
-                        <div className="border border-dashed border-orange-200 rounded-lg p-4 bg-orange-50/50 space-y-3">
+                        <div className={isSellerCheckout ? "hidden" : "border border-dashed border-orange-200 rounded-lg p-4 bg-orange-50/50 space-y-3"}>
                           <div>
                             <p className="text-sm font-medium text-gray-700">Criar conta para acompanhar pedidos futuros</p>
                             <p className="text-xs text-gray-500 mt-0.5">Opcional — deixe em branco para finalizar como convidado</p>
@@ -962,7 +970,7 @@ export default function CheckoutPage() {
                 )}
                 {step === "endereco" && !isStorePickupSelected && (
                   <>
-                    {customerProfile?.addressZipCode && (
+                    {customerProfile?.addressZipCode && !isSellerCheckout && (
                       <div className="flex items-start gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-800">
                         <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-green-600" />
                         <span>Endereço preenchido automaticamente com os dados do seu cadastro. Você pode editar se necessário.</span>

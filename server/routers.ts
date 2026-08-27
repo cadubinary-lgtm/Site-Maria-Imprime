@@ -78,7 +78,7 @@ import {
 } from "./db";
 import { desc, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { products, orders, orderItems, orderProductionStatusHistory, segments } from "../drizzle/schema";
+import { products, orders, orderItems, orderProductionStatusHistory, segments, sellers } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { crmRouter } from "./routers-crm";
 import { customerAuthRouter } from "./routers/customerAuth";
@@ -108,6 +108,19 @@ import { productPaymentPricingRouter } from "./routers-product-payment-pricing";
 import { homeCarouselRouter } from "./homeCarouselRouter";
 import { globalDeliveryOptionsRouter } from "./globalDeliveryOptionsRouter";
 import { sellersRouter } from "./sellersRouter";
+import { authenticateAdminRequest } from "./admin-auth";
+import { ensureSellerCommissionForOrder } from "./sellerCommissionService";
+
+/** Resolve exclusivamente a sessão comercial ativa, sem aceitar vendedor informado pelo navegador. */
+async function getCheckoutSeller(req: ExpressRequest): Promise<{ id: number; name: string } | null> {
+  const session = await authenticateAdminRequest(req);
+  if (!session || session.role !== "seller") return null;
+  const db = await getDb();
+  if (!db) return null;
+  const [seller] = await db.select({ id: sellers.id, status: sellers.status })
+    .from(sellers).where(eq(sellers.adminAccountId, session.adminId)).limit(1);
+  return seller?.status === "active" ? { id: seller.id, name: session.name } : null;
+}
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
 // Usado em todas as procedures do checkout/erp que o painel admin consome
@@ -993,6 +1006,8 @@ export const appRouter = router({
       const userId = ctx.user?.id ?? null;
       const customerSessionToken = getCookieFromReq(req, "customer_session");
       let sessionId: string | null = null;
+      const cartSeller = await getCheckoutSeller(req);
+      if (cartSeller) return await getCartByUser(null, `seller_${cartSeller.id}`);
 
       // Tentar resolver customerId via customer_session
       if (!userId && customerSessionToken) {
@@ -1028,6 +1043,8 @@ export const appRouter = router({
       const req = ctx.req as ExpressRequest;
       const userId = ctx.user?.id ?? null;
       const customerSessionToken = getCookieFromReq(req, "customer_session");
+      const cartSeller = await getCheckoutSeller(req);
+      if (cartSeller) return await getCartItemCount(null, `seller_${cartSeller.id}`);
 
       if (!userId && customerSessionToken) {
         try {
@@ -1089,6 +1106,11 @@ export const appRouter = router({
         const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
         const customerSessionToken = getCookieFromReq(req, "customer_session");
+        const cartSeller = await getCheckoutSeller(req);
+        if (cartSeller) {
+          const id = await addToCart({ sessionId: `seller_${cartSeller.id}`, ...input });
+          return { id };
+        }
 
         // Resolver customerId via customer_session
         if (!userId && customerSessionToken) {
@@ -1138,7 +1160,9 @@ export const appRouter = router({
         const userId = ctx.user?.id ?? null;
         // Resolver sessionId: customer_session tem PRIORIDADE sobre cart_session
         let sessionId: string | null = null;
-        if (!userId) {
+        const cartSeller = await getCheckoutSeller(req);
+        if (cartSeller) sessionId = `seller_${cartSeller.id}`;
+        if (!userId && !cartSeller) {
           const customerSessionToken = getCookieFromReq(req, "customer_session");
           if (customerSessionToken) {
             try {
@@ -1235,7 +1259,9 @@ export const appRouter = router({
         const userId = ctx.user?.id ?? null;
         // Resolver customer_session PRIMEIRO (tem prioridade sobre cart_session)
         let sessionId: string | null = null;
-        if (!userId) {
+        const cartSeller = await getCheckoutSeller(req);
+        if (cartSeller) sessionId = `seller_${cartSeller.id}`;
+        if (!userId && !cartSeller) {
           const customerSessionToken = getCookieFromReq(req, "customer_session");
           if (customerSessionToken) {
             try {
@@ -1264,7 +1290,9 @@ export const appRouter = router({
       const userId = ctx.user?.id ?? null;
       // Resolver customer_session PRIMEIRO
       let sessionId: string | null = null;
-      if (!userId) {
+      const cartSeller = await getCheckoutSeller(req);
+      if (cartSeller) sessionId = `seller_${cartSeller.id}`;
+      if (!userId && !cartSeller) {
         const customerSessionToken = getCookieFromReq(req, "customer_session");
         if (customerSessionToken) {
           try {
@@ -1317,12 +1345,13 @@ export const appRouter = router({
         const req = ctx.req as ExpressRequest;
         const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
+        const checkoutSeller = await getCheckoutSeller(req);
         const customerSessionToken = getCookieFromReq(req, "customer_session");
         const cartSessionId = getCookieFromReq(req, "cart_session") ?? null;
 
-        // Resolver customerId via customer_session
+        // Resolver customerId via customer_session. A sessão comercial sempre usa carrinho próprio.
         let resolvedCustomerId: number | null = null;
-        if (!userId && customerSessionToken) {
+        if (!checkoutSeller && !userId && customerSessionToken) {
           try {
             const { getDb: getDbInner } = await import("./db");
             const { customerSessions } = await import("../drizzle/schema");
@@ -1342,7 +1371,9 @@ export const appRouter = router({
 
         // 1. Buscar itens do carrinho
         let cartItems: any[];
-        if (userId) {
+        if (checkoutSeller) {
+          cartItems = await getCartByUser(null, `seller_${checkoutSeller.id}`);
+        } else if (userId) {
           cartItems = await getCartByUser(userId);
         } else if (resolvedCustomerId) {
           cartItems = await getCartByUser(null, `cust_${resolvedCustomerId}`);
@@ -1368,7 +1399,8 @@ export const appRouter = router({
         // 3. Gerar número do pedido
         const orderNumber = `PD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-        // 3b. Verificar se e-mail já está cadastrado (bloquear antes de criar pedido)
+        // 3b. Vendedor pode usar um cliente já cadastrado; visitantes continuam protegidos contra conflito de conta.
+        let finalCustomerId = resolvedCustomerId;
         if (!userId && !resolvedCustomerId && input.guestEmail) {
           try {
             const { customerAccounts: caCheck } = await import("../drizzle/schema");
@@ -1377,10 +1409,14 @@ export const appRouter = router({
             if (dbCheck) {
               const [existingCheck] = await dbCheck.select({ id: caCheck.id }).from(caCheck).where(eqCheck(caCheck.email, input.guestEmail)).limit(1);
               if (existingCheck) {
-                throw new TRPCError({
-                  code: "CONFLICT",
-                  message: "Este e-mail já possui uma conta cadastrada. Por favor, faça login para continuar.",
-                });
+                if (checkoutSeller) {
+                  finalCustomerId = existingCheck.id;
+                } else {
+                  throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "Este e-mail já possui uma conta cadastrada. Por favor, faça login para continuar.",
+                  });
+                }
               }
             }
           } catch (e: any) {
@@ -1389,8 +1425,7 @@ export const appRouter = router({
         }
 
         // 3c. Criar conta opcional (se cliente não logado e forneceu senha)
-        let finalCustomerId = resolvedCustomerId;
-        if (!userId && !resolvedCustomerId && input.accountPassword && input.guestEmail) {
+        if (!checkoutSeller && !userId && !resolvedCustomerId && input.accountPassword && input.guestEmail) {
           try {
             const { customerAccounts, customerSessions } = await import("../drizzle/schema");
             const { eq: eqInner } = await import("drizzle-orm");
@@ -1462,6 +1497,8 @@ export const appRouter = router({
           userId: userId ?? 0, // 0 = pedido de visitante
           clientId: userId ?? 0,
           customerId: finalCustomerId ?? null,
+          sellerId: checkoutSeller?.id ?? null,
+          sellerName: checkoutSeller?.name ?? null,
           orderNumber,
           totalPrice,
           notes: input.notes,
@@ -1522,9 +1559,16 @@ export const appRouter = router({
 
         // 6. Criar pedido
         const orderId = await createOrderFromCart(orderPayload);
+        if (checkoutSeller) {
+          const commissionDb = await getDb();
+          if (!commissionDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Não foi possível registrar a comissão da venda." });
+          await ensureSellerCommissionForOrder(commissionDb, orderId, { source: "seller_order" });
+        }
 
         // 7. Limpar carrinho
-        if (userId) {
+        if (checkoutSeller) {
+          await clearCart(null, `seller_${checkoutSeller.id}`);
+        } else if (userId) {
           await clearCart(userId);
         } else if (finalCustomerId) {
           await clearCart(null, `cust_${finalCustomerId}`);

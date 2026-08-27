@@ -61,6 +61,7 @@ const FILTER_OPTIONS = [
 export default function AdminOrders() {
   const [search, setSearch]       = useState("");
   const [filter, setFilter]       = useState("todos");
+  const [sellerFilter, setSellerFilter] = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
   const [orderToTrash, setOrderToTrash] = useState<any | null>(null);
@@ -103,11 +104,14 @@ export default function AdminOrders() {
 
   const { data: allOrders, isLoading } = trpc.checkout.getAllOrders.useQuery();
   const { data: trashedOrders = [], isLoading: isLoadingTrash } = trpc.ordersTrash.list.useQuery(undefined, { enabled: canManageTrash && showTrash });
+  const sellerOptions = useMemo(() => Array.from(new Set((allOrders as any[] ?? []).map((order) => String(order.sellerName ?? "").trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")), [allOrders]);
 
   const filtered = useMemo(() => {
     if (!allOrders) return [];
     return (allOrders as any[]).filter((o) => {
       if (filter !== "todos" && o.status !== filter) return false;
+      if (sellerFilter === "__site__" && o.sellerName) return false;
+      if (sellerFilter !== "todos" && sellerFilter !== "__site__" && String(o.sellerName ?? "") !== sellerFilter) return false;
       if (search) {
         const q = search.toLowerCase();
         return (
@@ -118,7 +122,7 @@ export default function AdminOrders() {
       }
       return true;
     });
-  }, [allOrders, filter, search]);
+  }, [allOrders, filter, sellerFilter, search]);
 
   const isAbandonedCartsView = new URLSearchParams(window.location.search).get("view") === "carrinho-abandonado";
 
@@ -196,8 +200,9 @@ export default function AdminOrders() {
             </div>
 
             {showFilters && (
-              <div id="admin-order-status-filters" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-4 border-t" aria-label="Filtrar pedidos por status">
-                {FILTER_OPTIONS.map((opt) => (
+              <div id="admin-order-status-filters" className="space-y-3 pt-4 border-t" aria-label="Filtrar pedidos por status e vendedor">
+                {adminUser?.role === "superadmin" && <label className="block max-w-xs text-sm font-medium text-gray-700">Vendedor<select value={sellerFilter} onChange={(event) => setSellerFilter(event.target.value)} className="mt-1 h-9 w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"><option value="todos">Todos os vendedores</option><option value="__site__">Somente vendas diretas do site</option>{sellerOptions.map((seller) => <option key={seller} value={seller}>{seller}</option>)}</select></label>}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">{FILTER_OPTIONS.map((opt) => (
                   <Button
                     key={opt.id}
                     variant={filter === opt.id ? "default" : "outline"}
@@ -209,7 +214,7 @@ export default function AdminOrders() {
                     {opt.id !== "todos" && ORDER_STATUS[opt.id]?.icon + " "}
                     {opt.label}
                   </Button>
-                ))}
+                ))}</div>
               </div>
             )}
           </CardContent>
@@ -237,6 +242,7 @@ export default function AdminOrders() {
                     <tr className="border-b bg-gray-50 text-gray-600">
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Pedido</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Cliente</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Vendedor</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Valor</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Pagamento</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Status</th>
@@ -256,6 +262,7 @@ export default function AdminOrders() {
                             <p className="font-medium text-gray-900">{order.deliveryFullName}</p>
                             <p className="text-xs text-gray-500">{order.deliveryPhone}</p>
                           </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{order.sellerName || "Venda direta"}</td>
                           <td className="px-4 py-3 font-semibold text-gray-900">
                             {fmt(parseFloat(order.totalPrice))}
                           </td>
