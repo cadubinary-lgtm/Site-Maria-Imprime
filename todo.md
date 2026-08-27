@@ -4465,3 +4465,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir o peso total calculado perto das opções de entrega
 - [x] Informar limites de peso ou dimensões de forma amigável e impedir seleção inválida
 - [x] Validar opções válidas, limites e responsividade do configurador
+
+## Redação Estimada de Prazos de Transporte
+- [x] Mapear as mensagens exibidas para entrega local e transportadoras
+- [x] Manter hoje e amanhã para entrega local e usar previsão estimada para transportadoras
+- [x] Validar os textos e o layout das opções de entrega

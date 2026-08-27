@@ -1761,11 +1761,9 @@ export default function ProductDetail() {
                     if (isLocal) {
                       if (totalDays === 0) return '🚀 Receba HOJE! (Entrega Local)';
                       if (totalDays === 1) return '⚡ Receba amanhã! (Entrega Local)';
-                      return `Receba em ${totalDays} dias úteis (Entrega Local)`;
+                      return `Previsão: até ${totalDays} dias úteis (Entrega Local)`;
                     }
-                    if (totalDays === 0) return 'Receba hoje!';
-                    if (totalDays === 1) return 'Receba amanhã!';
-                    return `Receba em ${totalDays} dias úteis`;
+                    return `Previsão: até ${totalDays} ${totalDays === 1 ? 'dia útil' : 'dias úteis'}`;
                   })();
                   return (
                     <button
@@ -1815,6 +1813,12 @@ export default function ProductDetail() {
                 {shippingCalculated && shippingQuotes.some(q => q.fixedType === 'local') && (
                   <p className="text-xs text-gray-400 mt-1 leading-relaxed">
                     *Prazos válidos para arquivos enviados com arte aprovada até as {cutoffTime}. Pedidos de grandes formatos ou altas tiragens podem sofrer acréscimo de prazo após análise técnica.
+                  </p>
+                )}
+
+                {shippingCalculated && shippingQuotes.some(q => !q.isFixed) && (
+                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                    *Previsão estimada após a confirmação da produção, sujeita à operação da transportadora.
                   </p>
                 )}
 
