@@ -407,6 +407,14 @@ export async function updateOrderStatus(orderId: number, status: string, notes?:
     newStatus: status as any,
     notes: notes ?? `Status alterado para ${status}`,
   });
+  if (status === "cancelado") {
+    try {
+      const { reconcileSellerCommissionForOrder } = await import("./sellerCommissionService");
+      await reconcileSellerCommissionForOrder(orderId);
+    } catch (error) {
+      console.error("[COMISSOES] Não foi possível cancelar a comissão do pedido:", error);
+    }
+  }
   if (enteredProduction) {
     await recordProductionStatusHistory(
       orderId,

@@ -4480,3 +4480,14 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter o preço à direita na posição anterior dos cartões de frete
 - [x] Preservar a linha compacta de serviço, transportadora e previsão
 - [x] Validar o alinhamento em telas desktop e mobile
+
+## Vendedores e Comissões
+- [x] Definir dados de vendedores, comissão individual e permissões de acesso
+- [x] Associar pedidos e orçamentos ao vendedor responsável
+- [x] Calcular e congelar comissões sobre subtotal menos descontos, sem frete
+- [x] Liberar comissão somente para pedidos com pagamento confirmado
+- [x] Criar painel do vendedor para pedidos, orçamentos e comissões próprias
+- [x] Criar barra lateral exclusiva e isolada para o acesso do vendedor
+- [x] Criar painel administrativo de vendedores, vendas e comissões a pagar ou pagas
+- [x] Registrar pagamento de comissão com data, observação e histórico
+- [x] Validar permissões, cálculos e fluxos de ponta a ponta

@@ -119,6 +119,8 @@ import AdminsManager from "./pages/admin/AdminsManager";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
+import AdminSellers from "./pages/admin/AdminSellers";
+import AdminCommissions from "./pages/admin/AdminCommissions";
 
 // ─── Orçamentos ──────────────────────────────────────────────────────────────
 import AdminQuotations from "./pages/admin/AdminQuotations";
@@ -131,6 +133,11 @@ import ProductionDashboard from "./pages/erp/ProductionDashboard";
 import FinancialDashboard from "./pages/erp/FinancialDashboard";
 import AutomationDashboard from "./pages/erp/AutomationDashboard";
 import SegmentsManager from "./pages/erp/SegmentsManager";
+import SellerDashboard from "./pages/seller/SellerDashboard";
+import SellerOrders from "./pages/seller/SellerOrders";
+import SellerQuotations from "./pages/seller/SellerQuotations";
+import SellerCommissions from "./pages/seller/SellerCommissions";
+import SellerNewSale from "./pages/seller/SellerNewSale";
 
 /**
  * AdminRoutes — detecta ambiente (Manus vs site) e usa autenticação apropriada.
@@ -158,6 +165,33 @@ function AdminRoutes() {
   } else {
     return <AdminProtectedRoutes />;
   }
+}
+
+/** Painel comercial independente, visível apenas para a conta de vendedor. */
+function SellerRoutes() {
+  const { adminUser, isLoading } = useAdminAuth();
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center bg-slate-950"><div className="h-10 w-10 animate-spin rounded-full border-2 border-pink-600 border-t-transparent" /></div>;
+  }
+  if (!adminUser) {
+    window.location.replace("/admin/login");
+    return null;
+  }
+  if (adminUser.role !== "seller") {
+    window.location.replace("/admin");
+    return null;
+  }
+
+  return (
+    <Switch>
+      <Route path="/vendedor" component={SellerDashboard} />
+      <Route path="/vendedor/pedidos" component={SellerOrders} />
+      <Route path="/vendedor/orcamentos" component={SellerQuotations} />
+      <Route path="/vendedor/vendas/nova" component={SellerNewSale} />
+      <Route path="/vendedor/comissoes" component={SellerCommissions} />
+    </Switch>
+  );
 }
 
 /**
@@ -189,6 +223,8 @@ return (
 <Route path="/admin/configuracoes-site/normas-de-arte" component={AdminArtworkGuidelines} />
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
 <Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
+	      <Route path="/admin/vendedores" component={AdminSellers} />
+	      <Route path="/admin/comissoes" component={AdminCommissions} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
@@ -292,6 +328,11 @@ function AdminProtectedRoutes() {
     return null;
   }
 
+  if (adminUser.role === "seller") {
+    window.location.replace("/vendedor");
+    return null;
+  }
+
 // Rotas protegidas do domínio oficial
 return (
 <Switch>
@@ -300,6 +341,8 @@ return (
 <Route path="/admin/configuracoes-site/guia-da-maria" component={AdminMariaGuide} />
 <Route path="/admin/configuracoes-site/gabaritos" component={AdminPrintTemplates} />
 <Route path="/admin/configuracoes-site/prazos-padrao" component={AdminGlobalDeliveryOptions} />
+	      <Route path="/admin/vendedores" component={AdminSellers} />
+	      <Route path="/admin/comissoes" component={AdminCommissions} />
       <Route path="/admin/configuracoes-site/dados-da-empresa" component={AdminCompanySettings} />
 <Route path="/admin/relatorios" component={AdminDashboard} />
       <Route path="/admin/financeiro/recibos/avulso/novo" component={FinanceiroReciboAvulso} />
@@ -392,6 +435,10 @@ function Router() {
     return <AdminRoutes />;
   }
 
+  if (location.startsWith("/vendedor")) {
+    return <SellerRoutes />;
+  }
+
   return (
     <Switch>
       {/* ── Rotas Públicas ─────────────────────────────────────────────── */}
@@ -437,7 +484,7 @@ function Router() {
 function AppLayout() {
   const { isOpen } = useCartDrawer();
   const [location] = useLocation();
-  const isAdminRoute = location.startsWith("/admin") || location.startsWith("/producao");
+  const isAdminRoute = location.startsWith("/admin") || location.startsWith("/producao") || location.startsWith("/vendedor");
 
   useEffect(() => {
     if (isAdminRoute) return;

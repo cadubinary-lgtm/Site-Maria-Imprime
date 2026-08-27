@@ -717,6 +717,13 @@ export const financeiroRouter = router({
         })
         .where(eq(orders.id, input.orderId));
 
+      try {
+        const { reconcileSellerCommissionForOrder } = await import("./sellerCommissionService");
+        await reconcileSellerCommissionForOrder(input.orderId);
+      } catch (error) {
+        console.error("[COMISSOES] Não foi possível sincronizar a comissão após confirmar o pagamento:", error);
+      }
+
       // Registra na tabela financeiro própria
       const order = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
       if (order.length > 0) {

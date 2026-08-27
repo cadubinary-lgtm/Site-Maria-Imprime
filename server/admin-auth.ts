@@ -25,7 +25,7 @@ const LOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 export type AdminSessionPayload = {
   adminId: number;
   email: string;
-  role: "superadmin" | "admin" | "production";
+  role: "superadmin" | "admin" | "production" | "seller";
   name: string;
 };
 

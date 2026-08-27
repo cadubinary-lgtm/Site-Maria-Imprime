@@ -11,7 +11,7 @@ export type AdminUser = {
   id: number;
   name: string;
   email: string;
-  role: "superadmin" | "admin" | "production";
+  role: "superadmin" | "admin" | "production" | "seller";
 };
 
 export function useAdminAuth() {

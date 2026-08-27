@@ -27,6 +27,10 @@ export default function AdminLogin() {
   // Se já está logado, redirecionar para o painel
   useEffect(() => {
     if (!isLoading && adminUser) {
+      if (adminUser.role === "seller") {
+        navigate("/vendedor");
+        return;
+      }
       // Buscar permissões para redirecionar corretamente
       // (superadmin → /admin, operador restrito → primeira rota permitida)
       navigate("/admin"); // será substituído abaixo via myPermissions
@@ -42,6 +46,10 @@ export default function AdminLogin() {
   // Quando permissões carregarem, redirecionar para a rota correta
   useEffect(() => {
     if (!isLoading && adminUser && myPermissions !== undefined) {
+      if (adminUser.role === "seller") {
+        navigate("/vendedor");
+        return;
+      }
       const route = getDefaultAdminRoute(adminUser.role, myPermissions);
       navigate(route);
     }
@@ -61,7 +69,11 @@ export default function AdminLogin() {
     }
 
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (result.admin.role === "seller") {
+        navigate("/vendedor");
+        return;
+      }
       // Redirecionar para /admin temporariamente; o useEffect acima vai corrigir
       // assim que myPermissions carregar
       navigate("/admin");

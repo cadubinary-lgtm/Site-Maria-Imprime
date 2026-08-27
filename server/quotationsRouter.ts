@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { sendQuotationEmail } from "./emailService";
 import { logAudit } from "./admin-auth";
 import { extractQuotationKpiRow } from "./quotation-kpi-result";
+import { ensureSellerCommissionForOrder } from "./sellerCommissionService";
 
 const adminAnyProcedure = adminOrManusAuthProcedure;
 
@@ -646,6 +647,7 @@ export const quotationsRouter = router({
       const [orderResult] = await db.insert(orders).values({
         clientId: q.clientId,
         userId: operatorId,
+        sellerId: q.sellerId,
         orderNumber,
         status: "analisando",
         totalPrice: q.total,
@@ -681,6 +683,13 @@ export const quotationsRouter = router({
       await db.update(quotations)
         .set({ convertedOrderId: orderId } as any)
         .where(eq(quotations.id, input.id));
+
+      if (q.sellerId) {
+        await ensureSellerCommissionForOrder(db as any, orderId, {
+          source: "quotation_conversion",
+          discountAmount: Number(q.discountAmount ?? 0),
+        });
+      }
 
       return { success: true, orderId, orderNumber };
     }),

@@ -11,7 +11,7 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin", "production"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "admin", "production", "seller"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -266,6 +266,7 @@ export const orders = mysqlTable("orders", {
   clientId: int("clientId").notNull(),
   userId: int("userId"), // Relacionamento com usuário Manus OAuth (admin)
   customerId: int("customerId"), // Relacionamento com cliente da loja (customer auth)
+  sellerId: int("sellerId"), // Perfil comercial responsável pelo pedido; nulo para vendas diretas do site
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   status: mysqlEnum("status", ["pagamento_aprovado", "pagamento_retirada", "analisando", "com_problemas", "em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue", "cancelado"]).notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
@@ -1778,7 +1779,7 @@ export const adminAccounts = mysqlTable("adminAccounts", {
   name: varchar("name", { length: 150 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
-  role: mysqlEnum("role", ["superadmin", "admin", "production"]).default("admin").notNull(),
+  role: mysqlEnum("role", ["superadmin", "admin", "production", "seller"]).default("admin").notNull(),
   status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
   lastLogin: bigint("lastLogin", { mode: "number" }),
   loginAttempts: int("loginAttempts").default(0).notNull(),
@@ -1790,6 +1791,68 @@ export const adminAccounts = mysqlTable("adminAccounts", {
 });
 export type AdminAccount = typeof adminAccounts.$inferSelect;
 export type InsertAdminAccount = typeof adminAccounts.$inferInsert;
+
+/**
+ * Sellers - Perfil comercial associado a uma conta autenticável do backoffice.
+ * O percentual é a regra vigente apenas para novas comissões; cada comissão
+ * preserva um snapshot próprio para não reescrever o histórico.
+ */
+export const sellers = mysqlTable("sellers", {
+  id: int("id").autoincrement().primaryKey(),
+  adminAccountId: int("adminAccountId").notNull().unique().references(() => adminAccounts.id, { onDelete: "restrict" }),
+  commissionRate: decimal("commissionRate", { precision: 5, scale: 2 }).notNull().default("0"),
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  createdByAdminId: int("createdByAdminId"),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+
+export type Seller = typeof sellers.$inferSelect;
+export type InsertSeller = typeof sellers.$inferInsert;
+
+/**
+ * Seller commissions - Registro único e imutável por pedido, com composição
+ * financeira congelada. O frete não integra a base de comissão.
+ */
+export const sellerCommissions = mysqlTable("sellerCommissions", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().unique().references(() => orders.id, { onDelete: "restrict" }),
+  sellerId: int("sellerId").notNull().references(() => sellers.id, { onDelete: "restrict" }),
+  orderNumberSnapshot: varchar("orderNumberSnapshot", { length: 50 }).notNull(),
+  sellerNameSnapshot: varchar("sellerNameSnapshot", { length: 150 }).notNull(),
+  subtotalSnapshot: decimal("subtotalSnapshot", { precision: 10, scale: 2 }).notNull(),
+  discountAmountSnapshot: decimal("discountAmountSnapshot", { precision: 10, scale: 2 }).notNull().default("0"),
+  commissionBaseAmount: decimal("commissionBaseAmount", { precision: 10, scale: 2 }).notNull(),
+  commissionRateSnapshot: decimal("commissionRateSnapshot", { precision: 5, scale: 2 }).notNull(),
+  commissionAmount: decimal("commissionAmount", { precision: 10, scale: 2 }).notNull(),
+  source: mysqlEnum("source", ["quotation_conversion", "seller_order", "admin_assignment"]).notNull().default("seller_order"),
+  status: mysqlEnum("status", ["prevista", "a_pagar", "paga", "cancelada"]).notNull().default("prevista"),
+  eligibleAt: bigint("eligibleAt", { mode: "number" }),
+  paidAt: bigint("paidAt", { mode: "number" }),
+  canceledAt: bigint("canceledAt", { mode: "number" }),
+  canceledReason: varchar("canceledReason", { length: 1000 }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+
+export type SellerCommission = typeof sellerCommissions.$inferSelect;
+export type InsertSellerCommission = typeof sellerCommissions.$inferInsert;
+
+/** Histórico financeiro da baixa de comissão, mantido separadamente para auditoria. */
+export const sellerCommissionPayments = mysqlTable("sellerCommissionPayments", {
+  id: int("id").autoincrement().primaryKey(),
+  commissionId: int("commissionId").notNull().references(() => sellerCommissions.id, { onDelete: "restrict" }),
+  sellerId: int("sellerId").notNull().references(() => sellers.id, { onDelete: "restrict" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paidAt: bigint("paidAt", { mode: "number" }).notNull(),
+  note: varchar("note", { length: 1500 }),
+  paidByAdminId: int("paidByAdminId").notNull(),
+  paidByAdminName: varchar("paidByAdminName", { length: 150 }).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+
+export type SellerCommissionPayment = typeof sellerCommissionPayments.$inferSelect;
+export type InsertSellerCommissionPayment = typeof sellerCommissionPayments.$inferInsert;
 
 /**
  * adminSessions — Sessões JWT dos administradores
@@ -1926,6 +1989,7 @@ export const quotations = mysqlTable("quotations", {
   quotationNumber: varchar("quotationNumber", { length: 50 }).notNull().unique(),
   clientId: int("clientId").notNull(),
   operatorId: int("operatorId").notNull(), // Usuário que criou o orçamento
+  sellerId: int("sellerId"), // Perfil comercial responsável; nulo para emissão administrativa sem comissão
   responsibleName: varchar("responsibleName", { length: 150 }), // Nome exibido como responsável pela emissão
   status: mysqlEnum("status", ["rascunho", "enviado", "em_negociacao", "aprovado", "recusado", "expirado", "cancelado"]).notNull().default("rascunho"),
   
