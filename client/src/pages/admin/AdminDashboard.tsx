@@ -18,6 +18,7 @@ import {
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "text-amber-800", bg: "bg-amber-100", dot: "#d97706" },
   pagamento_aprovado: { label: "Pagamento Aprovado", color: "text-green-700",   bg: "bg-green-100",   dot: "#22c55e" },
   pagamento_retirada: { label: "Pagamento Retirada",  color: "text-blue-700",    bg: "bg-blue-100",    dot: "#3b82f6" },
   analisando:         { label: "Analisando",          color: "text-amber-700",   bg: "bg-amber-100",   dot: "#d97706" },
@@ -43,7 +44,7 @@ function buildChartData(orders: any[]) {
     const key = d.toISOString().slice(0, 10);
     const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
     const value = orders
-      .filter((o) => o.createdAt && new Date(o.createdAt).toISOString().slice(0, 10) === key)
+      .filter((o) => o.paymentStatus === "pago" && o.createdAt && new Date(o.createdAt).toISOString().slice(0, 10) === key)
       .reduce((acc, o) => acc + parseFloat(o.totalPrice?.toString() ?? "0"), 0);
     days.push({ label, value });
   }
@@ -122,7 +123,7 @@ export default function AdminDashboard() {
 
   const today = new Date().toISOString().slice(0, 10);
   const todayOrders = allOrders.filter((o) => o.createdAt && new Date(o.createdAt).toISOString().slice(0, 10) === today);
-  const todayRevenue = todayOrders.reduce((acc, o) => acc + parseFloat(o.totalPrice?.toString() ?? "0"), 0);
+  const todayRevenue = todayOrders.filter((order) => order.paymentStatus === "pago").reduce((acc, o) => acc + parseFloat(o.totalPrice?.toString() ?? "0"), 0);
   const inProduction = allOrders.filter((o) => o.status === "em_producao").length;
   const readyToShip = allOrders.filter((o) => o.status === "pronto_entrega" || o.status === "pronto_retirada").length;
   const withProblems = allOrders.filter((o) => o.status === "com_problemas").length;
@@ -181,7 +182,7 @@ export default function AdminDashboard() {
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" aria-label="Indicadores principais" aria-live="polite">
           <KpiCard icon={<ShoppingCart className="w-5 h-5 text-blue-600" />}   iconBg="bg-blue-100"   title="Pedidos Hoje"      value={todayOrders.length}  sub={`${allOrders.length} total`}                                               href="/admin/pedidos" />
-          <KpiCard icon={<DollarSign className="w-5 h-5 text-green-600" />}   iconBg="bg-green-100"  title="Faturamento Hoje"  value={fmt(todayRevenue)}   sub={`Total: ${fmt(allOrders.reduce((a,o)=>a+parseFloat(o.totalPrice?.toString()??"0"),0))}`} subColor="text-green-600" href="/admin/financeiro" />
+          <KpiCard icon={<DollarSign className="w-5 h-5 text-green-600" />}   iconBg="bg-green-100"  title="Faturamento Hoje"  value={fmt(todayRevenue)}   sub={`Total recebido: ${fmt(allOrders.filter((order) => order.paymentStatus === "pago").reduce((a,o)=>a+parseFloat(o.totalPrice?.toString()??"0"),0))}`} subColor="text-green-600" href="/admin/financeiro" />
           <KpiCard icon={<Printer className="w-5 h-5 text-pink-600" aria-hidden="true" />}     iconBg="bg-pink-100" title="Em Produção"       value={inProduction}        sub="Ver produção →"                                                             href="/admin/pedidos/kanban" />
           <KpiCard icon={<Package className="w-5 h-5 text-teal-600" />}       iconBg="bg-teal-100"   title="Prontos p/ Envio"  value={readyToShip}         sub="Ver expedição →"                                                            href="/admin/pedidos" />
           <KpiCard icon={<AlertTriangle className="w-5 h-5 text-red-600" />}  iconBg="bg-red-100"    title="Com Problemas"     value={withProblems}        sub={withProblems > 0 ? "Atenção necessária" : "Tudo ok"} subColor={withProblems > 0 ? "text-red-600" : "text-green-600"} href="/admin/pedidos" />

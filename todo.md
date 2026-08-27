@@ -4513,3 +4513,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Configurar autorização individual de pagamento na retirada para cada vendedor
 - [x] Ocultar e bloquear pagamento na retirada no checkout de vendedor sem autorização
 - [x] Permitir ao Superadmin liberar ou bloquear pagamento na retirada na gestão de vendedores
+- [x] Manter pedido Pix pendente em espera até a confirmação real do pagamento
+- [x] Impedir pedidos com pagamento pendente de entrar em Novos Pedidos e produção
+- [x] Exibir separadamente método de pagamento, situação financeira e status operacional
+- [x] Direcionar checkout Pix não concluído ao fluxo de carrinho abandonado sem pedido operacional

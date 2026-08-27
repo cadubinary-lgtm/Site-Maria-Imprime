@@ -33,6 +33,7 @@ type Order = {
   id: number;
   orderNumber: string;
   status: string;
+  paymentStatus?: string | null;
   productionStatus?: string | null;
   totalPrice: string | number;
   createdAt: string | number | Date;
@@ -259,9 +260,10 @@ export default function AdminKanban() {
 
   // Filtrar pedidos por busca (DEVE ficar antes de qualquer return condicional)
   const filteredOrders = useMemo(() => {
-    if (!searchQuery.trim()) return orders;
+    const operationalOrders = orders.filter((order) => order.paymentStatus === "pago");
+    if (!searchQuery.trim()) return operationalOrders;
     const query = searchQuery.toLowerCase();
-    return orders.filter(o => 
+    return operationalOrders.filter(o =>
       o.orderNumber.toLowerCase().includes(query)
     );
   }, [orders, searchQuery]);

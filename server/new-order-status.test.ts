@@ -4,6 +4,7 @@ import { isNewOrderStatus } from "../client/src/lib/newOrderStatus";
 describe("indicador de Novos Pedidos", () => {
   it("considera apenas pedidos recém-aprovados para a primeira triagem", () => {
     expect(isNewOrderStatus("pagamento_aprovado")).toBe(true);
+    expect(isNewOrderStatus("aguardando_pagamento")).toBe(false);
     expect(isNewOrderStatus("pagamento_retirada")).toBe(false);
   });
 

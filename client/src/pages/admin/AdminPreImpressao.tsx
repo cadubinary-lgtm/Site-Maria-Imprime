@@ -85,7 +85,7 @@ export default function AdminPreImpressao() {
   });
 
   const activeOrders = useMemo(
-    () => (allOrders as any[]).filter((order) => !["pronto_entrega", "pronto_retirada", "entregue", "cancelado"].includes(order.status)),
+    () => (allOrders as any[]).filter((order) => order.paymentStatus === "pago" && !["pronto_entrega", "pronto_retirada", "entregue", "cancelado"].includes(order.status)),
     [allOrders]
   );
 

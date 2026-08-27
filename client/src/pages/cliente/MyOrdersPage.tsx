@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-amber-100 text-amber-800" },
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-100 text-green-700" },
   pagamento_retirada:  { label: "Pagamento na Retirada",  color: "bg-blue-100 text-blue-700" },
   analisando:          { label: "Analisando",             color: "bg-orange-100 text-orange-700" },

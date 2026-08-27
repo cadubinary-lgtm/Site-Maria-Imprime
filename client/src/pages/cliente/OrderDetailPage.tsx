@@ -579,7 +579,9 @@ function getStatusSteps(order: any) {
   const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
 
   // Passo 1: definir o status de pagamento correto (apenas o que foi usado)
-  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
+  const paymentStep = order.status === 'aguardando_pagamento' || order.paymentStatus !== 'pago'
+    ? { key: 'aguardando_pagamento', label: 'Aguardando\npagamento', emoji: '⏳' }
+    : order.paymentMethod === 'pagar_na_retirada'
     ? { key: 'pagamento_retirada', label: 'Pagamento\nna Retirada', emoji: '🏪' }
     : { key: 'pagamento_aprovado', label: 'Pagamento\nAprovado', emoji: '💳' };
 
@@ -611,6 +613,7 @@ function getStatusSteps(order: any) {
 }
 
 const STATUS_LABELS: Record<string, string> = {
+  aguardando_pagamento: "Aguardando Pagamento",
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
   analisando:          "Analisando",

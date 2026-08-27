@@ -11,7 +11,9 @@ function getTimelineSteps(order: any) {
   const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
 
   // Passo 1: apenas o método de pagamento usado
-  const paymentStep = order.paymentMethod === 'pagar_na_retirada'
+  const paymentStep = order.status === 'aguardando_pagamento' || order.paymentStatus !== 'pago'
+    ? { key: 'aguardando_pagamento', label: 'Aguardando Pagamento', icon: Clock }
+    : order.paymentMethod === 'pagar_na_retirada'
     ? { key: 'pagamento_retirada', label: 'Pagamento na Retirada', icon: CheckCircle2 }
     : { key: 'pagamento_aprovado', label: 'Pagamento Aprovado', icon: Clock };
 

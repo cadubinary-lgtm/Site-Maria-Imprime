@@ -1,0 +1,1 @@
+ALTER TABLE `orders` MODIFY COLUMN `status` enum('aguardando_pagamento','pagamento_aprovado','pagamento_retirada','analisando','com_problemas','em_producao','pronto_entrega','pronto_retirada','saiu_entrega','em_transporte','entregue','cancelado') NOT NULL;

@@ -14,6 +14,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-amber-100 text-amber-800", icon: "⏳" },
   pagamento_aprovado:  { label: "Pagamento Aprovado",      color: "bg-green-100 text-green-800",   icon: "💳" },
   pagamento_retirada:  { label: "Pagamento na Retirada",   color: "bg-blue-100 text-blue-800",     icon: "🏪" },
   analisando:          { label: "Analisando",              color: "bg-amber-100 text-amber-800", icon: "🔍" },
@@ -45,6 +46,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 
 const FILTER_OPTIONS = [
   { id: "todos",              label: "Todos" },
+  { id: "aguardando_pagamento", label: "Aguardando Pagamento" },
   { id: "pagamento_aprovado", label: "Pagamento Aprovado" },
   { id: "pagamento_retirada", label: "Pagamento na Retirada" },
   { id: "analisando",         label: "Analisando" },
@@ -236,7 +238,21 @@ export default function AdminOrders() {
                 <p className="text-gray-400 text-sm">Ajuste os filtros ou a busca</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              <div className="space-y-3 md:hidden">
+                {filtered.map((order: any) => {
+                  const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.analisando;
+                  const payment = PAYMENT_STATUS_LABELS[order.paymentStatus] ?? PAYMENT_STATUS_LABELS.pendente;
+                  const paymentMethod = PAYMENT_METHOD_LABELS[order.paymentMethod] ?? "Método não informado";
+                  return <article key={order.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-sm font-bold text-slate-900">{order.orderNumber}</p><p className="mt-1 text-sm font-medium text-slate-800">{order.deliveryFullName || "Cliente"}</p><p className="text-xs text-slate-500">{order.sellerName || "Venda direta"}</p></div><p className="text-sm font-bold text-slate-900">{fmt(parseFloat(order.totalPrice))}</p></div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-slate-50 p-2"><p className="text-slate-500">Pagamento</p><p className="mt-1 font-medium text-slate-800">{paymentMethod}</p></div><div className="rounded-lg bg-slate-50 p-2"><p className="text-slate-500">Situação financeira</p><Badge variant="outline" className={`mt-1 text-[10px] ${payment.className}`}>{payment.label}</Badge></div></div>
+                    <div className="mt-2 rounded-lg bg-slate-50 p-2"><p className="text-xs text-slate-500">Status operacional</p><Badge className={`mt-1 text-[10px] ${sc.color}`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge></div>
+                    <div className="mt-3 flex justify-end gap-2"><Button variant="outline" size="sm" asChild><Link href={`/admin/pedidos/${order.id}`}>Ver pedido <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" /></Link></Button>{canManageTrash && <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50" aria-label={`Mover o pedido ${order.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setOrderToTrash(order); }}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}</div>
+                  </article>;
+                })}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-gray-50 text-gray-600">
@@ -245,6 +261,7 @@ export default function AdminOrders() {
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Vendedor</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Valor</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Pagamento</th>
+                      <th scope="col" className="px-4 py-3 text-left font-semibold">Situação financeira</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Status</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Data</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Ações</th>
@@ -266,11 +283,9 @@ export default function AdminOrders() {
                           <td className="px-4 py-3 font-semibold text-gray-900">
                             {fmt(parseFloat(order.totalPrice))}
                           </td>
+                          <td className="px-4 py-3 text-sm text-gray-700">{paymentMethod}</td>
                           <td className="px-4 py-3">
-                            <div className="space-y-1">
-                              <Badge variant="outline" className={`text-xs ${payment.className}`}>{payment.label}</Badge>
-                              <p className="text-xs text-gray-500">{paymentMethod}</p>
-                            </div>
+                            <Badge variant="outline" className={`text-xs ${payment.className}`}>{payment.label}</Badge>
                           </td>
                           <td className="px-4 py-3">
                             <Badge className={`${sc.color} text-xs`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge>
@@ -292,6 +307,7 @@ export default function AdminOrders() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </CardContent>
         </Card>

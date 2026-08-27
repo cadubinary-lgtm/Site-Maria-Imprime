@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 // ─── Status operacionais ─────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
+  aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-amber-100 text-amber-800", icon: "⏳" },
   pagamento_aprovado:  { label: "Pagamento Aprovado",     color: "bg-green-100 text-green-800",   icon: "💳" },
   pagamento_retirada:  { label: "Aguardando Retirada",    color: "bg-blue-100 text-blue-800",     icon: "🏪" },
   analisando:          { label: "Analisando",             color: "bg-orange-100 text-orange-800", icon: "🔍" },
@@ -25,6 +26,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string
 
 // Fluxo para entrega em casa (PIX / Cartão)
 const STEPS_ENTREGA = [
+  { key: "aguardando_pagamento", label: "Aguardando",    icon: "⏳" },
   { key: "pagamento_aprovado", label: "Pagamento",   icon: "💳" },
   { key: "analisando",         label: "Analisando",   icon: "🔍" },
   { key: "em_producao",        label: "Produção",    icon: "⚙️" },

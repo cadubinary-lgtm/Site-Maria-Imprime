@@ -1525,13 +1525,13 @@ export const appRouter = router({
           termsVersion: input.termsVersion,
           termsDocuments: JSON.stringify({ "Termos e Condições de Venda": input.termsVersion }),
           // Status inicial baseado no método de pagamento:
-          // - PIX / cartão = pagamento_aprovado (já pago)
+          // - PIX / cartão = aguardando_pagamento até confirmação real do provedor
           // - retirada = pagamento_retirada (pagar na retirada)
           // - outros = analisando
           initialStatus: input.paymentMethod === "pagar_na_retirada"
             ? "pagamento_retirada"
             : (input.paymentMethod === "pix" || input.paymentMethod === "cartao_credito")
-              ? "pagamento_aprovado"
+              ? "aguardando_pagamento"
               : "analisando",
           cartItems: cartItems.map((item: any) => ({
             productId: item.productId,
@@ -1568,16 +1568,20 @@ export const appRouter = router({
           await ensureSellerCommissionForOrder(commissionDb, orderId, { source: "seller_order" });
         }
 
-        // 7. Limpar carrinho
-        if (checkoutSeller) {
-          await clearCart(null, `seller_${checkoutSeller.id}`);
-        } else if (userId) {
-          await clearCart(userId);
-        } else if (finalCustomerId) {
-          await clearCart(null, `cust_${finalCustomerId}`);
-        } else if (cartSessionId) {
-          await clearCart(null, cartSessionId);
-          res.clearCookie("cart_session");
+        // 7. Carrinhos Pix/cartão permanecem até o recebimento real. Assim, pagamentos não concluídos
+        // entram na fila normal de carrinhos abandonados em vez de gerar um pedido operacional.
+        const retainCartUntilOnlinePayment = input.paymentMethod === "pix" || input.paymentMethod === "cartao_credito";
+        if (!retainCartUntilOnlinePayment) {
+          if (checkoutSeller) {
+            await clearCart(null, `seller_${checkoutSeller.id}`);
+          } else if (userId) {
+            await clearCart(userId);
+          } else if (finalCustomerId) {
+            await clearCart(null, `cust_${finalCustomerId}`);
+          } else if (cartSessionId) {
+            await clearCart(null, cartSessionId);
+            res.clearCookie("cart_session");
+          }
         }
 
         // 8. Enviar e-mail de confirmação
@@ -2558,9 +2562,9 @@ export const appRouter = router({
         SELECT COUNT(*) as count FROM orders WHERE status = 'em_producao'
       `) as any;
       const inProductionCount = Number((inProductionRows[0]?.[0] ?? { count: 0 }).count);
-      // Aguardando análise (analisando + pagamento_aprovado + pagamento_retirada)
+      // Aguardando análise comercial, somente pedidos com pagamento confirmado.
       const pendingRows = await db.execute(sqlOp`
-        SELECT COUNT(*) as count FROM orders WHERE status IN ('analisando', 'pagamento_aprovado', 'pagamento_retirada')
+        SELECT COUNT(*) as count FROM orders WHERE paymentStatus = 'pago' AND status IN ('analisando', 'pagamento_aprovado', 'pagamento_retirada')
       `) as any;
       const pendingCount = Number((pendingRows[0]?.[0] ?? { count: 0 }).count);
       // Pedidos atrasados (deliveryDeadline < agora e não entregue/cancelado)

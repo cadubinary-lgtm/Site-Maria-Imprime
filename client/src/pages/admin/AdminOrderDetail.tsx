@@ -75,7 +75,9 @@ function formatAddress(order: any): string {
 function getAdminStatusSteps(order: any) {
   const isPickup = order.shippingMethod === "retirada" || order.shippingMethod === "pickup" || !order.deliveryStreet;
   const isInProduction = ["em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue"].includes(order.status);
-  const paymentStep = order.paymentMethod === "pagar_na_retirada"
+  const paymentStep = order.status === "aguardando_pagamento" || order.paymentStatus !== "pago"
+    ? { key: "aguardando_pagamento" }
+    : order.paymentMethod === "pagar_na_retirada"
     ? { key: "pagamento_retirada" }
     : { key: "pagamento_aprovado" };
   const base = [
@@ -89,7 +91,7 @@ function getAdminStatusSteps(order: any) {
     : [...base, { key: "pronto_entrega" }, { key: "saiu_entrega" }, { key: "em_transporte" }, { key: "entregue" }];
 }
 
-const STATUS_OPTIONS = Object.entries(ORDER_STATUS).map(([value, cfg]) => ({
+const STATUS_OPTIONS = Object.entries(ORDER_STATUS).filter(([value]) => value !== "aguardando_pagamento").map(([value, cfg]) => ({
   value,
   label: `${cfg.icon} ${cfg.label}`,
 }));
@@ -123,7 +125,7 @@ const RECEIVED_PAYMENT_OPTIONS = [
 type ReceivedPaymentMethod = (typeof RECEIVED_PAYMENT_OPTIONS)[number]["value"];
 
 /** Status do pedido que bloqueiam a pré-impressão */
-const LOCKED_ORDER_STATUSES = ["pagamento_aprovado", "pagamento_retirada"];
+const LOCKED_ORDER_STATUSES = ["aguardando_pagamento", "pagamento_aprovado", "pagamento_retirada"];
 
 function fileNameFromUrl(url: string): string {
   try {

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
 
 const STEPS_ENTREGA = [
+  { key: "aguardando_pagamento", label: "Aguardando Pagamento", icon: Clock },
   { key: "pagamento_aprovado",  label: "Pagamento Aprovado",     icon: Clock },
   { key: "analisando",          label: "Analisando",              icon: Package },
   { key: "com_problemas",       label: "Com Problemas",          icon: X },
@@ -44,6 +45,7 @@ function getStepIndex(steps: typeof STEPS_ENTREGA, status: string): number {
 }
 
 const STATUS_LABELS: Record<string, string> = {
+  aguardando_pagamento: "Aguardando Pagamento",
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
   analisando:          "Analisando",

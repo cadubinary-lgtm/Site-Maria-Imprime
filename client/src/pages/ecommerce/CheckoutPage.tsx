@@ -161,6 +161,7 @@ export default function CheckoutPage() {
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
   const canUsePickupPayment = isSellerCheckout ? sellerProfile?.allowStorePickupPayment === true : customerProfile?.allowStorePickup === true;
+  const clearPaidCart = trpc.cart.clear.useMutation();
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
   const createPixMutation = trpc.payment.createPixPayment.useMutation();
   const createCardMutation = trpc.payment.createCardPayment.useMutation();
@@ -463,6 +464,7 @@ export default function CheckoutPage() {
     if (st === "approved") {
       setPixStatus("approved");
       setPixPolling(false);
+      void clearPaidCart.mutateAsync();
       toast.success("Pagamento PIX aprovado! Redirecionando...");
       setTimeout(() => {
         // Usar orderNumber (string) para a rota /confirmacao/:orderNumber
@@ -593,6 +595,7 @@ export default function CheckoutPage() {
             payerName: fullName.trim() || undefined,
           });
           if (cardResult.status === "approved") {
+            await clearPaidCart.mutateAsync();
             toast.success("Pagamento aprovado! Redirecionando...");
           } else {
             toast.info("Pedido criado. Pagamento em análise.");

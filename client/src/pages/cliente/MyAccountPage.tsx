@@ -46,6 +46,7 @@ function formatCpfCnpjDisplay(value: string | null | undefined): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
+  aguardando_pagamento: "Aguardando Pagamento",
   pagamento_aprovado:  "Pagamento Aprovado",
   pagamento_retirada:  "Pagamento na Retirada",
   analisando:          "Analisando",
@@ -60,6 +61,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
+  aguardando_pagamento: "bg-amber-100 text-amber-800",
   pagamento_aprovado:  "bg-green-100 text-green-700",
   pagamento_retirada:  "bg-blue-100 text-blue-700",
   analisando:          "bg-orange-100 text-orange-700",

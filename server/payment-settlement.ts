@@ -29,6 +29,7 @@ export async function settleApprovedOnlinePayment(
     .set({
       paymentStatus: "pago",
       paymentMethod: input.paymentMethod,
+      ...(order.status === "aguardando_pagamento" ? { status: "pagamento_aprovado" } : {}),
       updatedAt: new Date(),
     })
     .where(eq(orders.id, input.orderId));
