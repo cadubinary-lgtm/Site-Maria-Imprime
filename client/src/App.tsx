@@ -178,11 +178,6 @@ function SellerRoutes() {
     window.location.replace("/admin/login");
     return null;
   }
-  if (adminUser.role !== "seller") {
-    window.location.replace("/admin");
-    return null;
-  }
-
   return (
     <Switch>
       <Route path="/vendedor" component={SellerDashboard} />

@@ -4491,3 +4491,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Criar painel administrativo de vendedores, vendas e comissões a pagar ou pagas
 - [x] Registrar pagamento de comissão com data, observação e histórico
 - [x] Validar permissões, cálculos e fluxos de ponta a ponta
+- [x] Permitir vincular uma conta existente ao cadastro de vendedor sem duplicar credenciais

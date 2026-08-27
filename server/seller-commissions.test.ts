@@ -36,7 +36,7 @@ describe("garantias de rastreabilidade comercial", () => {
   });
 
   it("restringe vendedores à carteira própria no servidor", () => {
-    expect(sellerRouterSource).toContain('adminUser.role !== "seller"');
+    expect(sellerRouterSource).toContain("eq(sellers.adminAccountId, adminUser.adminId)");
     expect(sellerRouterSource).toContain("eq(orders.sellerId, seller.id)");
     expect(sellerRouterSource).toContain("eq(quotations.sellerId, seller.id)");
     expect(sellerRouterSource).toContain("eq(sellerCommissions.sellerId, seller.id)");
@@ -61,5 +61,12 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(appSource).toContain('window.location.replace("/vendedor")');
     expect(adminNavigationSource).toContain('{ label: "Vendedores", href: "/admin/vendedores" }');
     expect(adminNavigationSource).toContain('{ label: "Comissões", href: "/admin/comissoes" }');
+  });
+
+  it("vincula uma conta existente sem recriar senha, papel ou credenciais", () => {
+    expect(sellerRouterSource).toContain("linkedExistingAccount: Boolean(existing)");
+    expect(sellerRouterSource).toContain("if (!existing && !input.password)");
+    expect(sellerRouterSource).toContain("if (!adminAccountId)");
+    expect(sellerRouterSource).toContain('action: created.linkedExistingAccount ? "link_existing_account_to_seller" : "create_seller"');
   });
 });

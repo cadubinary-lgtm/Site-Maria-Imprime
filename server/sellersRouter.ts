@@ -29,7 +29,7 @@ const salesAdminProcedure = adminOrManusAuthProcedure.use(({ ctx, next }) => {
 
 const sellerProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const adminUser = await authenticateAdminRequest(ctx.req);
-  if (!adminUser || adminUser.role !== "seller") {
+  if (!adminUser) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Acesso exclusivo ao painel do vendedor." });
   }
   const db = await getDb();
@@ -107,31 +107,42 @@ export const sellersRouter = router({
       .input(z.object({
         name: z.string().trim().min(2).max(150),
         email: z.string().trim().email().max(255),
-        password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
+        password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres.").optional(),
         commissionRate: z.number().min(0).max(100),
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
         const email = input.email.toLowerCase();
-        const [existing] = await db.select({ id: adminAccounts.id }).from(adminAccounts).where(eq(adminAccounts.email, email)).limit(1);
-        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Já existe uma conta cadastrada com este e-mail." });
+        const [existing] = await db.select({ id: adminAccounts.id, role: adminAccounts.role }).from(adminAccounts).where(eq(adminAccounts.email, email)).limit(1);
+        if (!existing && !input.password) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Informe uma senha inicial de pelo menos 8 caracteres para criar uma nova conta." });
+        }
 
         const now = Date.now();
         const adminUser = (ctx as any).adminUser;
         const created = await (db as any).transaction(async (tx: any) => {
-          const [accountResult] = await tx.insert(adminAccounts).values({
-            name: input.name,
-            email,
-            passwordHash: await hashPassword(input.password),
-            role: "seller",
-            status: "active",
-            createdBy: adminUser.adminId,
-            createdAt: now,
-            updatedAt: now,
-            permissions: JSON.stringify([]),
-          } as any);
-          const adminAccountId = Number(accountResult.insertId);
+          const [existingProfile] = existing
+            ? await tx.select({ id: sellers.id }).from(sellers).where(eq(sellers.adminAccountId, existing.id)).limit(1)
+            : [undefined];
+          if (existingProfile) {
+            throw new TRPCError({ code: "CONFLICT", message: "Esta conta já está vinculada a um vendedor." });
+          }
+          let adminAccountId = existing?.id;
+          if (!adminAccountId) {
+            const [accountResult] = await tx.insert(adminAccounts).values({
+              name: input.name,
+              email,
+              passwordHash: await hashPassword(input.password!),
+              role: "seller",
+              status: "active",
+              createdBy: adminUser.adminId,
+              createdAt: now,
+              updatedAt: now,
+              permissions: JSON.stringify([]),
+            } as any);
+            adminAccountId = Number(accountResult.insertId);
+          }
           const [sellerResult] = await tx.insert(sellers).values({
             adminAccountId,
             commissionRate: input.commissionRate.toFixed(2),
@@ -140,16 +151,16 @@ export const sellersRouter = router({
             createdAt: now,
             updatedAt: now,
           } as any);
-          return { sellerId: Number(sellerResult.insertId), adminAccountId };
+          return { sellerId: Number(sellerResult.insertId), adminAccountId, linkedExistingAccount: Boolean(existing) };
         });
 
         await logAudit({
           adminId: adminUser.adminId,
           adminName: adminUser.name,
-          action: "create_seller",
+          action: created.linkedExistingAccount ? "link_existing_account_to_seller" : "create_seller",
           entity: "sellers",
           entityId: String(created.sellerId),
-          after: { name: input.name, email, commissionRate: input.commissionRate },
+          after: { name: input.name, email, commissionRate: input.commissionRate, linkedExistingAccount: created.linkedExistingAccount },
         });
         return { success: true, ...created };
       }),
