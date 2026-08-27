@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "wouter";
-import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2, RotateCcw } from "lucide-react";
+import { Search, ChevronRight, Package, Filter, X, Loader2, Trash2, RotateCcw, Clock3, Send } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import AdminAbandonedCarts from "./AdminAbandonedCarts";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { getPixExpirationState } from "@shared/pix-expiration";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -62,7 +63,10 @@ const FILTER_OPTIONS = [
 
 export default function AdminOrders() {
   const [search, setSearch]       = useState("");
-  const [filter, setFilter]       = useState("todos");
+  const [filter, setFilter]       = useState(() => {
+    const status = new URLSearchParams(window.location.search).get("status");
+    return FILTER_OPTIONS.some((option) => option.id === status) ? status! : "todos";
+  });
   const [sellerFilter, setSellerFilter] = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
@@ -70,6 +74,7 @@ export default function AdminOrders() {
   const [deletionReason, setDeletionReason] = useState("");
   const [orderToRestore, setOrderToRestore] = useState<any | null>(null);
   const [orderToPermanentlyDelete, setOrderToPermanentlyDelete] = useState<any | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const utils = trpc.useUtils();
   const { adminUser } = useAdminAuth();
   const canManageTrash = Boolean(adminUser);
@@ -103,6 +108,13 @@ export default function AdminOrders() {
     },
     onError: (err) => toast.error(err.message || "Erro ao excluir pedido permanentemente."),
   });
+  const preparePendingPixWhatsApp = trpc.financeiro.preparePendingPixWhatsApp.useMutation({
+    onSuccess: (data) => {
+      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
+      toast.success("Mensagem Pix preparada no WhatsApp", { description: "Revise a mensagem antes de enviá-la ao cliente." });
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível preparar o reenvio do Pix."),
+  });
 
   const { data: allOrders, isLoading } = trpc.checkout.getAllOrders.useQuery();
   const { data: trashedOrders = [], isLoading: isLoadingTrash } = trpc.ordersTrash.list.useQuery(undefined, { enabled: canManageTrash && showTrash });
@@ -125,6 +137,18 @@ export default function AdminOrders() {
       return true;
     });
   }, [allOrders, filter, sellerFilter, search]);
+
+  const pendingPixOrderIds = useMemo(() => filtered.filter((order: any) => order.status === "aguardando_pagamento" && order.paymentStatus === "pendente" && order.paymentMethod === "pix").map((order: any) => order.id), [filtered]);
+  const pendingPixInput = useMemo(() => ({ orderIds: pendingPixOrderIds }), [pendingPixOrderIds]);
+  const { data: pendingPixDetails = [] } = trpc.financeiro.getPendingPixDetails.useQuery(pendingPixInput, { enabled: filter === "aguardando_pagamento" && pendingPixOrderIds.length > 0, refetchInterval: filter === "aguardando_pagamento" ? 30000 : false });
+  const pixByOrderId = useMemo(() => new Map((pendingPixDetails as any[]).map((payment) => [payment.orderId, payment])), [pendingPixDetails]);
+
+  useEffect(() => {
+    if (filter !== "aguardando_pagamento") return;
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [filter]);
 
   const isAbandonedCartsView = new URLSearchParams(window.location.search).get("view") === "carrinho-abandonado";
 
@@ -244,10 +268,13 @@ export default function AdminOrders() {
                   const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.analisando;
                   const payment = PAYMENT_STATUS_LABELS[order.paymentStatus] ?? PAYMENT_STATUS_LABELS.pendente;
                   const paymentMethod = PAYMENT_METHOD_LABELS[order.paymentMethod] ?? "Método não informado";
+                  const pixDetail = pixByOrderId.get(order.id);
+                  const pixExpiration = getPixExpirationState(pixDetail?.expiresAt, now);
                   return <article key={order.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-sm font-bold text-slate-900">{order.orderNumber}</p><p className="mt-1 text-sm font-medium text-slate-800">{order.deliveryFullName || "Cliente"}</p><p className="text-xs text-slate-500">{order.sellerName || "Venda direta"}</p></div><p className="text-sm font-bold text-slate-900">{fmt(parseFloat(order.totalPrice))}</p></div>
                     <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-slate-50 p-2"><p className="text-slate-500">Pagamento</p><p className="mt-1 font-medium text-slate-800">{paymentMethod}</p></div><div className="rounded-lg bg-slate-50 p-2"><p className="text-slate-500">Situação financeira</p><Badge variant="outline" className={`mt-1 text-[10px] ${payment.className}`}>{payment.label}</Badge></div></div>
                     <div className="mt-2 rounded-lg bg-slate-50 p-2"><p className="text-xs text-slate-500">Status operacional</p><Badge className={`mt-1 text-[10px] ${sc.color}`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge></div>
+                    {filter === "aguardando_pagamento" && <div className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-amber-100 bg-amber-50 p-2"><Badge variant="outline" className={pixExpiration.expired ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-white text-amber-800"}><Clock3 className="mr-1 h-3 w-3" aria-hidden="true" />{pixExpiration.label}</Badge>{pixDetail && <Button variant="outline" size="sm" className="h-8 border-emerald-200 bg-white text-xs text-emerald-700 hover:bg-emerald-100" title={pixExpiration.expired ? "Gere uma nova cobrança Pix antes de reenviar" : "Preparar mensagem Pix no WhatsApp"} disabled={pixExpiration.expired || preparePendingPixWhatsApp.isPending} onClick={() => preparePendingPixWhatsApp.mutate({ orderId: order.id })}><Send className="mr-1 h-3 w-3" aria-hidden="true" />Enviar Pix</Button>}</div>}
                     <div className="mt-3 flex justify-end gap-2"><Button variant="outline" size="sm" asChild><Link href={`/admin/pedidos/${order.id}`}>Ver pedido <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" /></Link></Button>{canManageTrash && <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50" aria-label={`Mover o pedido ${order.orderNumber} para a lixeira`} onClick={() => { setDeletionReason(""); setOrderToTrash(order); }}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}</div>
                   </article>;
                 })}
@@ -263,6 +290,7 @@ export default function AdminOrders() {
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Pagamento</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Situação financeira</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Status</th>
+                      {filter === "aguardando_pagamento" && <th scope="col" className="px-4 py-3 text-left font-semibold">Expiração Pix</th>}
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Data</th>
                       <th scope="col" className="px-4 py-3 text-left font-semibold">Ações</th>
                     </tr>
@@ -272,6 +300,8 @@ export default function AdminOrders() {
                       const sc = ORDER_STATUS[order.status] ?? ORDER_STATUS.analisando;
                       const payment = PAYMENT_STATUS_LABELS[order.paymentStatus] ?? PAYMENT_STATUS_LABELS.pendente;
                       const paymentMethod = PAYMENT_METHOD_LABELS[order.paymentMethod] ?? "Método não informado";
+                      const pixDetail = pixByOrderId.get(order.id);
+                      const pixExpiration = getPixExpirationState(pixDetail?.expiresAt, now);
                       return (
                         <tr key={order.id} className="border-b hover:bg-gray-50 transition">
                           <td className="px-4 py-3 font-mono font-semibold text-gray-900">{order.orderNumber}</td>
@@ -290,6 +320,7 @@ export default function AdminOrders() {
                           <td className="px-4 py-3">
                             <Badge className={`${sc.color} text-xs`}><span aria-hidden="true">{sc.icon} </span>{sc.label}</Badge>
                           </td>
+                          {filter === "aguardando_pagamento" && <td className="px-4 py-3"><div className="flex min-w-40 flex-col items-start gap-1.5"><Badge variant="outline" className={pixExpiration.expired ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-amber-50 text-amber-800"}><Clock3 className="mr-1 h-3 w-3" aria-hidden="true" />{pixExpiration.label}</Badge>{pixDetail && <Button variant="outline" size="sm" className="h-7 border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-50" title={pixExpiration.expired ? "Gere uma nova cobrança Pix antes de reenviar" : "Preparar mensagem Pix no WhatsApp"} disabled={pixExpiration.expired || preparePendingPixWhatsApp.isPending} onClick={() => preparePendingPixWhatsApp.mutate({ orderId: order.id })}><Send className="mr-1 h-3 w-3" aria-hidden="true" />Enviar Pix</Button>}</div></td>}
                           <td className="px-4 py-3 text-gray-600">{fmtDate(order.createdAt)}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1">

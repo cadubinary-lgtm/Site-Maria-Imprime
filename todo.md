@@ -4517,3 +4517,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Impedir pedidos com pagamento pendente de entrar em Novos Pedidos e produção
 - [x] Exibir separadamente método de pagamento, situação financeira e status operacional
 - [x] Direcionar checkout Pix não concluído ao fluxo de carrinho abandonado sem pedido operacional
+- [x] Exibir o tempo restante de expiração do Pix em pedidos aguardando pagamento
+- [x] Informar visualmente quando o Pix estiver expirado
+- [x] Permitir preparar o reenvio do QR Code e código Pix por WhatsApp ao cliente

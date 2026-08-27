@@ -1624,6 +1624,55 @@ export const financeiroRouter = router({
     }),
 
   // ── Notificações ────────────────────────────────────────────────────────────
+  getPendingPixDetails: adminOrManusAuthProcedure
+    .input(z.object({ orderIds: z.array(z.number().int().positive()).max(250) }))
+    .query(async ({ input, ctx }) => {
+      const role = (ctx as any).adminUser?.role ?? (ctx as any).user?.role;
+      if (role === "production") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas o Comercial e o Financeiro podem acessar cobranças Pix." });
+      if (!input.orderIds.length) return [];
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const payments = await db.select({ orderId: orderPayments.orderId, paymentId: orderPayments.paymentId, expiresAt: orderPayments.expiresAt, status: orderPayments.status, createdAt: orderPayments.createdAt })
+        .from(orderPayments)
+        .where(and(inArray(orderPayments.orderId, input.orderIds), eq(orderPayments.method, "pix"), eq(orderPayments.status, "pending")))
+        .orderBy(desc(orderPayments.createdAt));
+      const latestByOrder = new Map<number, typeof payments[number]>();
+      for (const payment of payments) if (!latestByOrder.has(payment.orderId)) latestByOrder.set(payment.orderId, payment);
+      return Array.from(latestByOrder.values());
+    }),
+
+  preparePendingPixWhatsApp: adminOrManusAuthProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const role = (ctx as any).adminUser?.role ?? (ctx as any).user?.role;
+      if (role === "production") throw new TRPCError({ code: "FORBIDDEN", message: "Apenas o Comercial e o Financeiro podem reenviar cobranças Pix." });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+      if (!order || order.status !== "aguardando_pagamento" || order.paymentStatus !== "pendente" || order.paymentMethod !== "pix") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Este pedido não possui um Pix pendente para reenvio." });
+      }
+      const [payment] = await db.select({ qrCode: orderPayments.qrCode, expiresAt: orderPayments.expiresAt })
+        .from(orderPayments)
+        .where(and(eq(orderPayments.orderId, order.id), eq(orderPayments.method, "pix"), eq(orderPayments.status, "pending")))
+        .orderBy(desc(orderPayments.createdAt)).limit(1);
+      if (!payment?.qrCode) throw new TRPCError({ code: "NOT_FOUND", message: "Código Pix pendente não encontrado para este pedido." });
+      const expiryTimestamp = payment.expiresAt && /^\d+$/.test(payment.expiresAt) ? Number(payment.expiresAt) : payment.expiresAt ? new Date(payment.expiresAt).getTime() : NaN;
+      if (Number.isFinite(expiryTimestamp) && expiryTimestamp <= Date.now()) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Este Pix expirou. Gere uma nova cobrança antes de reenviá-lo." });
+      }
+      const rawPhone = String(order.deliveryPhone || "").replace(/\D/g, "");
+      if (!rawPhone) throw new TRPCError({ code: "BAD_REQUEST", message: "O pedido não possui telefone para o reenvio por WhatsApp." });
+      const phone = rawPhone.startsWith("55") && rawPhone.length > 11 ? rawPhone : `55${rawPhone}`;
+      const expiry = payment.expiresAt ? new Date(payment.expiresAt) : null;
+      const expiryText = expiry && !Number.isNaN(expiry.getTime()) ? `\nValidade: ${expiry.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.` : "";
+      const customerName = order.guestName || order.deliveryFullName || "cliente";
+      const message = `Olá, ${customerName}! Segue novamente o Pix do pedido *#${order.orderNumber}* no valor de *R$ ${Number(order.totalPrice).toFixed(2).replace(".", ",")}*.${expiryText}\n\n*Copia e cola:*\n${payment.qrCode}\n\nApós a confirmação, daremos continuidade ao seu pedido. Maria Imprime.`;
+      const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      await logAudit({ adminId: (ctx as any).adminUser?.adminId, adminName: (ctx as any).adminUser?.name || "Administrador", action: "pending_pix_whatsapp_prepared", entity: "orderPayments", entityId: String(order.id), after: { orderNumber: order.orderNumber, expiresAt: payment.expiresAt }, ipAddress: ctx.req.ip });
+      return { whatsappUrl, expiresAt: payment.expiresAt };
+    }),
+
   getNotificacoes: adminOrManusAuthProcedure
     .input(z.object({ apenasNaoLidas: z.boolean().default(false) }))
     .query(async ({ input }) => {
