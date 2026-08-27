@@ -9,7 +9,7 @@ import { z } from "zod";
 import { eq, desc, and, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getDb } from "./db";
-import { adminAccounts, adminSessions, auditLogs } from "../drizzle/schema";
+import { adminAccounts, adminSessions, auditLogs, orders, quotations, sellerCommissions, sellers } from "../drizzle/schema";
 import {
   loginAdmin,
   logoutAdmin,
@@ -485,8 +485,36 @@ export const adminAuthRouter = router({
         }
       }
 
-      await db.delete(adminSessions).where(eq(adminSessions.adminId, input.id));
-      await db.delete(adminAccounts).where(eq(adminAccounts.id, input.id));
+      const [sellerProfile] = await db
+        .select({ id: sellers.id })
+        .from(sellers)
+        .where(eq(sellers.adminAccountId, input.id))
+        .limit(1);
+
+      if (sellerProfile) {
+        const [commission] = await db
+          .select({ id: sellerCommissions.id })
+          .from(sellerCommissions)
+          .where(eq(sellerCommissions.sellerId, sellerProfile.id))
+          .limit(1);
+        if (commission) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Este vendedor possui histórico de comissões. Desative-o em Comercial → Vendedores para preservar as vendas e auditorias.",
+          });
+        }
+      }
+
+      await (db as any).transaction(async (tx: any) => {
+        if (sellerProfile) {
+          // Pedidos e orçamentos sem comissão são desvinculados antes de remover o perfil.
+          await tx.update(orders).set({ sellerId: null, updatedAt: new Date() }).where(eq(orders.sellerId, sellerProfile.id));
+          await tx.update(quotations).set({ sellerId: null, updatedAt: new Date() }).where(eq(quotations.sellerId, sellerProfile.id));
+          await tx.delete(sellers).where(eq(sellers.id, sellerProfile.id));
+        }
+        await tx.delete(adminSessions).where(eq(adminSessions.adminId, input.id));
+        await tx.delete(adminAccounts).where(eq(adminAccounts.id, input.id));
+      });
 
       await logAudit({
         adminId: adminUser.adminId,
@@ -495,7 +523,7 @@ export const adminAuthRouter = router({
         entity: "adminAccounts",
         entityId: String(input.id),
         before: { name: target.name, email: target.email, role: target.role, status: target.status },
-        after: { permanentlyDeletedAt: Date.now() },
+        after: { permanentlyDeletedAt: Date.now(), removedSellerProfile: Boolean(sellerProfile) },
       });
 
       return { success: true };

@@ -78,4 +78,11 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(adminAuthRouterSource).toContain("loginSeller: publicProcedure");
     expect(adminAuthRouterSource).toContain("sellerOnly: true");
   });
+
+  it("remove um perfil de vendedor sem histórico antes da conta e protege histórico comissionado", () => {
+    expect(adminAuthRouterSource).toContain("where(eq(sellers.adminAccountId, input.id))");
+    expect(adminAuthRouterSource).toContain("Este vendedor possui histórico de comissões");
+    expect(adminAuthRouterSource).toContain("await tx.delete(sellers).where(eq(sellers.id, sellerProfile.id))");
+    expect(adminAuthRouterSource).toContain("removedSellerProfile: Boolean(sellerProfile)");
+  });
 });

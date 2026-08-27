@@ -4493,3 +4493,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar permissões, cálculos e fluxos de ponta a ponta
 - [x] Permitir vincular uma conta existente ao cadastro de vendedor sem duplicar credenciais
 - [x] Direcionar vendedores à Central do Vendedor sem depender do login da Área do Cliente
+- [x] Permitir excluir conta vinculada a vendedor sem quebrar vendas, comissões ou sessões
