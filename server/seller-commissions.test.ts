@@ -95,4 +95,9 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(adminSellersSource).toContain("Nova senha");
     expect(adminSellersSource).toContain("Excluir vendedor permanentemente?");
   });
+
+  it("limpa o formulário antes de cada novo cadastro de vendedor", () => {
+    expect(adminSellersSource).toContain("const handleCreateOpenChange = (open: boolean) => { setCreateOpen(open); if (open) setForm(blank); };");
+    expect(adminSellersSource).toContain("onOpenChange={handleCreateOpenChange}");
+  });
 });

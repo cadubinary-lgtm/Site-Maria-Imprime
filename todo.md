@@ -4497,3 +4497,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Separar vendedores da listagem de Usuários e Permissões
 - [x] Permitir ao administrador editar todos os dados comerciais e de acesso do vendedor
 - [x] Permitir ao administrador excluir o vendedor com confirmação e preservação de histórico financeiro
+- [x] Limpar os campos ao abrir o cadastro de novo vendedor
