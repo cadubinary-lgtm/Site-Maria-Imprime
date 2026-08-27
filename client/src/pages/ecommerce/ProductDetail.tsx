@@ -1757,6 +1757,10 @@ export default function ProductDetail() {
                   const deliveryDaysNum = Number(opt.deliveryDays ?? 0);
                   const totalDays = Math.round(productionDays + deliveryDaysNum);
                   const isLocal = opt.fixedType === 'local';
+                  const shippingServiceLabel = [opt.name, opt.company]
+                    .filter((label, index, labels) => Boolean(label) && labels.indexOf(label) === index)
+                    .join(' / ')
+                    .toUpperCase();
                   const deadlineText = (() => {
                     if (isLocal) {
                       if (totalDays === 0) return '🚀 Receba HOJE! (Entrega Local)';
@@ -1773,7 +1777,7 @@ export default function ProductDetail() {
                         setSelectedShipping(opt);
                         setOpenSteps(prev => ({ ...prev, [deliveryStepIdx]: false }));
                       }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-left transition-all ${
                         isSel
                           ? "border-pink-500 bg-pink-50 shadow-sm"
                           : "border-gray-200 bg-white hover:border-pink-300"
@@ -1786,17 +1790,9 @@ export default function ProductDetail() {
                         {isLocal ? <Zap className="w-4 h-4 text-pink-500" /> : <Truck className="w-4 h-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${isSel ? "text-pink-700" : "text-gray-800"}`}>{opt.name}</p>
-                        {opt.company && opt.company !== opt.name && !opt.name.startsWith(opt.company) && (
-                          <p className="text-xs text-gray-500">{opt.company}</p>
-                        )}
-                        {deadlineText && (
-                          <p className={`text-xs font-medium mt-0.5 ${
-                            totalDays === 0 ? 'text-green-600' :
-                            totalDays === 1 ? 'text-orange-500' :
-                            'text-gray-400'
-                          }`}>{deadlineText}</p>
-                        )}
+                        <p className={`truncate text-[11px] font-semibold tracking-wide ${isSel ? "text-pink-700" : "text-gray-800"}`} title={`${shippingServiceLabel} — ${deadlineText}`}>
+                          {shippingServiceLabel}{deadlineText ? ` — ${deadlineText}` : ''}
+                        </p>
                       </div>
                       <span className={`text-sm font-bold flex-shrink-0 ${isSel ? "text-pink-600" : "text-gray-700"}`}>
                         {opt.price === 0 ? <span className="text-green-600">Grátis</span> : `R$ ${opt.price.toFixed(2)}`}

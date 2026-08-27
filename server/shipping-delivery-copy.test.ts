@@ -19,4 +19,13 @@ describe("redação dos prazos de entrega", () => {
     expect(source).toContain("Previsão estimada após a confirmação da produção, sujeita à operação da transportadora.");
     expect(source).not.toContain("return `Receba em ${totalDays} dias úteis`");
   });
+
+  it("compacta serviço, transportadora e previsão em uma linha com preço abaixo", () => {
+    const source = readFileSync(productDetailPath, "utf8");
+
+    expect(source).toContain("const shippingServiceLabel = [opt.name, opt.company]");
+    expect(source).toContain(".toUpperCase()");
+    expect(source).toContain("{shippingServiceLabel}{deadlineText ? ` — ${deadlineText}` : ''}");
+    expect(source).toContain("text-sm font-bold flex-shrink-0");
+  });
 });

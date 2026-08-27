@@ -4470,3 +4470,13 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear as mensagens exibidas para entrega local e transportadoras
 - [x] Manter hoje e amanhã para entrega local e usar previsão estimada para transportadoras
 - [x] Validar os textos e o layout das opções de entrega
+
+## Compactação dos Cartões de Frete
+- [x] Mapear os elementos textuais e valores das opções de transportadora
+- [x] Unificar serviço, transportadora e previsão em uma única linha
+- [x] Manter o preço destacado à direita e validar o layout responsivo
+
+## Posição do Valor nas Opções de Frete
+- [x] Manter o preço à direita na posição anterior dos cartões de frete
+- [x] Preservar a linha compacta de serviço, transportadora e previsão
+- [x] Validar o alinhamento em telas desktop e mobile
