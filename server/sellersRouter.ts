@@ -36,7 +36,7 @@ const sellerProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const db = await getDb();
   if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
   const [seller] = await db
-    .select({ id: sellers.id, status: sellers.status, commissionRate: sellers.commissionRate, name: adminAccounts.name, email: adminAccounts.email })
+    .select({ id: sellers.id, status: sellers.status, commissionRate: sellers.commissionRate, allowStorePickupPayment: sellers.allowStorePickupPayment, name: adminAccounts.name, email: adminAccounts.email })
     .from(sellers)
     .innerJoin(adminAccounts, eq(sellers.adminAccountId, adminAccounts.id))
     .where(eq(sellers.adminAccountId, adminUser.adminId))
@@ -96,6 +96,7 @@ export const sellersRouter = router({
           email: adminAccounts.email,
           commissionRate: sellers.commissionRate,
           status: sellers.status,
+          allowStorePickupPayment: sellers.allowStorePickupPayment,
           lastLogin: adminAccounts.lastLogin,
           createdAt: sellers.createdAt,
         })
@@ -110,6 +111,7 @@ export const sellersRouter = router({
         email: z.string().trim().email().max(255),
         password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres.").optional(),
         commissionRate: z.number().min(0).max(100),
+        allowStorePickupPayment: z.boolean().optional().default(false),
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
@@ -159,6 +161,7 @@ export const sellersRouter = router({
             adminAccountId,
             commissionRate: input.commissionRate.toFixed(2),
             status: "active",
+            allowStorePickupPayment: input.allowStorePickupPayment,
             createdByAdminId: adminUser.adminId,
             createdAt: now,
             updatedAt: now,
@@ -185,6 +188,7 @@ export const sellersRouter = router({
         password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres.").optional(),
         commissionRate: z.number().min(0).max(100).optional(),
         status: z.enum(["active", "inactive"]).optional(),
+        allowStorePickupPayment: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
@@ -195,6 +199,7 @@ export const sellersRouter = router({
         const sellerUpdate: Record<string, unknown> = { updatedAt: now };
         if (input.commissionRate !== undefined) sellerUpdate.commissionRate = input.commissionRate.toFixed(2);
         if (input.status !== undefined) sellerUpdate.status = input.status;
+        if (input.allowStorePickupPayment !== undefined) sellerUpdate.allowStorePickupPayment = input.allowStorePickupPayment;
         const accountUpdate: Record<string, unknown> = { updatedAt: now };
         if (input.name !== undefined) accountUpdate.name = input.name;
         if (input.email !== undefined) {

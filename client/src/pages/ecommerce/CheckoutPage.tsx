@@ -156,9 +156,11 @@ export default function CheckoutPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { adminUser } = useAdminAuth();
   const isSellerCheckout = adminUser?.role === "seller";
+  const { data: sellerProfile } = trpc.sellers.seller.me.useQuery(undefined, { enabled: isSellerCheckout, retry: false });
 
   const { data: cartItems, isLoading: cartLoading } = trpc.cart.getItems.useQuery();
   const { data: customerProfile } = trpc.customerAuth.getProfile.useQuery();
+  const canUsePickupPayment = isSellerCheckout ? sellerProfile?.allowStorePickupPayment === true : customerProfile?.allowStorePickup === true;
   const createOrderMutation = trpc.checkout.createOrder.useMutation();
   const createPixMutation = trpc.payment.createPixPayment.useMutation();
   const createCardMutation = trpc.payment.createCardPayment.useMutation();
@@ -364,8 +366,8 @@ export default function CheckoutPage() {
 
   const validatePagamento = () => {
     if (!paymentMethod) { toast.error("Selecione uma forma de pagamento"); return false; }
-    if (paymentMethod === "retirada_loja" && !customerProfile?.allowStorePickup) {
-      toast.error("Pagamento na retirada não está disponível para sua conta.");
+    if (paymentMethod === "retirada_loja" && !canUsePickupPayment) {
+      toast.error(isSellerCheckout ? "Pagamento na retirada não está liberado para este vendedor." : "Pagamento na retirada não está disponível para sua conta.");
       return false;
     }
     if (paymentMethod === "cartao") {
@@ -1068,7 +1070,7 @@ export default function CheckoutPage() {
                       </button>
 
                       {/* Pagamento na Retirada — apenas para clientes com permissão */}
-                      {customerProfile?.allowStorePickup && (
+                      {canUsePickupPayment && (
                           <button
                             type="button"
                             onClick={() => setPaymentMethod("retirada_loja")}

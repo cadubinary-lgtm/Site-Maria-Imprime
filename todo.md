@@ -4510,3 +4510,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Associar automaticamente o vendedor ao pedido criado na jornada pública
 - [x] Preservar entrega, pagamento e comunicações ao cliente no fluxo comercial do vendedor
 - [x] Exibir apenas vendas e comissões próprias na área exclusiva do vendedor
+- [x] Configurar autorização individual de pagamento na retirada para cada vendedor
+- [x] Ocultar e bloquear pagamento na retirada no checkout de vendedor sem autorização
+- [x] Permitir ao Superadmin liberar ou bloquear pagamento na retirada na gestão de vendedores

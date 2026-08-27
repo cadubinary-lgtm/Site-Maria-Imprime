@@ -102,7 +102,8 @@ describe("garantias de rastreabilidade comercial", () => {
   });
 
   it("limpa o formulário antes de cada novo cadastro de vendedor", () => {
-    expect(adminSellersSource).toContain("const handleCreateOpenChange = (open: boolean) => { setCreateOpen(open); if (open) setForm(blank); };");
+    expect(adminSellersSource).toContain("const handleCreateOpenChange = (open: boolean) => {");
+    expect(adminSellersSource).toContain("if (open) setForm(blank);");
     expect(adminSellersSource).toContain("onOpenChange={handleCreateOpenChange}");
   });
 
@@ -140,5 +141,14 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerRouterSource).toContain('if (role !== "superadmin")');
     expect(adminNavigationSource).toContain('user?.role === "superadmin"');
     expect(adminSellersSource).toContain('adminUser?.role === "superadmin"');
+  });
+
+  it("autoriza pagamento na retirada individualmente e bloqueia tentativas sem liberação", () => {
+    expect(sellerRouterSource).toContain("allowStorePickupPayment: z.boolean().optional().default(false)");
+    expect(checkoutRouterSource).toContain('input.paymentMethod === "pagar_na_retirada" && !checkoutSeller.allowStorePickupPayment');
+    expect(checkoutPageSource).toContain("const canUsePickupPayment = isSellerCheckout");
+    expect(checkoutPageSource).toContain("{canUsePickupPayment && (");
+    expect(adminSellersSource).toContain("Liberar retirada");
+    expect(adminSellersSource).toContain("Pagamento na retirada");
   });
 });

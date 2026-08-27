@@ -112,14 +112,14 @@ import { authenticateAdminRequest } from "./admin-auth";
 import { ensureSellerCommissionForOrder } from "./sellerCommissionService";
 
 /** Resolve exclusivamente a sessão comercial ativa, sem aceitar vendedor informado pelo navegador. */
-async function getCheckoutSeller(req: ExpressRequest): Promise<{ id: number; name: string } | null> {
+async function getCheckoutSeller(req: ExpressRequest): Promise<{ id: number; name: string; allowStorePickupPayment: boolean } | null> {
   const session = await authenticateAdminRequest(req);
   if (!session || session.role !== "seller") return null;
   const db = await getDb();
   if (!db) return null;
-  const [seller] = await db.select({ id: sellers.id, status: sellers.status })
+  const [seller] = await db.select({ id: sellers.id, status: sellers.status, allowStorePickupPayment: sellers.allowStorePickupPayment })
     .from(sellers).where(eq(sellers.adminAccountId, session.adminId)).limit(1);
-  return seller?.status === "active" ? { id: seller.id, name: session.name } : null;
+  return seller?.status === "active" ? { id: seller.id, name: session.name, allowStorePickupPayment: Boolean(seller.allowStorePickupPayment) } : null;
 }
 
 // Alias: aceita tanto admin_session (site oficial) quanto Manus OAuth
@@ -1346,6 +1346,9 @@ export const appRouter = router({
         const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
         const checkoutSeller = await getCheckoutSeller(req);
+        if (checkoutSeller && input.paymentMethod === "pagar_na_retirada" && !checkoutSeller.allowStorePickupPayment) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Pagamento na retirada não está liberado para este vendedor." });
+        }
         const customerSessionToken = getCookieFromReq(req, "customer_session");
         const cartSessionId = getCookieFromReq(req, "cart_session") ?? null;
 

@@ -1803,6 +1803,7 @@ export const sellers = mysqlTable("sellers", {
   adminAccountId: int("adminAccountId").notNull().unique().references(() => adminAccounts.id, { onDelete: "restrict" }),
   commissionRate: decimal("commissionRate", { precision: 5, scale: 2 }).notNull().default("0"),
   status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  allowStorePickupPayment: boolean("allowStorePickupPayment").notNull().default(false),
   createdByAdminId: int("createdByAdminId"),
   createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
