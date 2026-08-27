@@ -23,4 +23,13 @@ describe("frete por medidas configuradas", () => {
     expect(source).toContain("window.setTimeout");
     expect(source).toContain("doCalculateShipping(clean, quantity, shippingQuotesRef.current)");
   });
+
+  it("mostra o peso calculado e um aviso amigável para limites de transportadora", () => {
+    const source = readFileSync(productDetailPath, "utf8");
+
+    expect(source).toContain("Peso total considerado no frete");
+    expect(source).toContain("{formattedShippingWeight} kg");
+    expect(source).toContain("result.restrictedCarriers");
+    expect(source).toContain("não aceitam o peso ou as dimensões atuais");
+  });
 });

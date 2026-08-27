@@ -4459,3 +4459,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear as medidas configuradas e o peso enviado à cotação de frete
 - [x] Recalcular frete ao alterar largura, altura ou área do produto
 - [x] Validar a atualização do envio e do resumo do pedido
+
+## Transparência de Peso e Limites de Frete
+- [x] Mapear o peso calculado e as restrições retornadas pelas transportadoras
+- [x] Exibir o peso total calculado perto das opções de entrega
+- [x] Informar limites de peso ou dimensões de forma amigável e impedir seleção inválida
+- [x] Validar opções válidas, limites e responsividade do configurador

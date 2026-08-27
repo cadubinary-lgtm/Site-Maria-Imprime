@@ -36,6 +36,10 @@ export function hasLogisticsAccess(role: unknown): boolean {
   return role === "admin" || role === "superadmin";
 }
 
+export function isCarrierLimitRestriction(error: unknown): boolean {
+  return /peso|weight|dimens|dimension|altura|height|largura|width|comprimento|length|limite|limit|exceed|exced/i.test(String(error ?? ""));
+}
+
 // Aceita a sessão administrativa oficial ou Manus OAuth, sempre restrita a admin/superadmin.
 const adminProcedure = adminOrManusAuthProcedure.use(({ ctx, next }) => {
   if (!hasLogisticsAccess((ctx as any).adminUser?.role)) {
@@ -338,6 +342,7 @@ const shippingRouter = router({
             },
           };
           const quotes = await calculateShipping(settings.accessToken, MELHOR_ENVIO_SANDBOX, payload);
+          const restrictedCarriers: Array<{ id: string | number; name: string; company: string }> = [];
           for (const q of quotes) {
             // Filtrar apenas transportadoras ativas
             if (!q.error && activeCarrierMap.has(q.company.id)) {
@@ -350,8 +355,21 @@ const shippingRouter = router({
                 deliveryDays: q.custom_delivery_time || q.delivery_time,
                 isFixed: false,
               });
+            } else if (q.error && activeCarrierMap.has(q.company.id) && isCarrierLimitRestriction(q.error)) {
+              restrictedCarriers.push({
+                id: q.id,
+                name: q.name,
+                company: q.company.name,
+              });
             }
           }
+
+          return {
+            quotes: results,
+            cutoffTime,
+            isPastCutoff,
+            restrictedCarriers,
+          };
         }
       } catch (_) {
         // Silencioso: falha no ME não bloqueia as opções fixas
@@ -362,6 +380,7 @@ const shippingRouter = router({
         quotes: results,
         cutoffTime,
         isPastCutoff,
+        restrictedCarriers: [],
       };
     }),
 });

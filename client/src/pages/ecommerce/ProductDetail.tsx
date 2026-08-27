@@ -676,6 +676,16 @@ export default function ProductDetail() {
     };
   };
 
+  const currentShippingParams = useMemo(
+    () => getShippingParams(quantity),
+    [product, quantity, shippingMeasureMultiplier],
+  );
+
+  const formattedShippingWeight = new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 3,
+  }).format(currentShippingParams.weight);
+
   const doCalculateShipping = async (cleanCep: string, qty: number, prevQuotes?: ShippingQuote[]) => {
     const params = getShippingParams(qty);
     const quotes = await calculateShippingMutation.mutateAsync({
@@ -685,9 +695,15 @@ export default function ProductDetail() {
     const result = quotes as any;
     const quotesArray: ShippingQuote[] = Array.isArray(result) ? result : (result.quotes ?? []);
     const serverCutoff: string = result.cutoffTime ?? '13:00';
+    const restrictedCarriers = Array.isArray(result.restrictedCarriers) ? result.restrictedCarriers : [];
 
     // Detectar transportadoras que foram removidas por excesso de peso/dimensão
-    if (prevQuotes && prevQuotes.length > 0 && qty > 1) {
+    if (restrictedCarriers.length > 0) {
+      const names = restrictedCarriers.map((carrier: any) => carrier.company || carrier.name).filter(Boolean).join(", ");
+      setShippingLimitWarning(
+        `As transportadoras ${names || "selecionadas"} não aceitam o peso ou as dimensões atuais. Escolha uma opção disponível, reduza as medidas ou divida o pedido.`
+      );
+    } else if (prevQuotes && prevQuotes.length > 0 && qty > 1) {
       const prevNonFixed = prevQuotes.filter(q => !(q as any).isFixed);
       const newNonFixed = quotesArray.filter(q => !(q as any).isFixed);
       const removedCarriers = prevNonFixed.filter(pq => !newNonFixed.some(nq => nq.id === pq.id));
@@ -1695,6 +1711,16 @@ export default function ProductDetail() {
                   </div>
                 )}
 
+                {shippingCalculated && (
+                  <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2" role="status" aria-live="polite">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Package className="h-4 w-4 shrink-0 text-sky-600" />
+                      <span className="text-xs text-sky-900">Peso total considerado no frete</span>
+                    </div>
+                    <span className="whitespace-nowrap text-xs font-semibold text-sky-800">{formattedShippingWeight} kg</span>
+                  </div>
+                )}
+
                 {/* Estado antes de calcular */}
                 {!shippingCalculated && !cepLoading && (
                   <div className="text-center py-3 text-gray-400">
@@ -1716,7 +1742,7 @@ export default function ProductDetail() {
                   <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-xl px-3 py-3 mt-1">
                     <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-semibold text-amber-800 mb-0.5">Opção indisponível para esta quantidade</p>
+                      <p className="text-xs font-semibold text-amber-800 mb-0.5">Algumas opções não aceitam esta configuração</p>
                       <p className="text-xs text-amber-700 leading-snug">{shippingLimitWarning.replace(/^⚠️\s*/, '')}</p>
                     </div>
                   </div>
