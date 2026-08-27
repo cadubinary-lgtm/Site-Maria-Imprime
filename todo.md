@@ -4526,3 +4526,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter pedidos em Novos Pedidos até o administrador avançar para Analisando
 - [x] Sincronizar pagamento na retirada com o status atual do pedido em todas as telas
 - [x] Proteger listas e indicadores contra regressões de status entre cliente, vendedor e admin
+- [x] Criar lixeira reversível para recibos emitidos e recibos avulsos
+- [x] Permitir restaurar recibos da lixeira sem alterar o pedido ou lançamento financeiro
+- [x] Exigir confirmação para mover recibo à lixeira e excluir definitivamente
+- [x] Permitir exclusão permanente apenas dentro da lixeira de recibos

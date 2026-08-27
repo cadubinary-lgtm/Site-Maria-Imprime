@@ -86,4 +86,25 @@ describe("central financeira de recibos", () => {
     expect(receiptPrint).toContain("prepareReceiptWhatsApp");
     expect(receiptPrint).toContain("sendReceiptEmail");
   });
+
+  it("mantém uma lixeira reversível sem alterar pedidos ou lançamentos financeiros", () => {
+    expect(schema).toContain('export const deletedReceipts = mysqlTable("deletedReceipts"');
+    expect(schema).toContain('receiptSnapshot: longtext("receiptSnapshot").notNull()');
+    expect(financeRouter).toContain("moverReciboParaLixeira:");
+    expect(financeRouter).toContain("restaurarReciboDaLixeira:");
+    expect(financeRouter).toContain("getRecibosNaLixeira:");
+    expect(financeRouter).toContain("receipt_moved_to_trash");
+    expect(financeRouter).toContain("receipt_restored_from_trash");
+    expect(receiptHub).toContain("Lixeira de Recibos");
+    expect(receiptHub).toContain("Mover recibo para a lixeira?");
+    expect(receiptHub).toContain("O pedido e os lançamentos financeiros não serão alterados.");
+  });
+
+  it("aceita exclusão definitiva somente da lixeira e apenas pelo Superadmin", () => {
+    expect(financeRouter).toContain("excluirReciboPermanentemente:");
+    expect(financeRouter).toContain("requireReceiptsSuperadmin");
+    expect(financeRouter).toContain("Apenas recibos presentes na lixeira podem ser excluídos permanentemente.");
+    expect(receiptHub).toContain("Excluir recibo permanentemente?");
+    expect(receiptHub).toContain("confirmation: true");
+  });
 });

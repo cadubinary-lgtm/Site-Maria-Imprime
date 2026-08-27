@@ -27,6 +27,7 @@ import {
   orderPayments,
   emailHistory,
   deletedReceivedAccounts,
+  deletedReceipts,
   paymentReceipts,
   standaloneReceipts,
   standaloneReceiptItems,
@@ -83,6 +84,14 @@ function requireFinanceAdmin(ctx: any) {
   const adminUser = ctx.adminUser;
   if (!adminUser) {
     throw new TRPCError({ code: "FORBIDDEN", message: "É necessário estar autenticado como administrador para acessar a lixeira financeira." });
+  }
+  return adminUser;
+}
+
+function requireReceiptsSuperadmin(ctx: any) {
+  const adminUser = requireFinanceAdmin(ctx);
+  if (adminUser.role !== "superadmin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Apenas Superadmin pode excluir recibos permanentemente." });
   }
   return adminUser;
 }
@@ -1107,6 +1116,110 @@ export const financeiroRouter = router({
         page: input.page,
         totalPages: Math.max(1, Math.ceil(total / input.limit)),
       };
+    }),
+
+  getRecibosNaLixeira: adminOrManusAuthProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+    return db.select().from(deletedReceipts).orderBy(desc(deletedReceipts.deletedAt));
+  }),
+
+  moverReciboParaLixeira: adminOrManusAuthProcedure
+    .input(z.object({ receiptId: z.number().int().positive(), receiptType: z.enum(["pedido", "avulso"]) }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const deletedAt = Date.now();
+      const adminId = (ctx as any).adminUser?.adminId ?? null;
+      const adminName = (ctx as any).adminUser?.name || "Administrador";
+
+      const moved = await db.transaction(async (tx: any) => {
+        if (input.receiptType === "pedido") {
+          const [receipt] = await tx.select().from(paymentReceipts).where(eq(paymentReceipts.id, input.receiptId)).limit(1);
+          if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado." });
+          const [existing] = await tx.select({ id: deletedReceipts.id }).from(deletedReceipts)
+            .where(and(eq(deletedReceipts.receiptType, "pedido"), eq(deletedReceipts.originalReceiptId, receipt.id))).limit(1);
+          if (existing) throw new TRPCError({ code: "CONFLICT", message: "Este recibo já está na lixeira." });
+          await tx.insert(deletedReceipts).values({
+            receiptType: "pedido", originalReceiptId: receipt.id, receiptNumber: receipt.receiptNumber,
+            orderId: receipt.orderId, orderNumber: receipt.orderNumber, customerName: receipt.customerName,
+            amount: receipt.amount, paidAt: receipt.paidAt, receiptSnapshot: JSON.stringify({ receipt }),
+            deletedAt, deletedByAdminId: adminId, deletedByAdminName: adminName,
+          });
+          await tx.delete(paymentReceipts).where(eq(paymentReceipts.id, receipt.id));
+          return { receiptNumber: receipt.receiptNumber, receiptType: input.receiptType };
+        }
+
+        const [receipt] = await tx.select().from(standaloneReceipts).where(eq(standaloneReceipts.id, input.receiptId)).limit(1);
+        if (!receipt) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo avulso não encontrado." });
+        const [existing] = await tx.select({ id: deletedReceipts.id }).from(deletedReceipts)
+          .where(and(eq(deletedReceipts.receiptType, "avulso"), eq(deletedReceipts.originalReceiptId, receipt.id))).limit(1);
+        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Este recibo já está na lixeira." });
+        const items = await tx.select().from(standaloneReceiptItems)
+          .where(eq(standaloneReceiptItems.standaloneReceiptId, receipt.id));
+        await tx.insert(deletedReceipts).values({
+          receiptType: "avulso", originalReceiptId: receipt.id, receiptNumber: receipt.receiptNumber,
+          customerName: receipt.customerName, amount: receipt.amount, paidAt: receipt.paidAt,
+          receiptSnapshot: JSON.stringify({ receipt, items }), deletedAt,
+          deletedByAdminId: adminId, deletedByAdminName: adminName,
+        });
+        await tx.delete(standaloneReceiptItems).where(eq(standaloneReceiptItems.standaloneReceiptId, receipt.id));
+        await tx.delete(standaloneReceipts).where(eq(standaloneReceipts.id, receipt.id));
+        return { receiptNumber: receipt.receiptNumber, receiptType: input.receiptType };
+      });
+
+      await logAudit({ adminId, adminName, action: "receipt_moved_to_trash", entity: "deletedReceipts", entityId: `${input.receiptType}:${input.receiptId}`, after: { ...moved, deletedAt }, ipAddress: ctx.req.ip });
+      return { success: true, ...moved };
+    }),
+
+  restaurarReciboDaLixeira: adminOrManusAuthProcedure
+    .input(z.object({ trashId: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const adminId = (ctx as any).adminUser?.adminId ?? null;
+      const adminName = (ctx as any).adminUser?.name || "Administrador";
+      const restored = await db.transaction(async (tx: any) => {
+        const [trash] = await tx.select().from(deletedReceipts).where(eq(deletedReceipts.id, input.trashId)).limit(1);
+        if (!trash) throw new TRPCError({ code: "NOT_FOUND", message: "Recibo não encontrado na lixeira." });
+        const snapshot = JSON.parse(trash.receiptSnapshot);
+        if (trash.receiptType === "pedido") {
+          const [existing] = await tx.select({ id: paymentReceipts.id }).from(paymentReceipts)
+            .where(or(eq(paymentReceipts.orderId, snapshot.receipt.orderId), eq(paymentReceipts.receiptNumber, snapshot.receipt.receiptNumber))).limit(1);
+          if (existing) throw new TRPCError({ code: "CONFLICT", message: "Já existe um recibo ativo para este pedido." });
+          const { id, createdAt, updatedAt, ...receiptValues } = snapshot.receipt;
+          await tx.insert(paymentReceipts).values(receiptValues);
+        } else {
+          const [existing] = await tx.select({ id: standaloneReceipts.id }).from(standaloneReceipts)
+            .where(eq(standaloneReceipts.receiptNumber, snapshot.receipt.receiptNumber)).limit(1);
+          if (existing) throw new TRPCError({ code: "CONFLICT", message: "Já existe um recibo avulso ativo com este número." });
+          const { id, createdAt, updatedAt, ...receiptValues } = snapshot.receipt;
+          await tx.insert(standaloneReceipts).values(receiptValues);
+          const [receipt] = await tx.select().from(standaloneReceipts)
+            .where(eq(standaloneReceipts.receiptNumber, snapshot.receipt.receiptNumber)).limit(1);
+          if (!receipt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Não foi possível restaurar o recibo avulso." });
+          if (Array.isArray(snapshot.items) && snapshot.items.length) {
+            await tx.insert(standaloneReceiptItems).values(snapshot.items.map(({ id: _id, standaloneReceiptId: _receiptId, createdAt: _createdAt, ...item }: any) => ({ ...item, standaloneReceiptId: receipt.id })));
+          }
+        }
+        await tx.delete(deletedReceipts).where(eq(deletedReceipts.id, trash.id));
+        return { receiptNumber: trash.receiptNumber, receiptType: trash.receiptType };
+      });
+      await logAudit({ adminId, adminName, action: "receipt_restored_from_trash", entity: "deletedReceipts", entityId: String(input.trashId), after: restored, ipAddress: ctx.req.ip });
+      return { success: true, ...restored };
+    }),
+
+  excluirReciboPermanentemente: adminOrManusAuthProcedure
+    .input(z.object({ trashId: z.number().int().positive(), confirmation: z.literal(true) }))
+    .mutation(async ({ input, ctx }) => {
+      const adminUser = requireReceiptsSuperadmin(ctx as any);
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const [trash] = await db.select().from(deletedReceipts).where(eq(deletedReceipts.id, input.trashId)).limit(1);
+      if (!trash) throw new TRPCError({ code: "NOT_FOUND", message: "Apenas recibos presentes na lixeira podem ser excluídos permanentemente." });
+      await db.delete(deletedReceipts).where(eq(deletedReceipts.id, trash.id));
+      await logAudit({ adminId: adminUser.adminId, adminName: adminUser.name, action: "receipt_permanently_deleted_from_trash", entity: "deletedReceipts", entityId: String(trash.id), before: { receiptNumber: trash.receiptNumber, receiptType: trash.receiptType, deletedAt: trash.deletedAt }, after: { permanentlyDeletedAt: Date.now() }, ipAddress: ctx.req.ip });
+      return { success: true };
     }),
 
   getRecibo: adminOrManusAuthProcedure

@@ -1704,6 +1704,29 @@ export type PaymentReceipt = typeof paymentReceipts.$inferSelect;
 export type InsertPaymentReceipt = typeof paymentReceipts.$inferInsert;
 
 /**
+ * deletedReceipts - lixeira reversível de recibos vinculados a pedidos e recibos avulsos.
+ * O snapshot permite restaurar o documento sem tocar no pedido ou no lançamento financeiro.
+ */
+export const deletedReceipts = mysqlTable("deletedReceipts", {
+  id: int("id").autoincrement().primaryKey(),
+  receiptType: mysqlEnum("receiptType", ["pedido", "avulso"]).notNull(),
+  originalReceiptId: int("originalReceiptId").notNull(),
+  receiptNumber: varchar("receiptNumber", { length: 80 }).notNull(),
+  orderId: int("orderId"),
+  orderNumber: varchar("orderNumber", { length: 50 }),
+  customerName: varchar("customerName", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paidAt: bigint("paidAt", { mode: "number" }).notNull(),
+  receiptSnapshot: longtext("receiptSnapshot").notNull(),
+  deletedAt: bigint("deletedAt", { mode: "number" }).notNull(),
+  deletedByAdminId: int("deletedByAdminId"),
+  deletedByAdminName: varchar("deletedByAdminName", { length: 150 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type DeletedReceipt = typeof deletedReceipts.$inferSelect;
+export type InsertDeletedReceipt = typeof deletedReceipts.$inferInsert;
+
+/**
  * standaloneReceipts - recibos emitidos manualmente, sem vínculo com pedido ou ordem de serviço.
  * Mantém os recibos financeiros existentes intactos e registra um snapshot independente do cliente e do pagamento.
  */
