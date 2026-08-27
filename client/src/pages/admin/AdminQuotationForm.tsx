@@ -148,7 +148,7 @@ export default function AdminQuotationForm() {
   const [newClientEmail, setNewClientEmail] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
   const [newClientWhatsapp, setNewClientWhatsapp] = useState("");
-  const [newClientType, setNewClientType] = useState<"balcao" | "site">("balcao");
+  const [newClientType, setNewClientType] = useState<"balcao" | "site" | "revendedor" | "agencia" | "corporativo">("balcao");
   const [newClientNotes, setNewClientNotes] = useState("");
   const [newClientCpfCnpj, setNewClientCpfCnpj] = useState("");
   const [newClientZipCode, setNewClientZipCode] = useState("");
@@ -969,7 +969,7 @@ export default function AdminQuotationForm() {
   };
 
   return (
-    <div className={`admin-visual-system ${isSellerMode ? "p-0 pb-6" : "h-screen overflow-y-scroll overscroll-contain p-6 pb-12"} max-w-6xl mx-auto space-y-6`}>
+    <div className={`admin-visual-system ${isSellerMode ? "h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain p-0 pb-6 pr-2" : "h-screen overflow-y-scroll overscroll-contain p-6 pb-12"} max-w-6xl mx-auto space-y-6`}>
       {/* Header */}
       <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate(returnTarget.path)} className="shrink-0 gap-1">
@@ -1069,7 +1069,7 @@ export default function AdminQuotationForm() {
                             : c.clientType === "site" ? "bg-blue-100 text-blue-700"
                             : "bg-gray-100 text-gray-600"
                           }`}>
-                            {c.source === "customer_accounts" ? "Loja" : c.source === "users" ? "Manus" : c.clientType === "site" ? "Site" : c.clientType === "balcao" ? "Balcão" : c.clientType ?? "CRM"}
+                            {c.clientType === "site" ? "Site" : c.clientType === "balcao" ? "Balcão" : c.clientType === "revendedor" ? "Revendedor" : c.clientType === "agencia" ? "Agência" : c.clientType === "corporativo" ? "Corporativo" : c.source === "users" ? "Manus" : "CRM"}
                           </span>
                         </div>
                       </button>
@@ -1112,15 +1112,17 @@ export default function AdminQuotationForm() {
                 {/* Canal de venda */}
                 <div>
                   <label className="text-xs text-gray-500 font-medium block mb-1.5">Canal de venda *</label>
-                  <div className="flex gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {[
                       { value: "balcao", label: "Cliente Balcão", desc: "Atendimento presencial" },
                       { value: "site", label: "Cliente Site", desc: "Compra online" },
+                      { value: "revendedor", label: "Revendedor", desc: "Tabela comercial de revenda" },
+                      { value: "agencia", label: "Agência", desc: "Atendimento para agência" },
                     ].map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => setNewClientType(opt.value as "balcao" | "site")}
+                        onClick={() => setNewClientType(opt.value as typeof newClientType)}
                         className={`flex-1 flex items-start gap-2 p-3 rounded-lg border text-left transition-all ${
                           newClientType === opt.value
                             ? "border-pink-500 bg-pink-50 shadow-sm"

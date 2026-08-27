@@ -4533,3 +4533,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Reutilizar o layout e recursos do formulário administrativo de orçamentos para vendedores
 - [x] Vincular automaticamente o vendedor como responsável pela emissão do orçamento
 - [x] Restringir edição, visualização e conversão a pedidos aos orçamentos próprios do vendedor
+- [x] Restaurar a rolagem no formulário completo de novo orçamento do vendedor
+- [x] Exibir clientes do site, balcão, revendedor e agência na busca de orçamentos
+- [x] Adicionar retorno de Meus Orçamentos para a loja em modo vendedor

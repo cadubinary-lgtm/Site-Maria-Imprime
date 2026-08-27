@@ -983,7 +983,12 @@ export const quotationsRouter = router({
           email: customerAccounts.email,
           phone: customerAccounts.phone,
           whatsapp: sql<string | null>`NULL`,
-          clientType: sql<string>`'site'`,
+          clientType: sql<string>`CASE ${customerAccounts.accountType}
+            WHEN 'balcao' THEN 'balcao'
+            WHEN 'reseller' THEN 'revendedor'
+            WHEN 'agency' THEN 'agencia'
+            ELSE 'site'
+          END`,
           source: sql<string>`'customer_accounts'`,
         })
         .from(customerAccounts)

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { ClipboardList, FileText, LogOut, Menu, X } from "lucide-react";
+import { ClipboardList, FileText, LogOut, Menu, Store, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
@@ -22,6 +22,10 @@ export default function SellerLayout({ title, description, children }: { title: 
         <h1 className="mt-1 text-lg font-semibold">Central do Vendedor</h1>
       </div>
       <nav className="space-y-1" aria-label="Navegação do vendedor">
+        <Link href="/" onClick={() => setMobileOpen(false)} className="mb-3 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm font-medium text-slate-100 transition-colors hover:border-pink-500/60 hover:bg-slate-800 hover:text-white">
+          <Store className="h-4 w-4 text-pink-400" aria-hidden="true" />
+          Voltar para a loja
+        </Link>
         {navigation.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(
             "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
@@ -53,6 +57,9 @@ export default function SellerLayout({ title, description, children }: { title: 
             <h2 className="truncate text-lg font-semibold text-slate-900">{title}</h2>
             <p className="hidden text-sm text-slate-500 sm:block">{description}</p>
           </div>
+          <Button asChild variant="outline" size="sm" className="ml-auto hidden border-pink-200 text-pink-700 hover:bg-pink-50 sm:inline-flex">
+            <Link href="/"><Store className="mr-2 h-4 w-4" />Ir para a loja</Link>
+          </Button>
         </header>
         <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">{children}</div>
       </main>

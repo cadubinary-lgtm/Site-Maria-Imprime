@@ -172,4 +172,20 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(quotationsRouterSource).toContain('"Você só pode converter seus próprios orçamentos."');
     expect(quotationsRouterSource).toContain("responsibleName: seller?.name ?? input.responsibleName");
   });
+
+  it("mantém a rolagem e todos os perfis de cliente no orçamento comercial", () => {
+    expect(quotationFormSource).toContain('"h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain');
+    expect(quotationFormSource).toContain('value: "revendedor", label: "Revendedor"');
+    expect(quotationFormSource).toContain('value: "agencia", label: "Agência"');
+    expect(quotationFormSource).toContain('c.clientType === "revendedor" ? "Revendedor"');
+    expect(quotationFormSource).toContain('c.clientType === "agencia" ? "Agência"');
+    expect(quotationsRouterSource).toContain("WHEN 'reseller' THEN 'revendedor'");
+    expect(quotationsRouterSource).toContain("WHEN 'agency' THEN 'agencia'");
+  });
+
+  it("oferece retorno à loja preservando a sessão comercial do vendedor", () => {
+    expect(sellerLayoutSource).toContain('href="/"');
+    expect(sellerLayoutSource).toContain("Voltar para a loja");
+    expect(sellerLayoutSource).toContain("Ir para a loja");
+  });
 });
