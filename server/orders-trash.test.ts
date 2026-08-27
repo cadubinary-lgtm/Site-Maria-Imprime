@@ -70,4 +70,18 @@ describe("lixeira de Todos os Pedidos", () => {
     expect(source).toContain("await deleteFinancialDependenciesForOrder(db, orderId);");
     expect(source.indexOf("await deleteFinancialDependenciesForOrder(db, orderId);")).toBeLessThan(source.indexOf("await db.delete(orders).where(eq(orders.id, orderId));"));
   });
+
+  it("remove pagamentos de comissão e a comissão antes do pedido vinculado", () => {
+    const source = readFileSync(routerPath, "utf8");
+    const schema = readFileSync(schemaPath, "utf8");
+    const cleanupStart = source.indexOf("async function permanentlyDeleteOrder");
+    const cleanupEnd = source.indexOf("function requireAdmin", cleanupStart);
+    const cleanupSource = source.slice(cleanupStart, cleanupEnd);
+
+    expect(schema).toContain('orderId: int("orderId").notNull().unique().references(() => orders.id, { onDelete: "restrict" })');
+    expect(cleanupSource).toContain("sellerCommissionPayments.commissionId");
+    expect(cleanupSource).toContain("sellerCommissions.orderId");
+    expect(cleanupSource.indexOf("db.delete(sellerCommissionPayments)")).toBeLessThan(cleanupSource.indexOf("db.delete(sellerCommissions)"));
+    expect(cleanupSource.indexOf("db.delete(sellerCommissions)")).toBeLessThan(cleanupSource.indexOf("db.delete(orders).where(eq(orders.id, orderId));"));
+  });
 });

@@ -4520,3 +4520,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir o tempo restante de expiração do Pix em pedidos aguardando pagamento
 - [x] Informar visualmente quando o Pix estiver expirado
 - [x] Permitir preparar o reenvio do QR Code e código Pix por WhatsApp ao cliente
+- [x] Remover dependências de pedido na ordem segura antes da exclusão permanente da lixeira
+- [x] Validar exclusão permanente de pedidos com registros financeiros, produção e pagamento vinculados

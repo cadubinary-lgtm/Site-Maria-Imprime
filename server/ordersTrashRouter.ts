@@ -21,6 +21,8 @@ import {
   productionJobs,
   productionStatusHistory,
   paymentReceipts,
+  sellerCommissionPayments,
+  sellerCommissions,
   shipments,
 } from "../drizzle/schema";
 import { logAudit } from "./admin-auth";
@@ -110,6 +112,16 @@ async function permanentlyDeleteOrder(db: NonNullable<Awaited<ReturnType<typeof 
   await db.delete(automationLogs).where(eq(automationLogs.orderId, orderId));
   await db.delete(shipments).where(eq(shipments.orderId, orderId));
   await db.delete(fiscalNotes).where(eq(fiscalNotes.orderId, orderId));
+  const commissionRows = await db.select({ id: sellerCommissions.id })
+    .from(sellerCommissions)
+    .where(eq(sellerCommissions.orderId, orderId));
+  const commissionIds = commissionRows.map((commission) => commission.id);
+  if (commissionIds.length > 0) {
+    await db.delete(sellerCommissionPayments)
+      .where(inArray(sellerCommissionPayments.commissionId, commissionIds));
+    await db.delete(sellerCommissions)
+      .where(eq(sellerCommissions.orderId, orderId));
+  }
   await db.delete(orderPayments).where(eq(orderPayments.orderId, orderId));
   await db.delete(emailHistory).where(eq(emailHistory.orderId, orderId));
   await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
