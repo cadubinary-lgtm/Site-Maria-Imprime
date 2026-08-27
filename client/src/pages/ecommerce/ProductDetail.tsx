@@ -649,16 +649,25 @@ export default function ProductDetail() {
   };
 
   // ─── CEP ─────────────────────────────────────────────────────────────────
-  // Calcula dimensões e peso proporcionais à quantidade
+  // Produtos cobrados por m² ou metro linear precisam levar a medida configurada
+  // para o peso da cotação, além da quantidade selecionada.
+  const shippingMeasureMultiplier = useMemo(() => {
+    if (isM2) return billedArea > 0 ? billedArea : 1;
+    if (isMetroLinear) return deadlineLinearMeters > 0 ? deadlineLinearMeters : 1;
+    return 1;
+  }, [isM2, isMetroLinear, billedArea, deadlineLinearMeters]);
+
+  // Calcula dimensões e peso proporcionais à quantidade e à medida configurada.
   const getShippingParams = (qty: number) => {
     const baseWeight = product ? (parseFloat((product as any).weight ?? '0') || 0.5) : 0.5;
     const baseH = product ? (parseFloat((product as any).height ?? '0') || 5) : 5;
     const baseW = product ? (parseFloat((product as any).width ?? '0') || 30) : 30;
     const baseL = product ? (parseFloat((product as any).length ?? '0') || 40) : 40;
-    // Peso cresce linearmente com a quantidade
-    const totalWeight = Math.max(0.1, baseWeight * qty);
+    const shippingUnits = qty * shippingMeasureMultiplier;
+    // Peso cresce linearmente com a quantidade e a área/metro configurados.
+    const totalWeight = Math.max(0.1, baseWeight * shippingUnits);
     // Dimensões: aumenta levemente (empilhamento), mas não linearmente
-    const stackFactor = Math.ceil(Math.sqrt(qty));
+    const stackFactor = Math.ceil(Math.sqrt(shippingUnits));
     return {
       weight: Math.round(totalWeight * 1000) / 1000,
       height: Math.min(baseH * stackFactor, 100),
@@ -728,18 +737,23 @@ export default function ProductDetail() {
     finally { setCepLoading(false); }
   };
 
-  // Recalcular frete automaticamente quando a quantidade muda (se CEP já foi calculado)
-  const prevQuantityRef = useRef(quantity);
+  // Recalcular frete automaticamente quando quantidade ou medida mudam.
+  const shippingConfigurationKey = `${quantity}:${shippingMeasureMultiplier.toFixed(4)}`;
+  const prevShippingConfigurationRef = useRef(shippingConfigurationKey);
   const shippingQuotesRef = useRef(shippingQuotes);
   useEffect(() => { shippingQuotesRef.current = shippingQuotes; }, [shippingQuotes]);
   useEffect(() => {
-    if (prevQuantityRef.current === quantity) return;
-    prevQuantityRef.current = quantity;
+    if (prevShippingConfigurationRef.current === shippingConfigurationKey) return;
+    prevShippingConfigurationRef.current = shippingConfigurationKey;
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8 || !shippingCalculated) return;
-    // Recalcular silenciosamente passando as cotações anteriores para detectar limites
-    doCalculateShipping(clean, quantity, shippingQuotesRef.current).catch(() => {});
-  }, [quantity, shippingCalculated]);
+    if ((isM2 && billedArea <= 0) || (isMetroLinear && deadlineLinearMeters <= 0)) return;
+    // Aguarda o término da edição para evitar cotar cada tecla digitada.
+    const debounceId = window.setTimeout(() => {
+      doCalculateShipping(clean, quantity, shippingQuotesRef.current).catch(() => {});
+    }, 500);
+    return () => window.clearTimeout(debounceId);
+  }, [shippingConfigurationKey, cep, shippingCalculated, isM2, isMetroLinear, billedArea, deadlineLinearMeters]);
 
   // ─── Add to Cart ─────────────────────────────────────────────────────────
   const handleAddToCart = async () => {

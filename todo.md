@@ -4454,3 +4454,8 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Mapear a atualização de quantidade e as dependências do cálculo de frete
 - [x] Corrigir o recálculo de frete quando a quantidade for alterada
 - [x] Validar o frete e o total em diferentes quantidades
+
+## Recálculo de Frete por Medidas
+- [x] Mapear as medidas configuradas e o peso enviado à cotação de frete
+- [x] Recalcular frete ao alterar largura, altura ou área do produto
+- [x] Validar a atualização do envio e do resumo do pedido
