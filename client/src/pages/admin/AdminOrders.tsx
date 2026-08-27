@@ -12,6 +12,7 @@ import AdminLayout from "@/components/AdminLayout";
 import AdminAbandonedCarts from "./AdminAbandonedCarts";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { getPixExpirationState } from "@shared/pix-expiration";
+import { isNewOrderStatus } from "@/lib/newOrderStatus";
 
 // ─── Mapa de status operacionais ────────────────────────────────────────────
 export const ORDER_STATUS: Record<string, { label: string; color: string; icon: string }> = {
@@ -123,6 +124,7 @@ export default function AdminOrders() {
   const filtered = useMemo(() => {
     if (!allOrders) return [];
     return (allOrders as any[]).filter((o) => {
+      if (filter === "todos" && isNewOrderStatus(o.status)) return false;
       if (filter !== "todos" && o.status !== filter) return false;
       if (sellerFilter === "__site__" && o.sellerName) return false;
       if (sellerFilter !== "todos" && sellerFilter !== "__site__" && String(o.sellerName ?? "") !== sellerFilter) return false;
@@ -181,7 +183,7 @@ export default function AdminOrders() {
               <Package className="w-8 h-8 text-pink-600" aria-hidden="true" />
               Gerenciamento de Pedidos
             </h1>
-            <p className="text-gray-500 mt-1">Acompanhe e gerencie todos os pedidos operacionais</p>
+            <p className="text-gray-500 mt-1">Acompanhe os pedidos em atendimento e produção</p>
           </div>
           <div className="flex items-center gap-2">
             {canManageTrash && <Button variant="outline" size="sm" onClick={() => setShowTrash((current) => !current)} className={showTrash ? "border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100" : ""}><Trash2 className="w-4 h-4 mr-1" />{showTrash ? "Fechar lixeira" : "Lixeira"}</Button>}

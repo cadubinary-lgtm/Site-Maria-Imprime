@@ -10,8 +10,8 @@ import { Search, ChevronRight, Package, X, Loader2, Trash2, Clock, RefreshCw } f
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 
-// Novos pedidos = pedidos recém-aprovados que acabaram de chegar e precisam de atenção.
-// Pedidos de pagamento na retirada seguem o fluxo financeiro e não permanecem nesta fila.
+// Novos pedidos = pedidos recém-chegados já elegíveis para atendimento comercial.
+// Inclui pagamentos aprovados e pagamentos na retirada autorizados.
 // Ao clicar em "Abrir", apenas navega para o pedido — NÃO muda o status automaticamente
 // O operador deve mudar o status manualmente para "Analisando" quando começar a trabalhar
 

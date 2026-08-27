@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { isNewOrderStatus } from "../client/src/lib/newOrderStatus";
 
 describe("indicador de Novos Pedidos", () => {
-  it("considera apenas pedidos recém-aprovados para a primeira triagem", () => {
+  it("considera pedidos recém-aprovados e pagamentos na retirada para a primeira triagem", () => {
     expect(isNewOrderStatus("pagamento_aprovado")).toBe(true);
     expect(isNewOrderStatus("aguardando_pagamento")).toBe(false);
-    expect(isNewOrderStatus("pagamento_retirada")).toBe(false);
+    expect(isNewOrderStatus("pagamento_retirada")).toBe(true);
   });
 
   it("não reintroduz pedidos de produção, entrega, retirada ou cancelados como novos", () => {

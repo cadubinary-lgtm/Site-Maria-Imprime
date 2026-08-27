@@ -21,7 +21,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
-
+import { getOrderPaymentStage } from "@shared/order-payment-stage";
 // ─── Prévia de Arte Aprovada por Item ───────────────────────────────────────────
 // Constrói a URL absoluta da imagem a partir de uma URL relativa ou absoluta,
 // garantindo que espaços e caracteres especiais sejam corretamente codificados.
@@ -579,11 +579,12 @@ function getStatusSteps(order: any) {
   const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
 
   // Passo 1: definir o status de pagamento correto (apenas o que foi usado)
-  const paymentStep = order.status === 'aguardando_pagamento' || order.paymentStatus !== 'pago'
-    ? { key: 'aguardando_pagamento', label: 'Aguardando\npagamento', emoji: '⏳' }
-    : order.paymentMethod === 'pagar_na_retirada'
+  const paymentStage = getOrderPaymentStage(order);
+  const paymentStep = paymentStage === 'pagamento_retirada'
     ? { key: 'pagamento_retirada', label: 'Pagamento\nna Retirada', emoji: '🏪' }
-    : { key: 'pagamento_aprovado', label: 'Pagamento\nAprovado', emoji: '💳' };
+    : paymentStage === 'aguardando_pagamento'
+      ? { key: 'aguardando_pagamento', label: 'Aguardando\npagamento', emoji: '⏳' }
+      : { key: 'pagamento_aprovado', label: 'Pagamento\nAprovado', emoji: '💳' };
 
   // Passo 2: montar fluxo base
   const base = [

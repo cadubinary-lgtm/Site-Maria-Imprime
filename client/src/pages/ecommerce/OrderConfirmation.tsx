@@ -5,17 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { HOME_PRIMARY_ACTION_CLASS, HOME_SECONDARY_ACTION_CLASS } from "@/lib/homeActionStyles";
+import { getOrderPaymentStage } from "@shared/order-payment-stage";
 
 function getTimelineSteps(order: any) {
   const isPickup = order.shippingMethod === 'retirada' || order.shippingMethod === 'pickup' || !order.deliveryStreet;
   const isInProduction = ['em_producao', 'pronto_entrega', 'pronto_retirada', 'saiu_entrega', 'em_transporte', 'entregue'].includes(order.status);
 
   // Passo 1: apenas o método de pagamento usado
-  const paymentStep = order.status === 'aguardando_pagamento' || order.paymentStatus !== 'pago'
-    ? { key: 'aguardando_pagamento', label: 'Aguardando Pagamento', icon: Clock }
-    : order.paymentMethod === 'pagar_na_retirada'
+  const paymentStage = getOrderPaymentStage(order);
+  const paymentStep = paymentStage === 'pagamento_retirada'
     ? { key: 'pagamento_retirada', label: 'Pagamento na Retirada', icon: CheckCircle2 }
-    : { key: 'pagamento_aprovado', label: 'Pagamento Aprovado', icon: Clock };
+    : paymentStage === 'aguardando_pagamento'
+      ? { key: 'aguardando_pagamento', label: 'Aguardando Pagamento', icon: Clock }
+      : { key: 'pagamento_aprovado', label: 'Pagamento Aprovado', icon: Clock };
 
   // Passo 2: base com ou sem "Com Problemas"
   const base = [

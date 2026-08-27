@@ -4522,3 +4522,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir preparar o reenvio do QR Code e código Pix por WhatsApp ao cliente
 - [x] Remover dependências de pedido na ordem segura antes da exclusão permanente da lixeira
 - [x] Validar exclusão permanente de pedidos com registros financeiros, produção e pagamento vinculados
+- [x] Garantir que pedidos elegíveis de cliente e vendedor entrem em Novos Pedidos
+- [x] Manter pedidos em Novos Pedidos até o administrador avançar para Analisando
+- [x] Sincronizar pagamento na retirada com o status atual do pedido em todas as telas
+- [x] Proteger listas e indicadores contra regressões de status entre cliente, vendedor e admin

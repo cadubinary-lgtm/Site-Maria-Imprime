@@ -25,6 +25,7 @@ import { OrderShippingPanel } from "@/components/orders/OrderShippingPanel";
 import { ShippingLabelViewer } from "@/components/orders/ShippingLabelViewer";
 import AdminLayout from "@/components/AdminLayout";
 import { getAdminMenuParentTarget } from "@/lib/adminNavigation";
+import { getOrderPaymentStage } from "@shared/order-payment-stage";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -75,11 +76,7 @@ function formatAddress(order: any): string {
 function getAdminStatusSteps(order: any) {
   const isPickup = order.shippingMethod === "retirada" || order.shippingMethod === "pickup" || !order.deliveryStreet;
   const isInProduction = ["em_producao", "pronto_entrega", "pronto_retirada", "saiu_entrega", "em_transporte", "entregue"].includes(order.status);
-  const paymentStep = order.status === "aguardando_pagamento" || order.paymentStatus !== "pago"
-    ? { key: "aguardando_pagamento" }
-    : order.paymentMethod === "pagar_na_retirada"
-    ? { key: "pagamento_retirada" }
-    : { key: "pagamento_aprovado" };
+  const paymentStep = { key: getOrderPaymentStage(order) };
   const base = [
     paymentStep,
     { key: "analisando" },
