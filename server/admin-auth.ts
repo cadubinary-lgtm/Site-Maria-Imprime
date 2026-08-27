@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { eq, and, gt } from "drizzle-orm";
 import { getDb } from "./db";
-import { adminAccounts, adminSessions, auditLogs } from "../drizzle/schema";
+import { adminAccounts, adminSessions, auditLogs, sellers } from "../drizzle/schema";
 import type { Request } from "express";
 
 // Cookie name para sessão admin
@@ -81,6 +81,7 @@ export async function loginAdmin(params: {
   password: string;
   ipAddress?: string;
   userAgent?: string;
+  sellerOnly?: boolean;
 }): Promise<{ token: string; admin: AdminSessionPayload }> {
   const db = (await getDb())!;
   const now = Date.now();
@@ -123,6 +124,17 @@ export async function loginAdmin(params: {
       .where(eq(adminAccounts.id, admin.id));
 
     throw new Error("Credenciais inválidas");
+  }
+
+  if (params.sellerOnly) {
+    const [sellerProfile] = await db
+      .select({ id: sellers.id })
+      .from(sellers)
+      .where(and(eq(sellers.adminAccountId, admin.id), eq(sellers.status, "active")))
+      .limit(1);
+    if (!sellerProfile) {
+      throw new Error("Credenciais inválidas");
+    }
   }
 
   // Reset tentativas e atualizar lastLogin

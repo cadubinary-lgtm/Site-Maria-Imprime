@@ -10,6 +10,8 @@ const paymentSource = readFileSync(resolve(root, "server/routers-financeiro.ts")
 const sellerLayoutSource = readFileSync(resolve(root, "client/src/components/seller/SellerLayout.tsx"), "utf8");
 const appSource = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
 const adminNavigationSource = readFileSync(resolve(root, "client/src/components/AdminLayout.tsx"), "utf8");
+const customerLoginSource = readFileSync(resolve(root, "client/src/pages/ecommerce/CustomerLogin.tsx"), "utf8");
+const adminAuthRouterSource = readFileSync(resolve(root, "server/routers-admin-auth.ts"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -68,5 +70,12 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerRouterSource).toContain("if (!existing && !input.password)");
     expect(sellerRouterSource).toContain("if (!adminAccountId)");
     expect(sellerRouterSource).toContain('action: created.linkedExistingAccount ? "link_existing_account_to_seller" : "create_seller"');
+  });
+
+  it("direciona credenciais de vendedor usadas no login público para a Central do Vendedor", () => {
+    expect(customerLoginSource).toContain("trpc.adminAuth.loginSeller.useMutation()");
+    expect(customerLoginSource).toContain('window.location.assign("/vendedor")');
+    expect(adminAuthRouterSource).toContain("loginSeller: publicProcedure");
+    expect(adminAuthRouterSource).toContain("sellerOnly: true");
   });
 });

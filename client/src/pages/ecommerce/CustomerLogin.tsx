@@ -35,16 +35,26 @@ export default function CustomerLogin() {
       }
     },
   });
+  const commercialLogin = trpc.adminAuth.loginSeller.useMutation();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    login.mutate(form);
+    setEmailNotVerified(false);
+
+    try {
+      await commercialLogin.mutateAsync(form);
+      window.location.assign("/vendedor");
+      return;
+    } catch {
+      // Credenciais que não pertencem ao backoffice seguem para a Área do Cliente.
+      login.mutate(form);
+    }
   }
 
   return (
@@ -147,9 +157,9 @@ export default function CustomerLogin() {
               <Button
                 type="submit"
                 className={`w-full ${HOME_PRIMARY_ACTION_CLASS}`}
-                disabled={login.isPending}
+                disabled={login.isPending || commercialLogin.isPending}
               >
-                {login.isPending ? (
+                {login.isPending || commercialLogin.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Entrando...
@@ -180,6 +190,9 @@ export default function CustomerLogin() {
                 <Link href="/reenviar-verificacao" className="text-pink-600 hover:underline">
                   Reenviar
                 </Link>
+              </p>
+              <p className="text-center text-xs text-gray-500 pt-1">
+                É vendedor? Use as mesmas credenciais: o acesso será direcionado para a Central do Vendedor.
               </p>
             </form>
           </CardContent>

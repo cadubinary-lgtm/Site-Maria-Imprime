@@ -146,6 +146,39 @@ export const adminAuthRouter = router({
       }
     }),
 
+  /** Login comercial: só autentica contas com perfil de vendedor ativo. */
+  loginSeller: publicProcedure
+    .input(z.object({
+      email: z.string().email("E-mail inválido"),
+      password: z.string().min(1, "Senha obrigatória"),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const ipAddress = ctx.req.ip || ctx.req.connection?.remoteAddress || "unknown";
+        const userAgent = ctx.req.headers["user-agent"] || "";
+        const { token, admin } = await loginAdmin({
+          email: input.email,
+          password: input.password,
+          ipAddress,
+          userAgent,
+          sellerOnly: true,
+        });
+        ctx.res.cookie(ADMIN_SESSION_COOKIE, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 8 * 60 * 60 * 1000,
+          path: "/",
+        });
+        return { success: true, admin: { id: admin.adminId, name: admin.name, email: admin.email } };
+      } catch (err) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: err instanceof Error ? err.message : "Falha no login comercial",
+        });
+      }
+    }),
+
   /**
    * Verificar sessão admin atual
    */
