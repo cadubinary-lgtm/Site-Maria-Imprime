@@ -713,6 +713,9 @@ export const financeiroRouter = router({
       observacoes: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
+      if ((ctx as any).adminUser?.role === "seller") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Vendedores não podem confirmar pagamentos. Esta baixa é realizada pela equipe financeira." });
+      }
       const db = await getDb();
       if (!db) throw new Error("Database not available");
       const paidAt = Date.now();

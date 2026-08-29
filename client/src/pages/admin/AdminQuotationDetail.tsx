@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { createAdminDetailLocation, getAdminMenuParentTarget } from "@/lib/adminNavigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
+import SellerLayout from "@/components/seller/SellerLayout";
 import { formatCompanyAddress } from "@/lib/companyQuotationDetails";
 import { getSelectedQuotationSpecifications } from "@/lib/quotationSpecifications";
 import { buildQuotationWhatsappUrl } from "@/lib/quotationWhatsappShare";
@@ -405,11 +406,21 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export default function AdminQuotationDetail() {
-  const [, navigate] = useLocation();
+function QuotationDetailShell({ sellerMode, children }: { sellerMode: boolean; children: React.ReactNode }) {
+  if (sellerMode) {
+    return <SellerLayout title="Detalhes do orçamento" description="Acompanhe e conduza as propostas da sua carteira comercial.">{children}</SellerLayout>;
+  }
+  return <AdminLayout>{children}</AdminLayout>;
+}
+
+export default function AdminQuotationDetail(_routeProps?: unknown) {
+  const [location, navigate] = useLocation();
+  const sellerMode = location.startsWith("/vendedor/");
   const params = useParams<{ id: string }>();
   const quotationId = parseInt(params.id);
-  const returnTarget = getAdminMenuParentTarget(`/admin/orcamentos/${quotationId}`);
+  const returnTarget = sellerMode
+    ? { path: "/vendedor/orcamentos", label: "Voltar para Meus Orçamentos" }
+    : getAdminMenuParentTarget(`/admin/orcamentos/${quotationId}`);
 
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);
@@ -433,7 +444,7 @@ export default function AdminQuotationDetail() {
   const duplicate = trpc.quotations.duplicate.useMutation({
     onSuccess: (res) => {
       toast.success(`Duplicado: ${res.newNumber}`);
-      navigate(`/admin/orcamentos/${res.newId}`);
+      navigate(sellerMode ? `/vendedor/orcamentos/${res.newId}` : `/admin/orcamentos/${res.newId}`);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -441,7 +452,7 @@ export default function AdminQuotationDetail() {
   const convertToOrder = trpc.quotations.convertToOrder.useMutation({
     onSuccess: (res) => {
       toast.success(`Pedido ${res.orderNumber} criado com sucesso!`);
-      navigate(createAdminDetailLocation(`/admin/pedidos/${res.orderId}`, returnTarget.path));
+      navigate(sellerMode ? `/vendedor/pedidos/${res.orderId}` : createAdminDetailLocation(`/admin/pedidos/${res.orderId}`, returnTarget.path));
     },
     onError: (e) => toast.error(e.message),
   });
@@ -472,10 +483,10 @@ export default function AdminQuotationDetail() {
   });
 
   if (isLoading) {
-    return <AdminLayout><div className="p-8 text-center text-gray-400" role="status">Carregando orçamento...</div></AdminLayout>;
+    return <QuotationDetailShell sellerMode={sellerMode}><div className="p-8 text-center text-gray-400" role="status">Carregando orçamento...</div></QuotationDetailShell>;
   }
   if (!quotation) {
-    return <AdminLayout><div className="p-8 text-center text-gray-400" role="status">Orçamento não encontrado.</div></AdminLayout>;
+    return <QuotationDetailShell sellerMode={sellerMode}><div className="p-8 text-center text-gray-400" role="status">Orçamento não encontrado.</div></QuotationDetailShell>;
   }
 
   const q = quotation;
@@ -506,10 +517,10 @@ export default function AdminQuotationDetail() {
   };
 
   return (
-    <AdminLayout>
+    <QuotationDetailShell sellerMode={sellerMode}>
     <div className="admin-visual-system p-6 max-w-5xl mx-auto space-y-6">
       <div className="no-print flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3" aria-label="Ações do orçamento">
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => printQuotationPDF(q, company, adminUser?.name)}>
             <Printer className="w-3.5 h-3.5" aria-hidden="true" /> Imprimir PDF
           </Button>
           <Button variant="outline" size="sm" className="gap-1 text-green-700 border-green-200 hover:bg-green-50" onClick={shareQuotationOnWhatsapp}>
@@ -533,7 +544,7 @@ export default function AdminQuotationDetail() {
             <Copy className="w-3.5 h-3.5" aria-hidden="true" /> Duplicar
           </Button>
           {isEditable && (
-            <Button variant="outline" size="sm" className="gap-1" onClick={() => navigate(`/admin/orcamentos/${q.id}/editar`)}>
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => navigate(sellerMode ? `/vendedor/orcamentos/${q.id}/editar` : `/admin/orcamentos/${q.id}/editar`)}>
               <Edit className="w-3.5 h-3.5" aria-hidden="true" /> Editar
             </Button>
           )}
@@ -747,6 +758,6 @@ export default function AdminQuotationDetail() {
         </div>
       )}
     </div>
-    </AdminLayout>
+    </QuotationDetailShell>
   );
 }

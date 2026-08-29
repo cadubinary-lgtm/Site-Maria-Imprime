@@ -53,6 +53,18 @@ async function getSellerQuotationScope(ctx: any, db: any) {
   return seller;
 }
 
+/** Garante que uma sessão de vendedor atue apenas na própria carteira comercial. */
+async function getQuotationForCommercialAction(db: any, ctx: any, quotationId: number) {
+  const { quotations } = await import("../drizzle/schema.js");
+  const seller = await getSellerQuotationScope(ctx, db);
+  const [quotation] = await db.select().from(quotations).where(eq(quotations.id, quotationId)).limit(1);
+  if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+  if (seller && quotation.sellerId !== seller.id) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Você só pode operar orçamentos da sua própria carteira." });
+  }
+  return { quotation, seller };
+}
+
 // ─── Router ─────────────────────────────────────────────────────────────────
 
 export const quotationsRouter = router({
@@ -484,8 +496,7 @@ export const quotationsRouter = router({
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationHistory } = await import("../drizzle/schema.js");
 
-      const [existing] = await db.select({ status: quotations.status }).from(quotations).where(eq(quotations.id, input.id));
-      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const { quotation: existing } = await getQuotationForCommercialAction(db, ctx, input.id);
 
       const operatorId = (ctx as any).user?.id ?? (ctx as any).adminUser?.id ?? 1;
       const now = new Date();
@@ -515,8 +526,7 @@ export const quotationsRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationHistory } = await import("../drizzle/schema.js");
-      const [quotation] = await db.select({ id: quotations.id, status: quotations.status, quotationNumber: quotations.quotationNumber }).from(quotations).where(eq(quotations.id, input.id)).limit(1);
-      if (!quotation) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const { quotation } = await getQuotationForCommercialAction(db, ctx, input.id);
       if (quotation.status !== "cancelado") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Apenas orçamentos cancelados podem ter o status restaurado." });
 
       const [cancellation] = await db.select().from(quotationHistory)
@@ -537,6 +547,7 @@ export const quotationsRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems, quotationHistory, clients, customerAccounts, users } = await import("../drizzle/schema.js");
+      await getQuotationForCommercialAction(db, ctx, input.id);
 
       const [quotation] = await db
         .select({
@@ -608,8 +619,7 @@ export const quotationsRouter = router({
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems } = await import("../drizzle/schema.js");
 
-      const [original] = await db.select().from(quotations).where(eq(quotations.id, input.id));
-      if (!original) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      const { quotation: original } = await getQuotationForCommercialAction(db, ctx, input.id);
 
       const originalItems = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, input.id));
 
@@ -728,13 +738,11 @@ export const quotationsRouter = router({
   // ── Excluir orçamento ──────────────────────────────────────────────────
   delete: adminAnyProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems, quotationHistory } = await import("../drizzle/schema.js");
-
-      const [existing] = await db.select({ status: quotations.status }).from(quotations).where(eq(quotations.id, input.id));
-      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Orçamento não encontrado" });
+      await getQuotationForCommercialAction(db, ctx, input.id);
 
       await db.delete(quotationHistory).where(eq(quotationHistory.quotationId, input.id));
       await db.delete(quotationItems).where(eq(quotationItems.quotationId, input.id));

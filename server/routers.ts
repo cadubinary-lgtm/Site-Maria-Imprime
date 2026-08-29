@@ -108,6 +108,12 @@ import { productPaymentPricingRouter } from "./routers-product-payment-pricing";
 import { homeCarouselRouter } from "./homeCarouselRouter";
 import { globalDeliveryOptionsRouter } from "./globalDeliveryOptionsRouter";
 import { sellersRouter } from "./sellersRouter";
+
+function requireOrderOperationalAccess(ctx: any) {
+  if (ctx.adminUser?.role === "seller") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Vendedores podem acompanhar somente os pedidos da própria carteira; alterações de pagamento e produção são realizadas pela equipe administrativa." });
+  }
+}
 import { authenticateAdminRequest } from "./admin-auth";
 import { ensureSellerCommissionForOrder } from "./sellerCommissionService";
 
@@ -390,8 +396,12 @@ export const appRouter = router({
           throw new Error(`Erro ao criar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
       }),
-    getAllOrders: adminAnyProcedure.query(() => getAllOrders()),
-    getPrepressMenuIndicators: adminAnyProcedure.query(async () => {
+    getAllOrders: adminAnyProcedure.query(({ ctx }) => {
+      requireOrderOperationalAccess(ctx);
+      return getAllOrders();
+    }),
+    getPrepressMenuIndicators: adminAnyProcedure.query(async ({ ctx }) => {
+      requireOrderOperationalAccess(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
 
@@ -478,6 +488,7 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const adminUser = (ctx as any).adminUser;
         return await updateOrderStatus(input.orderId, input.newStatus, input.notes, {
           id: adminUser?.adminId ?? adminUser?.id,
@@ -489,7 +500,8 @@ export const appRouter = router({
         orderItemId: z.number(),
         preProductionStatus: z.enum(["liberado_analise", "ajustar_arte", "aguardando_reenvio_arquivo", "aguardando_aprovacao_cliente", "arte_final_aprovada", "nova_arte_reenviada", "em_producao"]),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems: orderItemsT, orders: ordersT } = await import("../drizzle/schema.js");
@@ -509,6 +521,7 @@ export const appRouter = router({
         orderId: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems: orderItemsT, orders: ordersT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
@@ -555,6 +568,7 @@ export const appRouter = router({
         productionStatus: z.enum(["pendente", "impresso", "acabamento_finalizado"]),
       }))
       .mutation(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orders: ordersT, orderItems: orderItemsT, orderItemLogs: orderItemLogsT } = await import("../drizzle/schema.js");
@@ -600,7 +614,8 @@ export const appRouter = router({
       }),
     getProductionStatusHistory: adminAnyProcedure
       .input(z.object({ orderId: z.number().optional() }).optional())
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
         const fields = {
@@ -1714,7 +1729,8 @@ export const appRouter = router({
 
         getOrderById: adminAnyProcedure
       .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         // Suporta admin_session e Manus OAuth — admin pode ver qualquer pedido
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
@@ -1752,7 +1768,8 @@ export const appRouter = router({
       }),
     getOrderHistory: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         // Suporta admin_session e Manus OAuth — admin pode ver histórico de qualquer pedido
         return await getOrderStatusHistory(input.orderId);
       }),
@@ -1794,7 +1811,8 @@ export const appRouter = router({
         }
         return { addedCount };
       }),
-    getAllOrders: adminAnyProcedure.query(async () => {
+    getAllOrders: adminAnyProcedure.query(async ({ ctx }) => {
+      requireOrderOperationalAccess(ctx);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       const { orders: ordersTable, deletedOrders: deletedOrdersTable } = await import("../drizzle/schema.js");
@@ -1812,6 +1830,7 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        requireOrderOperationalAccess(ctx);
         const result = await updateOrderStatus(input.orderId, input.newStatus, input.notes);
         return result;
       }),
@@ -1819,7 +1838,8 @@ export const appRouter = router({
     // ── Arquivos do cliente por pedido ──────────────────────────────────────
     getOrderFiles: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) return [];
         const { orderItems: oi } = await import("../drizzle/schema.js");
@@ -2505,6 +2525,7 @@ export const appRouter = router({
     sendToProduction: adminAnyProcedure
       .input(z.object({ orderId: z.number() }))
       .mutation(async ({ input, ctx }) => {
+        requireOrderOperationalAccess(ctx);
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
         const { orderItems, orders } = await import("../drizzle/schema.js");

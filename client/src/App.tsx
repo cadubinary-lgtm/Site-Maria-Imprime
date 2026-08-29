@@ -136,6 +136,7 @@ import SegmentsManager from "./pages/erp/SegmentsManager";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerQuotations from "./pages/seller/SellerQuotations";
+import SellerOrderDetail from "./pages/seller/SellerOrderDetail";
 import SellerCommissions from "./pages/seller/SellerCommissions";
 import SellerNewSale from "./pages/seller/SellerNewSale";
 
@@ -178,13 +179,19 @@ function SellerRoutes() {
     window.location.replace("/admin/login");
     return null;
   }
+  if (adminUser.role !== "seller") {
+    window.location.replace("/admin");
+    return null;
+  }
   return (
     <Switch>
       <Route path="/vendedor" component={SellerOrders} />
+      <Route path="/vendedor/pedidos/:id" component={SellerOrderDetail} />
       <Route path="/vendedor/pedidos" component={SellerOrders} />
-      <Route path="/vendedor/orcamentos" component={SellerQuotations} />
       <Route path="/vendedor/orcamentos/novo" component={SellerQuotationForm} />
       <Route path="/vendedor/orcamentos/:id/editar" component={SellerQuotationForm} />
+      <Route path="/vendedor/orcamentos/:id" component={AdminQuotationDetail} />
+      <Route path="/vendedor/orcamentos" component={SellerQuotations} />
       <Route path="/vendedor/vendas/nova" component={SellerNewSale} />
       <Route path="/vendedor/comissoes" component={SellerOrders} />
     </Switch>

@@ -4548,3 +4548,11 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Dar mais largura à coluna de produtos para exibir nomes completos no seletor
 - [x] Destacar o título Proposta Comercial no cabeçalho do orçamento
 - [x] Exibir vendedor ou administrador responsável abaixo do título da proposta
+- [x] Dar ao vendedor detalhes completos e ações permitidas dos próprios orçamentos
+- [x] Permitir conversão confirmada de orçamento próprio aprovado em pedido
+- [x] Dar ao vendedor detalhes completos dos próprios pedidos com acompanhamento de pagamento, produção e entrega
+- [x] Manter vendedor isolado dos dados e ações da carteira administrativa global
+- [x] Alinhar Meus Orçamentos do vendedor às ações comerciais permitidas no admin
+- [x] Permitir ao vendedor converter orçamento próprio aprovado em pedido com confirmação
+- [x] Sincronizar Meus Pedidos/Minhas Vendas com status, pagamento e produção do pedido
+- [x] Preservar isolamento da carteira de cada vendedor em todas as ações comerciais

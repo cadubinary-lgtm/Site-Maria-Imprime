@@ -19,6 +19,8 @@ const checkoutPageSource = readFileSync(resolve(root, "client/src/pages/ecommerc
 const quotationsRouterSource = readFileSync(resolve(root, "server/quotationsRouter.ts"), "utf8");
 const quotationFormSource = readFileSync(resolve(root, "client/src/pages/admin/AdminQuotationForm.tsx"), "utf8");
 const sellerQuotationFormSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotationForm.tsx"), "utf8");
+const sellerOrderDetailSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrderDetail.tsx"), "utf8");
+const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -187,5 +189,37 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerLayoutSource).toContain('href="/"');
     expect(sellerLayoutSource).toContain("Voltar para a loja");
     expect(sellerLayoutSource).toContain("Ir para a loja");
+  });
+
+  it("expõe detalhes e históricos somente pelas consultas com escopo da carteira", () => {
+    expect(sellerRouterSource).toContain("orderDetail: sellerProcedure");
+    expect(sellerRouterSource).toContain("orderHistory: sellerProcedure");
+    expect(sellerRouterSource).toContain("productionHistory: sellerProcedure");
+    expect(sellerRouterSource).toContain("and(eq(orders.id, input.id), eq(orders.sellerId, seller.id))");
+    expect(sellerRouterSource).toContain("and(eq(orders.id, input.orderId), eq(orders.sellerId, seller.id))");
+    expect(appSource).toContain('path="/vendedor/pedidos/:id" component={SellerOrderDetail}');
+    expect(sellerOrderDetailSource).toContain("sellerMode");
+    expect(adminOrderDetailSource).toContain("trpc.sellers.seller.orderDetail.useQuery");
+    expect(adminOrderDetailSource).toContain("trpc.sellers.seller.orderHistory.useQuery");
+    expect(adminOrderDetailSource).toContain("trpc.sellers.seller.productionHistory.useQuery");
+  });
+
+  it("preserva no vendedor o acompanhamento em leitura e bloqueia operações no cliente e no servidor", () => {
+    expect(adminOrderDetailSource).toContain("!sellerMode && <div className=\"flex items-center gap-2\">");
+    expect(adminOrderDetailSource).toContain("!sellerMode && <div className=\"border-t pt-4 space-y-3\">");
+    expect(adminOrderDetailSource).toContain("!sellerMode && (o.status === \"com_problemas\"");
+    expect(adminOrderDetailSource).toContain("!sellerMode && o.paymentStatus !== \"pago\"");
+    expect(checkoutRouterSource).toContain("function requireOrderOperationalAccess");
+    expect(checkoutRouterSource).toContain("requireOrderOperationalAccess(ctx);");
+    expect(checkoutRouterSource).toContain("getOrderById: adminAnyProcedure");
+    expect(paymentSource).toContain('ctx as any).adminUser?.role === "seller"');
+  });
+
+  it("protege cada ação comercial de orçamento pela carteira autenticada", () => {
+    expect(quotationsRouterSource).toContain("getQuotationForCommercialAction");
+    expect(quotationsRouterSource).toContain("Você só pode operar orçamentos da sua própria carteira.");
+    expect(quotationsRouterSource).toContain("const { quotation: existing } = await getQuotationForCommercialAction");
+    expect(quotationsRouterSource).toContain("await getQuotationForCommercialAction(db, ctx, input.id);");
+    expect(quotationsRouterSource).toContain("const { quotation: original } = await getQuotationForCommercialAction");
   });
 });

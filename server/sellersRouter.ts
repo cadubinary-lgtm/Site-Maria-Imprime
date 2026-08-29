@@ -6,6 +6,8 @@ import {
   adminSessions,
   clients,
   orderItems,
+  orderProductionStatusHistory,
+  orderStatusHistory,
   orders,
   quotationItems,
   quotations,
@@ -408,6 +410,72 @@ export const sellersRouter = router({
         .leftJoin(clients, eq(orders.clientId, clients.id))
         .leftJoin(sellerCommissions, eq(sellerCommissions.orderId, orders.id))
         .where(and(...conditions)).orderBy(desc(orders.createdAt));
+    }),
+
+    orderDetail: sellerProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const seller = (ctx as any).seller;
+      const [order] = await db.select().from(orders)
+        .where(and(eq(orders.id, input.id), eq(orders.sellerId, seller.id))).limit(1);
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado na sua carteira." });
+
+      const itemRows = await db.execute(
+        sql`SELECT oi.*, p.imageUrl as productImage FROM orderItems oi LEFT JOIN products p ON oi.productId = p.id WHERE oi.orderId = ${order.id}`
+      ) as any;
+      const items = (itemRows[0] ?? []) as any[];
+
+      let customerData: any = null;
+      if ((order as any).customerId) {
+        const customerRows = await db.execute(sql`SELECT
+          ca.id, ca.firstName, ca.lastName, ca.email, ca.phone, ca.cpfCnpj,
+          COALESCE(addr.fullName, CONCAT(ca.firstName, ' ', ca.lastName)) as addrFullName,
+          COALESCE(addr.phone, ca.phone) as addrPhone,
+          COALESCE(addr.street, ca.addressStreet) as street,
+          COALESCE(addr.number, ca.addressNumber) as number,
+          COALESCE(addr.complement, ca.addressComplement) as complement,
+          COALESCE(addr.neighborhood, ca.addressNeighborhood) as neighborhood,
+          COALESCE(addr.city, ca.addressCity) as city,
+          COALESCE(addr.state, ca.addressState) as state,
+          COALESCE(addr.zipCode, ca.addressZipCode) as zipCode
+          FROM customer_accounts ca LEFT JOIN customerAddresses addr ON addr.userId = ca.id AND addr.isDefault = 1
+          WHERE ca.id = ${(order as any).customerId} LIMIT 1`) as any;
+        customerData = (customerRows[0] ?? [])[0] ?? null;
+      }
+
+      return { ...order, items, customerData };
+    }),
+
+    orderHistory: sellerProcedure.input(z.object({ orderId: z.number().int().positive() })).query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const seller = (ctx as any).seller;
+      const [order] = await db.select({ id: orders.id }).from(orders)
+        .where(and(eq(orders.id, input.orderId), eq(orders.sellerId, seller.id))).limit(1);
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado na sua carteira." });
+      return db.select().from(orderStatusHistory).where(eq(orderStatusHistory.orderId, order.id)).orderBy(desc(orderStatusHistory.createdAt));
+    }),
+
+    productionHistory: sellerProcedure.input(z.object({ orderId: z.number().int().positive() })).query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
+      const seller = (ctx as any).seller;
+      const [order] = await db.select({ id: orders.id, orderNumber: orders.orderNumber, deliveryFullName: orders.deliveryFullName }).from(orders)
+        .where(and(eq(orders.id, input.orderId), eq(orders.sellerId, seller.id))).limit(1);
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Pedido não encontrado na sua carteira." });
+      return db.select({
+        id: orderProductionStatusHistory.id,
+        orderId: orderProductionStatusHistory.orderId,
+        previousStatus: orderProductionStatusHistory.previousStatus,
+        newStatus: orderProductionStatusHistory.newStatus,
+        changedBy: orderProductionStatusHistory.changedBy,
+        changedByName: orderProductionStatusHistory.changedByName,
+        notes: orderProductionStatusHistory.notes,
+        createdAt: orderProductionStatusHistory.createdAt,
+        orderNumber: orders.orderNumber,
+        deliveryFullName: orders.deliveryFullName,
+      }).from(orderProductionStatusHistory).leftJoin(orders, eq(orderProductionStatusHistory.orderId, orders.id))
+        .where(eq(orderProductionStatusHistory.orderId, order.id)).orderBy(desc(orderProductionStatusHistory.createdAt));
     }),
 
     quotations: sellerProcedure.input(dateFilters).query(async ({ input, ctx }) => {

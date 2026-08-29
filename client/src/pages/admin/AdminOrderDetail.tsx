@@ -1026,10 +1026,12 @@ export function OrderDetailContent({
   orderId: externalOrderId,
   backRoute = "/admin/pedidos",
   backLabel = "Voltar para Pedidos",
+  sellerMode = false,
 }: {
   orderId: number | null;
   backRoute?: string;
   backLabel?: string;
+  sellerMode?: boolean;
 }) {
   const [, setLocation] = useLocation();
   const orderId = externalOrderId;
@@ -1069,18 +1071,32 @@ export function OrderDetailContent({
 
   const utils = trpc.useUtils();
 
-  const { data: order, isLoading } = trpc.checkout.getOrderById.useQuery(
+  const adminOrderQuery = trpc.checkout.getOrderById.useQuery(
     { id: orderId! }, {
-      enabled: !!orderId,
+      enabled: !!orderId && !sellerMode,
       refetchInterval: 15000, // Atualiza a cada 15s para detectar nova arte reenviada pelo cliente
     }
   );
-  const { data: history, isLoading: histLoading } = trpc.checkout.getOrderHistory.useQuery(
-    { orderId: orderId! }, { enabled: !!orderId }
+  const sellerOrderQuery = trpc.sellers.seller.orderDetail.useQuery(
+    { id: orderId! }, { enabled: !!orderId && sellerMode, refetchInterval: 15000 }
   );
-  const { data: productionHistory = [] } = trpc.admin.getProductionStatusHistory.useQuery(
-    { orderId: orderId! }, { enabled: !!orderId }
+  const adminHistoryQuery = trpc.checkout.getOrderHistory.useQuery(
+    { orderId: orderId! }, { enabled: !!orderId && !sellerMode }
   );
+  const sellerHistoryQuery = trpc.sellers.seller.orderHistory.useQuery(
+    { orderId: orderId! }, { enabled: !!orderId && sellerMode }
+  );
+  const adminProductionHistoryQuery = trpc.admin.getProductionStatusHistory.useQuery(
+    { orderId: orderId! }, { enabled: !!orderId && !sellerMode }
+  );
+  const sellerProductionHistoryQuery = trpc.sellers.seller.productionHistory.useQuery(
+    { orderId: orderId! }, { enabled: !!orderId && sellerMode }
+  );
+  const order = sellerMode ? sellerOrderQuery.data : adminOrderQuery.data;
+  const isLoading = sellerMode ? sellerOrderQuery.isLoading : adminOrderQuery.isLoading;
+  const history = sellerMode ? sellerHistoryQuery.data : adminHistoryQuery.data;
+  const histLoading = sellerMode ? sellerHistoryQuery.isLoading : adminHistoryQuery.isLoading;
+  const productionHistory = sellerMode ? (sellerProductionHistoryQuery.data ?? []) : (adminProductionHistoryQuery.data ?? []);
   // Prévias são carregadas por item individualmente via ItemPreviewCard
 
   const updateMutation = trpc.checkout.updateOrderStatus.useMutation({
@@ -1218,7 +1234,7 @@ export function OrderDetailContent({
               <Button variant="ghost" onClick={() => setLocation(backRoute)}>
                 <ChevronLeft className="w-4 h-4 mr-1" /> {backLabel}
               </Button>
-              <div className="flex items-center gap-2">
+              {!sellerMode && <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm"
                   onClick={() => setLocation("/admin/os")}
                   className="border-orange-200 text-orange-600 hover:bg-orange-50">
@@ -1229,7 +1245,7 @@ export function OrderDetailContent({
                   className="bg-orange-500 hover:bg-orange-600 text-white">
                   <Printer className="w-4 h-4 mr-1" /> Imprimir OS
                 </Button>
-              </div>
+              </div>}
             </div>
             <div className="flex items-start justify-between flex-wrap gap-4">
               <div>
@@ -1316,7 +1332,7 @@ export function OrderDetailContent({
                 </div>
               )}
 
-              <div className="border-t pt-4 space-y-3">
+              {!sellerMode && <div className="border-t pt-4 space-y-3">
                 <p className="text-sm font-semibold text-gray-700">Alterar Status do Pedido</p>
                 <div className="flex gap-3 flex-wrap">
                   <Select value={newStatus} onValueChange={setNewStatus}>
@@ -1342,7 +1358,7 @@ export function OrderDetailContent({
                   className="bg-white"
                 />
 
-              </div>
+              </div>}
 
               <div className="border-t pt-4">
                 <button
@@ -1496,7 +1512,7 @@ export function OrderDetailContent({
                     </div>
 
                     {/* Grid 3 colunas com divisores visuais — colapsável */}
-                    {isExpanded && <div className="grid grid-cols-1 lg:grid-cols-3">
+                    {isExpanded && <div className={`grid grid-cols-1 ${sellerMode ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
 
                       {/* Col 1 — Especificações + Arquivo do Cliente */}
                       <div className="lg:border-r border-gray-100">
@@ -1531,14 +1547,14 @@ export function OrderDetailContent({
                             artFileUrl={item.artFileUrl}
                             onLightbox={setLightboxUrl}
                             preProductionStatus={item.preProductionStatus || "liberado_analise"}
-                            orderItemId={item.id}
-                            orderId={orderId!}
+                            orderItemId={sellerMode ? undefined : item.id}
+                            orderId={sellerMode ? undefined : orderId!}
                           />
                         </div>
                       </div>
 
-                      {/* Col 2 — Prévia da Arte */}
-                      <div className="lg:border-r border-gray-100">
+                      {/* Col 2 — Prévia da Arte (operacional apenas para admin) */}
+                      {!sellerMode && <div className="lg:border-r border-gray-100">
                         <ItemPreviewSection
                           orderId={orderId!}
                           orderItemId={item.id}
@@ -1549,10 +1565,16 @@ export function OrderDetailContent({
                           onExternalNotesChange={(n) => setPendingNote(item.id, n)}
                           externalFile={pendingFiles.get(item.id) ?? null}
                         />
-                      </div>
+                      </div>}
+
+                      {sellerMode && <div className="border-t border-gray-100 p-5 lg:border-l lg:border-t-0">
+                        <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Acompanhamento da arte</p>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadge.cls}`}>{statusBadge.label}</span>
+                        <p className="mt-3 text-xs leading-relaxed text-gray-500">A conferência e a atualização de arte são realizadas pela equipe responsável. Use o arquivo deste pedido para acompanhar a versão em produção.</p>
+                      </div>}
 
                       {/* Col 3 — Pré-Impressão + Ação de Correção */}
-                      <ItemProductionSection
+                      {!sellerMode && <ItemProductionSection
                         orderId={orderId!}
                         orderItemId={item.id}
                         preProductionStatus={item.preProductionStatus || "liberado_analise"}
@@ -1562,7 +1584,7 @@ export function OrderDetailContent({
                         pendingPreviewNotes={pendingNotes.get(item.id) ?? ""}
                         onPreviewUploaded={() => { setPendingFile(item.id, null); setPendingNote(item.id, ""); }}
                         onCollapseItem={() => collapseItem(i)}
-                      />
+                      />}
 
                     </div>}
                   </Card>
@@ -1579,7 +1601,7 @@ export function OrderDetailContent({
           </div>
 
          {/* ── Botão Enviar para Produção — rodapé da seção de itens ── */}
-          {(o.status === "com_problemas" || o.status === "analisando") && (() => {
+          {!sellerMode && (o.status === "com_problemas" || o.status === "analisando") && (() => {
             // Bloco visível para pedidos em análise (analisando) ou com problemas (com_problemas).
             // O status global SÓ muda para em_producao quando o operador clicar em "Enviar para Produção".
             const items: any[] = o.items ?? [];
@@ -1656,7 +1678,7 @@ export function OrderDetailContent({
 
           {/* ── Dados do Cliente ── */}
           {/* ── Modal de confirmação: Enviar para Produção ── */}
-          <Dialog open={showSendToProductionConfirm} onOpenChange={setShowSendToProductionConfirm}>
+          {!sellerMode && <Dialog open={showSendToProductionConfirm} onOpenChange={setShowSendToProductionConfirm}>
             <DialogContent className="max-w-sm" aria-describedby="send-prod-desc">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-green-700">
@@ -1695,7 +1717,7 @@ export function OrderDetailContent({
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+          </Dialog>}
           {(() => {
             // Prioridade: dados do perfil cadastrado > dados do checkout
             const cd = o.customerData;
@@ -1816,7 +1838,7 @@ export function OrderDetailContent({
                     </div>
                   )}
                 </div>
-                {o.paymentStatus !== "pago" && o.paymentStatus !== "cancelado" && (
+                {!sellerMode && o.paymentStatus !== "pago" && o.paymentStatus !== "cancelado" && (
                   <div className="border-t border-gray-100 bg-white px-4 py-3">
                     <Button
                       type="button"
@@ -1835,7 +1857,7 @@ export function OrderDetailContent({
             </CardContent>
           </Card>}
 
-          {!isProductionRole && (
+          {!isProductionRole && !sellerMode && (
             <Dialog open={isReceiveDialogOpen} onOpenChange={setIsReceiveDialogOpen}>
               <DialogContent className="max-w-md" aria-describedby="receive-payment-description">
                 <DialogHeader>
@@ -1923,7 +1945,7 @@ export function OrderDetailContent({
             deliveryFullName={o.deliveryFullName}
           />}
 
-          {!isProductionRole && <ShippingLabelViewer orderId={o.id} />}
+          {!isProductionRole && !sellerMode && <ShippingLabelViewer orderId={o.id} />}
 
           {!isProductionRole && o.notes && (
             <Card>
