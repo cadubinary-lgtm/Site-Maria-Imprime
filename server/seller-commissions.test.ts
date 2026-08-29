@@ -144,6 +144,16 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerOrdersSource).toContain("Limpar filtros");
   });
 
+  it("pesquisa pedidos comerciais por número ou cliente sem ampliar a carteira", () => {
+    expect(sellerRouterSource).toContain("search: z.string().trim().max(160).optional()");
+    expect(sellerRouterSource).toContain("like(orders.orderNumber, `%${input.search}%`)");
+    expect(sellerRouterSource).toContain("like(clients.name, `%${input.search}%`)");
+    expect(sellerRouterSource).toContain("like(orders.guestName, `%${input.search}%`)");
+    expect(sellerRouterSource).toContain("eq(orders.sellerId, seller.id)");
+    expect(sellerOrdersSource).toContain("Buscar por número do pedido ou cliente...");
+    expect(sellerOrdersSource).toContain("search: search || undefined");
+  });
+
   it("vincula a sessão de vendedor ao pedido público sem aceitar identificação vinda do navegador", () => {
     expect(checkoutRouterSource).toContain("async function getCheckoutSeller");
     expect(checkoutRouterSource).toContain("const checkoutSeller = await getCheckoutSeller(req)");

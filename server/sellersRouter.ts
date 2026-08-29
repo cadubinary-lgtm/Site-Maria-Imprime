@@ -72,6 +72,7 @@ const sellerQuotationFilters = dateFilters.extend({
 });
 
 const sellerOrderFilters = dateFilters.extend({
+  search: z.string().trim().max(160).optional(),
   status: z.string().trim().max(50).optional(),
 });
 
@@ -404,6 +405,14 @@ export const sellersRouter = router({
       const conditions: any[] = [eq(orders.sellerId, seller.id)];
       addDateFilters(conditions, orders.createdAt, input);
       if (input.status) conditions.push(eq(orders.status, input.status as any));
+      if (input.search) {
+        conditions.push(or(
+          like(orders.orderNumber, `%${input.search}%`),
+          like(clients.name, `%${input.search}%`),
+          like(orders.guestName, `%${input.search}%`),
+          like(orders.deliveryFullName, `%${input.search}%`),
+        ));
+      }
       return db.select({
         id: orders.id,
         orderNumber: orders.orderNumber,

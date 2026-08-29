@@ -4564,3 +4564,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar filtros de status e período/data no topo de Meus Pedidos / Minhas Vendas do vendedor
 - [x] Manter os filtros de pedidos aplicados exclusivamente à carteira comercial do vendedor
 - [x] Validar os filtros de pedidos em desktop e celular, com testes e ponto de verificação
+- [x] Adicionar barra de pesquisa por número do pedido e nome do cliente em Meus Pedidos / Minhas Vendas
+- [x] Manter a pesquisa de pedidos protegida pelo vínculo da carteira do vendedor autenticado
+- [x] Validar a pesquisa de pedidos com testes e ponto de verificação

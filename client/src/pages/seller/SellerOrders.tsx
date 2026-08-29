@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { CalendarDays, SlidersHorizontal } from "lucide-react";
+import { CalendarDays, Search, SlidersHorizontal } from "lucide-react";
 import SellerLayout from "@/components/seller/SellerLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ function getMonthRange(offset: number) {
 }
 
 export default function SellerOrders() {
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [period, setPeriod] = useState<"all" | "this_month" | "last_month" | "custom">("all");
   const [customStartDate, setCustomStartDate] = useState("");
@@ -39,13 +40,14 @@ export default function SellerOrders() {
     return { startDate: undefined, endDate: undefined };
   }, [period, customStartDate, customEndDate]);
   const { data, isLoading } = trpc.sellers.seller.orders.useQuery({
+    search: search || undefined,
     status: statusFilter === "all" ? undefined : statusFilter,
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
   const { data: summary } = trpc.sellers.seller.summary.useQuery();
-  const clearFilters = () => { setStatusFilter("all"); setPeriod("all"); setCustomStartDate(""); setCustomEndDate(""); };
-  const hasActiveFilters = statusFilter !== "all" || period !== "all";
+  const clearFilters = () => { setSearch(""); setStatusFilter("all"); setPeriod("all"); setCustomStartDate(""); setCustomEndDate(""); };
+  const hasActiveFilters = Boolean(search) || statusFilter !== "all" || period !== "all";
 
   return (
     <SellerLayout title="Meus Pedidos / Minhas Vendas" description="Acompanhe somente as vendas realizadas por você e suas comissões.">
@@ -56,7 +58,8 @@ export default function SellerOrders() {
 
       <section className="mb-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm" aria-label="Filtros de pedidos">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex min-w-52 flex-1 items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-pink-600" aria-hidden="true" /><p className="text-sm font-semibold text-slate-800">Filtrar pedidos</p></div>
+          <div className="flex min-w-44 items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-pink-600" aria-hidden="true" /><p className="text-sm font-semibold text-slate-800">Filtrar pedidos</p></div>
+          <div className="relative min-w-60 flex-1"><label htmlFor="seller-orders-search" className="sr-only">Buscar pedido ou cliente</label><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" /><Input id="seller-orders-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por número do pedido ou cliente..." className="h-9 pl-9" /></div>
           <label htmlFor="seller-orders-status" className="sr-only">Filtrar por status</label>
           <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger id="seller-orders-status" className="h-9 w-56"><SelectValue placeholder="Todos os status" /></SelectTrigger><SelectContent><SelectItem value="all">Todos os status</SelectItem>{Object.entries(orderStatusLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select>
           {[{ value: "all", label: "Todo período" }, { value: "this_month", label: "Este mês" }, { value: "last_month", label: "Mês passado" }].map((item) => <Button key={item.value} type="button" variant={period === item.value ? "default" : "outline"} size="sm" className={period === item.value ? "bg-pink-600 hover:bg-pink-700" : ""} onClick={() => setPeriod(item.value as typeof period)}>{item.label}</Button>)}
