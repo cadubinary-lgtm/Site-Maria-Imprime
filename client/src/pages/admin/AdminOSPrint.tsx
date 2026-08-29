@@ -374,19 +374,11 @@ export default function AdminOSPrint() {
                 </h1>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px" }}>
-                  <div style={{
-                    border: `2px solid ${orange}`, borderRadius: "5px",
-                    padding: "3px 12px", display: "inline-flex", alignItems: "center",
-                  }}>
-                    <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
-                  </div>
-                  {salesOwnerName && salesOwnerLabel && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "8px", color: "#374151", lineHeight: 1.2 }}>
-                      <User style={{ width: "9px", height: "9px", flexShrink: 0, color: orange }} aria-hidden="true" />
-                      <span><strong style={{ fontSize: "6.7px", letterSpacing: "0.3px" }}>{salesOwnerLabel}:</strong> {salesOwnerName}</span>
-                    </div>
-                  )}
+                <div style={{
+                  border: `2px solid ${orange}`, borderRadius: "5px",
+                  padding: "3px 12px", display: "inline-flex", alignItems: "center",
+                }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 <div style={{
@@ -421,6 +413,20 @@ export default function AdminOSPrint() {
               </div>
             </div>
           </div>
+
+          {/* ══ RESPONSÁVEL COMERCIAL: faixa exclusiva alinhada ao cabeçalho ══ */}
+          {salesOwnerName && salesOwnerLabel && (
+            <div style={{ display: "flex", minHeight: "40px", borderBottom: `1px solid ${border}`, backgroundColor: "#fff" }}>
+              <div style={{ flex: 1, borderRight: `1px solid ${border}` }} />
+              <div style={{ flex: 1, padding: "9px 18px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <User style={{ width: "12px", height: "12px", flexShrink: 0, color: orange }} aria-hidden="true" />
+                <span style={{ fontSize: "9px", color: "#374151", lineHeight: 1.2 }}>
+                  <strong style={{ fontSize: "8px", letterSpacing: "0.55px" }}>{salesOwnerLabel}:</strong> {salesOwnerName}
+                </span>
+              </div>
+              <div style={{ width: "150px", flexShrink: 0, borderLeft: `1px solid ${border}` }} />
+            </div>
+          )}
 
           {/* ══ 2. FAIXA: DADOS DO CLIENTE (esq) | NÚMERO DO PEDIDO (dir) ══════════════ */}
           <div style={{ display: "flex", borderBottom: `1px solid ${border}`, backgroundColor: "#fff" }}>
