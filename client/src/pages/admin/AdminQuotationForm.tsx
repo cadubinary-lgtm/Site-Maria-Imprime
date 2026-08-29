@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useChunkedUpload } from "@/hooks/useChunkedUpload";
 import { useLocation, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -161,6 +161,7 @@ export default function AdminQuotationForm() {
   const [cepLoading, setCepLoading] = useState(false);
   const [manualAddress, setManualAddress] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [selectedProductSegmentId, setSelectedProductSegmentId] = useState<number | null>(null);
   const [showCustomItemNameStep, setShowCustomItemNameStep] = useState(false);
   const [customItemName, setCustomItemName] = useState("");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
@@ -332,9 +333,27 @@ export default function AdminQuotationForm() {
 
   // ── Products ─────────────────────────────────────────────────────────────
   const { data: allProducts } = trpc.products.getAll.useQuery();
-  const filteredProducts = (allProducts ?? []).filter((p: any) =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase())
+  const { data: productSegments, isLoading: isLoadingProductSegments } = trpc.productSegments.getAllSegments.useQuery();
+  const { data: selectedSegmentProducts, isLoading: isLoadingSelectedSegmentProducts } = trpc.productSegments.getProductsBySegment.useQuery(
+    selectedProductSegmentId ?? 0,
+    { enabled: selectedProductSegmentId !== null },
   );
+  const selectedProductSegment = useMemo(
+    () => (productSegments ?? []).find((segment: any) => segment.id === selectedProductSegmentId) ?? null,
+    [productSegments, selectedProductSegmentId],
+  );
+  const filteredProducts = useMemo(() => {
+    const searchTerm = productSearch.trim().toLowerCase();
+    // A busca permanece geral; sem busca, a lista respeita o segmento escolhido.
+    const source = searchTerm || selectedProductSegmentId === null
+      ? (allProducts ?? [])
+      : (selectedSegmentProducts ?? []);
+    return source.filter((product: any) => {
+      if (!searchTerm) return true;
+      return product.name.toLowerCase().includes(searchTerm)
+        || product.description?.toLowerCase().includes(searchTerm);
+    });
+  }, [allProducts, productSearch, selectedProductSegmentId, selectedSegmentProducts]);
 
   // ── Cálculo de preço por item baseado nas specs ──────────────────────────
   // Retorna { unitPrice: preço/m² (ou preço unitário), totalPrice: unitPrice × área × qtd }
@@ -2107,13 +2126,21 @@ export default function AdminQuotationForm() {
       </div>
 
       {/* Modal: Adicionar produto */}
-      <Dialog open={showAddProduct} onOpenChange={(open) => { setShowAddProduct(open); if (!open) { setShowCustomItemNameStep(false); setCustomItemName(""); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
+      <Dialog open={showAddProduct} onOpenChange={(open) => {
+        setShowAddProduct(open);
+        if (!open) {
+          setShowCustomItemNameStep(false);
+          setCustomItemName("");
+          setProductSearch("");
+          setSelectedProductSegmentId(null);
+        }
+      }}>
+        <DialogContent className="flex h-[min(78vh,46rem)] w-[calc(100vw-2rem)] max-w-[72rem] flex-col overflow-hidden p-0 sm:rounded-xl">
+          <DialogHeader className="border-b border-gray-100 px-5 py-4 sm:px-6">
             <DialogTitle>{showCustomItemNameStep ? "Nome do item personalizado" : "Adicionar Produto ao Orçamento"}</DialogTitle>
           </DialogHeader>
           {showCustomItemNameStep ? (
-            <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); confirmCustomItemName(); }}>
+            <form className="space-y-5 overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6" onSubmit={(event) => { event.preventDefault(); confirmCustomItemName(); }}>
               <div>
                 <label htmlFor="custom-item-name" className="text-sm font-medium text-gray-800">Produto / Serviço</label>
                 <p className="mt-1 text-xs text-gray-500">Informe o nome para que o item já seja criado identificado no orçamento.</p>
@@ -2133,56 +2160,101 @@ export default function AdminQuotationForm() {
                 <Button type="submit" className="bg-pink-600 hover:bg-pink-700">Continuar</Button>
               </div>
             </form>
-          ) : <>
-          <button
-            type="button"
-            className="w-full flex items-center gap-3 p-3 rounded-lg border border-pink-200 bg-pink-50/50 text-left hover:bg-pink-50 transition-colors"
-            onClick={openCustomItemNameStep}
-          >
-            <div className="w-10 h-10 rounded bg-pink-100 flex items-center justify-center">
-              <Plus className="w-5 h-5 text-pink-600" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="font-medium text-sm text-pink-800">Adicionar item personalizado</p>
-              <p className="text-xs text-pink-600">Para serviços ou produtos que não estão no catálogo</p>
-            </div>
-          </button>
-          <div className="relative mb-3">
-            <label htmlFor="quotation-product-search" className="sr-only">Buscar produto para adicionar ao orçamento</label>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
-            <Input
-              id="quotation-product-search"
-              placeholder="Buscar produto..."
-              className="pl-9"
-              value={productSearch}
-              onChange={(e) => setProductSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className="max-h-72 overflow-y-auto space-y-1">
-            {filteredProducts.length === 0 ? (
-              <p className="text-center text-gray-400 py-6 text-sm">Nenhum produto encontrado</p>
-            ) : filteredProducts.map((p: any) => (
-              <button
-                key={p.id}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 text-left"
-                onClick={() => addProductToQuote(p)}
-              >
-                {p.imageUrl || p.image ? (
-                  <img src={p.imageUrl ?? p.image} alt={p.name} className="w-10 h-10 object-contain rounded border border-gray-100" />
-                ) : (
-                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                    <Package className="w-5 h-5 text-gray-400" />
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-sm text-gray-800">{p.name}</p>
-                  {p.basePrice && <p className="text-xs text-gray-400">{fmt(Number(p.basePrice))}</p>}
+          ) : <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-5 pb-5 sm:px-6 sm:pb-6">
+            <button
+              type="button"
+              className="mt-4 flex w-full shrink-0 items-center gap-3 rounded-lg border border-pink-200 bg-pink-50/50 p-3 text-left transition-colors hover:bg-pink-50"
+              onClick={openCustomItemNameStep}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded bg-pink-100">
+                <Plus className="h-5 w-5 text-pink-600" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-pink-800">Adicionar item personalizado</p>
+                <p className="text-xs text-pink-600">Para serviços ou produtos que não estão no catálogo</p>
+              </div>
+            </button>
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-xl border border-gray-200 bg-white md:grid-cols-[15rem_minmax(0,1fr)]">
+              <aside className="flex min-h-0 flex-col border-b border-gray-200 bg-gray-50/70 md:border-b-0 md:border-r">
+                <div className="border-b border-gray-200 px-4 py-3">
+                  <h3 className="text-sm font-semibold text-gray-900">Segmentos</h3>
+                  <p className="mt-0.5 text-xs text-gray-500">Escolha uma categoria</p>
                 </div>
-              </button>
-            ))}
-          </div>
-          </>}
+                <nav aria-label="Filtrar produtos por segmento" className="flex max-h-36 gap-1 overflow-x-auto p-2 md:max-h-none md:flex-1 md:flex-col md:overflow-y-auto">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProductSegmentId(null)}
+                    aria-pressed={selectedProductSegmentId === null}
+                    className={`shrink-0 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors md:w-full ${selectedProductSegmentId === null ? "bg-pink-600 text-white shadow-sm" : "text-gray-700 hover:bg-pink-50 hover:text-pink-700"}`}
+                  >
+                    Todos os segmentos
+                  </button>
+                  {isLoadingProductSegments ? (
+                    <p className="px-3 py-2 text-xs text-gray-400">Carregando segmentos...</p>
+                  ) : (productSegments ?? []).map((segment: any) => (
+                    <button
+                      key={segment.id}
+                      type="button"
+                      onClick={() => setSelectedProductSegmentId(segment.id)}
+                      aria-pressed={selectedProductSegmentId === segment.id}
+                      className={`shrink-0 rounded-lg px-3 py-2 text-left text-sm transition-colors md:w-full ${selectedProductSegmentId === segment.id ? "bg-pink-600 text-white shadow-sm" : "text-gray-700 hover:bg-pink-50 hover:text-pink-700"}`}
+                    >
+                      {segment.name}
+                    </button>
+                  ))}
+                </nav>
+              </aside>
+              <section className="flex min-h-0 flex-col overflow-hidden">
+                <div className="border-b border-gray-100 p-3 sm:p-4">
+                  <div className="relative">
+                    <label htmlFor="quotation-product-search" className="sr-only">Buscar produto para adicionar ao orçamento</label>
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                    <Input
+                      id="quotation-product-search"
+                      placeholder="Buscar produto em todos os segmentos..."
+                      className="pl-9"
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500" aria-live="polite">
+                    {productSearch.trim() ? "Resultados da busca em todos os segmentos" : selectedProductSegment ? `Produtos em ${selectedProductSegment.name}` : "Todos os produtos"}
+                    {` · ${filteredProducts.length} disponível${filteredProducts.length === 1 ? "" : "is"}`}
+                  </p>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto p-2 sm:p-3">
+                  {isLoadingSelectedSegmentProducts && !productSearch.trim() ? (
+                    <p className="py-8 text-center text-sm text-gray-400">Carregando produtos do segmento...</p>
+                  ) : filteredProducts.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-gray-400">Nenhum produto encontrado</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-3">
+                      {filteredProducts.map((p: any) => (
+                        <button
+                          key={p.id}
+                          className="flex min-w-0 items-center gap-3 rounded-lg p-2.5 text-left transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+                          onClick={() => addProductToQuote(p)}
+                        >
+                          {p.imageUrl || p.image ? (
+                            <img src={p.imageUrl ?? p.image} alt={p.name} className="h-10 w-10 shrink-0 rounded border border-gray-100 object-contain" />
+                          ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-100">
+                              <Package className="h-5 w-5 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-gray-800">{p.name}</p>
+                            {p.basePrice && <p className="text-xs text-gray-400">{fmt(Number(p.basePrice))}</p>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+          </div>}
         </DialogContent>
       </Dialog>
 

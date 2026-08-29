@@ -4540,3 +4540,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Preservar o layout de impressão e a identificação existente do pedido na Ordem de Serviço
 - [x] Reposicionar vendedor ou administrador responsável abaixo do número do pedido na Ordem de Serviço
 - [x] Exibir vendedor ou administrador em faixa própria abaixo do cabeçalho da Ordem de Serviço
+- [x] Exibir segmentos à esquerda no seletor de produtos do orçamento
+- [x] Filtrar os produtos pelo segmento selecionado mantendo busca geral
+- [x] Ampliar o seletor de produtos e mantê-lo igual para admin e vendedor
