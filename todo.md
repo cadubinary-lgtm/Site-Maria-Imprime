@@ -4560,3 +4560,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar indicadores de acompanhamento, busca, filtros e ações comerciais por orçamento na Central do Vendedor
 - [x] Manter as ações do vendedor restritas à própria carteira e excluir lixeira, exclusão e demais controles administrativos globais
 - [x] Validar a lista comercial em desktop e celular, com testes e ponto de verificação
+- [x] Alinhar verticalmente pedido, cliente, data, status, total, comissão e ações em cada linha de Meus Pedidos do vendedor

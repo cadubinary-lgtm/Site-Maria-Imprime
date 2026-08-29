@@ -126,6 +126,12 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerOrdersSource).toContain("commissionAmount");
   });
 
+  it("alinha verticalmente os dados da linha de pedido comercial", () => {
+    const orderRow = sellerOrdersSource.slice(sellerOrdersSource.indexOf("<tr key={order.id}"), sellerOrdersSource.indexOf("</tr>", sellerOrdersSource.indexOf("<tr key={order.id}")));
+    expect(orderRow).toContain('className="align-middle p-4 font-medium"');
+    expect((orderRow.match(/align-middle p-4/g) ?? []).length).toBe(7);
+  });
+
   it("vincula a sessão de vendedor ao pedido público sem aceitar identificação vinda do navegador", () => {
     expect(checkoutRouterSource).toContain("async function getCheckoutSeller");
     expect(checkoutRouterSource).toContain("const checkoutSeller = await getCheckoutSeller(req)");
