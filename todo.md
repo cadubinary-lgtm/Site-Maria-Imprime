@@ -4543,3 +4543,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Exibir segmentos à esquerda no seletor de produtos do orçamento
 - [x] Filtrar os produtos pelo segmento selecionado mantendo busca geral
 - [x] Ampliar o seletor de produtos e mantê-lo igual para admin e vendedor
+- [x] Ampliar o seletor de produtos para ocupar quase toda a tela
+- [x] Restaurar produtos em lista vertical mantendo segmentos à esquerda
