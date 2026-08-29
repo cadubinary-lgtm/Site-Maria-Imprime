@@ -4538,3 +4538,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar retorno de Meus Orçamentos para a loja em modo vendedor
 - [x] Exibir vendedor ou administrador responsável na Ordem de Serviço conforme a origem da venda
 - [x] Preservar o layout de impressão e a identificação existente do pedido na Ordem de Serviço
+- [x] Reposicionar vendedor ou administrador responsável abaixo do número do pedido na Ordem de Serviço

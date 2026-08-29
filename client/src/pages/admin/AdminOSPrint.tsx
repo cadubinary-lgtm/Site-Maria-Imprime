@@ -373,12 +373,20 @@ export default function AdminOSPrint() {
                   ORDEM DE SERVIÇO
                 </h1>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{
-                  border: `2px solid ${orange}`, borderRadius: "5px",
-                  padding: "3px 12px", display: "inline-flex", alignItems: "center",
-                }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px" }}>
+                  <div style={{
+                    border: `2px solid ${orange}`, borderRadius: "5px",
+                    padding: "3px 12px", display: "inline-flex", alignItems: "center",
+                  }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: orange }}>{o.orderNumber}</span>
+                  </div>
+                  {salesOwnerName && salesOwnerLabel && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "8px", color: "#374151", lineHeight: 1.2 }}>
+                      <User style={{ width: "9px", height: "9px", flexShrink: 0, color: orange }} aria-hidden="true" />
+                      <span><strong style={{ fontSize: "6.7px", letterSpacing: "0.3px" }}>{salesOwnerLabel}:</strong> {salesOwnerName}</span>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 <div style={{
@@ -448,12 +456,6 @@ export default function AdminOSPrint() {
                     <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                   {clientEmail}
-                </div>
-              )}
-              {salesOwnerName && salesOwnerLabel && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginTop: "4px", paddingTop: "4px", borderTop: `1px dashed ${border}` }}>
-                  <User style={{ width: "9px", height: "9px", flexShrink: 0, color: orange }} aria-hidden="true" />
-                  <span><strong style={{ fontSize: "7px", letterSpacing: "0.35px" }}>{salesOwnerLabel}:</strong> {salesOwnerName}</span>
                 </div>
               )}
               {!isStorePickup && s(o.deliveryStreet) && (
