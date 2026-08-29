@@ -71,6 +71,10 @@ const sellerQuotationFilters = dateFilters.extend({
   status: z.string().trim().max(50).optional(),
 });
 
+const sellerOrderFilters = dateFilters.extend({
+  status: z.string().trim().max(50).optional(),
+});
+
 function money(value: unknown): number {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -393,12 +397,13 @@ export const sellersRouter = router({
         .from(clients).where(eq(clients.isActive, true)).orderBy(clients.name).limit(500);
     }),
 
-    orders: sellerProcedure.input(dateFilters).query(async ({ input, ctx }) => {
+    orders: sellerProcedure.input(sellerOrderFilters).query(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
       const seller = (ctx as any).seller;
       const conditions: any[] = [eq(orders.sellerId, seller.id)];
       addDateFilters(conditions, orders.createdAt, input);
+      if (input.status) conditions.push(eq(orders.status, input.status as any));
       return db.select({
         id: orders.id,
         orderNumber: orders.orderNumber,

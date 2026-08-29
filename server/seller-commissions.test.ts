@@ -132,6 +132,18 @@ describe("garantias de rastreabilidade comercial", () => {
     expect((orderRow.match(/align-middle p-4/g) ?? []).length).toBe(7);
   });
 
+  it("filtra pedidos comerciais por status e período sem sair da própria carteira", () => {
+    expect(sellerRouterSource).toContain("const sellerOrderFilters = dateFilters.extend");
+    expect(sellerRouterSource).toContain("orders: sellerProcedure.input(sellerOrderFilters)");
+    expect(sellerRouterSource).toContain("eq(orders.sellerId, seller.id)");
+    expect(sellerRouterSource).toContain("if (input.status) conditions.push(eq(orders.status, input.status as any))");
+    expect(sellerOrdersSource).toContain("Filtrar pedidos");
+    expect(sellerOrdersSource).toContain("Todos os status");
+    expect(sellerOrdersSource).toContain("Todo período");
+    expect(sellerOrdersSource).toContain("Personalizado");
+    expect(sellerOrdersSource).toContain("Limpar filtros");
+  });
+
   it("vincula a sessão de vendedor ao pedido público sem aceitar identificação vinda do navegador", () => {
     expect(checkoutRouterSource).toContain("async function getCheckoutSeller");
     expect(checkoutRouterSource).toContain("const checkoutSeller = await getCheckoutSeller(req)");

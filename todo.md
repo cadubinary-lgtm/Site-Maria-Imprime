@@ -4561,3 +4561,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Manter as ações do vendedor restritas à própria carteira e excluir lixeira, exclusão e demais controles administrativos globais
 - [x] Validar a lista comercial em desktop e celular, com testes e ponto de verificação
 - [x] Alinhar verticalmente pedido, cliente, data, status, total, comissão e ações em cada linha de Meus Pedidos do vendedor
+- [x] Adicionar filtros de status e período/data no topo de Meus Pedidos / Minhas Vendas do vendedor
+- [x] Manter os filtros de pedidos aplicados exclusivamente à carteira comercial do vendedor
+- [x] Validar os filtros de pedidos em desktop e celular, com testes e ponto de verificação
