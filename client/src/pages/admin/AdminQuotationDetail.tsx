@@ -240,12 +240,14 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
   @page { size: A4; margin: 8mm; }
   .page { width: 190mm; min-height: 277mm; margin: 0 auto; padding: 0; }
   .header { margin-bottom:6px; border:1px solid #edd7e5; border-radius:10px; overflow:hidden; }
-  .header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:64px; background:#fff; border-bottom:1px solid #f1e2eb; }
+  .header-top { display:grid; grid-template-columns:31% 38% 31%; min-height:72px; background:#fff; border-bottom:1px solid #f1e2eb; }
   .brand { position:relative; display:flex; align-items:center; padding:6px 10px; }
   .brand img { width:126px; height:44px; object-fit:contain; object-position:left center; display:block; }
   .brand::after, .proposal-block::after { content:""; position:absolute; top:10px; bottom:10px; right:0; width:1px; background:#b9b9b9; }
-  .proposal-block { position:relative; display:flex; align-items:center; justify-content:center; padding:6px 10px; }
-  .proposal-block h1 { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:#171717; }
+  .proposal-block { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 10px; }
+  .proposal-block h1 { font-size:16px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:#171717; }
+  .proposal-block .responsible { margin-top:4px; font-size:8px; font-weight:600; color:#6b7280; text-align:center; }
+  .proposal-block .responsible strong { color:#8f225e; text-transform:uppercase; letter-spacing:0.07em; }
   .doc-info { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:6px 10px; text-align:right; }
   .doc-info .doc-label { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#8f225e; }
   .doc-info .num { margin-top:2px; font-size:15px; font-weight:800; color:#171717; }
@@ -295,7 +297,7 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	  <header class="header">
 	    <div class="header-top">
 	      <div class="brand"><img src="https://graficaapp-uwgro8uv.manus.space/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" /></div>
-	      <div class="proposal-block"><h1>Proposta Comercial</h1></div>
+      <div class="proposal-block"><h1>Proposta Comercial</h1>${responsibleName ? `<div class="responsible"><strong>${q.sellerId ? "Vendedor responsável" : "Administrador responsável"}:</strong> ${escapeHtml(responsibleName)}</div>` : ""}</div>
         <div class="doc-info">
           <div class="doc-label">Identificação do orçamento</div>
           <div class="num">${q.quotationNumber}</div>
@@ -312,7 +314,6 @@ function printQuotationPDF(q: any, company?: any, responsible?: string) {
 	          ${contactPhone ? `<div class="info-item"><label>WhatsApp</label><span>${formattedContactPhone}</span></div>` : ""}
 	          ${company?.supportEmail ? `<div class="info-item"><label>E-mail</label><span>${company.supportEmail}</span></div>` : ""}
 	          ${companyAddress ? `<div class="info-item" style="grid-column:1 / -1"><label>Endereço</label><span>${companyAddress}</span></div>` : ""}
-	          ${responsibleName ? `<div class="info-item" style="grid-column:1 / -1"><label>Responsável</label><span>${responsibleName}</span></div>` : ""}
 	        </div>
 	      </section>
 	      <section class="info-panel">
@@ -478,6 +479,7 @@ export default function AdminQuotationDetail() {
   }
 
   const q = quotation;
+  const responsibleName = q.responsibleName?.trim() || adminUser?.name?.trim() || "Administração";
   const sc = STATUS_CONFIG[q.status] ?? STATUS_CONFIG.rascunho;
   const isApproved = q.status === "aprovado";
   const isDraft = q.status === "rascunho";
@@ -578,9 +580,19 @@ export default function AdminQuotationDetail() {
       </div>
       {/* Cabeçalho do documento — composição baseada na referência enviada */}
       <header className="overflow-hidden rounded-[22px] border border-pink-100 bg-white">
-        <div className="grid min-h-[128px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
+        <div className="grid min-h-[136px] grid-cols-1 md:grid-cols-[31%_38%_31%]">
           <div className="relative flex items-center px-4 py-3"><img src="/manus-storage/logo-maria-imprime_acc5585b.webp" alt="Maria Imprime" className="h-[79px] w-[221px] max-w-full object-contain object-left" /><span aria-hidden="true" className="absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
-          <div className="relative flex items-center justify-center border-y border-pink-100 px-4 py-3 text-center md:border-y-0"><h1 className="whitespace-nowrap text-[15px] font-extrabold uppercase tracking-[0.12em] text-gray-900 sm:text-base">Proposta Comercial</h1><span aria-hidden="true" className="absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9] md:block" /></div>
+          <div className="relative flex flex-col items-center justify-center border-y border-pink-100 px-4 py-3 text-center md:border-y-0">
+            <h1 className="text-[clamp(1.2rem,1.8vw,1.55rem)] font-extrabold uppercase tracking-[0.12em] text-gray-900">Proposta Comercial</h1>
+            {responsibleName && (
+              <p className="mt-2 flex flex-wrap items-center justify-center gap-x-1.5 text-xs text-gray-600">
+                <User className="h-3.5 w-3.5 text-pink-600" aria-hidden="true" />
+                <span className="font-extrabold uppercase tracking-[0.08em] text-pink-800">{q.sellerId ? "Vendedor responsável" : "Administrador responsável"}:</span>
+                <span className="font-semibold text-gray-800">{responsibleName}</span>
+              </p>
+            )}
+            <span aria-hidden="true" className="absolute inset-y-5 right-0 hidden w-px bg-[#b9b9b9] md:block" />
+          </div>
           <div className="flex flex-col items-start justify-center px-4 py-3 text-left md:items-end md:text-right"><p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-black">Identificação do Orçamento</p><p className="mt-0.5 whitespace-nowrap text-[clamp(0.9rem,1vw,1.15rem)] font-extrabold tracking-tight text-gray-950">{q.quotationNumber}</p><p className="mt-0.5 whitespace-nowrap text-[clamp(0.62rem,0.72vw,0.75rem)] text-gray-500">Emitido em {fmtDate(q.createdAt)} · Válido até {fmtDate(q.expiresAt)}</p><span className={`mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${sc.cls}`} aria-live="polite">{sc.label}</span></div>
         </div>
         <div className="grid grid-cols-1 gap-2 border-t border-pink-100 bg-white p-3 lg:grid-cols-2">
@@ -592,7 +604,6 @@ export default function AdminQuotationDetail() {
               {company?.whatsappNumber && <div><span className="text-gray-400 text-xs block">WhatsApp</span><span>{company.whatsappNumber}</span></div>}
               {company?.supportEmail && <div><span className="text-gray-400 text-xs block">E-mail</span><span>{company.supportEmail}</span></div>}
               {formatCompanyAddress(company) && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Endereço</span><span className="leading-relaxed">{formatCompanyAddress(company)}</span></div>}
-              {q.responsibleName && <div className="sm:col-span-2"><span className="text-gray-400 text-xs block">Responsável</span><span>{q.responsibleName}</span></div>}
             </div>
           </section>
           <section className="min-h-[170px] rounded-xl border border-gray-200 bg-white p-3">

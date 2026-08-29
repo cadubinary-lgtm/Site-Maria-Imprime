@@ -4546,3 +4546,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ampliar o seletor de produtos para ocupar quase toda a tela
 - [x] Restaurar produtos em lista vertical mantendo segmentos à esquerda
 - [x] Dar mais largura à coluna de produtos para exibir nomes completos no seletor
+- [x] Destacar o título Proposta Comercial no cabeçalho do orçamento
+- [x] Exibir vendedor ou administrador responsável abaixo do título da proposta
