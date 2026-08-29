@@ -56,90 +56,53 @@ export function OrderShippingPanel({
   const cityState = [deliveryCity, deliveryState].filter(Boolean).join(", ");
 
   return (
-    <Card className="border-pink-200">
-      <CardHeader className="pb-2">
+    <Card>
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Truck className="w-5 h-5 text-pink-600" aria-hidden="true" />
           Logística e entrega
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-gray-700">Método de entrega</p>
-          <Badge className={methodInfo.color} aria-label={`Método de entrega: ${methodInfo.label}`}>
-            <span className="mr-2" aria-hidden="true">{methodInfo.icon}</span>
-            {methodInfo.label}
-          </Badge>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-lg border border-pink-200 bg-pink-50 p-3">
-          <DollarSign className="w-5 h-5 flex-shrink-0 text-pink-600" aria-hidden="true" />
-          <div>
-            <p className="text-xs font-medium text-pink-700">Valor do frete</p>
-            <p className="font-bold text-gray-900">{formattedPrice}</p>
-            {shippingEstimatedDays && shippingEstimatedDays > 0 && (
-              <p className="mt-0.5 text-xs text-gray-600">Previsão: até {shippingEstimatedDays} dia{shippingEstimatedDays !== 1 ? "s úteis" : " útil"}</p>
-            )}
-          </div>
-        </div>
-
-        {!isPickup && hasAddress && (
-          <div className="space-y-2 border-t pt-4">
-            <p className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <MapPin className="w-4 h-4 text-pink-600" aria-hidden="true" />
-              Endereço de entrega
-            </p>
-            <div className="space-y-2 rounded-lg bg-gray-50 p-3 text-sm" role="list" aria-label="Endereço de entrega">
-              {deliveryFullName && (
-                <div role="listitem">
-                  <p className="text-xs text-gray-500">Destinatário</p>
-                  <p className="font-medium text-gray-900">{deliveryFullName}</p>
-                </div>
-              )}
-              {deliveryZipCode && (
-                <div role="listitem">
-                  <p className="text-xs text-gray-500">CEP</p>
-                  <p className="font-mono font-semibold text-gray-900">{deliveryZipCode}</p>
-                </div>
-              )}
-              {deliveryStreet && (
-                <div role="listitem">
-                  <p className="text-xs text-gray-500">Endereço</p>
-                  <p className="text-gray-900">{deliveryStreet}{deliveryNumber ? `, ${deliveryNumber}` : ""}{deliveryComplement ? ` — ${deliveryComplement}` : ""}</p>
-                </div>
-              )}
-              {deliveryNeighborhood && (
-                <div role="listitem">
-                  <p className="text-xs text-gray-500">Bairro</p>
-                  <p className="text-gray-900">{deliveryNeighborhood}</p>
-                </div>
-              )}
-              {cityState && (
-                <div role="listitem">
-                  <p className="text-xs text-gray-500">Cidade/UF</p>
-                  <p className="text-gray-900">{cityState}</p>
-                </div>
-              )}
+      <CardContent>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50" role="list" aria-label="Informações de logística e entrega">
+          <div className="grid grid-cols-1 sm:grid-cols-2">
+            <div className="flex items-start gap-2 border-b border-gray-100 bg-white px-4 py-3 sm:border-b-0 sm:border-r" role="listitem">
+              <Truck className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-pink-500" aria-hidden="true" />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Método de entrega</p>
+                <Badge className={`mt-1 ${methodInfo.color}`} aria-label={`Método de entrega: ${methodInfo.label}`}>
+                  <span className="mr-1.5" aria-hidden="true">{methodInfo.icon}</span>
+                  {methodInfo.label}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-white px-4 py-3" role="listitem">
+              <DollarSign className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-pink-500" aria-hidden="true" />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Frete</p>
+                <p className={`mt-0.5 text-sm font-semibold ${shippingAmount > 0 ? "text-gray-800" : "text-green-700"}`}>{formattedPrice}</p>
+                {shippingEstimatedDays && shippingEstimatedDays > 0 && <p className="mt-0.5 text-xs text-gray-500">Previsão: até {shippingEstimatedDays} dia{shippingEstimatedDays !== 1 ? "s úteis" : " útil"}</p>}
+              </div>
             </div>
           </div>
-        )}
 
-        {!isPickup && !hasAddress && (
-          <p className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-3 text-sm text-gray-600">O endereço de entrega ainda não foi informado no pedido.</p>
-        )}
-
-        {isPickup && (
-          <div className="space-y-2 border-t pt-4">
-            <p className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <MapPin className="w-4 h-4 text-green-600" aria-hidden="true" />
-              Local de retirada
-            </p>
-            <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-              <p className="text-sm font-medium text-green-800">Retirada na loja</p>
-              <p className="mt-1 text-xs text-green-700">O pedido será disponibilizado para retirada após a confirmação de produção.</p>
+          {!isPickup && hasAddress && (
+            <div className="border-t border-gray-100 bg-white px-4 py-3" role="listitem">
+              <div className="mb-3 flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-pink-500" aria-hidden="true" /><p className="text-xs font-medium uppercase tracking-wide text-gray-500">Endereço de entrega</p></div>
+              <div className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2" role="list" aria-label="Endereço de entrega">
+                {deliveryFullName && <div role="listitem"><p className="text-xs text-gray-500">Destinatário</p><p className="mt-0.5 font-medium text-gray-900">{deliveryFullName}</p></div>}
+                {deliveryZipCode && <div role="listitem"><p className="text-xs text-gray-500">CEP</p><p className="mt-0.5 font-mono font-semibold text-gray-900">{deliveryZipCode}</p></div>}
+                {deliveryStreet && <div className="sm:col-span-2" role="listitem"><p className="text-xs text-gray-500">Endereço</p><p className="mt-0.5 text-gray-900">{deliveryStreet}{deliveryNumber ? `, ${deliveryNumber}` : ""}{deliveryComplement ? ` — ${deliveryComplement}` : ""}</p></div>}
+                {deliveryNeighborhood && <div role="listitem"><p className="text-xs text-gray-500">Bairro</p><p className="mt-0.5 text-gray-900">{deliveryNeighborhood}</p></div>}
+                {cityState && <div role="listitem"><p className="text-xs text-gray-500">Cidade/UF</p><p className="mt-0.5 text-gray-900">{cityState}</p></div>}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {!isPickup && !hasAddress && <div className="border-t border-gray-100 bg-white px-4 py-3 text-sm text-gray-600" role="listitem">O endereço de entrega ainda não foi informado no pedido.</div>}
+
+          {isPickup && <div className="flex items-start gap-2 border-t border-gray-100 bg-white px-4 py-3" role="listitem"><MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-500" aria-hidden="true" /><div><p className="text-xs font-medium uppercase tracking-wide text-gray-500">Local de retirada</p><p className="mt-0.5 text-sm font-semibold text-emerald-800">Retirada na loja</p><p className="mt-0.5 text-xs text-emerald-700">O pedido será disponibilizado para retirada após a confirmação de produção.</p></div></div>}
+        </div>
       </CardContent>
     </Card>
   );

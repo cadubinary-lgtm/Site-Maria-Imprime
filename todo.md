@@ -4567,3 +4567,6 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Adicionar barra de pesquisa por número do pedido e nome do cliente em Meus Pedidos / Minhas Vendas
 - [x] Manter a pesquisa de pedidos protegida pelo vínculo da carteira do vendedor autenticado
 - [x] Validar a pesquisa de pedidos com testes e ponto de verificação
+- [x] Organizar visualmente Logística e entrega no detalhe de pedido seguindo o padrão do Resumo financeiro
+- [x] Preservar valores, método, local, rastreio e lógica de entrega ao reorganizar o bloco
+- [x] Validar a organização de logística com testes, interface e ponto de verificação

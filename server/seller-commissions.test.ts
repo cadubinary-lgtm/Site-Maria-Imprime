@@ -22,6 +22,7 @@ const sellerQuotationFormSource = readFileSync(resolve(root, "client/src/pages/s
 const sellerQuotationsSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotations.tsx"), "utf8");
 const sellerOrderDetailSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrderDetail.tsx"), "utf8");
 const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
+const orderShippingPanelSource = readFileSync(resolve(root, "client/src/components/orders/OrderShippingPanel.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
   it("deduz desconto do subtotal e não inclui frete na base", () => {
@@ -152,6 +153,17 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(sellerRouterSource).toContain("eq(orders.sellerId, seller.id)");
     expect(sellerOrdersSource).toContain("Buscar por número do pedido ou cliente...");
     expect(sellerOrdersSource).toContain("search: search || undefined");
+  });
+
+  it("organiza logística no mesmo padrão compacto do resumo financeiro sem perder dados de entrega", () => {
+    expect(orderShippingPanelSource).toContain('rounded-xl border border-gray-200 bg-gray-50');
+    expect(orderShippingPanelSource).toContain("Método de entrega");
+    expect(orderShippingPanelSource).toContain("Frete");
+    expect(orderShippingPanelSource).toContain("Endereço de entrega");
+    expect(orderShippingPanelSource).toContain("Local de retirada");
+    expect(orderShippingPanelSource).toContain("shippingEstimatedDays");
+    expect(orderShippingPanelSource).toContain("deliveryZipCode");
+    expect(orderShippingPanelSource).toContain("deliveryStreet");
   });
 
   it("vincula a sessão de vendedor ao pedido público sem aceitar identificação vinda do navegador", () => {
