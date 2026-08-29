@@ -1346,6 +1346,10 @@ export const appRouter = router({
         const res = ctx.res as ExpressResponse;
         const userId = ctx.user?.id ?? null;
         const checkoutSeller = await getCheckoutSeller(req);
+        const adminSession = checkoutSeller ? null : await authenticateAdminRequest(req);
+        const checkoutAdmin = adminSession && (adminSession.role === "superadmin" || adminSession.role === "admin")
+          ? adminSession
+          : null;
         if (checkoutSeller && input.paymentMethod === "pagar_na_retirada" && !checkoutSeller.allowStorePickupPayment) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Pagamento na retirada não está liberado para este vendedor." });
         }
@@ -1502,6 +1506,8 @@ export const appRouter = router({
           customerId: finalCustomerId ?? null,
           sellerId: checkoutSeller?.id ?? null,
           sellerName: checkoutSeller?.name ?? null,
+          salesOwnerType: (checkoutSeller ? "seller" : checkoutAdmin ? "admin" : null) as "seller" | "admin" | null,
+          salesOwnerName: checkoutSeller?.name ?? checkoutAdmin?.name ?? null,
           orderNumber,
           totalPrice,
           notes: input.notes,

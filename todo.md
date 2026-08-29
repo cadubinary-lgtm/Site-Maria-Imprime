@@ -4536,3 +4536,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Restaurar a rolagem no formulário completo de novo orçamento do vendedor
 - [x] Exibir clientes do site, balcão, revendedor e agência na busca de orçamentos
 - [x] Adicionar retorno de Meus Orçamentos para a loja em modo vendedor
+- [x] Exibir vendedor ou administrador responsável na Ordem de Serviço conforme a origem da venda
+- [x] Preservar o layout de impressão e a identificação existente do pedido na Ordem de Serviço

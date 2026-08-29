@@ -1575,6 +1575,8 @@ export async function createOrderFromCart(data: {
   customerId?: number | null; // ID do cliente da loja (customer auth)
   sellerId?: number | null;
   sellerName?: string | null;
+  salesOwnerType?: "seller" | "admin" | null;
+  salesOwnerName?: string | null;
   guestToken?: string | null;
   guestEmail?: string | null;
   guestName?: string | null;
@@ -1629,12 +1631,12 @@ export async function createOrderFromCart(data: {
     const orderResult = await db.execute(
       sql`
         INSERT INTO orders (
-          clientId, userId, customerId, sellerId, sellerName, orderNumber, status, totalPrice, paymentStatus, notes,
+          clientId, userId, customerId, sellerId, sellerName, salesOwnerType, salesOwnerName, orderNumber, status, totalPrice, paymentStatus, notes,
           deliveryStreet, deliveryNumber, deliveryComplement, deliveryNeighborhood,
           deliveryCity, deliveryState, deliveryZipCode, deliveryFullName, deliveryPhone,
           guestToken, guestEmail, guestName, shippingMethod, shippingPrice, shippingLabel, payment_method
         ) VALUES (
-          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.sellerId ?? null}, ${data.sellerName ?? null}, ${data.orderNumber},
+          ${data.clientId}, ${data.userId}, ${data.customerId ?? null}, ${data.sellerId ?? null}, ${data.sellerName ?? null}, ${data.salesOwnerType ?? null}, ${data.salesOwnerName ?? null}, ${data.orderNumber},
           ${data.initialStatus ?? 'pagamento_retirada'},
           ${data.totalPrice}, 'pendente', ${data.notes ?? null},
           ${data.deliveryStreet}, ${data.deliveryNumber}, ${data.deliveryComplement ?? null},

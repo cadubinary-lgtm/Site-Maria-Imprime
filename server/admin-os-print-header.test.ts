@@ -14,4 +14,11 @@ describe("cabeçalho da Ordem de Serviço", () => {
     expect(source).toContain('marginTop: "4px", marginBottom: "-4px"');
     expect(source).toContain('CNPJ: 34.528.399/0001-08');
   });
+
+  it("exibe o responsável comercial como vendedor ou administrador", () => {
+    expect(source).toContain("const salesOwnerName = o.salesOwnerName || o.sellerName || null;");
+    expect(source).toContain('"ADMINISTRADOR RESPONSÁVEL"');
+    expect(source).toContain('"VENDEDOR RESPONSÁVEL"');
+    expect(source).toContain("{salesOwnerName}");
+  });
 });

@@ -223,6 +223,12 @@ export default function AdminOSPrint() {
   const clientName = o.deliveryFullName || o.guestName || `Cliente #${o.clientId}`;
   const clientPhone = o.deliveryPhone || o.guestPhone || "";
   const clientEmail = o.guestEmail || "";
+  const salesOwnerName = o.salesOwnerName || o.sellerName || null;
+  const salesOwnerLabel = o.salesOwnerType === "admin"
+    ? "ADMINISTRADOR RESPONSÁVEL"
+    : o.salesOwnerType === "seller" || o.sellerName
+      ? "VENDEDOR RESPONSÁVEL"
+      : null;
 
   const subtotal = items.reduce(
     (acc: number, item: any) =>
@@ -442,6 +448,12 @@ export default function AdminOSPrint() {
                     <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                   {clientEmail}
+                </div>
+              )}
+              {salesOwnerName && salesOwnerLabel && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#374151", marginTop: "4px", paddingTop: "4px", borderTop: `1px dashed ${border}` }}>
+                  <User style={{ width: "9px", height: "9px", flexShrink: 0, color: orange }} aria-hidden="true" />
+                  <span><strong style={{ fontSize: "7px", letterSpacing: "0.35px" }}>{salesOwnerLabel}:</strong> {salesOwnerName}</span>
                 </div>
               )}
               {!isStorePickup && s(o.deliveryStreet) && (
