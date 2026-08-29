@@ -4556,3 +4556,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Permitir ao vendedor converter orçamento próprio aprovado em pedido com confirmação
 - [x] Sincronizar Meus Pedidos/Minhas Vendas com status, pagamento e produção do pedido
 - [x] Preservar isolamento da carteira de cada vendedor em todas as ações comerciais
+- [x] Alinhar a lista Meus Orçamentos do vendedor às colunas operacionais do admin: data, validade, valor, status e próximo procedimento
+- [x] Adicionar indicadores de acompanhamento, busca, filtros e ações comerciais por orçamento na Central do Vendedor
+- [x] Manter as ações do vendedor restritas à própria carteira e excluir lixeira, exclusão e demais controles administrativos globais
+- [x] Validar a lista comercial em desktop e celular, com testes e ponto de verificação

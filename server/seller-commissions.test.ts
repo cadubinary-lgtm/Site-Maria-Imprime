@@ -19,6 +19,7 @@ const checkoutPageSource = readFileSync(resolve(root, "client/src/pages/ecommerc
 const quotationsRouterSource = readFileSync(resolve(root, "server/quotationsRouter.ts"), "utf8");
 const quotationFormSource = readFileSync(resolve(root, "client/src/pages/admin/AdminQuotationForm.tsx"), "utf8");
 const sellerQuotationFormSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotationForm.tsx"), "utf8");
+const sellerQuotationsSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotations.tsx"), "utf8");
 const sellerOrderDetailSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrderDetail.tsx"), "utf8");
 const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
 
@@ -221,5 +222,23 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(quotationsRouterSource).toContain("const { quotation: existing } = await getQuotationForCommercialAction");
     expect(quotationsRouterSource).toContain("await getQuotationForCommercialAction(db, ctx, input.id);");
     expect(quotationsRouterSource).toContain("const { quotation: original } = await getQuotationForCommercialAction");
+  });
+
+  it("entrega ao vendedor a mesma visão operacional de orçamento sem expor lixeira administrativa", () => {
+    expect(sellerRouterSource).toContain("sellerQuotationFilters");
+    expect(sellerRouterSource).toContain("expiresAt: quotations.expiresAt");
+    expect(sellerRouterSource).toContain("clientEmail: clients.email");
+    expect(sellerRouterSource).toContain("return { rows, kpis, total: kpis.totalAtivos }");
+    expect(sellerQuotationsSource).toContain('"Data", "Validade", "Valor", "Status", "Próximo procedimento", "Ações"');
+    expect(sellerQuotationsSource).toContain("Acompanhamento operacional");
+    expect(sellerQuotationsSource).toContain("getQuotationProcedure(quote.status, quote.convertedOrderId)");
+    expect(sellerQuotationsSource).toContain("Duplicar");
+    expect(sellerQuotationsSource).toContain("Marcar aprovado");
+    expect(sellerQuotationsSource).toContain("Confirmar conversão");
+    expect(sellerQuotationsSource).not.toContain("Mover para lixeira");
+  });
+
+  it("impede remoção de orçamento por vendedor mesmo em uma chamada direta", () => {
+    expect(quotationsRouterSource).toContain("Vendedores não podem excluir orçamentos");
   });
 });

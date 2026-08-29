@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   adminAccounts,
@@ -64,6 +64,11 @@ const quotationItemInput = z.object({
 const dateFilters = z.object({
   startDate: z.number().int().positive().optional(),
   endDate: z.number().int().positive().optional(),
+});
+
+const sellerQuotationFilters = dateFilters.extend({
+  search: z.string().trim().max(160).optional(),
+  status: z.string().trim().max(50).optional(),
 });
 
 function money(value: unknown): number {
@@ -478,21 +483,57 @@ export const sellersRouter = router({
         .where(eq(orderProductionStatusHistory.orderId, order.id)).orderBy(desc(orderProductionStatusHistory.createdAt));
     }),
 
-    quotations: sellerProcedure.input(dateFilters).query(async ({ input, ctx }) => {
+    quotations: sellerProcedure.input(sellerQuotationFilters).query(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível." });
       const seller = (ctx as any).seller;
       const conditions: any[] = [eq(quotations.sellerId, seller.id)];
       addDateFilters(conditions, quotations.createdAt, input);
-      return db.select({
+      if (input.status) conditions.push(eq(quotations.status, input.status as any));
+      if (input.search) {
+        conditions.push(or(
+          like(quotations.quotationNumber, `%${input.search}%`),
+          like(clients.name, `%${input.search}%`),
+          like(clients.email, `%${input.search}%`),
+        ));
+      }
+
+      const rows = await db.select({
         id: quotations.id,
         quotationNumber: quotations.quotationNumber,
         status: quotations.status,
+        subtotal: quotations.subtotal,
+        discountAmount: quotations.discountAmount,
+        shippingPrice: quotations.shippingPrice,
         total: quotations.total,
         createdAt: quotations.createdAt,
+        expiresAt: quotations.expiresAt,
+        sentAt: quotations.sentAt,
+        approvedAt: quotations.approvedAt,
+        paymentMethod: quotations.paymentMethod,
+        productionDeadline: quotations.productionDeadline,
+        quotationValidity: quotations.quotationValidity,
         convertedOrderId: quotations.convertedOrderId,
         clientName: clients.name,
+        clientEmail: clients.email,
+        clientPhone: clients.phone,
       }).from(quotations).leftJoin(clients, eq(quotations.clientId, clients.id)).where(and(...conditions)).orderBy(desc(quotations.createdAt));
+
+      const kpiConditions: any[] = [eq(quotations.sellerId, seller.id)];
+      addDateFilters(kpiConditions, quotations.createdAt, input);
+      const kpiRows = await db.select({ status: quotations.status, convertedOrderId: quotations.convertedOrderId })
+        .from(quotations).where(and(...kpiConditions));
+      const kpis = kpiRows.reduce((summary: { rascunhos: number; enviados: number; emNegociacao: number; aprovados: number; convertidos: number; totalAtivos: number }, row: any) => {
+        summary.totalAtivos += 1;
+        if (row.status === "rascunho") summary.rascunhos += 1;
+        if (row.status === "enviado") summary.enviados += 1;
+        if (row.status === "em_negociacao") summary.emNegociacao += 1;
+        if (row.status === "aprovado") summary.aprovados += 1;
+        if (row.convertedOrderId) summary.convertidos += 1;
+        return summary;
+      }, { rascunhos: 0, enviados: 0, emNegociacao: 0, aprovados: 0, convertidos: 0, totalAtivos: 0 });
+
+      return { rows, kpis, total: kpis.totalAtivos };
     }),
 
     commissions: sellerProcedure.input(z.object({ status: z.enum(["prevista", "a_pagar", "paga", "cancelada"]).optional() }).merge(dateFilters)).query(async ({ input, ctx }) => {

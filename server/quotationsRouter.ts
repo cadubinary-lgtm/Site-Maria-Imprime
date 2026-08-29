@@ -742,7 +742,10 @@ export const quotationsRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB indisponível" });
       const { quotations, quotationItems, quotationHistory } = await import("../drizzle/schema.js");
-      await getQuotationForCommercialAction(db, ctx, input.id);
+      const { seller } = await getQuotationForCommercialAction(db, ctx, input.id);
+      if (seller) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Vendedores não podem excluir orçamentos. Solicite a remoção à equipe administrativa." });
+      }
 
       await db.delete(quotationHistory).where(eq(quotationHistory.quotationId, input.id));
       await db.delete(quotationItems).where(eq(quotationItems.quotationId, input.id));
