@@ -17,10 +17,11 @@ describe("seletor de produtos do orçamento por segmento", () => {
 
   it("mantém a busca geral e amplia a janela compartilhada por admin e vendedor", () => {
     expect(source).toContain("A busca permanece geral");
-    expect(source).toContain("max-w-[92rem]");
+    expect(source).toContain("!max-w-[96vw]");
     expect(source).toContain("h-[min(90vh,58rem)]");
     expect(source).toContain("Buscar produto em todos os segmentos...");
-    expect(source).toContain("grid-cols-1 overflow-hidden rounded-xl border border-gray-200 bg-white lg:grid-cols-[18rem_minmax(0,1fr)]");
+    expect(source).toContain("grid-cols-1 overflow-hidden rounded-xl border border-gray-200 bg-white lg:grid-cols-[16rem_minmax(0,1fr)]");
     expect(source).toContain('className="flex flex-col gap-1"');
+    expect(source).toContain('break-words text-sm font-medium leading-5 text-gray-800');
   });
 });

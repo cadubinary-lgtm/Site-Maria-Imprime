@@ -4545,3 +4545,4 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Ampliar o seletor de produtos e mantê-lo igual para admin e vendedor
 - [x] Ampliar o seletor de produtos para ocupar quase toda a tela
 - [x] Restaurar produtos em lista vertical mantendo segmentos à esquerda
+- [x] Dar mais largura à coluna de produtos para exibir nomes completos no seletor

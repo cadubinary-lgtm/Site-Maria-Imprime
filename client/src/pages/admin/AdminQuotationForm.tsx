@@ -2135,7 +2135,7 @@ export default function AdminQuotationForm() {
           setSelectedProductSegmentId(null);
         }
       }}>
-        <DialogContent className="flex h-[min(90vh,58rem)] w-[96vw] max-w-[92rem] flex-col overflow-hidden p-0 sm:rounded-xl">
+        <DialogContent className="flex h-[min(90vh,58rem)] !w-[96vw] !max-w-[96vw] flex-col overflow-hidden p-0 sm:!max-w-[96vw] sm:rounded-xl">
           <DialogHeader className="border-b border-gray-100 px-5 py-4 sm:px-6">
             <DialogTitle>{showCustomItemNameStep ? "Nome do item personalizado" : "Adicionar Produto ao Orçamento"}</DialogTitle>
           </DialogHeader>
@@ -2174,7 +2174,7 @@ export default function AdminQuotationForm() {
                 <p className="text-xs text-pink-600">Para serviços ou produtos que não estão no catálogo</p>
               </div>
             </button>
-            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-xl border border-gray-200 bg-white lg:grid-cols-[18rem_minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-xl border border-gray-200 bg-white lg:grid-cols-[16rem_minmax(0,1fr)]">
               <aside className="flex min-h-0 flex-col border-b border-gray-200 bg-gray-50/70 md:border-b-0 md:border-r">
                 <div className="border-b border-gray-200 px-4 py-3">
                   <h3 className="text-sm font-semibold text-gray-900">Segmentos</h3>
@@ -2244,7 +2244,7 @@ export default function AdminQuotationForm() {
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-800">{p.name}</p>
+                            <p className="break-words text-sm font-medium leading-5 text-gray-800">{p.name}</p>
                             {p.basePrice && <p className="text-xs text-gray-400">{fmt(Number(p.basePrice))}</p>}
                           </div>
                         </button>
