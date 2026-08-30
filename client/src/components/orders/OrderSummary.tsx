@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import { ShoppingCart, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Plus, Minus, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -70,14 +70,26 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const isAreaProduct = isAreaProductProp === true || (calculatorValue !== undefined && calculatorValue > 0);
   const fretePrice = selectedFrete?.price ?? 0;
   const finalPrice = isAreaProduct ? basePrice : basePrice * quantity;
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
     <Card className="sticky top-4 bg-card shadow-lg">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Resumo do Pedido</CardTitle>
+        <CardTitle>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-3 text-left text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+            onClick={() => setIsExpanded((current) => !current)}
+            aria-expanded={isExpanded}
+            aria-controls="order-summary-content"
+          >
+            <span className="flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-pink-600" aria-hidden="true" />Resumo do Pedido</span>
+            {isExpanded ? <ChevronUp className="h-5 w-5 text-gray-500" aria-hidden="true" /> : <ChevronDown className="h-5 w-5 text-gray-500" aria-hidden="true" />}
+          </button>
+        </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      {isExpanded && <CardContent id="order-summary-content" className="space-y-4">
         {/* Imagem do Produto */}
         {productImage && (
           <div className="w-full h-32 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
@@ -255,7 +267,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         <p className="text-xs text-center text-muted-foreground">
           Você será redirecionado para confirmar o pedido
         </p>
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 };

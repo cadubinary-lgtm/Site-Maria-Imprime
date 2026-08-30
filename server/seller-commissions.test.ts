@@ -24,6 +24,7 @@ const sellerOrderDetailSource = readFileSync(resolve(root, "client/src/pages/sel
 const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
 const headerSource = readFileSync(resolve(root, "client/src/components/layout/Header.tsx"), "utf8");
 const cookieConsentBannerSource = readFileSync(resolve(root, "client/src/components/CookieConsentBanner.tsx"), "utf8");
+const orderSummarySource = readFileSync(resolve(root, "client/src/components/orders/OrderSummary.tsx"), "utf8");
 const orderShippingPanelSource = readFileSync(resolve(root, "client/src/components/orders/OrderShippingPanel.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
@@ -288,5 +289,12 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(headerSource).toContain('className="flex items-center self-center cursor-pointer"');
     expect(cookieConsentBannerSource).toContain("!hasDecided");
     expect(cookieConsentBannerSource).not.toContain("Preferências de cookies</button>");
+  });
+  it("mantém o resumo do pedido fechado por padrão e permite expandi-lo manualmente", () => {
+    expect(orderSummarySource).toContain("const [isExpanded, setIsExpanded] = React.useState(false);");
+    expect(orderSummarySource).toContain("aria-expanded={isExpanded}");
+    expect(orderSummarySource).toContain("{isExpanded && <CardContent");
+    expect(orderSummarySource).toContain("onQuantityChange");
+    expect(orderSummarySource).toContain("onAddToCart");
   });
 });

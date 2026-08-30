@@ -4574,3 +4574,9 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Alinhar verticalmente a logo do cabeçalho mobile sem alterar a estrutura da página
 - [x] Ocultar a barra de preferências de cookies após o aceite no desktop e no mobile
 - [x] Validar os ajustes de logo e cookies com testes, responsividade e ponto de verificação
+
+- [x] Adicionar seta para expandir e recolher o Resumo do pedido no configurador em desktop e mobile
+- [x] Iniciar o Resumo do pedido recolhido sem alterar cálculos, estrutura ou fluxo
+- [x] Validar o controle do resumo em desktop e celular com testes e ponto de verificação
+
+- [x] Manter o Resumo do pedido sempre fechado por padrão em desktop e mobile, com expansão manual pela seta
