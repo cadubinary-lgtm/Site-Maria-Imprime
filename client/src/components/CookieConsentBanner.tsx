@@ -93,16 +93,6 @@ export function CookieConsentBanner() {
         </section>
       )}
 
-      {hasDecided && (
-        <button
-          type="button"
-          className="fixed bottom-4 left-4 z-40 rounded-full border border-pink-200 bg-white px-3 py-2 text-xs font-semibold text-pink-700 shadow-lg transition hover:bg-pink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
-          onClick={() => setShowSettings(true)}
-          aria-label="Revisar preferências de cookies"
-        >
-          Preferências de cookies
-        </button>
-      )}
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto border-pink-100 p-0 sm:max-w-2xl" showCloseButton={false}>

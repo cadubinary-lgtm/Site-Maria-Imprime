@@ -22,6 +22,8 @@ const sellerQuotationFormSource = readFileSync(resolve(root, "client/src/pages/s
 const sellerQuotationsSource = readFileSync(resolve(root, "client/src/pages/seller/SellerQuotations.tsx"), "utf8");
 const sellerOrderDetailSource = readFileSync(resolve(root, "client/src/pages/seller/SellerOrderDetail.tsx"), "utf8");
 const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admin/AdminOrderDetail.tsx"), "utf8");
+const headerSource = readFileSync(resolve(root, "client/src/components/layout/Header.tsx"), "utf8");
+const cookieConsentBannerSource = readFileSync(resolve(root, "client/src/components/CookieConsentBanner.tsx"), "utf8");
 const orderShippingPanelSource = readFileSync(resolve(root, "client/src/components/orders/OrderShippingPanel.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
@@ -280,5 +282,11 @@ describe("garantias de rastreabilidade comercial", () => {
 
   it("impede remoção de orçamento por vendedor mesmo em uma chamada direta", () => {
     expect(quotationsRouterSource).toContain("Vendedores não podem excluir orçamentos");
+  });
+  it("mantém a estrutura do cabeçalho e remove o atalho de cookies após a decisão", () => {
+    expect(headerSource).toContain('className="md:hidden flex items-center justify-between px-4"');
+    expect(headerSource).toContain('className="flex items-center self-center cursor-pointer"');
+    expect(cookieConsentBannerSource).toContain("!hasDecided");
+    expect(cookieConsentBannerSource).not.toContain("Preferências de cookies</button>");
   });
 });

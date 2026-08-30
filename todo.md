@@ -4570,3 +4570,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Organizar visualmente Logística e entrega no detalhe de pedido seguindo o padrão do Resumo financeiro
 - [x] Preservar valores, método, local, rastreio e lógica de entrega ao reorganizar o bloco
 - [x] Validar a organização de logística com testes, interface e ponto de verificação
+
+- [x] Alinhar verticalmente a logo do cabeçalho mobile sem alterar a estrutura da página
+- [x] Ocultar a barra de preferências de cookies após o aceite no desktop e no mobile
+- [x] Validar os ajustes de logo e cookies com testes, responsividade e ponto de verificação

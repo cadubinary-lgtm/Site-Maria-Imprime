@@ -313,7 +313,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Layout */}
-        <div className="md:hidden flex items-center justify-between" style={{paddingLeft: '40px'}}>
+        <div className="md:hidden flex items-center justify-between px-4">
           <div
             onClick={handleLogoClick}
             onKeyDown={(event) => {
@@ -324,7 +324,7 @@ export default function Header() {
             }}
             role="button"
             tabIndex={0}
-            className="flex items-center cursor-pointer"
+            className="flex items-center self-center cursor-pointer"
           >
               <img
                 src="/manus-storage/logo-maria-imprime_acc5585b.webp"
