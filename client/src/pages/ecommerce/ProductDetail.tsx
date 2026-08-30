@@ -149,6 +149,7 @@ export default function ProductDetail() {
   // Acordeão
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({ 0: true });
   const [isMobileProductInfoOpen, setIsMobileProductInfoOpen] = useState(false);
+  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
 
   // Frete dinâmico
   const [cep, setCep] = useState("");
@@ -1843,11 +1844,20 @@ export default function ProductDetail() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
               {/* Header do resumo */}
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-pink-600" />
-                <h3 className="font-bold text-gray-900">Resumo do pedido</h3>
+              <div className="border-b border-gray-100">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-500"
+                  onClick={() => setIsOrderSummaryOpen((current) => !current)}
+                  aria-expanded={isOrderSummaryOpen}
+                  aria-controls="product-order-summary-content"
+                >
+                  <span className="flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-pink-600" aria-hidden="true" /><span className="font-bold text-gray-900">Resumo do pedido</span></span>
+                  {isOrderSummaryOpen ? <ChevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" /> : <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />}
+                </button>
               </div>
 
+              {isOrderSummaryOpen && <div id="product-order-summary-content">
               <div className="px-5 py-4 space-y-3">
                 {/* Produto */}
                 <div className="flex gap-3 pb-3 border-b border-gray-100">
@@ -1970,7 +1980,10 @@ export default function ProductDetail() {
                     )}
                   </div>
                 )}
+              </div>
+              </div>}
 
+              <div className="px-5 pt-4 space-y-3">
                 {/* Quantidade */}
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <span className="text-xs text-gray-400">Quantidade</span>

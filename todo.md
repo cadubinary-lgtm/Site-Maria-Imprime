@@ -4580,3 +4580,7 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Validar o controle do resumo em desktop e celular com testes e ponto de verificação
 
 - [x] Manter o Resumo do pedido sempre fechado por padrão em desktop e mobile, com expansão manual pela seta
+
+- [x] Corrigir o bloco de Resumo do pedido efetivamente renderizado em Produto para iniciar fechado
+- [x] Validar visualmente a seta e o estado fechado no configurador real, em desktop e mobile
+- [x] Recolher somente do produto até Previsão de Entrega, mantendo quantidade, valores, pagamento e ações sempre visíveis

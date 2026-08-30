@@ -25,6 +25,7 @@ const adminOrderDetailSource = readFileSync(resolve(root, "client/src/pages/admi
 const headerSource = readFileSync(resolve(root, "client/src/components/layout/Header.tsx"), "utf8");
 const cookieConsentBannerSource = readFileSync(resolve(root, "client/src/components/CookieConsentBanner.tsx"), "utf8");
 const orderSummarySource = readFileSync(resolve(root, "client/src/components/orders/OrderSummary.tsx"), "utf8");
+const productDetailSource = readFileSync(resolve(root, "client/src/pages/ecommerce/ProductDetail.tsx"), "utf8");
 const orderShippingPanelSource = readFileSync(resolve(root, "client/src/components/orders/OrderShippingPanel.tsx"), "utf8");
 
 describe("cálculo de comissão", () => {
@@ -296,5 +297,13 @@ describe("garantias de rastreabilidade comercial", () => {
     expect(orderSummarySource).toContain("{isExpanded && <CardContent");
     expect(orderSummarySource).toContain("onQuantityChange");
     expect(orderSummarySource).toContain("onAddToCart");
+  });
+  it("recolhe somente os dados superiores no resumo efetivamente exibido no configurador", () => {
+    expect(productDetailSource).toContain("const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);");
+    expect(productDetailSource).toContain('id="product-order-summary-content"');
+    expect(productDetailSource).toContain("Previsão de Entrega");
+    expect(productDetailSource).toContain("{/* Quantidade */}");
+    expect(productDetailSource).toContain("{/* Totais */}");
+    expect(productDetailSource.indexOf("</div>}", productDetailSource.indexOf("Previsão de Entrega"))).toBeLessThan(productDetailSource.indexOf("{/* Quantidade */}"));
   });
 });
