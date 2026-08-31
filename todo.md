@@ -4584,3 +4584,5 @@ Transformar atributos em um sistema global onde todos os produtos herdam atribut
 - [x] Corrigir o bloco de Resumo do pedido efetivamente renderizado em Produto para iniciar fechado
 - [x] Validar visualmente a seta e o estado fechado no configurador real, em desktop e mobile
 - [x] Recolher somente do produto até Previsão de Entrega, mantendo quantidade, valores, pagamento e ações sempre visíveis
+- [ ] Verificar o repositório remoto e os arquivos sensíveis antes de enviar a versão atual ao GitHub
+- [ ] Enviar ao GitHub a versão atual do código sem segredos ou configurações locais sensíveis
